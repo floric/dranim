@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  front-spa:
+    build: ./
+    ports:
+      - 80:80
+    environment:
+      - API_URL=http://www.example.com/api/v1/
