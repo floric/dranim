@@ -1,14 +1,26 @@
 import { createAction, PayloadAction } from 'typesafe-actions';
-import { Entry } from '../../model/entry';
+import { Dataset } from '../../model/dataset';
 
-const ADD_ENTRY = 'ADD_ENTRY';
+const ADD_DATASET = 'ADD_DATASET';
 
-export type AddEntryPayload = PayloadAction<string, Entry>;
-type AddEntryActionAction = (val: Entry) => AddEntryPayload;
+export type AddDatasetPayload = PayloadAction<
+  string,
+  { val: Dataset; datasetId: string }
+>;
+type AddDatasetActionAction = (
+  val: Dataset,
+  datasetId: string
+) => AddDatasetPayload;
 
 export const actions = {
-  add: createAction<string, AddEntryActionAction>(ADD_ENTRY, (val: Entry) => ({
-    type: ADD_ENTRY,
-    payload: val
-  }))
+  add: createAction<string, AddDatasetActionAction>(
+    ADD_DATASET,
+    (val: Dataset, datasetId: string) => ({
+      type: ADD_DATASET,
+      payload: {
+        val,
+        datasetId
+      }
+    })
+  )
 };

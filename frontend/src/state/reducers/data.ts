@@ -1,24 +1,24 @@
 import { Reducer, AnyAction } from 'redux';
 import { getType } from 'typesafe-actions';
 
-import { actions, AddEntryPayload } from '../actions/data';
-import { Entry } from '../../model/entry';
+import { actions, AddDatasetPayload } from '../actions/data';
+import { Dataset } from '../../model/dataset';
 
 export interface IDataState {
-  readonly entries: ReadonlyArray<Entry>;
+  readonly datasets: Map<string, Dataset>;
 }
 
 export const reducer: Reducer<IDataState> = (
-  state: IDataState = { entries: [] },
+  state: IDataState = { datasets: new Map() },
   action: AnyAction
 ) => {
   switch (action.type) {
     case getType(actions.add):
-      const typedAction: AddEntryPayload = action as AddEntryPayload;
-      const entries = state.entries.slice();
-      entries.push(typedAction.payload);
+      const typedAction: AddDatasetPayload = action as AddDatasetPayload;
+      const datasets = new Map(state.datasets);
+      datasets.set(typedAction.payload.datasetId, typedAction.payload.val);
       return {
-        entries
+        datasets
       };
     default:
       return state;

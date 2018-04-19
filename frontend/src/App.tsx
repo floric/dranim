@@ -11,13 +11,18 @@ import DataDetailPage from './pages/DataDetailPage';
 
 import { Switch, Route, NavLink, RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router';
+import { connect } from 'react-redux';
+import { IRootState } from './state/reducers/root';
+import { Dataset } from './model/dataset';
 
 const { Content, Footer, Sider } = Layout;
 const SubMenu = Menu.SubMenu;
 
-export type AppProps = RouteComponentProps<{}>;
+export interface IAppProps extends RouteComponentProps<{}> {
+  datasets: Map<string, Dataset>;
+}
 
-class App extends React.Component<AppProps, { collapsed: boolean }> {
+class App extends React.Component<IAppProps, { collapsed: boolean }> {
   public componentWillMount() {
     this.setState({
       collapsed: false
@@ -29,6 +34,10 @@ class App extends React.Component<AppProps, { collapsed: boolean }> {
   };
 
   public render() {
+    console.log(this.props);
+    const { datasets } = this.props;
+    const datasetsArr = Array.from(datasets.values());
+
     return (
       <Layout style={{ minHeight: '100vh' }}>
         <Sider
@@ -58,13 +67,16 @@ class App extends React.Component<AppProps, { collapsed: boolean }> {
               <Menu.Item key="menu_datasets">
                 <NavLink to="/data">Datasets</NavLink>
               </Menu.Item>
-              <Menu.Divider />
-              <Menu.Item key="menu_passages">
-                <NavLink to="/data/passages">Passages</NavLink>
-              </Menu.Item>
-              <Menu.Item key="menu_commodities">
-                <NavLink to="/data/commodities">Commodities</NavLink>
-              </Menu.Item>
+              {datasets.size > 0 && (
+                <>
+                  <Menu.Divider />
+                  {datasetsArr.map(set => (
+                    <Menu.Item key={`menu_passages+${set.id}`}>
+                      <NavLink to={`/data/${set.id}`}>{set.name}</NavLink>
+                    </Menu.Item>
+                  ))}
+                </>
+              )}
             </SubMenu>
             <Menu.Item key="menu_explorer">
               <NavLink to="/explorer">
@@ -95,4 +107,8 @@ class App extends React.Component<AppProps, { collapsed: boolean }> {
   }
 }
 
-export default withRouter(App);
+const mapStateToProps = (state: IRootState) => ({
+  datasets: state.data.datasets
+});
+
+export default withRouter(connect(mapStateToProps)(App));

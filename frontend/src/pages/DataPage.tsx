@@ -1,27 +1,25 @@
 import * as React from 'react';
-import { Row, Col, Card, Button } from 'antd';
+import { Row, Col, Card } from 'antd';
 import { connect } from 'react-redux';
 
 import { withPageHeaderHoC } from '../components/PageHeaderHoC';
 import { actions } from '../state/actions/data';
 import { Dispatch } from 'redux';
-import { Entry } from '../model/entry';
-import { Value } from '../model/value';
 import { IRootState } from '../state/reducers/root';
+import { Dataset } from '../model/dataset';
+import { CreateDataSetForm } from './forms/CreateDatasetForm';
 
 class DataPage extends React.Component<{
-  entries: ReadonlyArray<Entry>;
-  onAddEntry: () => void;
+  datasets: Map<string, Dataset>;
+  onAddDataset: (name: string) => void;
 }> {
-  private handleClick = () => this.props.onAddEntry();
-
   public render() {
     return (
       <Row>
         <Col>
           <Card bordered={false}>
-            Create or import new Data here
-            <Button onClick={this.handleClick}>Click me</Button>
+            <h3>Add Dataset</h3>
+            <CreateDataSetForm handleCreateDataset={this.props.onAddDataset} />
           </Card>
         </Col>
       </Row>
@@ -30,14 +28,14 @@ class DataPage extends React.Component<{
 }
 
 const mapStateToProps = (state: IRootState) => ({
-  entries: state.data.entries
+  datasets: state.data.datasets
 });
 
 const mapDispatchToProps = (dispatch: Dispatch<IRootState>) => ({
-  onAddEntry: () => {
-    const newEntry = new Entry();
-    newEntry.addVal(new Value<number>('testA', 9.9));
-    dispatch(actions.add(newEntry));
+  onAddDataset: (name: string) => {
+    const dataset = new Dataset(name);
+
+    dispatch(actions.add(dataset, name));
   }
 });
 

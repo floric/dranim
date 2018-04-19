@@ -3,7 +3,7 @@ import { rootReducer, IRootState } from './reducers/root';
 
 const initialState: IRootState = {
   data: {
-    entries: []
+    datasets: new Map()
   }
 };
 
