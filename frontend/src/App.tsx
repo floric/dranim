@@ -7,6 +7,7 @@ import StartPage from './pages/StartPage';
 import DataPage from './pages/DataPage';
 import ExplorerPage from './pages/ExplorerPage';
 import VisPage from './pages/VisPage';
+import DataDetailPage from './pages/DataDetailPage';
 
 import { Switch, Route, NavLink, RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router';
@@ -54,6 +55,10 @@ class App extends React.Component<AppProps, { collapsed: boolean }> {
                 </span>
               }
             >
+              <Menu.Item key="menu_datasets">
+                <NavLink to="/data">Datasets</NavLink>
+              </Menu.Item>
+              <Menu.Divider />
               <Menu.Item key="menu_passages">
                 <NavLink to="/data/passages">Passages</NavLink>
               </Menu.Item>
@@ -77,7 +82,8 @@ class App extends React.Component<AppProps, { collapsed: boolean }> {
           <Content {...css({ background: '#ECECEC', padding: '30px' })}>
             <Switch>
               <Route exact={true} path="/" render={props => StartPage} />
-              <Route path="/data" render={props => DataPage} />
+              <Route exact={true} path="/data" render={props => DataPage} />
+              <Route path="/data/:id" render={props => DataDetailPage} />
               <Route path="/explorer" render={props => ExplorerPage} />
               <Route path="/visualizations" render={props => VisPage} />
             </Switch>

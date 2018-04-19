@@ -3,7 +3,12 @@
   "rules": {
     "member-ordering": false,
     "ordered-imports": false,
-    "jsx-no-lambda": false
+    "jsx-no-lambda": false,
+    "object-literal-sort-keys": false,
+    "array-type": {
+      "options": "generic"
+    },
+    "no-console": false
   },
   "linterOptions": {
     "exclude": ["config/**/*.js", "node_modules/**/*.ts"]

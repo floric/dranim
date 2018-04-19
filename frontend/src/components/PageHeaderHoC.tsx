@@ -14,7 +14,7 @@ export const withPageHeaderHoC = ({ title }: IPageHeaderHoCOptions) => <
     | React.ComponentClass<TOriginalProps>
     | React.StatelessComponent<TOriginalProps>
 ) => (
-  <div>
+  <>
     <Row>
       <Col>
         <Card bordered={false}>
@@ -25,5 +25,5 @@ export const withPageHeaderHoC = ({ title }: IPageHeaderHoCOptions) => <
     <Row {...css({ marginTop: '24px' })}>
       <Component />
     </Row>
-  </div>
+  </>
 );
