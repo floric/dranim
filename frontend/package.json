@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@types/history": "^4.6.2",
     "ant-design-pro": "^1.2.1",
     "antd": "^3.4.1",
     "date-fns": "^1.29.0",

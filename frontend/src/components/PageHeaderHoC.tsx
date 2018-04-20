@@ -5,11 +5,13 @@ import { css } from 'glamor';
 
 export interface IPageHeaderHoCOptions {
   title: string;
+  description?: string;
 }
 
-export const withPageHeaderHoC = ({ title }: IPageHeaderHoCOptions) => <
-  TOriginalProps extends {}
->(
+export const withPageHeaderHoC = ({
+  title,
+  description
+}: IPageHeaderHoCOptions) => <TOriginalProps extends {}>(
   Component:
     | React.ComponentClass<TOriginalProps>
     | React.StatelessComponent<TOriginalProps>
@@ -18,7 +20,7 @@ export const withPageHeaderHoC = ({ title }: IPageHeaderHoCOptions) => <
     <Row>
       <Col>
         <Card bordered={false}>
-          <PageHeader title={title} content="Description" />
+          <PageHeader title={title} content={description} />
         </Card>
       </Col>
     </Row>

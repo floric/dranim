@@ -13,7 +13,7 @@ export const reducer: Reducer<IDataState> = (
   action: AnyAction
 ) => {
   switch (action.type) {
-    case getType(actions.add):
+    case getType(actions.addDataset):
       const typedAction: AddDatasetPayload = action as AddDatasetPayload;
       const datasets = new Map(state.datasets);
       datasets.set(typedAction.payload.datasetId, typedAction.payload.val);

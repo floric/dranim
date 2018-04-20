@@ -1,22 +1,32 @@
 import * as React from 'react';
-import { Row, Col, Card, Table } from 'antd';
+import { Row, Col, Card, Table, Button } from 'antd';
 import { connect } from 'react-redux';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { format } from 'date-fns';
+import Exception from 'ant-design-pro/lib/Exception';
+import { History } from 'history';
 
 import { withPageHeaderHoC } from '../components/PageHeaderHoC';
 import { IRootState } from '../state/reducers/root';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { Dataset } from '../model/dataset';
+import { SFC } from 'react';
 
 export interface IDataDetailPageProps
   extends RouteComponentProps<{ id: string }> {
   dataset: Dataset | undefined;
 }
 
+const NoDatasetExceptionActions: SFC<{ history: History }> = ({ history }) => (
+  <Button type="primary" onClick={() => history.push('/data')}>
+    Create new Dataset
+  </Button>
+);
+
 class DataDetailPage extends React.Component<IDataDetailPageProps> {
   public render() {
     const {
       dataset,
+      history,
       match: {
         params: { id }
       }
@@ -24,9 +34,12 @@ class DataDetailPage extends React.Component<IDataDetailPageProps> {
     if (!dataset) {
       return (
         <Card>
-          <p>
-            No data imported yet for <b>{id}</b> dataset.
-          </p>
+          <Exception
+            type="404"
+            title="Unknown Dataset"
+            desc={`The dataset with id '${id}' doesn't exist.`}
+            actions={<NoDatasetExceptionActions history={history} />}
+          />
         </Card>
       );
     }

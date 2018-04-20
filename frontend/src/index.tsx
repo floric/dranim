@@ -9,6 +9,7 @@ import registerServiceWorker from './registerServiceWorker';
 import store from './state/store';
 
 import 'antd/dist/antd.css';
+import 'ant-design-pro/dist/ant-design-pro.css';
 
 ReactDOM.render(
   <BrowserRouter>

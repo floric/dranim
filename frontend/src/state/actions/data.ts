@@ -13,7 +13,7 @@ type AddDatasetActionAction = (
 ) => AddDatasetPayload;
 
 export const actions = {
-  add: createAction<string, AddDatasetActionAction>(
+  addDataset: createAction<string, AddDatasetActionAction>(
     ADD_DATASET,
     (val: Dataset, datasetId: string) => ({
       type: ADD_DATASET,

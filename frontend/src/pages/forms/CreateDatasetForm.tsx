@@ -14,15 +14,14 @@ export interface ICreateDataSetFormProps extends FormComponentProps {
 
 class CreateDataSetFormImpl extends React.Component<ICreateDataSetFormProps> {
   public componentDidMount() {
-    // To disabled submit button at the beginning.
     this.props.form.validateFields();
   }
 
   private handleSubmit = (e: any) => {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
-      if (!err) {
-        console.log('Received values of form: ', values);
+      if (err) {
+        return;
       }
 
       this.props.handleCreateDataset(this.props.form.getFieldValue('name'));
@@ -50,7 +49,7 @@ class CreateDataSetFormImpl extends React.Component<ICreateDataSetFormProps> {
             rules: [{ required: true, message: 'Please enter dataset name!' }]
           })(
             <Input
-              prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              prefix={<Icon type="info" style={{ color: 'rgba(0,0,0,.25)' }} />}
               placeholder="Name"
             />
           )}

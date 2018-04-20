@@ -35,7 +35,7 @@ const mapDispatchToProps = (dispatch: Dispatch<IRootState>) => ({
   onAddDataset: (name: string) => {
     const dataset = new Dataset(name);
 
-    dispatch(actions.add(dataset, name));
+    dispatch(actions.addDataset(dataset, dataset.id));
   }
 });
 

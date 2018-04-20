@@ -19,7 +19,7 @@ const { Content, Footer, Sider } = Layout;
 const SubMenu = Menu.SubMenu;
 
 export interface IAppProps extends RouteComponentProps<{}> {
-  datasets: Map<string, Dataset>;
+  datasets: Array<Dataset>;
 }
 
 class App extends React.Component<IAppProps, { collapsed: boolean }> {
@@ -34,9 +34,7 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
   };
 
   public render() {
-    console.log(this.props);
     const { datasets } = this.props;
-    const datasetsArr = Array.from(datasets.values());
 
     return (
       <Layout style={{ minHeight: '100vh' }}>
@@ -67,16 +65,12 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
               <Menu.Item key="menu_datasets">
                 <NavLink to="/data">Datasets</NavLink>
               </Menu.Item>
-              {datasets.size > 0 && (
-                <>
-                  <Menu.Divider />
-                  {datasetsArr.map(set => (
-                    <Menu.Item key={`menu_passages+${set.id}`}>
-                      <NavLink to={`/data/${set.id}`}>{set.name}</NavLink>
-                    </Menu.Item>
-                  ))}
-                </>
-              )}
+              {datasets.length > 0 && <Menu.Divider />}
+              {datasets.map(set => (
+                <Menu.Item key={`menu_passages+${set.id}`}>
+                  <NavLink to={`/data/${set.id}`}>{set.name}</NavLink>
+                </Menu.Item>
+              ))}
             </SubMenu>
             <Menu.Item key="menu_explorer">
               <NavLink to="/explorer">
@@ -108,7 +102,7 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
 }
 
 const mapStateToProps = (state: IRootState) => ({
-  datasets: state.data.datasets
+  datasets: Array.from(state.data.datasets.values())
 });
 
 export default withRouter(connect(mapStateToProps)(App));
