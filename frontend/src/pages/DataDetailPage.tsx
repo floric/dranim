@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { Row, Col, Card, Table, Button } from 'antd';
-import { connect } from 'react-redux';
+import { SFC, Component } from 'react';
+import { Row, Col, Table, Button, Card } from 'antd';
+import { connect, Dispatch } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { format } from 'date-fns';
 import Exception from 'ant-design-pro/lib/Exception';
@@ -9,11 +10,14 @@ import { History } from 'history';
 import { withPageHeaderHoC } from '../components/PageHeaderHoC';
 import { IRootState } from '../state/reducers/root';
 import { Dataset } from '../model/dataset';
-import { SFC } from 'react';
+import { actions } from '../state/actions/data';
+import { ValueSchema } from '../model/valueschema';
+import { CreateValueSchemaForm } from './forms/CreateValueSchemaForm';
 
 export interface IDataDetailPageProps
   extends RouteComponentProps<{ id: string }> {
   dataset: Dataset | undefined;
+  onAddValueSchema: (datasetId: string, val: ValueSchema) => void;
 }
 
 const NoDatasetExceptionActions: SFC<{ history: History }> = ({ history }) => (
@@ -22,7 +26,10 @@ const NoDatasetExceptionActions: SFC<{ history: History }> = ({ history }) => (
   </Button>
 );
 
-class DataDetailPage extends React.Component<IDataDetailPageProps> {
+class DataDetailPage extends Component<IDataDetailPageProps> {
+  private handleCreateValueSchema = (val: ValueSchema) =>
+    this.props.onAddValueSchema(this.props.match.params.id, val);
+
   public render() {
     const {
       dataset,
@@ -33,7 +40,7 @@ class DataDetailPage extends React.Component<IDataDetailPageProps> {
     } = this.props;
     if (!dataset) {
       return (
-        <Card>
+        <Card bordered={false}>
           <Exception
             type="404"
             title="Unknown Dataset"
@@ -44,13 +51,33 @@ class DataDetailPage extends React.Component<IDataDetailPageProps> {
       );
     }
 
-    const dataSource = dataset.entries.map(e => ({
+    const schemas = Array.from(dataset.schema.entries.values());
+
+    const schemasDataSource = schemas.map(e => ({
+      key: e.name,
+      type: e.type
+    }));
+
+    const schemasColumns = [
+      {
+        title: 'Name',
+        dataIndex: 'key',
+        key: 'key'
+      },
+      {
+        title: 'Type',
+        dataIndex: 'type',
+        key: 'type'
+      }
+    ];
+
+    const entriesDataSource = dataset.entries.map(e => ({
       time: format(e.time, 'MM/DD/YYYY'),
       key: e.id,
       values: e.values.size
     }));
 
-    const columns = [
+    const entriesColumns = [
       {
         title: 'Time',
         dataIndex: 'time',
@@ -70,9 +97,31 @@ class DataDetailPage extends React.Component<IDataDetailPageProps> {
 
     return (
       <Row>
-        <Col>
-          <Card>
-            <Table dataSource={dataSource} columns={columns} />
+        <Col style={{ marginBottom: 12 }}>
+          <Card bordered={false}>
+            <Row style={{ marginBottom: 12 }}>
+              <Col>
+                <h3>Value Schemas</h3>
+                <Table
+                  dataSource={schemasDataSource}
+                  columns={schemasColumns}
+                />
+              </Col>
+            </Row>
+            <Row style={{ marginBottom: 12 }}>
+              <Col>
+                <h4>Add Value Schema</h4>
+                <CreateValueSchemaForm
+                  handleCreateValueSchema={this.handleCreateValueSchema}
+                />
+              </Col>
+            </Row>
+          </Card>
+        </Col>
+        <Col style={{ marginBottom: 12 }}>
+          <Card bordered={false}>
+            <h3>Data</h3>
+            <Table dataSource={entriesDataSource} columns={entriesColumns} />
           </Card>
         </Col>
       </Row>
@@ -87,6 +136,13 @@ const mapStateToProps = (
   dataset: state.data.datasets.get(props.match.params.id)
 });
 
-export default withPageHeaderHoC({ title: 'Datadetails' })(
-  withRouter(connect(mapStateToProps)(DataDetailPage))
-);
+const mapDispatchToProps = (dispatch: Dispatch<IRootState>) => ({
+  onAddValueSchema: (datasetId: string, val: ValueSchema) => {
+    dispatch(actions.addDatasetSchemaValue(datasetId, val));
+  }
+});
+
+export default withPageHeaderHoC({
+  title: 'Details',
+  includeInCard: false
+})(withRouter(connect(mapStateToProps, mapDispatchToProps)(DataDetailPage)));

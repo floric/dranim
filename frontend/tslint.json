@@ -8,7 +8,8 @@
     "array-type": {
       "options": "generic"
     },
-    "no-console": false
+    "no-console": false,
+    "jsx-boolean-value": false
   },
   "linterOptions": {
     "exclude": ["config/**/*.js", "node_modules/**/*.ts"]

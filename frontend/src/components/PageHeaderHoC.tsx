@@ -1,31 +1,37 @@
 import * as React from 'react';
 import { Row, Col, Card } from 'antd';
 import PageHeader from 'ant-design-pro/lib/PageHeader';
-import { css } from 'glamor';
+import { ComponentClass, SFC } from 'react';
 
 export interface IPageHeaderHoCOptions {
   title: string;
   description?: string;
+  includeInCard?: boolean;
 }
 
 export const withPageHeaderHoC = ({
   title,
-  description
+  description,
+  includeInCard = true
 }: IPageHeaderHoCOptions) => <TOriginalProps extends {}>(
-  Component:
-    | React.ComponentClass<TOriginalProps>
-    | React.StatelessComponent<TOriginalProps>
+  Component: ComponentClass<TOriginalProps> | SFC<TOriginalProps>
 ) => (
   <>
-    <Row>
-      <Col>
-        <Card bordered={false}>
+    <Card bordered={false}>
+      <Row style={{ marginBottom: 12 }}>
+        <Col>
           <PageHeader title={title} content={description} />
-        </Card>
-      </Col>
-    </Row>
-    <Row {...css({ marginTop: '24px' })}>
-      <Component />
-    </Row>
+        </Col>
+      </Row>
+      {includeInCard && <Component />}
+    </Card>
+
+    {!includeInCard && (
+      <Row style={{ marginTop: 12 }}>
+        <Col>
+          <Component />
+        </Col>
+      </Row>
+    )}
   </>
 );

@@ -2,16 +2,17 @@ import { Value } from './value';
 import * as uuid from 'uuid/v4';
 
 export class Entry {
-  public readonly values: Map<string, Value<any>> = new Map();
+  public readonly values: Map<string, Value>;
   public readonly time: Date;
   public readonly id: string;
 
   constructor(time: Date = new Date(), id: string = uuid()) {
     this.id = id;
     this.time = time;
+    this.values = new Map();
   }
 
-  public addVal(val: Value<any>) {
+  public addVal(val: Value) {
     if (val.name.length === 0) {
       throw new Error('Invalid value.');
     }

@@ -1,9 +1,9 @@
-export class Value<T> {
-  constructor(name: string, val: T) {
+export class Value {
+  constructor(name: string, val: string) {
     this.val = val;
     this.name = name;
   }
 
   public readonly name: string;
-  public readonly val: T;
+  public readonly val: string;
 }
