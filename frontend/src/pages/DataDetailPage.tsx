@@ -55,7 +55,8 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
 
     const schemasDataSource = schemas.map(e => ({
       key: e.name,
-      type: e.type
+      type: e.type,
+      required: e.required ? 'true' : 'false'
     }));
 
     const schemasColumns = [
@@ -68,6 +69,11 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
         title: 'Type',
         dataIndex: 'type',
         key: 'type'
+      },
+      {
+        title: 'Required',
+        dataIndex: 'required',
+        key: 'required'
       }
     ];
 

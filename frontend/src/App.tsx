@@ -44,7 +44,9 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
           onCollapse={this.onCollapse}
         >
           <div className="logo" {...css({ color: '#CCC', padding: '24px' })}>
-            <span {...css({ fontWeight: '900', fontSize: '150%' })}>STR</span>
+            <span {...css({ fontWeight: '900', fontSize: '150%' })}>
+              Timeseries
+            </span>
             <br />
             <span>Explorer</span>
           </div>

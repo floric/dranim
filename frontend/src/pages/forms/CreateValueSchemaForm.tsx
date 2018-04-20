@@ -1,11 +1,13 @@
 import * as React from 'react';
 
-import { Form, Icon, Input, Button, Select } from 'antd';
+import { Form, Icon, Input, Button, Select, Checkbox } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import { ValueSchema, ValueSchemaType } from '../../model/valueschema';
+import { FormEvent } from 'react';
+import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 
 const FormItem = Form.Item;
-const Option = Select.Option;
+const { Option, OptGroup } = Select;
 
 function hasErrors(fieldsError: any) {
   return Object.keys(fieldsError).some(field => fieldsError[field]);
@@ -22,7 +24,7 @@ class CreateValueSchemaFormImpl extends React.Component<
     this.props.form.validateFields();
   }
 
-  private handleSubmit = (e: any) => {
+  private handleSubmit = (e: FormEvent<any>) => {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (err) {
@@ -31,7 +33,8 @@ class CreateValueSchemaFormImpl extends React.Component<
 
       this.props.handleCreateValueSchema({
         name: this.props.form.getFieldValue('name'),
-        type: this.props.form.getFieldValue('type') || ValueSchemaType.string
+        type: this.props.form.getFieldValue('type') || ValueSchemaType.string,
+        required: this.props.form.getFieldValue('required')
       });
     });
   };
@@ -39,6 +42,12 @@ class CreateValueSchemaFormImpl extends React.Component<
   private handleSelectTypeChange = (type: string) => {
     this.props.form.setFieldsValue({
       type
+    });
+  };
+
+  private handleIsRequiredChange = (val: CheckboxChangeEvent) => {
+    this.props.form.setFieldsValue({
+      required: val.target.checked
     });
   };
 
@@ -73,13 +82,25 @@ class CreateValueSchemaFormImpl extends React.Component<
           {getFieldDecorator('type', {
             initialValue: ValueSchemaType.string
           })(
-            <Select onChange={this.handleSelectTypeChange}>
-              {Object.keys(ValueSchemaType).map(t => (
-                <Option value={ValueSchemaType[t]} key={`option-${t}`}>
-                  {ValueSchemaType[t]}
-                </Option>
-              ))}
+            <Select
+              onChange={this.handleSelectTypeChange}
+              style={{ width: 120 }}
+            >
+              <OptGroup label="Primitive">
+                {Object.keys(ValueSchemaType).map(t => (
+                  <Option value={ValueSchemaType[t]} key={`option-${t}`}>
+                    {ValueSchemaType[t]}
+                  </Option>
+                ))}
+              </OptGroup>
             </Select>
+          )}
+        </FormItem>
+        <FormItem label="Type">
+          {getFieldDecorator('required', {
+            initialValue: false
+          })(
+            <Checkbox onChange={this.handleIsRequiredChange}>Required</Checkbox>
           )}
         </FormItem>
         <FormItem>
