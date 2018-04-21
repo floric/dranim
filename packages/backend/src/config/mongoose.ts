@@ -10,18 +10,24 @@ const config = {
 };
 
 export const mongooseClient = async () => {
-  (mongoose as any).Promise = global.Promise;
-  mongoose.connection
-    .on('error', err => {
-      console.log(err);
-    })
-    .on('open', () => {
-      console.log('Connection established with MongoDB');
-    });
+  try {
+    (mongoose as any).Promise = global.Promise;
+    mongoose.connection
+      .on('error', err => {
+        console.log(err);
+      })
+      .on('open', () => {
+        console.log('Connection established with MongoDB');
+      });
 
-  const client = await mongoose.connect(config.db);
-  if (client.connection.readyState !== 1) {
-    console.warn('Database not ready...');
-    return;
+    const client = await mongoose.connect(config.db);
+    if (client.connection.readyState !== 1) {
+      console.warn('Database not ready...');
+      return;
+    }
+
+    console.info('Database working.');
+  } catch (err) {
+    console.error(err);
   }
 };
