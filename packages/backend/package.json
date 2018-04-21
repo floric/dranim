@@ -4,16 +4,17 @@
   "description": "Based on webpack-graphql-server",
   "main": "build/main.js",
   "scripts": {
-    "build": "webpack",
-    "build:watch": "webpack --watch",
+    "build": "cross-env NODE_ENV=production webpack",
+    "build:watch": "cross-env NODE_ENV=development webpack --watch",
     "pretest": "yarn build",
     "test": "jest",
     "test:watch": "yarn test -- --watch",
     "test:notify": "yarn test:watch -- --notify",
     "coverage": "yarn test -- --coverage",
     "coverage:notify": "yarn coverage -- --watch --notify",
-    "start": "yarn build && node build/main.js",
-    "start:watch": "concurrently \"yarn build:watch\" \"nodemon build/main.js\""
+    "start": "cross-env NODE_ENV=production yarn build && node build/main.js",
+    "start:watch":
+      "concurrently \"yarn build:watch\" \"cross-env NODE_ENV=development nodemon build/main.js\" \"sudo docker run -p 127.0.0.1:27017:27017 mongo:latest\""
   },
   "dependencies": {
     "@types/body-parser": "1.16.7",
@@ -56,10 +57,6 @@
     "mapCoverage": true,
     "testEnvironment": "node",
     "testRegex": ".*\\.spec\\.ts$",
-    "moduleFileExtensions": [
-      "ts",
-      "js",
-      "json"
-    ]
+    "moduleFileExtensions": ["ts", "js", "json"]
   }
 }

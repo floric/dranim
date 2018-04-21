@@ -1,4 +1,4 @@
-import { GRAPHQL_ROUTE, GRAPHIQL_ROUTE, main, TestConnector } from './main';
+import { GRAPHQL_ROUTE, GRAPHIQL_ROUTE, main } from './main';
 import { get as httpGet, Server } from 'http';
 import 'jest';
 
@@ -120,16 +120,5 @@ describe('main', () => {
         }
       );
     });
-  });
-});
-
-describe('TestConnector', () => {
-  it('should pass sanity', () => {
-    expect(typeof TestConnector).toBe('function');
-  });
-
-  it('return string', () => {
-    const tc = new TestConnector();
-    expect(tc.testString).toBe('it works from connector as well!');
   });
 });

@@ -6,20 +6,16 @@
     "node": ">= 6.11.1",
     "yarn": ">= 1.0.0"
   },
-  "cacheDirectories": [
-    ".cache"
-  ],
+  "cacheDirectories": [".cache"],
   "scripts": {
     "build": "lerna run build --stream",
-    "start": "lerna run --scope=backend start --stream"
+    "start": "lerna run start:watch --stream"
   },
   "author": {
     "name": "Florian Richter",
     "email": "floririchte@gmail.com"
   },
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": ["packages/*"],
   "devDependencies": {
     "awesome-typescript-loader": "^3.4.1",
     "lerna": "^2.5.1",

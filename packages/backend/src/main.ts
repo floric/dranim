@@ -27,16 +27,10 @@ function verbosePrint(port, enableGraphiql) {
   console.log(
     `GraphQL Server is now running on http://localhost${GRAPHQL_ROUTE}`
   );
-  if (true === enableGraphiql) {
+  if (enableGraphiql) {
     console.log(
       `GraphiQL Server is now running on http://localhost${GRAPHIQL_ROUTE}`
     );
-  }
-}
-
-export class TestConnector {
-  public get testString() {
-    return 'it works from connector as well!';
   }
 }
 
@@ -49,14 +43,11 @@ export function main(options: IMainOptions) {
     app.use(GRAPHQL_ROUTE, cors());
   }
 
-  const testConnector = new TestConnector();
   app.use(
     GRAPHQL_ROUTE,
     bodyParser.json(),
     graphqlExpress({
-      context: {
-        testConnector
-      },
+      context: {},
       schema: Schema
     })
   );
