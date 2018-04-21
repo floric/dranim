@@ -9,7 +9,9 @@
   "cacheDirectories": [".cache"],
   "scripts": {
     "build": "lerna run build --stream",
-    "start": "lerna run start:watch --stream"
+    "start": "lerna run start:watch --stream",
+    "clean": "lerna run clean --stream",
+    "mongodb": "sudo docker run -p 127.0.0.1:27017:27017 mongo:latest"
   },
   "author": {
     "name": "Florian Richter",
@@ -17,7 +19,6 @@
   },
   "workspaces": ["packages/*"],
   "devDependencies": {
-    "awesome-typescript-loader": "^3.4.1",
     "lerna": "^2.5.1",
     "tslint": "^5.2.0",
     "tslint-config-prettier": "^1.5.0",

@@ -4,7 +4,7 @@ import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
 import * as cors from 'cors';
 import * as helmet from 'helmet';
 import * as morgan from 'morgan';
-const graphqlHTTP = require('express-graphql');
+import * as graphqlHTTP from 'express-graphql';
 
 import { mongooseClient } from './config/mongoose';
 import { UserSchema } from './graphql/schema';

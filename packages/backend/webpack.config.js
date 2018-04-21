@@ -13,15 +13,17 @@ var buildPath = function(name) {
 };
 
 var webpack_opts = {
+  mode: process.env.NODE_ENV,
   entry: './src/main.ts',
   target: 'node',
   output: {
-    filename: buildPath('main.js'),
+    filename: 'main.js',
     libraryTarget: 'commonjs2'
   },
   resolve: {
     extensions: ['.ts', '.js'],
-    modules: ['node_modules', 'src']
+    modules: ['node_modules', 'src'],
+    mainFields: ['main', 'module']
   },
   plugins: [
     new webpack.LoaderOptionsPlugin({
@@ -40,10 +42,10 @@ var webpack_opts = {
   ],
   devtool: 'source-map',
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.ts$/,
-        loaders: 'awesome-typescript-loader'
+        loaders: 'ts-loader'
       }
     ]
   },
