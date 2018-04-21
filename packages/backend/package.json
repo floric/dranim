@@ -13,8 +13,7 @@
     "coverage": "yarn test -- --coverage",
     "coverage:notify": "yarn coverage -- --watch --notify",
     "start": "cross-env NODE_ENV=production yarn build && node build/main.js",
-    "start:watch":
-      "concurrently \"yarn build:watch\" \"cross-env NODE_ENV=development nodemon build/main.js\" \"sudo docker run -p 127.0.0.1:27017:27017 mongo:latest\""
+    "start:watch": "concurrently \"yarn build:watch\" \"cross-env NODE_ENV=development nodemon build/main.js\" \"sudo docker run -p 127.0.0.1:27017:27017 mongo:latest\""
   },
   "dependencies": {
     "@types/body-parser": "1.16.7",
@@ -25,7 +24,9 @@
     "apollo-server-express": "^1.2.0",
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",
+    "cross-env": "^5.1.4",
     "express": "^4.16.2",
+    "express-graphql": "^0.6.12",
     "graphql": "0.11.7",
     "graphql-schema-tools": "^0.0.6",
     "helmet": "^3.9.0",
@@ -33,6 +34,7 @@
     "morgan": "^1.9.0"
   },
   "devDependencies": {
+    "@types/express-graphql": "^0.6.1",
     "@types/graphql": "^0.11.5",
     "@types/jest": "^21.1.5",
     "@types/mongoose": "^5.0.10",
@@ -57,6 +59,10 @@
     "mapCoverage": true,
     "testEnvironment": "node",
     "testRegex": ".*\\.spec\\.ts$",
-    "moduleFileExtensions": ["ts", "js", "json"]
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json"
+    ]
   }
 }

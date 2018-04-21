@@ -1,12 +1,14 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
-import { Schema } from './schema';
 import * as cors from 'cors';
 import * as helmet from 'helmet';
 import * as morgan from 'morgan';
+const graphqlHTTP = require('express-graphql');
 
 import { mongooseClient } from './config/mongoose';
+import { UserSchema } from './graphql/schema';
+import { truncate } from 'fs';
 
 const client = mongooseClient();
 
@@ -39,16 +41,12 @@ export function main(options: IMainOptions) {
   app.use(helmet());
   app.use(morgan(options.env));
 
-  if (true === options.enableCors) {
-    app.use(GRAPHQL_ROUTE, cors());
-  }
-
   app.use(
     GRAPHQL_ROUTE,
-    bodyParser.json(),
-    graphqlExpress({
-      context: {},
-      schema: Schema
+    cors(),
+    graphqlHTTP({
+      schema: UserSchema,
+      graphiql: true
     })
   );
 

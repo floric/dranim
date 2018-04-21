@@ -9,7 +9,8 @@
       "options": "generic"
     },
     "no-console": false,
-    "jsx-boolean-value": false
+    "jsx-boolean-value": false,
+    "no-var-requires": false
   },
   "linterOptions": {
     "exclude": [

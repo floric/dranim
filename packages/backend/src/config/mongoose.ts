@@ -9,7 +9,7 @@ const config = {
       : 'mongodb://mongodb:27017'
 };
 
-export const mongooseClient = () => {
+export const mongooseClient = async () => {
   (mongoose as any).Promise = global.Promise;
   mongoose.connection
     .on('error', err => {
@@ -19,5 +19,9 @@ export const mongooseClient = () => {
       console.log('Connection established with MongoDB');
     });
 
-  return mongoose.connect(config.db);
+  const client = await mongoose.connect(config.db);
+  if (client.connection.readyState !== 1) {
+    console.warn('Database not ready...');
+    return;
+  }
 };
