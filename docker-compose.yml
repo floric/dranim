@@ -1,9 +1,27 @@
 version: "3"
 
 services:
-  front-spa:
-    build: ./
+  backend:
+    build: ./packages/backend
     ports:
-      - 80:80
+      - "3000:3000"
+    network_mode: host
+
+  frontend:
+    build: ./packages/frontend
+    ports:
+      - "80:80"
+    network_mode: host
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
     environment:
-      - API_URL=http://www.example.com/api/v1/
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+    volumes:
+      - ./data/db:/data/db
+    ports:
+        - "27017:27017"
+    command: mongod --smallfiles --logpath=/dev/null
+    network_mode: host

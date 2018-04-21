@@ -1,0 +1,9 @@
+node_modules/
+coverage/
+build/
+.tmp/
+*.d.ts
+*.log
+*.tgz
+.idea/
+data/
