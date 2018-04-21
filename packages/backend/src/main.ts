@@ -6,6 +6,10 @@ import * as cors from 'cors';
 import * as helmet from 'helmet';
 import * as morgan from 'morgan';
 
+import { mongooseClient } from './config/mongoose';
+
+const client = mongooseClient();
+
 // Default port or given one.
 export const GRAPHQL_ROUTE = '/api/graphql';
 export const GRAPHIQL_ROUTE = '/api/graphiql';
@@ -21,11 +25,11 @@ interface IMainOptions {
 /* istanbul ignore next: no need to test verbose print */
 function verbosePrint(port, enableGraphiql) {
   console.log(
-    `GraphQL Server is now running on http://localhost:${port}${GRAPHQL_ROUTE}`
+    `GraphQL Server is now running on http://localhost${GRAPHQL_ROUTE}`
   );
   if (true === enableGraphiql) {
     console.log(
-      `GraphiQL Server is now running on http://localhost:${port}${GRAPHIQL_ROUTE}`
+      `GraphiQL Server is now running on http://localhost${GRAPHIQL_ROUTE}`
     );
   }
 }

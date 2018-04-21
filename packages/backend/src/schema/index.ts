@@ -2,7 +2,7 @@ import { GraphQLSchema } from 'graphql';
 import { makeExecutableSchema } from 'graphql-schema-tools';
 
 /* tslint:disable:no-var-requires */
-const modules = [require('./modules/query')];
+const modules = [require('./modules/main')];
 
 const mainDefs = [
   `schema {

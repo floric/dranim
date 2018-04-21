@@ -42,9 +42,6 @@ http {
         font/truetype
         font/opentype
         image/svg+xml;
-    upstream backend {
-        server 127.0.0.1:3000;
-    }
     server {
         listen 80;
         server_name localhost;
@@ -53,7 +50,7 @@ http {
             try_files $uri /index.html;
         }
         location /api {
-            proxy_pass http://backend;
+            proxy_pass http://backend:3000;
             proxy_read_timeout 5m;
         }
     }

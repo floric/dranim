@@ -28,11 +28,13 @@
     "graphql": "0.11.7",
     "graphql-schema-tools": "^0.0.6",
     "helmet": "^3.9.0",
+    "mongoose": "^5.0.15",
     "morgan": "^1.9.0"
   },
   "devDependencies": {
     "@types/graphql": "^0.11.5",
     "@types/jest": "^21.1.5",
+    "@types/mongoose": "^5.0.10",
     "@types/node": "^8.0.47",
     "awesome-typescript-loader": "^3.3.0",
     "concurrently": "^3.5.0",
@@ -54,6 +56,10 @@
     "mapCoverage": true,
     "testEnvironment": "node",
     "testRegex": ".*\\.spec\\.ts$",
-    "moduleFileExtensions": ["ts", "js", "json"]
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json"
+    ]
   }
 }
