@@ -14,8 +14,7 @@
     "coverage": "yarn test -- --coverage",
     "coverage:notify": "yarn coverage -- --watch --notify",
     "start": "cross-env NODE_ENV=development yarn build && node dist/main.js",
-    "start:watch":
-      "yarn build && concurrently \"yarn build:watch\" \"cross-env NODE_ENV=development nodemon dist/main.js\""
+    "start:watch": "yarn build && concurrently \"yarn build:watch\" \"cross-env NODE_ENV=development nodemon dist/main.js\""
   },
   "dependencies": {
     "@types/body-parser": "1.16.8",
@@ -31,10 +30,12 @@
     "express-graphql": "^0.6.12",
     "graphql": "0.13.2",
     "graphql-schema-tools": "^0.0.6",
+    "graphql-tools": "^2.24.0",
     "helmet": "^3.9.0",
     "mongoose": "^5.0.15",
     "morgan": "^1.9.0",
-    "ts-loader": "^4.2.0"
+    "ts-loader": "^4.2.0",
+    "uuid": "^3.2.1"
   },
   "devDependencies": {
     "@types/express-graphql": "^0.6.1",
@@ -42,6 +43,7 @@
     "@types/jest": "^21.1.5",
     "@types/mongoose": "^5.0.10",
     "@types/node": "^9.6.6",
+    "@types/uuid": "^3.4.3",
     "concurrently": "^3.5.0",
     "jest": "^21.2.1",
     "jest-cli": "^21.2.1",
@@ -62,6 +64,10 @@
     "mapCoverage": true,
     "testEnvironment": "node",
     "testRegex": ".*\\.spec\\.ts$",
-    "moduleFileExtensions": ["ts", "js", "json"]
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json"
+    ]
   }
 }

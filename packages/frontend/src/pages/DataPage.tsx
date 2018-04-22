@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Row, Col, Card } from 'antd';
 import { connect } from 'react-redux';
 import NumberInfo from 'ant-design-pro/lib/NumberInfo';
+import { Mutation } from 'react-apollo';
 
 import { withPageHeaderHoC } from '../components/PageHeaderHoC';
 import { actions } from '../state/actions/data';
@@ -10,6 +11,16 @@ import { Dispatch } from 'redux';
 import { IRootState } from '../state/reducers/root';
 import { Dataset } from '../../../common/src/model/dataset';
 import { CreateDataSetForm } from './forms/CreateDatasetForm';
+import gql from 'graphql-tag';
+
+const CREATE_DATASET = gql`
+  mutation createDataset($name: String!) {
+    createDataset(name: $name) {
+      _id
+      name
+    }
+  }
+`;
 
 class DataPage extends React.Component<{
   datasets: Array<Dataset>;
@@ -49,8 +60,15 @@ class DataPage extends React.Component<{
           style={{ marginBottom: 12 }}
         >
           <Card bordered={false}>
-            <h3>New Dataset</h3>
-            <CreateDataSetForm handleCreateDataset={this.props.onAddDataset} />
+            <Mutation mutation={CREATE_DATASET}>
+              {(createDataset, { data }) => (
+                <CreateDataSetForm
+                  handleCreateDataset={name => {
+                    createDataset({ variables: { name } });
+                  }}
+                />
+              )}
+            </Mutation>
           </Card>
         </Col>
       </Row>
