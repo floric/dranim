@@ -121,7 +121,7 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
               <Route path="/visualizations" render={props => VisPage} />
             </Switch>
           </Content>
-          <Footer style={{ textAlign: 'center' }}>Soundtoll Registers</Footer>
+          <Footer style={{ textAlign: 'center' }}>Florian Richter</Footer>
         </Layout>
       </Layout>
     );

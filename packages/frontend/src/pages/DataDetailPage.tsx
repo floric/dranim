@@ -1,23 +1,18 @@
 import * as React from 'react';
 import { SFC, Component } from 'react';
-import { Row, Col, Button, Card } from 'antd';
-import { connect, Dispatch } from 'react-redux';
+import { Row, Col, Button, Card, Table } from 'antd';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import Exception from 'ant-design-pro/lib/Exception';
 import { History } from 'history';
 import gql from 'graphql-tag';
-import { Query } from 'react-apollo';
+import { Query, Mutation } from 'react-apollo';
+import { format } from 'date-fns';
 
-import { ValueSchema } from '../../../common/src/model/valueschema';
 import { withPageHeaderHoC } from '../components/PageHeaderHoC';
-import { IRootState } from '../state/reducers/root';
-import { actions } from '../state/actions/data';
 import { CreateValueSchemaForm } from './forms/CreateValueSchemaForm';
 
 export interface IDataDetailPageProps
-  extends RouteComponentProps<{ id: string }> {
-  onAddValueSchema: (datasetId: string, val: ValueSchema) => void;
-}
+  extends RouteComponentProps<{ id: string }> {}
 
 const NoDatasetExceptionActions: SFC<{ history: History }> = ({ history }) => (
   <Button type="primary" onClick={() => history.push('/data')}>
@@ -30,15 +25,46 @@ const DATASET = gql`
     dataset(id: $id) {
       _id
       name
-      valueschema
+      valueschemas {
+        name
+        type
+        required
+      }
+      entries {
+        time
+        values
+      }
     }
   }
 `;
 
-class DataDetailPage extends Component<IDataDetailPageProps> {
-  private handleCreateValueSchema = (val: ValueSchema) =>
-    this.props.onAddValueSchema(this.props.match.params.id, val);
+const ADD_VALUE_SCHEMA = gql`
+  mutation addValueSchema(
+    $datasetId: String!
+    $name: String!
+    $type: String!
+    $required: Boolean!
+  ) {
+    addValueSchema(
+      datasetId: $datasetId
+      name: $name
+      type: $type
+      required: $required
+    ) {
+      _id
+    }
+  }
+`;
 
+/*const ADD_ENTRY = gql`
+  mutation addEntry($datasetId: String!, $time: String!, $values: String!) {
+    addEntry(datasetId: $datasetId, time: $time, values: $values) {
+      _id
+    }
+  }
+`;*/
+
+class DataDetailPage extends Component<IDataDetailPageProps> {
   public render() {
     const {
       history,
@@ -48,13 +74,22 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
     } = this.props;
 
     return (
-      <Query query={DATASET} variables={{ id }}>
+      <Query query={DATASET} variables={{ id }} pollInterval={5000}>
         {({ loading, error, data }) => {
           if (loading) {
             return null;
           }
           if (error) {
-            return `Error!: ${error}`;
+            return (
+              <Card bordered={false}>
+                <Exception
+                  type="500"
+                  title={`Error: ${error.name}`}
+                  desc={`An error has happened: ${error.message}`}
+                  actions={() => null}
+                />
+              </Card>
+            );
           }
 
           if (!data.dataset) {
@@ -70,12 +105,12 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
             );
           }
 
-          /*const schemasDataSource = schemas.map(e => ({
+          const schemasDataSource = data.dataset.valueschemas.map((e: any) => ({
             key: e.name,
             type: e.type,
             required: e.required ? 'true' : 'false'
           }));
-      
+
           const schemasColumns = [
             {
               title: 'Name',
@@ -92,14 +127,14 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
               dataIndex: 'required',
               key: 'required'
             }
-          ];*/
+          ];
 
-          /*const entriesDataSource = dataset.entries.map(e => ({
+          const entriesDataSource = data.dataset.entries.map((e: any) => ({
             time: format(e.time, 'MM/DD/YYYY'),
             key: e.id,
             values: e.values.size
           }));
-      
+
           const entriesColumns = [
             {
               title: 'Time',
@@ -116,7 +151,7 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
               dataIndex: 'values',
               key: 'values'
             }
-          ];*/
+          ];
 
           return (
             <Row>
@@ -125,18 +160,32 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
                   <Row style={{ marginBottom: 12 }}>
                     <Col>
                       <h3>Value Schemas</h3>
-                      {/*<Table
+                      <Table
+                        pagination={false}
                         dataSource={schemasDataSource}
                         columns={schemasColumns}
-                      />*/}
+                      />
                     </Col>
                   </Row>
                   <Row style={{ marginBottom: 12 }}>
                     <Col>
                       <h4>Add Value Schema</h4>
-                      <CreateValueSchemaForm
-                        handleCreateValueSchema={this.handleCreateValueSchema}
-                      />
+                      <Mutation mutation={ADD_VALUE_SCHEMA}>
+                        {addValueSchema => (
+                          <CreateValueSchemaForm
+                            handleCreateValueSchema={schema => {
+                              addValueSchema({
+                                variables: {
+                                  datasetId: id,
+                                  name: schema.name,
+                                  required: schema.required,
+                                  type: schema.type
+                                }
+                              });
+                            }}
+                          />
+                        )}
+                      </Mutation>
                     </Col>
                   </Row>
                 </Card>
@@ -144,7 +193,10 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
               <Col style={{ marginBottom: 12 }}>
                 <Card bordered={false}>
                   <h3>Data</h3>
-                  {/*<Table dataSource={entriesDataSource} columns={entriesColumns} />*/}
+                  <Table
+                    dataSource={entriesDataSource}
+                    columns={entriesColumns}
+                  />
                 </Card>
               </Col>
             </Row>
@@ -155,18 +207,7 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
   }
 }
 
-const mapStateToProps = (
-  state: IRootState,
-  props: RouteComponentProps<{ id: string }>
-) => ({});
-
-const mapDispatchToProps = (dispatch: Dispatch<IRootState>) => ({
-  onAddValueSchema: (datasetId: string, val: ValueSchema) => {
-    dispatch(actions.addDatasetSchemaValue(datasetId, val));
-  }
-});
-
 export default withPageHeaderHoC({
   title: 'Details',
   includeInCard: false
-})(withRouter(connect(mapStateToProps, mapDispatchToProps)(DataDetailPage)));
+})(withRouter(DataDetailPage));

@@ -17,7 +17,6 @@ const CREATE_DATASET = gql`
   mutation createDataset($name: String!) {
     createDataset(name: $name) {
       _id
-      name
     }
   }
 `;
