@@ -2,17 +2,15 @@ import * as React from 'react';
 
 import { Form, Icon, Input, Button } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
+import { hasErrors } from '../../utils/form';
+
 const FormItem = Form.Item;
 
-function hasErrors(fieldsError: any) {
-  return Object.keys(fieldsError).some(field => fieldsError[field]);
-}
-
-export interface ICreateDataSetFormProps extends FormComponentProps {
+export interface CreateDataSetFormProps extends FormComponentProps {
   handleCreateDataset: (name: string) => void;
 }
 
-class CreateDataSetFormImpl extends React.Component<ICreateDataSetFormProps> {
+class CreateDataSetFormImpl extends React.Component<CreateDataSetFormProps> {
   public componentDidMount() {
     this.props.form.validateFields();
   }

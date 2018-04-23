@@ -6,10 +6,12 @@ import Exception from 'ant-design-pro/lib/Exception';
 import { History } from 'history';
 import gql from 'graphql-tag';
 import { Query, Mutation } from 'react-apollo';
-import { format } from 'date-fns';
 
 import { withPageHeaderHoC } from '../components/PageHeaderHoC';
+import { Spinner } from '../components/Spinner';
 import { CreateValueSchemaForm } from './forms/CreateValueSchemaForm';
+import { CreateEntryForm } from './forms/CreateEntryForm';
+import { ValueSchema } from '../../../common/src/model/valueschema';
 
 export interface IDataDetailPageProps
   extends RouteComponentProps<{ id: string }> {}
@@ -23,7 +25,7 @@ const NoDatasetExceptionActions: SFC<{ history: History }> = ({ history }) => (
 const DATASET = gql`
   query dataset($id: String!) {
     dataset(id: $id) {
-      _id
+      id
       name
       valueschemas {
         name
@@ -31,7 +33,7 @@ const DATASET = gql`
         required
       }
       entries {
-        time
+        id
         values
       }
     }
@@ -51,18 +53,18 @@ const ADD_VALUE_SCHEMA = gql`
       type: $type
       required: $required
     ) {
-      _id
+      id
     }
   }
 `;
 
-/*const ADD_ENTRY = gql`
-  mutation addEntry($datasetId: String!, $time: String!, $values: String!) {
-    addEntry(datasetId: $datasetId, time: $time, values: $values) {
-      _id
+const ADD_ENTRY = gql`
+  mutation addEntry($datasetId: String!, $values: String!) {
+    addEntry(datasetId: $datasetId, values: $values) {
+      id
     }
   }
-`;*/
+`;
 
 class DataDetailPage extends Component<IDataDetailPageProps> {
   public render() {
@@ -74,11 +76,12 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
     } = this.props;
 
     return (
-      <Query query={DATASET} variables={{ id }} pollInterval={5000}>
+      <Query query={DATASET} variables={{ id }}>
         {({ loading, error, data }) => {
           if (loading) {
-            return null;
+            return <Spinner />;
           }
+
           if (error) {
             return (
               <Card bordered={false}>
@@ -105,11 +108,13 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
             );
           }
 
-          const schemasDataSource = data.dataset.valueschemas.map((e: any) => ({
-            key: e.name,
-            type: e.type,
-            required: e.required ? 'true' : 'false'
-          }));
+          const schemasDataSource = data.dataset.valueschemas.map(
+            (e: ValueSchema) => ({
+              key: e.name,
+              type: e.type,
+              required: e.required ? 'true' : 'false'
+            })
+          );
 
           const schemasColumns = [
             {
@@ -130,17 +135,11 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
           ];
 
           const entriesDataSource = data.dataset.entries.map((e: any) => ({
-            time: format(e.time, 'MM/DD/YYYY'),
             key: e.id,
-            values: e.values.size
+            values: e.values
           }));
 
           const entriesColumns = [
-            {
-              title: 'Time',
-              dataIndex: 'time',
-              key: 'time'
-            },
             {
               title: 'Index',
               dataIndex: 'key',
@@ -192,11 +191,35 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
               </Col>
               <Col style={{ marginBottom: 12 }}>
                 <Card bordered={false}>
-                  <h3>Data</h3>
-                  <Table
-                    dataSource={entriesDataSource}
-                    columns={entriesColumns}
-                  />
+                  <Row style={{ marginBottom: 12 }}>
+                    <Col>
+                      <h3>Entries</h3>
+                      <Table
+                        dataSource={entriesDataSource}
+                        columns={entriesColumns}
+                      />
+                    </Col>
+                  </Row>
+                  <Row style={{ marginBottom: 12 }}>
+                    <Col>
+                      <h4>Add Entry</h4>
+                      <Mutation mutation={ADD_ENTRY}>
+                        {addEntry => (
+                          <CreateEntryForm
+                            handleCreateEntry={values => {
+                              addEntry({
+                                variables: {
+                                  datasetId: id,
+                                  values: JSON.stringify(values)
+                                }
+                              });
+                            }}
+                            schema={data.dataset.valueschemas}
+                          />
+                        )}
+                      </Mutation>
+                    </Col>
+                  </Row>
                 </Card>
               </Col>
             </Row>

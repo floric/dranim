@@ -3,7 +3,7 @@ import Entry from './entry';
 
 const Dataset = `
   type Dataset {
-    _id: String!
+    id: String!
     name: String!
     valueschemas: [Valueschema!]!
     entries: [Entry!]!

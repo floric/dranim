@@ -1,9 +1,5 @@
-export class Value {
-  constructor(name: string, val: string) {
-    this.val = val;
-    this.name = name;
-  }
+import { ValueSchema } from './valueschema';
 
-  public readonly name: string;
-  public readonly val: string;
+export interface Value extends ValueSchema {
+  val: string;
 }

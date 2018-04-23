@@ -8,20 +8,17 @@ import {
 } from '../../../../common/src/model/valueschema';
 import { FormEvent } from 'react';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
+import { hasErrors } from '../../utils/form';
 
 const FormItem = Form.Item;
 const { Option, OptGroup } = Select;
 
-function hasErrors(fieldsError: any) {
-  return Object.keys(fieldsError).some(field => fieldsError[field]);
-}
-
-export interface ICreateValueSchemaFormProps extends FormComponentProps {
+export interface CreateValueSchemaFormProps extends FormComponentProps {
   handleCreateValueSchema: (val: ValueSchema) => void;
 }
 
 class CreateValueSchemaFormImpl extends React.Component<
-  ICreateValueSchemaFormProps
+  CreateValueSchemaFormProps
 > {
   public componentDidMount() {
     this.props.form.validateFields();

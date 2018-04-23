@@ -5,8 +5,8 @@ export enum ValueSchemaType {
   boolean = 'Boolean'
 }
 
-export class ValueSchema {
-  public readonly type: ValueSchemaType;
-  public readonly name: string;
-  public readonly required: boolean;
+export interface ValueSchema {
+  readonly type: ValueSchemaType;
+  readonly name: string;
+  readonly required: boolean;
 }

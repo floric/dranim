@@ -1,7 +1,5 @@
 import * as mongoose from 'mongoose';
 
-console.log();
-
 const config = {
   db:
     process.env.NODE_ENV === 'development'

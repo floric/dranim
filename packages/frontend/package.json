@@ -4,11 +4,13 @@
   "private": true,
   "main": "src",
   "dependencies": {
+    "@antv/data-set": "^0.8.7",
     "@types/history": "^4.6.2",
     "@types/prop-types": "^15.5.2",
     "ant-design-pro": "^1.2.1",
     "antd": "^3.4.1",
     "apollo-boost": "^0.1.4",
+    "d3-node-editor": "^0.7.2",
     "date-fns": "^1.29.0",
     "glamor": "^2.20.40",
     "graphql": "^0.13.2",

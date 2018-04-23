@@ -13,14 +13,12 @@ const datasetSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  valueschemas: [valueschemaSchema],
-  entries: [entrySchema]
+  valueschemas: [valueschemaSchema]
 });
 
 export interface Dataset {
   name: string;
   valueschemas: Array<{ name: string; required: boolean; type: string }>;
-  entries: Array<Entry>;
 }
 
 export const DatasetModel = mongoose.model<Dataset & Document>(

@@ -19,11 +19,17 @@ const SubMenu = Menu.SubMenu;
 
 export interface IAppProps extends RouteComponentProps<{}> {}
 
-const ALL_DATASETS = gql`
+export const ALL_DATASETS = gql`
   {
     datasets {
-      _id
+      id
       name
+      entries {
+        id
+      }
+      valueschemas {
+        name
+      }
     }
   }
 `;
@@ -31,7 +37,7 @@ const ALL_DATASETS = gql`
 const AppMenu: SFC<{
   datasets?: Array<{
     name: string;
-    _id: string;
+    id: string;
   }>;
 }> = ({ datasets }) => (
   <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
@@ -53,9 +59,9 @@ const AppMenu: SFC<{
       </Menu.Item>
       {datasets && datasets.length > 0 && <Menu.Divider />}
       {datasets &&
-        datasets.map((ds: { name: string; _id: string }) => (
-          <Menu.Item key={`menu_passages+${ds._id}`}>
-            <NavLink to={`/data/${ds._id}`}>{ds.name}</NavLink>
+        datasets.map((ds: { name: string; id: string }) => (
+          <Menu.Item key={`menu_passages+${ds.id}`}>
+            <NavLink to={`/data/${ds.id}`}>{ds.name}</NavLink>
           </Menu.Item>
         ))}
     </SubMenu>
@@ -98,12 +104,9 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
             <br />
             <span>Explorer</span>
           </div>
-          <Query query={ALL_DATASETS} pollInterval={5000}>
+          <Query query={ALL_DATASETS}>
             {res => {
-              if (res.loading) {
-                return <AppMenu />;
-              }
-              if (res.error) {
+              if (res.loading || res.error) {
                 return <AppMenu />;
               }
 

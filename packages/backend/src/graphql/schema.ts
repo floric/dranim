@@ -29,9 +29,12 @@ export const Mutation = `
     ): Dataset!
     addEntry (
       datasetId: String!
-      time: String!
       values: String!
     ): Entry!
+    importEntriesAsCSV(
+      datasetId: String!
+      csv: String!
+    ): [Entry!]!
   }
 `;
 
@@ -56,28 +59,41 @@ const getDataset = async (id: string) => {
   return ds;
 };
 
+const getEntry = async (id: string) => {
+  const isValidId = Types.ObjectId.isValid(id);
+  if (!isValidId) {
+    return null;
+  }
+  const e = await EntryModel.findById(id).exec();
+  if (!e) {
+    return null;
+  }
+
+  return e;
+};
+
+const getEntriesForDataset = async (datasetId: string) => {
+  const entries = await EntryModel.find()
+    .where('datasetId', datasetId)
+    .exec();
+  return entries.map(e => ({
+    id: e._id,
+    datasetId: e.datasetId,
+    values: JSON.stringify(e.toJSON())
+  }));
+};
+
 const resolvers = {
   Query: {
-    datasets: async () => {
-      const datasets = await DatasetModel.find().exec();
-      if (!datasets) {
-        throw new Error('Datasets not found.');
-      }
-      return datasets;
-    },
-    dataset: async (_, { id }) => getDataset(id),
-    entry: async (_, { id }) => {
-      const isValidId = Types.ObjectId.isValid(id);
-      if (!isValidId) {
-        return null;
-      }
-      const e = await EntryModel.findById(id).exec();
-      if (!e) {
-        return null;
-      }
-
-      return e;
-    }
+    datasets: async () => await DatasetModel.find().exec(),
+    dataset: async (_, { id }) => await getDataset(id),
+    entry: async (_, { id }) => await getEntry(id)
+  },
+  Dataset: {
+    entries: async ds => await getEntriesForDataset(ds._id)
+  },
+  Entry: {
+    dataset: async e => await getDataset(e.datasetId)
   },
   Mutation: {
     createDataset: async (_, { name }) => {
@@ -86,7 +102,7 @@ const resolvers = {
         valueschemas: []
       });
       if (!dataset) {
-        throw new Error('Datasets not found.');
+        throw new Error('Creating dataset failed.');
       }
       return dataset;
     },
@@ -99,13 +115,18 @@ const resolvers = {
       });
       return await DatasetModel.findByIdAndUpdate(datasetId, ds).exec();
     },
-    addEntry: async (_, { datasetId, time, values }) => {
+    addEntry: async (_, { datasetId, values }) => {
       const ds = await getDataset(datasetId);
-      ds.entries.push({
-        time,
+      if (!ds) {
+        throw new Error('Unknown dataset!');
+      }
+      return await EntryModel.create({
+        datasetId,
         values
       });
-      return await DatasetModel.findByIdAndUpdate(datasetId, ds).exec();
+    },
+    importEntriesAsCSV: async (_, { datasetId, csv }) => {
+      const ds = await getDataset(datasetId);
     }
   }
 };

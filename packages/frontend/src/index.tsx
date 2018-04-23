@@ -12,6 +12,7 @@ import store from './state/store';
 
 import 'antd/dist/antd.css';
 import 'ant-design-pro/dist/ant-design-pro.css';
+import 'd3-node-editor/build/d3-node-editor.css';
 
 const client = new ApolloClient({
   uri: '/api/graphql'

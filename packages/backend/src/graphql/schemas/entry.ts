@@ -1,9 +1,11 @@
+import Dataset from './dataset';
+
 const Entry = `
   type Entry {
-    _id: String!
-    time: String!
+    id: String!
+    dataset: Dataset!
     values: String!
   }
 `;
 
-export default () => [Entry];
+export default () => [Entry, Dataset];
