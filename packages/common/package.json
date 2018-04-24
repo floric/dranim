@@ -3,6 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "main": "src",
+  "scripts": {
+    "clean": "rm -rf dist node_modules"
+  },
   "dependencies": {
     "uuid": "^3.2.1"
   },

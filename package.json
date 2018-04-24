@@ -10,7 +10,7 @@
   "scripts": {
     "build": "lerna run build --stream",
     "start": "lerna run start:watch --stream",
-    "clean": "lerna run clean --stream",
+    "clean": "lerna run clean --stream && rm -rf \"data,node_modules\"",
     "mongodb": "sudo docker run -p 127.0.0.1:27017:27017 mongo:latest"
   },
   "author": {

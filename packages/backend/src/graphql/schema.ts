@@ -1,12 +1,12 @@
 import { makeExecutableSchema } from 'graphql-tools';
 import * as uuid from 'uuid/v4';
-import { Types } from 'mongoose';
+import { Types, Schema, Document } from 'mongoose';
 
-import { DatasetModel } from './models/dataset';
-import { EntryModel } from './models/entry';
+import { DatasetModel, Value } from './models/dataset';
+import { EntryModel, Entry } from './models/entry';
 import Dataset from './schemas/dataset';
 import Valueschema from './schemas/valueschema';
-import Entry from './schemas/entry';
+import { parse } from 'querystring';
 
 export const Query = `
   type Query {
@@ -21,6 +21,9 @@ export const Mutation = `
     createDataset (
       name: String!
     ): Dataset!
+    deleteDataset (
+      id: String!
+    ): Entry!
     addValueSchema (
       datasetId: String!
       name: String!
@@ -30,6 +33,9 @@ export const Mutation = `
     addEntry (
       datasetId: String!
       values: String!
+    ): Entry!
+    deleteEntry (
+      id: String!
     ): Entry!
     importEntriesAsCSV(
       datasetId: String!
@@ -72,6 +78,11 @@ const getEntry = async (id: string) => {
   return e;
 };
 
+const getEntryValues = (e: Entry & Document) => {
+  const { _id, __v, datasetId, ...values } = e.toJSON();
+  return values;
+};
+
 const getEntriesForDataset = async (datasetId: string) => {
   const entries = await EntryModel.find()
     .where('datasetId', datasetId)
@@ -79,7 +90,7 @@ const getEntriesForDataset = async (datasetId: string) => {
   return entries.map(e => ({
     id: e._id,
     datasetId: e.datasetId,
-    values: JSON.stringify(e.toJSON())
+    values: JSON.stringify(getEntryValues(e))
   }));
 };
 
@@ -120,10 +131,39 @@ const resolvers = {
       if (!ds) {
         throw new Error('Unknown dataset!');
       }
+      const parsedValues: Array<Value> = JSON.parse(values);
+      const valuesMap = {};
+      parsedValues.forEach(val => {
+        const valSchema = EntryModel.schema.get(val.name);
+        if (!valSchema) {
+          console.log('Add new schema: ' + JSON.stringify(val));
+          EntryModel.schema.add({
+            [val.name]: String
+          });
+        }
+        valuesMap[val.name] = val.val;
+      });
+
       return await EntryModel.create({
         datasetId,
-        values
+        ...valuesMap
       });
+    },
+    deleteDataset: async (_, { id }) => {
+      const res = await DatasetModel.findByIdAndRemove(id).exec();
+      if (!res) {
+        throw new Error("Dataset doesn't exist");
+      }
+
+      return res;
+    },
+    deleteEntry: async (_, { id }) => {
+      const res = await EntryModel.findByIdAndRemove(id).exec();
+      if (!res) {
+        throw new Error("Entry doesn't exist");
+      }
+
+      return res;
     },
     importEntriesAsCSV: async (_, { datasetId, csv }) => {
       const ds = await getDataset(datasetId);

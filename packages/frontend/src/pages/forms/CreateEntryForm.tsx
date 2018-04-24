@@ -51,7 +51,7 @@ class CreateEntryFormImpl extends React.Component<CreateEntryFormProps> {
       }
 
       const values = schema.map(s => ({
-        val: form.getFieldValue('name'),
+        val: form.getFieldValue(s.name),
         ...s
       }));
 

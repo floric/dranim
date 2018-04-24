@@ -6,7 +6,7 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack",
     "build:watch": "cross-env NODE_ENV=development webpack --watch",
-    "clean": "rm -rf build dist",
+    "clean": "rm -rf dist node_modules",
     "pretest": "yarn build",
     "test": "jest",
     "test:watch": "yarn test -- --watch",
@@ -14,7 +14,8 @@
     "coverage": "yarn test -- --coverage",
     "coverage:notify": "yarn coverage -- --watch --notify",
     "start": "cross-env NODE_ENV=development yarn build && node dist/main.js",
-    "start:watch": "yarn build && concurrently \"yarn build:watch\" \"cross-env NODE_ENV=development nodemon dist/main.js\""
+    "start:watch":
+      "concurrently \"yarn build:watch\" \"cross-env NODE_ENV=development nodemon dist/main.js\""
   },
   "dependencies": {
     "@types/body-parser": "1.16.8",
@@ -64,10 +65,6 @@
     "mapCoverage": true,
     "testEnvironment": "node",
     "testRegex": ".*\\.spec\\.ts$",
-    "moduleFileExtensions": [
-      "ts",
-      "js",
-      "json"
-    ]
+    "moduleFileExtensions": ["ts", "js", "json"]
   }
 }

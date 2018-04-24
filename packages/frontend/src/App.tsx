@@ -93,7 +93,7 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
     return (
       <Layout style={{ minHeight: '100vh' }}>
         <Sider
-          collapsible={true}
+          collapsible
           collapsed={this.state.collapsed}
           onCollapse={this.onCollapse}
         >
@@ -117,8 +117,8 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
         <Layout>
           <Content {...css({ background: '#ECECEC', padding: '30px' })}>
             <Switch>
-              <Route exact={true} path="/" render={props => StartPage} />
-              <Route exact={true} path="/data" render={props => DataPage} />
+              <Route exact path="/" render={props => StartPage} />
+              <Route exact path="/data" render={props => DataPage} />
               <Route path="/data/:id" render={props => DataDetailPage} />
               <Route path="/explorer" render={props => ExplorerPage} />
               <Route path="/visualizations" render={props => VisPage} />

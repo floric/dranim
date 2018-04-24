@@ -1,4 +1,4 @@
 #!/bin/sh
 yarn
 yarn build
-docker-compose build
+sudo docker-compose build

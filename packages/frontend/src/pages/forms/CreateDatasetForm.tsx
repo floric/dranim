@@ -34,7 +34,6 @@ class CreateDataSetFormImpl extends React.Component<CreateDataSetFormProps> {
       isFieldTouched
     } = this.props.form;
 
-    // Only show error after a field is touched.
     const nameError = isFieldTouched('name') && getFieldError('name');
 
     return (
@@ -47,7 +46,7 @@ class CreateDataSetFormImpl extends React.Component<CreateDataSetFormProps> {
             rules: [{ required: true, message: 'Please enter dataset name!' }]
           })(
             <Input
-              prefix={<Icon type="info" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              prefix={<Icon type="plus" style={{ color: 'rgba(0,0,0,.25)' }} />}
               placeholder="Name"
             />
           )}

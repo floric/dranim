@@ -21,6 +21,16 @@ export interface Dataset {
   valueschemas: Array<{ name: string; required: boolean; type: string }>;
 }
 
+export interface Valueschema {
+  name: string;
+  required: boolean;
+  type: string;
+}
+
+export interface Value extends Valueschema {
+  val: string;
+}
+
 export const DatasetModel = mongoose.model<Dataset & Document>(
   'Datasets',
   datasetSchema

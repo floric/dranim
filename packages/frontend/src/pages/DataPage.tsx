@@ -1,18 +1,26 @@
 import * as React from 'react';
-import { Link } from 'react-router-dom';
-import { Row, Col, Card } from 'antd';
+import { Row, Col, Card, Button } from 'antd';
 import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 import { Mutation, Query } from 'react-apollo';
 import gql from 'graphql-tag';
 
 import { withPageHeaderHoC } from '../components/PageHeaderHoC';
-import { Spinner } from '../components/Spinner';
+import { LoadingCard, UnknownErrorCard } from '../components/CustomCards';
 import { CreateDataSetForm } from './forms/CreateDatasetForm';
 import { ALL_DATASETS } from '../App';
+import { tryOperation } from '../utils/form';
 
 const CREATE_DATASET = gql`
   mutation createDataset($name: String!) {
     createDataset(name: $name) {
+      id
+    }
+  }
+`;
+
+const DELETE_DATASET = gql`
+  mutation deleteDataset($id: String!) {
+    deleteDataset(id: $id) {
       id
     }
   }
@@ -24,17 +32,18 @@ class DataPage extends React.Component<{
   public render() {
     return (
       <Query query={ALL_DATASETS}>
-        {res => {
-          if (res.loading) {
-            return <Spinner />;
+        {({ loading, error, data, refetch }) => {
+          if (loading) {
+            return <LoadingCard />;
           }
-          if (res.error) {
-            return null;
+
+          if (error) {
+            return <UnknownErrorCard error={error} />;
           }
 
           return (
             <Row gutter={12} style={{ marginBottom: 12 }}>
-              {res.data.datasets.map(ds => (
+              {data.datasets.map(ds => (
                 <Col
                   key={`card-${ds.id}`}
                   xs={{ span: 24 }}
@@ -42,10 +51,7 @@ class DataPage extends React.Component<{
                   xl={{ span: 8 }}
                   style={{ marginBottom: 12 }}
                 >
-                  <Card bordered={false}>
-                    <h2>
-                      <Link to={`/data/${ds.id}`}>{ds.name}</Link>
-                    </h2>
+                  <Card title={ds.name} bordered={false}>
                     <Row>
                       <Col xs={{ span: 24 }} md={{ span: 12 }}>
                         <NumberInfo
@@ -54,7 +60,51 @@ class DataPage extends React.Component<{
                         />
                       </Col>
                       <Col xs={{ span: 24 }} md={{ span: 12 }}>
-                        <NumberInfo total={ds.entries.length} title="Entries" />
+                        <NumberInfo
+                          gap={0}
+                          total={ds.entries.length}
+                          title="Entries"
+                        />
+                      </Col>
+                    </Row>
+                    <Row
+                      type="flex"
+                      justify="end"
+                      style={{ marginTop: 12 }}
+                      gutter={8}
+                    >
+                      <Col>
+                        <Button icon="ellipsis" />
+                      </Col>
+                      <Col>
+                        <Mutation mutation={DELETE_DATASET}>
+                          {deleteDataset => (
+                            <Button
+                              icon="delete"
+                              onClick={() =>
+                                tryOperation({
+                                  op: () =>
+                                    deleteDataset({
+                                      variables: {
+                                        id: ds.id
+                                      }
+                                    }),
+                                  refetch,
+                                  successTitle: 'Dataset deleted',
+                                  successMessage: `Dataset "${
+                                    ds.name
+                                  }" deleted successfully.`,
+                                  failedTitle: 'Dataset not deleted.',
+                                  failedMessage: `Dataset "${
+                                    ds.name
+                                  }" deletion failed.`
+                                })
+                              }
+                            >
+                              Delete
+                            </Button>
+                          )}
+                        </Mutation>
                       </Col>
                     </Row>
                   </Card>
@@ -67,12 +117,20 @@ class DataPage extends React.Component<{
                 style={{ marginBottom: 12 }}
               >
                 <Card bordered={false}>
+                  <h2>New Dataset</h2>
                   <Mutation mutation={CREATE_DATASET}>
-                    {(createDataset, { data }) => (
+                    {(createDataset, {}) => (
                       <CreateDataSetForm
-                        handleCreateDataset={name => {
-                          createDataset({ variables: { name } });
-                        }}
+                        handleCreateDataset={name =>
+                          tryOperation({
+                            op: () => createDataset({ variables: { name } }),
+                            refetch,
+                            successTitle: 'Dataset created',
+                            successMessage: `Dataset "${name}" created successfully.`,
+                            failedTitle: 'Dataset not deleted.',
+                            failedMessage: `Dataset  "${name}" creation failed.`
+                          })
+                        }
                       />
                     )}
                   </Mutation>

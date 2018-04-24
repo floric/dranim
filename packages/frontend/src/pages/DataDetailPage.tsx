@@ -2,16 +2,20 @@ import * as React from 'react';
 import { SFC, Component } from 'react';
 import { Row, Col, Button, Card, Table } from 'antd';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import Exception from 'ant-design-pro/lib/Exception';
 import { History } from 'history';
 import gql from 'graphql-tag';
 import { Query, Mutation } from 'react-apollo';
 
 import { withPageHeaderHoC } from '../components/PageHeaderHoC';
-import { Spinner } from '../components/Spinner';
+import {
+  LoadingCard,
+  UnknownErrorCard,
+  CustomErrorCard
+} from '../components/CustomCards';
 import { CreateValueSchemaForm } from './forms/CreateValueSchemaForm';
 import { CreateEntryForm } from './forms/CreateEntryForm';
 import { ValueSchema } from '../../../common/src/model/valueschema';
+import { tryOperation } from '../utils/form';
 
 export interface IDataDetailPageProps
   extends RouteComponentProps<{ id: string }> {}
@@ -66,6 +70,14 @@ const ADD_ENTRY = gql`
   }
 `;
 
+const DELETE_ENTRY = gql`
+  mutation deleteEntry($id: String!) {
+    deleteEntry(id: $id) {
+      id
+    }
+  }
+`;
+
 class DataDetailPage extends Component<IDataDetailPageProps> {
   public render() {
     const {
@@ -77,34 +89,22 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
 
     return (
       <Query query={DATASET} variables={{ id }}>
-        {({ loading, error, data }) => {
+        {({ loading, error, data, refetch }) => {
           if (loading) {
-            return <Spinner />;
+            return <LoadingCard />;
           }
 
           if (error) {
-            return (
-              <Card bordered={false}>
-                <Exception
-                  type="500"
-                  title={`Error: ${error.name}`}
-                  desc={`An error has happened: ${error.message}`}
-                  actions={() => null}
-                />
-              </Card>
-            );
+            return <UnknownErrorCard error={error} />;
           }
 
           if (!data.dataset) {
             return (
-              <Card bordered={false}>
-                <Exception
-                  type="404"
-                  title="Unknown Dataset"
-                  desc={`The dataset with id '${id}' doesn't exist.`}
-                  actions={<NoDatasetExceptionActions history={history} />}
-                />
-              </Card>
+              <CustomErrorCard
+                title="Unknown dataset"
+                description="Dataset doesn't exist."
+                actions={<NoDatasetExceptionActions history={history} />}
+              />
             );
           }
 
@@ -149,6 +149,37 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
               title: 'Values',
               dataIndex: 'values',
               key: 'values'
+            },
+            {
+              title: 'Operations',
+              dataIndex: 'operation',
+              render: (text, record) => {
+                return (
+                  <Mutation mutation={DELETE_ENTRY}>
+                    {deleteEntry => (
+                      <Button
+                        onClick={() =>
+                          tryOperation({
+                            op: () =>
+                              deleteEntry({
+                                variables: {
+                                  id: record.key
+                                }
+                              }),
+                            refetch,
+                            successTitle: 'Entry deleted',
+                            successMessage: `Entry "" deleted successfully.`,
+                            failedTitle: 'Entry not deleted.',
+                            failedMessage: `Entry "" deletion failed.`
+                          })
+                        }
+                      >
+                        Delete
+                      </Button>
+                    )}
+                  </Mutation>
+                );
+              }
             }
           ];
 
@@ -172,16 +203,28 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
                       <Mutation mutation={ADD_VALUE_SCHEMA}>
                         {addValueSchema => (
                           <CreateValueSchemaForm
-                            handleCreateValueSchema={schema => {
-                              addValueSchema({
-                                variables: {
-                                  datasetId: id,
-                                  name: schema.name,
-                                  required: schema.required,
-                                  type: schema.type
-                                }
-                              });
-                            }}
+                            handleCreateValueSchema={schema =>
+                              tryOperation({
+                                op: () =>
+                                  addValueSchema({
+                                    variables: {
+                                      datasetId: id,
+                                      name: schema.name,
+                                      required: schema.required,
+                                      type: schema.type
+                                    }
+                                  }),
+                                refetch,
+                                successTitle: 'Valueschema created',
+                                successMessage: `Valueschema "${
+                                  schema.name
+                                }" created successfully.`,
+                                failedTitle: 'Valueschema not deleted.',
+                                failedMessage: `Valueschema  "${
+                                  schema.name
+                                }" deletion failed.`
+                              })
+                            }
                           />
                         )}
                       </Mutation>
@@ -206,14 +249,22 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
                       <Mutation mutation={ADD_ENTRY}>
                         {addEntry => (
                           <CreateEntryForm
-                            handleCreateEntry={values => {
-                              addEntry({
-                                variables: {
-                                  datasetId: id,
-                                  values: JSON.stringify(values)
-                                }
-                              });
-                            }}
+                            handleCreateEntry={values =>
+                              tryOperation({
+                                op: () =>
+                                  addEntry({
+                                    variables: {
+                                      datasetId: id,
+                                      values: JSON.stringify(values)
+                                    }
+                                  }),
+                                refetch,
+                                successTitle: 'Entry created',
+                                successMessage: `Entry created successfully.`,
+                                failedTitle: 'Entry not created.',
+                                failedMessage: `Entry creation failed.`
+                              })
+                            }
                             schema={data.dataset.valueschemas}
                           />
                         )}
