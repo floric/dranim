@@ -50,15 +50,15 @@ const ADD_VALUE_SCHEMA = gql`
     $name: String!
     $type: String!
     $required: Boolean!
+    $fallback: String!
   ) {
     addValueSchema(
       datasetId: $datasetId
       name: $name
       type: $type
       required: $required
-    ) {
-      id
-    }
+      fallback: $fallback
+    )
   }
 `;
 
@@ -71,9 +71,9 @@ const ADD_ENTRY = gql`
 `;
 
 const DELETE_ENTRY = gql`
-  mutation deleteEntry($id: String!) {
-    deleteEntry(id: $id) {
-      id
+  mutation deleteEntry($datasetId: String!, $entryId: String!) {
+    deleteEntry(datasetId: $datasetId, entryId: $entryId) {
+      entryId
     }
   }
 `;
@@ -211,7 +211,8 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
                                       datasetId: id,
                                       name: schema.name,
                                       required: schema.required,
-                                      type: schema.type
+                                      type: schema.type,
+                                      fallback: 'fallback'
                                     }
                                   }),
                                 refetch,
@@ -219,10 +220,10 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
                                 successMessage: `Valueschema "${
                                   schema.name
                                 }" created successfully.`,
-                                failedTitle: 'Valueschema not deleted.',
+                                failedTitle: 'Valueschema not created.',
                                 failedMessage: `Valueschema  "${
                                   schema.name
-                                }" deletion failed.`
+                                }" creation failed.`
                               })
                             }
                           />

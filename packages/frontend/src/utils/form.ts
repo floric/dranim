@@ -1,5 +1,6 @@
 import { notification } from 'antd';
 import { ApolloQueryResult } from 'apollo-boost';
+import { isApolloError } from 'apollo-client/errors/ApolloError';
 
 export interface NotificationArguments {
   icon: 'success' | 'error' | 'info' | 'warning';
@@ -59,7 +60,10 @@ export const tryOperation = async <T>(
   } catch (err) {
     showNotificationWithIcon({
       icon: 'error',
-      content: failedMessage,
+      content:
+        isApolloError(err) && err.graphQLErrors.length > 0
+          ? `${failedMessage} ${err.graphQLErrors[0].message}`
+          : failedMessage,
       title: failedTitle
     });
     return null;

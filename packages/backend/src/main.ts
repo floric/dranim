@@ -5,15 +5,11 @@ import * as helmet from 'helmet';
 import * as morgan from 'morgan';
 import * as graphqlHTTP from 'express-graphql';
 import { graphqlExpress } from 'apollo-server-express';
-import { makeExecutableSchema } from 'graphql-tools';
 
-import { mongooseClient } from './config/mongoose';
+import { mongoDbClient } from './config/db';
 import Schema from './graphql/schema';
 import { truncate } from 'fs';
 import { GraphQLSchema } from 'graphql';
-
-const client = mongooseClient();
-
 export const GRAPHQL_ROUTE = '/api/graphql';
 
 interface IMainOptions {
@@ -29,27 +25,30 @@ function verbosePrint(port) {
   );
 }
 
-export function main(options: IMainOptions) {
+export const main = async (options: IMainOptions) => {
+  const client = await mongoDbClient();
+
   const app = express();
   app.use(helmet());
   app.use(morgan(options.env));
+  app.use(
+    GRAPHQL_ROUTE,
+    bodyParser.json(),
+    graphqlExpress({ schema: Schema, context: { db: client.db('App') } })
+  );
 
-  app.use(GRAPHQL_ROUTE, bodyParser.json(), graphqlExpress({ schema: Schema }));
+  app
+    .listen(options.port, () => {
+      if (options.verbose) {
+        verbosePrint(options.port);
+      }
 
-  return new Promise((resolve, reject) => {
-    const server = app
-      .listen(options.port, () => {
-        if (options.verbose) {
-          verbosePrint(options.port);
-        }
-
-        resolve(server);
-      })
-      .on('error', (err: Error) => {
-        reject(err);
-      });
-  });
-}
+      console.log('Express running.');
+    })
+    .on('error', (err: Error) => {
+      console.error(err);
+    });
+};
 
 if (require.main === module) {
   const PORT = parseInt(process.env.PORT || '3000', 10);
