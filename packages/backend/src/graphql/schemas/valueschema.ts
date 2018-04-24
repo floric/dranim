@@ -3,7 +3,7 @@ const Valueschema = `
     name: String!
     type: String!
     required: Boolean!
-    default: String!
+    fallback: String!
   }
 `;
 

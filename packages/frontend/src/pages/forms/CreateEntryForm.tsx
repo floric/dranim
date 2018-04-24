@@ -1,8 +1,20 @@
 import * as React from 'react';
 
-import { Form, Icon, Input, Button } from 'antd';
+import {
+  Form,
+  Icon,
+  Input,
+  Button,
+  Checkbox,
+  DatePicker,
+  InputNumber
+} from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
-import { ValueSchema } from '../../../../common/src/model/valueschema';
+import * as moment from 'moment';
+import {
+  ValueSchema,
+  ValueSchemaType
+} from '../../../../common/src/model/valueschema';
 import { Value } from '../../../../common/src/model/value';
 import { hasErrors } from '../../utils/form';
 
@@ -72,35 +84,64 @@ class CreateEntryFormImpl extends React.Component<CreateEntryFormProps> {
 
     return (
       <Form onSubmit={this.handleSubmit}>
-        {schema.map(type => (
-          <FormItem
-            key={type.name}
-            {...formItemLayout}
-            label={type.name}
-            validateStatus={
-              isFieldTouched(type.name) && getFieldError(type.name)
-                ? 'error'
-                : 'success'
+        {schema.map(type => {
+          const valueType = type.type;
+          const rules = [
+            {
+              required: type.required,
+              message: `Please specify ${type.name}`
             }
-            help={(isFieldTouched(type.name) && getFieldError(type.name)) || ''}
-          >
-            {getFieldDecorator(type.name, {
-              rules: [
-                {
-                  required: type.required,
-                  message: `Please enter ${type.name}!`
-                }
-              ]
-            })(
-              <Input
-                prefix={
-                  <Icon type="info" style={{ color: 'rgba(0,0,0,.25)' }} />
-                }
-                placeholder={type.type}
-              />
-            )}
-          </FormItem>
-        ))}
+          ];
+          return (
+            <FormItem
+              key={type.name}
+              {...formItemLayout}
+              label={type.name}
+              validateStatus={
+                isFieldTouched(type.name) && getFieldError(type.name)
+                  ? 'error'
+                  : 'success'
+              }
+              help={
+                (isFieldTouched(type.name) && getFieldError(type.name)) || ''
+              }
+            >
+              {valueType === ValueSchemaType.boolean &&
+                getFieldDecorator(type.name, {
+                  initialValue: true,
+                  rules
+                })(<Checkbox>Value</Checkbox>)}
+              {valueType === ValueSchemaType.string &&
+                getFieldDecorator(type.name, {
+                  initialValue: '',
+                  rules
+                })(
+                  <Input
+                    prefix={
+                      <Icon type="info" style={{ color: 'rgba(0,0,0,.25)' }} />
+                    }
+                    placeholder="Fallback"
+                  />
+                )}
+              {valueType === ValueSchemaType.date &&
+                getFieldDecorator(type.name, {
+                  initialValue: moment(),
+                  rules
+                })(
+                  <DatePicker
+                    showTime
+                    format="YYYY-MM-DD HH:mm:ss"
+                    placeholder="Select Date and Time"
+                  />
+                )}
+              {valueType === ValueSchemaType.number &&
+                getFieldDecorator(type.name, {
+                  initialValue: 0,
+                  rules
+                })(<InputNumber />)}
+            </FormItem>
+          );
+        })}
         <FormItem {...tailFormItemLayout}>
           <Button
             type="primary"

@@ -35,6 +35,7 @@ const DATASET = gql`
         name
         type
         required
+        fallback
       }
       entries {
         id
@@ -112,7 +113,8 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
             (e: ValueSchema) => ({
               key: e.name,
               type: e.type,
-              required: e.required ? 'true' : 'false'
+              required: e.required ? 'true' : 'false',
+              fallback: e.fallback
             })
           );
 
@@ -126,6 +128,11 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
               title: 'Type',
               dataIndex: 'type',
               key: 'type'
+            },
+            {
+              title: 'Fallback',
+              dataIndex: 'fallback',
+              key: 'fallback'
             },
             {
               title: 'Required',
@@ -212,7 +219,7 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
                                       name: schema.name,
                                       required: schema.required,
                                       type: schema.type,
-                                      fallback: 'fallback'
+                                      fallback: schema.fallback
                                     }
                                   }),
                                 refetch,

@@ -9,4 +9,5 @@ export interface ValueSchema {
   readonly type: ValueSchemaType;
   readonly name: string;
   readonly required: boolean;
+  readonly fallback: string;
 }

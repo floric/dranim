@@ -1,13 +1,22 @@
 import * as React from 'react';
 
-import { Form, Icon, Input, Button, Select, Checkbox } from 'antd';
+import {
+  Form,
+  Icon,
+  Input,
+  Button,
+  Select,
+  Checkbox,
+  DatePicker,
+  InputNumber
+} from 'antd';
+import * as moment from 'moment';
 import { FormComponentProps } from 'antd/lib/form';
 import {
   ValueSchema,
   ValueSchemaType
 } from '../../../../common/src/model/valueschema';
 import { FormEvent } from 'react';
-import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 import { hasErrors } from '../../utils/form';
 
 const FormItem = Form.Item;
@@ -26,15 +35,38 @@ class CreateValueSchemaFormImpl extends React.Component<
 
   private handleSubmit = (e: FormEvent<any>) => {
     e.preventDefault();
-    this.props.form.validateFields((err, values) => {
+    const { form } = this.props;
+    form.validateFields((err, values) => {
       if (err) {
         return;
       }
 
+      const name = form.getFieldValue('name');
+      const type = form.getFieldValue('type');
+      const required = form.getFieldValue('required');
+      let fallback = '';
+      switch (type) {
+        case ValueSchemaType.boolean:
+          fallback = form.getFieldValue('fallbackBoolean');
+          break;
+        case ValueSchemaType.date:
+          fallback = form.getFieldValue('fallbackDate');
+          break;
+        case ValueSchemaType.number:
+          fallback = form.getFieldValue('fallbackNumber');
+          break;
+        case ValueSchemaType.string:
+          fallback = form.getFieldValue('fallbackString');
+          break;
+        default:
+          throw new Error('Unsupported value schema type!');
+      }
+
       this.props.handleCreateValueSchema({
-        name: this.props.form.getFieldValue('name'),
-        type: this.props.form.getFieldValue('type') || ValueSchemaType.string,
-        required: this.props.form.getFieldValue('required')
+        name,
+        type,
+        required,
+        fallback
       });
     });
   };
@@ -45,22 +77,18 @@ class CreateValueSchemaFormImpl extends React.Component<
     });
   };
 
-  private handleIsRequiredChange = (val: CheckboxChangeEvent) => {
-    this.props.form.setFieldsValue({
-      required: val.target.checked
-    });
-  };
-
   public render() {
     const {
       getFieldDecorator,
       getFieldsError,
       getFieldError,
+      getFieldValue,
       isFieldTouched
     } = this.props.form;
 
     // Only show error after a field is touched.
     const nameError = isFieldTouched('name') && getFieldError('name');
+    const valueType = getFieldValue('type');
 
     return (
       <Form layout="inline" onSubmit={this.handleSubmit}>
@@ -96,12 +124,53 @@ class CreateValueSchemaFormImpl extends React.Component<
             </Select>
           )}
         </FormItem>
-        <FormItem label="Type">
+        {valueType === ValueSchemaType.boolean && (
+          <FormItem label="Fallback">
+            {getFieldDecorator('fallbackBoolean', {
+              initialValue: false
+            })(<Checkbox>Value</Checkbox>)}
+          </FormItem>
+        )}
+        {valueType === ValueSchemaType.string && (
+          <FormItem label="Fallback">
+            {getFieldDecorator('fallbackString', {
+              initialValue: ''
+            })(
+              <Input
+                prefix={
+                  <Icon type="info" style={{ color: 'rgba(0,0,0,.25)' }} />
+                }
+                placeholder="Fallback"
+              />
+            )}
+          </FormItem>
+        )}
+        {valueType === ValueSchemaType.date && (
+          <FormItem label="Fallback">
+            {getFieldDecorator('fallbackDate', {
+              initialValue: moment(),
+              rules: [{ required: true, message: 'Please specify a value.' }]
+            })(
+              <DatePicker
+                showTime
+                format="YYYY-MM-DD HH:mm:ss"
+                placeholder="Select Date and Time"
+              />
+            )}
+          </FormItem>
+        )}
+        {valueType === ValueSchemaType.number && (
+          <FormItem label="Fallback">
+            {getFieldDecorator('fallbackNumber', {
+              initialValue: 0,
+              rules: [{ required: true, message: 'Please specify a value.' }]
+            })(<InputNumber />)}
+          </FormItem>
+        )}
+        <FormItem label="Required">
           {getFieldDecorator('required', {
             initialValue: false
-          })(
-            <Checkbox onChange={this.handleIsRequiredChange}>Required</Checkbox>
-          )}
+          })(<Checkbox>Required</Checkbox>)}
         </FormItem>
         <FormItem>
           <Button
