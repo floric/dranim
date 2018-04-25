@@ -4,6 +4,7 @@ const Valueschema = `
     type: String!
     required: Boolean!
     fallback: String!
+    unique: Boolean!
   }
 `;
 

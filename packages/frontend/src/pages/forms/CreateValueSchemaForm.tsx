@@ -63,7 +63,9 @@ class CreateValueSchemaFormImpl extends React.Component<
         name,
         type,
         required,
-        fallback
+        fallback,
+        unique:
+          type === ValueSchemaType.string ? form.getFieldValue('uniqe') : false
       });
     });
   };
@@ -157,6 +159,13 @@ class CreateValueSchemaFormImpl extends React.Component<
             initialValue: false
           })(<Checkbox />)}
         </FormItem>
+        {valueType === ValueSchemaType.string && (
+          <FormItem label="Unique">
+            {getFieldDecorator('unique', {
+              initialValue: false
+            })(<Checkbox />)}
+          </FormItem>
+        )}
         <FormItem>
           <Button
             type="primary"

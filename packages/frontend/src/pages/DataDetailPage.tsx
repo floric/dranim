@@ -38,6 +38,7 @@ const DATASET = gql`
         type
         required
         fallback
+        unique
       }
       entriesCount
       latestEntries {
@@ -89,10 +90,13 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
               animated={{ inkBar: true, tabPane: false }}
               tabBarStyle={{ marginBottom: 0 }}
             >
-              <TabPane tab="Schemas" key="schemas">
+              <TabPane
+                tab={`${dataset.valueschemas.length} Schemas`}
+                key="schemas"
+              >
                 <DataSchemas dataset={dataset} refetch={refetch} />
               </TabPane>
-              <TabPane tab="Entries" key="entries">
+              <TabPane tab={`${dataset.entriesCount} Entries`} key="entries">
                 <DataEntries dataset={dataset} refetch={refetch} />
               </TabPane>
               <TabPane tab="Actions" key="actions">

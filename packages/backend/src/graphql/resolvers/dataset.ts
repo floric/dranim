@@ -1,12 +1,13 @@
 import { MongoClient, ObjectID, Db } from 'mongodb';
 
-import { getEntryCollection } from './entry';
+import { getEntryCollection, entry } from './entry';
 
 export interface Valueschema {
   name: string;
   type: 'String' | 'Boolean' | 'Date' | 'Number';
   required: boolean;
   fallback: string;
+  unique: boolean;
 }
 
 export interface Dataset {
@@ -93,7 +94,6 @@ export const addValueSchema = async (
   if (ds.valueschemas.find(s => s.name === schema.name)) {
     throw new Error('Schema already exists.');
   }
-
   const res = await collection.updateOne(
     { _id: datasetId },
     {
@@ -103,6 +103,14 @@ export const addValueSchema = async (
       upsert: false
     }
   );
+
+  // create unique index for identifiers
+  if (schema.type === 'String' && schema.unique) {
+    const entryCollection = getEntryCollection(db, datasetId);
+    await entryCollection.createIndex(`values.${schema.name}`, {
+      unique: true
+    });
+  }
 
   return res.modifiedCount === 1;
 };

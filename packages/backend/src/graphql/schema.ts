@@ -6,6 +6,7 @@ import * as promisesAll from 'promises-all';
 
 import Dataset from './schemas/dataset';
 import Valueschema from './schemas/valueschema';
+import Entry from './schemas/entry';
 import UploadResult from './schemas/upload';
 import {
   datasets,
@@ -23,6 +24,7 @@ import {
   entriesCount
 } from './resolvers/entry';
 import { uploadEntriesCsv } from './resolvers/upload';
+import { passagesSchemas } from '../example/str';
 
 interface ApolloContext {
   db: Db;
@@ -50,6 +52,7 @@ export const Mutation = `
       type: String!
       required: Boolean!
       fallback: String!
+      unique: Boolean!
     ): Boolean!
     addEntry (
       datasetId: String!
@@ -77,6 +80,10 @@ const resolvers: IResolvers<any, ApolloContext> = {
     dataset: (_, { id }, { db }) => dataset(db, new ObjectID(id)),
     entry: (_, { datasetId, entryId }) => null
   },
+  Entry: {
+    values: ({ values }, __, { db }) =>
+      Object.keys(values).map(k => ({ name: k, val: values[k] }))
+  },
   Dataset: {
     entriesCount: ({ _id }, __, { db }) => entriesCount(db, _id),
     latestEntries: ({ _id }, __, { db }) => latestEntries(db, _id)
@@ -85,14 +92,15 @@ const resolvers: IResolvers<any, ApolloContext> = {
     createDataset: (_, { name }, { db }) => createDataset(db, name),
     addValueSchema: async (
       _,
-      { datasetId, name, type, required, fallback },
+      { datasetId, name, type, required, fallback, unique },
       { db }
     ) =>
       addValueSchema(db, new ObjectID(datasetId), {
         name,
         type,
         required,
-        fallback
+        fallback,
+        unique
       }),
     addEntry: (_, { datasetId, values }, { db }) =>
       createEntryFromJSON(db, new ObjectID(datasetId), values),
@@ -118,6 +126,7 @@ const typeDefs = [
   Query,
   Mutation,
   UploadResult,
+  Entry,
   Dataset,
   Valueschema
 ];
@@ -126,111 +135,3 @@ export default makeExecutableSchema<ApolloContext>({
   typeDefs,
   resolvers
 });
-
-const passagesSchemas: Array<ValueSchema> = [
-  { name: 'ID', type: 'String', required: true, fallback: '' },
-  { name: 'pass_day', type: 'Number', required: true, fallback: '1' },
-  { name: 'pass_month', type: 'Number', required: true, fallback: '1' },
-  { name: 'pass_year', type: 'Number', required: true, fallback: '1' },
-  { name: 'shipmaster_a', type: 'String', required: true, fallback: '' },
-  { name: 'shipmaster_b', type: 'String', required: false, fallback: '' },
-  { name: 'shipmaster_c', type: 'String', required: false, fallback: '' },
-  { name: 'shipmaster_d', type: 'String', required: false, fallback: '' },
-  { name: 'domicile_city', type: 'String', required: true, fallback: '' },
-  { name: 'domicile_country_a', type: 'String', required: true, fallback: '' },
-  { name: 'domicile_country_b', type: 'String', required: true, fallback: '' },
-  { name: 'domicile_country_c', type: 'String', required: true, fallback: '' },
-  { name: 'domicile_country_d', type: 'String', required: true, fallback: '' },
-  { name: 'domicile_country_e', type: 'String', required: true, fallback: '' },
-  { name: 'domicile_coords_a', type: 'String', required: true, fallback: '' },
-  { name: 'domicile_coords_b', type: 'String', required: true, fallback: '' },
-  {
-    name: 'domicile_coords_n_int',
-    type: 'Number',
-    required: true,
-    fallback: '0'
-  },
-  {
-    name: 'domicile_coords_e_int',
-    type: 'Number',
-    required: true,
-    fallback: '0'
-  },
-  { name: 'departure_city', type: 'String', required: true, fallback: '' },
-  { name: 'departure_country_a', type: 'String', required: true, fallback: '' },
-  { name: 'departure_country_b', type: 'String', required: true, fallback: '' },
-  { name: 'departure_country_c', type: 'String', required: true, fallback: '' },
-  { name: 'departure_country_d', type: 'String', required: true, fallback: '' },
-  { name: 'departure_country_e', type: 'String', required: true, fallback: '' },
-  { name: 'departure_coords_a', type: 'String', required: true, fallback: '' },
-  { name: 'departure_coords_b', type: 'String', required: true, fallback: '' },
-  {
-    name: 'departure_coords_n_int',
-    type: 'Number',
-    required: true,
-    fallback: '0'
-  },
-  {
-    name: 'departure_coords_e_int',
-    type: 'Number',
-    required: true,
-    fallback: '0'
-  },
-  { name: 'destination_city', type: 'String', required: true, fallback: '' },
-  {
-    name: 'destination_country_a',
-    type: 'String',
-    required: true,
-    fallback: ''
-  },
-  {
-    name: 'destination_country_b',
-    type: 'String',
-    required: true,
-    fallback: ''
-  },
-  {
-    name: 'destination_country_c',
-    type: 'String',
-    required: true,
-    fallback: ''
-  },
-  {
-    name: 'destination_country_d',
-    type: 'String',
-    required: true,
-    fallback: ''
-  },
-  {
-    name: 'destination_country_e',
-    type: 'String',
-    required: true,
-    fallback: ''
-  },
-  {
-    name: 'destination_coords_a',
-    type: 'String',
-    required: true,
-    fallback: ''
-  },
-  {
-    name: 'destination_coords_b',
-    type: 'String',
-    required: true,
-    fallback: ''
-  },
-  {
-    name: 'destination_coords_n_int',
-    type: 'Number',
-    required: true,
-    fallback: '0'
-  },
-  {
-    name: 'destination_coords_e_int',
-    type: 'Number',
-    required: true,
-    fallback: '0'
-  },
-  { name: 'amount', type: 'Number', required: true, fallback: '1' },
-  { name: 'tonnes', type: 'Number', required: true, fallback: '0' }
-];

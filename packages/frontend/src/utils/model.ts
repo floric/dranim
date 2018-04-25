@@ -20,6 +20,7 @@ export interface ValueSchema {
   readonly name: string;
   readonly required: boolean;
   readonly fallback: string;
+  readonly unique: boolean;
 }
 
 export interface Dataset {

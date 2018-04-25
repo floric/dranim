@@ -40,9 +40,9 @@ const validateEntry = (parsedObj: any, schema: Array<Valueschema>) => {
   return true;
 };
 
-const processValidEntry = (entry: Entry, ds: Dataset, db: Db) => {
+const processValidEntry = async (entry: Entry, ds: Dataset, db: Db) => {
   const valueKeys = Object.keys(entry);
-  createEntry(
+  await createEntry(
     db,
     new ObjectID(ds.id),
     valueKeys.map(k => ({
@@ -67,9 +67,13 @@ const parseCsvFile = async (
     headers: ds.valueschemas.map(s => s.name)
   })
     .validate(obj => validateEntry)
-    .on('data', (entry: Entry) => {
-      processValidEntry(entry, ds, db);
-      uploadProgress.increaseValidEntries();
+    .on('data', async (entry: Entry) => {
+      try {
+        await processValidEntry(entry, ds, db);
+        uploadProgress.increaseValidEntries();
+      } catch (err) {
+        // TODO log fail messages
+      }
     })
     .on('data-invalid', () => {
       uploadProgress.increaseInvalidEntries();

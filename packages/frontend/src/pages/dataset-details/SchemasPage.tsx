@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ApolloQueryResult } from 'apollo-client';
-import { Row, Table, Col, Card } from 'antd';
+import { Row, Table, Col, Card, Tag } from 'antd';
 import { Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
 
@@ -37,6 +37,7 @@ export class DataSchemas extends React.Component<DataSchemasProps, {}> {
     const schemasDataSource = dataset.valueschemas.map(e => ({
       key: e.name,
       type: e.type,
+      unique: e.unique,
       required: e.required ? 'true' : 'false',
       fallback: e.fallback
     }));
@@ -45,7 +46,9 @@ export class DataSchemas extends React.Component<DataSchemasProps, {}> {
       {
         title: 'Name',
         dataIndex: 'key',
-        key: 'key'
+        key: 'key',
+        render: (name, record) =>
+          record.unique === true ? <strong>{name}</strong> : name
       },
       {
         title: 'Type',
@@ -58,9 +61,15 @@ export class DataSchemas extends React.Component<DataSchemasProps, {}> {
         key: 'fallback'
       },
       {
-        title: 'Required',
-        dataIndex: 'required',
-        key: 'required'
+        title: 'Properties',
+        dataIndex: 'properties',
+        key: 'properties',
+        render: (_, record) => (
+          <>
+            {record.unique && <Tag>Unique</Tag>}
+            {record.required && <Tag>Required</Tag>}
+          </>
+        )
       }
     ];
 
@@ -82,7 +91,8 @@ export class DataSchemas extends React.Component<DataSchemasProps, {}> {
                               name: schema.name,
                               required: schema.required,
                               type: schema.type,
-                              fallback: schema.fallback
+                              fallback: schema.fallback,
+                              unique: schema.unique
                             }
                           }),
                         refetch,

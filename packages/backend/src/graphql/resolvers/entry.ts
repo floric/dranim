@@ -5,7 +5,9 @@ import { parse } from 'graphql';
 
 export interface Entry {
   id: string;
-  values: Array<Value>;
+  values: {
+    [name: string]: any;
+  };
 }
 
 export interface Value {
@@ -60,13 +62,13 @@ export const latestEntries = async (
 export const createEntry = async (
   db: Db,
   datasetId: ObjectID,
-  values: Array<Value>
+  valuesArr: Array<Value>
 ) => {
-  if (!values.length) {
+  if (!valuesArr.length) {
     throw new Error('No values specified for entry.');
   }
 
-  values.forEach(v => {
+  valuesArr.forEach(v => {
     if (v.name === undefined || v.val === undefined) {
       throw new Error(`Value "${v.name}" malformed.`);
     }
@@ -81,20 +83,27 @@ export const createEntry = async (
   // check required schemas which are not set
   const missedSchemas = dsCollection.valueschemas
     .filter(s => s.required)
-    .filter(s => !values.map(v => v.name).includes(s.name));
+    .filter(s => !valuesArr.map(v => v.name).includes(s.name));
   if (missedSchemas.length > 0) {
     throw new Error(`${missedSchemas.map(s => s.name).join(', ')} not set!`);
   }
 
   // check values which are not specified in the schema
   const allValueNames = dsCollection.valueschemas.map(v => v.name);
-  const deliveredValueNames = values.map(v => v.name);
-  const unsupportedValues = values.filter(v => !allValueNames.includes(v.name));
+  const deliveredValueNames = valuesArr.map(v => v.name);
+  const unsupportedValues = valuesArr.filter(
+    v => !allValueNames.includes(v.name)
+  );
   if (unsupportedValues.length > 0) {
     throw new Error(
       `${unsupportedValues.map(v => v.name).join(', ')} not supported!`
     );
   }
+
+  const values = {};
+  valuesArr.forEach(v => {
+    values[v.name] = v.val;
+  });
 
   const collection = getEntryCollection(db, datasetId);
   const res = await collection.insertOne({
