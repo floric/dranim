@@ -1,22 +1,10 @@
 import * as React from 'react';
 
-import {
-  Form,
-  Icon,
-  Input,
-  Button,
-  Checkbox,
-  DatePicker,
-  InputNumber
-} from 'antd';
+import { Form, Input, Button, Checkbox, DatePicker, InputNumber } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import * as moment from 'moment';
-import {
-  ValueSchema,
-  ValueSchemaType
-} from '../../../../common/src/model/valueschema';
-import { Value } from '../../../../common/src/model/value';
 import { hasErrors } from '../../utils/form';
+import { Value, ValueSchema, ValueSchemaType } from '../../utils/model';
 
 const FormItem = Form.Item;
 
@@ -28,11 +16,11 @@ export interface CreateEntryFormProps extends FormComponentProps {
 const formItemLayout = {
   labelCol: {
     xs: { span: 24 },
-    sm: { span: 8 }
+    sm: { span: 6 }
   },
   wrapperCol: {
     xs: { span: 24 },
-    sm: { span: 16 }
+    sm: { span: 18 }
   }
 };
 
@@ -44,7 +32,7 @@ const tailFormItemLayout = {
     },
     sm: {
       span: 16,
-      offset: 8
+      offset: 6
     }
   }
 };
@@ -56,7 +44,7 @@ class CreateEntryFormImpl extends React.Component<CreateEntryFormProps> {
 
   private handleSubmit = (e: any) => {
     e.preventDefault();
-    const { form, schema } = this.props;
+    const { form, schema, handleCreateEntry } = this.props;
     form.validateFields((err, vals) => {
       if (err) {
         return;
@@ -64,10 +52,10 @@ class CreateEntryFormImpl extends React.Component<CreateEntryFormProps> {
 
       const values = schema.map(s => ({
         val: form.getFieldValue(s.name),
-        ...s
+        name: s.name
       }));
 
-      this.props.handleCreateEntry(values);
+      handleCreateEntry(values);
     });
   };
 
@@ -84,47 +72,39 @@ class CreateEntryFormImpl extends React.Component<CreateEntryFormProps> {
 
     return (
       <Form onSubmit={this.handleSubmit}>
-        {schema.map(type => {
-          const valueType = type.type;
+        {schema.map(s => {
+          const valueType = s.type;
           const rules = [
             {
-              required: type.required,
-              message: `Please specify ${type.name}`
+              required: s.required,
+              message: `Please specify ${s.name}`
             }
           ];
+
           return (
             <FormItem
-              key={type.name}
+              key={s.name}
               {...formItemLayout}
-              label={type.name}
+              label={s.name}
               validateStatus={
-                isFieldTouched(type.name) && getFieldError(type.name)
+                isFieldTouched(s.name) && getFieldError(s.name)
                   ? 'error'
                   : 'success'
               }
-              help={
-                (isFieldTouched(type.name) && getFieldError(type.name)) || ''
-              }
+              help={(isFieldTouched(s.name) && getFieldError(s.name)) || ''}
             >
               {valueType === ValueSchemaType.boolean &&
-                getFieldDecorator(type.name, {
+                getFieldDecorator(s.name, {
                   initialValue: true,
                   rules
                 })(<Checkbox>Value</Checkbox>)}
               {valueType === ValueSchemaType.string &&
-                getFieldDecorator(type.name, {
+                getFieldDecorator(s.name, {
                   initialValue: '',
                   rules
-                })(
-                  <Input
-                    prefix={
-                      <Icon type="info" style={{ color: 'rgba(0,0,0,.25)' }} />
-                    }
-                    placeholder="Fallback"
-                  />
-                )}
+                })(<Input placeholder="Fallback" />)}
               {valueType === ValueSchemaType.date &&
-                getFieldDecorator(type.name, {
+                getFieldDecorator(s.name, {
                   initialValue: moment(),
                   rules
                 })(
@@ -135,7 +115,7 @@ class CreateEntryFormImpl extends React.Component<CreateEntryFormProps> {
                   />
                 )}
               {valueType === ValueSchemaType.number &&
-                getFieldDecorator(type.name, {
+                getFieldDecorator(s.name, {
                   initialValue: 0,
                   rules
                 })(<InputNumber />)}

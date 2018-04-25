@@ -5,6 +5,7 @@ import * as helmet from 'helmet';
 import * as morgan from 'morgan';
 import * as graphqlHTTP from 'express-graphql';
 import { graphqlExpress } from 'apollo-server-express';
+import { apolloUploadExpress } from 'apollo-upload-server';
 
 import { mongoDbClient } from './config/db';
 import Schema from './graphql/schema';
@@ -34,6 +35,7 @@ export const main = async (options: IMainOptions) => {
   app.use(
     GRAPHQL_ROUTE,
     bodyParser.json(),
+    apolloUploadExpress(),
     graphqlExpress({ schema: Schema, context: { db: client.db('App') } })
   );
 

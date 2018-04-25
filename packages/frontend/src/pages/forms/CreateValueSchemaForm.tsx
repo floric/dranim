@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import {
   Form,
-  Icon,
   Input,
   Button,
   Select,
@@ -12,12 +11,9 @@ import {
 } from 'antd';
 import * as moment from 'moment';
 import { FormComponentProps } from 'antd/lib/form';
-import {
-  ValueSchema,
-  ValueSchemaType
-} from '../../../../common/src/model/valueschema';
 import { FormEvent } from 'react';
 import { hasErrors } from '../../utils/form';
+import { ValueSchema, ValueSchemaType } from '../../utils/model';
 
 const FormItem = Form.Item;
 const { Option, OptGroup } = Select;
@@ -44,6 +40,7 @@ class CreateValueSchemaFormImpl extends React.Component<
       const name = form.getFieldValue('name');
       const type = form.getFieldValue('type');
       const required = form.getFieldValue('required');
+
       let fallback = '';
       switch (type) {
         case ValueSchemaType.boolean:
@@ -99,12 +96,7 @@ class CreateValueSchemaFormImpl extends React.Component<
         >
           {getFieldDecorator('name', {
             rules: [{ required: true, message: 'Please enter an unique name!' }]
-          })(
-            <Input
-              prefix={<Icon type="info" style={{ color: 'rgba(0,0,0,.25)' }} />}
-              placeholder="Name"
-            />
-          )}
+          })(<Input placeholder="Name" />)}
         </FormItem>
         <FormItem label="Type">
           {getFieldDecorator('type', {
@@ -135,14 +127,7 @@ class CreateValueSchemaFormImpl extends React.Component<
           <FormItem label="Fallback">
             {getFieldDecorator('fallbackString', {
               initialValue: ''
-            })(
-              <Input
-                prefix={
-                  <Icon type="info" style={{ color: 'rgba(0,0,0,.25)' }} />
-                }
-                placeholder="Fallback"
-              />
-            )}
+            })(<Input placeholder="Fallback" />)}
           </FormItem>
         )}
         {valueType === ValueSchemaType.date && (
@@ -170,7 +155,7 @@ class CreateValueSchemaFormImpl extends React.Component<
         <FormItem label="Required">
           {getFieldDecorator('required', {
             initialValue: false
-          })(<Checkbox>Required</Checkbox>)}
+          })(<Checkbox />)}
         </FormItem>
         <FormItem>
           <Button

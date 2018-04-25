@@ -1,6 +1,6 @@
 import { notification } from 'antd';
-import { ApolloQueryResult } from 'apollo-boost';
 import { isApolloError } from 'apollo-client/errors/ApolloError';
+import { ApolloQueryResult } from 'apollo-client';
 
 export interface NotificationArguments {
   icon: 'success' | 'error' | 'info' | 'warning';

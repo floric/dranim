@@ -14,7 +14,6 @@ import {
 } from '../components/CustomCards';
 import { CreateValueSchemaForm } from './forms/CreateValueSchemaForm';
 import { CreateEntryForm } from './forms/CreateEntryForm';
-import { ValueSchema } from '../../../common/src/model/valueschema';
 import { tryOperation } from '../utils/form';
 
 export interface IDataDetailPageProps
@@ -39,7 +38,10 @@ const DATASET = gql`
       }
       entries {
         id
-        values
+        values {
+          name
+          val
+        }
       }
     }
   }
@@ -73,9 +75,13 @@ const ADD_ENTRY = gql`
 
 const DELETE_ENTRY = gql`
   mutation deleteEntry($datasetId: String!, $entryId: String!) {
-    deleteEntry(datasetId: $datasetId, entryId: $entryId) {
-      entryId
-    }
+    deleteEntry(datasetId: $datasetId, entryId: $entryId)
+  }
+`;
+
+const UPLOAD_CSV = gql`
+  mutation($file: Upload!) {
+    singleUpload(file: $file)
   }
 `;
 
@@ -109,14 +115,12 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
             );
           }
 
-          const schemasDataSource = data.dataset.valueschemas.map(
-            (e: ValueSchema) => ({
-              key: e.name,
-              type: e.type,
-              required: e.required ? 'true' : 'false',
-              fallback: e.fallback
-            })
-          );
+          const schemasDataSource = data.dataset.valueschemas.map(e => ({
+            key: e.name,
+            type: e.type,
+            required: e.required ? 'true' : 'false',
+            fallback: e.fallback
+          }));
 
           const schemasColumns = [
             {
@@ -141,9 +145,9 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
             }
           ];
 
-          const entriesDataSource = data.dataset.entries.map((e: any) => ({
+          const entriesDataSource = data.dataset.entries.map(e => ({
             key: e.id,
-            values: e.values
+            values: JSON.stringify(e.values.map(v => ({ [v.name]: v.val })))
           }));
 
           const entriesColumns = [
@@ -170,14 +174,19 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
                             op: () =>
                               deleteEntry({
                                 variables: {
-                                  id: record.key
+                                  datasetId: id,
+                                  entryId: record.key
                                 }
                               }),
                             refetch,
                             successTitle: 'Entry deleted',
-                            successMessage: `Entry "" deleted successfully.`,
+                            successMessage: `Entry "${
+                              record.key
+                            }" deleted successfully.`,
                             failedTitle: 'Entry not deleted.',
-                            failedMessage: `Entry "" deletion failed.`
+                            failedMessage: `Entry "${
+                              record.key
+                            }" deletion failed.`
                           })
                         }
                       >
@@ -249,6 +258,37 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
                         dataSource={entriesDataSource}
                         columns={entriesColumns}
                       />
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col>
+                      <Mutation mutation={UPLOAD_CSV}>
+                        {singleUpload => (
+                          <form
+                            encType="multipart/form-data"
+                            method="POST"
+                            onSubmit={form => {
+                              form.preventDefault();
+                              const elem = document.getElementById('grade_csv');
+                              if (!elem) {
+                                return false;
+                              }
+                              console.log(elem);
+                              const a = (elem as any).files[0];
+                              console.log(a);
+                              singleUpload({
+                                variables: {
+                                  file: a
+                                }
+                              });
+                              return false;
+                            }}
+                          >
+                            <input type="file" id="grade_csv" />
+                            <input type="submit" value="Generate Report" />
+                          </form>
+                        )}
+                      </Mutation>
                     </Col>
                   </Row>
                   <Row style={{ marginBottom: 12 }}>

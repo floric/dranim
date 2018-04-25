@@ -1,11 +1,17 @@
 import Dataset from './dataset';
 
-const Entry = `
-  type Entry {
-    id: String!
-    dataset: Dataset!
-    values: String!
+const Val = `
+  type Val {
+    name: String!
+    val: String!
   }
 `;
 
-export default () => [Entry, Dataset];
+const Entry = `
+  type Entry {
+    id: String!
+    values: [Val!]!
+  }
+`;
+
+export default () => [Entry, Val, Dataset];

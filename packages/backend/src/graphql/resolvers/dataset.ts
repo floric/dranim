@@ -1,4 +1,5 @@
 import { MongoClient, ObjectID, Db } from 'mongodb';
+import { getEntryCollection } from './entry';
 
 export interface Valueschema {
   name: string;
@@ -14,7 +15,7 @@ export interface Dataset {
   entries: Array<number>;
 }
 
-const getDatasetsCollection = (db: Db) => {
+export const getDatasetsCollection = (db: Db) => {
   return db.collection('Datasets');
 };
 
@@ -34,16 +35,24 @@ export const createDataset = async (db: Db, name: string): Promise<Dataset> => {
     valueschemas: []
   });
 
-  if (res.result.ok !== 1) {
+  if (res.result.ok !== 1 || res.ops.length !== 1) {
     throw new Error('Writing dataset failed');
   }
 
-  return dataset(db, res.insertedId);
+  const newItem = res.ops[0];
+  return {
+    id: newItem._id,
+    ...newItem
+  };
 };
 
 export const deleteDataset = async (db: Db, id: ObjectID) => {
   const collection = getDatasetsCollection(db);
   const res = await collection.deleteOne({ _id: id });
+
+  const entryCollection = getEntryCollection(db, id);
+  const deleteRes = await entryCollection.remove({});
+
   return res.deletedCount === 1;
 };
 

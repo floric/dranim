@@ -1,3 +1,8 @@
+export interface Value {
+  readonly val: string;
+  readonly name: string;
+}
+
 export enum ValueSchemaType {
   number = 'Number',
   string = 'String',
