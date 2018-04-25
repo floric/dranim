@@ -48,14 +48,13 @@ export const entries = async (
 export const createEntry = async (
   db: Db,
   datasetId: ObjectID,
-  values: string
-): Promise<Entry> => {
-  const parsedValues: Array<Value> = JSON.parse(values);
-  if (!parsedValues.length) {
+  values: Array<Value>
+) => {
+  if (!values.length) {
     throw new Error('No values specified for entry.');
   }
 
-  parsedValues.forEach(v => {
+  values.forEach(v => {
     if (v.name === undefined || v.val === undefined) {
       throw new Error(`Value "${v.name}" malformed.`);
     }
@@ -70,17 +69,15 @@ export const createEntry = async (
   // check required schemas which are not set
   const missedSchemas = dsCollection.valueschemas
     .filter(s => s.required)
-    .filter(s => !parsedValues.map(v => v.name).includes(s.name));
+    .filter(s => !values.map(v => v.name).includes(s.name));
   if (missedSchemas.length > 0) {
     throw new Error(`${missedSchemas.map(s => s.name).join(', ')} not set!`);
   }
 
   // check values which are not specified in the schema
   const allValueNames = dsCollection.valueschemas.map(v => v.name);
-  const deliveredValueNames = parsedValues.map(v => v.name);
-  const unsupportedValues = parsedValues.filter(
-    v => !allValueNames.includes(v.name)
-  );
+  const deliveredValueNames = values.map(v => v.name);
+  const unsupportedValues = values.filter(v => !allValueNames.includes(v.name));
   if (unsupportedValues.length > 0) {
     throw new Error(
       `${unsupportedValues.map(v => v.name).join(', ')} not supported!`
@@ -89,7 +86,7 @@ export const createEntry = async (
 
   const collection = getEntryCollection(db, datasetId);
   const res = await collection.insertOne({
-    values: parsedValues
+    values
   });
 
   if (res.result.ok !== 1 || res.ops.length !== 1) {
@@ -101,6 +98,15 @@ export const createEntry = async (
     id: newItem._id,
     ...newItem
   };
+};
+
+export const createEntryFromJSON = async (
+  db: Db,
+  datasetId: ObjectID,
+  values: string
+): Promise<Entry> => {
+  const parsedValues: Array<Value> = JSON.parse(values);
+  return await createEntry(db, datasetId, parsedValues);
 };
 
 export const deleteEntry = async (

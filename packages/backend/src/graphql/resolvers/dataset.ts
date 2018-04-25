@@ -94,12 +94,10 @@ export const addValueSchema = async (
     throw new Error('Schema already exists.');
   }
 
-  ds.valueschemas.push(schema);
-
   const res = await collection.updateOne(
     { _id: datasetId },
     {
-      $set: { valueschemas: ds.valueschemas }
+      $push: { valueschemas: schema }
     },
     {
       upsert: false

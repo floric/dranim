@@ -3,75 +3,67 @@ import * as fastCsv from 'fast-csv';
 import { ObjectID, Db } from 'mongodb';
 import * as promisesAll from 'promises-all';
 
-import { Entry } from './entry';
-import { getDatasetsCollection, Dataset } from './dataset';
+import { Entry, createEntry } from './entry';
+import { getDatasetsCollection, Dataset, Valueschema } from './dataset';
 import { dataset } from '../resolvers/dataset';
 import { Readable } from 'stream';
 
-/*
-[
-      'id',
-      'start_day',
-      'start_month',
-      'start_year',
-      'shipmaster_1',
-      'shipmaster_2',
-      'shipmaster_3',
-      'shipmaster_4',
-      'domicile_city',
-      'domicile_countryA',
-      'domicile_countryB',
-      'domicile_countryC',
-      'domicile_countryD',
-      'domicile_countryE',
-      'domicile_coordsA',
-      'domicile_coordsB',
-      'domicile_coordsC',
-      'domicile_coordsD',
-      'departure_city',
-      'departure_countryA',
-      'departure_countryB',
-      'departure_countryC',
-      'departure_countryD',
-      'departure_countryE',
-      'departure_coordsA',
-      'departure_coordsB',
-      'departure_coordsC',
-      'departure_coordsD',
-      'destination_city',
-      'destination_countryA',
-      'destination_countryB',
-      'destination_countryC',
-      'destination_countryD',
-      'destination_countryE',
-      'destination_coordsA',
-      'destination_coordsB',
-      'destination_coordsC',
-      'destination_coordsD',
-      'items',
-      'tonnnes'
-    ]*/
+const validateEntry = (parsedObj: any, schema: Array<Valueschema>) => {
+  if (Object.keys(parsedObj).length !== schema.length) {
+    return false;
+  }
 
-const validateEntry = (parsedObj: any) => {
+  schema.forEach(s => {
+    const correspondingVal = parsedObj[s.name];
+    if (correspondingVal === undefined) {
+      return false;
+    }
+
+    if (s.type === 'Number' && Number.isNaN(correspondingVal)) {
+      return false;
+    } else if (
+      s.type === 'Boolean' &&
+      (correspondingVal !== 'true' || correspondingVal !== 'false')
+    ) {
+      return false;
+    } else if (s.type === 'Date') {
+      // TODO validate date
+    }
+  });
+
   return true;
 };
 
-const processValidEntry = (entry: Entry) => {
-  console.log(`Valid entry :)`);
+const processValidEntry = (entry: Entry, ds: Dataset, db: Db) => {
+  const valueKeys = Object.keys(entry);
+  createEntry(
+    db,
+    new ObjectID(ds.id),
+    valueKeys.map(k => ({
+      name: k,
+      val: entry[k]
+    }))
+  );
 };
 
 const processInvalidEntry = (parsedObj: any) => {
   console.log(`Invalid entry: ${parsedObj}`);
 };
 
-const parseCsvFile = (stream: Readable, filename: string, ds: Dataset) => {
+const parseCsvFile = (
+  stream: Readable,
+  filename: string,
+  ds: Dataset,
+  db: Db
+) => {
   const csvStream = fastCsv({
     ignoreEmpty: true,
+    strictColumnHandling: true,
     trim: true,
     headers: ds.valueschemas.map(s => s.name)
   })
-    .validate(validateEntry)
-    .on('data', processValidEntry)
+    .validate(obj => validateEntry)
+    .on('data', (entry: Entry) => processValidEntry(entry, ds, db))
     .on('data-invalid', processInvalidEntry)
     .on('end', () => {
       console.log(`Finished import of ${filename}.`);
@@ -88,10 +80,10 @@ const parseCsvFile = (stream: Readable, filename: string, ds: Dataset) => {
   );
 };
 
-const processUpload = async (upload, ds: Dataset) => {
+const processUpload = async (upload, ds: Dataset, db: Db) => {
   try {
     const { stream, filename, mimetype, encoding } = await upload;
-    await parseCsvFile(stream, filename, ds);
+    await parseCsvFile(stream, filename, ds, db);
     return true;
   } catch (err) {
     console.log(err);
@@ -106,7 +98,7 @@ export const uploadEntriesCsv = async (
 ) => {
   const ds = await dataset(db, datasetId);
   const { resolve, reject } = await promisesAll.all(
-    files.map(f => processUpload(f, ds))
+    files.map(f => processUpload(f, ds, db))
   );
 
   if (reject.length) {
