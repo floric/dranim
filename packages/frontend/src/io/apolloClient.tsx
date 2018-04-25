@@ -8,7 +8,9 @@ const API_URL = '/api/graphql';
 
 export const client = new ApolloClient({
   link: ApolloLink.from([
-    onError(({ graphQLErrors, networkError }) => {
+    onError(err => {
+      const { graphQLErrors, networkError } = err;
+
       if (graphQLErrors) {
         graphQLErrors.map(({ message, locations, path }) =>
           console.log(

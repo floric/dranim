@@ -36,10 +36,12 @@
     "helmet": "^3.9.0",
     "mongodb": "^3.0.7",
     "morgan": "^1.9.0",
+    "promises-all": "^1.0.0",
     "ts-loader": "^4.2.0",
     "uuid": "^3.2.1"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.4",
     "@types/express-graphql": "^0.6.1",
     "@types/graphql": "^0.13.0",
     "@types/jest": "^21.1.5",

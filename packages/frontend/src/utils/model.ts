@@ -3,6 +3,11 @@ export interface Value {
   readonly name: string;
 }
 
+export interface Entry {
+  readonly id: string;
+  readonly values: Array<Value>;
+}
+
 export enum ValueSchemaType {
   number = 'Number',
   string = 'String',
@@ -15,4 +20,11 @@ export interface ValueSchema {
   readonly name: string;
   readonly required: boolean;
   readonly fallback: string;
+}
+
+export interface Dataset {
+  readonly id: string;
+  readonly name: string;
+  readonly valueschemas: Array<ValueSchema>;
+  readonly entries: Array<Entry>;
 }

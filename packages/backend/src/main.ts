@@ -6,11 +6,11 @@ import * as morgan from 'morgan';
 import * as graphqlHTTP from 'express-graphql';
 import { graphqlExpress } from 'apollo-server-express';
 import { apolloUploadExpress } from 'apollo-upload-server';
+import { truncate } from 'fs';
+import { GraphQLSchema } from 'graphql';
 
 import { mongoDbClient } from './config/db';
 import Schema from './graphql/schema';
-import { truncate } from 'fs';
-import { GraphQLSchema } from 'graphql';
 export const GRAPHQL_ROUTE = '/api/graphql';
 
 interface IMainOptions {
@@ -26,16 +26,32 @@ function verbosePrint(port) {
   );
 }
 
+const MAX_UPLOAD_LIMIT = 100 * 1024 * 1024 * 1024;
+
 export const main = async (options: IMainOptions) => {
   const client = await mongoDbClient();
 
   const app = express();
+  if (options.enableCors) {
+    app.options(GRAPHQL_ROUTE, cors());
+  }
+
   app.use(helmet());
   app.use(morgan(options.env));
   app.use(
     GRAPHQL_ROUTE,
-    bodyParser.json(),
-    apolloUploadExpress(),
+    bodyParser.json({
+      limit: MAX_UPLOAD_LIMIT
+    }),
+    bodyParser.urlencoded({
+      limit: MAX_UPLOAD_LIMIT,
+      extended: true
+    }),
+    apolloUploadExpress({
+      maxFieldSize: MAX_UPLOAD_LIMIT,
+      maxFiles: 10,
+      maxFileSize: MAX_UPLOAD_LIMIT
+    }),
     graphqlExpress({ schema: Schema, context: { db: client.db('App') } })
   );
 
@@ -59,7 +75,7 @@ if (require.main === module) {
   const ENABLE_CORS = NODE_ENV !== 'production';
 
   main({
-    enableCors: ENABLE_CORS,
+    enableCors: true,
     env: NODE_ENV,
     port: PORT,
     verbose: true

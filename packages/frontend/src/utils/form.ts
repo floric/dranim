@@ -25,6 +25,7 @@ export const hasErrors = (fieldsError: any) => {
 
 export interface TryOperationArgs<T> {
   op: () => Promise<T>;
+  onFail?: () => any;
   successTitle?: string;
   successMessage?: string;
   failedTitle?: string;
@@ -38,6 +39,7 @@ export const tryOperation = async <T>(
   const {
     op,
     refetch,
+    onFail,
     successTitle = 'Operation successfull',
     successMessage = 'Operation successfully done.',
     failedTitle = 'Operation failed',
@@ -58,6 +60,10 @@ export const tryOperation = async <T>(
 
     return res;
   } catch (err) {
+    if (onFail) {
+      onFail();
+    }
+
     showNotificationWithIcon({
       icon: 'error',
       content:

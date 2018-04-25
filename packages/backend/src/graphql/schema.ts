@@ -1,8 +1,7 @@
 import { makeExecutableSchema, IResolvers } from 'graphql-tools';
 import * as uuid from 'uuid/v4';
 import { GraphQLUpload } from 'apollo-upload-server';
-import * as fs from 'fs';
-import * as fastCsv from 'fast-csv';
+import { Db, ObjectID } from 'mongodb';
 
 import Dataset from './schemas/dataset';
 import Valueschema from './schemas/valueschema';
@@ -14,7 +13,7 @@ import {
   addValueSchema
 } from './resolvers/dataset';
 import { createEntry, entries, deleteEntry } from './resolvers/entry';
-import { Db, ObjectID } from 'mongodb';
+import { uploadEntriesCsv } from './resolvers/upload';
 
 interface ApolloContext {
   db: Db;
@@ -51,12 +50,7 @@ export const Mutation = `
       datasetId: String!
       entryId: String!
     ): Boolean!
-    importEntriesAsCSV(
-      datasetId: String!
-      csv: String!
-    ): [Entry!]!
-    singleUpload (file: Upload!): Boolean!
-    multipleUpload (files: [Upload!]!): Boolean!
+    uploadEntriesCsv (files: [Upload!]!, datasetId: String!): Boolean!
   }
 `;
 
@@ -68,26 +62,6 @@ export const SchemaDefinition = `
 `;
 
 export const Upload = `scalar Upload`;
-
-const processUpload = async upload => {
-  const { stream, filename, mimetype, encoding } = await upload;
-  const status = await storeFS({ stream, filename });
-  console.log('Import finished');
-};
-
-const storeFS = ({ stream, filename }) => {
-  return new Promise((resolve, reject) => {
-    const csvStream = fastCsv()
-      .on('data', data => {
-        console.log(data);
-      })
-      .on('end', () => {
-        console.log('done');
-        resolve();
-      });
-    stream.pipe(csvStream);
-  });
-};
 
 const resolvers: IResolvers<any, ApolloContext> = {
   Query: {
@@ -116,13 +90,8 @@ const resolvers: IResolvers<any, ApolloContext> = {
     deleteDataset: (_, { id }, { db }) => deleteDataset(db, new ObjectID(id)),
     deleteEntry: (_, { entryId, datasetId }, { db }) =>
       deleteEntry(db, new ObjectID(datasetId), new ObjectID(entryId)),
-    importEntriesAsCSV: (_, { datasetId, csv }) => {
-      //
-    },
-    singleUpload: (obj, { file }) => processUpload(file),
-    multipleUpload: (obj, { file }) => {
-      return true;
-    }
+    uploadEntriesCsv: (obj, { files, datasetId }, { db }) =>
+      uploadEntriesCsv(db, files, new ObjectID(datasetId))
   },
   Upload: GraphQLUpload
 };
