@@ -4,7 +4,7 @@ import gql from 'graphql-tag';
 import { Button, Col, Row, Table } from 'antd';
 import { tryOperation } from '../../utils/form';
 import { CreateEntryForm } from '../forms/CreateEntryForm';
-import { Dataset } from '../../utils/model';
+import { Dataset, Value } from '../../utils/model';
 import { ApolloQueryResult } from 'apollo-client';
 import Card from 'antd/lib/card';
 
@@ -27,12 +27,35 @@ const DELETE_ENTRY = gql`
   }
 `;
 
+const expandedRowRender = (e: { values: Array<Value>; key: string }) => {
+  const columns = [
+    { title: 'Name', dataIndex: 'name', key: 'name' },
+    { title: 'Value', dataIndex: 'value', key: 'value' }
+  ];
+
+  const data = e.values.map(v => ({
+    key: `${e.key}-${v.name}`,
+    name: v.name,
+    value: v.val
+  }));
+
+  return (
+    <Table
+      size="small"
+      columns={columns}
+      dataSource={data}
+      pagination={false}
+    />
+  );
+};
+
 export class DataEntries extends React.Component<DataEntriesProps, {}> {
   public render() {
     const { dataset, refetch } = this.props;
     const entriesDataSource = dataset.latestEntries.map(e => ({
       key: e.id,
-      values: JSON.stringify(e.values.map(v => ({ [v.name]: v.val })))
+      summary: `${e.values.length} values`,
+      values: e.values
     }));
 
     const entriesColumns = [
@@ -42,9 +65,9 @@ export class DataEntries extends React.Component<DataEntriesProps, {}> {
         key: 'key'
       },
       {
-        title: 'Values',
-        dataIndex: 'values',
-        key: 'values'
+        title: 'Summary',
+        dataIndex: 'summary',
+        key: 'summary'
       },
       {
         title: 'Operations',
@@ -63,10 +86,9 @@ export class DataEntries extends React.Component<DataEntriesProps, {}> {
                         }
                       }),
                     refetch,
-                    successTitle: 'Entry deleted',
-                    successMessage: `Entry "${
-                      record.key
-                    }" deleted successfully.`,
+                    successTitle: () => 'Entry deleted',
+                    successMessage: () =>
+                      `Entry "${record.key}" deleted successfully.`,
                     failedTitle: 'Entry not deleted.',
                     failedMessage: `Entry "${record.key}" deletion failed.`
                   })
@@ -99,8 +121,8 @@ export class DataEntries extends React.Component<DataEntriesProps, {}> {
                             }
                           }),
                         refetch,
-                        successTitle: 'Entry created',
-                        successMessage: `Entry created successfully.`,
+                        successTitle: () => 'Entry created',
+                        successMessage: () => `Entry created successfully.`,
                         failedTitle: 'Entry not created.',
                         failedMessage: `Entry creation failed.`
                       })
@@ -115,8 +137,13 @@ export class DataEntries extends React.Component<DataEntriesProps, {}> {
         <Row style={{ marginBottom: 12 }}>
           <Col>
             <Card bordered={false}>
-              <h3>Entries</h3>
-              <Table dataSource={entriesDataSource} columns={entriesColumns} />
+              <h3>Last Entries</h3>
+              <Table
+                size="small"
+                expandedRowRender={expandedRowRender}
+                dataSource={entriesDataSource}
+                columns={entriesColumns}
+              />
             </Card>
           </Col>
         </Row>

@@ -2,11 +2,17 @@ import * as fs from 'fs';
 import * as fastCsv from 'fast-csv';
 import { ObjectID, Db } from 'mongodb';
 import * as promisesAll from 'promises-all';
+import { Readable } from 'stream';
 
 import { Entry, createEntry } from './entry';
 import { getDatasetsCollection, Dataset, Valueschema } from './dataset';
 import { dataset } from '../resolvers/dataset';
-import { Readable } from 'stream';
+import { UploadProgress } from './util/UploadProgress';
+
+export interface UploadResult {
+  validEntries: number;
+  invalidEntries: number;
+}
 
 const validateEntry = (parsedObj: any, schema: Array<Valueschema>) => {
   if (Object.keys(parsedObj).length !== schema.length) {
@@ -46,16 +52,14 @@ const processValidEntry = (entry: Entry, ds: Dataset, db: Db) => {
   );
 };
 
-const processInvalidEntry = (parsedObj: any) => {
-  // TODO increase counter
-};
-
-const parseCsvFile = (
+const parseCsvFile = async (
   stream: Readable,
   filename: string,
   ds: Dataset,
   db: Db
-) => {
+): Promise<UploadResult> => {
+  const uploadProgress = new UploadProgress();
+
   const csvStream = fastCsv({
     ignoreEmpty: true,
     strictColumnHandling: true,
@@ -63,31 +67,44 @@ const parseCsvFile = (
     headers: ds.valueschemas.map(s => s.name)
   })
     .validate(obj => validateEntry)
-    .on('data', (entry: Entry) => processValidEntry(entry, ds, db))
-    .on('data-invalid', processInvalidEntry)
+    .on('data', (entry: Entry) => {
+      processValidEntry(entry, ds, db);
+      uploadProgress.increaseValidEntries();
+    })
+    .on('data-invalid', () => {
+      uploadProgress.increaseInvalidEntries();
+    })
     .on('end', () => {
       console.log(`Finished import of ${filename}.`);
     });
 
   console.log(`Started import of ${filename}.`);
 
-  return new Promise((resolve, reject) =>
+  const process = await new Promise((resolve, reject) =>
     stream
       .on('error', reject)
       .pipe(csvStream)
       .on('error', reject)
-      .on('finish', () => resolve(true))
+      .on('finish', () => resolve())
   );
+
+  return {
+    validEntries: uploadProgress.validEntries,
+    invalidEntries: uploadProgress.invalidEntries
+  };
 };
 
-const processUpload = async (upload, ds: Dataset, db: Db) => {
+const processUpload = async (
+  upload,
+  ds: Dataset,
+  db: Db
+): Promise<UploadResult> => {
   try {
     const { stream, filename, mimetype, encoding } = await upload;
-    await parseCsvFile(stream, filename, ds, db);
-    return true;
+    return await parseCsvFile(stream, filename, ds, db);
   } catch (err) {
     console.log(err);
-    return false;
+    throw new Error('Upload has failed.');
   }
 };
 
@@ -101,11 +118,16 @@ export const uploadEntriesCsv = async (
     files.map(f => processUpload(f, ds, db))
   );
 
+  const successfullUploads: Array<UploadResult> = resolve;
+
   if (reject.length) {
     reject.forEach(({ name, message }) => {
       console.error(`${name}: ${message}`);
     });
   }
 
-  return resolve;
+  return successfullUploads.reduce((x, y) => ({
+    validEntries: x.validEntries + y.validEntries,
+    invalidEntries: x.invalidEntries + y.invalidEntries
+  }));
 };

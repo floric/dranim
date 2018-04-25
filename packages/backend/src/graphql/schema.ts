@@ -6,6 +6,7 @@ import * as promisesAll from 'promises-all';
 
 import Dataset from './schemas/dataset';
 import Valueschema from './schemas/valueschema';
+import UploadResult from './schemas/upload';
 import {
   datasets,
   dataset,
@@ -59,7 +60,7 @@ export const Mutation = `
       entryId: String!
     ): Boolean!
     createSTRDemoData: Boolean!
-    uploadEntriesCsv (files: [Upload!]!, datasetId: String!): Boolean!
+    uploadEntriesCsv (files: [Upload!]!, datasetId: String!): UploadResult!
   }
 `;
 
@@ -69,8 +70,6 @@ export const SchemaDefinition = `
     mutation: Mutation
   }
 `;
-
-export const Upload = `scalar Upload`;
 
 const resolvers: IResolvers<any, ApolloContext> = {
   Query: {
@@ -104,9 +103,9 @@ const resolvers: IResolvers<any, ApolloContext> = {
       uploadEntriesCsv(db, files, new ObjectID(datasetId)),
     createSTRDemoData: async (_, {}, { db }) => {
       const ds = await createDataset(db, 'Passages');
-      await promisesAll.all(
-        passagesSchemas.map(s => addValueSchema(db, new ObjectID(ds.id), s))
-      );
+      for (const s of passagesSchemas) {
+        await addValueSchema(db, new ObjectID(ds.id), s);
+      }
 
       return true;
     }
@@ -118,9 +117,9 @@ const typeDefs = [
   SchemaDefinition,
   Query,
   Mutation,
+  UploadResult,
   Dataset,
-  Valueschema,
-  Upload
+  Valueschema
 ];
 
 export default makeExecutableSchema<ApolloContext>({

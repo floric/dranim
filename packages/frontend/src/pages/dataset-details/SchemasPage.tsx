@@ -86,10 +86,9 @@ export class DataSchemas extends React.Component<DataSchemasProps, {}> {
                             }
                           }),
                         refetch,
-                        successTitle: 'Valueschema created',
-                        successMessage: `Valueschema "${
-                          schema.name
-                        }" created successfully.`,
+                        successTitle: () => 'Valueschema created',
+                        successMessage: () =>
+                          `Valueschema "${schema.name}" created successfully.`,
                         failedTitle: 'Valueschema not created.',
                         failedMessage: `Valueschema  "${
                           schema.name
@@ -109,6 +108,7 @@ export class DataSchemas extends React.Component<DataSchemasProps, {}> {
                 <Col>
                   <h3>Value Schemas</h3>
                   <Table
+                    size="small"
                     pagination={false}
                     dataSource={schemasDataSource}
                     columns={schemasColumns}

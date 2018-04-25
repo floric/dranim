@@ -1,6 +1,5 @@
 import { notification } from 'antd';
 import { isApolloError } from 'apollo-client/errors/ApolloError';
-import { ApolloQueryResult } from 'apollo-client';
 
 export interface NotificationArguments {
   icon: 'success' | 'error' | 'info' | 'warning';
@@ -26,8 +25,8 @@ export const hasErrors = (fieldsError: any) => {
 export interface TryOperationArgs<T> {
   op: () => Promise<T>;
   onFail?: () => any;
-  successTitle?: string;
-  successMessage?: string;
+  successTitle?: (res: T) => string;
+  successMessage?: (res: T) => string;
   failedTitle?: string;
   failedMessage?: string;
   refetch?: () => Promise<any>;
@@ -40,8 +39,8 @@ export const tryOperation = async <T>(
     op,
     refetch,
     onFail,
-    successTitle = 'Operation successfull',
-    successMessage = 'Operation successfully done.',
+    successTitle = () => 'Operation successfull',
+    successMessage = () => 'Operation successfully done.',
     failedTitle = 'Operation failed',
     failedMessage = 'Operation execution has failed.'
   } = args;
@@ -54,8 +53,8 @@ export const tryOperation = async <T>(
 
     showNotificationWithIcon({
       icon: 'success',
-      content: successMessage,
-      title: successTitle
+      content: successMessage(res),
+      title: successTitle(res)
     });
 
     return res;
@@ -72,6 +71,7 @@ export const tryOperation = async <T>(
           : failedMessage,
       title: failedTitle
     });
+
     return null;
   }
 };

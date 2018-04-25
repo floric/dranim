@@ -13,30 +13,6 @@ export interface CreateEntryFormProps extends FormComponentProps {
   schema: Array<ValueSchema>;
 }
 
-const formItemLayout = {
-  labelCol: {
-    xs: { span: 24 },
-    sm: { span: 6 }
-  },
-  wrapperCol: {
-    xs: { span: 24 },
-    sm: { span: 18 }
-  }
-};
-
-const tailFormItemLayout = {
-  wrapperCol: {
-    xs: {
-      span: 24,
-      offset: 0
-    },
-    sm: {
-      span: 16,
-      offset: 6
-    }
-  }
-};
-
 class CreateEntryFormImpl extends React.Component<CreateEntryFormProps> {
   public componentDidMount() {
     this.props.form.validateFields();
@@ -84,7 +60,14 @@ class CreateEntryFormImpl extends React.Component<CreateEntryFormProps> {
           return (
             <FormItem
               key={s.name}
-              {...formItemLayout}
+              labelCol={{
+                sm: 12,
+                md: 4
+              }}
+              wrapperCol={{
+                sm: 12,
+                md: 12
+              }}
               label={s.name}
               validateStatus={
                 isFieldTouched(s.name) && getFieldError(s.name)
@@ -122,7 +105,12 @@ class CreateEntryFormImpl extends React.Component<CreateEntryFormProps> {
             </FormItem>
           );
         })}
-        <FormItem {...tailFormItemLayout}>
+        <FormItem
+          wrapperCol={{
+            xs: 24,
+            sm: 16
+          }}
+        >
           <Button
             type="primary"
             htmlType="submit"

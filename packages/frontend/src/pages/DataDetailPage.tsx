@@ -12,9 +12,9 @@ import {
   UnknownErrorCard,
   CustomErrorCard
 } from '../components/CustomCards';
-import { DataEntries } from './dataset-details/entries';
-import { DataSchemas } from './dataset-details/schemas';
-import { DatasetActions } from './dataset-details/actions';
+import { DataEntries } from './dataset-details/EntriesPage';
+import { DataSchemas } from './dataset-details/SchemasPage';
+import { DatasetActions } from './dataset-details/ActionsPage';
 import { Dataset } from '../utils/model';
 
 const TabPane = Tabs.TabPane;

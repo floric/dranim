@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 import { Row, Col, Card, Button } from 'antd';
 import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 import { Mutation, Query } from 'react-apollo';
@@ -50,7 +51,10 @@ class DataPage extends React.Component<{
                   xl={{ span: 8 }}
                   style={{ marginBottom: 12 }}
                 >
-                  <Card title={ds.name} bordered={false}>
+                  <Card
+                    title={<Link to={`/data/${ds.id}`}>{ds.name}</Link>}
+                    bordered={false}
+                  >
                     <Row>
                       <Col xs={{ span: 24 }} md={{ span: 12 }}>
                         <NumberInfo
@@ -89,10 +93,11 @@ class DataPage extends React.Component<{
                                       }
                                     }),
                                   refetch,
-                                  successTitle: 'Dataset deleted',
-                                  successMessage: `Dataset "${
-                                    ds.name
-                                  }" deleted successfully.`,
+                                  successTitle: () => 'Dataset deleted',
+                                  successMessage: () =>
+                                    `Dataset "${
+                                      ds.name
+                                    }" deleted successfully.`,
                                   failedTitle: 'Dataset not deleted.',
                                   failedMessage: `Dataset "${
                                     ds.name
@@ -124,8 +129,9 @@ class DataPage extends React.Component<{
                           tryOperation({
                             op: () => createDataset({ variables: { name } }),
                             refetch,
-                            successTitle: 'Dataset created',
-                            successMessage: `Dataset "${name}" created successfully.`,
+                            successTitle: () => 'Dataset created',
+                            successMessage: () =>
+                              `Dataset "${name}" created successfully.`,
                             failedTitle: 'Dataset not deleted.',
                             failedMessage: `Dataset  "${name}" creation failed.`
                           })

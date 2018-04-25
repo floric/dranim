@@ -15,11 +15,19 @@ import { tryOperation } from '../../utils/form';
 
 const UPLOAD_ENTRIES_CSV = gql`
   mutation($files: [Upload!]!, $datasetId: String!) {
-    uploadEntriesCsv(files: $files, datasetId: $datasetId)
+    uploadEntriesCsv(files: $files, datasetId: $datasetId) {
+      validEntries
+      invalidEntries
+    }
   }
 `;
 
-export interface DataActionsProps extends WithApolloClient<{}> {
+export interface UploadResult {
+  validEntries: number;
+  invalidEntries: number;
+}
+
+export interface DataActionsProps {
   dataset: Dataset;
   refetch: () => Promise<ApolloQueryResult<any>>;
 }
@@ -29,9 +37,9 @@ export interface DataActionsState {
   uploading: boolean;
 }
 
-export const DatasetActions = withApollo(
+export const DatasetActions = withApollo<DataActionsProps>(
   class DatasetActionsImpl extends React.Component<
-    DataActionsProps,
+    DataActionsProps & WithApolloClient<{}>,
     DataActionsState
   > {
     public componentWillMount() {
@@ -43,7 +51,7 @@ export const DatasetActions = withApollo(
 
     private handleUpload = async (
       uploadEntriesCsv: MutationFn<
-        any,
+        { uploadEntriesCsv: UploadResult },
         { files: Array<UploadFile>; datasetId: string }
       >
     ) => {
@@ -57,7 +65,7 @@ export const DatasetActions = withApollo(
             fileList: []
           });
 
-          await uploadEntriesCsv({
+          const csvRes = await uploadEntriesCsv({
             variables: {
               files: fileList,
               datasetId: dataset.id
@@ -67,15 +75,26 @@ export const DatasetActions = withApollo(
           this.setState({
             uploading: false
           });
+
+          return csvRes && csvRes.data && csvRes.data.uploadEntriesCsv
+            ? csvRes.data.uploadEntriesCsv
+            : null;
         },
         refetch: client.reFetchObservableQueries,
         onFail: () => this.setState({ uploading: false }),
         failedTitle: 'Upload failed',
-        successTitle: 'Upload successfull',
+        successTitle: () => 'Upload successfull',
         failedMessage: 'Upload has failed.',
-        successMessage: `Upload of ${
-          fileList.length > 1 ? `${fileList.length} files` : 'file'
-        } successfull.`
+        successMessage: res =>
+          `Upload of ${
+            fileList.length > 1 ? `${fileList.length} files` : 'file'
+          } successfull. ${
+            res
+              ? `${res.validEntries} entries were valid and ${
+                  res.invalidEntries
+                } entries invalid.`
+              : ''
+          }`
       });
     };
 
