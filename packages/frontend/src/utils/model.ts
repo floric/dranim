@@ -25,6 +25,7 @@ export interface ValueSchema {
 export interface Dataset {
   readonly id: string;
   readonly name: string;
+  readonly entriesCount: number;
   readonly valueschemas: Array<ValueSchema>;
-  readonly entries: Array<Entry>;
+  readonly latestEntries: Array<Entry>;
 }

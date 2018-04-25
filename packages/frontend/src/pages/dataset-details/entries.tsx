@@ -30,7 +30,7 @@ const DELETE_ENTRY = gql`
 export class DataEntries extends React.Component<DataEntriesProps, {}> {
   public render() {
     const { dataset, refetch } = this.props;
-    const entriesDataSource = dataset.entries.map(e => ({
+    const entriesDataSource = dataset.latestEntries.map(e => ({
       key: e.id,
       values: JSON.stringify(e.values.map(v => ({ [v.name]: v.val })))
     }));

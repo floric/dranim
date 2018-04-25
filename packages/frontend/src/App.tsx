@@ -24,9 +24,7 @@ export const ALL_DATASETS = gql`
     datasets {
       id
       name
-      entries {
-        id
-      }
+      entriesCount
       valueschemas {
         name
       }

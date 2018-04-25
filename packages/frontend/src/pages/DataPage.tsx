@@ -9,6 +9,7 @@ import { LoadingCard, UnknownErrorCard } from '../components/CustomCards';
 import { CreateDataSetForm } from './forms/CreateDatasetForm';
 import { ALL_DATASETS } from '../App';
 import { tryOperation } from '../utils/form';
+import { Dataset } from '../utils/model';
 
 const CREATE_DATASET = gql`
   mutation createDataset($name: String!) {
@@ -41,7 +42,7 @@ class DataPage extends React.Component<{
 
           return (
             <Row gutter={12} style={{ marginBottom: 12 }}>
-              {data.datasets.map(ds => (
+              {data.datasets.map((ds: Dataset) => (
                 <Col
                   key={`card-${ds.id}`}
                   xs={{ span: 24 }}
@@ -53,14 +54,14 @@ class DataPage extends React.Component<{
                     <Row>
                       <Col xs={{ span: 24 }} md={{ span: 12 }}>
                         <NumberInfo
-                          total={ds.valueschemas.length}
+                          total={ds.valueschemas.length.toLocaleString()}
                           title="Schemas"
                         />
                       </Col>
                       <Col xs={{ span: 24 }} md={{ span: 12 }}>
                         <NumberInfo
                           gap={0}
-                          total={ds.entries.length}
+                          total={ds.entriesCount.toLocaleString()}
                           title="Entries"
                         />
                       </Col>

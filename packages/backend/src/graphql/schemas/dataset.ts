@@ -6,7 +6,8 @@ const Dataset = `
     id: String!
     name: String!
     valueschemas: [Valueschema!]!
-    entries: [Entry!]!
+    entriesCount: Int!
+    latestEntries: [Entry!]!
   }
 `;
 

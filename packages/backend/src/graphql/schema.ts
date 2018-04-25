@@ -16,9 +16,10 @@ import {
 } from './resolvers/dataset';
 import {
   createEntry,
-  entries,
+  latestEntries,
   deleteEntry,
-  createEntryFromJSON
+  createEntryFromJSON,
+  entriesCount
 } from './resolvers/entry';
 import { uploadEntriesCsv } from './resolvers/upload';
 
@@ -78,7 +79,8 @@ const resolvers: IResolvers<any, ApolloContext> = {
     entry: (_, { datasetId, entryId }) => null
   },
   Dataset: {
-    entries: ({ _id }, __, { db }) => entries(db, _id)
+    entriesCount: ({ _id }, __, { db }) => entriesCount(db, _id),
+    latestEntries: ({ _id }, __, { db }) => latestEntries(db, _id)
   },
   Mutation: {
     createDataset: (_, { name }, { db }) => createDataset(db, name),

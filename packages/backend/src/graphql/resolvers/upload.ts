@@ -47,7 +47,7 @@ const processValidEntry = (entry: Entry, ds: Dataset, db: Db) => {
 };
 
 const processInvalidEntry = (parsedObj: any) => {
-  console.log(`Invalid entry: ${parsedObj}`);
+  // TODO increase counter
 };
 
 const parseCsvFile = (

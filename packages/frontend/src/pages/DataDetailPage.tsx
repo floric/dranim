@@ -39,7 +39,8 @@ const DATASET = gql`
         required
         fallback
       }
-      entries {
+      entriesCount
+      latestEntries {
         id
         values {
           name

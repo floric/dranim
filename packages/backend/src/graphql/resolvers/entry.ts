@@ -33,13 +33,25 @@ export const entry = async (
   };
 };
 
-export const entries = async (
+export const entriesCount = async (
+  db: Db,
+  datasetId: ObjectID
+): Promise<number> => {
+  const collection = getEntryCollection(db, datasetId);
+  return await collection.count({});
+};
+
+export const latestEntries = async (
   db: Db,
   datasetId: ObjectID
 ): Promise<Array<Entry>> => {
   const collection = getEntryCollection(db, datasetId);
-  const allEntries = await collection.find({}).toArray();
-  return allEntries.map(e => ({
+  // TODO Introduce pagination later
+  const entries = await collection
+    .find({})
+    .limit(20)
+    .toArray();
+  return entries.map(e => ({
     id: e._id,
     ...e
   }));

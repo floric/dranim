@@ -30,7 +30,7 @@ export interface TryOperationArgs<T> {
   successMessage?: string;
   failedTitle?: string;
   failedMessage?: string;
-  refetch?: () => Promise<ApolloQueryResult<any>>;
+  refetch?: () => Promise<any>;
 }
 
 export const tryOperation = async <T>(
