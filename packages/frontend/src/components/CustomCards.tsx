@@ -67,16 +67,18 @@ export interface CustomErrorCardProps {
   title: string;
   description: string;
   actions?: JSX.Element;
+  type?: '500' | '404' | '403';
 }
 
 export const CustomErrorCard: SFC<CustomErrorCardProps> = ({
   title,
   description,
-  actions
+  actions,
+  type = '500'
 }) => (
   <Card bordered={false}>
     <Exception
-      type="500"
+      type={type}
       title={title}
       desc={description}
       actions={actions ? actions : () => <DefaultErrorActions />}
