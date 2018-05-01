@@ -39,8 +39,8 @@ const nodes: Array<NodeDef> = [
 
 const connections: Array<ConnectionDef> = [
   {
-    from: { nodeId: '1', socketName: 'a' },
-    to: { nodeId: '2', socketName: 'g' }
+    from: { nodeId: '1', socketName: 'Dataset' },
+    to: { nodeId: '2', socketName: 'Dataset' }
   }
 ];
 
