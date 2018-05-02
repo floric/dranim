@@ -15,11 +15,11 @@ export interface NodeOptions {
 export const NumberInputNode: NodeOptions = {
   title: 'Number Input',
   inputs: [],
-  outputs: [NumberSocket('Number')]
+  outputs: [NumberSocket('Number', 'output')]
 };
 
 export const StringInputNode: NodeOptions = {
   title: 'String Input',
   inputs: [],
-  outputs: [StringSocket('String')]
+  outputs: [StringSocket('String', 'output')]
 };
