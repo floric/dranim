@@ -1,29 +1,13 @@
 import * as React from 'react';
-import { Card } from 'antd';
+import { Card, Row, Col, Select } from 'antd';
 import { css } from 'glamor';
 import * as Konva from 'konva';
+import * as uuid from 'uuid/v4';
 
 import { Dataset } from '../../utils/model';
-import {
-  DatasetInputNode,
-  DatasetSelectValuesNode
-} from './nodes/DatasetNodes';
-import {
-  NumberInputNode,
-  StringInputNode,
-  NodeOptions
-} from './nodes/BasicNodes';
 import { Socket } from './nodes/Sockets';
-import { StringLengthNode } from './nodes/StringNodes';
 import { showNotificationWithIcon } from '../../utils/form';
-
-const nodeTypes: Map<string, NodeOptions> = new Map([
-  ['DatasetInputNode', DatasetInputNode],
-  ['DatasetSelectValuesNode', DatasetSelectValuesNode],
-  ['NumberInputNode', NumberInputNode],
-  ['StringInputNode', StringInputNode],
-  ['StringLengthNode', StringLengthNode]
-]);
+import { nodeTypes } from './nodes/AllNodes';
 
 const EXPLORER_CONTAINER = 'explcontainer';
 const SOCKET_RADIUS = 8;
@@ -31,6 +15,8 @@ const SOCKET_DISTANCE = 30;
 const NODE_WIDTH = 200;
 const TEXT_HEIGHT = 20;
 const CONNECTION_STIFFNESS = 0.7;
+
+const Option = Select.Option;
 
 export interface NodeDef {
   type: string;
@@ -120,8 +106,6 @@ const getTypeOfSocket = (
       ? nodeType.outputs.find(o => o.name === socketName)
       : nodeType.inputs.find(i => i.name === socketName);
   if (!socketDef) {
-    console.log(nodeType);
-    console.log(socketName);
     throw new Error('Socket not found in type.');
   }
 
@@ -132,9 +116,9 @@ const onClickSocket = (
   s: Socket,
   nodeId: string,
   state: ExplorerEditorState,
-  changeState: (newState: ExplorerEditorState) => void
+  changeState: (newState: Partial<ExplorerEditorState>) => void
 ) => {
-  const { connections, nodes, openConnection } = state;
+  const { connections, openConnection } = state;
   if (openConnection === null) {
     const connIndex = connections.findIndex(
       c =>
@@ -146,14 +130,23 @@ const onClickSocket = (
             c.to.nodeId === nodeId &&
             c.to.socketName === s.name
     );
+
+    // is part of existing connection?
     if (connIndex >= 0) {
       connections[connIndex] = {
         from: s.type === 'output' ? null : connections[connIndex].from,
         to: s.type === 'input' ? null : connections[connIndex].to
       };
       changeState({
-        mode: 'DEFAULT',
-        nodes,
+        connections,
+        openConnection: { dataType: s.dataType }
+      });
+    } else {
+      connections.push({
+        from: s.type === 'input' ? null : { nodeId, socketName: s.name },
+        to: s.type === 'input' ? { nodeId, socketName: s.name } : null
+      });
+      changeState({
         connections,
         openConnection: { dataType: s.dataType }
       });
@@ -210,8 +203,6 @@ const onClickSocket = (
     };
 
     changeState({
-      mode: 'DEFAULT',
-      nodes,
       connections,
       openConnection: null
     });
@@ -235,10 +226,10 @@ const getSocketId = (
   socketName: string
 ) => `${type === 'input' ? 'in' : 'out'}-${nodeId}-${socketName}`;
 
-const initStage = (
+const updateStage = (
   canvasId: string,
-  state,
-  changeState: (newState: ExplorerEditorState) => void
+  state: ExplorerEditorState,
+  changeState: (newState: Partial<ExplorerEditorState>) => void
 ) => {
   const { connections, nodes } = state;
   const canvasContainer = document.getElementById(EXPLORER_CONTAINER);
@@ -284,15 +275,34 @@ const initStage = (
     const minSocketsNr =
       inputs.length > outputs.length ? inputs.length : outputs.length;
     const height = (minSocketsNr + 1) * SOCKET_DISTANCE + TEXT_HEIGHT;
+    const isSelected =
+      state.selectedNode !== null && state.selectedNode === n.id;
 
     const nodeGroup = new Konva.Group({ draggable: true, x: n.x, y: n.y });
+    nodeGroup.on('dragend', ev => {
+      const nodeIndex = nodes.findIndex(node => node.id === n.id);
+      nodes[nodeIndex] = {
+        id: n.id,
+        type: n.type,
+        x: ev.target.x(),
+        y: ev.target.y()
+      };
+      changeState({
+        nodes
+      });
+    });
+    nodeGroup.on('click', ev => {
+      changeState({
+        selectedNode: n.id
+      });
+    });
     const bgRect = new Konva.Rect({
       width: NODE_WIDTH,
       height,
-      fill: '#CCC'
+      fill: '#FFF'
     });
     const nodeTitle = new Konva.Text({
-      fill: '#000',
+      fill: isSelected ? '#1890ff' : '#000',
       align: 'center',
       text: title,
       fontStyle: 'bold',
@@ -353,11 +363,12 @@ const initStage = (
     const inputSocket = c.to
       ? socketsMap.get(getSocketId('input', c.to.nodeId, c.to.socketName))
       : null;
+    const isCurrentlyChanged = !inputSocket || !outputSocket;
 
     const line = new Konva.Line({
-      strokeWidth: 3,
+      strokeWidth: isCurrentlyChanged ? 4 : 2,
       strokeEnabled: true,
-      stroke: '#666',
+      stroke: isCurrentlyChanged ? '#666' : '#999',
       points: getConnectionPoints(
         outputSocket
           ? outputSocket.getAbsolutePosition()
@@ -403,6 +414,15 @@ const initStage = (
         );
         connsLayer.draw();
       });
+
+      stage.on('mousedown', () => {
+        changeState({
+          connections: connections.filter(
+            con => con.from !== null && con.to !== null
+          ),
+          openConnection: null
+        });
+      });
     }
 
     connsLayer.add(line);
@@ -417,6 +437,7 @@ export interface ExplorerEditorState {
   nodes: Array<NodeDef>;
   mode: 'DEFAULT';
   openConnection: { dataType: string } | null;
+  selectedNode: string | null;
 }
 
 export class ExplorerEditor extends React.Component<
@@ -426,6 +447,7 @@ export class ExplorerEditor extends React.Component<
   public componentWillMount() {
     this.setState({
       openConnection: null,
+      selectedNode: null,
       mode: 'DEFAULT',
       connections: this.props.connections,
       nodes: this.props.nodes
@@ -434,22 +456,62 @@ export class ExplorerEditor extends React.Component<
 
   private changeState = (newState: ExplorerEditorState) => {
     this.setState(newState);
-    this.updateCanvas();
   };
 
-  public componentDidMount() {
-    initStage(EXPLORER_CONTAINER, this.state, this.changeState);
+  public componentDidUpdate() {
+    this.updateCanvas();
   }
 
   public updateCanvas() {
-    initStage(EXPLORER_CONTAINER, this.state, this.changeState);
+    updateStage(EXPLORER_CONTAINER, this.state, this.changeState);
   }
 
+  private handleNodeSelection = (type: string) => {
+    this.setState({
+      nodes: [...this.state.nodes, { id: uuid(), x: 10, y: 10, type }]
+    });
+  };
+
   public render() {
+    const { selectedNode, nodes } = this.state;
     return (
       <>
         <Card bordered={false} style={{ marginBottom: 12 }}>
-          Select one node
+          <Row>
+            <Col xs={24} md={12}>
+              {selectedNode ? (
+                <>
+                  <strong>Selected: </strong>
+                  {nodes.find(n => n.id === selectedNode)!.type}
+                </>
+              ) : (
+                'Select a node'
+              )}
+            </Col>
+            <Col xs={24} md={12}>
+              <Select
+                showSearch
+                style={{ width: 200 }}
+                placeholder="Add Node"
+                optionFilterProp="children"
+                onChange={this.handleNodeSelection}
+                filterOption={(input, option) =>
+                  (option.props.children as string)
+                    .toLowerCase()
+                    .indexOf(input.toLowerCase()) >= 0
+                }
+              >
+                {Array.from(nodeTypes.values()).map(nodeType => (
+                  <Option
+                    key={`select-new-${nodeType.title}`}
+                    value={nodeType.title}
+                  >
+                    {nodeType.title}
+                  </Option>
+                ))}
+              </Select>
+            </Col>
+          </Row>
         </Card>
         <div
           id={EXPLORER_CONTAINER}

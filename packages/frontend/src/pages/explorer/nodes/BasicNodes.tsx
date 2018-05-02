@@ -23,3 +23,22 @@ export const StringInputNode: NodeOptions = {
   inputs: [],
   outputs: [StringSocket('String', 'output')]
 };
+
+export const NumberOutputNode: NodeOptions = {
+  title: 'Number Output',
+  inputs: [NumberSocket('Number', 'input')],
+  outputs: []
+};
+
+export const StringOutputNode: NodeOptions = {
+  title: 'String Output',
+  inputs: [StringSocket('String', 'input')],
+  outputs: []
+};
+
+export const AllBasicNodes = [
+  NumberInputNode,
+  StringInputNode,
+  NumberOutputNode,
+  StringOutputNode
+];
