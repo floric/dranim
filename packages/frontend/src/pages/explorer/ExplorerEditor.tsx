@@ -13,6 +13,7 @@ import {
   StringInputNode,
   NodeOptions
 } from './nodes/BasicNodes';
+import { Socket } from './nodes/Sockets';
 
 const nodeTypes: Map<string, NodeOptions> = new Map([
   ['DatasetInputNode', DatasetInputNode],
@@ -26,6 +27,7 @@ const SOCKET_RADIUS = 8;
 const SOCKET_DISTANCE = 30;
 const NODE_WIDTH = 200;
 const TEXT_HEIGHT = 20;
+const CONNECTION_STIFFNESS = 0.7;
 
 export interface NodeDef {
   type: string;
@@ -45,6 +47,42 @@ export interface ExplorerEditorProps {
   connections: Array<ConnectionDef>;
 }
 
+const createSocket = (s: Socket, type: 'output' | 'input') => {
+  const socketGroup = new Konva.Group();
+  const text = new Konva.Text({
+    fill: '#666',
+    text: s.name,
+    align: type === 'input' ? 'left' : 'right',
+    width: NODE_WIDTH,
+    x: type === 'input' ? SOCKET_RADIUS * 2 : -NODE_WIDTH - SOCKET_RADIUS * 2,
+    y: -SOCKET_RADIUS / 2
+  });
+  const socket = new Konva.Circle({
+    fill: s.color,
+    radius: SOCKET_RADIUS
+  });
+  socketGroup.add(text);
+  socketGroup.add(socket);
+  return socketGroup;
+};
+
+const getConnectionPoints = (output: Konva.Vector2d, input: Konva.Vector2d) => [
+  output.x,
+  output.y,
+  output.x + Math.abs(input.x - output.x) * CONNECTION_STIFFNESS,
+  output.y,
+  input.x - Math.abs(input.x - output.x) * CONNECTION_STIFFNESS,
+  input.y,
+  input.x,
+  input.y
+];
+
+const getSocketId = (
+  type: 'input' | 'output',
+  nodeId: string,
+  socketName: string
+) => `${type === 'input' ? 'in' : 'out'}-${nodeId}-${socketName}`;
+
 export class ExplorerEditor extends React.Component<ExplorerEditorProps> {
   public componentDidMount() {
     const { nodes, connections } = this.props;
@@ -60,7 +98,7 @@ export class ExplorerEditor extends React.Component<ExplorerEditorProps> {
     const layer = new Konva.Layer();
 
     const nodeMap: Map<string, Konva.Group> = new Map();
-    const socketsMap: Map<string, Konva.Circle> = new Map();
+    const socketsMap: Map<string, Konva.Group> = new Map();
 
     nodes.forEach(n => {
       const nodeType = nodeTypes.get(n.type);
@@ -69,11 +107,6 @@ export class ExplorerEditor extends React.Component<ExplorerEditorProps> {
       }
 
       const { inputs, outputs, title } = nodeType;
-      if (!outputs) {
-        console.log('Wrong');
-        return;
-      }
-
       const minSocketsNr =
         inputs.length > outputs.length ? inputs.length : outputs.length;
       const height = (minSocketsNr + 1) * SOCKET_DISTANCE + TEXT_HEIGHT;
@@ -99,21 +132,9 @@ export class ExplorerEditor extends React.Component<ExplorerEditorProps> {
         y: SOCKET_DISTANCE + TEXT_HEIGHT
       });
       inputs.forEach(i => {
-        const text = new Konva.Text({
-          fill: '#666',
-          text: i.name,
-          align: 'left',
-          width: NODE_WIDTH,
-          x: SOCKET_RADIUS * 2,
-          y: -SOCKET_RADIUS / 2
-        });
-        const socket = new Konva.Circle({
-          fill: i.color,
-          radius: SOCKET_RADIUS
-        });
-        inputsGroup.add(text);
+        const socket = createSocket(i, 'input');
         inputsGroup.add(socket);
-        socketsMap.set(`in-${n.id}-${i.name}`, socket);
+        socketsMap.set(getSocketId('input', n.id, i.name), socket);
       });
 
       const outputsGroup = new Konva.Group({
@@ -121,21 +142,9 @@ export class ExplorerEditor extends React.Component<ExplorerEditorProps> {
         y: SOCKET_DISTANCE + TEXT_HEIGHT
       });
       outputs.forEach(i => {
-        const text = new Konva.Text({
-          fill: '#666',
-          text: i.name,
-          align: 'right',
-          width: NODE_WIDTH,
-          x: -NODE_WIDTH - SOCKET_RADIUS * 2,
-          y: -SOCKET_RADIUS / 2
-        });
-        const socket = new Konva.Circle({
-          fill: i.color,
-          radius: SOCKET_RADIUS
-        });
-        outputsGroup.add(text);
+        const socket = createSocket(i, 'output');
         outputsGroup.add(socket);
-        socketsMap.set(`out-${n.id}-${i.name}`, socket);
+        socketsMap.set(getSocketId('output', n.id, i.name), socket);
       });
 
       nodeGroup.add(bgRect);
@@ -149,10 +158,10 @@ export class ExplorerEditor extends React.Component<ExplorerEditorProps> {
 
     connections.forEach(c => {
       const outputSocket = socketsMap.get(
-        `out-${c.from.nodeId}-${c.from.socketName}`
+        getSocketId('output', c.from.nodeId, c.from.socketName)
       );
       const inputSocket = socketsMap.get(
-        `in-${c.to.nodeId}-${c.to.socketName}`
+        getSocketId('input', c.to.nodeId, c.to.socketName)
       );
       if (!outputSocket || !inputSocket) {
         throw new Error('Socket not found!');
@@ -162,12 +171,11 @@ export class ExplorerEditor extends React.Component<ExplorerEditorProps> {
         strokeWidth: 3,
         strokeEnabled: true,
         stroke: '#666',
-        points: [
-          outputSocket.getAbsolutePosition().x,
-          outputSocket.getAbsolutePosition().y,
-          inputSocket.getAbsolutePosition().x,
-          inputSocket.getAbsolutePosition().y
-        ]
+        points: getConnectionPoints(
+          outputSocket.getAbsolutePosition(),
+          inputSocket.getAbsolutePosition()
+        ),
+        ...({ bezier: true } as any)
       });
 
       function adjustPoint(e) {
@@ -175,13 +183,12 @@ export class ExplorerEditor extends React.Component<ExplorerEditorProps> {
           return;
         }
 
-        const p = [
-          outputSocket.getAbsolutePosition().x,
-          outputSocket.getAbsolutePosition().y,
-          inputSocket.getAbsolutePosition().x,
-          inputSocket.getAbsolutePosition().y
-        ];
-        line.points(p);
+        line.points(
+          getConnectionPoints(
+            outputSocket.getAbsolutePosition(),
+            inputSocket.getAbsolutePosition()
+          )
+        );
         layer.draw();
       }
 
