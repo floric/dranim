@@ -52,6 +52,8 @@ class ExplorerPage extends React.Component<{}> {
   }
 }
 
-export default withPageHeaderHoC({ title: 'Explorer', includeInCard: false })(
-  ExplorerPage
-);
+export default withPageHeaderHoC({
+  title: 'Explorer',
+  includeInCard: false,
+  size: 'small'
+})(ExplorerPage);
