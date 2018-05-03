@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { AllBasicNodes, NodeOptions } from './BasicNodes';
 import { AllDatasetNodes } from './DatasetNodes';
 import { AllStringNodes } from './StringNodes';
@@ -26,18 +28,20 @@ const buildTree = (elems: Array<NodeOptions>, curPath: Array<string>) => {
   );
 
   return distinctPaths.map(e => ({
-    label: e.join('-'),
+    label: <strong>{e[e.length - 1]}</strong>,
     value: e.join('-'),
     key: e.join('-'),
+    selectable: false,
     children: [
       ...elems
-        .filter(
-          childE => JSON.stringify(childE.path) === JSON.stringify(curPath)
-        )
+        .filter(childE => JSON.stringify(childE.path) === JSON.stringify(e))
         .map(childE => ({
           label: childE.title,
           value: childE.title,
           key: childE.title,
+          index: `${childE.title} ${childE.path.join(
+            ' '
+          )} ${childE.keywords.join(' ')}`.toLocaleLowerCase(),
           children: []
         })),
       ...buildTree(elems, e)

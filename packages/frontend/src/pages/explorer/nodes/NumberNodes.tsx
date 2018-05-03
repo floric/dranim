@@ -5,7 +5,8 @@ export const FormatNumberNode: NodeOptions = {
   title: 'Format Number',
   inputs: [NumberSocket('Number', 'input')],
   outputs: [StringSocket('Formatted', 'output')],
-  path: ['Number', 'Converters']
+  path: ['Number', 'Converters'],
+  keywords: []
 };
 
 export const AllNumberNodes = [FormatNumberNode];

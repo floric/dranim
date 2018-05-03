@@ -5,14 +5,16 @@ export const StringLengthNode: NodeOptions = {
   title: 'String Length',
   inputs: [StringSocket('String', 'input')],
   outputs: [NumberSocket('Length', 'output')],
-  path: ['String', 'Operators']
+  path: ['String', 'Operators'],
+  keywords: []
 };
 
 export const SubStringNode: NodeOptions = {
   title: 'Substring',
   inputs: [StringSocket('String', 'input')],
   outputs: [StringSocket('String', 'output')],
-  path: ['String', 'Operators']
+  path: ['String', 'Operators'],
+  keywords: []
 };
 
 export const AllStringNodes = [StringLengthNode, SubStringNode];

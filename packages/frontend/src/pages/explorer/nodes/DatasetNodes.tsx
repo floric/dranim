@@ -5,21 +5,24 @@ export const DatasetInputNode: NodeOptions = {
   title: 'Dataset Input',
   inputs: [],
   outputs: [DataSocket('Dataset', 'output')],
-  path: ['Dataset']
+  path: ['Dataset'],
+  keywords: []
 };
 
 export const DatasetOutputNode: NodeOptions = {
   title: 'Dataset Output',
   inputs: [DataSocket('Dataset', 'input')],
   outputs: [],
-  path: ['Dataset']
+  path: ['Dataset'],
+  keywords: []
 };
 
 export const DatasetSelectValuesNode: NodeOptions = {
   title: 'Select Values',
   inputs: [DataSocket('Dataset', 'input')],
   outputs: [DataSocket('Dataset', 'output')],
-  path: ['Dataset', 'Filters']
+  path: ['Dataset', 'Filters'],
+  keywords: []
 };
 
 export const AllDatasetNodes = [
