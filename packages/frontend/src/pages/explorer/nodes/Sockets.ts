@@ -7,12 +7,6 @@ export interface Socket {
   type: SocketType;
 }
 
-// tslint:disable-next-line:no-empty-interface
-export interface Output extends Socket {}
-
-// tslint:disable-next-line:no-empty-interface
-export interface Input extends Socket {}
-
 export const DataSocket = (name: string, type: SocketType): Socket => ({
   color: '#0099ff',
   dataType: 'Dataset',

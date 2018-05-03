@@ -7,7 +7,7 @@ import * as uuid from 'uuid/v4';
 import { Dataset } from '../../utils/model';
 import { Socket } from './nodes/Sockets';
 import { showNotificationWithIcon } from '../../utils/form';
-import { nodeTypes } from './nodes/AllNodes';
+import { nodeTypes, nodeTypesTree } from './nodes/AllNodes';
 
 const EXPLORER_CONTAINER = 'explcontainer';
 const SOCKET_RADIUS = 8;
@@ -15,8 +15,6 @@ const SOCKET_DISTANCE = 30;
 const NODE_WIDTH = 160;
 const TEXT_HEIGHT = 20;
 const CONNECTION_STIFFNESS = 0.7;
-
-const TreeNode = TreeSelect.TreeNode;
 
 export interface NodeDef {
   type: string;
@@ -534,6 +532,9 @@ export class ExplorerEditor extends React.Component<
 
   public render() {
     const { selectedNode, nodes } = this.state;
+
+    console.log(nodeTypesTree);
+
     return (
       <>
         <div
@@ -573,18 +574,11 @@ export class ExplorerEditor extends React.Component<
             <Card bordered={false} title="Actions" style={{ marginBottom: 12 }}>
               <TreeSelect
                 showSearch
+                treeData={nodeTypesTree}
                 style={{ width: 200 }}
                 placeholder="Add Node"
                 onChange={this.handleCreateNode}
-              >
-                {Array.from(nodeTypes.values()).map(nodeType => (
-                  <TreeNode
-                    title={nodeType.title}
-                    key={`select-new-${nodeType.title}`}
-                    value={nodeType.title}
-                  />
-                ))}
-              </TreeSelect>
+              />
             </Card>
           </Col>
         </Row>

@@ -10,30 +10,35 @@ export interface NodeOptions {
   title: string;
   inputs: Array<Socket>;
   outputs: Array<Socket>;
+  path: Array<string>;
 }
 
 export const NumberInputNode: NodeOptions = {
   title: 'Number Input',
   inputs: [],
-  outputs: [NumberSocket('Number', 'output')]
+  outputs: [NumberSocket('Number', 'output')],
+  path: ['Number']
 };
 
 export const StringInputNode: NodeOptions = {
   title: 'String Input',
   inputs: [],
-  outputs: [StringSocket('String', 'output')]
+  outputs: [StringSocket('String', 'output')],
+  path: ['String']
 };
 
 export const NumberOutputNode: NodeOptions = {
   title: 'Number Output',
   inputs: [NumberSocket('Number', 'input')],
-  outputs: []
+  outputs: [],
+  path: ['Number']
 };
 
 export const StringOutputNode: NodeOptions = {
   title: 'String Output',
   inputs: [StringSocket('String', 'input')],
-  outputs: []
+  outputs: [],
+  path: ['String']
 };
 
 export const AllBasicNodes = [
