@@ -5,7 +5,8 @@ import * as uuid from 'uuid/v4';
 
 import { Dataset } from '../../utils/model';
 import { nodeTypes, nodeTypesTree } from './nodes/AllNodes';
-import { NODE_WIDTH, EXPLORER_CONTAINER, updateStage } from './EditorStage';
+import { EXPLORER_CONTAINER, updateStage } from './editor/EditorStage';
+import { NODE_WIDTH } from './editor/Nodes';
 
 const filterTreeNode = (inputValue: string, treeNode: any) => {
   if (!treeNode.props.index) {
@@ -169,7 +170,7 @@ export class ExplorerEditor extends React.Component<
                     {FormImpl ? (
                       <>
                         <h4>Properties</h4>
-                        <FormImpl />
+                        <FormImpl state={this.props} />
                       </>
                     ) : null}
                   </Col>

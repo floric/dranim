@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { SFC } from 'react';
-import { StringSocket, NumberSocket, Socket } from './Sockets';
 import { Input, Form, InputNumber } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
+import { ExplorerEditorProps } from '../ExplorerEditor';
+import { StringSocket, NumberSocket, Socket } from './Sockets';
 
 const FormItem = Form.Item;
 
@@ -18,7 +19,7 @@ export interface NodeOptions {
   outputs: Array<Socket>;
   path: Array<string>;
   keywords: Array<string>;
-  form?: SFC<FormComponentProps>;
+  form?: SFC<FormComponentProps & { state: ExplorerEditorProps }>;
 }
 
 export const NumberInputNode: NodeOptions = {
