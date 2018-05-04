@@ -39,9 +39,9 @@ const buildTree = (elems: Array<NodeOptions>, curPath: Array<string>) => {
           label: childE.title,
           value: childE.title,
           key: childE.title,
-          index: `${childE.title} ${childE.path.join(
+          index: `${childE.title}, ${childE.path.join(
             ' '
-          )} ${childE.keywords.join(' ')}`.toLocaleLowerCase(),
+          )}, ${childE.keywords.join(' ')}`.toLocaleLowerCase(),
           children: []
         })),
       ...buildTree(elems, e)
@@ -58,7 +58,7 @@ export const nodeTypes: Map<string, NodeOptions> = new Map(
       (list, elem, _, all) => [...list, ...elem],
       []
     )
-    .sort((a, b) => a['0'].localeCompare(b['0']))
+    .sort((a, b) => a[0].localeCompare(b[0]))
 );
 
 export const nodeTypesTree = buildTree(Array.from(nodeTypes.values()), []);

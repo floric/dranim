@@ -1,4 +1,4 @@
-import { DataSocket } from './Sockets';
+import { DataSocket, StringSocket } from './Sockets';
 import { NodeOptions } from './BasicNodes';
 
 export const DatasetInputNode: NodeOptions = {
@@ -25,8 +25,21 @@ export const DatasetSelectValuesNode: NodeOptions = {
   keywords: []
 };
 
+export const JoinDatasetsNode: NodeOptions = {
+  title: 'Join Datasets',
+  inputs: [
+    DataSocket('Dataset A', 'input'),
+    DataSocket('Dataset B', 'input'),
+    StringSocket('Index Colum', 'input')
+  ],
+  outputs: [DataSocket('Combined', 'output')],
+  path: ['Dataset', 'Aggregators'],
+  keywords: []
+};
+
 export const AllDatasetNodes = [
   DatasetInputNode,
   DatasetOutputNode,
-  DatasetSelectValuesNode
+  DatasetSelectValuesNode,
+  JoinDatasetsNode
 ];

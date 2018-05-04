@@ -1,4 +1,10 @@
+import * as React from 'react';
+import { SFC } from 'react';
 import { StringSocket, NumberSocket, Socket } from './Sockets';
+import { Input, Form, InputNumber } from 'antd';
+import { FormComponentProps } from 'antd/lib/form';
+
+const FormItem = Form.Item;
 
 export interface EditorProps {
   x?: number;
@@ -12,6 +18,7 @@ export interface NodeOptions {
   outputs: Array<Socket>;
   path: Array<string>;
   keywords: Array<string>;
+  form?: SFC<FormComponentProps>;
 }
 
 export const NumberInputNode: NodeOptions = {
@@ -19,7 +26,17 @@ export const NumberInputNode: NodeOptions = {
   inputs: [],
   outputs: [NumberSocket('Number', 'output')],
   path: ['Number'],
-  keywords: []
+  keywords: [],
+  form: ({ form: { getFieldDecorator } }) => (
+    <Form layout="inline" hideRequiredMark>
+      <FormItem label="Value">
+        {getFieldDecorator('value', {
+          rules: [{ required: true, type: 'number' }],
+          initialValue: 0
+        })(<InputNumber />)}
+      </FormItem>
+    </Form>
+  )
 };
 
 export const StringInputNode: NodeOptions = {
@@ -27,7 +44,12 @@ export const StringInputNode: NodeOptions = {
   inputs: [],
   outputs: [StringSocket('String', 'output')],
   path: ['String'],
-  keywords: []
+  keywords: [],
+  form: ({ form: { getFieldDecorator } }) => (
+    <Form layout="inline">
+      <FormItem label="Value">{getFieldDecorator('value')(<Input />)}</FormItem>
+    </Form>
+  )
 };
 
 export const NumberOutputNode: NodeOptions = {

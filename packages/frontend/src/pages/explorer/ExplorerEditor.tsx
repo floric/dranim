@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Card, Row, Col, TreeSelect, Button } from 'antd';
+import { Card, Row, Col, TreeSelect, Button, Form } from 'antd';
 import { css } from 'glamor';
 import * as uuid from 'uuid/v4';
 
@@ -40,6 +40,9 @@ export interface ExplorerEditorState {
   openConnection: { dataType: string } | null;
   selectedNode: string | null;
 }
+
+const isInvalidForSave = f =>
+  f.errors !== undefined || f.validating === true || f.dirty === true;
 
 export class ExplorerEditor extends React.Component<
   ExplorerEditorProps,
@@ -103,8 +106,44 @@ export class ExplorerEditor extends React.Component<
     });
   };
 
+  private onPropertiesFieldChange = (nodeId: string, field: any) => {
+    const changedNames = Object.keys(field);
+    const errorsOrValidatingOpen =
+      changedNames.map(fieldName => field[fieldName]).filter(isInvalidForSave)
+        .length > 0;
+    if (errorsOrValidatingOpen) {
+      return;
+    }
+
+    changedNames.forEach(fieldName =>
+      console.log(
+        `Save ${fieldName} in ${nodeId} with ${JSON.stringify(field)}`
+      )
+    );
+  };
+
   public render() {
     const { selectedNode, nodes } = this.state;
+
+    const node = selectedNode ? nodes.find(n => n.id === selectedNode) : null;
+    const ValueForm = node ? nodeTypes.get(node.type)!.form || null : null;
+    const FormImpl =
+      ValueForm && node
+        ? Form.create({
+            onFieldsChange: (props, fields) =>
+              this.onPropertiesFieldChange(node.id, fields)
+          })(ValueForm)
+        : null;
+
+    if (selectedNode) {
+      document.onkeypress = (ev: KeyboardEvent) => {
+        if (ev.code === 'Delete') {
+          this.handleDeleteSelectedNode();
+        }
+      };
+    } else {
+      document.onkeypress = null;
+    }
 
     return (
       <>
@@ -121,28 +160,36 @@ export class ExplorerEditor extends React.Component<
           <Col xs={24} md={12} xl={18}>
             <Card
               bordered={false}
-              title="Selected"
+              title={node ? node.type : 'Nothing selected'}
               style={{ marginBottom: 12 }}
             >
-              {selectedNode ? (
-                <>
-                  <strong>Selected: </strong>
-                  {nodes.find(n => n.id === selectedNode)!.type}
-                  <Row>
-                    <Col xs={8}>
-                      <Button onClick={this.handleDeleteSelectedNode}>
-                        Delete
-                      </Button>
-                    </Col>
-                  </Row>
-                </>
+              {node ? (
+                <Row>
+                  <Col xs={16}>
+                    {FormImpl ? (
+                      <>
+                        <h4>Properties</h4>
+                        <FormImpl />
+                      </>
+                    ) : null}
+                  </Col>
+                  <Col xs={8}>
+                    <h4>Actions</h4>
+                    <Button
+                      icon="delete"
+                      onClick={this.handleDeleteSelectedNode}
+                    >
+                      Delete
+                    </Button>
+                  </Col>
+                </Row>
               ) : (
-                'Nothing selected yet.'
+                'Select a node first.'
               )}
             </Card>
           </Col>
           <Col xs={24} md={12} xl={6}>
-            <Card bordered={false} title="Actions" style={{ marginBottom: 12 }}>
+            <Card bordered={false} title="Editor" style={{ marginBottom: 12 }}>
               <TreeSelect
                 allowClear
                 showSearch

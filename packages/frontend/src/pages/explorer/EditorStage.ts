@@ -6,18 +6,22 @@ import { nodeTypes } from './nodes/AllNodes';
 import { ExplorerEditorState, ConnectionDef, NodeDef } from './ExplorerEditor';
 
 export const EXPLORER_CONTAINER = 'explcontainer';
+export const NODE_WIDTH = 160;
 const SOCKET_RADIUS = 8;
 const SOCKET_DISTANCE = 30;
-export const NODE_WIDTH = 160;
 const TEXT_HEIGHT = 20;
 const CONNECTION_STIFFNESS = 0.7;
 
 const createSocket = (
   s: Socket,
+  i: number,
   isConnected: boolean,
   onClick?: (s: Socket) => void
 ) => {
-  const socketGroup = new Konva.Group();
+  const socketGroup = new Konva.Group({
+    x: 0,
+    y: i * SOCKET_DISTANCE
+  });
   const text = new Konva.Text({
     fill: '#666',
     text: s.name,
@@ -50,6 +54,7 @@ const createSocket = (
 
 const createSocketWithUsages = (
   s: Socket,
+  i: number,
   state: ExplorerEditorState,
   nodeId: string,
   changeState: (newState: ExplorerEditorState) => void,
@@ -66,7 +71,7 @@ const createSocketWithUsages = (
             c.from.nodeId === nodeId &&
             c.from.socketName === s.name
     ) !== undefined;
-  return createSocket(s, isUsed, socket => onClick(socket, nodeId));
+  return createSocket(s, i, isUsed, socket => onClick(socket, nodeId));
 };
 
 const createNewConnection = (
@@ -278,8 +283,11 @@ const renderNode = (
     x: 0,
     y: SOCKET_DISTANCE + TEXT_HEIGHT
   });
-  for (const i of inputs) {
+  // tslint:disable-next-line:prefer-for-of
+  for (let i = 0; i < inputs.length; ++i) {
+    const input = inputs[i];
     const socket = createSocketWithUsages(
+      input,
       i,
       state,
       n.id,
@@ -288,15 +296,17 @@ const renderNode = (
         onClickSocket(s, nodeId, state, changeState)
     );
     inputsGroup.add(socket);
-    socketsMap.set(getSocketId('input', n.id, i.name), socket);
+    socketsMap.set(getSocketId('input', n.id, input.name), socket);
   }
 
   const outputsGroup = new Konva.Group({
     x: NODE_WIDTH,
     y: SOCKET_DISTANCE + TEXT_HEIGHT
   });
-  for (const i of outputs) {
+  for (let i = 0; i < outputs.length; ++i) {
+    const output = outputs[i];
     const socket = createSocketWithUsages(
+      output,
       i,
       state,
       n.id,
@@ -305,7 +315,7 @@ const renderNode = (
         onClickSocket(s, nodeId, state, changeState)
     );
     outputsGroup.add(socket);
-    socketsMap.set(getSocketId('output', n.id, i.name), socket);
+    socketsMap.set(getSocketId('output', n.id, output.name), socket);
   }
 
   nodeGroup.add(bgRect);
