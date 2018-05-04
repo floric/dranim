@@ -36,8 +36,8 @@ export const renderNode = (
   const isSelected = state.selectedNode !== null && state.selectedNode === n.id;
 
   const nodeGroup = new Konva.Group({ draggable: true, x: n.x, y: n.y });
-  nodeGroup.on('dragend', ev => {
-    server.onNodeUpdated(n.id, ev.target.x(), ev.target.y());
+  nodeGroup.on('dragend', async ev => {
+    await server.onNodeUpdate(n.id, ev.target.x(), ev.target.y());
   });
   nodeGroup.on('click', ev => {
     changeState({
@@ -66,7 +66,6 @@ export const renderNode = (
     x: 0,
     y: SOCKET_DISTANCE + TEXT_HEIGHT
   });
-  // tslint:disable-next-line:prefer-for-of
   for (let i = 0; i < inputs.length; ++i) {
     const input = inputs[i];
     const socket = renderSocketWithUsages(

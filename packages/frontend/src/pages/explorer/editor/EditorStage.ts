@@ -13,6 +13,7 @@ export const updateStage = (
   changeState: (newState: Partial<ExplorerEditorState>) => void
 ) => {
   const { connections, nodes } = server;
+  const { openConnection } = state;
   const canvasContainer = document.getElementById(EXPLORER_CONTAINER);
   if (!canvasContainer) {
     throw new Error('Canvas container not found.');
@@ -46,7 +47,7 @@ export const updateStage = (
     nodeMap.set(n.id, nodeGroup);
   });
 
-  for (const c of connections) {
+  connections.forEach(c => {
     const line = renderConnection(
       c,
       server,
@@ -58,6 +59,36 @@ export const updateStage = (
       changeState
     );
     connsLayer.add(line);
+  });
+
+  if (openConnection && openConnection.outputs) {
+    openConnection.outputs.forEach(c => {
+      const line = renderConnection(
+        { from: { name: c.name, nodeId: c.nodeId }, to: null },
+        server,
+        state,
+        stage,
+        connsLayer,
+        socketsMap,
+        nodeMap,
+        changeState
+      );
+      connsLayer.add(line);
+    });
+  } else if (openConnection && openConnection.inputs) {
+    openConnection.inputs.forEach(c => {
+      const line = renderConnection(
+        { from: null, to: { name: c.name, nodeId: c.nodeId } },
+        server,
+        state,
+        stage,
+        connsLayer,
+        socketsMap,
+        nodeMap,
+        changeState
+      );
+      connsLayer.add(line);
+    });
   }
 
   stage.add(connsLayer);

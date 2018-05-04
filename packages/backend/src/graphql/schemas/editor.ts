@@ -32,6 +32,7 @@ const SocketInput = `
 
 const Connection = `
   type Connection {
+    id: String!
     from: Socket
     to: Socket
   }

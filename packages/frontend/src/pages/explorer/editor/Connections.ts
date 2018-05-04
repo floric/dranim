@@ -87,13 +87,9 @@ export const renderConnection = (
     });
 
     stage.on('mousedown', () => {
-      // TODO Remove Connection
-      /*changeState({
-        connections: connections.filter(
-          con => con.from !== null && con.to !== null
-        ),
+      changeState({
         openConnection: null
-      });*/
+      });
     });
   }
 

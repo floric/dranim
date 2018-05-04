@@ -22,22 +22,34 @@ export interface NodeDef {
   id: string;
 }
 
+export interface SocketDef {
+  nodeId: string;
+  name: string;
+}
+
 export interface ConnectionDef {
-  from: { nodeId: string; name: string } | null;
-  to: { nodeId: string; name: string } | null;
+  id?: string; // local connections don't have an ID!
+  from: SocketDef | null;
+  to: SocketDef | null;
 }
 
 export interface ExplorerEditorProps {
   connections: Array<ConnectionDef>;
   nodes: Array<NodeDef>;
   datasets: Array<Dataset>;
-  onNodeCreate: (type: string, x: number, y: number) => Promise<any>;
-  onNodeDelete: (id: string) => Promise<any>;
-  onNodeUpdated: (id: string, x: number, y: number) => Promise<void>;
+  onNodeCreate: (type: string, x: number, y: number) => Promise<void>;
+  onNodeDelete: (id: string) => Promise<void>;
+  onNodeUpdate: (id: string, x: number, y: number) => Promise<void>;
+  onConnectionCreate: (from: SocketDef, to: SocketDef) => Promise<void>;
+  onConnectionDelete: (id: string) => Promise<void>;
 }
 
 export interface ExplorerEditorState {
-  openConnection: { dataType: string } | null;
+  openConnection: {
+    dataType: string;
+    inputs: null | Array<SocketDef>;
+    outputs: null | Array<SocketDef>;
+  } | null;
   selectedNode: string | null;
 }
 
@@ -59,10 +71,14 @@ export class ExplorerEditor extends React.Component<
     this.updateCanvas();
   }
 
-  public componentDidUpdate(newProps: ExplorerEditorProps) {
-    const propsChanged =
-      JSON.stringify(this.props) !== JSON.stringify(newProps);
-    if (propsChanged) {
+  public componentDidUpdate(
+    prevProps: ExplorerEditorProps,
+    prevState: ExplorerEditorState
+  ) {
+    if (
+      JSON.stringify(prevProps) !== JSON.stringify(this.props) ||
+      JSON.stringify(prevState) !== JSON.stringify(this.state)
+    ) {
       this.updateCanvas();
     }
   }

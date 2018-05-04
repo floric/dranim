@@ -12,8 +12,11 @@ export interface Socket {
   name: string;
 }
 
-export interface Connection {
+export interface Connection extends ConnectionWithoutId {
   id: string;
+}
+
+export interface ConnectionWithoutId {
   from: Socket;
   to: Socket;
 }
@@ -29,6 +32,45 @@ export const getNodesCollection = (db: Db) => {
 
 export const getConnectionsCollection = (db: Db) => {
   return db.collection('Connections');
+};
+
+export const createConnection = async (db: Db, from: Socket, to: Socket) => {
+  if (!from || !to) {
+    throw new Error('Invalid connection');
+  }
+
+  const collection = getConnectionsCollection(db);
+
+  // check for existing connections to the input
+  let res = await collection.findOne({
+    'to.name': to.name,
+    'to.nodeId': to.nodeId
+  });
+  if (res !== null) {
+    throw new Error('Only one input allowed');
+  }
+
+  res = await collection.insertOne({ from, to });
+
+  if (res.result.ok !== 1 || res.ops.length !== 1) {
+    throw new Error('Writing connection failed');
+  }
+
+  const newItem = res.ops[0];
+  return {
+    id: newItem._id,
+    ...newItem
+  };
+};
+
+export const deleteConnection = async (db: Db, id: ObjectID) => {
+  const collection = getConnectionsCollection(db);
+  const res = await collection.deleteOne({ _id: id });
+  if (res.deletedCount !== 1) {
+    throw new Error('Deleting connection failed');
+  }
+
+  return true;
 };
 
 export const createNode = async (
@@ -60,8 +102,12 @@ export const createNode = async (
 };
 
 export const deleteNode = async (db: Db, id: ObjectID) => {
-  const collection = getNodesCollection(db);
-  const res = await collection.deleteOne({ _id: id });
+  const connectionsCollection = getConnectionsCollection(db);
+  await connectionsCollection.deleteMany({ 'from.nodeId': id.toHexString() });
+  await connectionsCollection.deleteMany({ 'to.nodeId': id.toHexString() });
+
+  const nodesCollection = getNodesCollection(db);
+  const res = await nodesCollection.deleteOne({ _id: id });
   if (res.deletedCount !== 1) {
     throw new Error('Deleting node failed');
   }

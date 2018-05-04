@@ -79,49 +79,50 @@ export const renderSocketWithUsages = (
   return renderSocket(s, i, isUsed, socket => onClick(socket, nodeId));
 };
 
-const createNewConnection = (
+const beginNewConnection = (
   nodeId: string,
   s: Socket,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   changeState: (newState: Partial<ExplorerEditorState>) => void
 ) => {
-  // TODO create connection
-  /*changeState({
-    connections: [
-      ...connections,
-      {
-        from: s.type === 'input' ? null : { nodeId, name: s.name },
-        to: s.type === 'input' ? { nodeId, name: s.name } : null
-      }
-    ],
-    openConnection: { dataType: s.dataType }
-  });*/
+  changeState({
+    openConnection: {
+      dataType: s.dataType,
+      inputs: s.type === 'input' ? [{ name: s.name, nodeId }] : null,
+      outputs: s.type !== 'input' ? [{ name: s.name, nodeId }] : null
+    }
+  });
 };
 
-const beginEditExistingConnection = (
+const beginEditExistingConnection = async (
   connectionsInSocket: Array<ConnectionDef>,
   s: Socket,
+  nodeId: string,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   changeState: (newState: Partial<ExplorerEditorState>) => void
 ) => {
-  // TODO Open existing connection
-  /*changeState({
-    connections: connections.map(
-      c =>
-        connectionsInSocket.includes(c)
-          ? {
-              from: s.type === 'output' ? null : c.from,
-              to: s.type === 'input' ? null : c.to
-            }
-          : c
-    ),
-    openConnection: { dataType: s.dataType }
-  });*/
+  const { connections } = server;
+  const existingConnections = connections.filter(
+    c =>
+      s.type === 'input'
+        ? c.to && c.to.nodeId === nodeId && c.to.name === s.name
+        : c.from && c.from.nodeId === nodeId && c.from.name === s.name
+  );
+  await Promise.all(
+    connectionsInSocket.map(c => server.onConnectionDelete(c.id!))
+  );
+  changeState({
+    openConnection: {
+      dataType: s.dataType,
+      inputs: s.type === 'input' ? null : existingConnections.map(c => c.to!),
+      outputs: s.type === 'input' ? existingConnections.map(c => c.from!) : null
+    }
+  });
 };
 
-export const onClickSocket = (
+export const onClickSocket = async (
   s: Socket,
   nodeId: string,
   server: ExplorerEditorProps,
@@ -140,15 +141,16 @@ export const onClickSocket = (
           : c.to !== null && c.to.nodeId === nodeId && c.to.name === s.name
     );
     if (connectionsInSocket.length > 0) {
-      beginEditExistingConnection(
+      await beginEditExistingConnection(
         connectionsInSocket,
         s,
+        nodeId,
         server,
         state,
         changeState
       );
     } else {
-      createNewConnection(nodeId, s, server, state, changeState);
+      beginNewConnection(nodeId, s, server, state, changeState);
     }
   } else {
     if (s.dataType !== openConnection.dataType) {
@@ -174,49 +176,30 @@ export const onClickSocket = (
       return;
     }
 
-    const openConnections = connections.filter(c => !c.to || !c.from);
-    openConnections.forEach(conn => {
-      const otherNode = s.type === 'input' ? conn.from : conn.to;
-      if (!otherNode) {
-        showNotificationWithIcon({
-          title: 'Connection not allowed',
-          icon: 'warning',
-          content: `Connections with other ${
-            s.type === 'input' ? 'inputs' : 'outputs'
-          } not possible.`
-        });
-        return;
-      }
+    let openConnections: Array<ConnectionDef> = [];
+    openConnections = openConnections.concat(
+      openConnection.inputs
+        ? openConnection.inputs.map(c => ({
+            to: { nodeId: c.nodeId, name: c.name },
+            from: { nodeId, name: s.name }
+          }))
+        : []
+    );
+    openConnections = openConnections.concat(
+      openConnection.outputs
+        ? openConnection.outputs.map(c => ({
+            to: { nodeId, name: s.name },
+            from: { nodeId: c.nodeId, name: c.name }
+          }))
+        : []
+    );
 
-      if (otherNode.nodeId === nodeId) {
-        showNotificationWithIcon({
-          title: 'Circles not allowed',
-          icon: 'warning',
-          content: 'Circular dependencies are not allowed.'
-        });
-        return;
-      }
+    openConnections.filter(c => c.to !== null && c.from !== null).forEach(c => {
+      server.onConnectionCreate(c.from!, c.to!);
     });
 
-    const newConnections = openConnections.map(c => ({
-      to: s.type === 'input' ? { nodeId, name: s.name } : c.to,
-      from: s.type === 'output' ? { nodeId, name: s.name } : c.from
-    }));
-    newConnections.forEach(c => {
-      const matchingConnections = connections.filter(
-        existingC =>
-          JSON.stringify(existingC.to) === JSON.stringify(c.to) &&
-          JSON.stringify(existingC.from) === JSON.stringify(c.from)
-      );
-      if (matchingConnections.length === 0) {
-        connections.push(c);
-      }
-    });
-
-    /* TODO Close connection
     changeState({
-      connections: connections.filter(c => c.from !== null && c.to !== null),
       openConnection: null
-    });*/
+    });
   }
 };
