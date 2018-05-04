@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Card, Row, Col, TreeSelect, Button, Form } from 'antd';
 import { css } from 'glamor';
-import * as uuid from 'uuid/v4';
 
 import { Dataset } from '../../utils/model';
 import { nodeTypes, nodeTypesTree } from './nodes/AllNodes';
@@ -24,20 +23,20 @@ export interface NodeDef {
 }
 
 export interface ConnectionDef {
-  from: { nodeId: string; socketName: string } | null;
-  to: { nodeId: string; socketName: string } | null;
+  from: { nodeId: string; name: string } | null;
+  to: { nodeId: string; name: string } | null;
 }
 
 export interface ExplorerEditorProps {
-  datasets: Array<Dataset>;
-  nodes: Array<NodeDef>;
   connections: Array<ConnectionDef>;
+  nodes: Array<NodeDef>;
+  datasets: Array<Dataset>;
+  onNodeCreate: (type: string, x: number, y: number) => Promise<any>;
+  onNodeDelete: (id: string) => Promise<any>;
+  onNodeUpdated: (id: string, x: number, y: number) => Promise<void>;
 }
 
 export interface ExplorerEditorState {
-  connections: Array<ConnectionDef>;
-  nodes: Array<NodeDef>;
-  mode: 'DEFAULT';
   openConnection: { dataType: string } | null;
   selectedNode: string | null;
 }
@@ -50,61 +49,51 @@ export class ExplorerEditor extends React.Component<
   ExplorerEditorState
 > {
   public componentWillMount() {
-    const { connections, nodes } = this.props;
     this.setState({
       openConnection: null,
-      selectedNode: null,
-      mode: 'DEFAULT',
-      connections,
-      nodes
+      selectedNode: null
     });
   }
 
-  private changeState = (newState: ExplorerEditorState) => {
-    this.setState(newState);
-  };
-
-  public componentDidUpdate() {
+  public componentDidMount() {
     this.updateCanvas();
   }
 
-  public updateCanvas() {
-    updateStage(EXPLORER_CONTAINER, this.state, this.changeState);
+  public componentDidUpdate(newProps: ExplorerEditorProps) {
+    const propsChanged =
+      JSON.stringify(this.props) !== JSON.stringify(newProps);
+    if (propsChanged) {
+      this.updateCanvas();
+    }
   }
 
-  private handleCreateNode = (type: string) => {
+  private changeState = async (newState: ExplorerEditorState) => {
+    this.setState(newState);
+  };
+
+  public updateCanvas() {
+    updateStage(EXPLORER_CONTAINER, this.props, this.state, this.changeState);
+  }
+
+  private handleDeleteSelectedNode = () => {
+    const { selectedNode } = this.state;
+    if (selectedNode === null) {
+      return;
+    }
+    this.setState({ selectedNode: null });
+    this.props.onNodeDelete(selectedNode);
+  };
+
+  private handleSelectCreateNode = (type: string) => {
     if (!nodeTypes.has(type)) {
       return;
     }
 
-    const newId = uuid();
     const canvas = document.getElementById(EXPLORER_CONTAINER);
     const x = canvas ? canvas.clientWidth / 2 - NODE_WIDTH / 2 : 50;
     const y = canvas ? canvas.clientHeight / 2 : 50;
-    this.setState({
-      selectedNode: newId,
-      nodes: [...this.state.nodes, { id: newId, x, y, type }]
-    });
-  };
 
-  private handleDeleteSelectedNode = () => {
-    const { connections, nodes, selectedNode } = this.state;
-    const nodeId = selectedNode;
-    if (selectedNode === null) {
-      return;
-    }
-
-    this.setState({
-      nodes: nodes.filter(n => n.id !== nodeId),
-      selectedNode: null,
-      connections: connections.filter(
-        c =>
-          c.to !== null &&
-          c.to.nodeId !== nodeId &&
-          c.from !== null &&
-          c.from.nodeId !== nodeId
-      )
-    });
+    this.props.onNodeCreate(type, x, y);
   };
 
   private onPropertiesFieldChange = (nodeId: string, field: any) => {
@@ -124,7 +113,8 @@ export class ExplorerEditor extends React.Component<
   };
 
   public render() {
-    const { selectedNode, nodes } = this.state;
+    const { selectedNode } = this.state;
+    const { nodes } = this.props;
 
     const node = selectedNode ? nodes.find(n => n.id === selectedNode) : null;
     const ValueForm = node ? nodeTypes.get(node.type)!.form || null : null;
@@ -198,7 +188,7 @@ export class ExplorerEditor extends React.Component<
                 treeData={nodeTypesTree}
                 style={{ width: 200 }}
                 placeholder="Add Node"
-                onSelect={this.handleCreateNode}
+                onSelect={this.handleSelectCreateNode}
               />
             </Card>
           </Col>

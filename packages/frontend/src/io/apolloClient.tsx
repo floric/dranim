@@ -18,25 +18,7 @@ const stateLink = withClientState({
     }
   },
   resolvers: {
-    Mutation: {
-      updateSocketPos: (_, { socketName, x, y }, { cache }) => {
-        const data = {
-          explorer: {
-            __typename: 'Explorer',
-            socketPositions: [
-              {
-                __typename: 'SocketPosition',
-                name: socketName,
-                x,
-                y
-              }
-            ]
-          }
-        };
-        cache.writeData({ data });
-        return null;
-      }
-    }
+    Mutation: {}
   }
 });
 

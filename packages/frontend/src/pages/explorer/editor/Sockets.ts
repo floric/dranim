@@ -1,5 +1,9 @@
 import * as Konva from 'konva';
-import { ExplorerEditorState, ConnectionDef } from '../ExplorerEditor';
+import {
+  ExplorerEditorState,
+  ConnectionDef,
+  ExplorerEditorProps
+} from '../ExplorerEditor';
 import { Socket } from '../nodes/Sockets';
 import { NODE_WIDTH } from './Nodes';
 import { showNotificationWithIcon } from '../../../utils/form';
@@ -10,8 +14,8 @@ export const SOCKET_DISTANCE = 30;
 export const getSocketId = (
   type: 'input' | 'output',
   nodeId: string,
-  socketName: string
-) => `${type === 'input' ? 'in' : 'out'}-${nodeId}-${socketName}`;
+  name: string
+) => `${type === 'input' ? 'in' : 'out'}-${nodeId}-${name}`;
 
 const renderSocket = (
   s: Socket,
@@ -56,21 +60,21 @@ const renderSocket = (
 export const renderSocketWithUsages = (
   s: Socket,
   i: number,
+  server: ExplorerEditorProps,
   state: ExplorerEditorState,
   nodeId: string,
-  changeState: (newState: ExplorerEditorState) => void,
+  changeState: (newState: Partial<ExplorerEditorState>) => void,
   onClick: (s: Socket, nodeId: string) => void
 ) => {
+  const { connections } = server;
   const isUsed =
-    state.connections.find(
+    connections.find(
       c =>
         s.type === 'input'
-          ? c.to !== null &&
-            c.to.nodeId === nodeId &&
-            c.to.socketName === s.name
+          ? c.to !== null && c.to.nodeId === nodeId && c.to.name === s.name
           : c.from !== null &&
             c.from.nodeId === nodeId &&
-            c.from.socketName === s.name
+            c.from.name === s.name
     ) !== undefined;
   return renderSocket(s, i, isUsed, socket => onClick(socket, nodeId));
 };
@@ -78,30 +82,32 @@ export const renderSocketWithUsages = (
 const createNewConnection = (
   nodeId: string,
   s: Socket,
+  server: ExplorerEditorProps,
   state: ExplorerEditorState,
   changeState: (newState: Partial<ExplorerEditorState>) => void
 ) => {
-  const { connections } = state;
-  changeState({
+  // TODO create connection
+  /*changeState({
     connections: [
       ...connections,
       {
-        from: s.type === 'input' ? null : { nodeId, socketName: s.name },
-        to: s.type === 'input' ? { nodeId, socketName: s.name } : null
+        from: s.type === 'input' ? null : { nodeId, name: s.name },
+        to: s.type === 'input' ? { nodeId, name: s.name } : null
       }
     ],
     openConnection: { dataType: s.dataType }
-  });
+  });*/
 };
 
 const beginEditExistingConnection = (
   connectionsInSocket: Array<ConnectionDef>,
   s: Socket,
+  server: ExplorerEditorProps,
   state: ExplorerEditorState,
   changeState: (newState: Partial<ExplorerEditorState>) => void
 ) => {
-  const { connections } = state;
-  changeState({
+  // TODO Open existing connection
+  /*changeState({
     connections: connections.map(
       c =>
         connectionsInSocket.includes(c)
@@ -112,31 +118,37 @@ const beginEditExistingConnection = (
           : c
     ),
     openConnection: { dataType: s.dataType }
-  });
+  });*/
 };
 
 export const onClickSocket = (
   s: Socket,
   nodeId: string,
+  server: ExplorerEditorProps,
   state: ExplorerEditorState,
   changeState: (newState: Partial<ExplorerEditorState>) => void
 ) => {
-  const { connections, openConnection } = state;
+  const { openConnection } = state;
+  const { connections } = server;
   if (openConnection === null) {
     const connectionsInSocket = connections.filter(
       c =>
         s.type === 'output'
           ? c.from !== null &&
             c.from.nodeId === nodeId &&
-            c.from.socketName === s.name
-          : c.to !== null &&
-            c.to.nodeId === nodeId &&
-            c.to.socketName === s.name
+            c.from.name === s.name
+          : c.to !== null && c.to.nodeId === nodeId && c.to.name === s.name
     );
     if (connectionsInSocket.length > 0) {
-      beginEditExistingConnection(connectionsInSocket, s, state, changeState);
+      beginEditExistingConnection(
+        connectionsInSocket,
+        s,
+        server,
+        state,
+        changeState
+      );
     } else {
-      createNewConnection(nodeId, s, state, changeState);
+      createNewConnection(nodeId, s, server, state, changeState);
     }
   } else {
     if (s.dataType !== openConnection.dataType) {
@@ -151,7 +163,7 @@ export const onClickSocket = (
     if (
       s.type === 'input' &&
       connections.filter(
-        c => c.to && c.to.nodeId === nodeId && c.to.socketName === s.name
+        c => c.to && c.to.nodeId === nodeId && c.to.name === s.name
       ).length > 0
     ) {
       showNotificationWithIcon({
@@ -187,8 +199,8 @@ export const onClickSocket = (
     });
 
     const newConnections = openConnections.map(c => ({
-      to: s.type === 'input' ? { nodeId, socketName: s.name } : c.to,
-      from: s.type === 'output' ? { nodeId, socketName: s.name } : c.from
+      to: s.type === 'input' ? { nodeId, name: s.name } : c.to,
+      from: s.type === 'output' ? { nodeId, name: s.name } : c.from
     }));
     newConnections.forEach(c => {
       const matchingConnections = connections.filter(
@@ -201,9 +213,10 @@ export const onClickSocket = (
       }
     });
 
+    /* TODO Close connection
     changeState({
       connections: connections.filter(c => c.from !== null && c.to !== null),
       openConnection: null
-    });
+    });*/
   }
 };

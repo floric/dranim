@@ -137,5 +137,9 @@ export const deleteEntry = async (
 ) => {
   const collection = getEntryCollection(db, datasetId);
   const res = await collection.deleteOne({ _id: entryId });
-  return res.deletedCount === 1;
+  if (res.deletedCount !== 1) {
+    throw new Error('Deleting entry failed');
+  }
+
+  return true;
 };

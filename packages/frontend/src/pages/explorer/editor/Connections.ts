@@ -1,5 +1,9 @@
 import * as Konva from 'konva';
-import { ExplorerEditorState, ConnectionDef } from '../ExplorerEditor';
+import {
+  ExplorerEditorState,
+  ConnectionDef,
+  ExplorerEditorProps
+} from '../ExplorerEditor';
 import { getSocketId } from './Sockets';
 
 const CONNECTION_STIFFNESS = 0.7;
@@ -17,6 +21,7 @@ const getConnectionPoints = (output: Konva.Vector2d, input: Konva.Vector2d) => [
 
 export const renderConnection = (
   c: ConnectionDef,
+  server: ExplorerEditorProps,
   state: ExplorerEditorState,
   stage: Konva.Stage,
   connsLayer: Konva.Layer,
@@ -24,12 +29,11 @@ export const renderConnection = (
   nodeMap: Map<string, Konva.Group>,
   changeState: (newState: Partial<ExplorerEditorState>) => void
 ) => {
-  const { connections } = state;
   const outputSocket = c.from
-    ? socketsMap.get(getSocketId('output', c.from.nodeId, c.from.socketName))
+    ? socketsMap.get(getSocketId('output', c.from.nodeId, c.from.name))
     : null;
   const inputSocket = c.to
-    ? socketsMap.get(getSocketId('input', c.to.nodeId, c.to.socketName))
+    ? socketsMap.get(getSocketId('input', c.to.nodeId, c.to.name))
     : null;
   const isCurrentlyChanged = !inputSocket || !outputSocket;
 
@@ -83,12 +87,13 @@ export const renderConnection = (
     });
 
     stage.on('mousedown', () => {
-      changeState({
+      // TODO Remove Connection
+      /*changeState({
         connections: connections.filter(
           con => con.from !== null && con.to !== null
         ),
         openConnection: null
-      });
+      });*/
     });
   }
 

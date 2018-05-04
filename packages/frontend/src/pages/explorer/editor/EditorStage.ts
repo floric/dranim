@@ -1,6 +1,6 @@
 import * as Konva from 'konva';
 
-import { ExplorerEditorState } from '../ExplorerEditor';
+import { ExplorerEditorState, ExplorerEditorProps } from '../ExplorerEditor';
 import { renderConnection } from './Connections';
 import { renderNode } from './Nodes';
 
@@ -8,10 +8,11 @@ export const EXPLORER_CONTAINER = 'explcontainer';
 
 export const updateStage = (
   canvasId: string,
+  server: ExplorerEditorProps,
   state: ExplorerEditorState,
   changeState: (newState: Partial<ExplorerEditorState>) => void
 ) => {
-  const { connections, nodes } = state;
+  const { connections, nodes } = server;
   const canvasContainer = document.getElementById(EXPLORER_CONTAINER);
   if (!canvasContainer) {
     throw new Error('Canvas container not found.');
@@ -33,7 +34,14 @@ export const updateStage = (
   const socketsMap: Map<string, Konva.Group> = new Map();
 
   nodes.forEach(n => {
-    const nodeGroup = renderNode(n, state, changeState, nodeMap, socketsMap);
+    const nodeGroup = renderNode(
+      n,
+      server,
+      state,
+      changeState,
+      nodeMap,
+      socketsMap
+    );
     nodesLayer.add(nodeGroup);
     nodeMap.set(n.id, nodeGroup);
   });
@@ -41,6 +49,7 @@ export const updateStage = (
   for (const c of connections) {
     const line = renderConnection(
       c,
+      server,
       state,
       stage,
       connsLayer,

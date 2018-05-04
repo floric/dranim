@@ -1,5 +1,9 @@
 import * as Konva from 'konva';
-import { NodeDef, ExplorerEditorState } from '../ExplorerEditor';
+import {
+  NodeDef,
+  ExplorerEditorState,
+  ExplorerEditorProps
+} from '../ExplorerEditor';
 import { nodeTypes } from '../nodes/AllNodes';
 import { Socket } from '../nodes/Sockets';
 import {
@@ -14,12 +18,12 @@ const TEXT_HEIGHT = 20;
 
 export const renderNode = (
   n: NodeDef,
+  server: ExplorerEditorProps,
   state: ExplorerEditorState,
   changeState: (newState: Partial<ExplorerEditorState>) => void,
   nodeMap: Map<string, Konva.Group>,
   socketsMap: Map<string, Konva.Group>
 ) => {
-  const { nodes } = state;
   const nodeType = nodeTypes.get(n.type);
   if (!nodeType) {
     throw new Error('Unknown node type');
@@ -33,16 +37,7 @@ export const renderNode = (
 
   const nodeGroup = new Konva.Group({ draggable: true, x: n.x, y: n.y });
   nodeGroup.on('dragend', ev => {
-    const nodeIndex = nodes.findIndex(node => node.id === n.id);
-    nodes[nodeIndex] = {
-      id: n.id,
-      type: n.type,
-      x: ev.target.x(),
-      y: ev.target.y()
-    };
-    changeState({
-      nodes
-    });
+    server.onNodeUpdated(n.id, ev.target.x(), ev.target.y());
   });
   nodeGroup.on('click', ev => {
     changeState({
@@ -77,11 +72,12 @@ export const renderNode = (
     const socket = renderSocketWithUsages(
       input,
       i,
+      server,
       state,
       n.id,
       changeState,
       (s: Socket, nodeId: string) =>
-        onClickSocket(s, nodeId, state, changeState)
+        onClickSocket(s, nodeId, server, state, changeState)
     );
     inputsGroup.add(socket);
     socketsMap.set(getSocketId('input', n.id, input.name), socket);
@@ -96,11 +92,12 @@ export const renderNode = (
     const socket = renderSocketWithUsages(
       output,
       i,
+      server,
       state,
       n.id,
       changeState,
       (s: Socket, nodeId: string) =>
-        onClickSocket(s, nodeId, state, changeState)
+        onClickSocket(s, nodeId, server, state, changeState)
     );
     outputsGroup.add(socket);
     socketsMap.set(getSocketId('output', n.id, output.name), socket);

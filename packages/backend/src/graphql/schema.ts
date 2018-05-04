@@ -1,5 +1,4 @@
 import { makeExecutableSchema, IResolvers } from 'graphql-tools';
-import * as uuid from 'uuid/v4';
 import { GraphQLUpload } from 'apollo-upload-server';
 import { Db, ObjectID } from 'mongodb';
 import * as promisesAll from 'promises-all';
@@ -8,6 +7,7 @@ import Dataset from './schemas/dataset';
 import Valueschema from './schemas/valueschema';
 import Entry from './schemas/entry';
 import UploadResult from './schemas/upload';
+import Editor from './schemas/editor';
 import {
   datasets,
   dataset,
@@ -16,6 +16,13 @@ import {
   addValueSchema,
   Valueschema as ValueSchema
 } from './resolvers/dataset';
+import {
+  createNode,
+  editor,
+  updateNode,
+  updateEditor,
+  deleteNode
+} from './resolvers/editor';
 import {
   createEntry,
   latestEntries,
@@ -33,6 +40,7 @@ interface ApolloContext {
 export const Query = `
   type Query {
     datasets: [Dataset!]!
+    editor: Editor!
     dataset(id: String!): Dataset
     entry(datasetId: String!, entryId: String!): Entry
   }
@@ -62,6 +70,23 @@ export const Mutation = `
       datasetId: String!
       entryId: String!
     ): Boolean!
+    createNode (
+      type: String!
+      x: Float!
+      y: Float!
+    ): Node!
+    deleteNode (
+      id: String!
+    ): Boolean!
+    updateNode (
+      id: String!
+      x: Float!
+      y: Float!
+    ): Boolean!
+    updateEditor (
+      nodes: [NodeInput!]!
+      connections: [ConnectionInput!]!
+    ): Boolean!
     createSTRDemoData: Boolean!
     uploadEntriesCsv (files: [Upload!]!, datasetId: String!): UploadResult!
   }
@@ -78,7 +103,8 @@ const resolvers: IResolvers<any, ApolloContext> = {
   Query: {
     datasets: (_, __, { db }) => datasets(db),
     dataset: (_, { id }, { db }) => dataset(db, new ObjectID(id)),
-    entry: (_, { datasetId, entryId }) => null
+    entry: (_, { datasetId, entryId }) => null,
+    editor: (_, __, { db }) => editor(db)
   },
   Entry: {
     values: ({ values }, __, { db }) =>
@@ -114,9 +140,14 @@ const resolvers: IResolvers<any, ApolloContext> = {
       for (const s of passagesSchemas) {
         await addValueSchema(db, new ObjectID(ds.id), s);
       }
-
       return true;
-    }
+    },
+    createNode: async (_, { type, x, y }, { db }) => createNode(db, type, x, y),
+    updateNode: async (_, { id, x, y }, { db }) =>
+      updateNode(db, new ObjectID(id), x, y),
+    deleteNode: async (_, { id }, { db }) => deleteNode(db, new ObjectID(id)),
+    updateEditor: async (_, { nodes, connections }, { db }) =>
+      updateEditor(db, nodes, connections)
   },
   Upload: GraphQLUpload
 };
@@ -127,6 +158,7 @@ const typeDefs = [
   Mutation,
   UploadResult,
   Entry,
+  Editor,
   Dataset,
   Valueschema
 ];
