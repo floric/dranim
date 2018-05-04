@@ -122,7 +122,7 @@ const beginEditExistingConnection = async (
   });
 };
 
-export const onClickSocket = async (
+export const onClickSocket = (
   s: Socket,
   nodeId: string,
   server: ExplorerEditorProps,
@@ -141,7 +141,7 @@ export const onClickSocket = async (
           : c.to !== null && c.to.nodeId === nodeId && c.to.name === s.name
     );
     if (connectionsInSocket.length > 0) {
-      await beginEditExistingConnection(
+      beginEditExistingConnection(
         connectionsInSocket,
         s,
         nodeId,

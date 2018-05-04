@@ -36,8 +36,8 @@ export const renderNode = (
   const isSelected = state.selectedNode !== null && state.selectedNode === n.id;
 
   const nodeGroup = new Konva.Group({ draggable: true, x: n.x, y: n.y });
-  nodeGroup.on('dragend', async ev => {
-    await server.onNodeUpdate(n.id, ev.target.x(), ev.target.y());
+  nodeGroup.on('dragend', ev => {
+    server.onNodeUpdate(n.id, ev.target.x(), ev.target.y());
   });
   nodeGroup.on('click', ev => {
     changeState({

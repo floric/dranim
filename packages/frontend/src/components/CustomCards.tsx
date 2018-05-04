@@ -8,7 +8,9 @@ import { isApolloError, ApolloError } from 'apollo-client/errors/ApolloError';
 import { History } from 'history';
 import { withRouter } from 'react-router';
 
-const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />;
+export const LoadingIcon = (
+  <Icon type="loading" style={{ fontSize: 24 }} spin />
+);
 
 const DefaultErrorActionsImpl: SFC<{ history: History }> = ({ history }) => (
   <Button type="primary" onClick={() => history.push('/')}>
@@ -22,7 +24,7 @@ export const LoadingCard: SFC<SpinProps> = props => (
   <Row>
     <Col>
       <Card bordered={false} {...css({ textAlign: 'center' })}>
-        <Spin indicator={antIcon} {...props} />
+        <Spin indicator={LoadingIcon} {...props} />
       </Card>
     </Col>
   </Row>
