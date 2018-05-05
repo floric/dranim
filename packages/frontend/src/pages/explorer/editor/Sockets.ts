@@ -122,6 +122,26 @@ const beginEditExistingConnection = async (
   });
 };
 
+/*const getOtherNodes = (
+  s: Socket,
+  state: ExplorerEditorState,
+  server: ExplorerEditorProps
+) => {
+  if (!state.openConnection) {
+    return [];
+  }
+  const nodeConnections = state.openConnection.outputs
+    ? state.openConnection.outputs
+    : state.openConnection.inputs;
+  if (nodeConnections && nodeConnections.length > 0) {
+    return nodeConnections.map(nc =>
+      server.nodes.find(n => n.id === nc.nodeId)
+    );
+  }
+
+  return [];
+};*/
+
 export const onClickSocket = (
   s: Socket,
   nodeId: string,
@@ -153,11 +173,25 @@ export const onClickSocket = (
       beginNewConnection(nodeId, s, server, state, changeState);
     }
   } else {
+    // TODO prevent circles (using ID lists)
     if (s.dataType !== openConnection.dataType) {
       showNotificationWithIcon({
         title: 'Connection not allowed',
         icon: 'warning',
         content: 'Connections between different data types are not supported.'
+      });
+      return;
+    }
+
+    if (
+      s.type === 'input'
+        ? openConnection.inputs !== null
+        : openConnection.outputs !== null
+    ) {
+      showNotificationWithIcon({
+        title: 'Connection not allowed',
+        icon: 'warning',
+        content: 'Connections only between inputs or outputs are not possible.'
       });
       return;
     }

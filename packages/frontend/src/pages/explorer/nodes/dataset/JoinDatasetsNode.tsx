@@ -65,9 +65,13 @@ export const JoinDatasetsNode: NodeOptions = {
   },
   path: ['Dataset', 'Aggregators'],
   keywords: [],
-  form: ({ form: { getFieldDecorator }, state: { datasets } }) => {
+  renderFormItems: ({
+    form,
+    form: { getFieldDecorator },
+    state: { datasets }
+  }) => {
     return (
-      <Form layout="inline" hideRequiredMark>
+      <>
         <FormItem label="Input">
           {getFieldDecorator('value', {
             rules: [{ required: true }]
@@ -85,7 +89,7 @@ export const JoinDatasetsNode: NodeOptions = {
             </Select>
           )}
         </FormItem>
-      </Form>
+      </>
     );
   }
 };

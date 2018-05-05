@@ -26,9 +26,16 @@ const DELETE_DATASET = gql`
   }
 `;
 
-class DataPage extends React.Component<{
-  onAddDataset: (name: string) => void;
-}> {
+class DataPage extends React.Component<
+  {
+    onAddDataset: (name: string) => void;
+  },
+  { saving: boolean }
+> {
+  public componentWillMount() {
+    this.setState({ saving: false });
+  }
+
   public render() {
     return (
       <Query query={ALL_DATASETS}>
@@ -84,8 +91,10 @@ class DataPage extends React.Component<{
                           {deleteDataset => (
                             <Button
                               icon="delete"
-                              onClick={() =>
-                                tryOperation({
+                              loading={this.state.saving}
+                              onClick={async () => {
+                                this.setState({ saving: true });
+                                await tryOperation({
                                   op: () =>
                                     deleteDataset({
                                       variables: {
@@ -102,8 +111,9 @@ class DataPage extends React.Component<{
                                   failedMessage: `Dataset "${
                                     ds.name
                                   }" deletion failed.`
-                                })
-                              }
+                                });
+                                this.setState({ saving: false });
+                              }}
                             >
                               Delete
                             </Button>

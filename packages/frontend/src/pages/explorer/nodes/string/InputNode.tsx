@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Input, Form } from 'antd';
+import { Input } from 'antd';
 import { NodeOptions } from '../AllNodes';
 import { StringSocket, OutputSocketInformation, STRING_TYPE } from '../Sockets';
 import FormItem from 'antd/lib/form/FormItem';
@@ -15,13 +15,13 @@ export const StringInputNode: NodeOptions = {
     new Map<string, OutputSocketInformation>([
       ['String', { dataType: STRING_TYPE }]
     ]),
-  form: ({ form: { getFieldDecorator }, node: { form } }) => (
-    <Form layout="inline">
+  renderFormItems: ({ form: { getFieldDecorator }, node: { form } }) => (
+    <>
       <FormItem label="Value">
         {getFieldDecorator('value', {
           initialValue: getOrDefault<string>(form, 'value', '')
         })(<Input />)}
       </FormItem>
-    </Form>
+    </>
   )
 };

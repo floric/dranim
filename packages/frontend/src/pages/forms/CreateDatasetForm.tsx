@@ -10,19 +10,30 @@ export interface CreateDataSetFormProps extends FormComponentProps {
   handleCreateDataset: (name: string) => void;
 }
 
-class CreateDataSetFormImpl extends React.Component<CreateDataSetFormProps> {
+class CreateDataSetFormImpl extends React.Component<
+  CreateDataSetFormProps,
+  { saving: boolean }
+> {
+  public componentWillMount() {
+    this.setState({ saving: false });
+  }
+
   public componentDidMount() {
     this.props.form.validateFields();
   }
 
   private handleSubmit = (e: any) => {
     e.preventDefault();
-    this.props.form.validateFields((err, values) => {
+    this.props.form.validateFields(async (err, values) => {
       if (err) {
         return;
       }
 
-      this.props.handleCreateDataset(this.props.form.getFieldValue('name'));
+      this.setState({ saving: true });
+      await this.props.handleCreateDataset(
+        this.props.form.getFieldValue('name')
+      );
+      this.setState({ saving: false });
     });
   };
 
@@ -55,6 +66,7 @@ class CreateDataSetFormImpl extends React.Component<CreateDataSetFormProps> {
           <Button
             type="primary"
             htmlType="submit"
+            loading={this.state.saving}
             disabled={hasErrors(getFieldsError())}
           >
             Add Dataset

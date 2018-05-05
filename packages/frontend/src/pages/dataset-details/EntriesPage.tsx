@@ -49,7 +49,16 @@ const expandedRowRender = (e: { values: Array<Value>; key: string }) => {
   );
 };
 
-export class DataEntries extends React.Component<DataEntriesProps, {}> {
+export class DataEntries extends React.Component<
+  DataEntriesProps,
+  { saving: boolean }
+> {
+  public componentWillMount() {
+    this.setState({
+      saving: false
+    });
+  }
+
   public render() {
     const { dataset, refetch } = this.props;
     const entriesDataSource = dataset.latestEntries.map(e => ({
@@ -76,7 +85,11 @@ export class DataEntries extends React.Component<DataEntriesProps, {}> {
           <Mutation mutation={DELETE_ENTRY}>
             {deleteEntry => (
               <Button
-                onClick={() =>
+                loading={this.state.saving}
+                onClick={() => {
+                  this.setState({
+                    saving: true
+                  });
                   tryOperation({
                     op: () =>
                       deleteEntry({
@@ -91,8 +104,11 @@ export class DataEntries extends React.Component<DataEntriesProps, {}> {
                       `Entry "${record.key}" deleted successfully.`,
                     failedTitle: 'Entry not deleted.',
                     failedMessage: `Entry "${record.key}" deletion failed.`
-                  })
-                }
+                  });
+                  this.setState({
+                    saving: false
+                  });
+                }}
               >
                 Delete
               </Button>

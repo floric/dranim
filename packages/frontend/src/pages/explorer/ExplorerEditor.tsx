@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Card, Row, Col, TreeSelect, Button, Form } from 'antd';
+import { Card, Row, Col, TreeSelect, Button } from 'antd';
 import { css } from 'glamor';
 
 import { Dataset } from '../../utils/model';
@@ -8,6 +8,8 @@ import { EXPLORER_CONTAINER, updateStage } from './editor/EditorStage';
 import { NODE_WIDTH } from './editor/Nodes';
 import { OutputSocketInformation } from './nodes/Sockets';
 import { getInputInformation } from './nodes/utils';
+import { WrappedFormUtils } from 'antd/lib/form/Form';
+import { PropertiesForm } from './editor/PropertiesForm';
 
 const filterTreeNode = (inputValue: string, treeNode: any) => {
   if (!treeNode.props.index) {
@@ -57,17 +59,17 @@ export interface ExplorerEditorProps {
   ) => Promise<void>;
 }
 
-export interface ExplorerEditorState {
-  openConnection: {
-    dataType: string;
-    inputs: null | Array<SocketDef>;
-    outputs: null | Array<SocketDef>;
-  } | null;
-  selectedNode: string | null;
+export interface OpenConnection {
+  dataType: string;
+  inputs: null | Array<SocketDef>;
+  outputs: null | Array<SocketDef>;
 }
 
-const isInvalidForSave = f =>
-  f.errors !== undefined || f.validating === true || f.dirty === true;
+export interface ExplorerEditorState {
+  openConnection: OpenConnection | null;
+  selectedNode: string | null;
+  saving: boolean;
+}
 
 export class ExplorerEditor extends React.Component<
   ExplorerEditorProps,
@@ -76,7 +78,8 @@ export class ExplorerEditor extends React.Component<
   public componentWillMount() {
     this.setState({
       openConnection: null,
-      selectedNode: null
+      selectedNode: null,
+      saving: false
     });
   }
 
@@ -104,13 +107,14 @@ export class ExplorerEditor extends React.Component<
     updateStage(EXPLORER_CONTAINER, this.props, this.state, this.changeState);
   }
 
-  private handleDeleteSelectedNode = () => {
+  private handleDeleteSelectedNode = async () => {
     const { selectedNode } = this.state;
     if (selectedNode === null) {
       return;
     }
-    this.setState({ selectedNode: null });
-    this.props.onNodeDelete(selectedNode);
+    this.setState({ selectedNode: null, saving: true });
+    await this.props.onNodeDelete(selectedNode);
+    this.setState({ saving: false });
   };
 
   private handleSelectCreateNode = (type: string) => {
@@ -125,37 +129,28 @@ export class ExplorerEditor extends React.Component<
     this.props.onNodeCreate(type, x, y);
   };
 
-  private onPropertiesFieldChange = (nodeId: string, field: any) => {
-    const changedNames = Object.keys(field);
-    const errorsOrValidatingOpen =
-      changedNames.map(fieldName => field[fieldName]).filter(isInvalidForSave)
-        .length > 0;
-    if (errorsOrValidatingOpen) {
-      return;
-    }
-
-    changedNames.forEach(fieldName =>
-      this.props.onAddOrUpdateFormValue(
-        nodeId,
-        fieldName,
-        JSON.stringify(field[fieldName].value)
-      )
+  private handleSave = (form: WrappedFormUtils, nodeId: string) => {
+    const changedNames = Object.keys(form.getFieldsValue());
+    return Promise.all(
+      changedNames.map(fieldName => {
+        const serializedVal = JSON.stringify(form.getFieldsValue()[fieldName]);
+        return this.props.onAddOrUpdateFormValue(
+          nodeId,
+          fieldName,
+          serializedVal
+        );
+      })
     );
   };
 
   public render() {
-    const { selectedNode } = this.state;
+    const { selectedNode, saving } = this.state;
     const { nodes } = this.props;
 
     const node = selectedNode ? nodes.find(n => n.id === selectedNode) : null;
-    const ValueForm = node ? nodeTypes.get(node.type)!.form || null : null;
-    const FormImpl =
-      ValueForm && node
-        ? Form.create({
-            onFieldsChange: (props, fields) =>
-              this.onPropertiesFieldChange(node.id, fields)
-          })(ValueForm)
-        : null;
+    const ValueForm = node
+      ? nodeTypes.get(node.type)!.renderFormItems || null
+      : null;
 
     if (selectedNode) {
       document.onkeypress = (ev: KeyboardEvent) => {
@@ -183,20 +178,20 @@ export class ExplorerEditor extends React.Component<
               {node ? (
                 <Row>
                   <Col xs={16}>
-                    {FormImpl ? (
-                      <>
-                        <h4>Properties</h4>
-                        <FormImpl
-                          state={this.props}
-                          node={node}
-                          inputs={inputs}
-                        />
-                      </>
+                    <h4>Properties</h4>
+                    {node && ValueForm ? (
+                      <PropertiesForm
+                        RenderFormItems={ValueForm}
+                        handleSubmit={this.handleSave}
+                        context={{ state: this.props, node }}
+                        inputs={inputs}
+                      />
                     ) : null}
                   </Col>
                   <Col xs={8}>
                     <h4>Actions</h4>
                     <Button
+                      loading={saving}
                       icon="delete"
                       onClick={this.handleDeleteSelectedNode}
                     >

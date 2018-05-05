@@ -15,6 +15,7 @@ const ADD_VALUE_SCHEMA = gql`
     $type: String!
     $required: Boolean!
     $fallback: String!
+    $unique: Boolean!
   ) {
     addValueSchema(
       datasetId: $datasetId
@@ -22,6 +23,7 @@ const ADD_VALUE_SCHEMA = gql`
       type: $type
       required: $required
       fallback: $fallback
+      unique: $unique
     )
   }
 `;

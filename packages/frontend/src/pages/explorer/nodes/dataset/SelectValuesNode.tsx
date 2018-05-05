@@ -48,10 +48,12 @@ export const DatasetSelectValuesNode: NodeOptions = {
       ]
     ]);
   },
-  form: ({
+  renderFormItems: ({
+    form,
     form: { getFieldDecorator },
     state: { datasets, connections, nodes },
-    node: { id, type, form },
+    node,
+    node: { id, type },
     inputs
   }) => {
     const dsInput = inputs.get('Dataset');
@@ -61,10 +63,10 @@ export const DatasetSelectValuesNode: NodeOptions = {
         : null;
     const options = metaValues ? metaValues.info : [];
     return (
-      <Form layout="inline">
+      <>
         <FormItem label="Input">
           {getFieldDecorator('values', {
-            initialValue: getOrDefault<Array<string>>(form, 'values', [])
+            initialValue: getOrDefault<Array<string>>(node.form, 'values', [])
           })(
             <Select
               mode="multiple"
@@ -75,7 +77,7 @@ export const DatasetSelectValuesNode: NodeOptions = {
             </Select>
           )}
         </FormItem>
-      </Form>
+      </>
     );
   }
 };

@@ -23,8 +23,15 @@ export interface CreateValueSchemaFormProps extends FormComponentProps {
 }
 
 class CreateValueSchemaFormImpl extends React.Component<
-  CreateValueSchemaFormProps
+  CreateValueSchemaFormProps,
+  { saving: boolean }
 > {
+  public componentWillMount() {
+    this.setState({
+      saving: false
+    });
+  }
+
   public componentDidMount() {
     this.props.form.validateFields();
   }
@@ -32,7 +39,7 @@ class CreateValueSchemaFormImpl extends React.Component<
   private handleSubmit = (e: FormEvent<any>) => {
     e.preventDefault();
     const { form } = this.props;
-    form.validateFields((err, values) => {
+    form.validateFields(async (err, values) => {
       if (err) {
         return;
       }
@@ -59,13 +66,21 @@ class CreateValueSchemaFormImpl extends React.Component<
           throw new Error('Unsupported value schema type!');
       }
 
-      this.props.handleCreateValueSchema({
+      this.setState({
+        saving: true
+      });
+
+      await this.props.handleCreateValueSchema({
         name,
         type,
         required,
         fallback,
         unique:
-          type === ValueSchemaType.string ? form.getFieldValue('uniqe') : false
+          type === ValueSchemaType.string ? form.getFieldValue('unique') : false
+      });
+
+      this.setState({
+        saving: false
       });
     });
   };
@@ -169,6 +184,7 @@ class CreateValueSchemaFormImpl extends React.Component<
         <FormItem>
           <Button
             type="primary"
+            loading={this.state.saving}
             htmlType="submit"
             disabled={hasErrors(getFieldsError())}
           >

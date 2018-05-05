@@ -112,7 +112,7 @@ class ExplorerPage extends React.Component<{}> {
           }
 
           return (
-            <Mutation mutation={ADD_OR_UPDATE_FORM_VALUE} ignoreResults>
+            <Mutation mutation={ADD_OR_UPDATE_FORM_VALUE}>
               {addOrUpdateFormValue => (
                 <Mutation mutation={DELETE_CONNECTION}>
                   {deleteConnection => (

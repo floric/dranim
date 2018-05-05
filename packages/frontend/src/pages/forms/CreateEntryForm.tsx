@@ -9,11 +9,20 @@ import { Value, ValueSchema, ValueSchemaType } from '../../utils/model';
 const FormItem = Form.Item;
 
 export interface CreateEntryFormProps extends FormComponentProps {
-  handleCreateEntry: (data: Array<Value>) => void;
+  handleCreateEntry: (data: Array<Value>) => Promise<any>;
   schema: Array<ValueSchema>;
 }
 
-class CreateEntryFormImpl extends React.Component<CreateEntryFormProps> {
+class CreateEntryFormImpl extends React.Component<
+  CreateEntryFormProps,
+  { saving: boolean }
+> {
+  public componentWillMount() {
+    this.setState({
+      saving: false
+    });
+  }
+
   public componentDidMount() {
     this.props.form.validateFields();
   }
@@ -21,7 +30,7 @@ class CreateEntryFormImpl extends React.Component<CreateEntryFormProps> {
   private handleSubmit = (e: any) => {
     e.preventDefault();
     const { form, schema, handleCreateEntry } = this.props;
-    form.validateFields((err, vals) => {
+    form.validateFields(async (err, vals) => {
       if (err) {
         return;
       }
@@ -31,7 +40,13 @@ class CreateEntryFormImpl extends React.Component<CreateEntryFormProps> {
         name: s.name
       }));
 
-      handleCreateEntry(values);
+      this.setState({
+        saving: true
+      });
+      await handleCreateEntry(values);
+      this.setState({
+        saving: false
+      });
     });
   };
 
@@ -112,6 +127,7 @@ class CreateEntryFormImpl extends React.Component<CreateEntryFormProps> {
           }}
         >
           <Button
+            loading={this.state.saving}
             type="primary"
             htmlType="submit"
             disabled={hasErrors(getFieldsError())}

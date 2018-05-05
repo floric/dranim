@@ -19,18 +19,19 @@ export interface EditorContext {
   node: NodeDef;
 }
 
+export interface RenderFormItemsProps
+  extends FormComponentProps,
+    EditorContext {
+  inputs: Map<string, OutputSocketInformation>;
+}
+
 export interface NodeOptions {
   title: string;
   inputs: Array<Socket>;
   outputs: Array<Socket>;
   path: Array<string>;
   keywords: Array<string>;
-  form?: SFC<
-    FormComponentProps &
-      EditorContext & {
-        inputs: Map<string, OutputSocketInformation>;
-      }
-  >;
+  renderFormItems?: SFC<RenderFormItemsProps>;
   onClientExecution: (
     inputs: Map<string, OutputSocketInformation>,
     context: EditorContext

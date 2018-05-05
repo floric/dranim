@@ -41,12 +41,12 @@ export const DatasetInputNode: NodeOptions = {
       ]
     ]);
   },
-  form: ({
+  renderFormItems: ({
     form: { getFieldDecorator },
     state: { datasets },
     node: { form }
   }) => (
-    <Form layout="inline" hideRequiredMark>
+    <>
       <FormItem label="Input">
         {getFieldDecorator('dataset', {
           rules: [{ required: true }],
@@ -69,6 +69,6 @@ export const DatasetInputNode: NodeOptions = {
           </Select>
         )}
       </FormItem>
-    </Form>
+    </>
   )
 };
