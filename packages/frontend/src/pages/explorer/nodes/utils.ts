@@ -1,7 +1,6 @@
 import { FormValue, ConnectionDef } from '../ExplorerEditor';
 import { OutputSocketInformation } from './Sockets';
-import { EditorContext } from './BasicNodes';
-import { nodeTypes } from './AllNodes';
+import { nodeTypes, EditorContext } from './AllNodes';
 
 export const getOrDefault = <T>(
   form: Array<FormValue>,
@@ -98,4 +97,15 @@ export const getInputInformation = (
       .filter(n => n !== null && n.output !== null)
       .map<[string, OutputSocketInformation]>(v => [v!.name, v!.output!])
   );
+};
+
+export const getValidInput = (
+  name: string,
+  inputs: Map<string, OutputSocketInformation>
+) => {
+  const elem = inputs.get(name);
+  if (elem && elem.isPresent !== false) {
+    return elem;
+  }
+  return null;
 };

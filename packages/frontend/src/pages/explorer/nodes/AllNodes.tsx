@@ -1,16 +1,43 @@
 import * as React from 'react';
+import { SFC } from 'react';
+import { FormComponentProps } from 'antd/lib/form';
 
-import { AllBasicNodes, NodeOptions } from './BasicNodes';
-import { AllDatasetNodes } from './DatasetNodes';
-import { AllStringNodes } from './StringNodes';
-import { AllNumberNodes } from './NumberNodes';
+import { NodeDef, ExplorerEditorProps } from '../ExplorerEditor';
+import { Socket, OutputSocketInformation } from './Sockets';
+import { AllDatasetNodes } from './dataset';
+import { AllNumberNodes } from './number';
+import { AllStringNodes } from './string';
 
-const allNodes = [
-  AllBasicNodes,
-  AllDatasetNodes,
-  AllNumberNodes,
-  AllStringNodes
-];
+export interface EditorProps {
+  x?: number;
+  y?: number;
+  nodeId: string;
+}
+
+export interface EditorContext {
+  state: ExplorerEditorProps;
+  node: NodeDef;
+}
+
+export interface NodeOptions {
+  title: string;
+  inputs: Array<Socket>;
+  outputs: Array<Socket>;
+  path: Array<string>;
+  keywords: Array<string>;
+  form?: SFC<
+    FormComponentProps &
+      EditorContext & {
+        inputs: Map<string, OutputSocketInformation>;
+      }
+  >;
+  onClientExecution: (
+    inputs: Map<string, OutputSocketInformation>,
+    context: EditorContext
+  ) => Map<string, OutputSocketInformation>;
+}
+
+const allNodes = [AllDatasetNodes, AllNumberNodes, AllStringNodes];
 
 const buildTree = (elems: Array<NodeOptions>, curPath: Array<string>) => {
   const nextPaths = elems

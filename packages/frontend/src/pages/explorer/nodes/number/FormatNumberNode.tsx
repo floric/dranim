@@ -1,15 +1,13 @@
 import * as React from 'react';
 import { Input, Form } from 'antd';
-
+import { NodeOptions } from '../AllNodes';
 import {
-  StringSocket,
   NumberSocket,
+  StringSocket,
   OutputSocketInformation,
   STRING_TYPE
-} from './Sockets';
-import { NodeOptions } from './BasicNodes';
-
-const FormItem = Form.Item;
+} from '../Sockets';
+import FormItem from 'antd/lib/form/FormItem';
 
 export const FormatNumberNode: NodeOptions = {
   title: 'Format Number',
@@ -32,5 +30,3 @@ export const FormatNumberNode: NodeOptions = {
     </Form>
   )
 };
-
-export const AllNumberNodes = [FormatNumberNode];

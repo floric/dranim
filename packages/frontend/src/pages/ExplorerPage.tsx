@@ -168,6 +168,7 @@ class ExplorerPage extends React.Component<{}> {
                                         await addOrUpdateFormValue({
                                           variables: { nodeId, name, value }
                                         });
+                                        await refetch();
                                       }}
                                     />
                                   )}
