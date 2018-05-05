@@ -23,7 +23,8 @@ import {
   updateEditor,
   createConnection,
   deleteConnection,
-  deleteNode
+  deleteNode,
+  addOrUpdateFormValue
 } from './resolvers/editor';
 import {
   createEntry,
@@ -91,6 +92,11 @@ export const Mutation = `
       x: Float!
       y: Float!
     ): Boolean!
+    addOrUpdateFormValue (
+      nodeId: String!
+      name: String!
+      value: String!
+    ): Boolean!
     updateEditor (
       nodes: [NodeInput!]!
       connections: [ConnectionInput!]!
@@ -154,6 +160,8 @@ const resolvers: IResolvers<any, ApolloContext> = {
     updateNode: async (_, { id, x, y }, { db }) =>
       updateNode(db, new ObjectID(id), x, y),
     deleteNode: async (_, { id }, { db }) => deleteNode(db, new ObjectID(id)),
+    addOrUpdateFormValue: async (_, { nodeId, name, value }, { db }) =>
+      addOrUpdateFormValue(db, new ObjectID(nodeId), name, value),
     createConnection: async (_, { input }, { db }) =>
       createConnection(db, input.from, input.to),
     deleteConnection: async (_, { id }, { db }) =>

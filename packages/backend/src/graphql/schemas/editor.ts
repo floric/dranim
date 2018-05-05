@@ -1,9 +1,17 @@
+const FormValue = `
+  type FormValue {
+    name: String!
+    value: String!
+  }
+`;
+
 const Node = `
   type Node {
     id: String!
     type: String!
     x: Float!
     y: Float!
+    form: [FormValue!]!
   }
 `;
 
@@ -53,6 +61,7 @@ const Editor = `
 `;
 
 export default () => [
+  FormValue,
   Node,
   NodeInput,
   Socket,

@@ -2,8 +2,16 @@ import * as React from 'react';
 import { SFC } from 'react';
 import { Input, Form, InputNumber } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
-import { ExplorerEditorProps } from '../ExplorerEditor';
-import { StringSocket, NumberSocket, Socket } from './Sockets';
+import { ExplorerEditorProps, NodeDef } from '../ExplorerEditor';
+import {
+  Socket,
+  NumberSocket,
+  StringSocket,
+  OutputSocketInformation,
+  NUMBER_TYPE,
+  STRING_TYPE
+} from './Sockets';
+import { getOrDefault } from './utils';
 
 const FormItem = Form.Item;
 
@@ -13,13 +21,23 @@ export interface EditorProps {
   nodeId: string;
 }
 
+export interface EditorContext {
+  state: ExplorerEditorProps;
+  node: NodeDef;
+  inputs: Map<string, OutputSocketInformation>;
+}
+
 export interface NodeOptions {
   title: string;
   inputs: Array<Socket>;
   outputs: Array<Socket>;
   path: Array<string>;
   keywords: Array<string>;
-  form?: SFC<FormComponentProps & { state: ExplorerEditorProps }>;
+  form?: SFC<FormComponentProps & EditorContext>;
+  onClientExecution: (
+    inputs: Map<string, OutputSocketInformation>,
+    context: EditorContext
+  ) => Map<string, OutputSocketInformation>;
 }
 
 export const NumberInputNode: NodeOptions = {
@@ -28,12 +46,16 @@ export const NumberInputNode: NodeOptions = {
   outputs: [NumberSocket('Number', 'output')],
   path: ['Number'],
   keywords: [],
-  form: ({ form: { getFieldDecorator } }) => (
+  onClientExecution: () =>
+    new Map<string, OutputSocketInformation>([
+      ['Number', { dataType: NUMBER_TYPE }]
+    ]),
+  form: ({ form: { getFieldDecorator }, node: { form } }) => (
     <Form layout="inline" hideRequiredMark>
       <FormItem label="Value">
         {getFieldDecorator('value', {
           rules: [{ required: true, type: 'number' }],
-          initialValue: 0
+          initialValue: getOrDefault<number>(form, 'value', 0)
         })(<InputNumber />)}
       </FormItem>
     </Form>
@@ -46,9 +68,17 @@ export const StringInputNode: NodeOptions = {
   outputs: [StringSocket('String', 'output')],
   path: ['String'],
   keywords: [],
-  form: ({ form: { getFieldDecorator } }) => (
+  onClientExecution: () =>
+    new Map<string, OutputSocketInformation>([
+      ['String', { dataType: STRING_TYPE }]
+    ]),
+  form: ({ form: { getFieldDecorator }, node: { form } }) => (
     <Form layout="inline">
-      <FormItem label="Value">{getFieldDecorator('value')(<Input />)}</FormItem>
+      <FormItem label="Value">
+        {getFieldDecorator('value', {
+          initialValue: getOrDefault<string>(form, 'value', '')
+        })(<Input />)}
+      </FormItem>
     </Form>
   )
 };
@@ -58,7 +88,8 @@ export const NumberOutputNode: NodeOptions = {
   inputs: [NumberSocket('Number', 'input')],
   outputs: [],
   path: ['Number'],
-  keywords: []
+  keywords: [],
+  onClientExecution: () => new Map()
 };
 
 export const StringOutputNode: NodeOptions = {
@@ -66,7 +97,8 @@ export const StringOutputNode: NodeOptions = {
   inputs: [StringSocket('String', 'input')],
   outputs: [],
   path: ['String'],
-  keywords: []
+  keywords: [],
+  onClientExecution: () => new Map()
 };
 
 export const AllBasicNodes = [

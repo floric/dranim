@@ -5,6 +5,7 @@ export interface Node {
   x: number;
   y: number;
   type: string;
+  form: Array<{ name: string; value: any }>;
 }
 
 export interface Socket {
@@ -32,6 +33,41 @@ export const getNodesCollection = (db: Db) => {
 
 export const getConnectionsCollection = (db: Db) => {
   return db.collection('Connections');
+};
+
+export const addOrUpdateFormValue = async (
+  db: Db,
+  nodeId: ObjectID,
+  name: string,
+  value: string
+) => {
+  if (name.length === 0) {
+    throw new Error('Not form value name specified.');
+  }
+
+  const node = await getNode(db, nodeId);
+  if (!node) {
+    throw new Error("Node doesn't exist.");
+  }
+
+  const collection = getNodesCollection(db);
+
+  let res;
+  if (node.form.find(f => f.name === name) !== undefined) {
+    const form = node.form.map(f => (f.name !== name ? f : { name, value }));
+    res = await collection.updateOne({ _id: nodeId }, { $set: { form } });
+  } else {
+    res = await collection.updateOne(
+      { _id: nodeId },
+      { $push: { form: { name, value } } }
+    );
+  }
+
+  if (res.result.ok !== 1) {
+    throw new Error('Adding or updating form value failed.');
+  }
+
+  return true;
 };
 
 export const createConnection = async (db: Db, from: Socket, to: Socket) => {
@@ -87,6 +123,7 @@ export const createNode = async (
   const res = await collection.insertOne({
     x,
     y,
+    form: [],
     type
   });
 
@@ -113,6 +150,11 @@ export const deleteNode = async (db: Db, id: ObjectID) => {
   }
 
   return true;
+};
+
+export const getNode = async (db: Db, nodeId: ObjectID): Promise<Node> => {
+  const collection = getNodesCollection(db);
+  return await collection.findOne({ _id: nodeId });
 };
 
 export const updateNode = async (

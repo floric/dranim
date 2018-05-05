@@ -1,7 +1,12 @@
 import * as React from 'react';
 import { Input, Form } from 'antd';
 
-import { StringSocket, NumberSocket } from './Sockets';
+import {
+  StringSocket,
+  NumberSocket,
+  OutputSocketInformation,
+  STRING_TYPE
+} from './Sockets';
 import { NodeOptions } from './BasicNodes';
 
 const FormItem = Form.Item;
@@ -12,6 +17,10 @@ export const FormatNumberNode: NodeOptions = {
   outputs: [StringSocket('Formatted', 'output')],
   path: ['Number', 'Converters'],
   keywords: [],
+  onClientExecution: () =>
+    new Map<string, OutputSocketInformation>([
+      ['Formatted', { dataType: STRING_TYPE }]
+    ]),
   form: ({ form: { getFieldDecorator } }) => (
     <Form layout="inline" hideRequiredMark>
       <FormItem label="Format">

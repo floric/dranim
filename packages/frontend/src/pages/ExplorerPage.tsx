@@ -23,6 +23,10 @@ const EDITOR_NODE_SELECTION = gql`
         type
         x
         y
+        form {
+          name
+          value
+        }
       }
       connections {
         id
@@ -84,6 +88,16 @@ const DELETE_CONNECTION = gql`
   }
 `;
 
+const ADD_OR_UPDATE_FORM_VALUE = gql`
+  mutation addOrUpdateFormValue(
+    $nodeId: String!
+    $name: String!
+    $value: String!
+  ) {
+    addOrUpdateFormValue(nodeId: $nodeId, name: $name, value: $value)
+  }
+`;
+
 class ExplorerPage extends React.Component<{}> {
   public render() {
     return (
@@ -98,51 +112,66 @@ class ExplorerPage extends React.Component<{}> {
           }
 
           return (
-            <Mutation mutation={DELETE_CONNECTION}>
-              {deleteConnection => (
-                <Mutation mutation={CREATE_CONNECTION}>
-                  {createConnection => (
-                    <Mutation mutation={DELETE_NODE}>
-                      {deleteNode => (
-                        <Mutation mutation={CREATE_NODE}>
-                          {createNode => (
-                            <Mutation mutation={UPDATE_NODE}>
-                              {updateNode => (
-                                <ExplorerEditor
-                                  datasets={data.datasets}
-                                  connections={deepCopyResponse(
-                                    data.editor.connections
+            <Mutation mutation={ADD_OR_UPDATE_FORM_VALUE} ignoreResults>
+              {addOrUpdateFormValue => (
+                <Mutation mutation={DELETE_CONNECTION}>
+                  {deleteConnection => (
+                    <Mutation mutation={CREATE_CONNECTION}>
+                      {createConnection => (
+                        <Mutation mutation={DELETE_NODE}>
+                          {deleteNode => (
+                            <Mutation mutation={CREATE_NODE}>
+                              {createNode => (
+                                <Mutation mutation={UPDATE_NODE}>
+                                  {updateNode => (
+                                    <ExplorerEditor
+                                      datasets={data.datasets}
+                                      connections={deepCopyResponse(
+                                        data.editor.connections
+                                      )}
+                                      nodes={deepCopyResponse(
+                                        data.editor.nodes
+                                      )}
+                                      onNodeCreate={async (type, x, y) => {
+                                        await createNode({
+                                          variables: { type, x, y }
+                                        });
+                                        await refetch();
+                                      }}
+                                      onNodeDelete={async id => {
+                                        await deleteNode({ variables: { id } });
+                                        await refetch();
+                                      }}
+                                      onNodeUpdate={async (id, x, y) => {
+                                        await updateNode({
+                                          variables: { id, x, y }
+                                        });
+                                        await refetch();
+                                      }}
+                                      onConnectionCreate={async (from, to) => {
+                                        await createConnection({
+                                          variables: { input: { from, to } }
+                                        });
+                                        await refetch();
+                                      }}
+                                      onConnectionDelete={async id => {
+                                        await deleteConnection({
+                                          variables: { id }
+                                        });
+                                        await refetch();
+                                      }}
+                                      onAddOrUpdateFormValue={async (
+                                        nodeId,
+                                        name,
+                                        value
+                                      ) => {
+                                        await addOrUpdateFormValue({
+                                          variables: { nodeId, name, value }
+                                        });
+                                      }}
+                                    />
                                   )}
-                                  nodes={deepCopyResponse(data.editor.nodes)}
-                                  onNodeCreate={async (type, x, y) => {
-                                    await createNode({
-                                      variables: { type, x, y }
-                                    });
-                                    await refetch();
-                                  }}
-                                  onNodeDelete={async id => {
-                                    await deleteNode({ variables: { id } });
-                                    await refetch();
-                                  }}
-                                  onNodeUpdate={async (id, x, y) => {
-                                    await updateNode({
-                                      variables: { id, x, y }
-                                    });
-                                    await refetch();
-                                  }}
-                                  onConnectionCreate={async (from, to) => {
-                                    await createConnection({
-                                      variables: { input: { from, to } }
-                                    });
-                                    await refetch();
-                                  }}
-                                  onConnectionDelete={async id => {
-                                    await deleteConnection({
-                                      variables: { id }
-                                    });
-                                    await refetch();
-                                  }}
-                                />
+                                </Mutation>
                               )}
                             </Mutation>
                           )}

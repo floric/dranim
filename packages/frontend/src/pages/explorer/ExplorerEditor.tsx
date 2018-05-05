@@ -6,6 +6,7 @@ import { Dataset } from '../../utils/model';
 import { nodeTypes, nodeTypesTree } from './nodes/AllNodes';
 import { EXPLORER_CONTAINER, updateStage } from './editor/EditorStage';
 import { NODE_WIDTH } from './editor/Nodes';
+import { OutputSocketInformation } from './nodes/Sockets';
 
 const filterTreeNode = (inputValue: string, treeNode: any) => {
   if (!treeNode.props.index) {
@@ -15,11 +16,17 @@ const filterTreeNode = (inputValue: string, treeNode: any) => {
   return treeNode.props.index.includes(inputValue.toLocaleLowerCase());
 };
 
+export interface FormValue {
+  name: string;
+  value: string;
+}
+
 export interface NodeDef {
   type: string;
   x: number;
   y: number;
   id: string;
+  form: Array<FormValue>;
 }
 
 export interface SocketDef {
@@ -42,6 +49,11 @@ export interface ExplorerEditorProps {
   onNodeUpdate: (id: string, x: number, y: number) => Promise<void>;
   onConnectionCreate: (from: SocketDef, to: SocketDef) => Promise<void>;
   onConnectionDelete: (id: string) => Promise<void>;
+  onAddOrUpdateFormValue: (
+    nodeId: string,
+    name: string,
+    value: string
+  ) => Promise<void>;
 }
 
 export interface ExplorerEditorState {
@@ -122,8 +134,10 @@ export class ExplorerEditor extends React.Component<
     }
 
     changedNames.forEach(fieldName =>
-      console.log(
-        `Save ${fieldName} in ${nodeId} with ${JSON.stringify(field)}`
+      this.props.onAddOrUpdateFormValue(
+        nodeId,
+        fieldName,
+        JSON.stringify(field[fieldName].value)
       )
     );
   };
@@ -152,17 +166,10 @@ export class ExplorerEditor extends React.Component<
       document.onkeypress = null;
     }
 
+    const inputs: Map<string, OutputSocketInformation> = new Map();
+
     return (
       <>
-        <div
-          id={EXPLORER_CONTAINER}
-          {...css({
-            width: '100%',
-            height: '800px',
-            border: '1px solid #CCC',
-            marginBottom: 12
-          })}
-        />
         <Row gutter={8}>
           <Col xs={24} md={12} xl={18}>
             <Card
@@ -176,7 +183,11 @@ export class ExplorerEditor extends React.Component<
                     {FormImpl ? (
                       <>
                         <h4>Properties</h4>
-                        <FormImpl state={this.props} />
+                        <FormImpl
+                          state={this.props}
+                          node={node}
+                          inputs={inputs}
+                        />
                       </>
                     ) : null}
                   </Col>
@@ -209,6 +220,15 @@ export class ExplorerEditor extends React.Component<
             </Card>
           </Col>
         </Row>
+        <div
+          id={EXPLORER_CONTAINER}
+          {...css({
+            width: '100%',
+            height: '800px',
+            border: '1px solid #CCC',
+            marginBottom: 12
+          })}
+        />
       </>
     );
   }
