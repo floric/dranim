@@ -24,7 +24,6 @@ export interface EditorProps {
 export interface EditorContext {
   state: ExplorerEditorProps;
   node: NodeDef;
-  inputs: Map<string, OutputSocketInformation>;
 }
 
 export interface NodeOptions {
@@ -33,7 +32,12 @@ export interface NodeOptions {
   outputs: Array<Socket>;
   path: Array<string>;
   keywords: Array<string>;
-  form?: SFC<FormComponentProps & EditorContext>;
+  form?: SFC<
+    FormComponentProps &
+      EditorContext & {
+        inputs: Map<string, OutputSocketInformation>;
+      }
+  >;
   onClientExecution: (
     inputs: Map<string, OutputSocketInformation>,
     context: EditorContext

@@ -7,6 +7,7 @@ import { nodeTypes, nodeTypesTree } from './nodes/AllNodes';
 import { EXPLORER_CONTAINER, updateStage } from './editor/EditorStage';
 import { NODE_WIDTH } from './editor/Nodes';
 import { OutputSocketInformation } from './nodes/Sockets';
+import { getInputInformation } from './nodes/utils';
 
 const filterTreeNode = (inputValue: string, treeNode: any) => {
   if (!treeNode.props.index) {
@@ -166,7 +167,9 @@ export class ExplorerEditor extends React.Component<
       document.onkeypress = null;
     }
 
-    const inputs: Map<string, OutputSocketInformation> = new Map();
+    const inputs: Map<string, OutputSocketInformation> = node
+      ? getInputInformation({ node, state: this.props })
+      : new Map();
 
     return (
       <>

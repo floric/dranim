@@ -7,7 +7,7 @@ import {
   DATASET_TYPE,
   OutputSocketInformation
 } from './Sockets';
-import { getInputNode, getOrDefault } from './utils';
+import { getOrDefault } from './utils';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
@@ -41,16 +41,25 @@ export const DatasetInputNode: NodeOptions = {
         'Dataset',
         {
           dataType: DATASET_TYPE,
-          meta: [{ name: 'schemas', info: ds.valueschemas }]
+          meta: [{ name: 'schemas', info: ds.valueschemas.map(n => n.name) }]
         }
       ]
     ]);
   },
-  form: ({ form: { getFieldDecorator }, state: { datasets } }) => (
+  form: ({
+    form: { getFieldDecorator },
+    state: { datasets },
+    node: { form }
+  }) => (
     <Form layout="inline" hideRequiredMark>
       <FormItem label="Input">
         {getFieldDecorator('dataset', {
-          rules: [{ required: true }]
+          rules: [{ required: true }],
+          initialValue: getOrDefault<string | undefined>(
+            form,
+            'dataset',
+            undefined
+          )
         })(
           <Select
             showSearch
@@ -93,13 +102,13 @@ export const DatasetSelectValuesNode: NodeOptions = {
     }
 
     const inputValues = validInput.meta
-      ? validInput.meta.filter(m => m.name === 'schema').map(s => s.info)
+      ? validInput.meta.filter(m => m.name === 'schemas').map(s => s.info)[0]
       : [];
 
-    const selectedValues = getOrDefault<string | null>(
+    const selectedValues = getOrDefault<Array<string>>(
       context.node.form,
       'values',
-      null
+      []
     );
 
     return new Map<string, OutputSocketInformation>([
@@ -122,15 +131,19 @@ export const DatasetSelectValuesNode: NodeOptions = {
   form: ({
     form: { getFieldDecorator },
     state: { datasets, connections, nodes },
-    node: { id, type, form }
+    node: { id, type, form },
+    inputs
   }) => {
-    const input = getInputNode('input', id, connections);
-    const options: Array<string> = input ? [] : [];
+    const dsInput = inputs.get('Dataset');
+    const metaValues =
+      dsInput && dsInput.isPresent !== false && dsInput.meta
+        ? dsInput.meta.find(m => m.name === 'schemas') || null
+        : null;
+    const options = metaValues ? metaValues.info : [];
     return (
-      <Form layout="inline" hideRequiredMark>
+      <Form layout="inline">
         <FormItem label="Input">
           {getFieldDecorator('values', {
-            rules: [{ required: true }],
             initialValue: getOrDefault<Array<string>>(form, 'values', [])
           })(
             <Select
@@ -152,7 +165,7 @@ const getValidInput = (
   inputs: Map<string, OutputSocketInformation>
 ) => {
   const elem = inputs.get(name);
-  if (elem && elem.isPresent) {
+  if (elem && elem.isPresent !== false) {
     return elem;
   }
   return null;
