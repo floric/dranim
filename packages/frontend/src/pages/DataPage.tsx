@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Row, Col, Card, Button } from 'antd';
+import { Row, Col, Card } from 'antd';
 import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 import { Mutation, Query } from 'react-apollo';
 import gql from 'graphql-tag';
@@ -11,6 +11,7 @@ import { CreateDataSetForm } from './forms/CreateDatasetForm';
 import { ALL_DATASETS } from '../App';
 import { tryOperation } from '../utils/form';
 import { Dataset } from '../utils/model';
+import { AsyncButton } from '../components/AsyncButton';
 
 const CREATE_DATASET = gql`
   mutation createDataset($name: String!) {
@@ -84,12 +85,9 @@ class DataPage extends React.Component<
                       gutter={8}
                     >
                       <Col>
-                        <Button icon="ellipsis" />
-                      </Col>
-                      <Col>
                         <Mutation mutation={DELETE_DATASET}>
                           {deleteDataset => (
-                            <Button
+                            <AsyncButton
                               icon="delete"
                               loading={this.state.saving}
                               onClick={async () => {
@@ -116,7 +114,7 @@ class DataPage extends React.Component<
                               }}
                             >
                               Delete
-                            </Button>
+                            </AsyncButton>
                           )}
                         </Mutation>
                       </Col>

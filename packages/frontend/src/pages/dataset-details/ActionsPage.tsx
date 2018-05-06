@@ -12,6 +12,7 @@ import gql from 'graphql-tag';
 import { Dataset } from '../../utils/model';
 import { UploadFile } from 'antd/lib/upload/interface';
 import { tryOperation } from '../../utils/form';
+import { AsyncButton } from '../../components/AsyncButton';
 
 const UPLOAD_ENTRIES_CSV = gql`
   mutation($files: [Upload!]!, $datasetId: String!) {
@@ -141,14 +142,13 @@ export const DatasetActions = withApollo<DataActionsProps>(
                     </Row>
                     <Row>
                       <Col>
-                        <Button
+                        <AsyncButton
                           type="primary"
                           onClick={() => this.handleUpload(uploadEntriesCsv)}
                           disabled={this.state.fileList.length === 0}
-                          loading={uploading}
                         >
                           {uploading ? 'Uploading' : 'Start Upload'}
-                        </Button>
+                        </AsyncButton>
                       </Col>
                     </Row>
                   </>

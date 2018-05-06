@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Card, Row, Col, TreeSelect, Button } from 'antd';
+import { Card, Row, Col, TreeSelect } from 'antd';
 import { css } from 'glamor';
 
 import { Dataset } from '../../utils/model';
@@ -10,6 +10,7 @@ import { OutputSocketInformation } from './nodes/Sockets';
 import { getInputInformation } from './nodes/utils';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { PropertiesForm } from './editor/PropertiesForm';
+import { AsyncButton } from '../../components/AsyncButton';
 
 const filterTreeNode = (inputValue: string, treeNode: any) => {
   if (!treeNode.props.index) {
@@ -68,7 +69,6 @@ export interface OpenConnection {
 export interface ExplorerEditorState {
   openConnection: OpenConnection | null;
   selectedNode: string | null;
-  saving: boolean;
 }
 
 export class ExplorerEditor extends React.Component<
@@ -78,8 +78,7 @@ export class ExplorerEditor extends React.Component<
   public componentWillMount() {
     this.setState({
       openConnection: null,
-      selectedNode: null,
-      saving: false
+      selectedNode: null
     });
   }
 
@@ -112,9 +111,8 @@ export class ExplorerEditor extends React.Component<
     if (selectedNode === null) {
       return;
     }
-    this.setState({ selectedNode: null, saving: true });
+    this.setState({ selectedNode: null });
     await this.props.onNodeDelete(selectedNode);
-    this.setState({ saving: false });
   };
 
   private handleSelectCreateNode = (type: string) => {
@@ -144,7 +142,7 @@ export class ExplorerEditor extends React.Component<
   };
 
   public render() {
-    const { selectedNode, saving } = this.state;
+    const { selectedNode } = this.state;
     const { nodes } = this.props;
 
     const node = selectedNode ? nodes.find(n => n.id === selectedNode) : null;
@@ -190,13 +188,12 @@ export class ExplorerEditor extends React.Component<
                   </Col>
                   <Col xs={8}>
                     <h4>Actions</h4>
-                    <Button
-                      loading={saving}
+                    <AsyncButton
                       icon="delete"
                       onClick={this.handleDeleteSelectedNode}
                     >
                       Delete
-                    </Button>
+                    </AsyncButton>
                   </Col>
                 </Row>
               ) : (

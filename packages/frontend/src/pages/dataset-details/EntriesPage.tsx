@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
-import { Button, Col, Row, Table } from 'antd';
+import { Col, Row, Table } from 'antd';
 import { tryOperation } from '../../utils/form';
 import { CreateEntryForm } from '../forms/CreateEntryForm';
 import { Dataset, Value } from '../../utils/model';
 import { ApolloQueryResult } from 'apollo-client';
 import Card from 'antd/lib/card';
+import { AsyncButton } from '../../components/AsyncButton';
 
 export interface DataEntriesProps {
   dataset: Dataset;
@@ -84,12 +85,8 @@ export class DataEntries extends React.Component<
         render: (text, record) => (
           <Mutation mutation={DELETE_ENTRY}>
             {deleteEntry => (
-              <Button
-                loading={this.state.saving}
-                onClick={() => {
-                  this.setState({
-                    saving: true
-                  });
+              <AsyncButton
+                onClick={() =>
                   tryOperation({
                     op: () =>
                       deleteEntry({
@@ -104,14 +101,11 @@ export class DataEntries extends React.Component<
                       `Entry "${record.key}" deleted successfully.`,
                     failedTitle: 'Entry not deleted.',
                     failedMessage: `Entry "${record.key}" deletion failed.`
-                  });
-                  this.setState({
-                    saving: false
-                  });
-                }}
+                  })
+                }
               >
                 Delete
-              </Button>
+              </AsyncButton>
             )}
           </Mutation>
         )
