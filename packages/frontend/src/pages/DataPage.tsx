@@ -66,6 +66,7 @@ class DataPage extends React.Component<
                     <Row>
                       <Col xs={{ span: 24 }} md={{ span: 12 }}>
                         <NumberInfo
+                          gap={0}
                           total={ds.valueschemas.length.toLocaleString()}
                           title="Schemas"
                         />

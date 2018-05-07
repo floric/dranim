@@ -2,17 +2,48 @@ import * as fs from 'fs';
 import * as fastCsv from 'fast-csv';
 import { ObjectID, Db } from 'mongodb';
 import * as promisesAll from 'promises-all';
-import { Readable } from 'stream';
+import { Readable, Writable } from 'stream';
 
 import { Entry, createEntry } from './entry';
 import { getDatasetsCollection, Dataset, Valueschema } from './dataset';
 import { dataset } from '../resolvers/dataset';
 import { UploadProgress } from './util/UploadProgress';
+import { updateNode } from './editor';
 
-export interface UploadResult {
-  validEntries: number;
+export interface UploadProcess {
+  id: string;
+  start: Date;
+  finish: Date | null;
+  datasetId: string;
+  errors: Array<{ name: string; message: string; count: number }>;
+  state: 'STARTED' | 'PROCESSING' | 'FINISHED';
+  addedEntries: number;
+  failedEntries: number;
   invalidEntries: number;
 }
+
+export class UploadEntryError extends Error {
+  constructor(private customMessage: string, private errorName: string) {
+    super(customMessage);
+  }
+}
+
+export const getUploadsCollection = (db: Db) => {
+  return db.collection('Uploads');
+};
+
+export const uploads = async (db: Db, datasetId: string | null) => {
+  const collection = getUploadsCollection(db);
+  const all = await collection
+    .find(datasetId ? { datasetId } : {})
+    .sort({ start: -1 })
+    .toArray();
+  return all.map(ds => ({
+    id: ds._id,
+    finish: ds.finish ? ds.finish : null,
+    ...ds
+  }));
+};
 
 const validateEntry = (parsedObj: any, schema: Array<Valueschema>) => {
   if (Object.keys(parsedObj).length !== schema.length) {
@@ -40,72 +71,111 @@ const validateEntry = (parsedObj: any, schema: Array<Valueschema>) => {
   return true;
 };
 
-const processValidEntry = async (entry: Entry, ds: Dataset, db: Db) => {
-  const valueKeys = Object.keys(entry);
-  await createEntry(
-    db,
-    new ObjectID(ds.id),
-    valueKeys.map(k => ({
-      name: k,
-      val: entry[k]
-    }))
-  );
+const processValidEntry = async (
+  values: any,
+  ds: Dataset,
+  db: Db,
+  processId: ObjectID
+) => {
+  const valueKeys = Object.keys(values);
+  const collection = getUploadsCollection(db);
+
+  try {
+    await createEntry(
+      db,
+      new ObjectID(ds.id),
+      valueKeys.map(k => ({
+        name: k,
+        val: values[k]
+      }))
+    );
+    await collection.updateOne(
+      { _id: processId },
+      { $inc: { addedEntries: 1 } }
+    );
+  } catch (err) {
+    if (err.errorName && err.errorName.length > 0) {
+      const res = await collection.updateOne(
+        { _id: processId },
+        {
+          $inc: {
+            failedEntries: 1,
+            [`errors.${err.errorName}.count`]: 1
+          },
+          $set: {
+            [`errors.${err.errorName}.message`]: err.message
+          }
+        },
+        { upsert: true }
+      );
+    } else {
+      console.log(err);
+    }
+  }
+};
+
+const processInvalidEntry = async (
+  ds: Dataset,
+  db: Db,
+  processId: ObjectID
+) => {
+  const collection = getUploadsCollection(db);
+  collection.updateOne({ _id: processId }, { $inc: { invalidEntries: 1 } });
 };
 
 const parseCsvFile = async (
   stream: Readable,
   filename: string,
   ds: Dataset,
-  db: Db
-): Promise<UploadResult> => {
-  const uploadProgress = new UploadProgress();
-
+  db: Db,
+  processId: ObjectID
+): Promise<boolean> => {
   const csvStream = fastCsv({
     ignoreEmpty: true,
+    objectMode: true,
     strictColumnHandling: true,
     trim: true,
     headers: ds.valueschemas.map(s => s.name)
   })
     .validate(obj => validateEntry)
-    .on('data', async (entry: Entry) => {
-      try {
-        await processValidEntry(entry, ds, db);
-        uploadProgress.increaseValidEntries();
-      } catch (err) {
-        // TODO log fail messages
-      }
-    })
-    .on('data-invalid', () => {
-      uploadProgress.increaseInvalidEntries();
-    })
+    .on('data', values => processValidEntry(values, ds, db, processId))
+    .on('data-invalid', () => processInvalidEntry(ds, db, processId))
     .on('end', () => {
       console.log(`Finished import of ${filename}.`);
     });
 
   console.log(`Started import of ${filename}.`);
 
-  const process = await new Promise((resolve, reject) =>
-    stream
-      .on('error', reject)
-      .pipe(csvStream)
-      .on('error', reject)
-      .on('finish', () => resolve())
-  );
+  try {
+    const process = await new Promise((resolve, reject) =>
+      stream
+        .on('error', err => console.log(err))
+        .pipe(csvStream)
+        .on('error', err => console.log(err))
+        .on('finish', () => resolve())
+    );
+  } catch (err) {
+    console.log(err);
+  }
 
-  return {
-    validEntries: uploadProgress.validEntries,
-    invalidEntries: uploadProgress.invalidEntries
-  };
+  return true;
 };
 
 const processUpload = async (
   upload,
   ds: Dataset,
-  db: Db
-): Promise<UploadResult> => {
+  db: Db,
+  processId: ObjectID
+): Promise<void> => {
   try {
     const { stream, filename, mimetype, encoding } = await upload;
-    return await parseCsvFile(stream, filename, ds, db);
+    await parseCsvFile(stream, filename, ds, db, processId);
+
+    const uploadsCollection = getUploadsCollection(db);
+    await uploadsCollection.updateOne(
+      { _id: processId },
+      { $push: { fileNames: filename } }
+    );
   } catch (err) {
     console.log(err);
     throw new Error('Upload has failed.');
@@ -116,22 +186,49 @@ export const uploadEntriesCsv = async (
   db: Db,
   files: Array<any>,
   datasetId: ObjectID
-) => {
-  const ds = await dataset(db, datasetId);
-  const { resolve, reject } = await promisesAll.all(
-    files.map(f => processUpload(f, ds, db))
-  );
+): Promise<UploadProcess> => {
+  try {
+    const ds = await dataset(db, datasetId);
 
-  const successfullUploads: Array<UploadResult> = resolve;
+    const uploadsCollection = getUploadsCollection(db);
+    const newProcess = {
+      addedEntries: 0,
+      failedEntries: 0,
+      invalidEntries: 0,
+      start: new Date(),
+      state: 'STARTED',
+      datasetId: datasetId.toHexString(),
+      fileNames: [],
+      errors: {}
+    };
+    const res = await uploadsCollection.insertOne(newProcess);
+    if (res.result.ok !== 1 || res.insertedCount !== 1) {
+      throw new Error('Creating Upload process failed.');
+    }
 
-  if (reject.length) {
-    reject.forEach(({ name, message }) => {
-      console.error(`${name}: ${message}`);
-    });
+    const process: UploadProcess = { id: res.ops[0]._id, ...res.ops[0] };
+    const processId = new ObjectID(process.id);
+
+    const { resolve, reject } = await promisesAll.all(
+      files.map(f => processUpload(f, ds, db, processId))
+    );
+
+    const successfullUploads: Array<boolean> = resolve;
+
+    if (reject.length) {
+      reject.forEach(({ name, message }) => {
+        console.error(`${name}: ${message}`);
+      });
+    }
+
+    await uploadsCollection.updateOne(
+      { _id: processId },
+      { $set: { state: 'FINISHED', finish: new Date() } }
+    );
+
+    return process;
+  } catch (err) {
+    console.log(err);
+    throw new Error('Upload failed');
   }
-
-  return successfullUploads.reduce((x, y) => ({
-    validEntries: x.validEntries + y.validEntries,
-    invalidEntries: x.invalidEntries + y.invalidEntries
-  }));
 };

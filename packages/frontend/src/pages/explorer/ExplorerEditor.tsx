@@ -111,8 +111,8 @@ export class ExplorerEditor extends React.Component<
     if (selectedNode === null) {
       return;
     }
-    this.setState({ selectedNode: null });
     await this.props.onNodeDelete(selectedNode);
+    this.setState({ selectedNode: null });
   };
 
   private handleSelectCreateNode = (type: string) => {

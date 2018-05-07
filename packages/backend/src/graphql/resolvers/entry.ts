@@ -2,6 +2,7 @@ import { MongoClient, ObjectID, Db } from 'mongodb';
 
 import { Valueschema, dataset } from './dataset';
 import { parse } from 'graphql';
+import { UploadEntryError } from './upload';
 
 export interface Entry {
   id: string;
@@ -65,7 +66,7 @@ export const createEntry = async (
   valuesArr: Array<Value>
 ) => {
   if (!valuesArr.length) {
-    throw new Error('No values specified for entry.');
+    throw new UploadEntryError('No values specified for entry.', 'no-values');
   }
 
   valuesArr.forEach(v => {
@@ -85,7 +86,10 @@ export const createEntry = async (
     .filter(s => s.required)
     .filter(s => !valuesArr.map(v => v.name).includes(s.name));
   if (missedSchemas.length > 0) {
-    throw new Error(`${missedSchemas.map(s => s.name).join(', ')} not set!`);
+    throw new UploadEntryError(
+      'Values from Schema not set',
+      'schema-not-fulfilled'
+    );
   }
 
   // check values which are not specified in the schema
@@ -95,8 +99,9 @@ export const createEntry = async (
     v => !allValueNames.includes(v.name)
   );
   if (unsupportedValues.length > 0) {
-    throw new Error(
-      `${unsupportedValues.map(v => v.name).join(', ')} not supported!`
+    throw new UploadEntryError(
+      'Unsupported values provided',
+      'unsupported-values'
     );
   }
 
@@ -106,19 +111,30 @@ export const createEntry = async (
   });
 
   const collection = getEntryCollection(db, datasetId);
-  const res = await collection.insertOne({
-    values
-  });
+  try {
+    const res = await collection.insertOne({
+      values
+    });
 
-  if (res.result.ok !== 1 || res.ops.length !== 1) {
-    throw new Error('Writing dataset failed');
+    if (res.result.ok !== 1 || res.ops.length !== 1) {
+      throw new Error('Writing dataset failed');
+    }
+
+    const newItem = res.ops[0];
+    return {
+      id: newItem._id,
+      ...newItem
+    };
+  } catch (err) {
+    if (err.code === 11000) {
+      throw new UploadEntryError('Key already used', 'key-already-used');
+    } else {
+      throw new UploadEntryError(
+        'Writing entry failed.',
+        'internal-write-error'
+      );
+    }
   }
-
-  const newItem = res.ops[0];
-  return {
-    id: newItem._id,
-    ...newItem
-  };
 };
 
 export const createEntryFromJSON = async (

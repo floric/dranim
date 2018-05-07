@@ -1,10 +1,26 @@
 const Upload = `scalar Upload`;
 
-const UploadResult = `
-  type UploadResult {
-    validEntries: Int!
-    invalidEntries: Int!
+const UploadError = `
+  type UploadError {
+    name: String!
+    message: String!
+    count: Int!
   }
 `;
 
-export default () => [Upload, UploadResult];
+const UploadProcess = `
+  type UploadProcess {
+    id: String!
+    start: String!
+    finish: String
+    datasetId: String!
+    errors: [UploadError!]!
+    state: String!
+    addedEntries: Int!
+    failedEntries: Int!
+    invalidEntries: Int!
+    fileNames: [String!]!
+  }
+`;
+
+export default () => [Upload, UploadError, UploadProcess];

@@ -1,30 +1,60 @@
 import * as React from 'react';
 import { ApolloQueryResult } from 'apollo-client';
-import { Row, Col, Card, Upload, Button, Icon } from 'antd';
+import { Row, Col, Card, Upload, Button, Icon, Table } from 'antd';
+import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 import {
   Mutation,
   MutationFn,
   WithApolloClient,
-  withApollo
+  withApollo,
+  Query
 } from 'react-apollo';
 import gql from 'graphql-tag';
+import { distanceInWordsToNow } from 'date-fns';
 
 import { Dataset } from '../../utils/model';
 import { UploadFile } from 'antd/lib/upload/interface';
 import { tryOperation } from '../../utils/form';
 import { AsyncButton } from '../../components/AsyncButton';
+import { UnknownErrorCard, LoadingCard } from '../../components/CustomCards';
+import Tooltip from 'antd/lib/tooltip';
 
 const UPLOAD_ENTRIES_CSV = gql`
   mutation($files: [Upload!]!, $datasetId: String!) {
     uploadEntriesCsv(files: $files, datasetId: $datasetId) {
-      validEntries
+      id
+    }
+  }
+`;
+
+export const ALL_UPLOADS = gql`
+  query dataset($datasetId: String!) {
+    uploads(datasetId: $datasetId) {
+      id
+      state
+      start
+      finish
+      errors {
+        name
+        message
+        count
+      }
+      fileNames
+      addedEntries
+      failedEntries
       invalidEntries
     }
   }
 `;
 
-export interface UploadResult {
-  validEntries: number;
+export interface UploadProcess {
+  id: string;
+  start: string;
+  finish: string | null;
+  errors: Array<{ name: string; message: string; count: number }>;
+  state: 'STARTED' | 'PROCESSING' | 'FINISHED';
+  addedEntries: number;
+  failedEntries: number;
   invalidEntries: number;
 }
 
@@ -52,7 +82,7 @@ export const DatasetActions = withApollo<DataActionsProps>(
 
     private handleUpload = async (
       uploadEntriesCsv: MutationFn<
-        { uploadEntriesCsv: UploadResult },
+        {},
         { files: Array<UploadFile>; datasetId: string }
       >
     ) => {
@@ -66,7 +96,7 @@ export const DatasetActions = withApollo<DataActionsProps>(
             fileList: []
           });
 
-          const csvRes = await uploadEntriesCsv({
+          await uploadEntriesCsv({
             variables: {
               files: fileList,
               datasetId: dataset.id
@@ -76,26 +106,13 @@ export const DatasetActions = withApollo<DataActionsProps>(
           this.setState({
             uploading: false
           });
-
-          return csvRes && csvRes.data && csvRes.data.uploadEntriesCsv
-            ? csvRes.data.uploadEntriesCsv
-            : null;
         },
         refetch: client.reFetchObservableQueries,
         onFail: () => this.setState({ uploading: false }),
         failedTitle: 'Upload failed',
         successTitle: () => 'Upload successfull',
         failedMessage: 'Upload has failed.',
-        successMessage: res =>
-          `Upload of ${
-            fileList.length > 1 ? `${fileList.length} files` : 'file'
-          } successfull. ${
-            res
-              ? `${res.validEntries} entries were valid and ${
-                  res.invalidEntries
-                } entries invalid.`
-              : ''
-          }`
+        successMessage: res => 'Upload succesfull. Processing is in progress.'
       });
     };
 
@@ -120,43 +137,158 @@ export const DatasetActions = withApollo<DataActionsProps>(
         fileList: this.state.fileList,
         multiple: true
       };
-
+      const { dataset } = this.props;
       const { uploading } = this.state;
 
       return (
-        <Row>
-          <Col xs={{ span: 24 }} md={{ span: 12 }} xl={{ span: 8 }}>
-            <Card bordered={false}>
-              <h3>Entry upload</h3>
-              <Mutation mutation={UPLOAD_ENTRIES_CSV}>
-                {uploadEntriesCsv => (
+        <Query query={ALL_UPLOADS} variables={{ datasetId: dataset.id }}>
+          {({ loading, error, data, refetch }) => {
+            if (loading) {
+              return <LoadingCard />;
+            }
+
+            if (error) {
+              return <UnknownErrorCard error={error} />;
+            }
+
+            const entriesDataSource = data.uploads.map((u: UploadProcess) => ({
+              key: u.id,
+              time: { start: u.start, finish: u.finish },
+              finish: u.finish,
+              state:
+                u.state === 'FINISHED' ? (
+                  <Icon type="check-circle" />
+                ) : (
+                  <Icon type="clock-circle" />
+                ),
+              errors: u.errors.map(e => (
+                <Tooltip key={e.name} title={e.message}>{`${e.name} (${
+                  e.count
+                })`}</Tooltip>
+              )),
+              results: {
+                added: u.addedEntries.toLocaleString(),
+                failed: u.failedEntries.toLocaleString(),
+                invalid: u.invalidEntries.toLocaleString()
+              }
+            }));
+
+            const entriesColumns = [
+              {
+                title: 'State',
+                dataIndex: 'state',
+                key: 'state'
+              },
+              {
+                title: 'Time',
+                dataIndex: 'time',
+                key: 'time',
+                render: time => (
                   <>
-                    <Row style={{ marginBottom: 12 }}>
-                      <Col>
-                        <Upload {...uploadProps}>
-                          <Button>
-                            <Icon type="upload" /> Select CSV file
-                          </Button>
-                        </Upload>
-                      </Col>
-                    </Row>
                     <Row>
-                      <Col>
-                        <AsyncButton
-                          type="primary"
-                          onClick={() => this.handleUpload(uploadEntriesCsv)}
-                          disabled={this.state.fileList.length === 0}
-                        >
-                          {uploading ? 'Uploading' : 'Start Upload'}
-                        </AsyncButton>
+                      <Col xs={6}>Started:</Col>
+                      <Col xs={18}>
+                        {distanceInWordsToNow(time.start, {
+                          includeSeconds: true,
+                          addSuffix: true
+                        })}
                       </Col>
                     </Row>
+                    {time.finish ? (
+                      <Row>
+                        <Col xs={6}>Finished:</Col>
+                        <Col xs={18}>
+                          {distanceInWordsToNow(time.finish, {
+                            includeSeconds: true,
+                            addSuffix: true
+                          })}
+                        </Col>
+                      </Row>
+                    ) : null}
                   </>
-                )}
-              </Mutation>
-            </Card>
-          </Col>
-        </Row>
+                )
+              },
+              {
+                title: 'Results',
+                dataIndex: 'results',
+                key: 'results',
+                render: u => (
+                  <Row>
+                    <Col xs={8}>
+                      <NumberInfo gap={0} title="Added" total={u.added} />
+                    </Col>
+                    <Col xs={8}>
+                      <NumberInfo gap={0} title="Failed" total={u.failed} />
+                    </Col>
+                    <Col xs={8}>
+                      <NumberInfo gap={0} title="Invalid" total={u.invalid} />
+                    </Col>
+                  </Row>
+                )
+              },
+              {
+                title: 'Errors',
+                dataIndex: 'errors',
+                key: 'errors'
+              }
+            ];
+
+            return (
+              <>
+                <Row gutter={8}>
+                  <Col
+                    xs={{ span: 24 }}
+                    md={{ span: 12 }}
+                    xl={{ span: 8 }}
+                    style={{ marginBottom: 12 }}
+                  >
+                    <Card bordered={false}>
+                      <h3>Entry upload</h3>
+                      <Mutation mutation={UPLOAD_ENTRIES_CSV}>
+                        {uploadEntriesCsv => (
+                          <>
+                            <Row style={{ marginBottom: 12 }}>
+                              <Col>
+                                <Upload {...uploadProps}>
+                                  <Button>
+                                    <Icon type="upload" /> Select CSV file
+                                  </Button>
+                                </Upload>
+                              </Col>
+                            </Row>
+                            <Row>
+                              <Col>
+                                <AsyncButton
+                                  type="primary"
+                                  onClick={() =>
+                                    this.handleUpload(uploadEntriesCsv)
+                                  }
+                                  disabled={this.state.fileList.length === 0}
+                                >
+                                  {uploading ? 'Uploading...' : 'Start Upload'}
+                                </AsyncButton>
+                              </Col>
+                            </Row>
+                          </>
+                        )}
+                      </Mutation>
+                    </Card>
+                  </Col>
+                </Row>
+                <Row>
+                  <Card bordered={false}>
+                    <h3>Uploads</h3>
+                    <Table
+                      size="small"
+                      dataSource={entriesDataSource}
+                      columns={entriesColumns}
+                    />
+                  </Card>
+                </Row>
+              </>
+            );
+          }}
+        </Query>
       );
     }
   }

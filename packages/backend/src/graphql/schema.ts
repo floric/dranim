@@ -6,7 +6,7 @@ import * as promisesAll from 'promises-all';
 import Dataset from './schemas/dataset';
 import Valueschema from './schemas/valueschema';
 import Entry from './schemas/entry';
-import UploadResult from './schemas/upload';
+import UploadProcess from './schemas/upload';
 import Editor from './schemas/editor';
 import {
   datasets,
@@ -33,7 +33,7 @@ import {
   createEntryFromJSON,
   entriesCount
 } from './resolvers/entry';
-import { uploadEntriesCsv } from './resolvers/upload';
+import { uploads, uploadEntriesCsv } from './resolvers/upload';
 import { passagesSchemas } from '../example/str';
 
 interface ApolloContext {
@@ -46,6 +46,7 @@ export const Query = `
     editor: Editor!
     dataset(id: String!): Dataset
     entry(datasetId: String!, entryId: String!): Entry
+    uploads(datasetId: String): [UploadProcess!]!
   }
 `;
 
@@ -102,7 +103,7 @@ export const Mutation = `
       connections: [ConnectionInput!]!
     ): Boolean!
     createSTRDemoData: Boolean!
-    uploadEntriesCsv (files: [Upload!]!, datasetId: String!): UploadResult!
+    uploadEntriesCsv (files: [Upload!]!, datasetId: String!): UploadProcess!
   }
 `;
 
@@ -118,7 +119,8 @@ const resolvers: IResolvers<any, ApolloContext> = {
     datasets: (_, __, { db }) => datasets(db),
     dataset: (_, { id }, { db }) => dataset(db, new ObjectID(id)),
     entry: (_, { datasetId, entryId }) => null,
-    editor: (_, __, { db }) => editor(db)
+    editor: (_, __, { db }) => editor(db),
+    uploads: (_, { datasetId }, { db }) => uploads(db, datasetId)
   },
   Entry: {
     values: ({ values }, __, { db }) =>
@@ -127,6 +129,14 @@ const resolvers: IResolvers<any, ApolloContext> = {
   Dataset: {
     entriesCount: ({ _id }, __, { db }) => entriesCount(db, _id),
     latestEntries: ({ _id }, __, { db }) => latestEntries(db, _id)
+  },
+  UploadProcess: {
+    errors: ({ _id, errors }, __, { db }) =>
+      Object.keys(errors).map(name => ({
+        name,
+        message: errors[name].message,
+        count: errors[name].count
+      }))
   },
   Mutation: {
     createDataset: (_, { name }, { db }) => createDataset(db, name),
@@ -176,7 +186,7 @@ const typeDefs = [
   SchemaDefinition,
   Query,
   Mutation,
-  UploadResult,
+  UploadProcess,
   Entry,
   Editor,
   Dataset,
