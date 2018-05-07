@@ -71,25 +71,23 @@ export const JoinDatasetsNode: NodeOptions = {
     state: { datasets }
   }) => {
     return (
-      <>
-        <FormItem label="Input">
-          {getFieldDecorator('value', {
-            rules: [{ required: true }]
-          })(
-            <Select
-              showSearch
-              style={{ width: 200 }}
-              placeholder="Select ID Value"
-            >
-              {datasets.map(ds => (
-                <Option value={ds.id} key={ds.id}>
-                  {ds.name}
-                </Option>
-              ))}
-            </Select>
-          )}
-        </FormItem>
-      </>
+      <FormItem label="Input">
+        {getFieldDecorator('value', {
+          rules: [{ required: true }]
+        })(
+          <Select
+            showSearch
+            style={{ width: 200 }}
+            placeholder="Select ID Value"
+          >
+            {datasets.map(ds => (
+              <Option value={ds.id} key={ds.id}>
+                {ds.name}
+              </Option>
+            ))}
+          </Select>
+        )}
+      </FormItem>
     );
   }
 };

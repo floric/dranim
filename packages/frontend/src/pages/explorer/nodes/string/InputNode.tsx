@@ -16,12 +16,10 @@ export const StringInputNode: NodeOptions = {
       ['String', { dataType: STRING_TYPE }]
     ]),
   renderFormItems: ({ form: { getFieldDecorator }, node: { form } }) => (
-    <>
-      <FormItem label="Value">
-        {getFieldDecorator('value', {
-          initialValue: getOrDefault<string>(form, 'value', '')
-        })(<Input />)}
-      </FormItem>
-    </>
+    <FormItem label="Value">
+      {getFieldDecorator('value', {
+        initialValue: getOrDefault<string>(form, 'value', '')
+      })(<Input />)}
+    </FormItem>
   )
 };

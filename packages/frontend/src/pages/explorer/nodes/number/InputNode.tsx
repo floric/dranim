@@ -16,13 +16,11 @@ export const NumberInputNode: NodeOptions = {
       ['Number', { dataType: NUMBER_TYPE }]
     ]),
   renderFormItems: ({ form: { getFieldDecorator }, node: { form } }) => (
-    <>
-      <FormItem label="Value">
-        {getFieldDecorator('value', {
-          rules: [{ required: true, type: 'number' }],
-          initialValue: getOrDefault<number>(form, 'value', 0)
-        })(<InputNumber />)}
-      </FormItem>
-    </>
+    <FormItem label="Value">
+      {getFieldDecorator('value', {
+        rules: [{ required: true, type: 'number' }],
+        initialValue: getOrDefault<number>(form, 'value', 0)
+      })(<InputNumber />)}
+    </FormItem>
   )
 };

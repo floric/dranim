@@ -20,13 +20,11 @@ export const FormatNumberNode: NodeOptions = {
       ['Formatted', { dataType: STRING_TYPE }]
     ]),
   renderFormItems: ({ form: { getFieldDecorator } }) => (
-    <>
-      <FormItem label="Format">
-        {getFieldDecorator('format', {
-          initialValue: '0.0',
-          rules: [{ required: true }]
-        })(<Input />)}
-      </FormItem>
-    </>
+    <FormItem label="Format">
+      {getFieldDecorator('format', {
+        initialValue: '0.0',
+        rules: [{ required: true }]
+      })(<Input />)}
+    </FormItem>
   )
 };

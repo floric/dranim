@@ -161,11 +161,7 @@ export const DatasetActions = withApollo<DataActionsProps>(
                 ) : (
                   <Icon type="clock-circle" />
                 ),
-              errors: u.errors.map(e => (
-                <Tooltip key={e.name} title={e.message}>{`${e.name} (${
-                  e.count
-                })`}</Tooltip>
-              )),
+              errors: u.errors.map(e => `${e.message} (${e.count})`),
               results: {
                 added: u.addedEntries.toLocaleString(),
                 failed: u.failedEntries.toLocaleString(),
@@ -188,20 +184,24 @@ export const DatasetActions = withApollo<DataActionsProps>(
                     <Row>
                       <Col xs={6}>Started:</Col>
                       <Col xs={18}>
-                        {distanceInWordsToNow(time.start, {
-                          includeSeconds: true,
-                          addSuffix: true
-                        })}
+                        <Tooltip title={time.start}>
+                          {distanceInWordsToNow(time.start, {
+                            includeSeconds: true,
+                            addSuffix: true
+                          })}
+                        </Tooltip>
                       </Col>
                     </Row>
                     {time.finish ? (
                       <Row>
                         <Col xs={6}>Finished:</Col>
                         <Col xs={18}>
-                          {distanceInWordsToNow(time.finish, {
-                            includeSeconds: true,
-                            addSuffix: true
-                          })}
+                          <Tooltip title={time.finish}>
+                            {distanceInWordsToNow(time.finish, {
+                              includeSeconds: true,
+                              addSuffix: true
+                            })}
+                          </Tooltip>
                         </Col>
                       </Row>
                     ) : null}

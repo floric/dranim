@@ -63,21 +63,19 @@ export const DatasetSelectValuesNode: NodeOptions = {
         : null;
     const options = metaValues ? metaValues.info : [];
     return (
-      <>
-        <FormItem label="Input">
-          {getFieldDecorator('values', {
-            initialValue: getOrDefault<Array<string>>(node.form, 'values', [])
-          })(
-            <Select
-              mode="multiple"
-              style={{ width: 200 }}
-              placeholder="Select Values"
-            >
-              {options.map(c => <Option key={c}>{c}</Option>)}
-            </Select>
-          )}
-        </FormItem>
-      </>
+      <FormItem label="Input">
+        {getFieldDecorator('values', {
+          initialValue: getOrDefault<Array<string>>(node.form, 'values', [])
+        })(
+          <Select
+            mode="multiple"
+            style={{ width: 200 }}
+            placeholder="Select Values"
+          >
+            {options.map(c => <Option key={c}>{c}</Option>)}
+          </Select>
+        )}
+      </FormItem>
     );
   }
 };
