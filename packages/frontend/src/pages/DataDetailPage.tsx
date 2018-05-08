@@ -112,5 +112,6 @@ class DataDetailPage extends Component<IDataDetailPageProps> {
 
 export default withPageHeaderHoC({
   title: 'Details',
+  size: 'small',
   includeInCard: false
 })(withRouter(DataDetailPage));

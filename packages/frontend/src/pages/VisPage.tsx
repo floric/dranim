@@ -39,5 +39,6 @@ class VisPage extends React.Component<{}, {}> {
 
 export default withPageHeaderHoC({
   title: 'Visualizations',
+  size: 'small',
   includeInCard: false
 })(VisPage);

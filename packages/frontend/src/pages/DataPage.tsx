@@ -158,6 +158,8 @@ class DataPage extends React.Component<
   }
 }
 
-export default withPageHeaderHoC({ title: 'Data', includeInCard: false })(
-  DataPage
-);
+export default withPageHeaderHoC({
+  title: 'Data',
+  includeInCard: false,
+  size: 'small'
+})(DataPage);

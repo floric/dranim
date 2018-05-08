@@ -34,7 +34,7 @@ import {
   entriesCount
 } from './resolvers/entry';
 import { uploads, uploadEntriesCsv } from './resolvers/upload';
-import { passagesSchemas } from '../example/str';
+import { passagesSchemas, commoditiesSchemas } from '../example/str';
 
 interface ApolloContext {
   db: Db;
@@ -160,8 +160,12 @@ const resolvers: IResolvers<any, ApolloContext> = {
     uploadEntriesCsv: (obj, { files, datasetId }, { db }) =>
       uploadEntriesCsv(db, files, new ObjectID(datasetId)),
     createSTRDemoData: async (_, {}, { db }) => {
-      const ds = await createDataset(db, 'Passages');
+      let ds = await createDataset(db, 'Passages');
       for (const s of passagesSchemas) {
+        await addValueSchema(db, new ObjectID(ds.id), s);
+      }
+      ds = await createDataset(db, 'Commodities');
+      for (const s of commoditiesSchemas) {
         await addValueSchema(db, new ObjectID(ds.id), s);
       }
       return true;
