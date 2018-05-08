@@ -13,7 +13,7 @@ const CREATE_DEMO_DATA = gql`
   }
 `;
 
-class StartPage extends React.Component<{}, {}> {
+class StartPage extends React.Component<{}> {
   public render() {
     return (
       <Row>

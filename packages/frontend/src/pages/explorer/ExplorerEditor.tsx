@@ -190,6 +190,7 @@ export class ExplorerEditor extends React.Component<
                     <h4>Actions</h4>
                     <AsyncButton
                       icon="delete"
+                      confirmClick
                       onClick={this.handleDeleteSelectedNode}
                     >
                       Delete

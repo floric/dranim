@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Component } from 'react';
-import { Button } from 'antd';
+import { Button, Popconfirm } from 'antd';
 import { ButtonProps } from 'antd/lib/button';
 
 interface AsyncButtonState {
@@ -8,7 +8,7 @@ interface AsyncButtonState {
 }
 
 export class AsyncButton extends Component<
-  ButtonProps & { onClick: () => Promise<any> },
+  ButtonProps & { onClick: () => Promise<any> } & { confirmClick?: boolean },
   AsyncButtonState
 > {
   public componentWillMount() {
@@ -16,7 +16,7 @@ export class AsyncButton extends Component<
   }
 
   private handleClick = async (ev: React.MouseEvent<HTMLButtonElement>) => {
-    this.setState({ isLoading: true });
+    await this.setState({ isLoading: true });
 
     try {
       if (this.props.onClick) {
@@ -26,17 +26,39 @@ export class AsyncButton extends Component<
       console.log(e);
     }
 
-    this.setState({ isLoading: false });
+    await this.setState({ isLoading: false });
   };
 
   public render() {
-    const { children, disabled, type, icon } = this.props;
+    const { isLoading } = this.state;
+    const { children, disabled, type, icon, confirmClick } = this.props;
+
+    if (confirmClick) {
+      return (
+        <Popconfirm
+          title="Delete node?"
+          onConfirm={this.handleClick}
+          okText="Confirm"
+          cancelText="Cancel"
+        >
+          <Button
+            type={type}
+            icon={icon}
+            disabled={disabled}
+            loading={isLoading}
+          >
+            {children}
+          </Button>
+        </Popconfirm>
+      );
+    }
+
     return (
       <Button
         type={type}
         icon={icon}
         disabled={disabled}
-        loading={this.state.isLoading}
+        loading={isLoading}
         onClick={this.handleClick}
       >
         {children}

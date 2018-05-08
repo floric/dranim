@@ -86,6 +86,7 @@ export class DataEntries extends React.Component<
           <Mutation mutation={DELETE_ENTRY}>
             {deleteEntry => (
               <AsyncButton
+                confirmClick
                 onClick={() =>
                   tryOperation({
                     op: () =>

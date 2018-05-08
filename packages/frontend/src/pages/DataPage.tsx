@@ -89,6 +89,7 @@ class DataPage extends React.Component<
                         <Mutation mutation={DELETE_DATASET}>
                           {deleteDataset => (
                             <AsyncButton
+                              confirmClick
                               icon="delete"
                               loading={this.state.saving}
                               onClick={async () => {
