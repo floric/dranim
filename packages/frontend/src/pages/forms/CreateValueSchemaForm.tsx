@@ -66,7 +66,7 @@ class CreateValueSchemaFormImpl extends React.Component<
           throw new Error('Unsupported value schema type!');
       }
 
-      this.setState({
+      await this.setState({
         saving: true
       });
 
@@ -79,7 +79,7 @@ class CreateValueSchemaFormImpl extends React.Component<
           type === ValueSchemaType.string ? form.getFieldValue('unique') : false
       });
 
-      this.setState({
+      await this.setState({
         saving: false
       });
     });

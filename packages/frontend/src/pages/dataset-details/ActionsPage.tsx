@@ -91,7 +91,7 @@ export const DatasetActions = withApollo<DataActionsProps>(
 
       tryOperation({
         op: async () => {
-          this.setState({
+          await this.setState({
             uploading: true,
             fileList: []
           });
@@ -103,7 +103,7 @@ export const DatasetActions = withApollo<DataActionsProps>(
             }
           });
 
-          this.setState({
+          await this.setState({
             uploading: false
           });
         },

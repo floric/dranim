@@ -46,7 +46,7 @@ class PropertiesFormImpl extends React.Component<
       if (err) {
         return;
       }
-      this.setState({
+      await this.setState({
         saving: true
       });
       await tryOperation({
@@ -58,7 +58,7 @@ class PropertiesFormImpl extends React.Component<
         failedTitle: 'Properties not saved.',
         failedMessage: `Saving properties has failed.`
       });
-      this.setState({
+      await this.setState({
         saving: false
       });
       this.props.form.resetFields();

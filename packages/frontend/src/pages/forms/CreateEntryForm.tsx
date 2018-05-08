@@ -40,11 +40,11 @@ class CreateEntryFormImpl extends React.Component<
         name: s.name
       }));
 
-      this.setState({
+      await this.setState({
         saving: true
       });
       await handleCreateEntry(values);
-      this.setState({
+      await this.setState({
         saving: false
       });
     });

@@ -8,11 +8,24 @@ interface AsyncButtonState {
 }
 
 export class AsyncButton extends Component<
-  ButtonProps & { onClick: () => Promise<any> } & { confirmClick?: boolean },
+  ButtonProps & { onClick: () => Promise<any> } & {
+    confirmClick?: boolean;
+    confirmMessage?: string;
+  },
   AsyncButtonState
 > {
+  private mounted = false;
+
   public componentWillMount() {
     this.setState({ isLoading: false });
+  }
+
+  public componentDidMount() {
+    this.mounted = true;
+  }
+
+  public componentWillUnmount() {
+    this.mounted = false;
   }
 
   private handleClick = async (ev: React.MouseEvent<HTMLButtonElement>) => {
@@ -25,19 +38,27 @@ export class AsyncButton extends Component<
     } catch (e) {
       console.log(e);
     }
-
-    await this.setState({ isLoading: false });
+    if (this.mounted) {
+      await this.setState({ isLoading: false });
+    }
   };
 
   public render() {
     const { isLoading } = this.state;
-    const { children, disabled, type, icon, confirmClick } = this.props;
+    const {
+      children,
+      disabled,
+      type,
+      icon,
+      confirmClick,
+      confirmMessage
+    } = this.props;
 
     if (confirmClick) {
       return (
         <Popconfirm
-          title="Delete node?"
-          onConfirm={this.handleClick}
+          title={confirmMessage ? confirmMessage : 'Really do this action?'}
+          onConfirm={ev => this.handleClick(ev)}
           okText="Confirm"
           cancelText="Cancel"
         >
@@ -59,7 +80,7 @@ export class AsyncButton extends Component<
         icon={icon}
         disabled={disabled}
         loading={isLoading}
-        onClick={this.handleClick}
+        onClick={ev => this.handleClick(ev)}
       >
         {children}
       </Button>

@@ -86,6 +86,7 @@ export class DataEntries extends React.Component<
           <Mutation mutation={DELETE_ENTRY}>
             {deleteEntry => (
               <AsyncButton
+                confirmMessage="Delete Entry?"
                 confirmClick
                 onClick={() =>
                   tryOperation({
@@ -98,10 +99,9 @@ export class DataEntries extends React.Component<
                       }),
                     refetch,
                     successTitle: () => 'Entry deleted',
-                    successMessage: () =>
-                      `Entry "${record.key}" deleted successfully.`,
+                    successMessage: () => `Entry deleted successfully.`,
                     failedTitle: 'Entry not deleted.',
-                    failedMessage: `Entry "${record.key}" deletion failed.`
+                    failedMessage: `Entry deletion failed.`
                   })
                 }
               >

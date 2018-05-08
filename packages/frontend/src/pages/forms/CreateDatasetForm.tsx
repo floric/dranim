@@ -7,7 +7,7 @@ import { hasErrors } from '../../utils/form';
 const FormItem = Form.Item;
 
 export interface CreateDataSetFormProps extends FormComponentProps {
-  handleCreateDataset: (name: string) => void;
+  handleCreateDataset: (name: string) => Promise<boolean | null>;
 }
 
 class CreateDataSetFormImpl extends React.Component<
@@ -29,11 +29,14 @@ class CreateDataSetFormImpl extends React.Component<
         return;
       }
 
-      this.setState({ saving: true });
-      await this.props.handleCreateDataset(
+      await this.setState({ saving: true });
+      const successful = await this.props.handleCreateDataset(
         this.props.form.getFieldValue('name')
       );
-      this.setState({ saving: false });
+      await this.setState({ saving: false });
+      if (successful) {
+        this.props.form.resetFields();
+      }
     });
   };
 
@@ -57,6 +60,7 @@ class CreateDataSetFormImpl extends React.Component<
             rules: [{ required: true, message: 'Please enter dataset name!' }]
           })(
             <Input
+              autoComplete="off"
               prefix={<Icon type="plus" style={{ color: 'rgba(0,0,0,.25)' }} />}
               placeholder="Name"
             />

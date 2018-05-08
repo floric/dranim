@@ -112,7 +112,7 @@ export class ExplorerEditor extends React.Component<
       return;
     }
     await this.props.onNodeDelete(selectedNode);
-    this.setState({ selectedNode: null });
+    await this.setState({ selectedNode: null });
   };
 
   private handleSelectCreateNode = (type: string) => {
@@ -189,6 +189,7 @@ export class ExplorerEditor extends React.Component<
                   <Col xs={8}>
                     <h4>Actions</h4>
                     <AsyncButton
+                      confirmMessage="Delete Node?"
                       icon="delete"
                       confirmClick
                       onClick={this.handleDeleteSelectedNode}

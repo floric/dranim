@@ -90,6 +90,7 @@ class DataPage extends React.Component<
                           {deleteDataset => (
                             <AsyncButton
                               confirmClick
+                              confirmMessage="Delete Dataset?"
                               icon="delete"
                               loading={this.state.saving}
                               onClick={async () => {
@@ -133,11 +134,14 @@ class DataPage extends React.Component<
                 <Card bordered={false}>
                   <h2>New Dataset</h2>
                   <Mutation mutation={CREATE_DATASET}>
-                    {(createDataset, {}) => (
+                    {createDataset => (
                       <CreateDataSetForm
                         handleCreateDataset={name =>
                           tryOperation({
-                            op: () => createDataset({ variables: { name } }),
+                            op: async () => {
+                              await createDataset({ variables: { name } });
+                              return true;
+                            },
                             refetch,
                             successTitle: () => 'Dataset created',
                             successMessage: () =>
