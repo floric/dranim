@@ -26,7 +26,7 @@ export const withPageHeaderHoC = ({
           {size === 'large' ? (
             <PageHeader title={title} content={description} />
           ) : (
-            <h1 {...css({ margin: 0 })}>{title}</h1>
+            <h1 {...css({ margin: includeInCard ? undefined : 0 })}>{title}</h1>
           )}
         </Col>
       </Row>

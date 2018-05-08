@@ -32,28 +32,48 @@ export const ALL_DATASETS = gql`
   }
 `;
 
+const MenuItemContent: SFC<{
+  collapsed: boolean;
+  href: string;
+  iconName?: string;
+  title: string;
+}> = ({ href, iconName, title, collapsed }) => (
+  <>
+    <NavLink to={href}>
+      {iconName && <Icon type={iconName} />}
+      {!collapsed ? ` ${title}` : null}
+    </NavLink>
+    {collapsed ? <span>{title}</span> : null}
+  </>
+);
+
 const AppMenu: SFC<{
+  collapsed: boolean;
   datasets?: Array<{
     name: string;
     id: string;
   }>;
-}> = ({ datasets }) => (
+}> = ({ datasets, collapsed }) => (
   <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
     <Menu.Item key="menu_start">
-      <NavLink to="/">
-        <Icon type="appstore-o" /> Start
-      </NavLink>
+      <MenuItemContent
+        collapsed={collapsed}
+        href="/"
+        iconName="appstore-o"
+        title="Start"
+      />
     </Menu.Item>
     <SubMenu
       key="sub1"
       title={
         <span>
-          <Icon type="user" /> Data
+          <Icon type="user" />
+          {!collapsed ? ' Data' : null}
         </span>
       }
     >
       <Menu.Item key="menu_datasets">
-        <NavLink to="/data">Datasets</NavLink>
+        <MenuItemContent collapsed={collapsed} href="/data" title="Datasets" />
       </Menu.Item>
       {datasets && datasets.length > 0 && <Menu.Divider />}
       {datasets &&
@@ -64,14 +84,20 @@ const AppMenu: SFC<{
         ))}
     </SubMenu>
     <Menu.Item key="menu_explorer">
-      <NavLink to="/explorer">
-        <Icon type="filter" /> Explorer
-      </NavLink>
+      <MenuItemContent
+        collapsed={collapsed}
+        href="/explorer"
+        iconName="filter"
+        title="Explorer"
+      />
     </Menu.Item>
     <Menu.Item key="menu_vis">
-      <NavLink to="/visualizations">
-        <Icon type="area-chart" /> Visualizations
-      </NavLink>
+      <MenuItemContent
+        collapsed={collapsed}
+        href="/visualizations"
+        iconName="area-chart"
+        title="Visualizations"
+      />
     </Menu.Item>
   </Menu>
 );
@@ -88,27 +114,30 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
   };
 
   public render() {
+    const { collapsed } = this.state;
     return (
       <Layout style={{ minHeight: '100vh' }}>
-        <Sider
-          collapsible
-          collapsed={this.state.collapsed}
-          onCollapse={this.onCollapse}
-        >
+        <Sider collapsible collapsed={collapsed} onCollapse={this.onCollapse}>
           <div className="logo" {...css({ color: '#CCC', padding: '24px' })}>
-            <span {...css({ fontWeight: '900', fontSize: '150%' })}>
-              Timeseries
-            </span>
-            <br />
-            <span>Explorer</span>
+            {!collapsed ? (
+              <>
+                <span {...css({ fontWeight: '900', fontSize: '150%' })}>
+                  Timeseries
+                </span>
+                <br />
+                <span>Explorer</span>
+              </>
+            ) : null}
           </div>
           <Query query={ALL_DATASETS}>
             {res => {
               if (res.loading || res.error) {
-                return <AppMenu />;
+                return <AppMenu collapsed={collapsed} />;
               }
 
-              return <AppMenu datasets={res.data!.datasets} />;
+              return (
+                <AppMenu datasets={res.data!.datasets} collapsed={collapsed} />
+              );
             }}
           </Query>
         </Sider>

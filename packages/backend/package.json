@@ -37,6 +37,7 @@
     "mongodb": "^3.0.7",
     "morgan": "^1.9.0",
     "promises-all": "^1.0.0",
+    "through2": "^2.0.3",
     "ts-loader": "^4.2.0",
     "uuid": "^3.2.1"
   },
@@ -47,6 +48,7 @@
     "@types/jest": "^21.1.5",
     "@types/mongodb": "^3.0.15",
     "@types/node": "^9.6.6",
+    "@types/through2": "^2.0.33",
     "@types/uuid": "^3.4.3",
     "concurrently": "^3.5.0",
     "jest": "^22.4.3",

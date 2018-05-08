@@ -9,6 +9,7 @@ import { getDatasetsCollection, Dataset, Valueschema } from './dataset';
 import { dataset } from '../resolvers/dataset';
 import { UploadProgress } from './util/UploadProgress';
 import { updateNode } from './editor';
+import { Upper } from './util/TransformStream';
 
 export interface UploadProcess {
   id: string;

@@ -49,11 +49,11 @@ export const createDataset = async (db: Db, name: string): Promise<Dataset> => {
 };
 
 export const deleteDataset = async (db: Db, id: ObjectID) => {
-  const collection = getDatasetsCollection(db);
-  const res = await collection.deleteOne({ _id: id });
-
   const entryCollection = getEntryCollection(db, id);
   const deleteRes = await entryCollection.remove({});
+
+  const collection = getDatasetsCollection(db);
+  const res = await collection.deleteOne({ _id: id });
 
   return res.deletedCount === 1;
 };
