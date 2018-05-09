@@ -3,9 +3,11 @@ import { StringSocket } from '../Sockets';
 
 export const StringOutputNode: NodeDef = {
   title: 'String Output',
-  inputs: [StringSocket('String', 'input')],
+  inputs: [StringSocket('String')],
   outputs: [],
-  path: ['String'],
-  keywords: [],
-  onClientExecution: () => new Map()
+  isInputValid: () => Promise.resolve(true),
+  onServerExecution: () =>
+    Promise.resolve({
+      outputs: new Map()
+    })
 };

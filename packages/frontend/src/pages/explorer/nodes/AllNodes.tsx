@@ -2,7 +2,7 @@ import * as React from 'react';
 import { SFC } from 'react';
 import { FormComponentProps } from 'antd/lib/form';
 
-import { NodeDef, ExplorerEditorProps } from '../ExplorerEditor';
+import { NodeInstance, ExplorerEditorProps } from '../ExplorerEditor';
 import { Socket, OutputSocketInformation } from './Sockets';
 import { AllDatasetNodes } from './dataset';
 import { AllNumberNodes } from './number';
@@ -16,7 +16,7 @@ export interface EditorProps {
 
 export interface EditorContext {
   state: ExplorerEditorProps;
-  node: NodeDef;
+  node: NodeInstance;
 }
 
 export interface RenderFormItemsProps
@@ -25,7 +25,7 @@ export interface RenderFormItemsProps
   inputs: Map<string, OutputSocketInformation>;
 }
 
-export interface NodeOptions {
+export interface NodeDef {
   title: string;
   inputs: Array<Socket>;
   outputs: Array<Socket>;
@@ -40,7 +40,7 @@ export interface NodeOptions {
 
 const allNodes = [AllDatasetNodes, AllNumberNodes, AllStringNodes];
 
-const buildTree = (elems: Array<NodeOptions>, curPath: Array<string>) => {
+const buildTree = (elems: Array<NodeDef>, curPath: Array<string>) => {
   const nextPaths = elems
     .filter(
       e =>
@@ -77,12 +77,12 @@ const buildTree = (elems: Array<NodeOptions>, curPath: Array<string>) => {
   }));
 };
 
-export const nodeTypes: Map<string, NodeOptions> = new Map(
+export const nodeTypes: Map<string, NodeDef> = new Map(
   allNodes
-    .map<Array<[string, NodeOptions]>>(nodes =>
-      nodes.map<[string, NodeOptions]>(n => [n.title, n])
+    .map<Array<[string, NodeDef]>>(nodes =>
+      nodes.map<[string, NodeDef]>(n => [n.title, n])
     )
-    .reduce<Array<[string, NodeOptions]>>(
+    .reduce<Array<[string, NodeDef]>>(
       (list, elem, _, all) => [...list, ...elem],
       []
     )

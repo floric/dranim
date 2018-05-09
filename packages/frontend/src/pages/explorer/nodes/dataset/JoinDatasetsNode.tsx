@@ -2,12 +2,12 @@ import * as React from 'react';
 import { Form, Select } from 'antd';
 import { DataSocket, DATASET_TYPE, OutputSocketInformation } from '../Sockets';
 import { getOrDefault, getValidInput } from '../utils';
-import { NodeOptions } from '../AllNodes';
+import { NodeDef } from '../AllNodes';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
 
-export const JoinDatasetsNode: NodeOptions = {
+export const JoinDatasetsNode: NodeDef = {
   title: 'Join Datasets',
   inputs: [DataSocket('Dataset A', 'input'), DataSocket('Dataset B', 'input')],
   outputs: [DataSocket('Combined', 'output')],

@@ -2,12 +2,12 @@ import * as React from 'react';
 import { Form, Select } from 'antd';
 import { DataSocket, DATASET_TYPE, OutputSocketInformation } from '../Sockets';
 import { getOrDefault, getValidInput } from '../utils';
-import { NodeOptions } from '../AllNodes';
+import { NodeDef } from '../AllNodes';
 
 const FormItem = Form.Item;
 const Option = Select.Option;
 
-export const DatasetSelectValuesNode: NodeOptions = {
+export const DatasetSelectValuesNode: NodeDef = {
   title: 'Select Values',
   inputs: [DataSocket('Dataset', 'input')],
   outputs: [DataSocket('Dataset', 'output')],

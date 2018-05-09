@@ -1,7 +1,7 @@
 import * as Konva from 'konva';
 import {
   ExplorerEditorState,
-  ConnectionDef,
+  ConnectionInstance,
   ExplorerEditorProps
 } from '../ExplorerEditor';
 import { Socket } from '../nodes/Sockets';
@@ -96,7 +96,7 @@ const beginNewConnection = (
 };
 
 const beginEditExistingConnection = async (
-  connectionsInSocket: Array<ConnectionDef>,
+  connectionsInSocket: Array<ConnectionInstance>,
   s: Socket,
   nodeId: string,
   server: ExplorerEditorProps,
@@ -210,7 +210,7 @@ export const onClickSocket = (
       return;
     }
 
-    let openConnections: Array<ConnectionDef> = [];
+    let openConnections: Array<ConnectionInstance> = [];
     openConnections = openConnections.concat(
       openConnection.inputs
         ? openConnection.inputs.map(c => ({

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Input } from 'antd';
-import { NodeOptions } from '../AllNodes';
+import { NodeDef } from '../AllNodes';
 import {
   NumberSocket,
   StringSocket,
@@ -9,7 +9,7 @@ import {
 } from '../Sockets';
 import FormItem from 'antd/lib/form/FormItem';
 
-export const FormatNumberNode: NodeOptions = {
+export const FormatNumberNode: NodeDef = {
   title: 'Format Number',
   inputs: [NumberSocket('Number', 'input')],
   outputs: [StringSocket('Formatted', 'output')],

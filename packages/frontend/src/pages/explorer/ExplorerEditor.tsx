@@ -20,12 +20,18 @@ const filterTreeNode = (inputValue: string, treeNode: any) => {
   return treeNode.props.index.includes(inputValue.toLocaleLowerCase());
 };
 
+export enum NodeState {
+  VALID = 'VALID',
+  INVALID = 'INVALID'
+}
+
 export interface FormValue {
   name: string;
   value: string;
 }
 
-export interface NodeDef {
+export interface NodeInstance {
+  state: NodeState;
   type: string;
   x: number;
   y: number;
@@ -38,21 +44,22 @@ export interface SocketDef {
   name: string;
 }
 
-export interface ConnectionDef {
+export interface ConnectionInstance {
   id?: string; // local connections don't have an ID!
   from: SocketDef | null;
   to: SocketDef | null;
 }
 
 export interface ExplorerEditorProps {
-  connections: Array<ConnectionDef>;
-  nodes: Array<NodeDef>;
+  connections: Array<ConnectionInstance>;
+  nodes: Array<NodeInstance>;
   datasets: Array<Dataset>;
   onNodeCreate: (type: string, x: number, y: number) => Promise<any>;
   onNodeDelete: (id: string) => Promise<any>;
   onNodeUpdate: (id: string, x: number, y: number) => Promise<any>;
   onConnectionCreate: (from: SocketDef, to: SocketDef) => Promise<any>;
   onConnectionDelete: (id: string) => Promise<any>;
+  onStartCalculation: () => Promise<any>;
   onAddOrUpdateFormValue: (
     nodeId: string,
     name: string,
@@ -115,6 +122,10 @@ export class ExplorerEditor extends React.Component<
     await this.setState({ selectedNode: null });
   };
 
+  private handleStartCalulcation = async () => {
+    await this.props.onStartCalculation();
+  };
+
   private handleSelectCreateNode = (type: string) => {
     if (!nodeTypes.has(type)) {
       return;
@@ -173,11 +184,11 @@ export class ExplorerEditor extends React.Component<
               title={node ? node.type : 'Nothing selected'}
               style={{ marginBottom: 12 }}
             >
-              {node ? (
-                <Row>
+              <Row>
+                {node && (
                   <Col xs={16}>
                     <h4>Properties</h4>
-                    {node && ValueForm ? (
+                    {ValueForm ? (
                       <PropertiesForm
                         RenderFormItems={ValueForm}
                         handleSubmit={this.handleSave}
@@ -186,21 +197,27 @@ export class ExplorerEditor extends React.Component<
                       />
                     ) : null}
                   </Col>
-                  <Col xs={8}>
-                    <h4>Actions</h4>
+                )}
+                <Col xs={8}>
+                  <h4>Actions</h4>
+                  {node && (
                     <AsyncButton
                       confirmMessage="Delete Node?"
                       icon="delete"
                       confirmClick
                       onClick={this.handleDeleteSelectedNode}
                     >
-                      Delete
+                      Delete Selected
                     </AsyncButton>
-                  </Col>
-                </Row>
-              ) : (
-                'Select a node first.'
-              )}
+                  )}
+                  <AsyncButton
+                    icon="rocket"
+                    onClick={this.handleStartCalulcation}
+                  >
+                    Calculate Outputs
+                  </AsyncButton>
+                </Col>
+              </Row>
             </Card>
           </Col>
           <Col xs={24} md={12} xl={6}>

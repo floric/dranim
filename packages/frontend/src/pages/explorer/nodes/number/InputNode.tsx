@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { InputNumber } from 'antd';
-import { NodeOptions } from '../AllNodes';
+import { NodeDef } from '../AllNodes';
 import { NumberSocket, OutputSocketInformation, NUMBER_TYPE } from '../Sockets';
 import FormItem from 'antd/lib/form/FormItem';
 import { getOrDefault } from '../utils';
 
-export const NumberInputNode: NodeOptions = {
+export const NumberInputNode: NodeDef = {
   title: 'Number Input',
   inputs: [],
   outputs: [NumberSocket('Number', 'output')],

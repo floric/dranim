@@ -1,7 +1,7 @@
-import { NodeOptions } from '../AllNodes';
+import { NodeDef } from '../AllNodes';
 import { StringSocket, OutputSocketInformation, STRING_TYPE } from '../Sockets';
 
-export const SubStringNode: NodeOptions = {
+export const SubStringNode: NodeDef = {
   title: 'Substring',
   inputs: [StringSocket('String', 'input')],
   outputs: [StringSocket('String', 'output')],

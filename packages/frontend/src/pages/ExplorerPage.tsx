@@ -98,6 +98,16 @@ const ADD_OR_UPDATE_FORM_VALUE = gql`
   }
 `;
 
+const START_CALCULATION = gql`
+  mutation startCalculation {
+    startCalculation {
+      id
+      start
+      state
+    }
+  }
+`;
+
 class ExplorerPage extends React.Component<{}> {
   public render() {
     return (
@@ -112,95 +122,121 @@ class ExplorerPage extends React.Component<{}> {
           }
 
           return (
-            <Mutation mutation={ADD_OR_UPDATE_FORM_VALUE}>
-              {addOrUpdateFormValue => (
-                <Mutation mutation={DELETE_CONNECTION}>
-                  {deleteConnection => (
-                    <Mutation mutation={CREATE_CONNECTION}>
-                      {createConnection => (
-                        <Mutation mutation={DELETE_NODE}>
-                          {deleteNode => (
-                            <Mutation mutation={CREATE_NODE}>
-                              {createNode => (
-                                <Mutation mutation={UPDATE_NODE}>
-                                  {updateNode => (
-                                    <ExplorerEditor
-                                      datasets={data.datasets}
-                                      connections={deepCopyResponse(
-                                        data.editor.connections
+            <Mutation mutation={START_CALCULATION}>
+              {startCalculation => (
+                <Mutation mutation={ADD_OR_UPDATE_FORM_VALUE}>
+                  {addOrUpdateFormValue => (
+                    <Mutation mutation={DELETE_CONNECTION}>
+                      {deleteConnection => (
+                        <Mutation mutation={CREATE_CONNECTION}>
+                          {createConnection => (
+                            <Mutation mutation={DELETE_NODE}>
+                              {deleteNode => (
+                                <Mutation mutation={CREATE_NODE}>
+                                  {createNode => (
+                                    <Mutation mutation={UPDATE_NODE}>
+                                      {updateNode => (
+                                        <ExplorerEditor
+                                          datasets={data.datasets}
+                                          connections={deepCopyResponse(
+                                            data.editor.connections
+                                          )}
+                                          nodes={deepCopyResponse(
+                                            data.editor.nodes
+                                          )}
+                                          onNodeCreate={(type, x, y) =>
+                                            tryOperation({
+                                              op: () =>
+                                                createNode({
+                                                  variables: { type, x, y }
+                                                }),
+                                              refetch,
+                                              successTitle: null,
+                                              failedTitle: 'Node not created'
+                                            })
+                                          }
+                                          onNodeDelete={id =>
+                                            tryOperation({
+                                              op: () =>
+                                                deleteNode({
+                                                  variables: { id }
+                                                }),
+                                              refetch,
+                                              successTitle: null,
+                                              failedTitle: 'Node not deleted'
+                                            })
+                                          }
+                                          onNodeUpdate={(id, x, y) =>
+                                            tryOperation({
+                                              op: () =>
+                                                updateNode({
+                                                  variables: { id, x, y }
+                                                }),
+                                              refetch,
+                                              successTitle: null,
+                                              failedTitle: 'Node not updated'
+                                            })
+                                          }
+                                          onConnectionCreate={(from, to) =>
+                                            tryOperation({
+                                              op: () =>
+                                                createConnection({
+                                                  variables: {
+                                                    input: { from, to }
+                                                  }
+                                                }),
+                                              refetch,
+                                              successTitle: null,
+                                              failedTitle:
+                                                'Connection not created'
+                                            })
+                                          }
+                                          onConnectionDelete={id =>
+                                            tryOperation({
+                                              op: () =>
+                                                deleteConnection({
+                                                  variables: { id }
+                                                }),
+                                              refetch,
+                                              successTitle: null,
+                                              failedTitle:
+                                                'Connection not deleted'
+                                            })
+                                          }
+                                          onAddOrUpdateFormValue={(
+                                            nodeId,
+                                            name,
+                                            value
+                                          ) =>
+                                            tryOperation({
+                                              op: () =>
+                                                addOrUpdateFormValue({
+                                                  variables: {
+                                                    nodeId,
+                                                    name,
+                                                    value
+                                                  }
+                                                }),
+                                              refetch,
+                                              successTitle: null,
+                                              failedTitle: 'Value not changed'
+                                            })
+                                          }
+                                          onStartCalculation={() =>
+                                            tryOperation({
+                                              op: () => startCalculation(),
+                                              refetch,
+                                              successTitle: () =>
+                                                'Process started',
+                                              successMessage: () =>
+                                                'This might take several minutes',
+                                              failedTitle:
+                                                'Process start has failed'
+                                            })
+                                          }
+                                        />
                                       )}
-                                      nodes={deepCopyResponse(
-                                        data.editor.nodes
-                                      )}
-                                      onNodeCreate={(type, x, y) =>
-                                        tryOperation({
-                                          op: () =>
-                                            createNode({
-                                              variables: { type, x, y }
-                                            }),
-                                          refetch,
-                                          successTitle: null,
-                                          failedTitle: 'Node not created'
-                                        })
-                                      }
-                                      onNodeDelete={id =>
-                                        tryOperation({
-                                          op: () =>
-                                            deleteNode({ variables: { id } }),
-                                          refetch,
-                                          successTitle: null,
-                                          failedTitle: 'Node not deleted'
-                                        })
-                                      }
-                                      onNodeUpdate={(id, x, y) =>
-                                        tryOperation({
-                                          op: () =>
-                                            updateNode({
-                                              variables: { id, x, y }
-                                            }),
-                                          refetch,
-                                          successTitle: null,
-                                          failedTitle: 'Node not updated'
-                                        })
-                                      }
-                                      onConnectionCreate={(from, to) =>
-                                        tryOperation({
-                                          op: () =>
-                                            createConnection({
-                                              variables: { input: { from, to } }
-                                            }),
-                                          refetch,
-                                          successTitle: null,
-                                          failedTitle: 'Connection not created'
-                                        })
-                                      }
-                                      onConnectionDelete={id =>
-                                        tryOperation({
-                                          op: () =>
-                                            deleteConnection({
-                                              variables: { id }
-                                            }),
-                                          refetch,
-                                          successTitle: null,
-                                          failedTitle: 'Connection not deleted'
-                                        })
-                                      }
-                                      onAddOrUpdateFormValue={(
-                                        nodeId,
-                                        name,
-                                        value
-                                      ) =>
-                                        tryOperation({
-                                          op: () =>
-                                            addOrUpdateFormValue({
-                                              variables: { nodeId, name, value }
-                                            }),
-                                          refetch,
-                                          successTitle: null,
-                                          failedTitle: 'Value not changed'
-                                        })
-                                      }
-                                    />
+                                    </Mutation>
                                   )}
                                 </Mutation>
                               )}

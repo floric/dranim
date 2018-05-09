@@ -1,11 +1,13 @@
 import { MongoClient, ObjectID, Db } from 'mongodb';
 
+export type FormValues = Array<{ name: string; value: any }>;
+
 export interface Node {
   id: string;
   x: number;
   y: number;
   type: string;
-  form: Array<{ name: string; value: any }>;
+  form: FormValues;
 }
 
 export interface Socket {
@@ -205,6 +207,7 @@ export const allNodes = async (db: Db): Promise<Array<Node>> => {
   const all = await collection.find({}).toArray();
   return all.map(ds => ({
     id: ds._id,
+    state: 'INVALID',
     ...ds
   }));
 };

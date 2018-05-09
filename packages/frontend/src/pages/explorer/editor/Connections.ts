@@ -1,7 +1,7 @@
 import * as Konva from 'konva';
 import {
   ExplorerEditorState,
-  ConnectionDef,
+  ConnectionInstance,
   ExplorerEditorProps
 } from '../ExplorerEditor';
 import { getSocketId } from './Sockets';
@@ -20,7 +20,7 @@ const getConnectionPoints = (output: Konva.Vector2d, input: Konva.Vector2d) => [
 ];
 
 export const renderConnection = (
-  c: ConnectionDef,
+  c: ConnectionInstance,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   stage: Konva.Stage,

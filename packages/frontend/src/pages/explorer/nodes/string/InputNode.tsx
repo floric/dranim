@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { Input } from 'antd';
-import { NodeOptions } from '../AllNodes';
+import { NodeDef } from '../AllNodes';
 import { StringSocket, OutputSocketInformation, STRING_TYPE } from '../Sockets';
 import FormItem from 'antd/lib/form/FormItem';
 import { getOrDefault } from '../utils';
 
-export const StringInputNode: NodeOptions = {
+export const StringInputNode: NodeDef = {
   title: 'String Input',
   inputs: [],
   outputs: [StringSocket('String', 'output')],

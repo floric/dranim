@@ -1,4 +1,4 @@
-import { FormValue, ConnectionDef } from '../ExplorerEditor';
+import { FormValue, ConnectionInstance } from '../ExplorerEditor';
 import { OutputSocketInformation } from './Sockets';
 import { nodeTypes, EditorContext } from './AllNodes';
 
@@ -18,7 +18,7 @@ export const getOrDefault = <T>(
 export const getInputNode = (
   socketName: string,
   nodeId: string,
-  connections: Array<ConnectionDef>
+  connections: Array<ConnectionInstance>
 ) => {
   const inputs = connections.filter(
     n => n.to && n.to.nodeId === nodeId && n.to.name === socketName
@@ -33,7 +33,7 @@ export const getInputNode = (
 export const getOutputNodes = (
   socketName: string,
   nodeId: string,
-  connections: Array<ConnectionDef>
+  connections: Array<ConnectionInstance>
 ) => {
   const outputs = connections.filter(
     n => n.from && n.from.nodeId === nodeId && n.from.name === socketName

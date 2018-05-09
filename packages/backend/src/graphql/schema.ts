@@ -8,6 +8,7 @@ import Valueschema from './schemas/valueschema';
 import Entry from './schemas/entry';
 import UploadProcess from './schemas/upload';
 import Editor from './schemas/editor';
+import CalculationProcess from './schemas/calculation';
 import {
   datasets,
   dataset,
@@ -34,6 +35,7 @@ import {
   entriesCount
 } from './resolvers/entry';
 import { uploads, uploadEntriesCsv } from './resolvers/upload';
+import { startCalculation } from './resolvers/calculation';
 import { passagesSchemas, commoditiesSchemas } from '../example/str';
 
 interface ApolloContext {
@@ -104,6 +106,7 @@ export const Mutation = `
     ): Boolean!
     createSTRDemoData: Boolean!
     uploadEntriesCsv (files: [Upload!]!, datasetId: String!): UploadProcess!
+    startCalculation: CalculationProcess!
   }
 `;
 
@@ -181,7 +184,8 @@ const resolvers: IResolvers<any, ApolloContext> = {
     deleteConnection: async (_, { id }, { db }) =>
       deleteConnection(db, new ObjectID(id)),
     updateEditor: async (_, { nodes, connections }, { db }) =>
-      updateEditor(db, nodes, connections)
+      updateEditor(db, nodes, connections),
+    startCalculation: async (_, __, { db }) => startCalculation(db)
   },
   Upload: GraphQLUpload
 };
@@ -194,7 +198,8 @@ const typeDefs = [
   Entry,
   Editor,
   Dataset,
-  Valueschema
+  Valueschema,
+  CalculationProcess
 ];
 
 export default makeExecutableSchema<ApolloContext>({

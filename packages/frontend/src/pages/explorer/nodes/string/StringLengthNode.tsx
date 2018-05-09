@@ -1,4 +1,4 @@
-import { NodeOptions } from '../AllNodes';
+import { NodeDef } from '../AllNodes';
 import {
   StringSocket,
   NumberSocket,
@@ -6,7 +6,7 @@ import {
   NUMBER_TYPE
 } from '../Sockets';
 
-export const StringLengthNode: NodeOptions = {
+export const StringLengthNode: NodeDef = {
   title: 'String Length',
   inputs: [StringSocket('String', 'input')],
   outputs: [NumberSocket('Length', 'output')],

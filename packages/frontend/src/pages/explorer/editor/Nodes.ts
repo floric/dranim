@@ -1,8 +1,9 @@
 import * as Konva from 'konva';
 import {
-  NodeDef,
+  NodeInstance,
   ExplorerEditorState,
-  ExplorerEditorProps
+  ExplorerEditorProps,
+  NodeState
 } from '../ExplorerEditor';
 import { nodeTypes } from '../nodes/AllNodes';
 import { Socket } from '../nodes/Sockets';
@@ -15,9 +16,10 @@ import {
 
 export const NODE_WIDTH = 160;
 const TEXT_HEIGHT = 20;
+const STATE_LINE_HEIGHT = 1;
 
 export const renderNode = (
-  n: NodeDef,
+  n: NodeInstance,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   changeState: (newState: Partial<ExplorerEditorState>) => void,
@@ -102,10 +104,19 @@ export const renderNode = (
     socketsMap.set(getSocketId('output', n.id, output.name), socket);
   }
 
+  const stateRect = new Konva.Rect({
+    width: NODE_WIDTH,
+    height: STATE_LINE_HEIGHT,
+    x: 0,
+    y: height - STATE_LINE_HEIGHT,
+    fill: n.state === NodeState.VALID ? 'green' : 'red'
+  });
+
   nodeGroup.add(bgRect);
   nodeGroup.add(nodeTitle);
   nodeGroup.add(inputsGroup);
   nodeGroup.add(outputsGroup);
+  nodeGroup.add(stateRect);
 
   return nodeGroup;
 };
