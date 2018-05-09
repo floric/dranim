@@ -48,16 +48,16 @@ export interface ExplorerEditorProps {
   connections: Array<ConnectionDef>;
   nodes: Array<NodeDef>;
   datasets: Array<Dataset>;
-  onNodeCreate: (type: string, x: number, y: number) => Promise<void>;
-  onNodeDelete: (id: string) => Promise<void>;
-  onNodeUpdate: (id: string, x: number, y: number) => Promise<void>;
-  onConnectionCreate: (from: SocketDef, to: SocketDef) => Promise<void>;
-  onConnectionDelete: (id: string) => Promise<void>;
+  onNodeCreate: (type: string, x: number, y: number) => Promise<any>;
+  onNodeDelete: (id: string) => Promise<any>;
+  onNodeUpdate: (id: string, x: number, y: number) => Promise<any>;
+  onConnectionCreate: (from: SocketDef, to: SocketDef) => Promise<any>;
+  onConnectionDelete: (id: string) => Promise<any>;
   onAddOrUpdateFormValue: (
     nodeId: string,
     name: string,
     value: string
-  ) => Promise<void>;
+  ) => Promise<any>;
 }
 
 export interface OpenConnection {

@@ -8,6 +8,8 @@ export interface NotificationArguments {
   position?: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
 }
 
+export type SuccessContentFunc<T> = (res: T) => string;
+
 export const showNotificationWithIcon = (args: NotificationArguments) => {
   notification.config({
     placement: args.position || 'bottomRight'
@@ -25,9 +27,9 @@ export const hasErrors = (fieldsError: any) => {
 export interface TryOperationArgs<T> {
   op: () => Promise<T>;
   onFail?: () => any;
-  successTitle?: (res: T) => string;
-  successMessage?: (res: T) => string;
-  failedTitle?: string;
+  successTitle?: null | SuccessContentFunc<T>;
+  successMessage?: SuccessContentFunc<T>;
+  failedTitle?: string | null;
   failedMessage?: string;
   refetch?: () => Promise<any>;
 }
@@ -52,7 +54,7 @@ export const tryOperation = async <T>(
     successTitle = () => 'Operation successfull',
     successMessage = () => 'Operation successfully done.',
     failedTitle = 'Operation failed',
-    failedMessage = 'Operation execution has failed.'
+    failedMessage = 'Operation has failed.'
   } = args;
   try {
     const res = await op();
@@ -61,11 +63,13 @@ export const tryOperation = async <T>(
       await refetch();
     }
 
-    showNotificationWithIcon({
-      icon: 'success',
-      content: successMessage(res),
-      title: successTitle(res)
-    });
+    if (successTitle !== null) {
+      showNotificationWithIcon({
+        icon: 'success',
+        content: successMessage(res),
+        title: successTitle(res)
+      });
+    }
 
     return res;
   } catch (err) {
@@ -73,14 +77,16 @@ export const tryOperation = async <T>(
       onFail();
     }
 
-    showNotificationWithIcon({
-      icon: 'error',
-      content:
-        isApolloError(err) && err.graphQLErrors.length > 0
-          ? `${failedMessage} ${err.graphQLErrors[0].message}`
-          : failedMessage,
-      title: failedTitle
-    });
+    if (failedTitle !== null) {
+      showNotificationWithIcon({
+        icon: 'error',
+        content:
+          isApolloError(err) && err.graphQLErrors.length > 0
+            ? `${failedMessage} ${err.graphQLErrors[0].message}`
+            : failedMessage,
+        title: failedTitle
+      });
+    }
 
     return null;
   }

@@ -86,6 +86,30 @@ export const createConnection = async (db: Db, from: Socket, to: Socket) => {
     throw new Error('Only one input allowed');
   }
 
+  const all = await allConnections(db);
+  let foundCircle = false;
+  let curFromSocket: Socket = from;
+  while (foundCircle === false) {
+    if (curFromSocket.nodeId === to.nodeId) {
+      foundCircle = true;
+      break;
+    } else {
+      const inputConnection = all.find(
+        s => s.to.nodeId === curFromSocket.nodeId
+      );
+      if (inputConnection !== undefined) {
+        curFromSocket = inputConnection.from;
+      } else {
+        // nothing found
+        break;
+      }
+    }
+  }
+
+  if (foundCircle) {
+    throw new Error('Cyclic dependencies not allowed!');
+  }
+
   res = await collection.insertOne({ from, to });
 
   if (res.result.ok !== 1 || res.ops.length !== 1) {

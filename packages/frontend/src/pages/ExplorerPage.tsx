@@ -5,7 +5,7 @@ import gql from 'graphql-tag';
 import { withPageHeaderHoC } from '../components/PageHeaderHoC';
 import { ExplorerEditor } from './explorer/ExplorerEditor';
 import { LoadingCard, UnknownErrorCard } from '../components/CustomCards';
-import { deepCopyResponse } from '../utils/form';
+import { deepCopyResponse, tryOperation } from '../utils/form';
 
 const EDITOR_NODE_SELECTION = gql`
   {
@@ -132,44 +132,74 @@ class ExplorerPage extends React.Component<{}> {
                                       nodes={deepCopyResponse(
                                         data.editor.nodes
                                       )}
-                                      onNodeCreate={async (type, x, y) => {
-                                        await createNode({
-                                          variables: { type, x, y }
-                                        });
-                                        await refetch();
-                                      }}
-                                      onNodeDelete={async id => {
-                                        await deleteNode({ variables: { id } });
-                                        await refetch();
-                                      }}
-                                      onNodeUpdate={async (id, x, y) => {
-                                        await updateNode({
-                                          variables: { id, x, y }
-                                        });
-                                        await refetch();
-                                      }}
-                                      onConnectionCreate={async (from, to) => {
-                                        await createConnection({
-                                          variables: { input: { from, to } }
-                                        });
-                                        await refetch();
-                                      }}
-                                      onConnectionDelete={async id => {
-                                        await deleteConnection({
-                                          variables: { id }
-                                        });
-                                        await refetch();
-                                      }}
-                                      onAddOrUpdateFormValue={async (
+                                      onNodeCreate={(type, x, y) =>
+                                        tryOperation({
+                                          op: () =>
+                                            createNode({
+                                              variables: { type, x, y }
+                                            }),
+                                          refetch,
+                                          successTitle: null,
+                                          failedTitle: 'Node not created'
+                                        })
+                                      }
+                                      onNodeDelete={id =>
+                                        tryOperation({
+                                          op: () =>
+                                            deleteNode({ variables: { id } }),
+                                          refetch,
+                                          successTitle: null,
+                                          failedTitle: 'Node not deleted'
+                                        })
+                                      }
+                                      onNodeUpdate={(id, x, y) =>
+                                        tryOperation({
+                                          op: () =>
+                                            updateNode({
+                                              variables: { id, x, y }
+                                            }),
+                                          refetch,
+                                          successTitle: null,
+                                          failedTitle: 'Node not updated'
+                                        })
+                                      }
+                                      onConnectionCreate={(from, to) =>
+                                        tryOperation({
+                                          op: () =>
+                                            createConnection({
+                                              variables: { input: { from, to } }
+                                            }),
+                                          refetch,
+                                          successTitle: null,
+                                          failedTitle: 'Connection not created'
+                                        })
+                                      }
+                                      onConnectionDelete={id =>
+                                        tryOperation({
+                                          op: () =>
+                                            deleteConnection({
+                                              variables: { id }
+                                            }),
+                                          refetch,
+                                          successTitle: null,
+                                          failedTitle: 'Connection not deleted'
+                                        })
+                                      }
+                                      onAddOrUpdateFormValue={(
                                         nodeId,
                                         name,
                                         value
-                                      ) => {
-                                        await addOrUpdateFormValue({
-                                          variables: { nodeId, name, value }
-                                        });
-                                        await refetch();
-                                      }}
+                                      ) =>
+                                        tryOperation({
+                                          op: () =>
+                                            addOrUpdateFormValue({
+                                              variables: { nodeId, name, value }
+                                            }),
+                                          refetch,
+                                          successTitle: null,
+                                          failedTitle: 'Value not changed'
+                                        })
+                                      }
                                     />
                                   )}
                                 </Mutation>
