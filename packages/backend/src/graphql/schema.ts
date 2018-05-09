@@ -10,8 +10,8 @@ import UploadProcess from './schemas/upload';
 import Editor from './schemas/editor';
 import CalculationProcess from './schemas/calculation';
 import {
-  datasets,
-  dataset,
+  getAllDatasets,
+  getDataset,
   createDataset,
   deleteDataset,
   addValueSchema,
@@ -35,8 +35,8 @@ import {
   createEntryFromJSON,
   entriesCount
 } from './resolvers/entry';
-import { uploads, uploadEntriesCsv } from './resolvers/upload';
-import { startCalculation } from './resolvers/calculation';
+import { getAllUploads, uploadEntriesCsv } from './resolvers/upload';
+import { startCalculation, getAllCalculations } from './resolvers/calculation';
 import { passagesSchemas, commoditiesSchemas } from '../example/str';
 
 interface ApolloContext {
@@ -50,6 +50,7 @@ export const Query = `
     dataset(id: String!): Dataset
     entry(datasetId: String!, entryId: String!): Entry
     uploads(datasetId: String): [UploadProcess!]!
+    calculations: [CalculationProcess!]!
   }
 `;
 
@@ -120,11 +121,12 @@ export const SchemaDefinition = `
 
 const resolvers: IResolvers<any, ApolloContext> = {
   Query: {
-    datasets: (_, __, { db }) => datasets(db),
-    dataset: (_, { id }, { db }) => dataset(db, new ObjectID(id)),
+    datasets: (_, __, { db }) => getAllDatasets(db),
+    dataset: (_, { id }, { db }) => getDataset(db, new ObjectID(id)),
     entry: (_, { datasetId, entryId }) => null,
     editor: (_, __, { db }) => editor(db),
-    uploads: (_, { datasetId }, { db }) => uploads(db, datasetId)
+    uploads: (_, { datasetId }, { db }) => getAllUploads(db, datasetId),
+    calculations: (_, __, { db }) => getAllCalculations(db)
   },
   Entry: {
     values: ({ values }, __, { db }) =>
@@ -177,19 +179,19 @@ const resolvers: IResolvers<any, ApolloContext> = {
       }
       return true;
     },
-    createNode: async (_, { type, x, y }, { db }) => createNode(db, type, x, y),
-    updateNode: async (_, { id, x, y }, { db }) =>
+    createNode: (_, { type, x, y }, { db }) => createNode(db, type, x, y),
+    updateNode: (_, { id, x, y }, { db }) =>
       updateNode(db, new ObjectID(id), x, y),
-    deleteNode: async (_, { id }, { db }) => deleteNode(db, new ObjectID(id)),
-    addOrUpdateFormValue: async (_, { nodeId, name, value }, { db }) =>
+    deleteNode: (_, { id }, { db }) => deleteNode(db, new ObjectID(id)),
+    addOrUpdateFormValue: (_, { nodeId, name, value }, { db }) =>
       addOrUpdateFormValue(db, new ObjectID(nodeId), name, value),
-    createConnection: async (_, { input }, { db }) =>
+    createConnection: (_, { input }, { db }) =>
       createConnection(db, input.from, input.to),
-    deleteConnection: async (_, { id }, { db }) =>
+    deleteConnection: (_, { id }, { db }) =>
       deleteConnection(db, new ObjectID(id)),
-    updateEditor: async (_, { nodes, connections }, { db }) =>
+    updateEditor: (_, { nodes, connections }, { db }) =>
       updateEditor(db, nodes, connections),
-    startCalculation: async (_, __, { db }) => startCalculation(db)
+    startCalculation: (_, __, { db }) => startCalculation(db)
   },
   Upload: GraphQLUpload
 };

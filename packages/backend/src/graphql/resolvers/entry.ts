@@ -1,6 +1,6 @@
 import { MongoClient, ObjectID, Db } from 'mongodb';
 
-import { Valueschema, dataset } from './dataset';
+import { Valueschema, getDataset } from './dataset';
 import { parse } from 'graphql';
 import { UploadEntryError } from './upload';
 
@@ -20,7 +20,7 @@ export const getEntryCollection = (db: Db, datasetId: ObjectID) => {
   return db.collection(`Entries_${datasetId.toHexString()}`);
 };
 
-export const entry = async (
+export const getEntry = async (
   db: Db,
   datasetId: ObjectID,
   id: ObjectID
@@ -79,7 +79,7 @@ export const createEntry = async (
     }
   });
 
-  const dsCollection = await dataset(db, datasetId);
+  const dsCollection = await getDataset(db, datasetId);
 
   // check required schemas which are not set
   const missedSchemas = dsCollection.valueschemas

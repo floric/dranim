@@ -6,7 +6,7 @@ import { Readable, Writable } from 'stream';
 
 import { Entry, createEntry } from './entry';
 import { getDatasetsCollection, Dataset, Valueschema } from './dataset';
-import { dataset } from '../resolvers/dataset';
+import { getDataset } from '../resolvers/dataset';
 import { UploadProgress } from './util/UploadProgress';
 import { updateNode } from './editor';
 import { Upper } from './util/TransformStream';
@@ -33,7 +33,7 @@ export const getUploadsCollection = (db: Db) => {
   return db.collection('Uploads');
 };
 
-export const uploads = async (db: Db, datasetId: string | null) => {
+export const getAllUploads = async (db: Db, datasetId: string | null) => {
   const collection = getUploadsCollection(db);
   const all = await collection
     .find(datasetId ? { datasetId } : {})
@@ -189,7 +189,7 @@ export const uploadEntriesCsv = async (
   datasetId: ObjectID
 ): Promise<UploadProcess> => {
   try {
-    const ds = await dataset(db, datasetId);
+    const ds = await getDataset(db, datasetId);
 
     const uploadsCollection = getUploadsCollection(db);
     const newProcess = {

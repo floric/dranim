@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ApolloQueryResult } from 'apollo-client';
-import { Row, Col, Card, Upload, Button, Icon, Table } from 'antd';
+import { Row, Col, Card, Upload, Button, Icon, Table, Form } from 'antd';
 import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 import {
   Mutation,
@@ -10,14 +10,13 @@ import {
   Query
 } from 'react-apollo';
 import gql from 'graphql-tag';
-import { distanceInWordsToNow } from 'date-fns';
 
 import { Dataset } from '../../utils/model';
 import { UploadFile } from 'antd/lib/upload/interface';
 import { tryOperation } from '../../utils/form';
 import { AsyncButton } from '../../components/AsyncButton';
 import { UnknownErrorCard, LoadingCard } from '../../components/CustomCards';
-import Tooltip from 'antd/lib/tooltip';
+import { ProcessTime } from '../../components/ProcessTime';
 
 const UPLOAD_ENTRIES_CSV = gql`
   mutation($files: [Upload!]!, $datasetId: String!) {
@@ -154,7 +153,6 @@ export const DatasetActions = withApollo<DataActionsProps>(
             const entriesDataSource = data.uploads.map((u: UploadProcess) => ({
               key: u.id,
               time: { start: u.start, finish: u.finish },
-              finish: u.finish,
               state:
                 u.state === 'FINISHED' ? (
                   <Icon type="check-circle" />
@@ -180,32 +178,7 @@ export const DatasetActions = withApollo<DataActionsProps>(
                 dataIndex: 'time',
                 key: 'time',
                 render: time => (
-                  <>
-                    <Row>
-                      <Col xs={6}>Started:</Col>
-                      <Col xs={18}>
-                        <Tooltip title={time.start}>
-                          {distanceInWordsToNow(time.start, {
-                            includeSeconds: true,
-                            addSuffix: true
-                          })}
-                        </Tooltip>
-                      </Col>
-                    </Row>
-                    {time.finish ? (
-                      <Row>
-                        <Col xs={6}>Finished:</Col>
-                        <Col xs={18}>
-                          <Tooltip title={time.finish}>
-                            {distanceInWordsToNow(time.finish, {
-                              includeSeconds: true,
-                              addSuffix: true
-                            })}
-                          </Tooltip>
-                        </Col>
-                      </Row>
-                    ) : null}
-                  </>
+                  <ProcessTime start={time.start} finish={time.finish} />
                 )
               },
               {
@@ -243,7 +216,7 @@ export const DatasetActions = withApollo<DataActionsProps>(
                     style={{ marginBottom: 12 }}
                   >
                     <Card bordered={false}>
-                      <h3>Entry upload</h3>
+                      <h3>Upload</h3>
                       <Mutation mutation={UPLOAD_ENTRIES_CSV}>
                         {uploadEntriesCsv => (
                           <>
@@ -272,6 +245,42 @@ export const DatasetActions = withApollo<DataActionsProps>(
                           </>
                         )}
                       </Mutation>
+                    </Card>
+                  </Col>
+                  <Col
+                    xs={{ span: 24 }}
+                    md={{ span: 12 }}
+                    xl={{ span: 8 }}
+                    style={{ marginBottom: 12 }}
+                  >
+                    <Card bordered={false}>
+                      <h3>Export</h3>
+                      <Row>
+                        <Col>
+                          <Form layout="inline">
+                            <Form.Item label="Export entries">
+                              <Row gutter={8}>
+                                <Col span={12}>
+                                  <AsyncButton
+                                    type="primary"
+                                    onClick={async () => console.log('TODO')}
+                                  >
+                                    as CSV
+                                  </AsyncButton>
+                                </Col>
+                                <Col span={12}>
+                                  <AsyncButton
+                                    type="primary"
+                                    onClick={async () => console.log('TODO')}
+                                  >
+                                    as ZIP
+                                  </AsyncButton>
+                                </Col>
+                              </Row>
+                            </Form.Item>
+                          </Form>
+                        </Col>
+                      </Row>
                     </Card>
                   </Col>
                 </Row>

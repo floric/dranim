@@ -4,6 +4,8 @@ const CalculationProcess = `
     start: String!
     finish: String
     state: String!
+    processedOutputs: Int!
+    totalOutputs: Int!
   }
 `;
 

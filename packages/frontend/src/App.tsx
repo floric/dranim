@@ -13,6 +13,7 @@ import DataPage from './pages/DataPage';
 import ExplorerPage from './pages/ExplorerPage';
 import VisPage from './pages/VisPage';
 import DataDetailPage from './pages/DataDetailPage';
+import CalculationProcessesPage from './pages/CalculationProcessesPage';
 
 const { Content, Footer, Sider } = Layout;
 const SubMenu = Menu.SubMenu;
@@ -83,14 +84,30 @@ const AppMenu: SFC<{
           </Menu.Item>
         ))}
     </SubMenu>
-    <Menu.Item key="menu_explorer">
-      <MenuItemContent
-        collapsed={collapsed}
-        href="/explorer"
-        iconName="filter"
-        title="Explorer"
-      />
-    </Menu.Item>
+    <SubMenu
+      key="sub2"
+      title={
+        <span>
+          <Icon type="filter" />
+          {!collapsed ? ' Explorer' : null}
+        </span>
+      }
+    >
+      <Menu.Item key="menu_explorer">
+        <MenuItemContent
+          collapsed={collapsed}
+          href="/explorer"
+          title="Editor"
+        />
+      </Menu.Item>
+      <Menu.Item key="menu_calculations">
+        <MenuItemContent
+          collapsed={collapsed}
+          href="/explorer/calculations"
+          title="Calculations"
+        />
+      </Menu.Item>
+    </SubMenu>
     <Menu.Item key="menu_vis">
       <MenuItemContent
         collapsed={collapsed}
@@ -147,8 +164,13 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
               <Route exact path="/" render={props => StartPage} />
               <Route exact path="/data" render={props => DataPage} />
               <Route path="/data/:id" render={props => DataDetailPage} />
-              <Route path="/explorer" render={props => ExplorerPage} />
-              <Route path="/visualizations" render={props => VisPage} />
+              <Route exact path="/explorer" render={props => ExplorerPage} />
+              <Route
+                exact
+                path="/explorer/calculations"
+                render={props => CalculationProcessesPage}
+              />
+              <Route exact path="/visualizations" render={props => VisPage} />
             </Switch>
           </Content>
           <Footer style={{ textAlign: 'center' }}>Florian Richter</Footer>

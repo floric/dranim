@@ -25,21 +25,71 @@ export interface CalculationProcess {
   id: string;
   start: string;
   finish: string | null;
+  processedOutputs: number;
+  totalOutputs: number;
   state: CalculationProcessState;
 }
 
 const startProcess = async (db: Db, processId: string) => {
-  const connections = await allConnections(db);
-  const nodes = await allNodes(db);
-  const outputs = nodes.filter(n => outputNodes.includes(n.type));
+  const processCollection = getCalculationsCollection(db);
 
-  outputs.forEach(async o => {
-    const resultsFromOutput = await executeNode(db, o);
-    console.log(resultsFromOutput);
-    console.log(
-      `${o.type}: ${JSON.stringify(Array.from(resultsFromOutput.entries()))}`
+  try {
+    const connections = await allConnections(db);
+    const nodes = await allNodes(db);
+    const outputs = nodes.filter(n => outputNodes.includes(n.type));
+
+    await processCollection.updateOne(
+      { _id: new ObjectID(processId) },
+      {
+        $set: {
+          totalOutputs: outputs.length,
+          state: CalculationProcessState.PROCESSING
+        }
+      }
     );
-  });
+
+    await Promise.all(
+      outputs.map(async o => {
+        const resultsFromOutput = await executeNode(db, o);
+        console.log(
+          `${o.type}: ${JSON.stringify(
+            Array.from(resultsFromOutput.entries())
+          )}`
+        );
+        await processCollection.updateOne(
+          { _id: new ObjectID(processId) },
+          {
+            $inc: {
+              processedOutputs: 1
+            }
+          }
+        );
+      })
+    );
+
+    await processCollection.updateOne(
+      { _id: new ObjectID(processId) },
+      {
+        $set: {
+          finish: new Date(),
+          state: CalculationProcessState.SUCCESSFUL
+        }
+      }
+    );
+
+    console.log('Finished calculation.');
+  } catch (err) {
+    await processCollection.updateOne(
+      { _id: new ObjectID(processId) },
+      {
+        $set: {
+          finish: new Date(),
+          state: CalculationProcessState.ERROR
+        }
+      }
+    );
+    console.log('Finished calculation with errors.');
+  }
 };
 
 const executeNode = async (
@@ -80,15 +130,17 @@ const executeNode = async (
   return res.outputs;
 };
 
-export const getProcessesCollection = (db: Db) => {
-  return db.collection('Processes');
+export const getCalculationsCollection = (db: Db) => {
+  return db.collection('Calculations');
 };
 
 export const startCalculation = async (db: Db): Promise<CalculationProcess> => {
-  const coll = getProcessesCollection(db);
+  const coll = getCalculationsCollection(db);
   const newProcess = await coll.insertOne({
     start: new Date(),
     finish: null,
+    processedOutputs: 0,
+    totalOutputs: 0,
     state: CalculationProcessState.STARTED
   });
   if (newProcess.result.ok !== 1 || newProcess.ops.length !== 1) {
@@ -103,4 +155,15 @@ export const startCalculation = async (db: Db): Promise<CalculationProcess> => {
     id,
     ...newProcess.ops[0]
   };
+};
+
+export const getAllCalculations = async (
+  db: Db
+): Promise<Array<CalculationProcess>> => {
+  const collection = getCalculationsCollection(db);
+  const all = await collection.find({}).toArray();
+  return all.map(ds => ({
+    id: ds._id,
+    ...ds
+  }));
 };

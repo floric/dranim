@@ -1,6 +1,6 @@
 import { MongoClient, ObjectID, Db } from 'mongodb';
 
-import { getEntryCollection, entry } from './entry';
+import { getEntryCollection, getEntry } from './entry';
 
 export interface Valueschema {
   name: string;
@@ -58,7 +58,7 @@ export const deleteDataset = async (db: Db, id: ObjectID) => {
   return res.deletedCount === 1;
 };
 
-export const datasets = async (db: Db): Promise<Array<Dataset>> => {
+export const getAllDatasets = async (db: Db): Promise<Array<Dataset>> => {
   const collection = getDatasetsCollection(db);
   const allDatasets = await collection.find({}).toArray();
   return allDatasets.map(ds => ({
@@ -67,7 +67,7 @@ export const datasets = async (db: Db): Promise<Array<Dataset>> => {
   }));
 };
 
-export const dataset = async (db: Db, id: ObjectID): Promise<Dataset> => {
+export const getDataset = async (db: Db, id: ObjectID): Promise<Dataset> => {
   const collection = getDatasetsCollection(db);
   const obj = await collection.findOne({ _id: id });
   if (!obj) {
@@ -85,7 +85,7 @@ export const addValueSchema = async (
   schema: Valueschema
 ): Promise<boolean> => {
   const collection = getDatasetsCollection(db);
-  const ds = await dataset(db, datasetId);
+  const ds = await getDataset(db, datasetId);
 
   if (schema.name.length === 0) {
     throw new Error("Name mustn't be empty.");
