@@ -22,6 +22,7 @@ const filterTreeNode = (inputValue: string, treeNode: any) => {
 
 export enum NodeState {
   VALID = 'VALID',
+  ERROR = 'ERROR',
   INVALID = 'INVALID'
 }
 

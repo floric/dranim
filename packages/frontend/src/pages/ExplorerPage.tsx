@@ -23,6 +23,15 @@ const EDITOR_NODE_SELECTION = gql`
         type
         x
         y
+        state
+        inputs {
+          name
+          connectionId
+        }
+        outputs {
+          name
+          connectionId
+        }
         form {
           name
           value

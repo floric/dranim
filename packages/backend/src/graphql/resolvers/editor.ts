@@ -1,11 +1,21 @@
 import { MongoClient, ObjectID, Db } from 'mongodb';
+import { nodeTypes } from '../../nodes/AllNodes';
 
 export type FormValues = Array<{ name: string; value: any }>;
+
+export enum NodeState {
+  VALID = 'VALID',
+  ERROR = 'ERROR',
+  INVALID = 'INVALID'
+}
 
 export interface Node {
   id: string;
   x: number;
   y: number;
+  state: NodeState;
+  outputs: Array<{ name: string; connectionId: string }>;
+  inputs: Array<{ name: string; connectionId: string }>;
   type: string;
   form: FormValues;
 }
@@ -119,6 +129,18 @@ export const createConnection = async (db: Db, from: Socket, to: Socket) => {
   }
 
   const newItem = res.ops[0];
+  const connId = newItem._id;
+
+  const nodesCollection = getNodesCollection(db);
+  await nodesCollection.updateOne(
+    { _id: new ObjectID(from.nodeId) },
+    { $push: { outputs: { name: from.name, connectionId: connId } } }
+  );
+  await nodesCollection.updateOne(
+    { _id: new ObjectID(to.nodeId) },
+    { $push: { inputs: { name: to.name, connectionId: connId } } }
+  );
+
   return {
     id: newItem._id,
     ...newItem
@@ -127,6 +149,41 @@ export const createConnection = async (db: Db, from: Socket, to: Socket) => {
 
 export const deleteConnection = async (db: Db, id: ObjectID) => {
   const collection = getConnectionsCollection(db);
+  const nodesCollection = getNodesCollection(db);
+  const connection = await getConnection(db, id);
+  if (!connection) {
+    throw new Error('Connection not known.');
+  }
+
+  const outputNode = await getNode(db, new ObjectID(connection.from.nodeId));
+  const inputNode = await getNode(db, new ObjectID(connection.to.nodeId));
+
+  if (!outputNode || !inputNode) {
+    throw new Error('Unknown nodes as input or output!');
+  }
+
+  await nodesCollection.updateOne(
+    { _id: new ObjectID(outputNode.id) },
+    {
+      $set: {
+        outputs: outputNode.outputs.filter(
+          n =>
+            n.name !== connection.from.name && n.connectionId !== connection.id
+        )
+      }
+    }
+  );
+  await nodesCollection.updateOne(
+    { _id: new ObjectID(inputNode.id) },
+    {
+      $set: {
+        inputs: inputNode.inputs.filter(
+          n => n.name !== connection.to.name && n.connectionId !== connection.id
+        )
+      }
+    }
+  );
+
   const res = await collection.deleteOne({ _id: id });
   if (res.deletedCount !== 1) {
     throw new Error('Deleting connection failed');
@@ -150,6 +207,8 @@ export const createNode = async (
     x,
     y,
     form: [],
+    outputs: [],
+    inputs: [],
     type
   });
 
@@ -177,12 +236,6 @@ export const deleteNode = async (db: Db, id: ObjectID) => {
 
   return true;
 };
-
-export const getNode = async (db: Db, nodeId: ObjectID): Promise<Node> => {
-  const collection = getNodesCollection(db);
-  return await collection.findOne({ _id: nodeId });
-};
-
 export const updateNode = async (
   db: Db,
   id: ObjectID,
@@ -207,9 +260,58 @@ export const allNodes = async (db: Db): Promise<Array<Node>> => {
   const all = await collection.find({}).toArray();
   return all.map(ds => ({
     id: ds._id,
-    state: 'INVALID',
     ...ds
   }));
+};
+
+export const getNodeState = async (
+  db: Db,
+  node: Pick<Node, 'form' | 'inputs' | 'type'>
+) => {
+  const t = nodeTypes.get(node.type);
+  if (!t) {
+    return NodeState.ERROR;
+  }
+
+  const isValid = t.isFormValid ? t.isFormValid(node.form) : true;
+  if (!isValid) {
+    return NodeState.INVALID;
+  }
+
+  if (node.inputs.length !== t.inputs.length) {
+    return NodeState.INVALID;
+  }
+
+  return NodeState.VALID;
+};
+
+export const getNode = async (db: Db, id: ObjectID): Promise<Node | null> => {
+  const collection = getNodesCollection(db);
+  const node = await collection.findOne({ _id: id });
+  if (!node) {
+    return null;
+  }
+
+  return {
+    id: node._id,
+    ...node
+  };
+};
+
+export const getConnection = async (
+  db: Db,
+  id: ObjectID
+): Promise<Connection | null> => {
+  const collection = getConnectionsCollection(db);
+  const connection = await collection.findOne({ _id: id });
+  if (!connection) {
+    return null;
+  }
+
+  return {
+    id: connection._id,
+    ...connection
+  };
 };
 
 export const allConnections = async (db: Db): Promise<Array<Connection>> => {

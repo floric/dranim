@@ -25,7 +25,8 @@ import {
   createConnection,
   deleteConnection,
   deleteNode,
-  addOrUpdateFormValue
+  addOrUpdateFormValue,
+  getNodeState
 } from './resolvers/editor';
 import {
   createEntry,
@@ -140,6 +141,9 @@ const resolvers: IResolvers<any, ApolloContext> = {
         message: errors[name].message,
         count: errors[name].count
       }))
+  },
+  Node: {
+    state: (node, __, { db }) => getNodeState(db, node)
   },
   Mutation: {
     createDataset: (_, { name }, { db }) => createDataset(db, name),

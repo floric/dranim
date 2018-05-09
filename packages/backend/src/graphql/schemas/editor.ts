@@ -5,12 +5,22 @@ const FormValue = `
   }
 `;
 
+const SocketValue = `
+  type SocketValue {
+    name: String!
+    connectionId: String!
+  }
+`;
+
 const Node = `
   type Node {
     id: String!
     type: String!
     x: Float!
     y: Float!
+    inputs: [SocketValue!]!
+    outputs: [SocketValue!]!
+    state: String!
     form: [FormValue!]!
   }
 `;
@@ -62,6 +72,7 @@ const Editor = `
 
 export default () => [
   FormValue,
+  SocketValue,
   Node,
   NodeInput,
   Socket,
