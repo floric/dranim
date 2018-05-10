@@ -36,10 +36,10 @@
     "name": "Florian Richter"
   },
   "scripts": {
-    "start": "node scripts/start.js",
-    "build": "node scripts/build.js",
+    "start": "parcel public/index.html",
+    "build": "parcel build public/index.html",
     "clean": "rm -rf build node_modules",
-    "start:watch": "node scripts/start.js"
+    "start:watch": "parcel public/index.html"
   },
   "devDependencies": {
     "@types/history": "^4.6.2",
@@ -83,9 +83,7 @@
     "webpack-manifest-plugin": "2.0.2"
   },
   "babel": {
-    "presets": [
-      "react-app"
-    ]
+    "presets": ["react-app"]
   },
   "eslintConfig": {
     "extends": "react-app"

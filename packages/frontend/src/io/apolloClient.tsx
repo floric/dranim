@@ -6,7 +6,10 @@ import { createUploadLink } from 'apollo-upload-client';
 import { withClientState } from 'apollo-link-state';
 import customFetch from './customFetch';
 
-const API_URL = '/api/graphql';
+const API_URL =
+  process.env.NODE_ENV === 'production'
+    ? '/api/graphql'
+    : 'http://localhost:3000/api/graphql';
 
 const stateCache = new InMemoryCache();
 

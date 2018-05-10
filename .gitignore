@@ -7,4 +7,5 @@ dist/
 *.log
 *.tgz
 .idea/
+.cache/
 data/

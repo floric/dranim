@@ -3,6 +3,8 @@ import * as bodyParser from 'body-parser';
 import * as helmet from 'helmet';
 import * as morgan from 'morgan';
 import * as graphqlHTTP from 'express-graphql';
+import * as cors from 'cors';
+
 import { graphqlExpress } from 'apollo-server-express';
 import { apolloUploadExpress } from 'apollo-upload-server';
 import { truncate } from 'fs';
@@ -30,6 +32,9 @@ export const main = async (options: IMainOptions) => {
   const client = await mongoDbClient();
 
   const app = express();
+  if (options.env !== 'production') {
+    app.use(cors());
+  }
   app.use(helmet());
   app.use(morgan(options.env));
   app.use(
