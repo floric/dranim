@@ -24,8 +24,8 @@ http {
     tcp_nopush on;
     tcp_nodelay off;
     client_header_timeout 10s;
-    client_body_timeout 10s;
-    client_max_body_size 128k;
+    client_body_timeout 200s;
+    client_max_body_size 500M;
     reset_timedout_connection on;
     gzip on;
     gzip_types

@@ -1,6 +1,5 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
-import * as cors from 'cors';
 import * as helmet from 'helmet';
 import * as morgan from 'morgan';
 import * as graphqlHTTP from 'express-graphql';
@@ -14,7 +13,6 @@ import Schema from './graphql/schema';
 export const GRAPHQL_ROUTE = '/api/graphql';
 
 interface IMainOptions {
-  enableCors: boolean;
   env: string;
   port: number;
   verbose?: boolean;
@@ -32,10 +30,6 @@ export const main = async (options: IMainOptions) => {
   const client = await mongoDbClient();
 
   const app = express();
-  if (options.enableCors) {
-    app.options(GRAPHQL_ROUTE, cors());
-  }
-
   app.use(helmet());
   app.use(morgan(options.env));
   app.use(
@@ -72,10 +66,8 @@ if (require.main === module) {
   const PORT = parseInt(process.env.PORT || '3000', 10);
   const NODE_ENV = process.env.NODE_ENV !== 'production' ? 'dev' : 'production';
   const EXPORT_GRAPHIQL = NODE_ENV !== 'production';
-  const ENABLE_CORS = NODE_ENV !== 'production';
 
   main({
-    enableCors: true,
     env: NODE_ENV,
     port: PORT,
     verbose: true
