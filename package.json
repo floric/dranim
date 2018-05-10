@@ -6,22 +6,19 @@
     "node": ">= 6.11.1",
     "yarn": ">= 1.0.0"
   },
-  "cacheDirectories": [
-    ".cache"
-  ],
+  "cacheDirectories": [".cache"],
   "scripts": {
     "build": "lerna run build --stream",
-    "start": "lerna run start:watch --stream",
-    "clean": "lerna run clean --stream && rm -rf \"data,node_modules\"",
+    "start": "lerna run start --stream",
+    "clean":
+      "lerna run clean --stream && rm -rf node_modules && sudo rm -rf data",
     "mongodb": "sudo docker run -p 127.0.0.1:27017:27017 mongo:latest"
   },
   "author": {
     "name": "Florian Richter",
     "email": "floririchte@gmail.com"
   },
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": ["packages/*"],
   "devDependencies": {
     "apollo-codegen": "^0.19.1",
     "lerna": "^2.11.0",

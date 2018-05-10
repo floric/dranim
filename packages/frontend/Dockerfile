@@ -1,9 +1,13 @@
-FROM library/nginx:alpine
+FROM node:slim
+WORKDIR /build
+ADD . .
+RUN yarn
+RUN yarn build
 
+FROM library/nginx:alpine
 RUN mkdir -p /var/www/html
 WORKDIR /var/www/html
-ADD ./dist ./dist
-ADD ./dist/index.html .
+COPY --from=0 ./build/dist .
 COPY scripts/serve.sh /serve.sh
 
 EXPOSE 80

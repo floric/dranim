@@ -1,9 +1,9 @@
-import * as express from 'express';
-import * as bodyParser from 'body-parser';
-import * as helmet from 'helmet';
-import * as morgan from 'morgan';
-import * as graphqlHTTP from 'express-graphql';
-import * as cors from 'cors';
+const express = require('express');
+const bodyParser = require('body-parser');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const graphqlHTTP = require('express-graphql');
+const cors = require('cors');
 
 import { graphqlExpress } from 'apollo-server-express';
 import { apolloUploadExpress } from 'apollo-upload-server';
@@ -21,16 +21,13 @@ interface IMainOptions {
 }
 
 function verbosePrint(port) {
-  console.log(
-    `GraphQL Server is now running on http://localhost${GRAPHQL_ROUTE}`
-  );
+  console.log(`Server running on http://localhost${GRAPHQL_ROUTE}`);
 }
 
 const MAX_UPLOAD_LIMIT = 100 * 1024 * 1024 * 1024;
 
 export const main = async (options: IMainOptions) => {
   const client = await mongoDbClient();
-
   const app = express();
   if (options.env !== 'production') {
     app.use(cors());
@@ -59,22 +56,18 @@ export const main = async (options: IMainOptions) => {
       if (options.verbose) {
         verbosePrint(options.port);
       }
-
-      console.log('Express running.');
     })
     .on('error', (err: Error) => {
       console.error(err);
     });
 };
 
-if (require.main === module) {
-  const PORT = parseInt(process.env.PORT || '3000', 10);
-  const NODE_ENV = process.env.NODE_ENV !== 'production' ? 'dev' : 'production';
-  const EXPORT_GRAPHIQL = NODE_ENV !== 'production';
+const PORT = parseInt(process.env.PORT || '3000', 10);
+const NODE_ENV = process.env.NODE_ENV !== 'production' ? 'dev' : 'production';
+const EXPORT_GRAPHIQL = NODE_ENV !== 'production';
 
-  main({
-    env: NODE_ENV,
-    port: PORT,
-    verbose: true
-  });
-}
+main({
+  env: NODE_ENV,
+  port: PORT,
+  verbose: true
+});

@@ -1,9 +1,14 @@
 FROM node:slim
+WORKDIR /build
+ADD . .
+RUN yarn
+RUN yarn build
 
-ADD ./dist .
-
+WORKDIR /
+RUN cp -r ./build/dist ./
+RUN cp -r ./build/node_modules ./dist/
 ENV NODE_ENV="production"
 ENV PORT=3000
 EXPOSE ${PORT}
 
-CMD ["node", "main.js"]
+CMD ["node", "dist/main.js"]
