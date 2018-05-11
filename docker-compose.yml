@@ -14,6 +14,7 @@ services:
     build: ./packages/frontend
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - backend
     links:

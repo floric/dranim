@@ -1,9 +1,9 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const graphqlHTTP = require('express-graphql');
-const cors = require('cors');
+import express from 'express';
+import bodyParser from 'body-parser';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import graphqlHTTP from 'express-graphql';
+import cors from 'cors';
 
 import { graphqlExpress } from 'apollo-server-express';
 import { apolloUploadExpress } from 'apollo-upload-server';

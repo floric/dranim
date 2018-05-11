@@ -1,11 +1,5 @@
 #!/bin/sh
 
-cat <<EOJS > /var/www/html/env.js
-window.env = {
-    "apiUrl": "${API_URL}"
-};
-EOJS
-
 cat <<'EOF' > /etc/nginx/nginx.conf
 user  nginx;
 worker_processes  1;
@@ -45,6 +39,18 @@ http {
     server {
         listen 80;
         server_name localhost;
+        return 301 https://$host$request_uri;
+    }
+    server {
+        listen 443 http2;
+        server_name localhost;
+        ssl_certificate /etc/nginx/server.crt;
+        ssl_certificate_key /etc/nginx/server.key;
+        ssl on;
+        ssl_session_cache  builtin:1000  shared:SSL:10m;
+        ssl_protocols  TLSv1 TLSv1.1 TLSv1.2;
+        ssl_ciphers HIGH:!aNULL:!eNULL:!EXPORT:!CAMELLIA:!DES:!MD5:!PSK:!RC4;
+        ssl_prefer_server_ciphers on;
         root /var/www/html;
         location / {
             try_files $uri /index.html;
