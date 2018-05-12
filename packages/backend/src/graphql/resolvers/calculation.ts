@@ -103,9 +103,9 @@ const executeNode = async (
 
   const inputValues = await Promise.all(
     node.inputs.map(async i => {
-      const c = await getConnection(db, new ObjectID(i.connectionId));
+      const c = await getConnection(db, i.connectionId);
       const inputNodeId = c.from.nodeId;
-      const inputNode = await getNode(db, new ObjectID(inputNodeId));
+      const inputNode = await getNode(db, inputNodeId);
       if (!inputNode) {
         throw new Error('Node not found!');
       }

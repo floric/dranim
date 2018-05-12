@@ -16,17 +16,17 @@ export interface Value {
   val: string;
 }
 
-export const getEntryCollection = (db: Db, datasetId: ObjectID) => {
-  return db.collection(`Entries_${datasetId.toHexString()}`);
+export const getEntryCollection = (db: Db, datasetId: string) => {
+  return db.collection(`Entries_${datasetId}`);
 };
 
 export const getEntry = async (
   db: Db,
-  datasetId: ObjectID,
-  id: ObjectID
+  datasetId: string,
+  id: string
 ): Promise<Entry> => {
   const collection = getEntryCollection(db, datasetId);
-  const obj = await collection.findOne({ _id: id });
+  const obj = await collection.findOne({ _id: new ObjectID(id) });
   if (!obj) {
     throw new Error('Dataset not found!');
   }
@@ -38,7 +38,7 @@ export const getEntry = async (
 
 export const entriesCount = async (
   db: Db,
-  datasetId: ObjectID
+  datasetId: string
 ): Promise<number> => {
   const collection = getEntryCollection(db, datasetId);
   return await collection.count({});
@@ -46,7 +46,7 @@ export const entriesCount = async (
 
 export const latestEntries = async (
   db: Db,
-  datasetId: ObjectID
+  datasetId: string
 ): Promise<Array<Entry>> => {
   const collection = getEntryCollection(db, datasetId);
   // TODO Introduce pagination later
@@ -62,7 +62,7 @@ export const latestEntries = async (
 
 export const createEntry = async (
   db: Db,
-  datasetId: ObjectID,
+  datasetId: string,
   valuesArr: Array<Value>
 ) => {
   if (!valuesArr.length) {
@@ -139,7 +139,7 @@ export const createEntry = async (
 
 export const createEntryFromJSON = async (
   db: Db,
-  datasetId: ObjectID,
+  datasetId: string,
   values: string
 ): Promise<Entry> => {
   const parsedValues: Array<Value> = JSON.parse(values);
@@ -148,11 +148,15 @@ export const createEntryFromJSON = async (
 
 export const deleteEntry = async (
   db: Db,
-  datasetId: ObjectID,
-  entryId: ObjectID
+  datasetId: string,
+  entryId: string
 ) => {
+  if (!ObjectID.isValid(entryId) || !ObjectID.isValid(datasetId)) {
+    throw new Error('Invalid ID');
+  }
+
   const collection = getEntryCollection(db, datasetId);
-  const res = await collection.deleteOne({ _id: entryId });
+  const res = await collection.deleteOne({ _id: new ObjectID(entryId) });
   if (res.deletedCount !== 1) {
     throw new Error('Deleting entry failed');
   }

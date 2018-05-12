@@ -1,6 +1,6 @@
 import { makeExecutableSchema, IResolvers } from 'graphql-tools';
 import { GraphQLUpload } from 'apollo-upload-server';
-import { Db, ObjectID } from 'mongodb';
+import { Db } from 'mongodb';
 import * as promisesAll from 'promises-all';
 
 import Dataset from './schemas/dataset';
@@ -141,10 +141,10 @@ export const SchemaDefinition = `
 const resolvers: IResolvers<any, ApolloContext> = {
   Query: {
     datasets: (_, __, { db }) => getAllDatasets(db),
-    dataset: (_, { id }, { db }) => getDataset(db, new ObjectID(id)),
+    dataset: (_, { id }, { db }) => getDataset(db, id),
     entry: (_, { datasetId, entryId }) => null,
     workspaces: (_, __, { db }) => getAllWorkspaces(db),
-    workspace: (_, { id }, { db }) => getWorkspace(db, new ObjectID(id)),
+    workspace: (_, { id }, { db }) => getWorkspace(db, id),
     uploads: (_, { datasetId }, { db }) => getAllUploads(db, datasetId),
     calculations: (_, { workspaceId }, { db }) =>
       getAllCalculations(db, workspaceId)
@@ -167,8 +167,7 @@ const resolvers: IResolvers<any, ApolloContext> = {
   },
   Node: {
     state: (node, __, { db }) => getNodeState(db, node),
-    workspace: ({ workspaceId }, __, { db }) =>
-      getWorkspace(db, new ObjectID(workspaceId))
+    workspace: ({ workspaceId }, __, { db }) => getWorkspace(db, workspaceId)
   },
   Workspace: {
     nodes: ({ id }, __, { db }) => getAllNodes(db, id),
@@ -181,7 +180,7 @@ const resolvers: IResolvers<any, ApolloContext> = {
       { datasetId, name, type, required, fallback, unique },
       { db }
     ) =>
-      addValueSchema(db, new ObjectID(datasetId), {
+      addValueSchema(db, datasetId, {
         name,
         type,
         required,
@@ -189,30 +188,27 @@ const resolvers: IResolvers<any, ApolloContext> = {
         unique
       }),
     addEntry: (_, { datasetId, values }, { db }) =>
-      createEntryFromJSON(db, new ObjectID(datasetId), values),
-    deleteDataset: (_, { id }, { db }) => deleteDataset(db, new ObjectID(id)),
+      createEntryFromJSON(db, datasetId, values),
+    deleteDataset: (_, { id }, { db }) => deleteDataset(db, id),
     deleteEntry: (_, { entryId, datasetId }, { db }) =>
-      deleteEntry(db, new ObjectID(datasetId), new ObjectID(entryId)),
+      deleteEntry(db, datasetId, entryId),
     uploadEntriesCsv: (obj, { files, datasetId }, { db }) =>
-      uploadEntriesCsv(db, files, new ObjectID(datasetId)),
+      uploadEntriesCsv(db, files, datasetId),
     createSTRDemoData: (_, {}, { db }) => createSTRDemoData(db),
     createNode: (_, { type, x, y, workspaceId }, { db }) =>
       createNode(db, type, workspaceId, x, y),
-    updateNode: (_, { id, x, y }, { db }) =>
-      updateNode(db, new ObjectID(id), x, y),
-    deleteNode: (_, { id }, { db }) => deleteNode(db, new ObjectID(id)),
+    updateNode: (_, { id, x, y }, { db }) => updateNode(db, id, x, y),
+    deleteNode: (_, { id }, { db }) => deleteNode(db, id),
     addOrUpdateFormValue: (_, { nodeId, name, value }, { db }) =>
-      addOrUpdateFormValue(db, new ObjectID(nodeId), name, value),
+      addOrUpdateFormValue(db, nodeId, name, value),
     createConnection: (_, { input }, { db }) =>
       createConnection(db, input.from, input.to),
-    deleteConnection: (_, { id }, { db }) =>
-      deleteConnection(db, new ObjectID(id)),
+    deleteConnection: (_, { id }, { db }) => deleteConnection(db, id),
     updateWorkspace: (_, { id, nodes, connections }, { db }) =>
-      updateWorkspace(db, new ObjectID(id), nodes, connections),
+      updateWorkspace(db, id, nodes, connections),
     createWorkspace: (_, { name, description }, { db }) =>
       createWorkspace(db, name, description),
-    deleteWorkspace: (_, { id }, { db }) =>
-      deleteWorkspace(db, new ObjectID(id)),
+    deleteWorkspace: (_, { id }, { db }) => deleteWorkspace(db, id),
     startCalculation: (_, { workspaceId }, { db }) =>
       startCalculation(db, workspaceId)
   },

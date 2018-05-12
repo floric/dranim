@@ -9,11 +9,11 @@ import { createWorkspace } from '../graphql/resolvers/workspace';
 export const createSTRDemoData = async (db: Db) => {
   let ds = await createDataset(db, 'Passages');
   for (const s of passagesSchemas) {
-    await addValueSchema(db, new ObjectID(ds.id), s);
+    await addValueSchema(db, ds.id, s);
   }
   ds = await createDataset(db, 'Commodities');
   for (const s of commoditiesSchemas) {
-    await addValueSchema(db, new ObjectID(ds.id), s);
+    await addValueSchema(db, ds.id, s);
   }
   await createWorkspace(
     db,

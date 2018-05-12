@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Tabs } from 'antd';
 import { Switch, Route, RouteComponentProps } from 'react-router-dom';
 
 import WorkspaceEditorPage from './WorkspaceEditorPage';
@@ -15,6 +16,22 @@ export default class WorkspaceswPage extends React.Component<
     return (
       <>
         <PageHeaderCard title="Workspace" />
+        <Tabs
+          onChange={a => {
+            const history = this.props.history;
+            if (a === 'calculations') {
+              history.push(`${this.props.match.url}/calculations`);
+            } else if (a === 'editor') {
+              history.push(`${this.props.match.url}`);
+            }
+          }}
+          type="card"
+          animated={{ inkBar: true, tabPane: false }}
+          tabBarStyle={{ marginBottom: 0 }}
+        >
+          <Tabs.TabPane forceRender tab="Editor" key="editor" />
+          <Tabs.TabPane forceRender tab="Calculations" key="calculations" />
+        </Tabs>
         <Switch>
           <Route
             exact

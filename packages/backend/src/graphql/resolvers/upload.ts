@@ -84,7 +84,7 @@ const processValidEntry = async (
   try {
     await createEntry(
       db,
-      new ObjectID(ds.id),
+      ds.id,
       valueKeys.map(k => ({
         name: k,
         val: values[k]
@@ -186,7 +186,7 @@ const processUpload = async (
 export const uploadEntriesCsv = async (
   db: Db,
   files: Array<any>,
-  datasetId: ObjectID
+  datasetId: string
 ): Promise<UploadProcess> => {
   try {
     const ds = await getDataset(db, datasetId);
@@ -198,7 +198,7 @@ export const uploadEntriesCsv = async (
       invalidEntries: 0,
       start: new Date(),
       state: 'STARTED',
-      datasetId: datasetId.toHexString(),
+      datasetId,
       fileNames: [],
       errors: {}
     };

@@ -48,14 +48,20 @@ export const createDataset = async (db: Db, name: string): Promise<Dataset> => {
   };
 };
 
-export const deleteDataset = async (db: Db, id: ObjectID) => {
+export const deleteDataset = async (db: Db, id: string) => {
   const entryCollection = getEntryCollection(db, id);
-  const deleteRes = await entryCollection.remove({});
+  const containedEntries = await entryCollection.count({});
+  if (containedEntries > 0) {
+    await entryCollection.drop();
+  }
 
   const collection = getDatasetsCollection(db);
-  const res = await collection.deleteOne({ _id: id });
+  const res = await collection.deleteOne({ _id: new ObjectID(id) });
+  if (res.result.ok !== 1 || res.deletedCount !== 1) {
+    throw new Error('Deletion of Dataset failed.');
+  }
 
-  return res.deletedCount === 1;
+  return true;
 };
 
 export const getAllDatasets = async (db: Db): Promise<Array<Dataset>> => {
@@ -67,12 +73,17 @@ export const getAllDatasets = async (db: Db): Promise<Array<Dataset>> => {
   }));
 };
 
-export const getDataset = async (db: Db, id: ObjectID): Promise<Dataset> => {
-  const collection = getDatasetsCollection(db);
-  const obj = await collection.findOne({ _id: id });
-  if (!obj) {
-    throw new Error('Dataset not found!');
+export const getDataset = async (db: Db, id: string): Promise<Dataset> => {
+  if (!ObjectID.isValid(id)) {
+    return null;
   }
+
+  const collection = getDatasetsCollection(db);
+  const obj = await collection.findOne({ _id: new ObjectID(id) });
+  if (!obj) {
+    return null;
+  }
+
   return {
     id: obj._id.toHexString(),
     ...obj
@@ -81,11 +92,14 @@ export const getDataset = async (db: Db, id: ObjectID): Promise<Dataset> => {
 
 export const addValueSchema = async (
   db: Db,
-  datasetId: ObjectID,
+  datasetId: string,
   schema: Valueschema
 ): Promise<boolean> => {
   const collection = getDatasetsCollection(db);
   const ds = await getDataset(db, datasetId);
+  if (!ds) {
+    throw new Error('Dataset not found.');
+  }
 
   if (schema.name.length === 0) {
     throw new Error("Name mustn't be empty.");
@@ -95,7 +109,7 @@ export const addValueSchema = async (
     throw new Error('Schema already exists.');
   }
   const res = await collection.updateOne(
-    { _id: datasetId },
+    { _id: new ObjectID(datasetId) },
     {
       $push: { valueschemas: schema }
     },

@@ -17,8 +17,6 @@ import { DatasetActions } from './dataset-details/ActionsPage';
 import { Dataset } from '../utils/model';
 import { PageHeaderCard } from '../components/PageHeaderCard';
 
-const TabPane = Tabs.TabPane;
-
 export interface IDataDetailPageProps
   extends RouteComponentProps<{ id: string }> {}
 
@@ -92,18 +90,21 @@ export default class DataDetailPage extends Component<IDataDetailPageProps> {
                 animated={{ inkBar: true, tabPane: false }}
                 tabBarStyle={{ marginBottom: 0 }}
               >
-                <TabPane
+                <Tabs.TabPane
                   tab={`${dataset.valueschemas.length} Schemas`}
                   key="schemas"
                 >
                   <DataSchemas dataset={dataset} refetch={refetch} />
-                </TabPane>
-                <TabPane tab={`${dataset.entriesCount} Entries`} key="entries">
+                </Tabs.TabPane>
+                <Tabs.TabPane
+                  tab={`${dataset.entriesCount} Entries`}
+                  key="entries"
+                >
                   <DataEntries dataset={dataset} refetch={refetch} />
-                </TabPane>
-                <TabPane tab="Actions" key="actions">
+                </Tabs.TabPane>
+                <Tabs.TabPane tab="Actions" key="actions">
                   <DatasetActions dataset={dataset} refetch={refetch} />
-                </TabPane>
+                </Tabs.TabPane>
               </Tabs>
             );
           }}

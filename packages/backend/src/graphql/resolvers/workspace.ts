@@ -66,7 +66,7 @@ export const getConnectionsCollection = (db: Db) => {
 
 export const addOrUpdateFormValue = async (
   db: Db,
-  nodeId: ObjectID,
+  nodeId: string,
   name: string,
   value: string
 ) => {
@@ -79,15 +79,17 @@ export const addOrUpdateFormValue = async (
     throw new Error("Node doesn't exist.");
   }
 
+  const nodeObjId = new ObjectID(nodeId);
+
   const collection = getNodesCollection(db);
 
   let res;
   if (node.form.find(f => f.name === name) !== undefined) {
     const form = node.form.map(f => (f.name !== name ? f : { name, value }));
-    res = await collection.updateOne({ _id: nodeId }, { $set: { form } });
+    res = await collection.updateOne({ _id: nodeObjId }, { $set: { form } });
   } else {
     res = await collection.updateOne(
-      { _id: nodeId },
+      { _id: nodeObjId },
       { $push: { form: { name, value } } }
     );
   }
@@ -182,16 +184,17 @@ export const createConnection = async (db: Db, from: Socket, to: Socket) => {
   };
 };
 
-export const deleteConnection = async (db: Db, id: ObjectID) => {
-  const collection = getConnectionsCollection(db);
-  const nodesCollection = getNodesCollection(db);
+export const deleteConnection = async (db: Db, id: string) => {
   const connection = await getConnection(db, id);
   if (!connection) {
     throw new Error('Connection not known.');
   }
 
-  const outputNode = await getNode(db, new ObjectID(connection.from.nodeId));
-  const inputNode = await getNode(db, new ObjectID(connection.to.nodeId));
+  const connCollection = getConnectionsCollection(db);
+  const nodesCollection = getNodesCollection(db);
+
+  const outputNode = await getNode(db, connection.from.nodeId);
+  const inputNode = await getNode(db, connection.to.nodeId);
 
   if (!outputNode || !inputNode) {
     throw new Error('Unknown nodes as input or output!');
@@ -219,7 +222,7 @@ export const deleteConnection = async (db: Db, id: ObjectID) => {
     }
   );
 
-  const res = await collection.deleteOne({ _id: id });
+  const res = await connCollection.deleteOne({ _id: new ObjectID(id) });
   if (res.deletedCount !== 1) {
     throw new Error('Deleting connection failed');
   }
@@ -239,7 +242,7 @@ export const createNode = async (
     throw new Error("Name mustn't be empty.");
   }
 
-  const ws = await getWorkspace(db, new ObjectID(workspaceId));
+  const ws = await getWorkspace(db, workspaceId);
   if (!ws) {
     throw new Error('Unknown workspace!');
   }
@@ -265,13 +268,17 @@ export const createNode = async (
   };
 };
 
-export const deleteNode = async (db: Db, id: ObjectID) => {
+export const deleteNode = async (db: Db, id: string) => {
+  if (!ObjectID.isValid(id)) {
+    throw new Error('Invalid ID');
+  }
+
   const connectionsCollection = getConnectionsCollection(db);
-  await connectionsCollection.deleteMany({ 'from.nodeId': id.toHexString() });
-  await connectionsCollection.deleteMany({ 'to.nodeId': id.toHexString() });
+  await connectionsCollection.deleteMany({ 'from.nodeId': id });
+  await connectionsCollection.deleteMany({ 'to.nodeId': id });
 
   const nodesCollection = getNodesCollection(db);
-  const res = await nodesCollection.deleteOne({ _id: id });
+  const res = await nodesCollection.deleteOne({ _id: new ObjectID(id) });
   if (res.deletedCount !== 1) {
     throw new Error('Deleting node failed');
   }
@@ -279,16 +286,15 @@ export const deleteNode = async (db: Db, id: ObjectID) => {
   return true;
 };
 
-export const updateNode = async (
-  db: Db,
-  id: ObjectID,
-  x: number,
-  y: number
-) => {
+export const updateNode = async (db: Db, id: string, x: number, y: number) => {
+  if (!ObjectID.isValid(id)) {
+    throw new Error('Invalid ID.');
+  }
+
   const collection = getNodesCollection(db);
   const wsCollection = getWorkspacesCollection(db);
   const res = await collection.findOneAndUpdate(
-    { _id: id },
+    { _id: new ObjectID(id) },
     { $set: { x, y } }
   );
 
@@ -337,9 +343,13 @@ export const getNodeState = async (
   return NodeState.VALID;
 };
 
-export const getNode = async (db: Db, id: ObjectID): Promise<Node | null> => {
+export const getNode = async (db: Db, id: string): Promise<Node | null> => {
+  if (!ObjectID.isValid(id)) {
+    return null;
+  }
+
   const collection = getNodesCollection(db);
-  const node = await collection.findOne({ _id: id });
+  const node = await collection.findOne({ _id: new ObjectID(id) });
   if (!node) {
     return null;
   }
@@ -352,10 +362,14 @@ export const getNode = async (db: Db, id: ObjectID): Promise<Node | null> => {
 
 export const getConnection = async (
   db: Db,
-  id: ObjectID
+  id: string
 ): Promise<Connection | null> => {
+  if (!ObjectID.isValid(id)) {
+    return null;
+  }
+
   const collection = getConnectionsCollection(db);
-  const connection = await collection.findOne({ _id: id });
+  const connection = await collection.findOne({ _id: new ObjectID(id) });
   if (!connection) {
     return null;
   }
@@ -406,23 +420,24 @@ export const createWorkspace = async (
   };
 };
 
-export const deleteWorkspace = async (db: Db, id: ObjectID) => {
+export const deleteWorkspace = async (db: Db, id: string) => {
+  if (!ObjectID.isValid(id)) {
+    throw new Error('Invalid ID');
+  }
+
   const wsCollection = getWorkspacesCollection(db);
   const connectionsCollection = getConnectionsCollection(db);
   const nodesCollection = getNodesCollection(db);
 
-  const ws = await wsCollection.findOne<Workspace>({ _id: new ObjectID(id) });
-  if (!ws) {
-    throw new Error("Workspace doesn't exist.");
-  }
+  const wsRes = await wsCollection.deleteOne({ _id: new ObjectID(id) });
 
-  const wsRes = await wsCollection.deleteOne({ _id: id });
   if (wsRes.result.ok !== 1 || wsRes.deletedCount !== 1) {
     throw new Error('Deletion of Workspace failed.');
   }
+
   await Promise.all([
-    nodesCollection.deleteMany({ workspaceId: id.toHexString() }),
-    connectionsCollection.deleteMany({ workspaceId: id.toHexString() })
+    nodesCollection.deleteMany({ workspaceId: id }),
+    connectionsCollection.deleteMany({ workspaceId: id })
   ]);
 
   return true;
@@ -430,10 +445,14 @@ export const deleteWorkspace = async (db: Db, id: ObjectID) => {
 
 export const updateWorkspace = async (
   db: Db,
-  id: ObjectID,
+  id: string,
   nodes: Array<Node>,
   connections: Array<Connection>
 ) => {
+  if (!ObjectID.isValid(id)) {
+    throw new Error('Invalid ID');
+  }
+
   const nodesCollection = getNodesCollection(db);
   await Promise.all(
     nodes.map(n =>
@@ -454,6 +473,12 @@ export const updateWorkspace = async (
     )
   );
 
+  const wsCollection = getWorkspacesCollection(db);
+  wsCollection.findOneAndUpdate(
+    { _id: new ObjectID(id) },
+    { $set: { lastChange: new Date() } }
+  );
+
   return true;
 };
 
@@ -466,13 +491,14 @@ export const getAllWorkspaces = async (db: Db): Promise<Array<Workspace>> => {
   }));
 };
 
-export const getWorkspace = async (
-  db: Db,
-  id: ObjectID
-): Promise<Workspace> => {
+export const getWorkspace = async (db: Db, id: string): Promise<Workspace> => {
+  if (!ObjectID.isValid(id)) {
+    return null;
+  }
+
   const wsCollection = getWorkspacesCollection(db);
   const ws = await wsCollection.findOne({
-    _id: id
+    _id: new ObjectID(id)
   });
   if (!ws) {
     return null;
