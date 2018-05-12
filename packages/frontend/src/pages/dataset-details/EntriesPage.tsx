@@ -1,12 +1,11 @@
 import * as React from 'react';
 import { Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
-import { Col, Row, Table } from 'antd';
+import { Col, Row, Table, Card } from 'antd';
 import { tryOperation } from '../../utils/form';
 import { CreateEntryForm } from '../forms/CreateEntryForm';
 import { Dataset, Value } from '../../utils/model';
 import { ApolloQueryResult } from 'apollo-client';
-import Card from 'antd/lib/card';
 import { AsyncButton } from '../../components/AsyncButton';
 
 export interface DataEntriesProps {

@@ -151,7 +151,7 @@ export const startCalculation = async (
     throw new Error('Process creation failed');
   }
 
-  const id = newProcess.ops[0]._id;
+  const id = newProcess.ops[0]._id.toHexString();
 
   startProcess(db, id, workspaceId);
 
@@ -168,7 +168,7 @@ export const getAllCalculations = async (
   const collection = getCalculationsCollection(db);
   const all = await collection.find({ workspaceId }).toArray();
   return all.map(ds => ({
-    id: ds._id,
+    id: ds._id.toHexString(),
     ...ds
   }));
 };

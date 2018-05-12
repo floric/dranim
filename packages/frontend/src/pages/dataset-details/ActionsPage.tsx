@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { ApolloQueryResult } from 'apollo-client';
 import { Row, Col, Card, Upload, Button, Icon, Table, Form } from 'antd';
-import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 import {
   Mutation,
   MutationFn,
@@ -17,6 +16,7 @@ import { tryOperation } from '../../utils/form';
 import { AsyncButton } from '../../components/AsyncButton';
 import { UnknownErrorCard, LoadingCard } from '../../components/CustomCards';
 import { ProcessTime } from '../../components/ProcessTime';
+import { NumberInfo } from '../../components/NumberInfo';
 
 const UPLOAD_ENTRIES_CSV = gql`
   mutation($files: [Upload!]!, $datasetId: String!) {
@@ -51,7 +51,7 @@ export interface UploadProcess {
   start: string;
   finish: string | null;
   errors: Array<{ name: string; message: string; count: number }>;
-  state: 'STARTED' | 'PROCESSING' | 'FINISHED';
+  state: 'STARTED' | 'PROCESSING' | 'FINISHED' | 'ERROR';
   addedEntries: number;
   failedEntries: number;
   invalidEntries: number;
@@ -156,6 +156,8 @@ export const DatasetActions = withApollo<DataActionsProps>(
               state:
                 u.state === 'FINISHED' ? (
                   <Icon type="check-circle" />
+                ) : u.state === 'ERROR' ? (
+                  <Icon type="exclamation-circle" />
                 ) : (
                   <Icon type="clock-circle" />
                 ),
@@ -188,13 +190,13 @@ export const DatasetActions = withApollo<DataActionsProps>(
                 render: u => (
                   <Row>
                     <Col xs={8}>
-                      <NumberInfo gap={0} title="Added" total={u.added} />
+                      <NumberInfo title="Added" total={u.added} />
                     </Col>
                     <Col xs={8}>
-                      <NumberInfo gap={0} title="Failed" total={u.failed} />
+                      <NumberInfo title="Failed" total={u.failed} />
                     </Col>
                     <Col xs={8}>
-                      <NumberInfo gap={0} title="Invalid" total={u.invalid} />
+                      <NumberInfo title="Invalid" total={u.invalid} />
                     </Col>
                   </Row>
                 )

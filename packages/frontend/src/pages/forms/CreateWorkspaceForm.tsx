@@ -53,7 +53,7 @@ class CreateWorkspaceFormImpl extends React.Component<
     const nameError = isFieldTouched('name') && getFieldError('name');
 
     return (
-      <Form layout="inline" onSubmit={this.handleSubmit}>
+      <Form layout="vertical" onSubmit={this.handleSubmit}>
         <Form.Item
           validateStatus={nameError ? 'error' : 'success'}
           help={nameError || ''}
@@ -70,9 +70,9 @@ class CreateWorkspaceFormImpl extends React.Component<
         </Form.Item>
         <Form.Item>
           {getFieldDecorator('description')(
-            <Input
+            <Input.TextArea
+              autosize={{ minRows: 2, maxRows: 6 }}
               autoComplete="off"
-              prefix={<Icon type="plus" style={{ color: 'rgba(0,0,0,.25)' }} />}
               placeholder="Description"
             />
           )}

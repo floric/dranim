@@ -31,7 +31,7 @@ export const getEntry = async (
     throw new Error('Dataset not found!');
   }
   return {
-    id: obj._id,
+    id: obj._id.toHexString(),
     ...obj
   };
 };
@@ -51,11 +51,11 @@ export const latestEntries = async (
   const collection = getEntryCollection(db, datasetId);
   // TODO Introduce pagination later
   const entries = await collection
-    .find({})
+    .find()
     .limit(20)
     .toArray();
   return entries.map(e => ({
-    id: e._id,
+    id: e._id.toHexString(),
     ...e
   }));
 };
@@ -122,7 +122,7 @@ export const createEntry = async (
 
     const newItem = res.ops[0];
     return {
-      id: newItem._id,
+      id: newItem._id.toHexString(),
       ...newItem
     };
   } catch (err) {

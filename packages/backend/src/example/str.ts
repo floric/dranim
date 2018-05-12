@@ -1,4 +1,27 @@
-import { Valueschema } from '../graphql/resolvers/dataset';
+import {
+  Valueschema,
+  createDataset,
+  addValueSchema
+} from '../graphql/resolvers/dataset';
+import { Db, ObjectID } from 'mongodb';
+import { createWorkspace } from '../graphql/resolvers/workspace';
+
+export const createSTRDemoData = async (db: Db) => {
+  let ds = await createDataset(db, 'Passages');
+  for (const s of passagesSchemas) {
+    await addValueSchema(db, new ObjectID(ds.id), s);
+  }
+  ds = await createDataset(db, 'Commodities');
+  for (const s of commoditiesSchemas) {
+    await addValueSchema(db, new ObjectID(ds.id), s);
+  }
+  await createWorkspace(
+    db,
+    'Trade volumes over time',
+    'Contains aggregation and filtering for trading development from 1600 until 1800.'
+  );
+  return true;
+};
 
 export const passagesSchemas: Array<Valueschema> = [
   {

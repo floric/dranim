@@ -12,6 +12,8 @@ import { GraphQLSchema } from 'graphql';
 
 import { mongoDbClient } from './config/db';
 import Schema from './graphql/schema';
+import { Db } from 'mongodb';
+import { initWorkspaceDb } from './graphql/resolvers/workspace';
 export const GRAPHQL_ROUTE = '/api/graphql';
 
 interface IMainOptions {
@@ -28,16 +30,15 @@ const MAX_UPLOAD_LIMIT = 100 * 1024 * 1024 * 1024;
 
 export const main = async (options: IMainOptions) => {
   const client = await mongoDbClient();
+  const db = client.db('App');
+  await initDb(db);
+
   const app = express();
   if (options.env !== 'production') {
-    app.use(cors());
+    app.use(cors({ maxAge: 600, origin: 'http://localhost:1234' }));
   }
   app.use(helmet());
   app.use(morgan(options.env));
-  app.use((req, res, next) => {
-    res.setHeader('Access-Control-Max-Age', '600');
-    return next();
-  });
   app.use(
     GRAPHQL_ROUTE,
     bodyParser.json({
@@ -54,7 +55,7 @@ export const main = async (options: IMainOptions) => {
     }),
     graphqlExpress({
       schema: Schema,
-      context: { db: client.db('App') }
+      context: { db }
     })
   );
 
@@ -67,6 +68,10 @@ export const main = async (options: IMainOptions) => {
     .on('error', (err: Error) => {
       console.error(err);
     });
+};
+
+export const initDb = async (db: Db) => {
+  await initWorkspaceDb(db);
 };
 
 const PORT = parseInt(process.env.PORT || '3000', 10);

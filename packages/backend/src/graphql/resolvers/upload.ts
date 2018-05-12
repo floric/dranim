@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import * as fastCsv from 'fast-csv';
+import fastCsv from 'fast-csv';
 import { ObjectID, Db } from 'mongodb';
 import * as promisesAll from 'promises-all';
 import { Readable, Writable } from 'stream';
@@ -17,7 +17,7 @@ export interface UploadProcess {
   finish: Date | null;
   datasetId: string;
   errors: Array<{ name: string; message: string; count: number }>;
-  state: 'STARTED' | 'PROCESSING' | 'FINISHED';
+  state: 'STARTED' | 'PROCESSING' | 'FINISHED' | 'ERROR';
   addedEntries: number;
   failedEntries: number;
   invalidEntries: number;
@@ -40,7 +40,7 @@ export const getAllUploads = async (db: Db, datasetId: string | null) => {
     .sort({ start: -1 })
     .toArray();
   return all.map(ds => ({
-    id: ds._id,
+    id: ds._id.toHexString(),
     finish: ds.finish ? ds.finish : null,
     ...ds
   }));
@@ -168,11 +168,11 @@ const processUpload = async (
   db: Db,
   processId: ObjectID
 ): Promise<void> => {
+  const uploadsCollection = getUploadsCollection(db);
+
   try {
     const { stream, filename, mimetype, encoding } = await upload;
     await parseCsvFile(stream, filename, ds, db, processId);
-
-    const uploadsCollection = getUploadsCollection(db);
     await uploadsCollection.updateOne(
       { _id: processId },
       { $push: { fileNames: filename } }
@@ -207,7 +207,10 @@ export const uploadEntriesCsv = async (
       throw new Error('Creating Upload process failed.');
     }
 
-    const process: UploadProcess = { id: res.ops[0]._id, ...res.ops[0] };
+    const process: UploadProcess = {
+      id: res.ops[0]._id.toHexString(),
+      ...res.ops[0]
+    };
     const processId = new ObjectID(process.id);
 
     const { resolve, reject } = await promisesAll.all(
@@ -220,12 +223,16 @@ export const uploadEntriesCsv = async (
       reject.forEach(({ name, message }) => {
         console.error(`${name}: ${message}`);
       });
+      await uploadsCollection.updateOne(
+        { _id: processId },
+        { $set: { state: 'ERROR', finish: new Date() } }
+      );
+    } else {
+      await uploadsCollection.updateOne(
+        { _id: processId },
+        { $set: { state: 'FINISHED', finish: new Date() } }
+      );
     }
-
-    await uploadsCollection.updateOne(
-      { _id: processId },
-      { $set: { state: 'FINISHED', finish: new Date() } }
-    );
 
     return process;
   } catch (err) {

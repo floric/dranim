@@ -75,7 +75,7 @@ const AppMenu: SFC<{
       key="sub1"
       title={
         <span>
-          <Icon type="user" />
+          <Icon type="database" />
           {!collapsed ? ' Data' : null}
         </span>
       }

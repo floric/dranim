@@ -42,7 +42,11 @@ import {
 } from './resolvers/entry';
 import { getAllUploads, uploadEntriesCsv } from './resolvers/upload';
 import { startCalculation, getAllCalculations } from './resolvers/calculation';
-import { passagesSchemas, commoditiesSchemas } from '../example/str';
+import {
+  passagesSchemas,
+  commoditiesSchemas,
+  createSTRDemoData
+} from '../example/str';
 
 interface ApolloContext {
   db: Db;
@@ -154,7 +158,7 @@ const resolvers: IResolvers<any, ApolloContext> = {
     latestEntries: ({ _id }, __, { db }) => latestEntries(db, _id)
   },
   UploadProcess: {
-    errors: ({ _id, errors }, __, { db }) =>
+    errors: ({ errors }, __, { db }) =>
       Object.keys(errors).map(name => ({
         name,
         message: errors[name].message,
@@ -172,7 +176,7 @@ const resolvers: IResolvers<any, ApolloContext> = {
   },
   Mutation: {
     createDataset: (_, { name }, { db }) => createDataset(db, name),
-    addValueSchema: async (
+    addValueSchema: (
       _,
       { datasetId, name, type, required, fallback, unique },
       { db }
@@ -191,17 +195,7 @@ const resolvers: IResolvers<any, ApolloContext> = {
       deleteEntry(db, new ObjectID(datasetId), new ObjectID(entryId)),
     uploadEntriesCsv: (obj, { files, datasetId }, { db }) =>
       uploadEntriesCsv(db, files, new ObjectID(datasetId)),
-    createSTRDemoData: async (_, {}, { db }) => {
-      let ds = await createDataset(db, 'Passages');
-      for (const s of passagesSchemas) {
-        await addValueSchema(db, new ObjectID(ds.id), s);
-      }
-      ds = await createDataset(db, 'Commodities');
-      for (const s of commoditiesSchemas) {
-        await addValueSchema(db, new ObjectID(ds.id), s);
-      }
-      return true;
-    },
+    createSTRDemoData: (_, {}, { db }) => createSTRDemoData(db),
     createNode: (_, { type, x, y, workspaceId }, { db }) =>
       createNode(db, type, workspaceId, x, y),
     updateNode: (_, { id, x, y }, { db }) =>

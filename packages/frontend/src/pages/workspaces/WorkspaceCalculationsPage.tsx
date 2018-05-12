@@ -3,11 +3,11 @@ import { Component } from 'react';
 import gql from 'graphql-tag';
 import { Row, Col, Card, Table, Icon } from 'antd';
 import { Query } from 'react-apollo';
-import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 
 import { LoadingCard, UnknownErrorCard } from '../../components/CustomCards';
 import { ProcessTime } from '../../components/ProcessTime';
 import { RouteComponentProps } from 'react-router-dom';
+import { NumberInfo } from '../../components/NumberInfo';
 
 export enum CalculationProcessState {
   STARTED = 'STARTED',
@@ -101,10 +101,10 @@ export default class WorkspaceCalculationsPage extends Component<
               render: u => (
                 <Row>
                   <Col xs={8}>
-                    <NumberInfo gap={0} title="Processed" total={u.processed} />
+                    <NumberInfo title="Processed" total={u.processed} />
                   </Col>
                   <Col xs={8}>
-                    <NumberInfo gap={0} title="Total" total={u.total} />
+                    <NumberInfo title="Total" total={u.total} />
                   </Col>
                 </Row>
               )

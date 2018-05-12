@@ -18,6 +18,8 @@ const WORKSPACE_NODE_SELECTION = gql`
       }
     }
     workspace(id: $workspaceId) {
+      id
+      name
       nodes {
         id
         type

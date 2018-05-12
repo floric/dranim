@@ -85,13 +85,17 @@ export default class WorkspacesOverviewPage extends React.Component<
                     xl={{ span: 8 }}
                     style={{ marginBottom: 12 }}
                   >
-                    <Card bordered={false}>
-                      <Card.Meta
-                        title={
-                          <Link to={`/workspaces/${ws.id}`}>{ws.name}</Link>
-                        }
-                        description={ws.description}
-                      />
+                    <Card
+                      bordered={false}
+                      title={
+                        <Card.Meta
+                          title={
+                            <Link to={`/workspaces/${ws.id}`}>{ws.name}</Link>
+                          }
+                          description={ws.description}
+                        />
+                      }
+                    >
                       <Row>
                         <Col xs={6}>Created:</Col>
                         <Col xs={18}>

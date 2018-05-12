@@ -43,7 +43,7 @@ export const createDataset = async (db: Db, name: string): Promise<Dataset> => {
 
   const newItem = res.ops[0];
   return {
-    id: newItem._id,
+    id: newItem._id.toHexString(),
     ...newItem
   };
 };
@@ -60,9 +60,9 @@ export const deleteDataset = async (db: Db, id: ObjectID) => {
 
 export const getAllDatasets = async (db: Db): Promise<Array<Dataset>> => {
   const collection = getDatasetsCollection(db);
-  const allDatasets = await collection.find({}).toArray();
+  const allDatasets = await collection.find().toArray();
   return allDatasets.map(ds => ({
-    id: ds._id,
+    id: ds._id.toHexString(),
     ...ds
   }));
 };
@@ -74,7 +74,7 @@ export const getDataset = async (db: Db, id: ObjectID): Promise<Dataset> => {
     throw new Error('Dataset not found!');
   }
   return {
-    id: obj._id,
+    id: obj._id.toHexString(),
     ...obj
   };
 };

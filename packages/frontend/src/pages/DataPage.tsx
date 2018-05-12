@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { Row, Col, Card } from 'antd';
-import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 import { Mutation, Query } from 'react-apollo';
 import gql from 'graphql-tag';
 
@@ -12,6 +11,7 @@ import { tryOperation } from '../utils/form';
 import { Dataset } from '../utils/model';
 import { AsyncButton } from '../components/AsyncButton';
 import { PageHeaderCard } from '../components/PageHeaderCard';
+import { NumberInfo } from '../components/NumberInfo';
 
 const CREATE_DATASET = gql`
   mutation createDataset($name: String!) {
@@ -51,9 +51,9 @@ export default class DataPage extends React.Component<{}, { saving: boolean }> {
                 {data.datasets.map((ds: Dataset) => (
                   <Col
                     key={`card-${ds.id}`}
-                    xs={{ span: 24 }}
+                    sm={{ span: 24 }}
                     md={{ span: 12 }}
-                    xl={{ span: 8 }}
+                    xl={{ span: 6 }}
                     style={{ marginBottom: 12 }}
                   >
                     <Card
@@ -63,17 +63,12 @@ export default class DataPage extends React.Component<{}, { saving: boolean }> {
                       <Row>
                         <Col xs={{ span: 24 }} md={{ span: 12 }}>
                           <NumberInfo
-                            gap={0}
-                            total={ds.valueschemas.length.toLocaleString()}
+                            total={ds.valueschemas.length}
                             title="Schemas"
                           />
                         </Col>
                         <Col xs={{ span: 24 }} md={{ span: 12 }}>
-                          <NumberInfo
-                            gap={0}
-                            total={ds.entriesCount.toLocaleString()}
-                            title="Entries"
-                          />
+                          <NumberInfo total={ds.entriesCount} title="Entries" />
                         </Col>
                       </Row>
                       <Row

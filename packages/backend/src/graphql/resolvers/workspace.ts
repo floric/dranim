@@ -45,6 +45,13 @@ export interface Workspace {
   connections: Array<Connection>;
 }
 
+export const initWorkspaceDb = async (db: Db) => {
+  const connCollection = getConnectionsCollection(db);
+  const nodesCollection = getNodesCollection(db);
+  await connCollection.createIndex('workspaceId');
+  await nodesCollection.createIndex('workspaceId');
+};
+
 export const getNodesCollection = (db: Db) => {
   return db.collection('Nodes');
 };
@@ -170,7 +177,7 @@ export const createConnection = async (db: Db, from: Socket, to: Socket) => {
   );
 
   return {
-    id: newItem._id,
+    id: newItem._id.toHexString(),
     ...newItem
   };
 };
@@ -253,7 +260,7 @@ export const createNode = async (
 
   const newItem = res.ops[0];
   return {
-    id: newItem._id,
+    id: newItem._id.toHexString(),
     ...newItem
   };
 };
@@ -279,6 +286,7 @@ export const updateNode = async (
   y: number
 ) => {
   const collection = getNodesCollection(db);
+  const wsCollection = getWorkspacesCollection(db);
   const res = await collection.findOneAndUpdate(
     { _id: id },
     { $set: { x, y } }
@@ -287,6 +295,11 @@ export const updateNode = async (
   if (res.ok !== 1) {
     throw new Error('Updating node failed');
   }
+
+  wsCollection.findOneAndUpdate(
+    { _id: new ObjectID(res.value.workspaceId) },
+    { $set: { lastChange: new Date() } }
+  );
 
   return true;
 };
@@ -297,9 +310,8 @@ export const getAllNodes = async (
 ): Promise<Array<Node>> => {
   const collection = getNodesCollection(db);
   const all = await collection.find({ workspaceId }).toArray();
-  console.log(await collection.find().toArray());
   return all.map(ds => ({
-    id: ds._id,
+    id: ds._id.toHexString(),
     ...ds
   }));
 };
@@ -333,7 +345,7 @@ export const getNode = async (db: Db, id: ObjectID): Promise<Node | null> => {
   }
 
   return {
-    id: node._id,
+    id: node._id.toHexString(),
     ...node
   };
 };
@@ -349,7 +361,7 @@ export const getConnection = async (
   }
 
   return {
-    id: connection._id,
+    id: connection._id.toHexString(),
     ...connection
   };
 };
@@ -361,7 +373,7 @@ export const getAllConnections = async (
   const collection = getConnectionsCollection(db);
   const all = await collection.find({ workspaceId }).toArray();
   return all.map(ds => ({
-    id: ds._id,
+    id: ds._id.toHexString(),
     ...ds
   }));
 };
@@ -389,7 +401,7 @@ export const createWorkspace = async (
 
   const newItem = res.ops[0];
   return {
-    id: newItem._id,
+    id: newItem._id.toHexString(),
     ...newItem
   };
 };
@@ -449,7 +461,7 @@ export const getAllWorkspaces = async (db: Db): Promise<Array<Workspace>> => {
   const wsCollection = getWorkspacesCollection(db);
   const all = await wsCollection.find().toArray();
   return all.map(ws => ({
-    id: ws._id,
+    id: ws._id.toHexString(),
     ...ws
   }));
 };
@@ -467,7 +479,7 @@ export const getWorkspace = async (
   }
 
   return {
-    id: ws._id,
+    id: ws._id.toHexString(),
     ...ws
   };
 };
