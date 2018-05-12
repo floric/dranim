@@ -5,9 +5,9 @@ import { Row, Col, Card, Table, Icon } from 'antd';
 import { Query } from 'react-apollo';
 import NumberInfo from 'ant-design-pro/lib/NumberInfo';
 
-import { withPageHeaderHoC } from '../components/PageHeaderHoC';
-import { LoadingCard, UnknownErrorCard } from '../components/CustomCards';
-import { ProcessTime } from '../components/ProcessTime';
+import { LoadingCard, UnknownErrorCard } from '../../components/CustomCards';
+import { ProcessTime } from '../../components/ProcessTime';
+import { RouteComponentProps } from 'react-router-dom';
 
 export enum CalculationProcessState {
   STARTED = 'STARTED',
@@ -26,8 +26,8 @@ export interface CalculationProcess {
 }
 
 const CALCULATIONS = gql`
-  {
-    calculations {
+  query calculations($workspaceId: String!) {
+    calculations(workspaceId: $workspaceId) {
       id
       start
       finish
@@ -38,10 +38,20 @@ const CALCULATIONS = gql`
   }
 `;
 
-class CalculationProcessesPage extends Component<{}> {
+export interface IWorkspaceCalculationsPageProps
+  extends RouteComponentProps<{ id: string }> {}
+
+export default class WorkspaceCalculationsPage extends Component<
+  IWorkspaceCalculationsPageProps
+> {
   public render() {
+    const {
+      match: {
+        params: { id }
+      }
+    } = this.props;
     return (
-      <Query query={CALCULATIONS}>
+      <Query query={CALCULATIONS} variables={{ workspaceId: id }}>
         {({ loading, error, data, refetch }) => {
           if (loading) {
             return <LoadingCard />;
@@ -121,9 +131,3 @@ class CalculationProcessesPage extends Component<{}> {
     );
   }
 }
-
-export default withPageHeaderHoC({
-  title: 'Calculations',
-  size: 'small',
-  includeInCard: false
-})(CalculationProcessesPage);

@@ -3,12 +3,16 @@ import * as React from 'react';
 import { Form, Icon, Input, Button } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import { hasErrors } from '../../utils/form';
-export interface CreateDataSetFormProps extends FormComponentProps {
-  handleCreateDataset: (name: string) => Promise<boolean | null>;
+
+export interface CreateWorkspaceFormProps extends FormComponentProps {
+  handleCreateWorkspace: (
+    name: string,
+    description: string
+  ) => Promise<boolean | null>;
 }
 
-class CreateDataSetFormImpl extends React.Component<
-  CreateDataSetFormProps,
+class CreateWorkspaceFormImpl extends React.Component<
+  CreateWorkspaceFormProps,
   { saving: boolean }
 > {
   public componentWillMount() {
@@ -27,8 +31,9 @@ class CreateDataSetFormImpl extends React.Component<
       }
 
       await this.setState({ saving: true });
-      const successful = await this.props.handleCreateDataset(
-        this.props.form.getFieldValue('name')
+      const successful = await this.props.handleCreateWorkspace(
+        this.props.form.getFieldValue('name'),
+        this.props.form.getFieldValue('description')
       );
       await this.setState({ saving: false });
       if (successful) {
@@ -54,12 +59,21 @@ class CreateDataSetFormImpl extends React.Component<
           help={nameError || ''}
         >
           {getFieldDecorator('name', {
-            rules: [{ required: true, message: 'Please enter dataset name!' }]
+            rules: [{ required: true, message: 'Please enter workspace name!' }]
           })(
             <Input
               autoComplete="off"
               prefix={<Icon type="plus" style={{ color: 'rgba(0,0,0,.25)' }} />}
               placeholder="Name"
+            />
+          )}
+        </Form.Item>
+        <Form.Item>
+          {getFieldDecorator('description')(
+            <Input
+              autoComplete="off"
+              prefix={<Icon type="plus" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              placeholder="Description"
             />
           )}
         </Form.Item>
@@ -70,7 +84,7 @@ class CreateDataSetFormImpl extends React.Component<
             loading={this.state.saving}
             disabled={hasErrors(getFieldsError())}
           >
-            Add Dataset
+            Add Workspace
           </Button>
         </Form.Item>
       </Form>
@@ -78,4 +92,4 @@ class CreateDataSetFormImpl extends React.Component<
   }
 }
 
-export const CreateDataSetForm = Form.create()(CreateDataSetFormImpl);
+export const CreateWorkspaceForm = Form.create()(CreateWorkspaceFormImpl);

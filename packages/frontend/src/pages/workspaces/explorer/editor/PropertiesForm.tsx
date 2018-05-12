@@ -1,25 +1,21 @@
 import * as React from 'react';
-import { SFC } from 'react';
 
 import { Form, Button } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { RenderFormItemsProps, EditorContext } from '../nodes/AllNodes';
 import { OutputSocketInformation } from '../nodes/Sockets';
-import { tryOperation } from '../../../utils/form';
-import ButtonGroup from 'antd/lib/button/button-group';
+import { tryOperation } from '../../../../utils/form';
 
-const FormItem = Form.Item;
-
-export interface PropertiesFormProps {
+export interface IPropertiesFormProps {
   handleSubmit: (form: WrappedFormUtils, nodeId: string) => Promise<any>;
   inputs: Map<string, OutputSocketInformation>;
-  RenderFormItems: SFC<RenderFormItemsProps>;
+  renderFormItems: (props: RenderFormItemsProps) => JSX.Element;
   context: EditorContext;
 }
 
 class PropertiesFormImpl extends React.Component<
-  PropertiesFormProps & FormComponentProps,
+  IPropertiesFormProps & FormComponentProps,
   { saving: boolean }
 > {
   public componentWillMount() {
@@ -72,7 +68,7 @@ class PropertiesFormImpl extends React.Component<
   public render() {
     const {
       form,
-      RenderFormItems,
+      renderFormItems,
       inputs,
       context: { state, node }
     } = this.props;
@@ -81,14 +77,9 @@ class PropertiesFormImpl extends React.Component<
 
     return (
       <Form layout="inline" hideRequiredMark onSubmit={this.handleSubmit}>
-        <RenderFormItems
-          form={form}
-          inputs={inputs}
-          state={state}
-          node={node}
-        />
-        <FormItem wrapperCol={{ xs: 24 }}>
-          <ButtonGroup>
+        {renderFormItems({ form, inputs, state, node })}
+        <Form.Item wrapperCol={{ xs: 24 }}>
+          <Button.Group>
             <Button
               type="primary"
               disabled={!unsavedChanges}
@@ -101,8 +92,8 @@ class PropertiesFormImpl extends React.Component<
             {unsavedChanges && (
               <Button onClick={this.resetFields}>Cancel</Button>
             )}
-          </ButtonGroup>
-        </FormItem>
+          </Button.Group>
+        </Form.Item>
       </Form>
     );
   }

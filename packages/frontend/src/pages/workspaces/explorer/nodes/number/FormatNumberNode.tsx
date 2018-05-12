@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Input } from 'antd';
+import { Input, Form } from 'antd';
 import { NodeDef } from '../AllNodes';
 import {
   NumberSocket,
@@ -7,7 +7,6 @@ import {
   OutputSocketInformation,
   STRING_TYPE
 } from '../Sockets';
-import FormItem from 'antd/lib/form/FormItem';
 
 export const FormatNumberNode: NodeDef = {
   title: 'Format Number',
@@ -20,11 +19,11 @@ export const FormatNumberNode: NodeDef = {
       ['Formatted', { dataType: STRING_TYPE }]
     ]),
   renderFormItems: ({ form: { getFieldDecorator } }) => (
-    <FormItem label="Format">
+    <Form.Item label="Format">
       {getFieldDecorator('format', {
         initialValue: '0.0',
         rules: [{ required: true }]
       })(<Input />)}
-    </FormItem>
+    </Form.Item>
   )
 };

@@ -4,9 +4,6 @@ import { DataSocket, DATASET_TYPE, OutputSocketInformation } from '../Sockets';
 import { getOrDefault } from '../utils';
 import { NodeDef } from '../AllNodes';
 
-const FormItem = Form.Item;
-const Option = Select.Option;
-
 export const DatasetInputNode: NodeDef = {
   title: 'Dataset Input',
   inputs: [],
@@ -46,7 +43,7 @@ export const DatasetInputNode: NodeDef = {
     state: { datasets },
     node: { form }
   }) => (
-    <FormItem label="Input">
+    <Form.Item label="Input">
       {getFieldDecorator('dataset', {
         rules: [{ required: true }],
         initialValue: getOrDefault<string | undefined>(
@@ -57,12 +54,12 @@ export const DatasetInputNode: NodeDef = {
       })(
         <Select showSearch style={{ width: 200 }} placeholder="Select Dataset">
           {datasets.map(ds => (
-            <Option value={ds.id} key={ds.id}>
+            <Select.Option value={ds.id} key={ds.id}>
               {ds.name}
-            </Option>
+            </Select.Option>
           ))}
         </Select>
       )}
-    </FormItem>
+    </Form.Item>
   )
 };

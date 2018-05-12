@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { SFC } from 'react';
 import { FormComponentProps } from 'antd/lib/form';
 
 import { NodeInstance, ExplorerEditorProps } from '../ExplorerEditor';
@@ -31,7 +30,7 @@ export interface NodeDef {
   outputs: Array<Socket>;
   path: Array<string>;
   keywords: Array<string>;
-  renderFormItems?: SFC<RenderFormItemsProps>;
+  renderFormItems?: (props: RenderFormItemsProps) => JSX.Element;
   onClientExecution: (
     inputs: Map<string, OutputSocketInformation>,
     context: EditorContext

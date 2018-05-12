@@ -7,7 +7,7 @@ import Dataset from './schemas/dataset';
 import Valueschema from './schemas/valueschema';
 import Entry from './schemas/entry';
 import UploadProcess from './schemas/upload';
-import Editor from './schemas/editor';
+import Workspace from './schemas/workspace';
 import CalculationProcess from './schemas/calculation';
 import {
   getAllDatasets,
@@ -19,15 +19,20 @@ import {
 } from './resolvers/dataset';
 import {
   createNode,
-  editor,
+  getWorkspace,
   updateNode,
-  updateEditor,
+  updateWorkspace,
   createConnection,
   deleteConnection,
   deleteNode,
   addOrUpdateFormValue,
-  getNodeState
-} from './resolvers/editor';
+  getNodeState,
+  getAllWorkspaces,
+  createWorkspace,
+  getAllNodes,
+  getAllConnections,
+  deleteWorkspace
+} from './resolvers/workspace';
 import {
   createEntry,
   latestEntries,
@@ -46,11 +51,12 @@ interface ApolloContext {
 export const Query = `
   type Query {
     datasets: [Dataset!]!
-    editor: Editor!
+    workspace(id: String!): Workspace
+    workspaces: [Workspace!]!
     dataset(id: String!): Dataset
     entry(datasetId: String!, entryId: String!): Entry
     uploads(datasetId: String): [UploadProcess!]!
-    calculations: [CalculationProcess!]!
+    calculations(workspaceId: String!): [CalculationProcess!]!
   }
 `;
 
@@ -83,6 +89,7 @@ export const Mutation = `
     ): Connection!
     createNode (
       type: String!
+      workspaceId: String!
       x: Float!
       y: Float!
     ): Node!
@@ -102,13 +109,21 @@ export const Mutation = `
       name: String!
       value: String!
     ): Boolean!
-    updateEditor (
+    createWorkspace (
+      name: String!
+      description: String
+    ): Workspace!
+    deleteWorkspace (
+      id: String!
+    ): Boolean!
+    updateWorkspace (
+      id: String!
       nodes: [NodeInput!]!
       connections: [ConnectionInput!]!
     ): Boolean!
     createSTRDemoData: Boolean!
     uploadEntriesCsv (files: [Upload!]!, datasetId: String!): UploadProcess!
-    startCalculation: CalculationProcess!
+    startCalculation (workspaceId: String!): CalculationProcess!
   }
 `;
 
@@ -124,9 +139,11 @@ const resolvers: IResolvers<any, ApolloContext> = {
     datasets: (_, __, { db }) => getAllDatasets(db),
     dataset: (_, { id }, { db }) => getDataset(db, new ObjectID(id)),
     entry: (_, { datasetId, entryId }) => null,
-    editor: (_, __, { db }) => editor(db),
+    workspaces: (_, __, { db }) => getAllWorkspaces(db),
+    workspace: (_, { id }, { db }) => getWorkspace(db, new ObjectID(id)),
     uploads: (_, { datasetId }, { db }) => getAllUploads(db, datasetId),
-    calculations: (_, __, { db }) => getAllCalculations(db)
+    calculations: (_, { workspaceId }, { db }) =>
+      getAllCalculations(db, workspaceId)
   },
   Entry: {
     values: ({ values }, __, { db }) =>
@@ -145,7 +162,13 @@ const resolvers: IResolvers<any, ApolloContext> = {
       }))
   },
   Node: {
-    state: (node, __, { db }) => getNodeState(db, node)
+    state: (node, __, { db }) => getNodeState(db, node),
+    workspace: ({ workspaceId }, __, { db }) =>
+      getWorkspace(db, new ObjectID(workspaceId))
+  },
+  Workspace: {
+    nodes: ({ id }, __, { db }) => getAllNodes(db, id),
+    connections: ({ id }, __, { db }) => getAllConnections(db, id)
   },
   Mutation: {
     createDataset: (_, { name }, { db }) => createDataset(db, name),
@@ -179,7 +202,8 @@ const resolvers: IResolvers<any, ApolloContext> = {
       }
       return true;
     },
-    createNode: (_, { type, x, y }, { db }) => createNode(db, type, x, y),
+    createNode: (_, { type, x, y, workspaceId }, { db }) =>
+      createNode(db, type, workspaceId, x, y),
     updateNode: (_, { id, x, y }, { db }) =>
       updateNode(db, new ObjectID(id), x, y),
     deleteNode: (_, { id }, { db }) => deleteNode(db, new ObjectID(id)),
@@ -189,9 +213,14 @@ const resolvers: IResolvers<any, ApolloContext> = {
       createConnection(db, input.from, input.to),
     deleteConnection: (_, { id }, { db }) =>
       deleteConnection(db, new ObjectID(id)),
-    updateEditor: (_, { nodes, connections }, { db }) =>
-      updateEditor(db, nodes, connections),
-    startCalculation: (_, __, { db }) => startCalculation(db)
+    updateWorkspace: (_, { id, nodes, connections }, { db }) =>
+      updateWorkspace(db, new ObjectID(id), nodes, connections),
+    createWorkspace: (_, { name, description }, { db }) =>
+      createWorkspace(db, name, description),
+    deleteWorkspace: (_, { id }, { db }) =>
+      deleteWorkspace(db, new ObjectID(id)),
+    startCalculation: (_, { workspaceId }, { db }) =>
+      startCalculation(db, workspaceId)
   },
   Upload: GraphQLUpload
 };
@@ -202,7 +231,7 @@ const typeDefs = [
   Mutation,
   UploadProcess,
   Entry,
-  Editor,
+  Workspace,
   Dataset,
   Valueschema,
   CalculationProcess

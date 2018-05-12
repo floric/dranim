@@ -4,9 +4,6 @@ import { DataSocket, DATASET_TYPE, OutputSocketInformation } from '../Sockets';
 import { getOrDefault, getValidInput } from '../utils';
 import { NodeDef } from '../AllNodes';
 
-const FormItem = Form.Item;
-const Option = Select.Option;
-
 export const JoinDatasetsNode: NodeDef = {
   title: 'Join Datasets',
   inputs: [DataSocket('Dataset A', 'input'), DataSocket('Dataset B', 'input')],
@@ -71,7 +68,7 @@ export const JoinDatasetsNode: NodeDef = {
     state: { datasets }
   }) => {
     return (
-      <FormItem label="Input">
+      <Form.Item label="Input">
         {getFieldDecorator('value', {
           rules: [{ required: true }]
         })(
@@ -81,13 +78,13 @@ export const JoinDatasetsNode: NodeDef = {
             placeholder="Select ID Value"
           >
             {datasets.map(ds => (
-              <Option value={ds.id} key={ds.id}>
+              <Select.Option value={ds.id} key={ds.id}>
                 {ds.name}
-              </Option>
+              </Select.Option>
             ))}
           </Select>
         )}
-      </FormItem>
+      </Form.Item>
     );
   }
 };

@@ -6,8 +6,6 @@ import * as moment from 'moment';
 import { hasErrors } from '../../utils/form';
 import { Value, ValueSchema, ValueSchemaType } from '../../utils/model';
 
-const FormItem = Form.Item;
-
 export interface CreateEntryFormProps extends FormComponentProps {
   handleCreateEntry: (data: Array<Value>) => Promise<any>;
   schema: Array<ValueSchema>;
@@ -73,7 +71,7 @@ class CreateEntryFormImpl extends React.Component<
           ];
 
           return (
-            <FormItem
+            <Form.Item
               key={s.name}
               labelCol={{
                 sm: 12,
@@ -117,10 +115,10 @@ class CreateEntryFormImpl extends React.Component<
                   initialValue: 0,
                   rules
                 })(<InputNumber />)}
-            </FormItem>
+            </Form.Item>
           );
         })}
-        <FormItem
+        <Form.Item
           wrapperCol={{
             xs: 24,
             sm: 16
@@ -134,7 +132,7 @@ class CreateEntryFormImpl extends React.Component<
           >
             Add Entry
           </Button>
-        </FormItem>
+        </Form.Item>
       </Form>
     );
   }

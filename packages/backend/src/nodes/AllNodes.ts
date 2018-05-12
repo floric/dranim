@@ -1,6 +1,6 @@
 import { FormComponentProps } from 'antd/lib/form';
 
-import { FormValues, Socket } from '../graphql/resolvers/editor';
+import { FormValues, Socket } from '../graphql/resolvers/workspace';
 import { AllDatasetNodes } from './dataset';
 import { AllNumberNodes } from './number';
 import { AllStringNodes } from './string';

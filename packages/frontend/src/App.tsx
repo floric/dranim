@@ -10,10 +10,12 @@ import gql from 'graphql-tag';
 
 import StartPage from './pages/StartPage';
 import DataPage from './pages/DataPage';
-import ExplorerPage from './pages/ExplorerPage';
+import WorkspacesOverviewPage, {
+  Workspace
+} from './pages/WorkspacesOverviewPage';
+import WorkspaceDetailPage from './pages/workspaces/WorkspaceDetailPage';
 import VisPage from './pages/VisPage';
 import DataDetailPage from './pages/DataDetailPage';
-import CalculationProcessesPage from './pages/CalculationProcessesPage';
 
 const { Content, Footer, Sider } = Layout;
 const SubMenu = Menu.SubMenu;
@@ -29,6 +31,10 @@ export const ALL_DATASETS = gql`
       valueschemas {
         name
       }
+    }
+    workspaces {
+      id
+      name
     }
   }
 `;
@@ -50,11 +56,12 @@ const MenuItemContent: SFC<{
 
 const AppMenu: SFC<{
   collapsed: boolean;
+  workspaces?: Array<Workspace>;
   datasets?: Array<{
     name: string;
     id: string;
   }>;
-}> = ({ datasets, collapsed }) => (
+}> = ({ datasets, workspaces, collapsed }) => (
   <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
     <Menu.Item key="menu_start">
       <MenuItemContent
@@ -93,20 +100,20 @@ const AppMenu: SFC<{
         </span>
       }
     >
-      <Menu.Item key="menu_explorer">
+      <Menu.Item key="menu_workspaces">
         <MenuItemContent
           collapsed={collapsed}
-          href="/explorer"
-          title="Editor"
+          href="/workspaces"
+          title="Workspaces"
         />
       </Menu.Item>
-      <Menu.Item key="menu_calculations">
-        <MenuItemContent
-          collapsed={collapsed}
-          href="/explorer/calculations"
-          title="Calculations"
-        />
-      </Menu.Item>
+      {workspaces && workspaces.length > 0 && <Menu.Divider />}
+      {workspaces &&
+        workspaces.map((ws: { name: string; id: string }) => (
+          <Menu.Item key={`menu_ws+${ws.id}`}>
+            <NavLink to={`/workspaces/${ws.id}`}>{ws.name}</NavLink>
+          </Menu.Item>
+        ))}
     </SubMenu>
     <Menu.Item key="menu_vis">
       <MenuItemContent
@@ -153,7 +160,11 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
               }
 
               return (
-                <AppMenu datasets={res.data!.datasets} collapsed={collapsed} />
+                <AppMenu
+                  datasets={res.data!.datasets}
+                  workspaces={res.data!.workspaces}
+                  collapsed={collapsed}
+                />
               );
             }}
           </Query>
@@ -161,16 +172,16 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
         <Layout>
           <Content {...css({ background: '#ECECEC', padding: '30px' })}>
             <Switch>
-              <Route exact path="/" render={props => StartPage} />
-              <Route exact path="/data" render={props => DataPage} />
-              <Route path="/data/:id" render={props => DataDetailPage} />
-              <Route exact path="/explorer" render={props => ExplorerPage} />
+              <Route exact path="/" component={StartPage} />
+              <Route exact path="/data" component={DataPage} />
+              <Route path="/data/:id" component={DataDetailPage} />
               <Route
                 exact
-                path="/explorer/calculations"
-                render={props => CalculationProcessesPage}
+                path="/workspaces"
+                component={WorkspacesOverviewPage}
               />
-              <Route exact path="/visualizations" render={props => VisPage} />
+              <Route path="/workspaces/:id" component={WorkspaceDetailPage} />
+              <Route exact path="/visualizations" component={VisPage} />
             </Switch>
           </Content>
           <Footer style={{ textAlign: 'center' }}>Florian Richter</Footer>

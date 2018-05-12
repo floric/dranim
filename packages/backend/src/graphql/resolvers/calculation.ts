@@ -1,11 +1,11 @@
 import { Db, ObjectID } from 'mongodb';
 import {
-  allNodes,
-  allConnections,
+  getAllNodes,
+  getAllConnections,
   Node,
   getConnection,
   getNode
-} from './editor';
+} from './workspace';
 import { mongoDbClient } from '../../config/db';
 import {
   outputNodes,
@@ -30,12 +30,12 @@ export interface CalculationProcess {
   state: CalculationProcessState;
 }
 
-const startProcess = async (db: Db, processId: string) => {
+const startProcess = async (db: Db, processId: string, workspaceId: string) => {
   const processCollection = getCalculationsCollection(db);
 
   try {
-    const connections = await allConnections(db);
-    const nodes = await allNodes(db);
+    const connections = await getAllConnections(db, workspaceId);
+    const nodes = await getAllNodes(db, workspaceId);
     const outputs = nodes.filter(n => outputNodes.includes(n.type));
 
     await processCollection.updateOne(
@@ -134,11 +134,15 @@ export const getCalculationsCollection = (db: Db) => {
   return db.collection('Calculations');
 };
 
-export const startCalculation = async (db: Db): Promise<CalculationProcess> => {
+export const startCalculation = async (
+  db: Db,
+  workspaceId: string
+): Promise<CalculationProcess> => {
   const coll = getCalculationsCollection(db);
   const newProcess = await coll.insertOne({
     start: new Date(),
     finish: null,
+    workspaceId,
     processedOutputs: 0,
     totalOutputs: 0,
     state: CalculationProcessState.STARTED
@@ -149,7 +153,7 @@ export const startCalculation = async (db: Db): Promise<CalculationProcess> => {
 
   const id = newProcess.ops[0]._id;
 
-  startProcess(db, id);
+  startProcess(db, id, workspaceId);
 
   return {
     id,
@@ -158,10 +162,11 @@ export const startCalculation = async (db: Db): Promise<CalculationProcess> => {
 };
 
 export const getAllCalculations = async (
-  db: Db
+  db: Db,
+  workspaceId: string
 ): Promise<Array<CalculationProcess>> => {
   const collection = getCalculationsCollection(db);
-  const all = await collection.find({}).toArray();
+  const all = await collection.find({ workspaceId }).toArray();
   return all.map(ds => ({
     id: ds._id,
     ...ds

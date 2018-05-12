@@ -22,6 +22,7 @@ const Node = `
     outputs: [SocketValue!]!
     state: String!
     form: [FormValue!]!
+    workspace: Workspace!
   }
 `;
 
@@ -53,6 +54,7 @@ const Connection = `
     id: String!
     from: Socket
     to: Socket
+    workspace: Workspace!
   }
 `;
 
@@ -63,8 +65,13 @@ const ConnectionInput = `
   }
 `;
 
-const Editor = `
-  type Editor {
+const Workspace = `
+  type Workspace {
+    id: String!
+    name: String!
+    lastChange: String!
+    created: String!
+    description: String!
     nodes: [Node!]!
     connections: [Connection!]!
   }
@@ -79,5 +86,5 @@ export default () => [
   SocketInput,
   Connection,
   ConnectionInput,
-  Editor
+  Workspace
 ];

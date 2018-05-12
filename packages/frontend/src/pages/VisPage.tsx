@@ -1,24 +1,22 @@
 import * as React from 'react';
-import { withPageHeaderHoC } from '../components/PageHeaderHoC';
 import { Col, Row, Card, Select, Form, Button } from 'antd';
+import { PageHeaderCard } from '../components/PageHeaderCard';
 
-const { OptGroup } = Select;
-const FormItem = Form.Item;
-
-class VisPage extends React.Component<{}, {}> {
+export default class VisPage extends React.Component<{}, {}> {
   public render() {
     return (
       <>
+        <PageHeaderCard title="Visualizations" />
         <Row style={{ marginBottom: 12, marginTop: 12 }}>
           <Col>
             <Card bordered={false}>
               <Form layout="inline">
-                <FormItem label="Source">
+                <Form.Item label="Source">
                   <Select style={{ width: 300 }}>
-                    <OptGroup label="Outputs" />
-                    <OptGroup label="Datasets" />
+                    <Select.OptGroup label="Outputs" />
+                    <Select.OptGroup label="Datasets" />
                   </Select>
-                </FormItem>
+                </Form.Item>
               </Form>
             </Card>
           </Col>
@@ -36,9 +34,3 @@ class VisPage extends React.Component<{}, {}> {
     );
   }
 }
-
-export default withPageHeaderHoC({
-  title: 'Visualizations',
-  size: 'small',
-  includeInCard: false
-})(VisPage);

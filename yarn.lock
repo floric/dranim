@@ -54,7 +54,7 @@
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/@antv/hierarchy/-/hierarchy-0.1.2.tgz#d736fe5c4cf8ae664ba51bca194a1786c028ad9d"
 
-"@babel/code-frame@7.0.0-beta.46", "@babel/code-frame@^7.0.0-beta.35":
+"@babel/code-frame@7.0.0-beta.46", "@babel/code-frame@^7.0.0-beta.34", "@babel/code-frame@^7.0.0-beta.35":
   version "7.0.0-beta.46"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.0.0-beta.46.tgz#e0d002100805daab1461c0fcb32a07e304f3a4f4"
   dependencies:
@@ -2428,6 +2428,12 @@ commander@~2.13.0:
   version "2.13.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.13.0.tgz#6964bca67685df7c1f1430c584f07d7597885b9c"
 
+comment-json@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/comment-json/-/comment-json-1.1.3.tgz#6986c3330fee0c4c9e00c2398cd61afa5d8f239e"
+  dependencies:
+    json-parser "^1.0.0"
+
 common-tags@^1.5.1:
   version "1.7.2"
   resolved "https://registry.yarnpkg.com/common-tags/-/common-tags-1.7.2.tgz#24d9768c63d253a56ecff93845b44b4df1d52771"
@@ -3583,7 +3589,7 @@ eslint-plugin-prettier@^2.2.0:
     fast-diff "^1.1.1"
     jest-docblock "^21.0.0"
 
-esprima@^2.6.0:
+esprima@^2.6.0, esprima@^2.7.0:
   version "2.7.3"
   resolved "https://registry.yarnpkg.com/esprima/-/esprima-2.7.3.tgz#96e3b70d5779f6ad49cd032673d1c312767ba581"
 
@@ -5560,6 +5566,12 @@ json-parse-better-errors@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/json-parse-better-errors/-/json-parse-better-errors-1.0.2.tgz#bb867cfb3450e69107c131d1c514bab3dc8bcaa9"
 
+json-parser@^1.0.0:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/json-parser/-/json-parser-1.1.5.tgz#e62ec5261d1a6a5fc20e812a320740c6d9005677"
+  dependencies:
+    esprima "^2.7.0"
+
 json-schema-traverse@^0.3.0:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/json-schema-traverse/-/json-schema-traverse-0.3.1.tgz#349a6d44c53a51de89b40805c5d5e59b417d3340"
@@ -6698,6 +6710,21 @@ parcel-bundler@^1.8.1:
     uglify-es "^3.2.1"
     v8-compile-cache "^2.0.0"
     ws "^5.1.1"
+
+parcel-plugin-typescript@^0.7.1:
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/parcel-plugin-typescript/-/parcel-plugin-typescript-0.7.1.tgz#51ebd15a9b13c33140ea33f64384a0a12f83b564"
+  dependencies:
+    "@babel/code-frame" "^7.0.0-beta.34"
+    body-parser "^1.18.2"
+    chalk "^2.3.0"
+    comment-json "^1.1.3"
+    express "^4.16.2"
+    find-up "^2.1.0"
+    normalize-path "^2.1.1"
+    tmp "^0.0.33"
+    tslib "^1.8.1"
+    uuid "^3.1.0"
 
 parse-asn1@^5.0.0:
   version "5.1.1"

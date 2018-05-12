@@ -6,7 +6,7 @@ import {
 } from '../ExplorerEditor';
 import { Socket } from '../nodes/Sockets';
 import { NODE_WIDTH } from './Nodes';
-import { showNotificationWithIcon } from '../../../utils/form';
+import { showNotificationWithIcon } from '../../../../utils/form';
 
 export const SOCKET_RADIUS = 8;
 export const SOCKET_DISTANCE = 30;
@@ -121,26 +121,6 @@ const beginEditExistingConnection = async (
     }
   });
 };
-
-/*const getOtherNodes = (
-  s: Socket,
-  state: ExplorerEditorState,
-  server: ExplorerEditorProps
-) => {
-  if (!state.openConnection) {
-    return [];
-  }
-  const nodeConnections = state.openConnection.outputs
-    ? state.openConnection.outputs
-    : state.openConnection.inputs;
-  if (nodeConnections && nodeConnections.length > 0) {
-    return nodeConnections.map(nc =>
-      server.nodes.find(n => n.id === nc.nodeId)
-    );
-  }
-
-  return [];
-};*/
 
 export const onClickSocket = (
   s: Socket,

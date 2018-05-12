@@ -13,7 +13,7 @@ export interface Node {
   id: string;
   x: number;
   y: number;
-  state: NodeState;
+  workspaceId: string;
   outputs: Array<{ name: string; connectionId: string }>;
   inputs: Array<{ name: string; connectionId: string }>;
   type: string;
@@ -32,15 +32,25 @@ export interface Connection extends ConnectionWithoutId {
 export interface ConnectionWithoutId {
   from: Socket;
   to: Socket;
+  workspaceId: string;
 }
 
-export interface Editor {
+export interface Workspace {
+  id: string;
+  name: string;
+  lastChange: string;
+  created: string;
+  description: string;
   nodes: Array<Node>;
   connections: Array<Connection>;
 }
 
 export const getNodesCollection = (db: Db) => {
   return db.collection('Nodes');
+};
+
+export const getWorkspacesCollection = (db: Db) => {
+  return db.collection('Workspaces');
 };
 
 export const getConnectionsCollection = (db: Db) => {
@@ -98,7 +108,22 @@ export const createConnection = async (db: Db, from: Socket, to: Socket) => {
     throw new Error('Only one input allowed');
   }
 
-  const all = await allConnections(db);
+  const nodesCollection = getNodesCollection(db);
+  const outputNode = await nodesCollection.findOne<Node>({
+    _id: new ObjectID(from.nodeId)
+  });
+  const inputNode = await nodesCollection.findOne<Node>({
+    _id: new ObjectID(to.nodeId)
+  });
+  if (!outputNode || !inputNode) {
+    throw new Error('Unknown node!');
+  }
+
+  if (inputNode.workspaceId !== outputNode.workspaceId) {
+    throw new Error('Nodes live in different workspaes!');
+  }
+
+  const all = await getAllConnections(db, inputNode.workspaceId);
   let foundCircle = false;
   let curFromSocket: Socket = from;
   while (foundCircle === false) {
@@ -122,7 +147,11 @@ export const createConnection = async (db: Db, from: Socket, to: Socket) => {
     throw new Error('Cyclic dependencies not allowed!');
   }
 
-  res = await collection.insertOne({ from, to });
+  res = await collection.insertOne({
+    from,
+    to,
+    workspaceId: inputNode.workspaceId
+  });
 
   if (res.result.ok !== 1 || res.ops.length !== 1) {
     throw new Error('Writing connection failed');
@@ -131,7 +160,6 @@ export const createConnection = async (db: Db, from: Socket, to: Socket) => {
   const newItem = res.ops[0];
   const connId = newItem._id;
 
-  const nodesCollection = getNodesCollection(db);
   await nodesCollection.updateOne(
     { _id: new ObjectID(from.nodeId) },
     { $push: { outputs: { name: from.name, connectionId: connId } } }
@@ -195,6 +223,7 @@ export const deleteConnection = async (db: Db, id: ObjectID) => {
 export const createNode = async (
   db: Db,
   type: string,
+  workspaceId: string,
   x: number,
   y: number
 ): Promise<Node> => {
@@ -203,12 +232,18 @@ export const createNode = async (
     throw new Error("Name mustn't be empty.");
   }
 
+  const ws = await getWorkspace(db, new ObjectID(workspaceId));
+  if (!ws) {
+    throw new Error('Unknown workspace!');
+  }
+
   const res = await collection.insertOne({
     x,
     y,
     form: [],
     outputs: [],
     inputs: [],
+    workspaceId,
     type
   });
 
@@ -236,6 +271,7 @@ export const deleteNode = async (db: Db, id: ObjectID) => {
 
   return true;
 };
+
 export const updateNode = async (
   db: Db,
   id: ObjectID,
@@ -255,9 +291,13 @@ export const updateNode = async (
   return true;
 };
 
-export const allNodes = async (db: Db): Promise<Array<Node>> => {
+export const getAllNodes = async (
+  db: Db,
+  workspaceId: string
+): Promise<Array<Node>> => {
   const collection = getNodesCollection(db);
-  const all = await collection.find({}).toArray();
+  const all = await collection.find({ workspaceId }).toArray();
+  console.log(await collection.find().toArray());
   return all.map(ds => ({
     id: ds._id,
     ...ds
@@ -314,17 +354,71 @@ export const getConnection = async (
   };
 };
 
-export const allConnections = async (db: Db): Promise<Array<Connection>> => {
+export const getAllConnections = async (
+  db: Db,
+  workspaceId: string
+): Promise<Array<Connection>> => {
   const collection = getConnectionsCollection(db);
-  const all = await collection.find({}).toArray();
+  const all = await collection.find({ workspaceId }).toArray();
   return all.map(ds => ({
     id: ds._id,
     ...ds
   }));
 };
 
-export const updateEditor = async (
+export const createWorkspace = async (
   db: Db,
+  name: string,
+  description: string | null
+) => {
+  const wsCollection = getWorkspacesCollection(db);
+  if (!name.length) {
+    throw new Error('Name of workspace must not be empty.');
+  }
+
+  const res = await wsCollection.insertOne({
+    name,
+    description: description || '',
+    lastChange: new Date(),
+    created: new Date()
+  });
+
+  if (res.result.ok !== 1 || res.ops.length !== 1) {
+    throw new Error('Writing workspace failed');
+  }
+
+  const newItem = res.ops[0];
+  return {
+    id: newItem._id,
+    ...newItem
+  };
+};
+
+export const deleteWorkspace = async (db: Db, id: ObjectID) => {
+  const wsCollection = getWorkspacesCollection(db);
+  const connectionsCollection = getConnectionsCollection(db);
+  const nodesCollection = getNodesCollection(db);
+
+  const ws = await wsCollection.findOne<Workspace>({ _id: new ObjectID(id) });
+  if (!ws) {
+    throw new Error("Workspace doesn't exist.");
+  }
+
+  const wsRes = await wsCollection.deleteOne({ _id: id });
+  if (wsRes.result.ok !== 1 || wsRes.deletedCount !== 1) {
+    throw new Error('Deletion of Workspace failed.');
+  }
+  await Promise.all([
+    nodesCollection.deleteMany({ workspaceId: id.toHexString() }),
+    connectionsCollection.deleteMany({ workspaceId: id.toHexString() })
+  ]);
+
+  return true;
+};
+
+export const updateWorkspace = async (
+  db: Db,
+  id: ObjectID,
   nodes: Array<Node>,
   connections: Array<Connection>
 ) => {
@@ -351,6 +445,29 @@ export const updateEditor = async (
   return true;
 };
 
-export const editor = async (db: Db): Promise<Editor> => {
-  return { nodes: await allNodes(db), connections: await allConnections(db) };
+export const getAllWorkspaces = async (db: Db): Promise<Array<Workspace>> => {
+  const wsCollection = getWorkspacesCollection(db);
+  const all = await wsCollection.find().toArray();
+  return all.map(ws => ({
+    id: ws._id,
+    ...ws
+  }));
+};
+
+export const getWorkspace = async (
+  db: Db,
+  id: ObjectID
+): Promise<Workspace> => {
+  const wsCollection = getWorkspacesCollection(db);
+  const ws = await wsCollection.findOne({
+    _id: id
+  });
+  if (!ws) {
+    return null;
+  }
+
+  return {
+    id: ws._id,
+    ...ws
+  };
 };

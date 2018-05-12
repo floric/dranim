@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Card, Row, Col, TreeSelect } from 'antd';
 import { css } from 'glamor';
 
-import { Dataset } from '../../utils/model';
+import { Dataset } from '../../../utils/model';
 import { nodeTypes, nodeTypesTree } from './nodes/AllNodes';
 import { EXPLORER_CONTAINER, updateStage } from './editor/EditorStage';
 import { NODE_WIDTH } from './editor/Nodes';
@@ -10,7 +10,7 @@ import { OutputSocketInformation } from './nodes/Sockets';
 import { getInputInformation } from './nodes/utils';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { PropertiesForm } from './editor/PropertiesForm';
-import { AsyncButton } from '../../components/AsyncButton';
+import { AsyncButton } from '../../../components/AsyncButton';
 
 const filterTreeNode = (inputValue: string, treeNode: any) => {
   if (!treeNode.props.index) {
@@ -158,7 +158,8 @@ export class ExplorerEditor extends React.Component<
     const { nodes } = this.props;
 
     const node = selectedNode ? nodes.find(n => n.id === selectedNode) : null;
-    const ValueForm = node
+
+    const renderFormItems = node
       ? nodeTypes.get(node.type)!.renderFormItems || null
       : null;
 
@@ -189,9 +190,9 @@ export class ExplorerEditor extends React.Component<
                 {node && (
                   <Col xs={16}>
                     <h4>Properties</h4>
-                    {ValueForm ? (
+                    {renderFormItems ? (
                       <PropertiesForm
-                        RenderFormItems={ValueForm}
+                        renderFormItems={renderFormItems}
                         handleSubmit={this.handleSave}
                         context={{ state: this.props, node }}
                         inputs={inputs}

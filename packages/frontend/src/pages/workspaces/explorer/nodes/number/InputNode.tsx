@@ -1,8 +1,7 @@
 import * as React from 'react';
-import { InputNumber } from 'antd';
+import { InputNumber, Form } from 'antd';
 import { NodeDef } from '../AllNodes';
 import { NumberSocket, OutputSocketInformation, NUMBER_TYPE } from '../Sockets';
-import FormItem from 'antd/lib/form/FormItem';
 import { getOrDefault } from '../utils';
 
 export const NumberInputNode: NodeDef = {
@@ -16,11 +15,11 @@ export const NumberInputNode: NodeDef = {
       ['Number', { dataType: NUMBER_TYPE }]
     ]),
   renderFormItems: ({ form: { getFieldDecorator }, node: { form } }) => (
-    <FormItem label="Value">
+    <Form.Item label="Value">
       {getFieldDecorator('value', {
         rules: [{ required: true, type: 'number' }],
         initialValue: getOrDefault<number>(form, 'value', 0)
       })(<InputNumber />)}
-    </FormItem>
+    </Form.Item>
   )
 };

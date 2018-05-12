@@ -1,14 +1,14 @@
 import * as React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { Query, Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
 
-import { withPageHeaderHoC } from '../components/PageHeaderHoC';
 import { ExplorerEditor } from './explorer/ExplorerEditor';
-import { LoadingCard, UnknownErrorCard } from '../components/CustomCards';
-import { deepCopyResponse, tryOperation } from '../utils/form';
+import { LoadingCard, UnknownErrorCard } from '../../components/CustomCards';
+import { deepCopyResponse, tryOperation } from '../../utils/form';
 
-const EDITOR_NODE_SELECTION = gql`
-  {
+const WORKSPACE_NODE_SELECTION = gql`
+  query dataset($workspaceId: String!) {
     datasets {
       id
       name
@@ -17,7 +17,7 @@ const EDITOR_NODE_SELECTION = gql`
         name
       }
     }
-    editor {
+    workspace(id: $workspaceId) {
       nodes {
         id
         type
@@ -53,11 +53,19 @@ const EDITOR_NODE_SELECTION = gql`
 `;
 
 const CREATE_NODE = gql`
-  mutation createNode($type: String!, $x: Float!, $y: Float!) {
-    createNode(type: $type, x: $x, y: $y) {
+  mutation createNode(
+    $type: String!
+    $workspaceId: String!
+    $x: Float!
+    $y: Float!
+  ) {
+    createNode(type: $type, workspaceId: $workspaceId, x: $x, y: $y) {
       id
       x
       y
+      workspace {
+        id
+      }
       type
     }
   }
@@ -108,8 +116,8 @@ const ADD_OR_UPDATE_FORM_VALUE = gql`
 `;
 
 const START_CALCULATION = gql`
-  mutation startCalculation {
-    startCalculation {
+  mutation startCalculation($workspaceId: String!) {
+    startCalculation(workspaceId: $workspaceId) {
       id
       start
       state
@@ -117,10 +125,17 @@ const START_CALCULATION = gql`
   }
 `;
 
-class ExplorerPage extends React.Component<{}> {
+export default class WorkspaceEditorPage extends React.Component<
+  RouteComponentProps<{ id: string }>
+> {
   public render() {
+    const {
+      match: {
+        params: { id }
+      }
+    } = this.props;
     return (
-      <Query query={EDITOR_NODE_SELECTION}>
+      <Query query={WORKSPACE_NODE_SELECTION} variables={{ workspaceId: id }}>
         {({ loading, error, data, refetch }) => {
           if (loading) {
             return <LoadingCard />;
@@ -148,38 +163,47 @@ class ExplorerPage extends React.Component<{}> {
                                         <ExplorerEditor
                                           datasets={data.datasets}
                                           connections={deepCopyResponse(
-                                            data.editor.connections
+                                            data.workspace.connections
                                           )}
                                           nodes={deepCopyResponse(
-                                            data.editor.nodes
+                                            data.workspace.nodes
                                           )}
                                           onNodeCreate={(type, x, y) =>
                                             tryOperation({
                                               op: () =>
                                                 createNode({
-                                                  variables: { type, x, y }
+                                                  variables: {
+                                                    type,
+                                                    x,
+                                                    y,
+                                                    workspaceId: id
+                                                  }
                                                 }),
                                               refetch,
                                               successTitle: null,
                                               failedTitle: 'Node not created'
                                             })
                                           }
-                                          onNodeDelete={id =>
+                                          onNodeDelete={nodeId =>
                                             tryOperation({
                                               op: () =>
                                                 deleteNode({
-                                                  variables: { id }
+                                                  variables: { id: nodeId }
                                                 }),
                                               refetch,
                                               successTitle: null,
                                               failedTitle: 'Node not deleted'
                                             })
                                           }
-                                          onNodeUpdate={(id, x, y) =>
+                                          onNodeUpdate={(nodeId, x, y) =>
                                             tryOperation({
                                               op: () =>
                                                 updateNode({
-                                                  variables: { id, x, y }
+                                                  variables: {
+                                                    id: nodeId,
+                                                    x,
+                                                    y
+                                                  }
                                                 }),
                                               refetch,
                                               successTitle: null,
@@ -200,11 +224,11 @@ class ExplorerPage extends React.Component<{}> {
                                                 'Connection not created'
                                             })
                                           }
-                                          onConnectionDelete={id =>
+                                          onConnectionDelete={connId =>
                                             tryOperation({
                                               op: () =>
                                                 deleteConnection({
-                                                  variables: { id }
+                                                  variables: { id: connId }
                                                 }),
                                               refetch,
                                               successTitle: null,
@@ -233,7 +257,10 @@ class ExplorerPage extends React.Component<{}> {
                                           }
                                           onStartCalculation={() =>
                                             tryOperation({
-                                              op: () => startCalculation(),
+                                              op: () =>
+                                                startCalculation({
+                                                  variables: { workspaceId: id }
+                                                }),
                                               refetch,
                                               successTitle: () =>
                                                 'Process started',
@@ -264,9 +291,3 @@ class ExplorerPage extends React.Component<{}> {
     );
   }
 }
-
-export default withPageHeaderHoC({
-  title: 'Explorer',
-  includeInCard: false,
-  size: 'small'
-})(ExplorerPage);

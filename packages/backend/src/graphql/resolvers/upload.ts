@@ -8,7 +8,7 @@ import { Entry, createEntry } from './entry';
 import { getDatasetsCollection, Dataset, Valueschema } from './dataset';
 import { getDataset } from '../resolvers/dataset';
 import { UploadProgress } from './util/UploadProgress';
-import { updateNode } from './editor';
+import { updateNode } from './workspace';
 import { Upper } from './util/TransformStream';
 
 export interface UploadProcess {

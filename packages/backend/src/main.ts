@@ -34,6 +34,10 @@ export const main = async (options: IMainOptions) => {
   }
   app.use(helmet());
   app.use(morgan(options.env));
+  app.use((req, res, next) => {
+    res.setHeader('Access-Control-Max-Age', '600');
+    return next();
+  });
   app.use(
     GRAPHQL_ROUTE,
     bodyParser.json({
@@ -48,7 +52,10 @@ export const main = async (options: IMainOptions) => {
       maxFiles: 10,
       maxFileSize: MAX_UPLOAD_LIMIT
     }),
-    graphqlExpress({ schema: Schema, context: { db: client.db('App') } })
+    graphqlExpress({
+      schema: Schema,
+      context: { db: client.db('App') }
+    })
   );
 
   app

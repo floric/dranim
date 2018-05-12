@@ -15,9 +15,6 @@ import { FormEvent } from 'react';
 import { hasErrors } from '../../utils/form';
 import { ValueSchema, ValueSchemaType } from '../../utils/model';
 
-const FormItem = Form.Item;
-const { Option, OptGroup } = Select;
-
 export interface CreateValueSchemaFormProps extends FormComponentProps {
   handleCreateValueSchema: (val: ValueSchema) => void;
 }
@@ -106,7 +103,7 @@ class CreateValueSchemaFormImpl extends React.Component<
 
     return (
       <Form layout="inline" onSubmit={this.handleSubmit}>
-        <FormItem
+        <Form.Item
           label="Name"
           validateStatus={nameError ? 'error' : 'success'}
           help={nameError || ''}
@@ -114,8 +111,8 @@ class CreateValueSchemaFormImpl extends React.Component<
           {getFieldDecorator('name', {
             rules: [{ required: true, message: 'Please enter an unique name!' }]
           })(<Input placeholder="Name" />)}
-        </FormItem>
-        <FormItem label="Type">
+        </Form.Item>
+        <Form.Item label="Type">
           {getFieldDecorator('type', {
             initialValue: ValueSchemaType.string
           })(
@@ -123,32 +120,32 @@ class CreateValueSchemaFormImpl extends React.Component<
               onChange={this.handleSelectTypeChange}
               style={{ width: 120 }}
             >
-              <OptGroup label="Primitive">
+              <Select.OptGroup label="Primitive">
                 {Object.keys(ValueSchemaType).map(t => (
-                  <Option value={ValueSchemaType[t]} key={`option-${t}`}>
+                  <Select.Option value={ValueSchemaType[t]} key={`option-${t}`}>
                     {ValueSchemaType[t]}
-                  </Option>
+                  </Select.Option>
                 ))}
-              </OptGroup>
+              </Select.OptGroup>
             </Select>
           )}
-        </FormItem>
+        </Form.Item>
         {valueType === ValueSchemaType.boolean && (
-          <FormItem label="Fallback">
+          <Form.Item label="Fallback">
             {getFieldDecorator('fallbackBoolean', {
               initialValue: false
             })(<Checkbox>Value</Checkbox>)}
-          </FormItem>
+          </Form.Item>
         )}
         {valueType === ValueSchemaType.string && (
-          <FormItem label="Fallback">
+          <Form.Item label="Fallback">
             {getFieldDecorator('fallbackString', {
               initialValue: ''
             })(<Input placeholder="Fallback" />)}
-          </FormItem>
+          </Form.Item>
         )}
         {valueType === ValueSchemaType.date && (
-          <FormItem label="Fallback">
+          <Form.Item label="Fallback">
             {getFieldDecorator('fallbackDate', {
               initialValue: moment(),
               rules: [{ required: true, message: 'Please specify a value.' }]
@@ -159,29 +156,29 @@ class CreateValueSchemaFormImpl extends React.Component<
                 placeholder="Select Date and Time"
               />
             )}
-          </FormItem>
+          </Form.Item>
         )}
         {valueType === ValueSchemaType.number && (
-          <FormItem label="Fallback">
+          <Form.Item label="Fallback">
             {getFieldDecorator('fallbackNumber', {
               initialValue: 0,
               rules: [{ required: true, message: 'Please specify a value.' }]
             })(<InputNumber />)}
-          </FormItem>
+          </Form.Item>
         )}
-        <FormItem label="Required">
+        <Form.Item label="Required">
           {getFieldDecorator('required', {
             initialValue: false
           })(<Checkbox />)}
-        </FormItem>
+        </Form.Item>
         {valueType === ValueSchemaType.string && (
-          <FormItem label="Unique">
+          <Form.Item label="Unique">
             {getFieldDecorator('unique', {
               initialValue: false
             })(<Checkbox />)}
-          </FormItem>
+          </Form.Item>
         )}
-        <FormItem>
+        <Form.Item>
           <Button
             type="primary"
             loading={this.state.saving}
@@ -190,7 +187,7 @@ class CreateValueSchemaFormImpl extends React.Component<
           >
             Add Value Schema
           </Button>
-        </FormItem>
+        </Form.Item>
       </Form>
     );
   }
