@@ -9,7 +9,7 @@ import { PageHeaderCard } from '../../components/PageHeaderCard';
 export interface IWorkspacesPageProps
   extends RouteComponentProps<{ id: string }> {}
 
-export default class WorkspaceswPage extends React.Component<
+export default class WorkspacesPage extends React.Component<
   IWorkspacesPageProps
 > {
   public render() {

@@ -3,7 +3,6 @@ import { SFC } from 'react';
 import { Spin, Icon, Row, Col, Card, Button, List } from 'antd';
 import { SpinProps } from 'antd/lib/spin';
 import { css } from 'glamor';
-import Exception from 'ant-design-pro/lib/Exception';
 import { isApolloError, ApolloError } from 'apollo-client/errors/ApolloError';
 import { History } from 'history';
 import { withRouter } from 'react-router';
@@ -29,6 +28,12 @@ export const LoadingCard: SFC<SpinProps> = props => (
     </Col>
   </Row>
 );
+
+export const Exception: SFC<{
+  title: string;
+  desc: JSX.Element | string;
+  actions: JSX.Element;
+}> = ({ title, desc, actions }) => <p>{title}</p>;
 
 export interface UnknownErrorCardProps {
   error: Error;
@@ -56,7 +61,6 @@ export const UnknownErrorCard: SFC<UnknownErrorCardProps> = ({ error }) => {
   return (
     <Card bordered={false}>
       <Exception
-        type="500"
         title={error.name}
         desc={description}
         actions={<DefaultErrorActions />}
@@ -80,10 +84,9 @@ export const CustomErrorCard: SFC<CustomErrorCardProps> = ({
 }) => (
   <Card bordered={false}>
     <Exception
-      type={type}
       title={title}
       desc={description}
-      actions={actions ? actions : () => <DefaultErrorActions />}
+      actions={<DefaultErrorActions />}
     />
   </Card>
 );

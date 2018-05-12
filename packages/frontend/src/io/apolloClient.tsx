@@ -4,7 +4,6 @@ import { onError } from 'apollo-link-error';
 import { ApolloLink } from 'apollo-link';
 import { createUploadLink } from 'apollo-upload-client';
 import { withClientState } from 'apollo-link-state';
-import customFetch from './customFetch';
 
 const API_URL =
   process.env.NODE_ENV === 'production'
@@ -46,14 +45,7 @@ export const client = new ApolloClient({
     }),
     createUploadLink({
       uri: API_URL,
-      credentials: 'same-origin',
-      fetch:
-        typeof window === 'undefined' ? (global as any).fetch : customFetch,
-      fetchOptions: {
-        onProgress: progress => {
-          console.log(100.0 * progress.loaded / progress.total);
-        }
-      }
+      credentials: 'same-origin'
     })
   ]),
   cache: stateCache

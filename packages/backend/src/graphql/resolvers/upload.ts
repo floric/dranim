@@ -189,9 +189,12 @@ export const uploadEntriesCsv = async (
   datasetId: string
 ): Promise<UploadProcess> => {
   try {
-    const ds = await getDataset(db, datasetId);
-
     const uploadsCollection = getUploadsCollection(db);
+    const ds = await getDataset(db, datasetId);
+    if (!ds) {
+      throw new Error('Dataset not found.');
+    }
+
     const newProcess = {
       addedEntries: 0,
       failedEntries: 0,
@@ -213,30 +216,41 @@ export const uploadEntriesCsv = async (
     };
     const processId = new ObjectID(process.id);
 
-    const { resolve, reject } = await promisesAll.all(
-      files.map(f => processUpload(f, ds, db, processId))
-    );
-
-    const successfullUploads: Array<boolean> = resolve;
-
-    if (reject.length) {
-      reject.forEach(({ name, message }) => {
-        console.error(`${name}: ${message}`);
-      });
-      await uploadsCollection.updateOne(
-        { _id: processId },
-        { $set: { state: 'ERROR', finish: new Date() } }
-      );
-    } else {
-      await uploadsCollection.updateOne(
-        { _id: processId },
-        { $set: { state: 'FINISHED', finish: new Date() } }
-      );
-    }
+    // don't await
+    doUploadAsync(db, ds, processId, files);
 
     return process;
   } catch (err) {
     console.log(err);
     throw new Error('Upload failed');
+  }
+};
+
+export const doUploadAsync = async (
+  db: Db,
+  ds: Dataset,
+  processId: ObjectID,
+  files: Array<any>
+) => {
+  const uploadsCollection = getUploadsCollection(db);
+  const { resolve, reject } = await promisesAll.all(
+    files.map(f => processUpload(f, ds, db, processId))
+  );
+
+  const successfullUploads: Array<boolean> = resolve;
+
+  if (reject.length) {
+    reject.forEach(({ name, message }) => {
+      console.error(`${name}: ${message}`);
+    });
+    await uploadsCollection.updateOne(
+      { _id: processId },
+      { $set: { state: 'ERROR', finish: new Date() } }
+    );
+  } else {
+    await uploadsCollection.updateOne(
+      { _id: processId },
+      { $set: { state: 'FINISHED', finish: new Date() } }
+    );
   }
 };

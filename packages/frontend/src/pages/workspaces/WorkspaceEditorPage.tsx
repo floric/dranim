@@ -4,7 +4,11 @@ import { Query, Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
 
 import { ExplorerEditor } from './explorer/ExplorerEditor';
-import { LoadingCard, UnknownErrorCard } from '../../components/CustomCards';
+import {
+  LoadingCard,
+  UnknownErrorCard,
+  CustomErrorCard
+} from '../../components/CustomCards';
 import { deepCopyResponse, tryOperation } from '../../utils/form';
 
 const WORKSPACE_NODE_SELECTION = gql`
@@ -145,6 +149,15 @@ export default class WorkspaceEditorPage extends React.Component<
 
           if (error) {
             return <UnknownErrorCard error={error} />;
+          }
+
+          if (!data.workspace) {
+            return (
+              <CustomErrorCard
+                title="Unknown workspace"
+                description="Workspace doesn't exist."
+              />
+            );
           }
 
           return (
