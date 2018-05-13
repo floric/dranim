@@ -5,6 +5,7 @@ import {
   ExplorerEditorProps
 } from '../ExplorerEditor';
 import { getSocketId } from './Sockets';
+import { SocketType } from '../nodes/Sockets';
 
 const CONNECTION_STIFFNESS = 0.7;
 
@@ -30,10 +31,10 @@ export const renderConnection = (
   changeState: (newState: Partial<ExplorerEditorState>) => void
 ) => {
   const outputSocket = c.from
-    ? socketsMap.get(getSocketId('output', c.from.nodeId, c.from.name))
+    ? socketsMap.get(getSocketId(SocketType.OUTPUT, c.from.nodeId, c.from.name))
     : null;
   const inputSocket = c.to
-    ? socketsMap.get(getSocketId('input', c.to.nodeId, c.to.name))
+    ? socketsMap.get(getSocketId(SocketType.INPUT, c.to.nodeId, c.to.name))
     : null;
   const isCurrentlyChanged = !inputSocket || !outputSocket;
 

@@ -4,21 +4,19 @@ import {
   ConnectionInstance,
   ExplorerEditorProps
 } from '../ExplorerEditor';
-import { Socket } from '../nodes/Sockets';
+import { Socket, SocketType } from '../nodes/Sockets';
 import { NODE_WIDTH } from './Nodes';
 import { showNotificationWithIcon } from '../../../../utils/form';
 
 export const SOCKET_RADIUS = 8;
 export const SOCKET_DISTANCE = 30;
 
-export const getSocketId = (
-  type: 'input' | 'output',
-  nodeId: string,
-  name: string
-) => `${type === 'input' ? 'in' : 'out'}-${nodeId}-${name}`;
+export const getSocketId = (type: SocketType, nodeId: string, name: string) =>
+  `${type === SocketType.INPUT ? 'in' : 'out'}-${nodeId}-${name}`;
 
 const renderSocket = (
   s: Socket,
+  type: SocketType,
   i: number,
   isConnected: boolean,
   onClick?: (s: Socket) => void
@@ -30,10 +28,10 @@ const renderSocket = (
   const text = new Konva.Text({
     fill: '#666',
     text: s.name,
-    align: s.type === 'input' ? 'left' : 'right',
+    align: type === SocketType.INPUT ? 'left' : 'right',
     width: NODE_WIDTH / 2,
     x:
-      s.type === 'input'
+      type === SocketType.INPUT
         ? SOCKET_RADIUS * 2
         : -NODE_WIDTH / 2 - SOCKET_RADIUS * 2,
     y: -SOCKET_RADIUS / 2
@@ -59,6 +57,7 @@ const renderSocket = (
 
 export const renderSocketWithUsages = (
   s: Socket,
+  type: SocketType,
   i: number,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
@@ -70,18 +69,19 @@ export const renderSocketWithUsages = (
   const isUsed =
     connections.find(
       c =>
-        s.type === 'input'
+        type === SocketType.INPUT
           ? c.to !== null && c.to.nodeId === nodeId && c.to.name === s.name
           : c.from !== null &&
             c.from.nodeId === nodeId &&
             c.from.name === s.name
     ) !== undefined;
-  return renderSocket(s, i, isUsed, socket => onClick(socket, nodeId));
+  return renderSocket(s, type, i, isUsed, socket => onClick(socket, nodeId));
 };
 
 const beginNewConnection = (
   nodeId: string,
   s: Socket,
+  type: SocketType,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   changeState: (newState: Partial<ExplorerEditorState>) => void
@@ -89,8 +89,8 @@ const beginNewConnection = (
   changeState({
     openConnection: {
       dataType: s.dataType,
-      inputs: s.type === 'input' ? [{ name: s.name, nodeId }] : null,
-      outputs: s.type !== 'input' ? [{ name: s.name, nodeId }] : null
+      inputs: type === SocketType.INPUT ? [{ name: s.name, nodeId }] : null,
+      outputs: type !== SocketType.INPUT ? [{ name: s.name, nodeId }] : null
     }
   });
 };
@@ -98,6 +98,7 @@ const beginNewConnection = (
 const beginEditExistingConnection = async (
   connectionsInSocket: Array<ConnectionInstance>,
   s: Socket,
+  type: SocketType,
   nodeId: string,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
@@ -106,7 +107,7 @@ const beginEditExistingConnection = async (
   const { connections } = server;
   const existingConnections = connections.filter(
     c =>
-      s.type === 'input'
+      type === SocketType.INPUT
         ? c.to && c.to.nodeId === nodeId && c.to.name === s.name
         : c.from && c.from.nodeId === nodeId && c.from.name === s.name
   );
@@ -116,14 +117,17 @@ const beginEditExistingConnection = async (
   changeState({
     openConnection: {
       dataType: s.dataType,
-      inputs: s.type === 'input' ? null : existingConnections.map(c => c.to!),
-      outputs: s.type === 'input' ? existingConnections.map(c => c.from!) : null
+      inputs:
+        type !== SocketType.INPUT ? existingConnections.map(c => c.to!) : null,
+      outputs:
+        type === SocketType.INPUT ? existingConnections.map(c => c.from!) : null
     }
   });
 };
 
 export const onClickSocket = (
   s: Socket,
+  type: SocketType,
   nodeId: string,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
@@ -134,7 +138,7 @@ export const onClickSocket = (
   if (openConnection === null) {
     const connectionsInSocket = connections.filter(
       c =>
-        s.type === 'output'
+        type === SocketType.OUTPUT
           ? c.from !== null &&
             c.from.nodeId === nodeId &&
             c.from.name === s.name
@@ -144,13 +148,14 @@ export const onClickSocket = (
       beginEditExistingConnection(
         connectionsInSocket,
         s,
+        type,
         nodeId,
         server,
         state,
         changeState
       );
     } else {
-      beginNewConnection(nodeId, s, server, state, changeState);
+      beginNewConnection(nodeId, s, type, server, state, changeState);
     }
   } else {
     // TODO prevent circles (using ID lists)
@@ -164,7 +169,7 @@ export const onClickSocket = (
     }
 
     if (
-      s.type === 'input'
+      type === SocketType.INPUT
         ? openConnection.inputs !== null
         : openConnection.outputs !== null
     ) {
@@ -177,7 +182,7 @@ export const onClickSocket = (
     }
 
     if (
-      s.type === 'input' &&
+      type === SocketType.INPUT &&
       connections.filter(
         c => c.to && c.to.nodeId === nodeId && c.to.name === s.name
       ).length > 0

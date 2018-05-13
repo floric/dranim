@@ -7,7 +7,7 @@ import { NodeDef } from '../AllNodes';
 export const DatasetInputNode: NodeDef = {
   title: 'Dataset Input',
   inputs: [],
-  outputs: [DataSocket('Dataset', 'output')],
+  outputs: [DataSocket('Dataset')],
   path: ['Dataset'],
   keywords: [],
   onClientExecution: (inputs, context) => {

@@ -10,8 +10,8 @@ import {
 
 export const FormatNumberNode: NodeDef = {
   title: 'Format Number',
-  inputs: [NumberSocket('Number', 'input')],
-  outputs: [StringSocket('Formatted', 'output')],
+  inputs: [NumberSocket('Number')],
+  outputs: [StringSocket('Formatted')],
   path: ['Number', 'Converters'],
   keywords: [],
   onClientExecution: () =>

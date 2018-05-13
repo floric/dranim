@@ -6,8 +6,8 @@ import { NodeDef } from '../AllNodes';
 
 export const DatasetSelectValuesNode: NodeDef = {
   title: 'Select Values',
-  inputs: [DataSocket('Dataset', 'input')],
-  outputs: [DataSocket('Dataset', 'output')],
+  inputs: [DataSocket('Dataset')],
+  outputs: [DataSocket('Dataset')],
   path: ['Dataset', 'Filters'],
   keywords: [],
   onClientExecution: (inputs, context) => {

@@ -122,7 +122,7 @@ export default class WorkspacesOverviewPage extends React.Component<
                         type="flex"
                         justify="end"
                         style={{ marginTop: 12 }}
-                        gutter={8}
+                        gutter={12}
                       >
                         <Col>
                           <Mutation mutation={DELETE_WORKSPACE}>

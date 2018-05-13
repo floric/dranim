@@ -7,7 +7,7 @@ import { getOrDefault } from '../utils';
 
 export const DatasetOutputNode: NodeDef = {
   title: 'Dataset Output',
-  inputs: [DataSocket('Dataset', 'input')],
+  inputs: [DataSocket('Dataset')],
   outputs: [],
   path: ['Dataset'],
   keywords: [],

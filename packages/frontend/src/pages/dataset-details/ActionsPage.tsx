@@ -210,7 +210,7 @@ export const DatasetActions = withApollo<DataActionsProps>(
 
             return (
               <>
-                <Row gutter={8}>
+                <Row gutter={12}>
                   <Col
                     xs={{ span: 24 }}
                     md={{ span: 12 }}
@@ -261,7 +261,7 @@ export const DatasetActions = withApollo<DataActionsProps>(
                         <Col>
                           <Form layout="inline">
                             <Form.Item label="Export entries">
-                              <Row gutter={8}>
+                              <Row gutter={12}>
                                 <Col span={12}>
                                   <AsyncButton
                                     type="primary"

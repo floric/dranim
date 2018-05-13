@@ -3,7 +3,7 @@ import { NodeDef } from '../AllNodes';
 
 export const NumberOutputNode: NodeDef = {
   title: 'Number Output',
-  inputs: [NumberSocket('Number', 'input')],
+  inputs: [NumberSocket('Number')],
   outputs: [],
   path: ['Number'],
   keywords: [],

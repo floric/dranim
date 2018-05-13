@@ -6,7 +6,7 @@ import {
   NodeState
 } from '../ExplorerEditor';
 import { nodeTypes } from '../nodes/AllNodes';
-import { Socket } from '../nodes/Sockets';
+import { Socket, SocketType } from '../nodes/Sockets';
 import {
   renderSocketWithUsages,
   onClickSocket,
@@ -72,16 +72,17 @@ export const renderNode = (
     const input = inputs[i];
     const socket = renderSocketWithUsages(
       input,
+      SocketType.INPUT,
       i,
       server,
       state,
       n.id,
       changeState,
       (s: Socket, nodeId: string) =>
-        onClickSocket(s, nodeId, server, state, changeState)
+        onClickSocket(s, SocketType.INPUT, nodeId, server, state, changeState)
     );
     inputsGroup.add(socket);
-    socketsMap.set(getSocketId('input', n.id, input.name), socket);
+    socketsMap.set(getSocketId(SocketType.INPUT, n.id, input.name), socket);
   }
 
   const outputsGroup = new Konva.Group({
@@ -92,16 +93,17 @@ export const renderNode = (
     const output = outputs[i];
     const socket = renderSocketWithUsages(
       output,
+      SocketType.OUTPUT,
       i,
       server,
       state,
       n.id,
       changeState,
       (s: Socket, nodeId: string) =>
-        onClickSocket(s, nodeId, server, state, changeState)
+        onClickSocket(s, SocketType.OUTPUT, nodeId, server, state, changeState)
     );
     outputsGroup.add(socket);
-    socketsMap.set(getSocketId('output', n.id, output.name), socket);
+    socketsMap.set(getSocketId(SocketType.OUTPUT, n.id, output.name), socket);
   }
 
   const stateRect = new Konva.Rect({

@@ -6,8 +6,8 @@ import { NodeDef } from '../AllNodes';
 
 export const JoinDatasetsNode: NodeDef = {
   title: 'Join Datasets',
-  inputs: [DataSocket('Dataset A', 'input'), DataSocket('Dataset B', 'input')],
-  outputs: [DataSocket('Combined', 'output')],
+  inputs: [DataSocket('Dataset A'), DataSocket('Dataset B')],
+  outputs: [DataSocket('Combined')],
   onClientExecution: (inputs, context) => {
     const validInputA = getValidInput('Dataset A', inputs);
     const validInputB = getValidInput('Dataset B', inputs);

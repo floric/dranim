@@ -8,8 +8,8 @@ import {
 
 export const StringLengthNode: NodeDef = {
   title: 'String Length',
-  inputs: [StringSocket('String', 'input')],
-  outputs: [NumberSocket('Length', 'output')],
+  inputs: [StringSocket('String')],
+  outputs: [NumberSocket('Length')],
   onClientExecution: () =>
     new Map<string, OutputSocketInformation>([
       ['Length', { dataType: NUMBER_TYPE }]

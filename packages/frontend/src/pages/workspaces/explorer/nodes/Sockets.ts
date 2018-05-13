@@ -1,4 +1,7 @@
-export type SocketType = 'output' | 'input';
+export enum SocketType {
+  INPUT = 'INPUT',
+  OUTPUT = 'OUTPUT'
+}
 
 export const DATASET_TYPE = 'Dataset';
 export const NUMBER_TYPE = 'Number';
@@ -9,7 +12,6 @@ export interface Socket {
   color: string;
   dataType: DataType;
   name: string;
-  type: SocketType;
 }
 
 export interface OutputSocketInformation {
@@ -18,23 +20,20 @@ export interface OutputSocketInformation {
   isPresent?: boolean;
 }
 
-export const DataSocket = (name: string, type: SocketType): Socket => ({
+export const DataSocket = (name: string): Socket => ({
   color: '#0099ff',
   dataType: DATASET_TYPE,
-  type,
   name
 });
 
-export const NumberSocket = (name: string, type: SocketType): Socket => ({
+export const NumberSocket = (name: string): Socket => ({
   color: '#ff9900',
   dataType: NUMBER_TYPE,
-  type,
   name
 });
 
-export const StringSocket = (name: string, type: SocketType): Socket => ({
+export const StringSocket = (name: string): Socket => ({
   color: '#ff0099',
   dataType: STRING_TYPE,
-  type,
   name
 });

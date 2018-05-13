@@ -3,7 +3,7 @@ import { StringSocket } from '../Sockets';
 
 export const StringOutputNode: NodeDef = {
   title: 'String Output',
-  inputs: [StringSocket('String', 'input')],
+  inputs: [StringSocket('String')],
   outputs: [],
   path: ['String'],
   keywords: [],

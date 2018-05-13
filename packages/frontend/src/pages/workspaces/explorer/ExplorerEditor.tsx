@@ -179,7 +179,7 @@ export class ExplorerEditor extends React.Component<
 
     return (
       <>
-        <Row gutter={8}>
+        <Row gutter={12}>
           <Col xs={24} md={12} xl={18}>
             <Card
               bordered={false}
