@@ -1,15 +1,11 @@
 import * as React from 'react';
 import { InputNumber, Form } from 'antd';
-import { NodeDef } from '../AllNodes';
-import { NumberSocket, OutputSocketInformation, NUMBER_TYPE } from '../Sockets';
+import { ClientNodeDef } from '../AllNodes';
+import { OutputSocketInformation, NUMBER_TYPE } from '../Sockets';
 import { getOrDefault } from '../utils';
 
-export const NumberInputNode: NodeDef = {
+export const NumberInputNode: ClientNodeDef = {
   title: 'Number Input',
-  inputs: [],
-  outputs: [NumberSocket('Number', 'output')],
-  path: ['Number'],
-  keywords: [],
   onClientExecution: () =>
     new Map<string, OutputSocketInformation>([
       ['Number', { dataType: NUMBER_TYPE }]

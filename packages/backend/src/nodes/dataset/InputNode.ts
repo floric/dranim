@@ -1,10 +1,12 @@
-import { DataSocket, DATASET_TYPE } from '../Sockets';
-import { NodeDef } from '../AllNodes';
+import { DataSocket } from '../Sockets';
+import { ServerNodeDef } from '../AllNodes';
 
-export const DatasetInputNode: NodeDef = {
+export const DatasetInputNode: ServerNodeDef = {
   title: 'Dataset Input',
   inputs: [],
   outputs: [DataSocket('Dataset')],
+  path: ['Dataset'],
+  keywords: [],
   isInputValid: () => Promise.resolve(true),
   onServerExecution: () =>
     Promise.resolve({

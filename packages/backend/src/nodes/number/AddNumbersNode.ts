@@ -1,10 +1,12 @@
-import { NodeDef } from '../AllNodes';
-import { NumberSocket, NUMBER_TYPE } from '../Sockets';
+import { ServerNodeDef } from '../AllNodes';
+import { NumberSocket } from '../Sockets';
 
-export const AddNumbersNode: NodeDef = {
+export const AddNumbersNode: ServerNodeDef = {
   title: 'Add Numbers',
   inputs: [NumberSocket('A'), NumberSocket('B')],
   outputs: [NumberSocket('Sum')],
+  path: ['Numbers', 'Operators'],
+  keywords: ['sum'],
   isInputValid: async values => {
     const aVal = values.get('A');
     const bVal = values.get('B');
@@ -21,8 +23,8 @@ export const AddNumbersNode: NodeDef = {
     return true;
   },
   onServerExecution: async (form, values) => {
-    const a = Number.parseFloat(values.get('A'));
-    const b = Number.parseFloat(values.get('B'));
+    const a = Number.parseFloat(values.get('A')!);
+    const b = Number.parseFloat(values.get('B')!);
     return {
       outputs: new Map([['Sum', (a + b).toString()]])
     };

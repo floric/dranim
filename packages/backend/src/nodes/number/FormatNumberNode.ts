@@ -1,10 +1,12 @@
-import { NodeDef } from '../AllNodes';
+import { ServerNodeDef } from '../AllNodes';
 import { NumberSocket, NUMBER_TYPE, StringSocket } from '../Sockets';
 
-export const FormatNumberNode: NodeDef = {
+export const FormatNumberNode: ServerNodeDef = {
   title: 'Format Number',
   inputs: [NumberSocket('Number')],
   outputs: [StringSocket('Formatted')],
+  path: ['Numbers', 'Converters'],
+  keywords: [],
   isInputValid: async values => {
     const val = values.get('Number');
 

@@ -1,16 +1,11 @@
 import * as React from 'react';
 import { Form, Input } from 'antd';
 
-import { DataSocket } from '../Sockets';
-import { NodeDef } from '../AllNodes';
+import { ClientNodeDef } from '../AllNodes';
 import { getOrDefault } from '../utils';
 
-export const DatasetOutputNode: NodeDef = {
+export const DatasetOutputNode: ClientNodeDef = {
   title: 'Dataset Output',
-  inputs: [DataSocket('Dataset')],
-  outputs: [],
-  path: ['Dataset'],
-  keywords: [],
   onClientExecution: () => new Map(),
   renderFormItems: ({ form: { getFieldDecorator }, node: { form } }) => (
     <Form.Item label="Name">

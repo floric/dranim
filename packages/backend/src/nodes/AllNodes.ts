@@ -15,10 +15,12 @@ export interface NodeExecutionResult {
   outputs: NodeExecutionOutputs;
 }
 
-export interface NodeDef {
+export interface ServerNodeDef {
   title: string;
   inputs: Array<SocketDef>;
   outputs: Array<SocketDef>;
+  path: Array<string>;
+  keywords: Array<string>;
   isFormValid?: (form: FormValues) => boolean;
   isInputValid: (inputs: NodeExecutionOutputs) => Promise<boolean>;
   onServerExecution: (
@@ -28,12 +30,12 @@ export interface NodeDef {
 }
 
 const allNodes = [AllDatasetNodes, AllNumberNodes, AllStringNodes];
-export const nodeTypes: Map<string, NodeDef> = new Map(
+export const serverNodeTypes: Map<string, ServerNodeDef> = new Map(
   allNodes
-    .map<Array<[string, NodeDef]>>(nodes =>
-      nodes.map<[string, NodeDef]>(n => [n.title, n])
+    .map<Array<[string, ServerNodeDef]>>(nodes =>
+      nodes.map<[string, ServerNodeDef]>(n => [n.title, n])
     )
-    .reduce<Array<[string, NodeDef]>>(
+    .reduce<Array<[string, ServerNodeDef]>>(
       (list, elem, _, all) => [...list, ...elem],
       []
     )

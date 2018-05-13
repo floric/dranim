@@ -4,7 +4,7 @@ import {
   ConnectionInstance,
   ExplorerEditorProps
 } from '../ExplorerEditor';
-import { Socket, SocketType } from '../nodes/Sockets';
+import { Socket, SocketType, socketColors } from '../nodes/Sockets';
 import { NODE_WIDTH } from './Nodes';
 import { showNotificationWithIcon } from '../../../../utils/form';
 
@@ -36,9 +36,10 @@ const renderSocket = (
         : -NODE_WIDTH / 2 - SOCKET_RADIUS * 2,
     y: -SOCKET_RADIUS / 2
   });
+  const col = socketColors.get(s.dataType);
   const socket = new Konva.Circle({
-    fill: isConnected ? s.color : '#FFF',
-    stroke: s.color,
+    fill: isConnected ? col : '#FFF',
+    stroke: col,
     strokeEnabled: !isConnected,
     strokeWidth: 3,
     radius: SOCKET_RADIUS

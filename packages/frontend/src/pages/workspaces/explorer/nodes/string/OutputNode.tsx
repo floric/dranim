@@ -1,11 +1,6 @@
-import { NodeDef } from '../AllNodes';
-import { StringSocket } from '../Sockets';
+import { ClientNodeDef } from '../AllNodes';
 
-export const StringOutputNode: NodeDef = {
+export const StringOutputNode: ClientNodeDef = {
   title: 'String Output',
-  inputs: [StringSocket('String')],
-  outputs: [],
-  path: ['String'],
-  keywords: [],
   onClientExecution: () => new Map()
 };

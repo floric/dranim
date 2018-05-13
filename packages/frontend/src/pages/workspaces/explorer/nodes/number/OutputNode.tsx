@@ -1,11 +1,6 @@
-import { NumberSocket } from '../Sockets';
-import { NodeDef } from '../AllNodes';
+import { ClientNodeDef } from '../AllNodes';
 
-export const NumberOutputNode: NodeDef = {
+export const NumberOutputNode: ClientNodeDef = {
   title: 'Number Output',
-  inputs: [NumberSocket('Number')],
-  outputs: [],
-  path: ['Number'],
-  keywords: [],
   onClientExecution: () => new Map()
 };

@@ -9,7 +9,6 @@ export const STRING_TYPE = 'String';
 export type DataType = 'Dataset' | 'Number' | 'String';
 
 export interface Socket {
-  color: string;
   dataType: DataType;
   name: string;
 }
@@ -20,20 +19,8 @@ export interface OutputSocketInformation {
   isPresent?: boolean;
 }
 
-export const DataSocket = (name: string): Socket => ({
-  color: '#0099ff',
-  dataType: DATASET_TYPE,
-  name
-});
-
-export const NumberSocket = (name: string): Socket => ({
-  color: '#ff9900',
-  dataType: NUMBER_TYPE,
-  name
-});
-
-export const StringSocket = (name: string): Socket => ({
-  color: '#ff0099',
-  dataType: STRING_TYPE,
-  name
-});
+export const socketColors = new Map([
+  [DATASET_TYPE, '#0099ff'],
+  [NUMBER_TYPE, '#ff9900'],
+  [STRING_TYPE, '#ff0099']
+]);

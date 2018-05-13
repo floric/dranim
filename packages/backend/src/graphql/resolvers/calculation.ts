@@ -9,7 +9,7 @@ import {
 import { mongoDbClient } from '../../config/db';
 import {
   outputNodes,
-  nodeTypes,
+  serverNodeTypes,
   NodeExecutionOutputs
 } from '../../nodes/AllNodes';
 import { exec } from 'child_process';
@@ -96,7 +96,7 @@ const executeNode = async (
   db: Db,
   node: Node
 ): Promise<NodeExecutionOutputs> => {
-  const type = nodeTypes.get(node.type);
+  const type = serverNodeTypes.get(node.type);
   if (!type) {
     throw new Error('Unknown node type');
   }

@@ -1,13 +1,11 @@
 import * as React from 'react';
 import { Form, Select } from 'antd';
-import { DataSocket, DATASET_TYPE, OutputSocketInformation } from '../Sockets';
+import { DATASET_TYPE, OutputSocketInformation } from '../Sockets';
 import { getOrDefault, getValidInput } from '../utils';
-import { NodeDef } from '../AllNodes';
+import { ClientNodeDef } from '../AllNodes';
 
-export const JoinDatasetsNode: NodeDef = {
+export const JoinDatasetsNode: ClientNodeDef = {
   title: 'Join Datasets',
-  inputs: [DataSocket('Dataset A'), DataSocket('Dataset B')],
-  outputs: [DataSocket('Combined')],
   onClientExecution: (inputs, context) => {
     const validInputA = getValidInput('Dataset A', inputs);
     const validInputB = getValidInput('Dataset B', inputs);
@@ -60,8 +58,6 @@ export const JoinDatasetsNode: NodeDef = {
       ]
     ]);
   },
-  path: ['Dataset', 'Aggregators'],
-  keywords: [],
   renderFormItems: ({
     form,
     form: { getFieldDecorator },

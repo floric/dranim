@@ -1,10 +1,12 @@
-import { NodeDef } from '../AllNodes';
-import { NumberSocket, NUMBER_TYPE } from '../Sockets';
+import { ServerNodeDef } from '../AllNodes';
+import { NumberSocket } from '../Sockets';
 
-export const NumberInputNode: NodeDef = {
+export const NumberInputNode: ServerNodeDef = {
   title: 'Number Input',
   inputs: [],
   outputs: [NumberSocket('Number')],
+  path: ['Numbers'],
+  keywords: [],
   isInputValid: inputs => Promise.resolve(true),
   isFormValid: form => {
     const input = form.find(n => n.name === 'value');
@@ -16,6 +18,13 @@ export const NumberInputNode: NodeDef = {
   },
   onServerExecution: async (form, values) =>
     Promise.resolve({
-      outputs: new Map([['Number', form.find(n => n.name === 'value').value]])
+      outputs: new Map([
+        [
+          'Number',
+          form.find(n => n.name === 'value')
+            ? form.find(n => n.name === 'value')!.value
+            : ''
+        ]
+      ])
     })
 };

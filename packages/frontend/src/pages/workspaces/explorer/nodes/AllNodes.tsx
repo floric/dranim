@@ -2,10 +2,14 @@ import * as React from 'react';
 import { FormComponentProps } from 'antd/lib/form';
 
 import { NodeInstance, ExplorerEditorProps } from '../ExplorerEditor';
-import { Socket, OutputSocketInformation } from './Sockets';
+import { OutputSocketInformation } from './Sockets';
 import { AllDatasetNodes } from './dataset';
 import { AllNumberNodes } from './number';
 import { AllStringNodes } from './string';
+import {
+  ServerNodeDef,
+  serverNodeTypes
+} from '../../../../../../backend/src/nodes/AllNodes';
 
 export interface EditorProps {
   x?: number;
@@ -24,18 +28,16 @@ export interface RenderFormItemsProps
   inputs: Map<string, OutputSocketInformation>;
 }
 
-export interface NodeDef {
+export interface ClientNodeDef {
   title: string;
-  inputs: Array<Socket>;
-  outputs: Array<Socket>;
-  path: Array<string>;
-  keywords: Array<string>;
   renderFormItems?: (props: RenderFormItemsProps) => JSX.Element;
   onClientExecution: (
     inputs: Map<string, OutputSocketInformation>,
     context: EditorContext
   ) => Map<string, OutputSocketInformation>;
 }
+
+export type NodeDef = ClientNodeDef & ServerNodeDef;
 
 const allNodes = [AllDatasetNodes, AllNumberNodes, AllStringNodes];
 
@@ -78,13 +80,22 @@ const buildTree = (elems: Array<NodeDef>, curPath: Array<string>) => {
 
 export const nodeTypes: Map<string, NodeDef> = new Map(
   allNodes
-    .map<Array<[string, NodeDef]>>(nodes =>
-      nodes.map<[string, NodeDef]>(n => [n.title, n])
+    .map<Array<[string, ClientNodeDef]>>(nodes =>
+      nodes.map<[string, ClientNodeDef]>(n => [n.title, n])
     )
-    .reduce<Array<[string, NodeDef]>>(
+    .reduce<Array<[string, ClientNodeDef]>>(
       (list, elem, _, all) => [...list, ...elem],
       []
     )
+    .map<[string, NodeDef]>(n => [
+      n[0],
+      { ...serverNodeTypes.get(n[0])!, ...n[1] }
+    ])
+    .map(n => {
+      console.log(n);
+      return n;
+    })
+    .filter(n => n[1].inputs !== undefined && n[1].inputs !== null)
     .sort((a, b) => a[0].localeCompare(b[0]))
 );
 

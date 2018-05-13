@@ -1,15 +1,11 @@
 import * as React from 'react';
 import { Form, Select } from 'antd';
-import { DataSocket, DATASET_TYPE, OutputSocketInformation } from '../Sockets';
+import { DATASET_TYPE, OutputSocketInformation } from '../Sockets';
 import { getOrDefault, getValidInput } from '../utils';
-import { NodeDef } from '../AllNodes';
+import { ClientNodeDef } from '../AllNodes';
 
-export const DatasetSelectValuesNode: NodeDef = {
+export const DatasetSelectValuesNode: ClientNodeDef = {
   title: 'Select Values',
-  inputs: [DataSocket('Dataset')],
-  outputs: [DataSocket('Dataset')],
-  path: ['Dataset', 'Filters'],
-  keywords: [],
   onClientExecution: (inputs, context) => {
     const validInput = getValidInput('Dataset', inputs);
     if (!validInput) {

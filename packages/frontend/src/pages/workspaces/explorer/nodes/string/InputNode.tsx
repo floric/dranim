@@ -1,15 +1,11 @@
 import * as React from 'react';
 import { Input, Form } from 'antd';
-import { NodeDef } from '../AllNodes';
-import { StringSocket, OutputSocketInformation, STRING_TYPE } from '../Sockets';
+import { ClientNodeDef } from '../AllNodes';
+import { OutputSocketInformation, STRING_TYPE } from '../Sockets';
 import { getOrDefault } from '../utils';
 
-export const StringInputNode: NodeDef = {
+export const StringInputNode: ClientNodeDef = {
   title: 'String Input',
-  inputs: [],
-  outputs: [StringSocket('String', 'output')],
-  path: ['String'],
-  keywords: [],
   onClientExecution: () =>
     new Map<string, OutputSocketInformation>([
       ['String', { dataType: STRING_TYPE }]

@@ -1,5 +1,5 @@
 import { MongoClient, ObjectID, Db } from 'mongodb';
-import { nodeTypes } from '../../nodes/AllNodes';
+import { serverNodeTypes } from '../../nodes/AllNodes';
 
 export type FormValues = Array<{ name: string; value: any }>;
 
@@ -326,7 +326,7 @@ export const getNodeState = async (
   db: Db,
   node: Pick<Node, 'form' | 'inputs' | 'type'>
 ) => {
-  const t = nodeTypes.get(node.type);
+  const t = serverNodeTypes.get(node.type);
   if (!t) {
     return NodeState.ERROR;
   }

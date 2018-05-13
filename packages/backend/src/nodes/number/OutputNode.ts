@@ -1,13 +1,15 @@
 import { NumberSocket } from '../Sockets';
-import { NodeDef } from '../AllNodes';
+import { ServerNodeDef } from '../AllNodes';
 
-export const NumberOutputNode: NodeDef = {
+export const NumberOutputNode: ServerNodeDef = {
   title: 'Number Output',
   inputs: [NumberSocket('Number')],
   outputs: [],
+  keywords: [],
+  path: ['Numbers'],
   isInputValid: () => Promise.resolve(true),
   onServerExecution: (form, values) =>
     Promise.resolve({
-      outputs: new Map([['Result', values.get('Number')]])
+      outputs: new Map([['Result', values.get('Number')!]])
     })
 };

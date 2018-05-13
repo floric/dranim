@@ -1,10 +1,12 @@
-import { NodeDef } from '../AllNodes';
-import { StringSocket, STRING_TYPE } from '../Sockets';
+import { ServerNodeDef } from '../AllNodes';
+import { StringSocket } from '../Sockets';
 
-export const StringInputNode: NodeDef = {
+export const StringInputNode: ServerNodeDef = {
   title: 'String Input',
   inputs: [],
   outputs: [StringSocket('String')],
+  keywords: [],
+  path: ['String'],
   isInputValid: () => Promise.resolve(true),
   onServerExecution: () =>
     Promise.resolve({
