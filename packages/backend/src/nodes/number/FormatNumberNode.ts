@@ -1,5 +1,6 @@
 import { ServerNodeDef } from '../AllNodes';
 import { NumberSocket, NUMBER_TYPE, StringSocket } from '../Sockets';
+import numbro from 'numbro';
 
 export const FormatNumberNode: ServerNodeDef = {
   title: 'Format Number',
@@ -16,11 +17,24 @@ export const FormatNumberNode: ServerNodeDef = {
 
     return true;
   },
+  isFormValid: form => {
+    const val = form.find(n => n.name === 'format');
+    if (!val) {
+      return false;
+    }
+
+    return true;
+  },
   onServerExecution: async (form, values) => {
     const val = Number.parseFloat(values.get('Number'));
-    // TODO add formatting lib and notes
+    const format = form.find(n => n.name === 'format');
+    if (!format) {
+      throw new Error('Invalid format');
+    }
+    const formatted = '0.0';
+
     return {
-      outputs: new Map([['Formatted', val.toString()]])
+      outputs: new Map([['Formatted', formatted]])
     };
   }
 };

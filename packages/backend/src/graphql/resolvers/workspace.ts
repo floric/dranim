@@ -1,4 +1,4 @@
-import { MongoClient, ObjectID, Db } from 'mongodb';
+import { ObjectID, Db } from 'mongodb';
 import { serverNodeTypes } from '../../nodes/AllNodes';
 
 export type FormValues = Array<{ name: string; value: any }>;
@@ -83,16 +83,10 @@ export const addOrUpdateFormValue = async (
 
   const collection = getNodesCollection(db);
 
-  let res;
-  if (node.form.find(f => f.name === name) !== undefined) {
-    const form = node.form.map(f => (f.name !== name ? f : { name, value }));
-    res = await collection.updateOne({ _id: nodeObjId }, { $set: { form } });
-  } else {
-    res = await collection.updateOne(
-      { _id: nodeObjId },
-      { $push: { form: { name, value } } }
-    );
-  }
+  const res = await collection.updateOne(
+    { _id: nodeObjId },
+    { $set: { [`form.${name}`]: value } }
+  );
 
   if (res.result.ok !== 1) {
     throw new Error('Adding or updating form value failed.');
@@ -200,27 +194,30 @@ export const deleteConnection = async (db: Db, id: string) => {
     throw new Error('Unknown nodes as input or output!');
   }
 
-  await nodesCollection.updateOne(
-    { _id: new ObjectID(outputNode.id) },
-    {
-      $set: {
-        outputs: outputNode.outputs.filter(
-          n =>
-            n.name !== connection.from.name && n.connectionId !== connection.id
-        )
+  await Promise.all([
+    nodesCollection.updateOne(
+      { _id: new ObjectID(outputNode.id) },
+      {
+        $pull: {
+          outputs: {
+            name: connection.from.name,
+            connectionId: connection.id
+          }
+        }
       }
-    }
-  );
-  await nodesCollection.updateOne(
-    { _id: new ObjectID(inputNode.id) },
-    {
-      $set: {
-        inputs: inputNode.inputs.filter(
-          n => n.name !== connection.to.name && n.connectionId !== connection.id
-        )
+    ),
+    nodesCollection.updateOne(
+      { _id: new ObjectID(inputNode.id) },
+      {
+        $pull: {
+          inputs: {
+            name: connection.to.name,
+            connectionId: connection.id
+          }
+        }
       }
-    }
-  );
+    )
+  ]);
 
   const res = await connCollection.deleteOne({ _id: new ObjectID(id) });
   if (res.deletedCount !== 1) {
@@ -250,7 +247,6 @@ export const createNode = async (
   const res = await collection.insertOne({
     x,
     y,
-    form: [],
     outputs: [],
     inputs: [],
     workspaceId,
@@ -316,10 +312,14 @@ export const getAllNodes = async (
 ): Promise<Array<Node>> => {
   const collection = getNodesCollection(db);
   const all = await collection.find({ workspaceId }).toArray();
-  return all.map(ds => ({
-    id: ds._id.toHexString(),
-    ...ds
-  }));
+  return all.map(n => {
+    const valueNames = n.form ? Object.keys(n.form) : [];
+    return {
+      ...n,
+      id: n._id.toHexString(),
+      form: valueNames.map(name => ({ name, value: n.form[name] }))
+    };
+  });
 };
 
 export const getNodeState = async (
@@ -354,9 +354,12 @@ export const getNode = async (db: Db, id: string): Promise<Node | null> => {
     return null;
   }
 
+  const valueNames = node.form ? Object.keys(node.form) : [];
+
   return {
+    ...node,
     id: node._id.toHexString(),
-    ...node
+    form: valueNames.map(name => ({ name, value: node.form[name] }))
   };
 };
 
@@ -491,7 +494,10 @@ export const getAllWorkspaces = async (db: Db): Promise<Array<Workspace>> => {
   }));
 };
 
-export const getWorkspace = async (db: Db, id: string): Promise<Workspace> => {
+export const getWorkspace = async (
+  db: Db,
+  id: string
+): Promise<Workspace | null> => {
   if (!ObjectID.isValid(id)) {
     return null;
   }

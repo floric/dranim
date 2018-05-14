@@ -5,8 +5,7 @@
   "scripts": {
     "build": "parcel build src/main.ts --target node --no-cache ",
     "clean": "rm -rf dist node_modules .cache",
-    "start":
-      "concurrently \"parcel watch src/main.ts --target node\" \"cross-env NODE_ENV=development nodemon dist/main.js\""
+    "start": "concurrently \"parcel watch src/main.ts --target node\" \"cross-env NODE_ENV=development nodemon dist/main.js\""
   },
   "dependencies": {
     "@types/body-parser": "1.17.0",
@@ -27,6 +26,7 @@
     "helmet": "^3.9.0",
     "mongodb": "^3.0.7",
     "morgan": "^1.9.0",
+    "numbro": "^2.0.6",
     "promise-retry": "^1.1.1",
     "promises-all": "^1.0.0",
     "through2": "^2.0.3",
@@ -61,6 +61,10 @@
     "mapCoverage": true,
     "testEnvironment": "node",
     "testRegex": ".*\\.spec\\.ts$",
-    "moduleFileExtensions": ["ts", "js", "json"]
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json"
+    ]
   }
 }

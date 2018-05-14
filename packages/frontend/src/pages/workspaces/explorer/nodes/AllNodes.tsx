@@ -91,10 +91,6 @@ export const nodeTypes: Map<string, NodeDef> = new Map(
       n[0],
       { ...serverNodeTypes.get(n[0])!, ...n[1] }
     ])
-    .map(n => {
-      console.log(n);
-      return n;
-    })
     .filter(n => n[1].inputs !== undefined && n[1].inputs !== null)
     .sort((a, b) => a[0].localeCompare(b[0]))
 );

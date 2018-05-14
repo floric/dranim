@@ -79,6 +79,7 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
 
     console.log('Finished calculation.');
   } catch (err) {
+    console.log(err);
     await processCollection.updateOne(
       { _id: new ObjectID(processId) },
       {
@@ -88,7 +89,7 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
         }
       }
     );
-    console.log('Finished calculation with errors.');
+    console.log(`Finished calculation with errors: ${JSON.stringify(err)}`);
   }
 };
 
