@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Form, Input } from 'antd';
 
 import { ClientNodeDef } from '../AllNodes';
-import { getOrDefault } from '../utils';
+import { getOrDefault } from '../../../../../utils/shared';
 
 export const DatasetOutputNode: ClientNodeDef = {
   title: 'Dataset Output',

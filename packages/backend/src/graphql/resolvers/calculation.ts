@@ -105,6 +105,7 @@ const executeNode = async (
   const inputValues = await Promise.all(
     node.inputs.map(async i => {
       const c = await getConnection(db, i.connectionId);
+      console.log(i);
       const inputNodeId = c.from.nodeId;
       const inputNode = await getNode(db, inputNodeId);
       if (!inputNode) {

@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Form, Select } from 'antd';
 import { DATASET_TYPE, OutputSocketInformation } from '../Sockets';
-import { getOrDefault } from '../utils';
 import { ClientNodeDef } from '../AllNodes';
+import { getOrDefault } from '../../../../../utils/shared';
 
 export const DatasetInputNode: ClientNodeDef = {
   title: 'Dataset Input',

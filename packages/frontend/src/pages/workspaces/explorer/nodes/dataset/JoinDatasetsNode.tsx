@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { Form, Select } from 'antd';
 import { DATASET_TYPE, OutputSocketInformation } from '../Sockets';
-import { getOrDefault, getValidInput } from '../utils';
+import { getValidInput } from '../utils';
 import { ClientNodeDef } from '../AllNodes';
+import { getOrDefault } from '../../../../../utils/shared';
 
 export const JoinDatasetsNode: ClientNodeDef = {
   title: 'Join Datasets',

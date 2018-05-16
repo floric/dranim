@@ -2,7 +2,7 @@ import * as React from 'react';
 import { InputNumber, Form } from 'antd';
 import { ClientNodeDef } from '../AllNodes';
 import { OutputSocketInformation, NUMBER_TYPE } from '../Sockets';
-import { getOrDefault } from '../utils';
+import { getOrDefault } from '../../../../../utils/shared';
 
 export const NumberInputNode: ClientNodeDef = {
   title: 'Number Input',

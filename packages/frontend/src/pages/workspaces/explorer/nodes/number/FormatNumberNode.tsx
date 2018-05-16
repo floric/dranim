@@ -2,7 +2,7 @@ import * as React from 'react';
 import { InputNumber, Select, Form, Checkbox } from 'antd';
 import { ClientNodeDef } from '../AllNodes';
 import { OutputSocketInformation, STRING_TYPE } from '../Sockets';
-import { getOrDefault } from '../utils';
+import { getOrDefault } from '../../../../../utils/shared';
 
 export const FormatNumberNode: ClientNodeDef = {
   title: 'Format Number',
@@ -18,7 +18,7 @@ export const FormatNumberNode: ClientNodeDef = {
       true
     );
     const average = getOrDefault<boolean>(form, 'average', true);
-    const avgSpace = getOrDefault<boolean>(form, 'average-space', true);
+    const space = getOrDefault<boolean>(form, 'space-separated', true);
 
     return (
       <>
@@ -43,8 +43,8 @@ export const FormatNumberNode: ClientNodeDef = {
           )}
         </Form.Item>
         <Form.Item label="Space separated">
-          {getFieldDecorator('average-space', { initialValue: avgSpace })(
-            <Checkbox defaultChecked={avgSpace} />
+          {getFieldDecorator('space-separated', { initialValue: space })(
+            <Checkbox defaultChecked={space} />
           )}
         </Form.Item>
         <Form.Item label="Total length">

@@ -194,33 +194,40 @@ export const deleteConnection = async (db: Db, id: string) => {
     throw new Error('Unknown nodes as input or output!');
   }
 
-  await Promise.all([
+  const connRes = await Promise.all([
     nodesCollection.updateOne(
       { _id: new ObjectID(outputNode.id) },
       {
-        $pull: {
-          outputs: {
-            name: connection.from.name,
-            connectionId: connection.id
-          }
+        $pullAll: {
+          outputs: [
+            {
+              name: connection.from.name,
+              connectionId: connection.id
+            }
+          ]
         }
       }
     ),
     nodesCollection.updateOne(
       { _id: new ObjectID(inputNode.id) },
       {
-        $pull: {
-          inputs: {
-            name: connection.to.name,
-            connectionId: connection.id
-          }
+        $pullAll: {
+          inputs: [
+            {
+              name: connection.to.name,
+              connectionId: connection.id
+            }
+          ]
         }
       }
     )
   ]);
 
   const res = await connCollection.deleteOne({ _id: new ObjectID(id) });
-  if (res.deletedCount !== 1) {
+  if (
+    res.deletedCount !== 1 ||
+    connRes.map(a => a.result.n).reduce((a, b) => a + b) !== 2
+  ) {
     throw new Error('Deleting connection failed');
   }
 
