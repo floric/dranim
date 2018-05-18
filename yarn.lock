@@ -317,6 +317,12 @@
     "@types/node" "*"
     "@types/react" "*"
 
+"@types/react-fontawesome@^1.6.3":
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/@types/react-fontawesome/-/react-fontawesome-1.6.3.tgz#03d00dd940d2eb9dc3f21f4b9a972789a95dc8cf"
+  dependencies:
+    "@types/react" "*"
+
 "@types/react-router-dom@^4.2.6":
   version "4.2.6"
   resolved "https://registry.yarnpkg.com/@types/react-router-dom/-/react-router-dom-4.2.6.tgz#9f7eb3c0e6661a9607d878ff8675cc4ea95cd276"
@@ -7790,6 +7796,12 @@ react-fittext@^1.0.0:
   dependencies:
     create-react-class "^15.5.3"
     prop-types "^15.5.10"
+
+react-fontawesome@^1.6.1:
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/react-fontawesome/-/react-fontawesome-1.6.1.tgz#eddce17e7dc731aa09fd4a186688a61793a16c5c"
+  dependencies:
+    prop-types "^15.5.6"
 
 react-konva@^1.7.2:
   version "1.7.2"

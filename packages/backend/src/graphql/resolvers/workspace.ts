@@ -161,16 +161,18 @@ export const createConnection = async (db: Db, from: Socket, to: Socket) => {
   }
 
   const newItem = res.ops[0];
-  const connId = newItem._id;
+  const connId = newItem._id.toHexString();
 
-  await nodesCollection.updateOne(
-    { _id: new ObjectID(from.nodeId) },
-    { $push: { outputs: { name: from.name, connectionId: connId } } }
-  );
-  await nodesCollection.updateOne(
-    { _id: new ObjectID(to.nodeId) },
-    { $push: { inputs: { name: to.name, connectionId: connId } } }
-  );
+  await Promise.all([
+    nodesCollection.updateOne(
+      { _id: new ObjectID(from.nodeId) },
+      { $push: { outputs: { name: from.name, connectionId: connId } } }
+    ),
+    nodesCollection.updateOne(
+      { _id: new ObjectID(to.nodeId) },
+      { $push: { inputs: { name: to.name, connectionId: connId } } }
+    )
+  ]);
 
   return {
     id: newItem._id.toHexString(),
@@ -194,40 +196,31 @@ export const deleteConnection = async (db: Db, id: string) => {
     throw new Error('Unknown nodes as input or output!');
   }
 
-  const connRes = await Promise.all([
-    nodesCollection.updateOne(
-      { _id: new ObjectID(outputNode.id) },
-      {
-        $pullAll: {
-          outputs: [
-            {
-              name: connection.from.name,
-              connectionId: connection.id
-            }
-          ]
+  await nodesCollection.updateMany(
+    { _id: new ObjectID(connection.from.nodeId) },
+    {
+      $pull: {
+        outputs: {
+          name: connection.from.name,
+          connectionId: connection.id
         }
       }
-    ),
-    nodesCollection.updateOne(
-      { _id: new ObjectID(inputNode.id) },
-      {
-        $pullAll: {
-          inputs: [
-            {
-              name: connection.to.name,
-              connectionId: connection.id
-            }
-          ]
+    }
+  );
+  await nodesCollection.updateOne(
+    { _id: new ObjectID(connection.to.nodeId) },
+    {
+      $pull: {
+        inputs: {
+          name: connection.to.name,
+          connectionId: connection.id
         }
       }
-    )
-  ]);
+    }
+  );
 
   const res = await connCollection.deleteOne({ _id: new ObjectID(id) });
-  if (
-    res.deletedCount !== 1 ||
-    connRes.map(a => a.result.n).reduce((a, b) => a + b) !== 2
-  ) {
+  if (res.deletedCount !== 1) {
     throw new Error('Deleting connection failed');
   }
 

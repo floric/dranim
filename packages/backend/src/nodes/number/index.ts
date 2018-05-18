@@ -1,11 +1,13 @@
 import { NumberInputNode } from './InputNode';
 import { NumberOutputNode } from './OutputNode';
-import { AddNumbersNode } from './AddNumbersNode';
+import { SumNode } from './SumNode';
 import { FormatNumberNode } from './FormatNumberNode';
+import { MultiplicationNode } from './MultiplicationNode';
 
 export const AllNumberNodes = [
   NumberInputNode,
   NumberOutputNode,
   FormatNumberNode,
-  AddNumbersNode
+  MultiplicationNode,
+  SumNode
 ];

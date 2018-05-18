@@ -9,7 +9,7 @@ export const StringInputNode: ServerNodeDef = {
   path: ['String'],
   isInputValid: () => Promise.resolve(true),
   onServerExecution: async (form, a) => {
-    const val = form.find(f => f.name === '');
+    const val = form.find(f => f.name === 'value');
     return { outputs: new Map([['String', val ? val.value : '']]) };
   }
 };
