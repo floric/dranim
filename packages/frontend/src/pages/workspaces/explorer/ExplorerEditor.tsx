@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Card, Row, Col, TreeSelect } from 'antd';
 import { css } from 'glamor';
 
-import { Dataset } from '../../../utils/model';
 import { nodeTypes, nodeTypesTree } from './nodes/AllNodes';
 import { EXPLORER_CONTAINER, updateStage } from './editor/EditorStage';
 import { NODE_WIDTH } from './editor/Nodes';
@@ -11,7 +10,12 @@ import { getInputInformation } from './nodes/utils';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { PropertiesForm } from './editor/PropertiesForm';
 import { AsyncButton } from '../../../components/AsyncButton';
-import { ConnectionInstance, NodeInstance, SocketDef } from '@masterthesis/shared';
+import {
+  ConnectionInstance,
+  NodeInstance,
+  SocketInstance,
+  Dataset
+} from '@masterthesis/shared';
 
 const filterTreeNode = (inputValue: string, treeNode: any) => {
   if (!treeNode.props.index) {
@@ -28,7 +32,10 @@ export interface ExplorerEditorProps {
   onNodeCreate: (type: string, x: number, y: number) => Promise<any>;
   onNodeDelete: (id: string) => Promise<any>;
   onNodeUpdate: (id: string, x: number, y: number) => Promise<any>;
-  onConnectionCreate: (from: SocketDef, to: SocketDef) => Promise<any>;
+  onConnectionCreate: (
+    from: SocketInstance,
+    to: SocketInstance
+  ) => Promise<any>;
   onConnectionDelete: (id: string) => Promise<any>;
   onStartCalculation: () => Promise<any>;
   onAddOrUpdateFormValue: (
@@ -40,8 +47,8 @@ export interface ExplorerEditorProps {
 
 export interface OpenConnection {
   dataType: string;
-  inputs: null | Array<SocketDef>;
-  outputs: null | Array<SocketDef>;
+  inputs: null | Array<SocketInstance>;
+  outputs: null | Array<SocketInstance>;
 }
 
 export interface ExplorerEditorState {

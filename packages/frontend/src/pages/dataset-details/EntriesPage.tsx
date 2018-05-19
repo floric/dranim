@@ -4,9 +4,9 @@ import gql from 'graphql-tag';
 import { Col, Row, Table, Card } from 'antd';
 import { tryOperation } from '../../utils/form';
 import { CreateEntryForm } from '../forms/CreateEntryForm';
-import { Dataset, Value } from '../../utils/model';
 import { ApolloQueryResult } from 'apollo-client';
 import { AsyncButton } from '../../components/AsyncButton';
+import { Dataset, Value } from '@masterthesis/shared';
 
 export interface DataEntriesProps {
   dataset: Dataset;

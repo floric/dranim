@@ -1,29 +1,18 @@
 import { Db, ObjectID } from 'mongodb';
-import {
-  getAllNodes,
-  getAllConnections,
-  getConnection,
-  getNode
-} from './workspace';
-import { mongoDbClient } from '../../config/db';
-import {
-  outputNodes,
-  serverNodeTypes,
-  NodeExecutionOutputs
-} from '../../nodes/AllNodes';
-import { exec } from 'child_process';
+import { getAllNodes, getConnection, getNode } from './workspace';
+import { outputNodes, serverNodeTypes } from '../../nodes/AllNodes';
 import {
   NodeInstance,
   formToMap,
   CalculationProcessState,
-  CalculationProcess
+  CalculationProcess,
+  NodeExecutionOutputs
 } from '@masterthesis/shared';
 
 const startProcess = async (db: Db, processId: string, workspaceId: string) => {
   const processCollection = getCalculationsCollection(db);
 
   try {
-    const connections = await getAllConnections(db, workspaceId);
     const nodes = await getAllNodes(db, workspaceId);
     const outputs = nodes.filter(n => outputNodes.includes(n.type));
 
@@ -39,7 +28,6 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
 
     await Promise.all(
       outputs.map(async o => {
-        const resultsFromOutput = await executeNode(db, o);
         await processCollection.updateOne(
           { _id: new ObjectID(processId) },
           {

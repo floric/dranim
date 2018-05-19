@@ -13,7 +13,7 @@ import * as moment from 'moment';
 import { FormComponentProps } from 'antd/lib/form';
 import { FormEvent } from 'react';
 import { hasErrors } from '../../utils/form';
-import { ValueSchema, ValueSchemaType } from '../../utils/model';
+import { DataType, ValueSchema } from '@masterthesis/shared';
 
 export interface CreateValueSchemaFormProps extends FormComponentProps {
   handleCreateValueSchema: (val: ValueSchema) => void;
@@ -47,16 +47,16 @@ class CreateValueSchemaFormImpl extends React.Component<
 
       let fallback = '';
       switch (type) {
-        case ValueSchemaType.boolean:
+        case DataType.BOOLEAN:
           fallback = form.getFieldValue('fallbackBoolean');
           break;
-        case ValueSchemaType.date:
+        case DataType.DATE:
           fallback = form.getFieldValue('fallbackDate');
           break;
-        case ValueSchemaType.number:
+        case DataType.NUMBER:
           fallback = form.getFieldValue('fallbackNumber');
           break;
-        case ValueSchemaType.string:
+        case DataType.STRING:
           fallback = form.getFieldValue('fallbackString');
           break;
         default:
@@ -72,8 +72,7 @@ class CreateValueSchemaFormImpl extends React.Component<
         type,
         required,
         fallback,
-        unique:
-          type === ValueSchemaType.string ? form.getFieldValue('unique') : false
+        unique: type === DataType.STRING ? form.getFieldValue('unique') : false
       });
 
       await this.setState({
@@ -114,37 +113,37 @@ class CreateValueSchemaFormImpl extends React.Component<
         </Form.Item>
         <Form.Item label="Type">
           {getFieldDecorator('type', {
-            initialValue: ValueSchemaType.string
+            initialValue: DataType.STRING
           })(
             <Select
               onChange={this.handleSelectTypeChange}
               style={{ width: 120 }}
             >
               <Select.OptGroup label="Primitive">
-                {Object.keys(ValueSchemaType).map(t => (
-                  <Select.Option value={ValueSchemaType[t]} key={`option-${t}`}>
-                    {ValueSchemaType[t]}
+                {Object.keys(DataType).map(t => (
+                  <Select.Option value={DataType[t]} key={`option-${t}`}>
+                    {DataType[t]}
                   </Select.Option>
                 ))}
               </Select.OptGroup>
             </Select>
           )}
         </Form.Item>
-        {valueType === ValueSchemaType.boolean && (
+        {valueType === DataType.BOOLEAN && (
           <Form.Item label="Fallback">
             {getFieldDecorator('fallbackBoolean', {
               initialValue: false
             })(<Checkbox>Value</Checkbox>)}
           </Form.Item>
         )}
-        {valueType === ValueSchemaType.string && (
+        {valueType === DataType.STRING && (
           <Form.Item label="Fallback">
             {getFieldDecorator('fallbackString', {
               initialValue: ''
             })(<Input placeholder="Fallback" />)}
           </Form.Item>
         )}
-        {valueType === ValueSchemaType.date && (
+        {valueType === DataType.DATE && (
           <Form.Item label="Fallback">
             {getFieldDecorator('fallbackDate', {
               initialValue: moment(),
@@ -158,7 +157,7 @@ class CreateValueSchemaFormImpl extends React.Component<
             )}
           </Form.Item>
         )}
-        {valueType === ValueSchemaType.number && (
+        {valueType === DataType.NUMBER && (
           <Form.Item label="Fallback">
             {getFieldDecorator('fallbackNumber', {
               initialValue: 0,
@@ -171,7 +170,7 @@ class CreateValueSchemaFormImpl extends React.Component<
             initialValue: false
           })(<Checkbox />)}
         </Form.Item>
-        {valueType === ValueSchemaType.string && (
+        {valueType === DataType.STRING && (
           <Form.Item label="Unique">
             {getFieldDecorator('unique', {
               initialValue: false

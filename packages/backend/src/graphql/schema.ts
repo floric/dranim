@@ -1,7 +1,6 @@
 import { makeExecutableSchema, IResolvers } from 'graphql-tools';
 import { GraphQLUpload } from 'apollo-upload-server';
 import { Db } from 'mongodb';
-import * as promisesAll from 'promises-all';
 
 import Dataset from './schemas/dataset';
 import Valueschema from './schemas/valueschema';
@@ -14,8 +13,7 @@ import {
   getDataset,
   createDataset,
   deleteDataset,
-  addValueSchema,
-  Valueschema as ValueSchema
+  addValueSchema
 } from './resolvers/dataset';
 import {
   createNode,
@@ -34,7 +32,6 @@ import {
   deleteWorkspace
 } from './resolvers/workspace';
 import {
-  createEntry,
   latestEntries,
   deleteEntry,
   createEntryFromJSON,
@@ -42,11 +39,7 @@ import {
 } from './resolvers/entry';
 import { getAllUploads, uploadEntriesCsv } from './resolvers/upload';
 import { startCalculation, getAllCalculations } from './resolvers/calculation';
-import {
-  passagesSchemas,
-  commoditiesSchemas,
-  createSTRDemoData
-} from '../example/str';
+import { createSTRDemoData } from '../example/str';
 
 interface ApolloContext {
   db: Db;

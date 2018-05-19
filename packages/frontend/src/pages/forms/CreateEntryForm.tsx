@@ -4,7 +4,7 @@ import { Form, Input, Button, Checkbox, DatePicker, InputNumber } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import * as moment from 'moment';
 import { hasErrors } from '../../utils/form';
-import { Value, ValueSchema, ValueSchemaType } from '../../utils/model';
+import { Value, ValueSchema, DataType } from '@masterthesis/shared';
 
 export interface CreateEntryFormProps extends FormComponentProps {
   handleCreateEntry: (data: Array<Value>) => Promise<any>;
@@ -89,17 +89,17 @@ class CreateEntryFormImpl extends React.Component<
               }
               help={(isFieldTouched(s.name) && getFieldError(s.name)) || ''}
             >
-              {valueType === ValueSchemaType.boolean &&
+              {valueType === DataType.BOOLEAN &&
                 getFieldDecorator(s.name, {
                   initialValue: true,
                   rules
                 })(<Checkbox>Value</Checkbox>)}
-              {valueType === ValueSchemaType.string &&
+              {valueType === DataType.STRING &&
                 getFieldDecorator(s.name, {
                   initialValue: '',
                   rules
                 })(<Input placeholder="Fallback" />)}
-              {valueType === ValueSchemaType.date &&
+              {valueType === DataType.DATE &&
                 getFieldDecorator(s.name, {
                   initialValue: moment(),
                   rules
@@ -110,7 +110,7 @@ class CreateEntryFormImpl extends React.Component<
                     placeholder="Select Date and Time"
                   />
                 )}
-              {valueType === ValueSchemaType.number &&
+              {valueType === DataType.NUMBER &&
                 getFieldDecorator(s.name, {
                   initialValue: 0,
                   rules

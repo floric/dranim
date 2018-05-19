@@ -15,6 +15,7 @@ export const mongoDbClient = async (): Promise<MongoClient> => {
       return await tryConnectoDb();
     } catch (err) {
       retry();
+      return null;
     }
   });
 };

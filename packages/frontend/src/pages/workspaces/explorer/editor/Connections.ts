@@ -1,11 +1,7 @@
 import * as Konva from 'konva';
-import {
-  ExplorerEditorState,
-  ConnectionInstance,
-  ExplorerEditorProps
-} from '../ExplorerEditor';
+import { ExplorerEditorState, ExplorerEditorProps } from '../ExplorerEditor';
 import { getSocketId } from './Sockets';
-import { SocketType } from '@masterthesis/shared';
+import { SocketType, ConnectionWithoutId } from '@masterthesis/shared';
 
 const CONNECTION_STIFFNESS = 0.7;
 
@@ -21,7 +17,7 @@ const getConnectionPoints = (output: Konva.Vector2d, input: Konva.Vector2d) => [
 ];
 
 export const renderConnection = (
-  c: ConnectionInstance,
+  c: ConnectionWithoutId,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   stage: Konva.Stage,

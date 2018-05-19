@@ -9,21 +9,8 @@ import { LoadingCard, UnknownErrorCard } from './../components/CustomCards';
 import { tryOperation } from './../utils/form';
 import { AsyncButton } from './../components/AsyncButton';
 import { CreateWorkspaceForm } from './forms/CreateWorkspaceForm';
-import {
-  NodeInstance,
-  ConnectionInstance
-} from './workspaces/explorer/ExplorerEditor';
 import { PageHeaderCard } from '../components/PageHeaderCard';
-
-export interface Workspace {
-  id: string;
-  name: string;
-  description: string;
-  lastChange: string;
-  created: string;
-  nodes: Array<NodeInstance>;
-  connections: Array<ConnectionInstance>;
-}
+import { Workspace } from '@masterthesis/shared';
 
 export const ALL_WORKSPACES = gql`
   {

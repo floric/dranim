@@ -4,6 +4,32 @@ export enum NodeState {
   INVALID = 'INVALID'
 }
 
+export interface Value {
+  val: string;
+  name: string;
+}
+
+export interface Entry {
+  id: string;
+  values: Array<Value>;
+}
+
+export interface ValueSchema {
+  type: DataType;
+  name: string;
+  required: boolean;
+  fallback: string;
+  unique: boolean;
+}
+
+export interface Dataset {
+  id: string;
+  name: string;
+  entriesCount: number;
+  valueschemas: Array<ValueSchema>;
+  latestEntries: Array<Entry>;
+}
+
 export interface FormValue {
   name: string;
   value: string;
@@ -17,6 +43,8 @@ export enum SocketType {
 export enum DataType {
   DATASET = 'Dataset',
   NUMBER = 'Number',
+  BOOLEAN = 'Boolean',
+  DATE = 'Date',
   STRING = 'String'
 }
 
@@ -105,4 +133,15 @@ export interface CalculationProcess {
   processedOutputs: number;
   totalOutputs: number;
   state: CalculationProcessState;
+}
+
+export interface UploadProcess {
+  id: string;
+  start: string;
+  finish: string | null;
+  errors: Array<{ name: string; message: string; count: number }>;
+  state: 'STARTED' | 'PROCESSING' | 'FINISHED' | 'ERROR';
+  addedEntries: number;
+  failedEntries: number;
+  invalidEntries: number;
 }

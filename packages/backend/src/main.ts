@@ -2,13 +2,10 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import graphqlHTTP from 'express-graphql';
 import cors from 'cors';
 
 import { graphqlExpress } from 'apollo-server-express';
 import { apolloUploadExpress } from 'apollo-upload-server';
-import { truncate } from 'fs';
-import { GraphQLSchema } from 'graphql';
 
 import { mongoDbClient } from './config/db';
 import Schema from './graphql/schema';
@@ -76,7 +73,6 @@ export const initDb = async (db: Db) => {
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const NODE_ENV = process.env.NODE_ENV !== 'production' ? 'dev' : 'production';
-const EXPORT_GRAPHIQL = NODE_ENV !== 'production';
 
 main({
   env: NODE_ENV,

@@ -3,7 +3,7 @@ import {
   createDataset,
   addValueSchema
 } from '../graphql/resolvers/dataset';
-import { Db, ObjectID } from 'mongodb';
+import { Db } from 'mongodb';
 import { createWorkspace } from '../graphql/resolvers/workspace';
 
 export const createSTRDemoData = async (db: Db) => {

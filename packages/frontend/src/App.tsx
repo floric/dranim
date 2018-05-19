@@ -10,12 +10,11 @@ import gql from 'graphql-tag';
 
 import StartPage from './pages/StartPage';
 import DataPage from './pages/DataPage';
-import WorkspacesOverviewPage, {
-  Workspace
-} from './pages/WorkspacesOverviewPage';
+import WorkspacesOverviewPage from './pages/WorkspacesOverviewPage';
 import WorkspaceDetailPage from './pages/workspaces/WorkspaceDetailPage';
 import VisPage from './pages/VisPage';
 import DataDetailPage from './pages/DataDetailPage';
+import { Workspace } from '@masterthesis/shared';
 
 const { Content, Footer, Sider } = Layout;
 const SubMenu = Menu.SubMenu;

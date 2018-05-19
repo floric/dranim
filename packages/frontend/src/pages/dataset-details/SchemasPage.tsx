@@ -4,9 +4,9 @@ import { Row, Table, Col, Card, Tag } from 'antd';
 import { Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
 
-import { Dataset } from '../../utils/model';
 import { CreateValueSchemaForm } from '../forms/CreateValueSchemaForm';
 import { tryOperation } from '../../utils/form';
+import { Dataset } from '@masterthesis/shared';
 
 const ADD_VALUE_SCHEMA = gql`
   mutation addValueSchema(

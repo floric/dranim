@@ -1,28 +1,15 @@
-import * as fs from 'fs';
 import fastCsv from 'fast-csv';
 import { ObjectID, Db } from 'mongodb';
 import * as promisesAll from 'promises-all';
-import { Readable, Writable } from 'stream';
+import { Readable } from 'stream';
 
-import { Entry, createEntry } from './entry';
-import { getDatasetsCollection, Dataset, Valueschema } from './dataset';
+import { createEntry } from './entry';
+import { Dataset, Valueschema } from './dataset';
 import { getDataset } from '../resolvers/dataset';
-import { updateNode } from './workspace';
-
-export interface UploadProcess {
-  id: string;
-  start: Date;
-  finish: Date | null;
-  datasetId: string;
-  errors: Array<{ name: string; message: string; count: number }>;
-  state: 'STARTED' | 'PROCESSING' | 'FINISHED' | 'ERROR';
-  addedEntries: number;
-  failedEntries: number;
-  invalidEntries: number;
-}
+import { UploadProcess } from '@masterthesis/shared';
 
 export class UploadEntryError extends Error {
-  constructor(private customMessage: string, private errorName: string) {
+  constructor(customMessage: string, errorName: string) {
     super(customMessage);
   }
 }
@@ -65,6 +52,8 @@ const validateEntry = (parsedObj: any, schema: Array<Valueschema>) => {
     } else if (s.type === 'Date') {
       // TODO validate date
     }
+
+    return false;
   });
 
   return true;
@@ -94,7 +83,7 @@ const processValidEntry = async (
     );
   } catch (err) {
     if (err.errorName && err.errorName.length > 0) {
-      const res = await collection.updateOne(
+      await collection.updateOne(
         { _id: processId },
         {
           $inc: {
@@ -146,7 +135,7 @@ const parseCsvFile = async (
   console.log(`Started import of ${filename}.`);
 
   try {
-    const process = await new Promise((resolve, reject) =>
+    await new Promise((resolve, reject) =>
       stream
         .on('error', err => console.log(err))
         .pipe(csvStream)
@@ -169,7 +158,7 @@ const processUpload = async (
   const uploadsCollection = getUploadsCollection(db);
 
   try {
-    const { stream, filename, mimetype, encoding } = await upload;
+    const { stream, filename } = await upload;
     await parseCsvFile(stream, filename, ds, db, processId);
     await uploadsCollection.updateOne(
       { _id: processId },
@@ -231,11 +220,9 @@ export const doUploadAsync = async (
   files: Array<any>
 ) => {
   const uploadsCollection = getUploadsCollection(db);
-  const { resolve, reject } = await promisesAll.all(
+  const { reject } = await promisesAll.all(
     files.map(f => processUpload(f, ds, db, processId))
   );
-
-  const successfullUploads: Array<boolean> = resolve;
 
   if (reject.length) {
     reject.forEach(({ name, message }) => {

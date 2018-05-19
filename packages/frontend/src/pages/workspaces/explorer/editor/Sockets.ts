@@ -1,13 +1,14 @@
 import * as Konva from 'konva';
-import {
-  ExplorerEditorState,
-  ConnectionInstance,
-  ExplorerEditorProps
-} from '../ExplorerEditor';
+import { ExplorerEditorState, ExplorerEditorProps } from '../ExplorerEditor';
 import { socketColors } from '../nodes/Sockets';
 import { NODE_WIDTH } from './Nodes';
 import { showNotificationWithIcon } from '../../../../utils/form';
-import { SocketType, Socket } from '@masterthesis/shared';
+import {
+  SocketType,
+  SocketDef,
+  ConnectionInstance,
+  ConnectionWithoutId
+} from '@masterthesis/shared';
 
 export const SOCKET_RADIUS = 8;
 export const SOCKET_DISTANCE = 30;
@@ -16,11 +17,11 @@ export const getSocketId = (type: SocketType, nodeId: string, name: string) =>
   `${type === SocketType.INPUT ? 'in' : 'out'}-${nodeId}-${name}`;
 
 const renderSocket = (
-  s: Socket,
+  s: SocketDef,
   type: SocketType,
   i: number,
   isConnected: boolean,
-  onClick?: (s: Socket) => void
+  onClick?: (s: SocketDef) => void
 ) => {
   const socketGroup = new Konva.Group({
     x: 0,
@@ -58,14 +59,14 @@ const renderSocket = (
 };
 
 export const renderSocketWithUsages = (
-  s: Socket,
+  s: SocketDef,
   type: SocketType,
   i: number,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   nodeId: string,
   changeState: (newState: Partial<ExplorerEditorState>) => void,
-  onClick: (s: Socket, nodeId: string) => void
+  onClick: (s: SocketDef, nodeId: string) => void
 ) => {
   const { connections } = server;
   const isUsed =
@@ -82,7 +83,7 @@ export const renderSocketWithUsages = (
 
 const beginNewConnection = (
   nodeId: string,
-  s: Socket,
+  s: SocketDef,
   type: SocketType,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
@@ -99,7 +100,7 @@ const beginNewConnection = (
 
 const beginEditExistingConnection = async (
   connectionsInSocket: Array<ConnectionInstance>,
-  s: Socket,
+  s: SocketDef,
   type: SocketType,
   nodeId: string,
   server: ExplorerEditorProps,
@@ -128,7 +129,7 @@ const beginEditExistingConnection = async (
 };
 
 export const onClickSocket = (
-  s: Socket,
+  s: SocketDef,
   type: SocketType,
   nodeId: string,
   server: ExplorerEditorProps,
@@ -197,7 +198,7 @@ export const onClickSocket = (
       return;
     }
 
-    let openConnections: Array<ConnectionInstance> = [];
+    let openConnections: Array<ConnectionWithoutId> = [];
     openConnections = openConnections.concat(
       openConnection.inputs
         ? openConnection.inputs.map(c => ({

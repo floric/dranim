@@ -6,12 +6,7 @@ import { OutputSocketInformation } from './Sockets';
 import { AllDatasetNodes } from './dataset';
 import { AllNumberNodes } from './number';
 import { AllStringNodes } from './string';
-import {
-  NodeInstance,
-  NodeDef,
-  NodesMap,
-  ServerNodeDef
-} from '@masterthesis/shared';
+import { NodeInstance, NodeDef, NodesMap } from '@masterthesis/shared';
 import { TreeData } from 'antd/lib/tree-select';
 
 export interface EditorProps {

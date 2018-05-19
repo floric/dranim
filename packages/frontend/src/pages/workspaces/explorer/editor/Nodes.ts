@@ -1,12 +1,12 @@
 import * as Konva from 'konva';
-import {
-  NodeInstance,
-  ExplorerEditorState,
-  ExplorerEditorProps,
-  NodeState
-} from '../ExplorerEditor';
+import { ExplorerEditorState, ExplorerEditorProps } from '../ExplorerEditor';
 import { nodeTypes } from '../nodes/AllNodes';
-import { Socket, SocketType } from '@masterthesis/shared';
+import {
+  SocketType,
+  NodeInstance,
+  NodeState,
+  SocketDef
+} from '@masterthesis/shared';
 import {
   renderSocketWithUsages,
   onClickSocket,
@@ -31,7 +31,7 @@ export const renderNode = (
     throw new Error('Unknown node type');
   }
 
-  const { inputs, outputs, title } = nodeType;
+  const { inputs, outputs, name } = nodeType;
   const minSocketsNr =
     inputs.length > outputs.length ? inputs.length : outputs.length;
   const height = (minSocketsNr + 1) * SOCKET_DISTANCE + TEXT_HEIGHT;
@@ -57,7 +57,7 @@ export const renderNode = (
   const nodeTitle = new Konva.Text({
     fill: isSelected ? '#1890ff' : '#000',
     align: 'center',
-    text: title,
+    text: name,
     fontStyle: 'bold',
     height: TEXT_HEIGHT,
     width: NODE_WIDTH,
@@ -78,7 +78,7 @@ export const renderNode = (
       state,
       n.id,
       changeState,
-      (s: Socket, nodeId: string) =>
+      (s: SocketDef, nodeId: string) =>
         onClickSocket(s, SocketType.INPUT, nodeId, server, state, changeState)
     );
     inputsGroup.add(socket);
@@ -99,7 +99,7 @@ export const renderNode = (
       state,
       n.id,
       changeState,
-      (s: Socket, nodeId: string) =>
+      (s: SocketDef, nodeId: string) =>
         onClickSocket(s, SocketType.OUTPUT, nodeId, server, state, changeState)
     );
     outputsGroup.add(socket);

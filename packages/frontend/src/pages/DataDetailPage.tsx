@@ -14,8 +14,8 @@ import {
 import { DataEntries } from './dataset-details/EntriesPage';
 import { DataSchemas } from './dataset-details/SchemasPage';
 import { DatasetActions } from './dataset-details/ActionsPage';
-import { Dataset } from '../utils/model';
 import { PageHeaderCard } from '../components/PageHeaderCard';
+import { Dataset } from '@masterthesis/shared';
 
 export interface IDataDetailPageProps
   extends RouteComponentProps<{ id: string }> {}

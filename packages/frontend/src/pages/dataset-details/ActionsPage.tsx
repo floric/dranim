@@ -10,13 +10,13 @@ import {
 } from 'react-apollo';
 import gql from 'graphql-tag';
 
-import { Dataset } from '../../utils/model';
 import { UploadFile } from 'antd/lib/upload/interface';
 import { tryOperation } from '../../utils/form';
 import { AsyncButton } from '../../components/AsyncButton';
 import { UnknownErrorCard, LoadingCard } from '../../components/CustomCards';
 import { ProcessTime } from '../../components/ProcessTime';
 import { NumberInfo } from '../../components/NumberInfo';
+import { Dataset, UploadProcess } from '@masterthesis/shared';
 
 const UPLOAD_ENTRIES_CSV = gql`
   mutation($files: [Upload!]!, $datasetId: String!) {
@@ -45,17 +45,6 @@ export const ALL_UPLOADS = gql`
     }
   }
 `;
-
-export interface UploadProcess {
-  id: string;
-  start: string;
-  finish: string | null;
-  errors: Array<{ name: string; message: string; count: number }>;
-  state: 'STARTED' | 'PROCESSING' | 'FINISHED' | 'ERROR';
-  addedEntries: number;
-  failedEntries: number;
-  invalidEntries: number;
-}
 
 export interface DataActionsProps {
   dataset: Dataset;

@@ -15,6 +15,8 @@ var DataType;
 (function (DataType) {
     DataType["DATASET"] = "Dataset";
     DataType["NUMBER"] = "Number";
+    DataType["BOOLEAN"] = "Boolean";
+    DataType["DATE"] = "Date";
     DataType["STRING"] = "String";
 })(DataType = exports.DataType || (exports.DataType = {}));
 var CalculationProcessState;

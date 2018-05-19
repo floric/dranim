@@ -8,10 +8,10 @@ import { LoadingCard, UnknownErrorCard } from '../components/CustomCards';
 import { CreateDataSetForm } from './forms/CreateDatasetForm';
 import { ALL_DATASETS } from '../App';
 import { tryOperation } from '../utils/form';
-import { Dataset } from '../utils/model';
 import { AsyncButton } from '../components/AsyncButton';
 import { PageHeaderCard } from '../components/PageHeaderCard';
 import { NumberInfo } from '../components/NumberInfo';
+import { Dataset } from '@masterthesis/shared';
 
 const CREATE_DATASET = gql`
   mutation createDataset($name: String!) {

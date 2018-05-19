@@ -1,7 +1,6 @@
-import { MongoClient, ObjectID, Db } from 'mongodb';
+import { ObjectID, Db } from 'mongodb';
 
-import { Valueschema, getDataset } from './dataset';
-import { parse } from 'graphql';
+import { getDataset } from './dataset';
 import { UploadEntryError } from './upload';
 
 export interface Entry {
@@ -94,7 +93,6 @@ export const createEntry = async (
 
   // check values which are not specified in the schema
   const allValueNames = dsCollection.valueschemas.map(v => v.name);
-  const deliveredValueNames = valuesArr.map(v => v.name);
   const unsupportedValues = valuesArr.filter(
     v => !allValueNames.includes(v.name)
   );

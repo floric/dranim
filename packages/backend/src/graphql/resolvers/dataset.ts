@@ -1,6 +1,6 @@
-import { MongoClient, ObjectID, Db } from 'mongodb';
+import { ObjectID, Db } from 'mongodb';
 
-import { getEntryCollection, getEntry } from './entry';
+import { getEntryCollection } from './entry';
 
 export interface Valueschema {
   name: string;
