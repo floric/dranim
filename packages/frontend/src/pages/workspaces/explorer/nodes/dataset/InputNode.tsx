@@ -34,6 +34,7 @@ export const DatasetInputNode: ClientNodeDef = {
         'Dataset',
         {
           dataType: DataType.DATASET,
+          isPresent: true,
           meta: [{ name: 'schemas', info: ds.valueschemas.map(n => n.name) }]
         }
       ]

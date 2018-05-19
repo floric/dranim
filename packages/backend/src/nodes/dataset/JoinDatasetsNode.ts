@@ -3,8 +3,8 @@ import { JoinDatasetsNodeDef, ServerNodeDef } from '@masterthesis/shared';
 export const JoinDatasetsNode: ServerNodeDef = {
   name: JoinDatasetsNodeDef.name,
   isInputValid: async inputs => {
-    const aVal = inputs.get('A');
-    const bVal = inputs.get('B');
+    const aVal = inputs.get('Dataset A');
+    const bVal = inputs.get('Dataset B');
 
     if (!aVal || !bVal) {
       return false;

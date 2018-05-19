@@ -36,7 +36,7 @@ export const JoinDatasetsNode: ClientNodeDef = {
 
     if (!idValue) {
       return new Map<string, OutputSocketInformation>([
-        ['Combined', { dataType: DataType.DATASET, isPresent: false }]
+        ['Joined', { dataType: DataType.DATASET, isPresent: false }]
       ]);
     }
 
@@ -44,14 +44,14 @@ export const JoinDatasetsNode: ClientNodeDef = {
       inputValuesA.includes(idValue) && inputValuesB.includes(idValue);
     if (!isIdPresentInInputs) {
       return new Map<string, OutputSocketInformation>([
-        ['Combined', { dataType: DataType.DATASET, isPresent: false }]
+        ['Joined', { dataType: DataType.DATASET, isPresent: false }]
       ]);
     }
 
     const allSchemas = new Set(inputValuesA.concat(inputValuesB));
     return new Map<string, OutputSocketInformation>([
       [
-        'Dataset',
+        'Joined',
         {
           dataType: DataType.DATASET,
           meta: [
@@ -65,28 +65,62 @@ export const JoinDatasetsNode: ClientNodeDef = {
     ]);
   },
   renderFormItems: ({
-    form,
+    inputs,
+    node: { form },
     form: { getFieldDecorator },
     state: { datasets }
   }) => {
+    const dsA = inputs.get('Dataset A');
+    const dsB = inputs.get('Dataset B');
+    if (!dsA || !dsB || !dsA.isPresent || !dsB.isPresent) {
+      return <p>Plugin the two datasets first.</p>;
+    }
+    const schemasA = dsA.meta!.find(n => n.name === 'schemas')
+      ? dsA.meta!.find(n => n.name === 'schemas').info
+      : [];
+    const schemasB = dsB.meta!.find(n => n.name === 'schemas')
+      ? dsB.meta!.find(n => n.name === 'schemas').info
+      : [];
+
     return (
-      <Form.Item label="Input">
-        {getFieldDecorator('value', {
-          rules: [{ required: true }]
-        })(
-          <Select
-            showSearch
-            style={{ width: 200 }}
-            placeholder="Select ID Value"
-          >
-            {datasets.map(ds => (
-              <Select.Option value={ds.id} key={ds.id}>
-                {ds.name}
-              </Select.Option>
-            ))}
-          </Select>
-        )}
-      </Form.Item>
+      <>
+        <Form.Item label="Value from A">
+          {getFieldDecorator('valueA', {
+            rules: [{ required: true }],
+            initialValue: getOrDefault<string>(formToMap(form), 'valueA', '')
+          })(
+            <Select
+              showSearch
+              style={{ width: 200 }}
+              placeholder="Select Value"
+            >
+              {schemasA.map(ds => (
+                <Select.Option value={ds} key={ds}>
+                  {ds}
+                </Select.Option>
+              ))}
+            </Select>
+          )}
+        </Form.Item>
+        <Form.Item label="Value from B">
+          {getFieldDecorator('valueB', {
+            rules: [{ required: true }],
+            initialValue: getOrDefault<string>(formToMap(form), 'valueB', '')
+          })(
+            <Select
+              showSearch
+              style={{ width: 200 }}
+              placeholder="Select Value"
+            >
+              {schemasB.map(ds => (
+                <Select.Option value={ds} key={ds}>
+                  {ds}
+                </Select.Option>
+              ))}
+            </Select>
+          )}
+        </Form.Item>
+      </>
     );
   }
 };

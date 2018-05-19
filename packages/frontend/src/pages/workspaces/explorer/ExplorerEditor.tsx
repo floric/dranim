@@ -61,7 +61,7 @@ export class ExplorerEditor extends React.Component<
   ExplorerEditorProps,
   ExplorerEditorState
 > {
-  private selectNodeRef: Ref<TreeSelect> | null = null;
+  private selectNodeRef: Ref<TreeSelect> = React.createRef<TreeSelect>();
 
   public componentWillMount() {
     this.setState({
@@ -99,7 +99,6 @@ export class ExplorerEditor extends React.Component<
     if (selectedNode === null) {
       return;
     }
-    console.log(this.selectNodeRef);
 
     await this.props.onNodeDelete(selectedNode);
     await this.setState({ selectedNode: null });

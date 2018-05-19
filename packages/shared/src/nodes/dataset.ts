@@ -11,16 +11,16 @@ export const DatasetInputNodeDef: NodeDef = {
 
 export const JoinDatasetsNodeDef: NodeDef = {
   name: 'Join Datasets',
-  inputs: [DataSocket('A'), DataSocket('B')],
-  outputs: [DataSocket('Combined')],
+  inputs: [DataSocket('Dataset A'), DataSocket('Dataset B')],
+  outputs: [DataSocket('Joined')],
   path: ['Dataset'],
   keywords: []
 };
 
 export const SelectValuesNodeDef: NodeDef = {
   name: 'Select Values',
-  inputs: [DataSocket('A'), DataSocket('B')],
-  outputs: [DataSocket('Combined')],
+  inputs: [DataSocket('Dataset')],
+  outputs: [DataSocket('Dataset')],
   path: ['Dataset'],
   keywords: []
 };
