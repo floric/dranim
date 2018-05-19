@@ -1,9 +1,9 @@
 import { ClientNodeDef } from '../AllNodes';
 import { OutputSocketInformation } from '../Sockets';
-import { DataType } from '@masterthesis/shared';
+import { DataType, SumNodeDef } from '@masterthesis/shared';
 
 export const SumNode: ClientNodeDef = {
-  title: 'Sum',
+  name: SumNodeDef.name,
   onClientExecution: () =>
     new Map<string, OutputSocketInformation>([
       ['Sum', { dataType: DataType.NUMBER }]

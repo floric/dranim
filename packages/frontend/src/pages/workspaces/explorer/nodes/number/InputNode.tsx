@@ -2,10 +2,15 @@ import * as React from 'react';
 import { InputNumber, Form } from 'antd';
 import { ClientNodeDef } from '../AllNodes';
 import { OutputSocketInformation } from '../Sockets';
-import { getOrDefault, formToMap, DataType } from '@masterthesis/shared';
+import {
+  getOrDefault,
+  formToMap,
+  DataType,
+  NumberInputNodeDef
+} from '@masterthesis/shared';
 
 export const NumberInputNode: ClientNodeDef = {
-  title: 'Number Input',
+  name: NumberInputNodeDef.name,
   onClientExecution: () =>
     new Map<string, OutputSocketInformation>([
       ['Number', { dataType: DataType.NUMBER }]

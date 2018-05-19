@@ -1,12 +1,7 @@
-import { ServerNodeDef } from '../AllNodes';
-import { StringSocket } from '../Sockets';
+import { StringInputNodeDef, ServerNodeDef } from '@masterthesis/shared';
 
 export const StringInputNode: ServerNodeDef = {
-  title: 'String Input',
-  inputs: [],
-  outputs: [StringSocket('String')],
-  keywords: [],
-  path: ['String'],
+  name: StringInputNodeDef.name,
   onServerExecution: async (form, a) => {
     const val = form.get('value');
     return { outputs: new Map([['String', val ? val : '']]) };

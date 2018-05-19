@@ -8,7 +8,10 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "declaration": false,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
     "allowSyntheticDefaultImports": true,
+    "noUnusedLocals": true,
     "typeRoots": ["node_modules/@types"]
   },
   "files": ["src/main.ts"],

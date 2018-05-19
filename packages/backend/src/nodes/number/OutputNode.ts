@@ -1,12 +1,7 @@
-import { NumberSocket } from '../Sockets';
-import { ServerNodeDef } from '../AllNodes';
+import { NumberOutputNodeDef, ServerNodeDef } from '@masterthesis/shared';
 
 export const NumberOutputNode: ServerNodeDef = {
-  title: 'Number Output',
-  inputs: [NumberSocket('Number')],
-  outputs: [],
-  keywords: [],
-  path: ['Numbers'],
+  name: NumberOutputNodeDef.name,
   onServerExecution: (form, values) =>
     Promise.resolve({
       outputs: new Map([['Result', values.get('Number')!]])

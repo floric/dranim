@@ -2,10 +2,14 @@ import * as React from 'react';
 import { Form, Input } from 'antd';
 
 import { ClientNodeDef } from '../AllNodes';
-import { getOrDefault, formToMap } from '@masterthesis/shared';
+import {
+  getOrDefault,
+  formToMap,
+  DatasetOutputNodeDef
+} from '@masterthesis/shared';
 
 export const DatasetOutputNode: ClientNodeDef = {
-  title: 'Dataset Output',
+  name: DatasetOutputNodeDef.name,
   onClientExecution: () => new Map(),
   renderFormItems: ({ form: { getFieldDecorator }, node: { form } }) => (
     <Form.Item label="Name">

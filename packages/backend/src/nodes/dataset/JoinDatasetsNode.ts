@@ -1,12 +1,7 @@
-import { DataSocket } from '../Sockets';
-import { ServerNodeDef } from '../AllNodes';
+import { JoinDatasetsNodeDef, ServerNodeDef } from '@masterthesis/shared';
 
 export const JoinDatasetsNode: ServerNodeDef = {
-  title: 'Dataset Output',
-  inputs: [DataSocket('A'), DataSocket('B')],
-  outputs: [DataSocket('Combined')],
-  path: ['Dataset'],
-  keywords: [],
+  name: JoinDatasetsNodeDef.name,
   isInputValid: async inputs => {
     const aVal = inputs.get('A');
     const bVal = inputs.get('B');

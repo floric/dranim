@@ -1,9 +1,4 @@
-import { DataType } from '@masterthesis/shared';
-
-export interface SocketDef {
-  dataType: DataType;
-  name: string;
-}
+import { DataType, SocketDef } from './interfaces';
 
 export const DataSocket = (name: string): SocketDef => ({
   dataType: DataType.DATASET,

@@ -3,10 +3,15 @@ import { Form, Select } from 'antd';
 import { OutputSocketInformation } from '../Sockets';
 import { getValidInput } from '../utils';
 import { ClientNodeDef } from '../AllNodes';
-import { getOrDefault, formToMap, DataType } from '@masterthesis/shared';
+import {
+  getOrDefault,
+  formToMap,
+  DataType,
+  JoinDatasetsNodeDef
+} from '@masterthesis/shared';
 
 export const JoinDatasetsNode: ClientNodeDef = {
-  title: 'Join Datasets',
+  name: JoinDatasetsNodeDef.name,
   onClientExecution: (inputs, context) => {
     const validInputA = getValidInput('Dataset A', inputs);
     const validInputB = getValidInput('Dataset B', inputs);

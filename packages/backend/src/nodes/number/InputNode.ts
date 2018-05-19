@@ -1,12 +1,7 @@
-import { ServerNodeDef } from '../AllNodes';
-import { NumberSocket } from '../Sockets';
+import { NumberInputNodeDef, ServerNodeDef } from '@masterthesis/shared';
 
 export const NumberInputNode: ServerNodeDef = {
-  title: 'Number Input',
-  inputs: [],
-  outputs: [NumberSocket('Number')],
-  path: ['Numbers'],
-  keywords: [],
+  name: NumberInputNodeDef.name,
   isFormValid: form => {
     const input = form.get('value');
     if (!input || Number.isNaN(Number.parseFloat(input))) {

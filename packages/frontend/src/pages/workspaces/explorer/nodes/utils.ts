@@ -1,6 +1,6 @@
-import { ConnectionInstance } from '../ExplorerEditor';
 import { OutputSocketInformation } from './Sockets';
 import { nodeTypes, EditorContext } from './AllNodes';
+import { ConnectionInstance } from '@masterthesis/shared';
 
 export const getInputNode = (
   socketName: string,
@@ -71,10 +71,12 @@ export const getInputInformation = (
           state: context.state
         });
 
-        const outputs = nodeInputType.onClientExecution(inputs, {
-          state: context.state,
-          node: inputNode
-        });
+        const outputs = nodeInputType.onClientExecution
+          ? nodeInputType.onClientExecution(inputs, {
+              state: context.state,
+              node: inputNode
+            })
+          : new Map();
 
         return {
           name: i.name,

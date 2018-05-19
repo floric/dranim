@@ -1,12 +1,7 @@
-import { ServerNodeDef } from '../AllNodes';
-import { NumberSocket } from '../Sockets';
+import { MultiplicationNodeDef, ServerNodeDef } from '@masterthesis/shared';
 
 export const MultiplicationNode: ServerNodeDef = {
-  title: 'Multiplication',
-  inputs: [NumberSocket('A'), NumberSocket('B')],
-  outputs: [NumberSocket('Product')],
-  path: ['Numbers', 'Operators'],
-  keywords: ['times', 'multiplication'],
+  name: MultiplicationNodeDef.name,
   isInputValid: async values => {
     const aVal = values.get('A');
     const bVal = values.get('B');

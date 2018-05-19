@@ -1,12 +1,7 @@
-import { DataSocket } from '../Sockets';
-import { ServerNodeDef } from '../AllNodes';
+import { DatasetOutputNodeDef, ServerNodeDef } from '@masterthesis/shared';
 
 export const DatasetOutputNode: ServerNodeDef = {
-  title: 'Dataset Output',
-  inputs: [DataSocket('Dataset')],
-  outputs: [],
-  path: ['Dataset'],
-  keywords: [],
+  name: DatasetOutputNodeDef.name,
   onServerExecution: () =>
     Promise.resolve({
       outputs: new Map()

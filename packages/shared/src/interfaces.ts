@@ -20,6 +20,30 @@ export enum DataType {
   STRING = 'String'
 }
 
+export interface NodeDef {
+  name: string;
+  inputs: Array<SocketDef>;
+  outputs: Array<SocketDef>;
+  path: Array<string>;
+  keywords: Array<string>;
+}
+
+export type NodeExecutionOutputs = Map<string, string>;
+
+export interface NodeExecutionResult {
+  outputs: NodeExecutionOutputs;
+}
+
+export interface ServerNodeDef {
+  name: string;
+  isFormValid?: (form: Map<string, string>) => boolean;
+  isInputValid?: (inputs: NodeExecutionOutputs) => Promise<boolean>;
+  onServerExecution: (
+    form: Map<string, string>,
+    inputs: NodeExecutionOutputs
+  ) => Promise<NodeExecutionResult>;
+}
+
 export interface ConnectionDescription {
   name: string;
   connectionId: string;
@@ -42,7 +66,7 @@ export interface SocketInstance {
   name: string;
 }
 
-export interface Socket {
+export interface SocketDef {
   dataType: DataType;
   name: string;
 }

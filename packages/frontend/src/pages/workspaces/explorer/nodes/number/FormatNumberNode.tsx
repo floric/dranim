@@ -2,10 +2,15 @@ import * as React from 'react';
 import { InputNumber, Select, Form, Checkbox } from 'antd';
 import { ClientNodeDef } from '../AllNodes';
 import { OutputSocketInformation } from '../Sockets';
-import { getOrDefault, formToMap, DataType } from '@masterthesis/shared';
+import {
+  getOrDefault,
+  formToMap,
+  DataType,
+  FormatNumberNodeDef
+} from '@masterthesis/shared';
 
 export const FormatNumberNode: ClientNodeDef = {
-  title: 'Format Number',
+  name: FormatNumberNodeDef.name,
   onClientExecution: () =>
     new Map<string, OutputSocketInformation>([
       ['Formatted', { dataType: DataType.STRING }]

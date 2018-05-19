@@ -1,12 +1,7 @@
-import { ServerNodeDef } from '../AllNodes';
-import { NumberSocket } from '../Sockets';
+import { SumNodeDef, ServerNodeDef } from '@masterthesis/shared';
 
 export const SumNode: ServerNodeDef = {
-  title: 'Sum',
-  inputs: [NumberSocket('A'), NumberSocket('B')],
-  outputs: [NumberSocket('Sum')],
-  path: ['Numbers', 'Operators'],
-  keywords: ['sum', 'add'],
+  name: SumNodeDef.name,
   isInputValid: async values => {
     const aVal = values.get('A');
     const bVal = values.get('B');

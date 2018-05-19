@@ -1,14 +1,12 @@
 const numbro = require('numbro');
-import { ServerNodeDef } from '../AllNodes';
-import { NumberSocket, StringSocket } from '../Sockets';
-import { getOrDefault } from '@masterthesis/shared';
+import {
+  getOrDefault,
+  FormatNumberNodeDef,
+  ServerNodeDef
+} from '@masterthesis/shared';
 
 export const FormatNumberNode: ServerNodeDef = {
-  title: 'Format Number',
-  inputs: [NumberSocket('Number')],
-  outputs: [StringSocket('Formatted')],
-  path: ['Numbers', 'Converters'],
-  keywords: [],
+  name: FormatNumberNodeDef.name,
   isInputValid: async values => {
     const val = values.get('Number');
 

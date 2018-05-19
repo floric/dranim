@@ -2,10 +2,15 @@ import * as React from 'react';
 import { Form, Select } from 'antd';
 import { OutputSocketInformation } from '../Sockets';
 import { ClientNodeDef } from '../AllNodes';
-import { DataType, getOrDefault, formToMap } from '@masterthesis/shared';
+import {
+  DataType,
+  getOrDefault,
+  formToMap,
+  DatasetInputNodeDef
+} from '@masterthesis/shared';
 
 export const DatasetInputNode: ClientNodeDef = {
-  title: 'Dataset Input',
+  name: DatasetInputNodeDef.name,
   onClientExecution: (inputs, context) => {
     const dsId = getOrDefault<string | null>(
       formToMap(context.node.form),

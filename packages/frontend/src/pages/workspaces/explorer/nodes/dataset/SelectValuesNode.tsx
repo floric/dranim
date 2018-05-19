@@ -3,10 +3,15 @@ import { Form, Select } from 'antd';
 import { OutputSocketInformation } from '../Sockets';
 import { getValidInput } from '../utils';
 import { ClientNodeDef } from '../AllNodes';
-import { getOrDefault, formToMap, DataType } from '@masterthesis/shared';
+import {
+  getOrDefault,
+  formToMap,
+  DataType,
+  SelectValuesNodeDef
+} from '@masterthesis/shared';
 
 export const DatasetSelectValuesNode: ClientNodeDef = {
-  title: 'Select Values',
+  name: SelectValuesNodeDef.name,
   onClientExecution: (inputs, context) => {
     const validInput = getValidInput('Dataset', inputs);
     if (!validInput) {

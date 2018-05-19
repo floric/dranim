@@ -1,15 +1,18 @@
 import * as React from 'react';
 import { FormComponentProps } from 'antd/lib/form';
 
-import { NodeInstance, ExplorerEditorProps } from '../ExplorerEditor';
+import { ExplorerEditorProps } from '../ExplorerEditor';
 import { OutputSocketInformation } from './Sockets';
 import { AllDatasetNodes } from './dataset';
 import { AllNumberNodes } from './number';
 import { AllStringNodes } from './string';
 import {
-  ServerNodeDef,
-  serverNodeTypes
-} from '../../../../../../backend/src/nodes/AllNodes';
+  NodeInstance,
+  NodeDef,
+  NodesMap,
+  ServerNodeDef
+} from '@masterthesis/shared';
+import { TreeData } from 'antd/lib/tree-select';
 
 export interface EditorProps {
   x?: number;
@@ -29,19 +32,20 @@ export interface RenderFormItemsProps
 }
 
 export interface ClientNodeDef {
-  title: string;
+  name: string;
   renderFormItems?: (props: RenderFormItemsProps) => JSX.Element;
-  onClientExecution: (
+  onClientExecution?: (
     inputs: Map<string, OutputSocketInformation>,
     context: EditorContext
   ) => Map<string, OutputSocketInformation>;
 }
 
-export type NodeDef = ClientNodeDef & ServerNodeDef;
-
 const allNodes = [AllDatasetNodes, AllNumberNodes, AllStringNodes];
 
-const buildTree = (elems: Array<NodeDef>, curPath: Array<string>) => {
+const buildTree = (
+  elems: Array<ClientNodeDef & NodeDef>,
+  curPath: Array<string>
+): Array<TreeData> => {
   const nextPaths = elems
     .filter(
       e =>
@@ -65,10 +69,10 @@ const buildTree = (elems: Array<NodeDef>, curPath: Array<string>) => {
       ...elems
         .filter(elem => JSON.stringify(elem.path) === JSON.stringify(e))
         .map(elem => ({
-          label: elem.title,
-          value: elem.title,
-          key: elem.title,
-          index: `${elem.title}, ${elem.path.join(' ')}, ${elem.keywords.join(
+          label: elem.name,
+          value: elem.name,
+          key: elem.name,
+          index: `${elem.name}, ${elem.path.join(' ')}, ${elem.keywords.join(
             ' '
           )}`.toLocaleLowerCase(),
           children: []
@@ -78,20 +82,17 @@ const buildTree = (elems: Array<NodeDef>, curPath: Array<string>) => {
   }));
 };
 
-export const nodeTypes: Map<string, NodeDef> = new Map(
+export const nodeTypes: Map<string, ClientNodeDef & NodeDef> = new Map(
   allNodes
     .map<Array<[string, ClientNodeDef]>>(nodes =>
-      nodes.map<[string, ClientNodeDef]>(n => [n.title, n])
+      nodes.map<[string, ClientNodeDef]>(n => [n.name, n])
     )
-    .reduce<Array<[string, ClientNodeDef]>>(
-      (list, elem, _, all) => [...list, ...elem],
-      []
-    )
-    .map<[string, NodeDef]>(n => [
+    .reduce<Array<[string, ClientNodeDef]>>((a, b) => [...a, ...b], [])
+    .map<[string, (ClientNodeDef & NodeDef) | null]>(n => [
       n[0],
-      { ...serverNodeTypes.get(n[0])!, ...n[1] }
+      NodesMap.has(n[0]) ? { ...NodesMap.get(n[0]), ...n[1] } : null
     ])
-    .filter(n => n[1].inputs !== undefined && n[1].inputs !== null)
+    .filter(n => n[1] !== null)
     .sort((a, b) => a[0].localeCompare(b[0]))
 );
 

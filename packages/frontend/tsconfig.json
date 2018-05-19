@@ -11,8 +11,10 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
-    "strictNullChecks": true,
-    "suppressImplicitAnyIndexErrors": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declaration": false,
+    "allowSyntheticDefaultImports": true,
     "noUnusedLocals": true
   },
   "exclude": ["node_modules", "build", "scripts"],

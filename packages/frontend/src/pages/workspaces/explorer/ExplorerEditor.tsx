@@ -11,6 +11,7 @@ import { getInputInformation } from './nodes/utils';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { PropertiesForm } from './editor/PropertiesForm';
 import { AsyncButton } from '../../../components/AsyncButton';
+import { ConnectionInstance, NodeInstance, SocketDef } from '@masterthesis/shared';
 
 const filterTreeNode = (inputValue: string, treeNode: any) => {
   if (!treeNode.props.index) {
@@ -19,37 +20,6 @@ const filterTreeNode = (inputValue: string, treeNode: any) => {
 
   return treeNode.props.index.includes(inputValue.toLocaleLowerCase());
 };
-
-export enum NodeState {
-  VALID = 'VALID',
-  ERROR = 'ERROR',
-  INVALID = 'INVALID'
-}
-
-export interface FormValue {
-  name: string;
-  value: string;
-}
-
-export interface NodeInstance {
-  state: NodeState;
-  type: string;
-  x: number;
-  y: number;
-  id: string;
-  form: Array<FormValue>;
-}
-
-export interface SocketDef {
-  nodeId: string;
-  name: string;
-}
-
-export interface ConnectionInstance {
-  id?: string; // local connections don't have an ID!
-  from: SocketDef | null;
-  to: SocketDef | null;
-}
 
 export interface ExplorerEditorProps {
   connections: Array<ConnectionInstance>;
