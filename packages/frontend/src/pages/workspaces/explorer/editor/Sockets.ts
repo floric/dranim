@@ -4,9 +4,10 @@ import {
   ConnectionInstance,
   ExplorerEditorProps
 } from '../ExplorerEditor';
-import { Socket, SocketType, socketColors } from '../nodes/Sockets';
+import { socketColors } from '../nodes/Sockets';
 import { NODE_WIDTH } from './Nodes';
 import { showNotificationWithIcon } from '../../../../utils/form';
+import { SocketType, Socket } from '@masterthesis/shared';
 
 export const SOCKET_RADIUS = 8;
 export const SOCKET_DISTANCE = 30;

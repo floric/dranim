@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Form, Select } from 'antd';
-import { DATASET_TYPE, OutputSocketInformation } from '../Sockets';
+import { OutputSocketInformation } from '../Sockets';
 import { ClientNodeDef } from '../AllNodes';
-import { getOrDefault, formToMap } from '@masterthesis/shared';
+import { DataType, getOrDefault, formToMap } from '@masterthesis/shared';
 
 export const DatasetInputNode: ClientNodeDef = {
   title: 'Dataset Input',
@@ -14,13 +14,13 @@ export const DatasetInputNode: ClientNodeDef = {
     );
     if (!dsId) {
       return new Map<string, OutputSocketInformation>([
-        ['Dataset', { dataType: DATASET_TYPE, isPresent: false }]
+        ['Dataset', { dataType: DataType.DATASET, isPresent: false }]
       ]);
     }
     const ds = context.state.datasets.find(n => n.id === dsId);
     if (!ds) {
       return new Map<string, OutputSocketInformation>([
-        ['Dataset', { dataType: DATASET_TYPE, isPresent: false }]
+        ['Dataset', { dataType: DataType.DATASET, isPresent: false }]
       ]);
     }
 
@@ -28,7 +28,7 @@ export const DatasetInputNode: ClientNodeDef = {
       [
         'Dataset',
         {
-          dataType: DATASET_TYPE,
+          dataType: DataType.DATASET,
           meta: [{ name: 'schemas', info: ds.valueschemas.map(n => n.name) }]
         }
       ]

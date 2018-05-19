@@ -5,7 +5,7 @@ import {
   ExplorerEditorProps
 } from '../ExplorerEditor';
 import { getSocketId } from './Sockets';
-import { SocketType } from '../nodes/Sockets';
+import { SocketType } from '@masterthesis/shared';
 
 const CONNECTION_STIFFNESS = 0.7;
 

@@ -2,10 +2,10 @@ import { ObjectID, Db } from 'mongodb';
 import { serverNodeTypes } from '../../nodes/AllNodes';
 import {
   NodeInstance,
-  Socket,
+  SocketInstance,
   NodeState,
   formToMap,
-  Connection,
+  ConnectionInstance,
   Workspace
 } from '@masterthesis/shared';
 
@@ -59,7 +59,11 @@ export const addOrUpdateFormValue = async (
   return true;
 };
 
-export const createConnection = async (db: Db, from: Socket, to: Socket) => {
+export const createConnection = async (
+  db: Db,
+  from: SocketInstance,
+  to: SocketInstance
+) => {
   if (!from || !to) {
     throw new Error('Invalid connection');
   }
@@ -92,7 +96,7 @@ export const createConnection = async (db: Db, from: Socket, to: Socket) => {
 
   const all = await getAllConnections(db, inputNode.workspaceId);
   let foundCircle = false;
-  let curFromSocket: Socket = from;
+  let curFromSocket: SocketInstance = from;
   while (foundCircle === false) {
     if (curFromSocket.nodeId === to.nodeId) {
       foundCircle = true;
@@ -333,7 +337,7 @@ export const getNode = async (
 export const getConnection = async (
   db: Db,
   id: string
-): Promise<Connection | null> => {
+): Promise<ConnectionInstance | null> => {
   if (!ObjectID.isValid(id)) {
     return null;
   }
@@ -353,7 +357,7 @@ export const getConnection = async (
 export const getAllConnections = async (
   db: Db,
   workspaceId: string
-): Promise<Array<Connection>> => {
+): Promise<Array<ConnectionInstance>> => {
   const collection = getConnectionsCollection(db);
   const all = await collection.find({ workspaceId }).toArray();
   return all.map(ds => ({
@@ -417,7 +421,7 @@ export const updateWorkspace = async (
   db: Db,
   id: string,
   nodes: Array<NodeInstance>,
-  connections: Array<Connection>
+  connections: Array<ConnectionInstance>
 ) => {
   if (!ObjectID.isValid(id)) {
     throw new Error('Invalid ID');

@@ -1,14 +1,14 @@
 import * as React from 'react';
 import { InputNumber, Select, Form, Checkbox } from 'antd';
 import { ClientNodeDef } from '../AllNodes';
-import { OutputSocketInformation, STRING_TYPE } from '../Sockets';
-import { getOrDefault, formToMap } from '@masterthesis/shared';
+import { OutputSocketInformation } from '../Sockets';
+import { getOrDefault, formToMap, DataType } from '@masterthesis/shared';
 
 export const FormatNumberNode: ClientNodeDef = {
   title: 'Format Number',
   onClientExecution: () =>
     new Map<string, OutputSocketInformation>([
-      ['Formatted', { dataType: STRING_TYPE }]
+      ['Formatted', { dataType: DataType.STRING }]
     ]),
   renderFormItems: ({ form: { getFieldDecorator }, node: { form } }) => {
     const formMap = formToMap(form);

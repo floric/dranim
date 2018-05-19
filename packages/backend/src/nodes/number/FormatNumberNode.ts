@@ -44,6 +44,7 @@ export const FormatNumberNode: ServerNodeDef = {
       average,
       totalLength
     });
+
     return {
       outputs: new Map([['Formatted', formatted]])
     };

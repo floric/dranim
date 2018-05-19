@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Form, Select } from 'antd';
-import { DATASET_TYPE, OutputSocketInformation } from '../Sockets';
+import { OutputSocketInformation } from '../Sockets';
 import { getValidInput } from '../utils';
 import { ClientNodeDef } from '../AllNodes';
-import { getOrDefault, formToMap } from '@masterthesis/shared';
+import { getOrDefault, formToMap, DataType } from '@masterthesis/shared';
 
 export const DatasetSelectValuesNode: ClientNodeDef = {
   title: 'Select Values',
@@ -11,7 +11,7 @@ export const DatasetSelectValuesNode: ClientNodeDef = {
     const validInput = getValidInput('Dataset', inputs);
     if (!validInput) {
       return new Map<string, OutputSocketInformation>([
-        ['Dataset', { dataType: DATASET_TYPE, isPresent: false }]
+        ['Dataset', { dataType: DataType.DATASET, isPresent: false }]
       ]);
     }
 
@@ -29,7 +29,7 @@ export const DatasetSelectValuesNode: ClientNodeDef = {
       [
         'Dataset',
         {
-          dataType: DATASET_TYPE,
+          dataType: DataType.DATASET,
           meta: [
             {
               name: 'schemas',

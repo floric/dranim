@@ -7,9 +7,7 @@ import { Readable, Writable } from 'stream';
 import { Entry, createEntry } from './entry';
 import { getDatasetsCollection, Dataset, Valueschema } from './dataset';
 import { getDataset } from '../resolvers/dataset';
-import { UploadProgress } from './util/UploadProgress';
 import { updateNode } from './workspace';
-import { Upper } from './util/TransformStream';
 
 export interface UploadProcess {
   id: string;
@@ -216,7 +214,7 @@ export const uploadEntriesCsv = async (
     };
     const processId = new ObjectID(process.id);
 
-    // don't await
+    // don't await for entry processing
     doUploadAsync(db, ds, processId, files);
 
     return process;

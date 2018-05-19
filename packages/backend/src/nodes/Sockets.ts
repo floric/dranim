@@ -1,7 +1,4 @@
-export const DATASET_TYPE = 'Dataset';
-export const NUMBER_TYPE = 'Number';
-export const STRING_TYPE = 'String';
-export type DataType = 'Dataset' | 'Number' | 'String';
+import { DataType } from '@masterthesis/shared';
 
 export interface SocketDef {
   dataType: DataType;
@@ -9,16 +6,16 @@ export interface SocketDef {
 }
 
 export const DataSocket = (name: string): SocketDef => ({
-  dataType: DATASET_TYPE,
+  dataType: DataType.DATASET,
   name
 });
 
 export const NumberSocket = (name: string): SocketDef => ({
-  dataType: NUMBER_TYPE,
+  dataType: DataType.NUMBER,
   name
 });
 
 export const StringSocket = (name: string): SocketDef => ({
-  dataType: STRING_TYPE,
+  dataType: DataType.STRING,
   name
 });

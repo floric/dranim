@@ -1,11 +1,11 @@
-import { FormValues, FormValuesMap } from './interfaces';
+import { FormValue } from './interfaces';
 
-export const formToMap = (form: FormValues): FormValuesMap => {
+export const formToMap = (form: Array<FormValue>): Map<string, string> => {
   return new Map(form.map<[string, string]>(f => [f.name, f.value]));
 };
 
 export const getOrDefault = <T>(
-  form: FormValuesMap,
+  form: Map<string, string>,
   name: string,
   defaultVal: T
 ): T => {

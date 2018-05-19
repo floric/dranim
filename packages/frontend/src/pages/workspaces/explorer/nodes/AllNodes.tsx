@@ -63,14 +63,14 @@ const buildTree = (elems: Array<NodeDef>, curPath: Array<string>) => {
     selectable: false,
     children: [
       ...elems
-        .filter(childE => JSON.stringify(childE.path) === JSON.stringify(e))
-        .map(childE => ({
-          label: childE.title,
-          value: childE.title,
-          key: childE.title,
-          index: `${childE.title}, ${childE.path.join(
+        .filter(elem => JSON.stringify(elem.path) === JSON.stringify(e))
+        .map(elem => ({
+          label: elem.title,
+          value: elem.title,
+          key: elem.title,
+          index: `${elem.title}, ${elem.path.join(' ')}, ${elem.keywords.join(
             ' '
-          )}, ${childE.keywords.join(' ')}`.toLocaleLowerCase(),
+          )}`.toLocaleLowerCase(),
           children: []
         })),
       ...buildTree(elems, e)

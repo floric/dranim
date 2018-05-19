@@ -6,7 +6,7 @@ import {
   NodeState
 } from '../ExplorerEditor';
 import { nodeTypes } from '../nodes/AllNodes';
-import { Socket, SocketType } from '../nodes/Sockets';
+import { Socket, SocketType } from '@masterthesis/shared';
 import {
   renderSocketWithUsages,
   onClickSocket,

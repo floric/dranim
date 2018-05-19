@@ -1,36 +1,60 @@
-export type FormValues = Array<{ name: string; value: string }>;
-export type FormValuesMap = Map<string, string>;
-
 export enum NodeState {
   VALID = 'VALID',
   ERROR = 'ERROR',
   INVALID = 'INVALID'
 }
 
+export interface FormValue {
+  name: string;
+  value: string;
+}
+
+export enum SocketType {
+  INPUT = 'INPUT',
+  OUTPUT = 'OUTPUT'
+}
+
+export enum DataType {
+  DATASET = 'Dataset',
+  NUMBER = 'Number',
+  STRING = 'String'
+}
+
+export interface ConnectionDescription {
+  name: string;
+  connectionId: string;
+}
+
 export interface NodeInstance {
   id: string;
   x: number;
   y: number;
+  state: NodeState;
   workspaceId: string;
-  outputs: Array<{ name: string; connectionId: string }>;
-  inputs: Array<{ name: string; connectionId: string }>;
+  outputs: Array<ConnectionDescription>;
+  inputs: Array<ConnectionDescription>;
   type: string;
-  form: FormValues;
+  form: Array<FormValue>;
 }
 
-export interface Socket {
+export interface SocketInstance {
   nodeId: string;
   name: string;
 }
 
-export interface Connection extends ConnectionWithoutId {
+export interface Socket {
+  dataType: DataType;
+  name: string;
+}
+
+export interface ConnectionInstance extends ConnectionWithoutId {
   id: string;
+  workspaceId: string;
 }
 
 export interface ConnectionWithoutId {
-  from: Socket;
-  to: Socket;
-  workspaceId: string;
+  from: SocketInstance;
+  to: SocketInstance;
 }
 
 export interface Workspace {
@@ -40,7 +64,7 @@ export interface Workspace {
   created: string;
   description: string;
   nodes: Array<Node>;
-  connections: Array<Connection>;
+  connections: Array<ConnectionInstance>;
 }
 
 export enum CalculationProcessState {

@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Form, Select } from 'antd';
-import { DATASET_TYPE, OutputSocketInformation } from '../Sockets';
+import { OutputSocketInformation } from '../Sockets';
 import { getValidInput } from '../utils';
 import { ClientNodeDef } from '../AllNodes';
-import { getOrDefault, formToMap } from '@masterthesis/shared';
+import { getOrDefault, formToMap, DataType } from '@masterthesis/shared';
 
 export const JoinDatasetsNode: ClientNodeDef = {
   title: 'Join Datasets',
@@ -12,7 +12,7 @@ export const JoinDatasetsNode: ClientNodeDef = {
     const validInputB = getValidInput('Dataset B', inputs);
     if (!validInputA || !validInputB) {
       return new Map<string, OutputSocketInformation>([
-        ['Combined', { dataType: DATASET_TYPE, isPresent: false }]
+        ['Combined', { dataType: DataType.DATASET, isPresent: false }]
       ]);
     }
 
@@ -31,7 +31,7 @@ export const JoinDatasetsNode: ClientNodeDef = {
 
     if (!idValue) {
       return new Map<string, OutputSocketInformation>([
-        ['Combined', { dataType: DATASET_TYPE, isPresent: false }]
+        ['Combined', { dataType: DataType.DATASET, isPresent: false }]
       ]);
     }
 
@@ -39,7 +39,7 @@ export const JoinDatasetsNode: ClientNodeDef = {
       inputValuesA.includes(idValue) && inputValuesB.includes(idValue);
     if (!isIdPresentInInputs) {
       return new Map<string, OutputSocketInformation>([
-        ['Combined', { dataType: DATASET_TYPE, isPresent: false }]
+        ['Combined', { dataType: DataType.DATASET, isPresent: false }]
       ]);
     }
 
@@ -48,7 +48,7 @@ export const JoinDatasetsNode: ClientNodeDef = {
       [
         'Dataset',
         {
-          dataType: DATASET_TYPE,
+          dataType: DataType.DATASET,
           meta: [
             {
               name: 'schemas',

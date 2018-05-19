@@ -1,14 +1,14 @@
 import * as React from 'react';
 import { Input, Form } from 'antd';
 import { ClientNodeDef } from '../AllNodes';
-import { OutputSocketInformation, STRING_TYPE } from '../Sockets';
-import { getOrDefault, formToMap } from '@masterthesis/shared';
+import { OutputSocketInformation } from '../Sockets';
+import { getOrDefault, formToMap, DataType } from '@masterthesis/shared';
 
 export const StringInputNode: ClientNodeDef = {
   title: 'String Input',
   onClientExecution: () =>
     new Map<string, OutputSocketInformation>([
-      ['String', { dataType: STRING_TYPE }]
+      ['String', { dataType: DataType.STRING }]
     ]),
   renderFormItems: ({ form: { getFieldDecorator }, node: { form } }) => (
     <Form.Item label="Value">
