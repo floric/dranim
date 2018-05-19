@@ -64,7 +64,7 @@ export interface NodeExecutionResult {
 
 export interface ServerNodeDef {
   name: string;
-  isFormValid?: (form: Map<string, string>) => boolean;
+  isFormValid?: (form: Map<string, string>) => Promise<boolean>;
   isInputValid?: (inputs: NodeExecutionOutputs) => Promise<boolean>;
   onServerExecution: (
     form: Map<string, string>,

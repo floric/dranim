@@ -10,7 +10,7 @@ export const DatasetInputNodeDef: NodeDef = {
 };
 
 export const JoinDatasetsNodeDef: NodeDef = {
-  name: 'Dataset Output',
+  name: 'Join Datasets',
   inputs: [DataSocket('A'), DataSocket('B')],
   outputs: [DataSocket('Combined')],
   path: ['Dataset'],

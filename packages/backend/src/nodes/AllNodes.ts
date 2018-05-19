@@ -1,16 +1,17 @@
-import { AllDatasetNodes } from './dataset';
-import { AllNumberNodes } from './number';
-import { AllStringNodes } from './string';
+import * as AllDatasetNodes from './dataset';
+import * as AllNumberNodes from './number';
+import * as AllStringNodes from './string';
 import { NumberOutputNode } from './number/OutputNode';
 import { DatasetOutputNode } from './dataset/OutputNode';
 import { StringOutputNode } from './string/OutputNode';
 import { ServerNodeDef, NodesMap, NodeDef } from '@masterthesis/shared';
 
 const allNodes = [AllDatasetNodes, AllNumberNodes, AllStringNodes];
+
 export const serverNodeTypes: Map<string, ServerNodeDef & NodeDef> = new Map(
   allNodes
     .map<Array<[string, ServerNodeDef]>>(nodes =>
-      nodes.map<[string, ServerNodeDef]>(n => [n.name, n])
+      Object.values(nodes).map<[string, ServerNodeDef]>(n => [n.name, n])
     )
     .reduce<Array<[string, ServerNodeDef]>>((a, b) => [...a, ...b], [])
     .map<[string, (ServerNodeDef & NodeDef) | null]>(n => [

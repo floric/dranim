@@ -16,6 +16,7 @@ import {
   SocketInstance,
   Dataset
 } from '@masterthesis/shared';
+import { Ref } from 'react';
 
 const filterTreeNode = (inputValue: string, treeNode: any) => {
   if (!treeNode.props.index) {
@@ -60,6 +61,8 @@ export class ExplorerEditor extends React.Component<
   ExplorerEditorProps,
   ExplorerEditorState
 > {
+  private selectNodeRef: Ref<TreeSelect> | null = null;
+
   public componentWillMount() {
     this.setState({
       openConnection: null,
@@ -96,6 +99,8 @@ export class ExplorerEditor extends React.Component<
     if (selectedNode === null) {
       return;
     }
+    console.log(this.selectNodeRef);
+
     await this.props.onNodeDelete(selectedNode);
     await this.setState({ selectedNode: null });
   };
@@ -202,6 +207,7 @@ export class ExplorerEditor extends React.Component<
           <Col xs={24} md={12} xl={6}>
             <Card bordered={false} title="Editor" style={{ marginBottom: 12 }}>
               <TreeSelect
+                ref={this.selectNodeRef}
                 allowClear
                 showSearch
                 filterTreeNode={filterTreeNode}

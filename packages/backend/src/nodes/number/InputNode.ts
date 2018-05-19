@@ -2,7 +2,7 @@ import { NumberInputNodeDef, ServerNodeDef } from '@masterthesis/shared';
 
 export const NumberInputNode: ServerNodeDef = {
   name: NumberInputNodeDef.name,
-  isFormValid: form => {
+  isFormValid: async form => {
     const input = form.get('value');
     if (!input || Number.isNaN(Number.parseFloat(input))) {
       return false;

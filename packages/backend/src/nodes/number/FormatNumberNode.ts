@@ -16,9 +16,6 @@ export const FormatNumberNode: ServerNodeDef = {
 
     return true;
   },
-  isFormValid: () => {
-    return true;
-  },
   onServerExecution: async (form, values) => {
     const val = Number.parseFloat(values.get('Number')!);
     const mantissa = getOrDefault<number>(form, 'mantissa', 0);

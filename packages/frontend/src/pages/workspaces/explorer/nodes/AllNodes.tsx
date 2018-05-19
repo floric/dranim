@@ -3,9 +3,9 @@ import { FormComponentProps } from 'antd/lib/form';
 
 import { ExplorerEditorProps } from '../ExplorerEditor';
 import { OutputSocketInformation } from './Sockets';
-import { AllDatasetNodes } from './dataset';
-import { AllNumberNodes } from './number';
-import { AllStringNodes } from './string';
+import * as AllDatasetNodes from './dataset';
+import * as AllNumberNodes from './number';
+import * as AllStringNodes from './string';
 import { NodeInstance, NodeDef, NodesMap } from '@masterthesis/shared';
 import { TreeData } from 'antd/lib/tree-select';
 
@@ -80,7 +80,7 @@ const buildTree = (
 export const nodeTypes: Map<string, ClientNodeDef & NodeDef> = new Map(
   allNodes
     .map<Array<[string, ClientNodeDef]>>(nodes =>
-      nodes.map<[string, ClientNodeDef]>(n => [n.name, n])
+      Object.values(nodes).map<[string, ClientNodeDef]>(n => [n.name, n])
     )
     .reduce<Array<[string, ClientNodeDef]>>((a, b) => [...a, ...b], [])
     .map<[string, (ClientNodeDef & NodeDef) | null]>(n => [
