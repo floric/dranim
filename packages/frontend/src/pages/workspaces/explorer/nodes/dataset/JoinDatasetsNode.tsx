@@ -3,7 +3,7 @@ import { Form, Select } from 'antd';
 import { DATASET_TYPE, OutputSocketInformation } from '../Sockets';
 import { getValidInput } from '../utils';
 import { ClientNodeDef } from '../AllNodes';
-import { getOrDefault } from '../../../../../utils/shared';
+import { getOrDefault, formToMap } from '@masterthesis/shared';
 
 export const JoinDatasetsNode: ClientNodeDef = {
   title: 'Join Datasets',
@@ -24,7 +24,7 @@ export const JoinDatasetsNode: ClientNodeDef = {
       : [];
 
     const idValue = getOrDefault<string | null>(
-      context.node.form,
+      formToMap(context.node.form),
       'value',
       null
     );

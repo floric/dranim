@@ -1,9 +1,9 @@
 {
-  "name": "frontend",
+  "name": "@masterthesis/frontend",
   "version": "1.0.0",
-  "private": true,
-  "main": "src",
+  "main": "dist",
   "dependencies": {
+    "@masterthesis/shared": "1.0.0",
     "ant-design-pro": "^1.2.1",
     "antd": "^3.4.4",
     "apollo-cache-inmemory": "^1.1.12",

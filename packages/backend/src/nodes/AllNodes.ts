@@ -1,6 +1,5 @@
 import { FormComponentProps } from 'antd/lib/form';
 
-import { FormValues, Socket } from '../graphql/resolvers/workspace';
 import { AllDatasetNodes } from './dataset';
 import { AllNumberNodes } from './number';
 import { AllStringNodes } from './string';
@@ -8,6 +7,7 @@ import { DataType, SocketDef } from './Sockets';
 import { NumberOutputNode } from './number/OutputNode';
 import { DatasetOutputNode } from './dataset/OutputNode';
 import { StringOutputNode } from './string/OutputNode';
+import { FormValuesMap } from '@masterthesis/shared';
 
 export type NodeExecutionOutputs = Map<string, string>;
 
@@ -21,10 +21,10 @@ export interface ServerNodeDef {
   outputs: Array<SocketDef>;
   path: Array<string>;
   keywords: Array<string>;
-  isFormValid?: (form: FormValues) => boolean;
-  isInputValid: (inputs: NodeExecutionOutputs) => Promise<boolean>;
+  isFormValid?: (form: FormValuesMap) => boolean;
+  isInputValid?: (inputs: NodeExecutionOutputs) => Promise<boolean>;
   onServerExecution: (
-    form: FormValues,
+    form: FormValuesMap,
     inputs: NodeExecutionOutputs
   ) => Promise<NodeExecutionResult>;
 }

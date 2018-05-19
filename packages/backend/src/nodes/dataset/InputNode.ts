@@ -7,7 +7,6 @@ export const DatasetInputNode: ServerNodeDef = {
   outputs: [DataSocket('Dataset')],
   path: ['Dataset'],
   keywords: [],
-  isInputValid: () => Promise.resolve(true),
   onServerExecution: () =>
     Promise.resolve({
       outputs: new Map()

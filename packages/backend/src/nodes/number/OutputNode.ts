@@ -7,7 +7,6 @@ export const NumberOutputNode: ServerNodeDef = {
   outputs: [],
   keywords: [],
   path: ['Numbers'],
-  isInputValid: () => Promise.resolve(true),
   onServerExecution: (form, values) =>
     Promise.resolve({
       outputs: new Map([['Result', values.get('Number')!]])

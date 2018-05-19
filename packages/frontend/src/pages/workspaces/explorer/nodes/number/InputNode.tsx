@@ -2,7 +2,7 @@ import * as React from 'react';
 import { InputNumber, Form } from 'antd';
 import { ClientNodeDef } from '../AllNodes';
 import { OutputSocketInformation, NUMBER_TYPE } from '../Sockets';
-import { getOrDefault } from '../../../../../utils/shared';
+import { getOrDefault, formToMap } from '@masterthesis/shared';
 
 export const NumberInputNode: ClientNodeDef = {
   title: 'Number Input',
@@ -14,7 +14,7 @@ export const NumberInputNode: ClientNodeDef = {
     <Form.Item label="Value">
       {getFieldDecorator('value', {
         rules: [{ required: true, type: 'number' }],
-        initialValue: getOrDefault<number>(form, 'value', 0)
+        initialValue: getOrDefault<number>(formToMap(form), 'value', 0)
       })(<InputNumber />)}
     </Form.Item>
   )

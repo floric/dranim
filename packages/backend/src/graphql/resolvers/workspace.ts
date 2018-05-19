@@ -1,49 +1,13 @@
 import { ObjectID, Db } from 'mongodb';
 import { serverNodeTypes } from '../../nodes/AllNodes';
-
-export type FormValues = Array<{ name: string; value: any }>;
-
-export enum NodeState {
-  VALID = 'VALID',
-  ERROR = 'ERROR',
-  INVALID = 'INVALID'
-}
-
-export interface Node {
-  id: string;
-  x: number;
-  y: number;
-  workspaceId: string;
-  outputs: Array<{ name: string; connectionId: string }>;
-  inputs: Array<{ name: string; connectionId: string }>;
-  type: string;
-  form: FormValues;
-}
-
-export interface Socket {
-  nodeId: string;
-  name: string;
-}
-
-export interface Connection extends ConnectionWithoutId {
-  id: string;
-}
-
-export interface ConnectionWithoutId {
-  from: Socket;
-  to: Socket;
-  workspaceId: string;
-}
-
-export interface Workspace {
-  id: string;
-  name: string;
-  lastChange: string;
-  created: string;
-  description: string;
-  nodes: Array<Node>;
-  connections: Array<Connection>;
-}
+import {
+  NodeInstance,
+  Socket,
+  NodeState,
+  formToMap,
+  Connection,
+  Workspace
+} from '@masterthesis/shared';
 
 export const initWorkspaceDb = async (db: Db) => {
   const connCollection = getConnectionsCollection(db);
@@ -112,10 +76,10 @@ export const createConnection = async (db: Db, from: Socket, to: Socket) => {
   }
 
   const nodesCollection = getNodesCollection(db);
-  const outputNode = await nodesCollection.findOne<Node>({
+  const outputNode = await nodesCollection.findOne<NodeInstance>({
     _id: new ObjectID(from.nodeId)
   });
-  const inputNode = await nodesCollection.findOne<Node>({
+  const inputNode = await nodesCollection.findOne<NodeInstance>({
     _id: new ObjectID(to.nodeId)
   });
   if (!outputNode || !inputNode) {
@@ -233,7 +197,7 @@ export const createNode = async (
   workspaceId: string,
   x: number,
   y: number
-): Promise<Node> => {
+): Promise<NodeInstance> => {
   const collection = getNodesCollection(db);
   if (type.length === 0) {
     throw new Error("Name mustn't be empty.");
@@ -309,7 +273,7 @@ export const updateNode = async (db: Db, id: string, x: number, y: number) => {
 export const getAllNodes = async (
   db: Db,
   workspaceId: string
-): Promise<Array<Node>> => {
+): Promise<Array<NodeInstance>> => {
   const collection = getNodesCollection(db);
   const all = await collection.find({ workspaceId }).toArray();
   return all.map(n => {
@@ -324,14 +288,14 @@ export const getAllNodes = async (
 
 export const getNodeState = async (
   db: Db,
-  node: Pick<Node, 'form' | 'inputs' | 'type'>
+  node: Pick<NodeInstance, 'form' | 'inputs' | 'type'>
 ) => {
   const t = serverNodeTypes.get(node.type);
   if (!t) {
     return NodeState.ERROR;
   }
 
-  const isValid = t.isFormValid ? t.isFormValid(node.form) : true;
+  const isValid = t.isFormValid ? t.isFormValid(formToMap(node.form)) : true;
   if (!isValid) {
     return NodeState.INVALID;
   }
@@ -343,7 +307,10 @@ export const getNodeState = async (
   return NodeState.VALID;
 };
 
-export const getNode = async (db: Db, id: string): Promise<Node | null> => {
+export const getNode = async (
+  db: Db,
+  id: string
+): Promise<NodeInstance | null> => {
   if (!ObjectID.isValid(id)) {
     return null;
   }
@@ -449,7 +416,7 @@ export const deleteWorkspace = async (db: Db, id: string) => {
 export const updateWorkspace = async (
   db: Db,
   id: string,
-  nodes: Array<Node>,
+  nodes: Array<NodeInstance>,
   connections: Array<Connection>
 ) => {
   if (!ObjectID.isValid(id)) {

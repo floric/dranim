@@ -9,7 +9,7 @@
   "cacheDirectories": [".cache"],
   "scripts": {
     "build": "lerna run build --stream",
-    "start": "lerna run start --stream",
+    "start": "lerna bootstrap && lerna run start --stream",
     "clean":
       "lerna run clean --stream && rm -rf node_modules && sudo rm -rf data",
     "mongodb": "sudo docker run -p 127.0.0.1:27017:27017 mongo:latest"

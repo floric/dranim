@@ -7,9 +7,8 @@ export const StringInputNode: ServerNodeDef = {
   outputs: [StringSocket('String')],
   keywords: [],
   path: ['String'],
-  isInputValid: () => Promise.resolve(true),
   onServerExecution: async (form, a) => {
-    const val = form.find(f => f.name === 'value');
-    return { outputs: new Map([['String', val ? val.value : '']]) };
+    const val = form.get('value');
+    return { outputs: new Map([['String', val ? val : '']]) };
   }
 };

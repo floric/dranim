@@ -2,13 +2,13 @@ import * as React from 'react';
 import { Form, Select } from 'antd';
 import { DATASET_TYPE, OutputSocketInformation } from '../Sockets';
 import { ClientNodeDef } from '../AllNodes';
-import { getOrDefault } from '../../../../../utils/shared';
+import { getOrDefault, formToMap } from '@masterthesis/shared';
 
 export const DatasetInputNode: ClientNodeDef = {
   title: 'Dataset Input',
   onClientExecution: (inputs, context) => {
     const dsId = getOrDefault<string | null>(
-      context.node.form,
+      formToMap(context.node.form),
       'dataset',
       null
     );
@@ -43,7 +43,7 @@ export const DatasetInputNode: ClientNodeDef = {
       {getFieldDecorator('dataset', {
         rules: [{ required: true }],
         initialValue: getOrDefault<string | undefined>(
-          form,
+          formToMap(form),
           'dataset',
           undefined
         )

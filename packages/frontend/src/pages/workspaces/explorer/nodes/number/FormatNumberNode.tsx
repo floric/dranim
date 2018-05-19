@@ -2,7 +2,7 @@ import * as React from 'react';
 import { InputNumber, Select, Form, Checkbox } from 'antd';
 import { ClientNodeDef } from '../AllNodes';
 import { OutputSocketInformation, STRING_TYPE } from '../Sockets';
-import { getOrDefault } from '../../../../../utils/shared';
+import { getOrDefault, formToMap } from '@masterthesis/shared';
 
 export const FormatNumberNode: ClientNodeDef = {
   title: 'Format Number',
@@ -11,14 +11,15 @@ export const FormatNumberNode: ClientNodeDef = {
       ['Formatted', { dataType: STRING_TYPE }]
     ]),
   renderFormItems: ({ form: { getFieldDecorator }, node: { form } }) => {
-    const optMantissa = getOrDefault<boolean>(form, 'opt-mantissa', true);
+    const formMap = formToMap(form);
+    const optMantissa = getOrDefault<boolean>(formMap, 'opt-mantissa', true);
     const thousandsSeparated = getOrDefault<boolean>(
-      form,
+      formMap,
       'thousands-separated',
       true
     );
-    const average = getOrDefault<boolean>(form, 'average', true);
-    const space = getOrDefault<boolean>(form, 'space-separated', true);
+    const average = getOrDefault<boolean>(formMap, 'average', true);
+    const space = getOrDefault<boolean>(formMap, 'space-separated', true);
 
     return (
       <>
@@ -29,7 +30,7 @@ export const FormatNumberNode: ClientNodeDef = {
         </Form.Item>
         <Form.Item label="Mantissa">
           {getFieldDecorator('mantissa', {
-            initialValue: getOrDefault<number>(form, 'mantissa', 1)
+            initialValue: getOrDefault<number>(formMap, 'mantissa', 1)
           })(<InputNumber />)}
         </Form.Item>
         <Form.Item label="Optional mantissa">
@@ -49,14 +50,17 @@ export const FormatNumberNode: ClientNodeDef = {
         </Form.Item>
         <Form.Item label="Total length">
           {getFieldDecorator('average-total', {
-            initialValue: getOrDefault<number>(form, 'average-total', 1)
+            initialValue: getOrDefault<number>(formMap, 'average-total', 1)
           })(<InputNumber />)}
         </Form.Item>
         <Form.Item label="Output">
           {getFieldDecorator('output', {
-            initialValue: getOrDefault<string>(form, 'output', 'ordinal')
+            initialValue: getOrDefault<string>(formMap, 'output', 'number')
           })(
             <Select style={{ width: 200 }} placeholder="Output">
+              <Select.Option value="number" key="number">
+                Number
+              </Select.Option>
               <Select.Option value="ordinal" key="ordinal">
                 Ordinal
               </Select.Option>

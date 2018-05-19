@@ -3,7 +3,7 @@ import { Form, Select } from 'antd';
 import { DATASET_TYPE, OutputSocketInformation } from '../Sockets';
 import { getValidInput } from '../utils';
 import { ClientNodeDef } from '../AllNodes';
-import { getOrDefault } from '../../../../../utils/shared';
+import { getOrDefault, formToMap } from '@masterthesis/shared';
 
 export const DatasetSelectValuesNode: ClientNodeDef = {
   title: 'Select Values',
@@ -20,7 +20,7 @@ export const DatasetSelectValuesNode: ClientNodeDef = {
       : [];
 
     const selectedValues = getOrDefault<Array<string>>(
-      context.node.form,
+      formToMap(context.node.form),
       'values',
       []
     );
@@ -59,7 +59,11 @@ export const DatasetSelectValuesNode: ClientNodeDef = {
     return (
       <Form.Item label="Input">
         {getFieldDecorator('values', {
-          initialValue: getOrDefault<Array<string>>(node.form, 'values', [])
+          initialValue: getOrDefault<Array<string>>(
+            formToMap(node.form),
+            'values',
+            []
+          )
         })(
           <Select
             mode="multiple"

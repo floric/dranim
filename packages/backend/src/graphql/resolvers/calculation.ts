@@ -2,7 +2,6 @@ import { Db, ObjectID } from 'mongodb';
 import {
   getAllNodes,
   getAllConnections,
-  Node,
   getConnection,
   getNode
 } from './workspace';
@@ -13,22 +12,12 @@ import {
   NodeExecutionOutputs
 } from '../../nodes/AllNodes';
 import { exec } from 'child_process';
-
-export enum CalculationProcessState {
-  STARTED = 'STARTED',
-  PROCESSING = 'PROCESSING',
-  ERROR = 'ERROR',
-  SUCCESSFUL = 'SUCCESSFUL'
-}
-
-export interface CalculationProcess {
-  id: string;
-  start: string;
-  finish: string | null;
-  processedOutputs: number;
-  totalOutputs: number;
-  state: CalculationProcessState;
-}
+import {
+  NodeInstance,
+  formToMap,
+  CalculationProcessState,
+  CalculationProcess
+} from '@masterthesis/shared';
 
 const startProcess = async (db: Db, processId: string, workspaceId: string) => {
   const processCollection = getCalculationsCollection(db);
@@ -51,11 +40,6 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
     await Promise.all(
       outputs.map(async o => {
         const resultsFromOutput = await executeNode(db, o);
-        console.log(
-          `${o.type}: ${JSON.stringify(
-            Array.from(resultsFromOutput.entries())
-          )}`
-        );
         await processCollection.updateOne(
           { _id: new ObjectID(processId) },
           {
@@ -95,7 +79,7 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
 
 const executeNode = async (
   db: Db,
-  node: Node
+  node: NodeInstance
 ): Promise<NodeExecutionOutputs> => {
   const type = serverNodeTypes.get(node.type);
   if (!type) {
@@ -105,7 +89,6 @@ const executeNode = async (
   const inputValues = await Promise.all(
     node.inputs.map(async i => {
       const c = await getConnection(db, i.connectionId);
-      console.log(i);
       const inputNodeId = c.from.nodeId;
       const inputNode = await getNode(db, inputNodeId);
       if (!inputNode) {
@@ -121,13 +104,17 @@ const executeNode = async (
   const inputsMap = new Map(
     inputValues.map<[string, string]>(i => [i.socketName, i.val])
   );
-  const validForm = type.isFormValid ? type.isFormValid(node.form) : true;
-  const validInput = await type.isInputValid(inputsMap);
+  const validForm = type.isFormValid
+    ? type.isFormValid(formToMap(node.form))
+    : true;
+  const validInput = type.isInputValid
+    ? await type.isInputValid(inputsMap)
+    : true;
   if (!validInput || !validForm) {
     throw new Error('Invalid input.');
   }
 
-  const res = await type.onServerExecution(node.form, inputsMap);
+  const res = await type.onServerExecution(formToMap(node.form), inputsMap);
 
   return res.outputs;
 };
@@ -149,6 +136,7 @@ export const startCalculation = async (
     totalOutputs: 0,
     state: CalculationProcessState.STARTED
   });
+
   if (newProcess.result.ok !== 1 || newProcess.ops.length !== 1) {
     throw new Error('Process creation failed');
   }

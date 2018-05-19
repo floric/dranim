@@ -1,7 +1,7 @@
-import numbro from 'numbro';
+const numbro = require('numbro');
 import { ServerNodeDef } from '../AllNodes';
-import { NumberSocket, NUMBER_TYPE, StringSocket } from '../Sockets';
-import { getOrDefault } from '../../../../frontend/src/utils/shared';
+import { NumberSocket, StringSocket } from '../Sockets';
+import { getOrDefault } from '@masterthesis/shared';
 
 export const FormatNumberNode: ServerNodeDef = {
   title: 'Format Number',
@@ -22,9 +22,9 @@ export const FormatNumberNode: ServerNodeDef = {
     return true;
   },
   onServerExecution: async (form, values) => {
-    const val = Number.parseFloat(values.get('Number'));
+    const val = Number.parseFloat(values.get('Number')!);
     const mantissa = getOrDefault<number>(form, 'mantissa', 0);
-    const optMantissa = getOrDefault<boolean>(form, 'opt-mantissa', true);
+    const optionalMantissa = getOrDefault<boolean>(form, 'opt-mantissa', true);
     const thousandSeparated = getOrDefault<boolean>(
       form,
       'thousands-separated',
@@ -32,13 +32,14 @@ export const FormatNumberNode: ServerNodeDef = {
     );
     const average = getOrDefault<boolean>(form, 'average', true);
     const spaceSeparated = getOrDefault<boolean>(form, 'space-separated', true);
-    const output = getOrDefault<string>(form, 'output', 'percent');
+    const output = getOrDefault<string>(form, 'output', 'number');
     const totalLength = getOrDefault<number>(form, 'average-total', 3);
 
     const formatted = numbro(val).format({
       thousandSeparated,
       spaceSeparated,
       mantissa,
+      optionalMantissa,
       output,
       average,
       totalLength

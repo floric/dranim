@@ -7,7 +7,6 @@ export const StringOutputNode: ServerNodeDef = {
   outputs: [],
   keywords: [],
   path: ['String'],
-  isInputValid: () => Promise.resolve(true),
   onServerExecution: (form, values) =>
     Promise.resolve({
       outputs: new Map([['Result', values.get('String')!]])
