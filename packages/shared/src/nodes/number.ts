@@ -1,42 +1,112 @@
 import { NodeDef } from '../interfaces';
 import { NumberSocket, StringSocket } from '../sockets';
 
-export const FormatNumberNodeDef: NodeDef = {
+export interface FormatNumberNodeInputs {
+  number: string;
+}
+export interface FormatNumberNodeOutputs {
+  formatted: string;
+}
+export interface FormatNumberNodeForm {
+  mantissa: number;
+  optMantissa: boolean;
+  thousandsSeparated: boolean;
+  average: boolean;
+  spaceSeparated: boolean;
+  output: string;
+  averageTotal: number;
+}
+
+export const FormatNumberNodeDef: NodeDef<
+  FormatNumberNodeInputs,
+  FormatNumberNodeOutputs
+> = {
   name: 'Format Number',
-  inputs: [NumberSocket('Number')],
-  outputs: [StringSocket('Formatted')],
+  inputs: {
+    number: NumberSocket('Number')
+  },
+  outputs: {
+    formatted: StringSocket('Formatted')
+  },
   path: ['Numbers', 'Converters'],
   keywords: []
 };
 
-export const NumberInputNodeDef: NodeDef = {
+export interface NumberInputNodeOutputs {
+  val: number;
+}
+
+export interface NumberInputNodeForm {
+  value: number;
+}
+
+export const NumberInputNodeDef: NodeDef<{}, NumberInputNodeOutputs> = {
   name: 'Number Input',
-  inputs: [],
-  outputs: [NumberSocket('Number')],
+  inputs: {},
+  outputs: {
+    val: NumberSocket('Number')
+  },
   path: ['Numbers'],
   keywords: []
 };
 
-export const MultiplicationNodeDef: NodeDef = {
+export interface MultiplicationNodeInputs {
+  a: number;
+  b: number;
+}
+
+export interface MultiplicationNodeOutputs {
+  product: number;
+}
+
+export const MultiplicationNodeDef: NodeDef<
+  MultiplicationNodeInputs,
+  MultiplicationNodeOutputs
+> = {
   name: 'Multiplication',
-  inputs: [NumberSocket('A'), NumberSocket('B')],
-  outputs: [NumberSocket('Product')],
+  inputs: {
+    a: NumberSocket('A'),
+    b: NumberSocket('B')
+  },
+  outputs: {
+    product: NumberSocket('Product')
+  },
   path: ['Numbers', 'Operators'],
   keywords: ['times', 'multiplication']
 };
 
-export const NumberOutputNodeDef: NodeDef = {
+export interface NumberOutputNodeInputs {
+  val: number;
+}
+
+export interface SumNodeNodeInputs {
+  a: number;
+  b: number;
+}
+
+export interface SumNodeNodeOutputs {
+  sum: number;
+}
+
+export const NumberOutputNodeDef: NodeDef<NumberOutputNodeInputs, {}> = {
   name: 'Number Output',
-  inputs: [NumberSocket('Number')],
-  outputs: [],
+  inputs: {
+    val: NumberSocket('Number')
+  },
+  outputs: {},
   keywords: [],
   path: ['Numbers']
 };
 
-export const SumNodeDef: NodeDef = {
+export const SumNodeDef: NodeDef<SumNodeNodeInputs, SumNodeNodeOutputs> = {
   name: 'Sum',
-  inputs: [NumberSocket('A'), NumberSocket('B')],
-  outputs: [NumberSocket('Sum')],
+  inputs: {
+    a: NumberSocket('A'),
+    b: NumberSocket('B')
+  },
+  outputs: {
+    sum: NumberSocket('Sum')
+  },
   path: ['Numbers', 'Operators'],
   keywords: ['sum', 'add']
 };

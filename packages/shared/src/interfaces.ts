@@ -48,28 +48,40 @@ export enum DataType {
   STRING = 'String'
 }
 
-export interface NodeDef {
+export interface SocketDef {
+  dataType: DataType;
   name: string;
-  inputs: Array<SocketDef>;
-  outputs: Array<SocketDef>;
+  order?: number;
+}
+
+export type SocketDefs<T> = { [P in keyof T]: SocketDef };
+export type FormValues<T> = { [P in keyof T]: string | undefined };
+export type IOValues<T> = { [P in keyof T]: string };
+
+export interface NodeDef<NodeInputs = {}, NodeOutputs = {}> {
+  name: string;
+  inputs: SocketDefs<NodeInputs>;
+  outputs: SocketDefs<NodeOutputs>;
   path: Array<string>;
   keywords: Array<string>;
 }
 
-export type NodeExecutionOutputs = Map<string, string>;
-
-export interface NodeExecutionResult {
-  outputs: NodeExecutionOutputs;
+export interface NodeExecutionResult<NodeOutputs> {
+  outputs: IOValues<NodeOutputs>;
 }
 
-export interface ServerNodeDef {
+export interface ServerNodeDef<
+  NodeInputs = {},
+  NodeOutputs = {},
+  NodeForm = {}
+> {
   name: string;
-  isFormValid?: (form: Map<string, string>) => Promise<boolean>;
-  isInputValid?: (inputs: NodeExecutionOutputs) => Promise<boolean>;
+  isFormValid?: (form: FormValues<NodeForm>) => Promise<boolean>;
+  isInputValid?: (inputs: IOValues<NodeInputs>) => Promise<boolean>;
   onServerExecution: (
-    form: Map<string, string>,
-    inputs: NodeExecutionOutputs
-  ) => Promise<NodeExecutionResult>;
+    form: NodeForm,
+    inputs: IOValues<NodeInputs>
+  ) => Promise<NodeExecutionResult<NodeOutputs>>;
 }
 
 export interface ConnectionDescription {
@@ -94,11 +106,6 @@ export interface SocketInstance {
   name: string;
 }
 
-export interface SocketDef {
-  dataType: DataType;
-  name: string;
-}
-
 export interface ConnectionInstance extends ConnectionWithoutId {
   id: string;
   workspaceId: string;
@@ -115,7 +122,7 @@ export interface Workspace {
   lastChange: string;
   created: string;
   description: string;
-  nodes: Array<Node>;
+  nodes: Array<NodeInstance>;
   connections: Array<ConnectionInstance>;
 }
 

@@ -1,12 +1,11 @@
-import { Db, ObjectID } from 'mongodb';
+import { Db, ObjectID, Collection } from 'mongodb';
 import { getAllNodes, getConnection, getNode } from './workspace';
 import { outputNodes, serverNodeTypes } from '../../nodes/AllNodes';
 import {
   NodeInstance,
   formToMap,
   CalculationProcessState,
-  CalculationProcess,
-  NodeExecutionOutputs
+  CalculationProcess
 } from '@masterthesis/shared';
 
 const startProcess = async (db: Db, processId: string, workspaceId: string) => {
@@ -65,10 +64,7 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
   }
 };
 
-const executeNode = async (
-  db: Db,
-  node: NodeInstance
-): Promise<NodeExecutionOutputs> => {
+const executeNode = async (db: Db, node: NodeInstance): Promise<any> => {
   const type = serverNodeTypes.get(node.type);
   if (!type) {
     throw new Error('Unknown node type');
@@ -77,6 +73,10 @@ const executeNode = async (
   const inputValues = await Promise.all(
     node.inputs.map(async i => {
       const c = await getConnection(db, i.connectionId);
+      if (!c) {
+        throw new Error('Invalid connection.');
+      }
+
       const inputNodeId = c.from.nodeId;
       const inputNode = await getNode(db, inputNodeId);
       if (!inputNode) {
@@ -85,7 +85,7 @@ const executeNode = async (
 
       const nodeRes = await executeNode(db, inputNode);
 
-      return { socketName: i.name, val: nodeRes.get(c.from.name) };
+      return { socketName: i.name, val: nodeRes[c.from.name] };
     })
   );
 
@@ -107,7 +107,9 @@ const executeNode = async (
   return res.outputs;
 };
 
-export const getCalculationsCollection = (db: Db) => {
+export const getCalculationsCollection = (
+  db: Db
+): Collection<CalculationProcess & { _id: ObjectID }> => {
   return db.collection('Calculations');
 };
 

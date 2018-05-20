@@ -1,9 +1,15 @@
-import { NumberOutputNodeDef, ServerNodeDef } from '@masterthesis/shared';
+import {
+  NumberOutputNodeDef,
+  ServerNodeDef,
+  NumberOutputNodeInputs
+} from '@masterthesis/shared';
 
-export const NumberOutputNode: ServerNodeDef = {
+export const NumberOutputNode: ServerNodeDef<NumberOutputNodeInputs, {}> = {
   name: NumberOutputNodeDef.name,
   onServerExecution: (form, values) =>
     Promise.resolve({
-      outputs: new Map([['Result', values.get('Number')!]])
+      outputs: {
+        new: values.val
+      }
     })
 };

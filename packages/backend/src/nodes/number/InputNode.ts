@@ -1,9 +1,18 @@
-import { NumberInputNodeDef, ServerNodeDef } from '@masterthesis/shared';
+import {
+  NumberInputNodeDef,
+  ServerNodeDef,
+  NumberInputNodeOutputs,
+  NumberInputNodeForm
+} from '@masterthesis/shared';
 
-export const NumberInputNode: ServerNodeDef = {
+export const NumberInputNode: ServerNodeDef<
+  {},
+  NumberInputNodeOutputs,
+  NumberInputNodeForm
+> = {
   name: NumberInputNodeDef.name,
   isFormValid: async form => {
-    const input = form.get('value');
+    const input = form.value;
     if (!input || Number.isNaN(Number.parseFloat(input))) {
       return false;
     }
@@ -12,8 +21,8 @@ export const NumberInputNode: ServerNodeDef = {
   },
   onServerExecution: async (form, values) =>
     Promise.resolve({
-      outputs: new Map([
-        ['Number', form.has('value') ? form.get('value')! : '']
-      ])
+      outputs: {
+        val: form.value.toString() || '0'
+      }
     })
 };

@@ -1,9 +1,15 @@
-import { StringOutputNodeDef, ServerNodeDef } from '@masterthesis/shared';
+import {
+  StringOutputNodeDef,
+  ServerNodeDef,
+  StringOutputNodeInputs
+} from '@masterthesis/shared';
 
-export const StringOutputNode: ServerNodeDef = {
+export const StringOutputNode: ServerNodeDef<StringOutputNodeInputs, {}> = {
   name: StringOutputNodeDef.name,
   onServerExecution: (form, values) =>
     Promise.resolve({
-      outputs: new Map([['Result', values.get('String')!]])
+      outputs: {
+        Result: ''
+      }
     })
 };

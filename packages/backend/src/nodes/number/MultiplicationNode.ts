@@ -1,10 +1,18 @@
-import { MultiplicationNodeDef, ServerNodeDef } from '@masterthesis/shared';
+import {
+  MultiplicationNodeDef,
+  ServerNodeDef,
+  MultiplicationNodeInputs,
+  MultiplicationNodeOutputs
+} from '@masterthesis/shared';
 
-export const MultiplicationNode: ServerNodeDef = {
+export const MultiplicationNode: ServerNodeDef<
+  MultiplicationNodeInputs,
+  MultiplicationNodeOutputs
+> = {
   name: MultiplicationNodeDef.name,
   isInputValid: async values => {
-    const aVal = values.get('A');
-    const bVal = values.get('B');
+    const aVal = values.a;
+    const bVal = values.b;
 
     if (
       !aVal ||
@@ -18,10 +26,12 @@ export const MultiplicationNode: ServerNodeDef = {
     return true;
   },
   onServerExecution: async (form, values) => {
-    const a = Number.parseFloat(values.get('A')!);
-    const b = Number.parseFloat(values.get('B')!);
+    const a = Number.parseFloat(values.a);
+    const b = Number.parseFloat(values.b);
     return {
-      outputs: new Map([['Product', (a * b).toString()]])
+      outputs: {
+        product: (a * b).toString()
+      }
     };
   }
 };

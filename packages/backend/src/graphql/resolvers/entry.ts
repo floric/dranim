@@ -1,9 +1,10 @@
-import { ObjectID, Db } from 'mongodb';
+import { ObjectID, Db, Collection } from 'mongodb';
 
 import { getDataset } from './dataset';
 import { UploadEntryError } from './upload';
 
 export interface Entry {
+  _id: ObjectID;
   id: string;
   values: {
     [name: string]: any;
@@ -15,7 +16,10 @@ export interface Value {
   val: string;
 }
 
-export const getEntryCollection = (db: Db, datasetId: string) => {
+export const getEntryCollection = (
+  db: Db,
+  datasetId: string
+): Collection<Entry> => {
   return db.collection(`Entries_${datasetId}`);
 };
 
@@ -78,10 +82,13 @@ export const createEntry = async (
     }
   });
 
-  const dsCollection = await getDataset(db, datasetId);
+  const ds = await getDataset(db, datasetId);
+  if (!ds) {
+    throw new Error('Invalid dataset');
+  }
 
   // check required schemas which are not set
-  const missedSchemas = dsCollection.valueschemas
+  const missedSchemas = ds.valueschemas
     .filter(s => s.required)
     .filter(s => !valuesArr.map(v => v.name).includes(s.name));
   if (missedSchemas.length > 0) {
@@ -92,7 +99,7 @@ export const createEntry = async (
   }
 
   // check values which are not specified in the schema
-  const allValueNames = dsCollection.valueschemas.map(v => v.name);
+  const allValueNames = ds.valueschemas.map(v => v.name);
   const unsupportedValues = valuesArr.filter(
     v => !allValueNames.includes(v.name)
   );

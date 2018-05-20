@@ -1,9 +1,13 @@
-import { DatasetOutputNodeDef, ServerNodeDef } from '@masterthesis/shared';
+import {
+  DatasetOutputNodeDef,
+  ServerNodeDef,
+  DatasetOutputNodeInputs
+} from '@masterthesis/shared';
 
-export const DatasetOutputNode: ServerNodeDef = {
+export const DatasetOutputNode: ServerNodeDef<DatasetOutputNodeInputs, {}> = {
   name: DatasetOutputNodeDef.name,
   onServerExecution: () =>
     Promise.resolve({
-      outputs: new Map()
+      outputs: {}
     })
 };

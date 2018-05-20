@@ -1,18 +1,30 @@
 import { NodeDef } from '../interfaces';
 import { StringSocket } from '../sockets';
 
-export const StringInputNodeDef: NodeDef = {
+export interface StringInputNodeOutputs {
+  string: string;
+}
+
+export const StringInputNodeDef: NodeDef<{}, StringInputNodeOutputs> = {
   name: 'String Input',
-  inputs: [],
-  outputs: [StringSocket('String')],
+  inputs: {},
+  outputs: {
+    string: StringSocket('String')
+  },
   keywords: [],
   path: ['String']
 };
 
-export const StringOutputNodeDef: NodeDef = {
+export interface StringOutputNodeInputs {
+  string: string;
+}
+
+export const StringOutputNodeDef: NodeDef<StringOutputNodeInputs, {}> = {
   name: 'String Output',
-  inputs: [StringSocket('String')],
-  outputs: [],
+  inputs: {
+    string: StringSocket('String')
+  },
+  outputs: {},
   keywords: [],
   path: ['String']
 };

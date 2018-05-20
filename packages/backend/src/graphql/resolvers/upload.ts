@@ -1,5 +1,5 @@
 import fastCsv from 'fast-csv';
-import { ObjectID, Db } from 'mongodb';
+import { ObjectID, Db, Collection } from 'mongodb';
 import * as promisesAll from 'promises-all';
 import { Readable } from 'stream';
 
@@ -14,11 +14,16 @@ export class UploadEntryError extends Error {
   }
 }
 
-export const getUploadsCollection = (db: Db) => {
+export const getUploadsCollection = (
+  db: Db
+): Collection<UploadProcess & { _id: ObjectID }> => {
   return db.collection('Uploads');
 };
 
-export const getAllUploads = async (db: Db, datasetId: string | null) => {
+export const getAllUploads = async (
+  db: Db,
+  datasetId: string | null
+): Promise<Array<UploadProcess & { _id: ObjectID }>> => {
   const collection = getUploadsCollection(db);
   const all = await collection
     .find(datasetId ? { datasetId } : {})

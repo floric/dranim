@@ -1,4 +1,4 @@
-import { ObjectID, Db } from 'mongodb';
+import { ObjectID, Db, Collection } from 'mongodb';
 import { serverNodeTypes } from '../../nodes/AllNodes';
 import {
   NodeInstance,
@@ -16,15 +16,21 @@ export const initWorkspaceDb = async (db: Db) => {
   await nodesCollection.createIndex('workspaceId');
 };
 
-export const getNodesCollection = (db: Db) => {
+export const getNodesCollection = (
+  db: Db
+): Collection<NodeInstance & { _id: ObjectID }> => {
   return db.collection('Nodes');
 };
 
-export const getWorkspacesCollection = (db: Db) => {
+export const getWorkspacesCollection = (
+  db: Db
+): Collection<Workspace & { _id: ObjectID }> => {
   return db.collection('Workspaces');
 };
 
-export const getConnectionsCollection = (db: Db) => {
+export const getConnectionsCollection = (
+  db: Db
+): Collection<ConnectionInstance & { _id: ObjectID }> => {
   return db.collection('Connections');
 };
 
@@ -71,7 +77,7 @@ export const createConnection = async (
   const collection = getConnectionsCollection(db);
 
   // check for existing connections to the input
-  let res = await collection.findOne({
+  const res = await collection.findOne({
     'to.name': to.name,
     'to.nodeId': to.nodeId
   });
@@ -118,17 +124,17 @@ export const createConnection = async (
     throw new Error('Cyclic dependencies not allowed!');
   }
 
-  res = await collection.insertOne({
+  const insertRes = await collection.insertOne({
     from,
     to,
     workspaceId: inputNode.workspaceId
   });
 
-  if (res.result.ok !== 1 || res.ops.length !== 1) {
+  if (insertRes.result.ok !== 1 || insertRes.ops.length !== 1) {
     throw new Error('Writing connection failed');
   }
 
-  const newItem = res.ops[0];
+  const newItem = insertRes.ops[0];
   const connId = newItem._id.toHexString();
 
   await Promise.all([
@@ -267,7 +273,7 @@ export const updateNode = async (db: Db, id: string, x: number, y: number) => {
   }
 
   wsCollection.findOneAndUpdate(
-    { _id: new ObjectID(res.value.workspaceId) },
+    { _id: new ObjectID(res.value!.workspaceId) },
     { $set: { lastChange: new Date() } }
   );
 
@@ -304,7 +310,7 @@ export const getNodeState = async (
     return NodeState.INVALID;
   }
 
-  if (node.inputs.length !== t.inputs.length) {
+  if (node.inputs.length !== Object.keys(t.inputs).length) {
     return NodeState.INVALID;
   }
 
@@ -314,7 +320,7 @@ export const getNodeState = async (
 export const getNode = async (
   db: Db,
   id: string
-): Promise<NodeInstance | null> => {
+): Promise<NodeInstance & { _id: ObjectID } | null> => {
   if (!ObjectID.isValid(id)) {
     return null;
   }
@@ -337,7 +343,7 @@ export const getNode = async (
 export const getConnection = async (
   db: Db,
   id: string
-): Promise<ConnectionInstance | null> => {
+): Promise<ConnectionInstance & { _id: ObjectID } | null> => {
   if (!ObjectID.isValid(id)) {
     return null;
   }
@@ -468,7 +474,7 @@ export const getAllWorkspaces = async (db: Db): Promise<Array<Workspace>> => {
 export const getWorkspace = async (
   db: Db,
   id: string
-): Promise<Workspace | null> => {
+): Promise<Workspace & { _id: ObjectID } | null> => {
   if (!ObjectID.isValid(id)) {
     return null;
   }

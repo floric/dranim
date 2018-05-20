@@ -41,7 +41,7 @@ import { getAllUploads, uploadEntriesCsv } from './resolvers/upload';
 import { startCalculation, getAllCalculations } from './resolvers/calculation';
 import { createSTRDemoData } from '../example/str';
 
-interface ApolloContext {
+export interface ApolloContext {
   db: Db;
 }
 
@@ -223,4 +223,4 @@ const typeDefs = [
 export default makeExecutableSchema<ApolloContext>({
   typeDefs,
   resolvers
-});
+}) as any;

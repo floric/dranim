@@ -83,11 +83,10 @@ export const nodeTypes: Map<string, ClientNodeDef & NodeDef> = new Map(
       Object.values(nodes).map<[string, ClientNodeDef]>(n => [n.name, n])
     )
     .reduce<Array<[string, ClientNodeDef]>>((a, b) => [...a, ...b], [])
-    .map<[string, (ClientNodeDef & NodeDef) | null]>(n => [
+    .map<[string, (ClientNodeDef & NodeDef)]>(n => [
       n[0],
-      NodesMap.has(n[0]) ? { ...NodesMap.get(n[0]), ...n[1] } : null
+      { ...NodesMap.get(n[0]), ...n[1] }
     ])
-    .filter(n => n[1] !== null)
     .sort((a, b) => a[0].localeCompare(b[0]))
 );
 

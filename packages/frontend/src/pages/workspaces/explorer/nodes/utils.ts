@@ -1,6 +1,6 @@
 import { OutputSocketInformation } from './Sockets';
 import { nodeTypes, EditorContext } from './AllNodes';
-import { ConnectionInstance } from '@masterthesis/shared';
+import { ConnectionInstance, SocketDef } from '@masterthesis/shared';
 
 export const getInputNode = (
   socketName: string,
@@ -41,7 +41,7 @@ export const getInputInformation = (
   }
 
   return new Map<string, OutputSocketInformation>(
-    node.inputs
+    Array.from<SocketDef>(Object.values(node.inputs))
       .map(i => {
         const inputSocketName = i.name;
         const inputConnection = context.state.connections.find(

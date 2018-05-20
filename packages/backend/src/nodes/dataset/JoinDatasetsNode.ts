@@ -1,10 +1,18 @@
-import { JoinDatasetsNodeDef, ServerNodeDef } from '@masterthesis/shared';
+import {
+  JoinDatasetsNodeDef,
+  ServerNodeDef,
+  JoinDatasetsNodeInputs,
+  JoinDatasetsNodeOutputs
+} from '@masterthesis/shared';
 
-export const JoinDatasetsNode: ServerNodeDef = {
+export const JoinDatasetsNode: ServerNodeDef<
+  JoinDatasetsNodeInputs,
+  JoinDatasetsNodeOutputs
+> = {
   name: JoinDatasetsNodeDef.name,
   isInputValid: async inputs => {
-    const aVal = inputs.get('Dataset A');
-    const bVal = inputs.get('Dataset B');
+    const aVal = inputs.datasetA;
+    const bVal = inputs.datasetB;
 
     if (!aVal || !bVal) {
       return false;
@@ -16,6 +24,6 @@ export const JoinDatasetsNode: ServerNodeDef = {
     return true;
   },
   onServerExecution: async (form, inputs) => {
-    return { outputs: new Map() };
+    return { outputs: { joined: '{}' } };
   }
 };

@@ -1,4 +1,4 @@
-import { ObjectID, Db } from 'mongodb';
+import { ObjectID, Db, Collection } from 'mongodb';
 
 import { getEntryCollection } from './entry';
 
@@ -11,13 +11,14 @@ export interface Valueschema {
 }
 
 export interface Dataset {
+  _id: ObjectID;
   id: string;
   name: string;
   valueschemas: Array<Valueschema>;
   entries: Array<number>;
 }
 
-export const getDatasetsCollection = (db: Db) => {
+export const getDatasetsCollection = (db: Db): Collection<Dataset> => {
   return db.collection('Datasets');
 };
 
@@ -73,7 +74,10 @@ export const getAllDatasets = async (db: Db): Promise<Array<Dataset>> => {
   }));
 };
 
-export const getDataset = async (db: Db, id: string): Promise<Dataset> => {
+export const getDataset = async (
+  db: Db,
+  id: string
+): Promise<Dataset | null> => {
   if (!ObjectID.isValid(id)) {
     return null;
   }

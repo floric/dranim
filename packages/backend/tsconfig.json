@@ -1,22 +1,23 @@
 {
   "compilerOptions": {
+    "module": "commonjs",
     "target": "es6",
     "lib": ["es2017", "esnext"],
-    "module": "esnext",
+    "declaration": true,
     "moduleResolution": "node",
-    "sourceMap": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "declaration": false,
+    "rootDir": "src",
+    "outDir": "dist",
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
-    "allowSyntheticDefaultImports": true,
+    "strictNullChecks": true,
+    "skipLibCheck": true,
+    "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": true,
-    "typeRoots": ["node_modules/@types"]
+    "preserveWatchOutput": true,
+    "pretty": true
   },
-  "files": ["src/main.ts"],
-  "exclude": ["node_modules"],
-  "parcelTsPluginOptions": {
-    "transpileOnly": false
-  }
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }

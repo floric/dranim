@@ -1,10 +1,36 @@
-import * as DatasetNodes from './nodes/dataset';
-import * as StringNodes from './nodes/string';
-import * as NumberNodes from './nodes/number';
+import {
+  DatasetInputNodeDef,
+  DatasetOutputNodeDef,
+  JoinDatasetsNodeDef,
+  SelectValuesNodeDef
+} from './nodes/dataset';
+import { StringInputNodeDef, StringOutputNodeDef } from './nodes/string';
+import {
+  NumberInputNodeDef,
+  NumberOutputNodeDef,
+  FormatNumberNodeDef,
+  MultiplicationNodeDef,
+  SumNodeDef
+} from './nodes/number';
 import { NodeDef } from './interfaces';
 
 export const NodesMap = new Map<string, NodeDef>(
-  [DatasetNodes, StringNodes, NumberNodes]
+  [
+    {
+      DatasetInputNodeDef,
+      DatasetOutputNodeDef,
+      JoinDatasetsNodeDef,
+      SelectValuesNodeDef
+    },
+    { StringInputNodeDef, StringOutputNodeDef },
+    {
+      NumberInputNodeDef,
+      NumberOutputNodeDef,
+      FormatNumberNodeDef,
+      MultiplicationNodeDef,
+      SumNodeDef
+    }
+  ]
     .map(n => Object.values(n))
     .reduce<Array<NodeDef>>((list, elem, _, all) => [...list, ...elem], [])
     .map<[string, NodeDef]>(n => [n.name, n])

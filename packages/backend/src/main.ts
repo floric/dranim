@@ -1,8 +1,8 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import helmet from 'helmet';
-import morgan from 'morgan';
-import cors from 'cors';
+import * as express from 'express';
+import * as bodyParser from 'body-parser';
+import * as helmet from 'helmet';
+import * as morgan from 'morgan';
+import * as cors from 'cors';
 
 import { graphqlExpress } from 'apollo-server-express';
 import { apolloUploadExpress } from 'apollo-upload-server';
@@ -13,7 +13,7 @@ import { Db } from 'mongodb';
 import { initWorkspaceDb } from './graphql/resolvers/workspace';
 export const GRAPHQL_ROUTE = '/api/graphql';
 
-interface IMainOptions {
+export interface IMainOptions {
   env: string;
   port: number;
   verbose?: boolean;
@@ -34,6 +34,7 @@ export const main = async (options: IMainOptions) => {
   if (options.env !== 'production') {
     app.use(cors({ maxAge: 600, origin: 'http://localhost:1234' }));
   }
+
   app.use(helmet());
   app.use(morgan(options.env));
   app.use(

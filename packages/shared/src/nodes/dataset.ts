@@ -1,34 +1,76 @@
-import { NodeDef } from '../interfaces';
+import { NodeDef, Dataset } from '../interfaces';
 import { DataSocket } from '../sockets';
 
-export const DatasetInputNodeDef: NodeDef = {
+export interface DatasetInputNodeOutputs {
+  dataset: Dataset;
+}
+
+export const DatasetInputNodeDef: NodeDef<{}, DatasetInputNodeOutputs> = {
   name: 'Dataset Input',
-  inputs: [],
-  outputs: [DataSocket('Dataset')],
+  inputs: {},
+  outputs: { dataset: DataSocket('Dataset') },
   path: ['Dataset'],
   keywords: []
 };
 
-export const JoinDatasetsNodeDef: NodeDef = {
+export interface JoinDatasetsNodeInputs {
+  datasetA: Dataset;
+  datasetB: Dataset;
+}
+
+export interface JoinDatasetsNodeOutputs {
+  joined: Dataset;
+}
+
+export const JoinDatasetsNodeDef: NodeDef<
+  JoinDatasetsNodeInputs,
+  JoinDatasetsNodeOutputs
+> = {
   name: 'Join Datasets',
-  inputs: [DataSocket('Dataset A'), DataSocket('Dataset B')],
-  outputs: [DataSocket('Joined')],
+  inputs: {
+    datasetA: DataSocket('Dataset A'),
+    datasetB: DataSocket('Dataset B')
+  },
+  outputs: {
+    joined: DataSocket('Joined')
+  },
   path: ['Dataset'],
   keywords: []
 };
 
-export const SelectValuesNodeDef: NodeDef = {
+export interface SelectValuesNodeInputs {
+  dataset: Dataset;
+}
+
+export interface SelectValuesNodeOutputs {
+  dataset: Dataset;
+}
+
+export const SelectValuesNodeDef: NodeDef<
+  SelectValuesNodeInputs,
+  SelectValuesNodeOutputs
+> = {
   name: 'Select Values',
-  inputs: [DataSocket('Dataset')],
-  outputs: [DataSocket('Dataset')],
+  inputs: {
+    dataset: DataSocket('Dataset')
+  },
+  outputs: {
+    dataset: DataSocket('Dataset')
+  },
   path: ['Dataset'],
   keywords: []
 };
 
-export const DatasetOutputNodeDef: NodeDef = {
+export interface DatasetOutputNodeInputs {
+  dataset: Dataset;
+}
+
+export const DatasetOutputNodeDef: NodeDef<DatasetOutputNodeInputs, {}> = {
   name: 'Dataset Output',
-  inputs: [DataSocket('Dataset')],
-  outputs: [],
+  inputs: {
+    dataset: DataSocket('Dataset')
+  },
+  outputs: {},
   path: ['Dataset'],
   keywords: []
 };

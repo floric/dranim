@@ -1,10 +1,15 @@
-import { SumNodeDef, ServerNodeDef } from '@masterthesis/shared';
+import {
+  SumNodeDef,
+  ServerNodeDef,
+  SumNodeNodeInputs,
+  SumNodeNodeOutputs
+} from '@masterthesis/shared';
 
-export const SumNode: ServerNodeDef = {
+export const SumNode: ServerNodeDef<SumNodeNodeInputs, SumNodeNodeOutputs> = {
   name: SumNodeDef.name,
   isInputValid: async values => {
-    const aVal = values.get('A');
-    const bVal = values.get('B');
+    const aVal = values.a;
+    const bVal = values.b;
 
     if (
       !aVal ||
@@ -18,10 +23,10 @@ export const SumNode: ServerNodeDef = {
     return true;
   },
   onServerExecution: async (form, values) => {
-    const a = Number.parseFloat(values.get('A')!);
-    const b = Number.parseFloat(values.get('B')!);
+    const a = Number.parseFloat(values.a);
+    const b = Number.parseFloat(values.b);
     return {
-      outputs: new Map([['Sum', (a + b).toString()]])
+      outputs: { sum: (a + b).toString() }
     };
   }
 };

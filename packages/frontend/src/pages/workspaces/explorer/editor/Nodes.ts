@@ -33,7 +33,9 @@ export const renderNode = (
 
   const { inputs, outputs, name } = nodeType;
   const minSocketsNr =
-    inputs.length > outputs.length ? inputs.length : outputs.length;
+    Object.keys(inputs).length > Object.keys(outputs).length
+      ? Object.keys(inputs).length
+      : Object.keys(outputs).length;
   const height = (minSocketsNr + 1) * SOCKET_DISTANCE + TEXT_HEIGHT;
   const isSelected = state.selectedNode !== null && state.selectedNode === n.id;
 
@@ -68,8 +70,9 @@ export const renderNode = (
     x: 0,
     y: SOCKET_DISTANCE + TEXT_HEIGHT
   });
-  for (let i = 0; i < inputs.length; ++i) {
-    const input = inputs[i];
+  const allInputs: Array<SocketDef> = Array.from(Object.values(inputs));
+  for (let i = 0; i < allInputs.length; ++i) {
+    const input = allInputs[i];
     const socket = renderSocketWithUsages(
       input,
       SocketType.INPUT,
@@ -89,8 +92,9 @@ export const renderNode = (
     x: NODE_WIDTH,
     y: SOCKET_DISTANCE + TEXT_HEIGHT
   });
-  for (let i = 0; i < outputs.length; ++i) {
-    const output = outputs[i];
+  const allOutputs: Array<SocketDef> = Array.from(Object.values(outputs));
+  for (let i = 0; i < allOutputs.length; ++i) {
+    const output = allOutputs[i];
     const socket = renderSocketWithUsages(
       output,
       SocketType.OUTPUT,
