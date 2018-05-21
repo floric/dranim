@@ -1,24 +1,28 @@
 import * as React from 'react';
 import { Form, Select } from 'antd';
-import { OutputSocketInformation } from '../Sockets';
 import { getValidInput } from '../utils';
 import { ClientNodeDef } from '../AllNodes';
 import {
   getOrDefault,
   formToMap,
   DataType,
-  JoinDatasetsNodeDef
+  JoinDatasetsNodeDef,
+  JoinDatasetsNodeInputs,
+  JoinDatasetsNodeOutputs
 } from '@masterthesis/shared';
 
-export const JoinDatasetsNode: ClientNodeDef = {
+export const JoinDatasetsNode: ClientNodeDef<
+  JoinDatasetsNodeInputs,
+  JoinDatasetsNodeOutputs
+> = {
   name: JoinDatasetsNodeDef.name,
   onClientExecution: (inputs, context) => {
-    const validInputA = getValidInput('Dataset A', inputs);
-    const validInputB = getValidInput('Dataset B', inputs);
+    const validInputA = getValidInput(inputs.datasetA);
+    const validInputB = getValidInput(inputs.datasetB);
     if (!validInputA || !validInputB) {
-      return new Map<string, OutputSocketInformation>([
-        ['Combined', { dataType: DataType.DATASET, isPresent: false }]
-      ]);
+      return {
+        joined: { dataType: DataType.DATASET, isPresent: false }
+      };
     }
 
     const inputValuesA = validInputA.meta

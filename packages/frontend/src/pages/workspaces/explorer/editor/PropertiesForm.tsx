@@ -4,12 +4,12 @@ import { Form, Button } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { RenderFormItemsProps, EditorContext } from '../nodes/AllNodes';
-import { OutputSocketInformation } from '../nodes/Sockets';
 import { tryOperation } from '../../../../utils/form';
+import { OutputMetaValues } from '@masterthesis/shared';
 
 export interface IPropertiesFormProps {
   handleSubmit: (form: WrappedFormUtils, nodeId: string) => Promise<any>;
-  inputs: Map<string, OutputSocketInformation>;
+  inputs: OutputMetaValues<any>;
   renderFormItems: (props: RenderFormItemsProps) => JSX.Element;
   context: EditorContext;
 }

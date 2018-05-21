@@ -5,7 +5,6 @@ import { css } from 'glamor';
 import { nodeTypes, nodeTypesTree } from './nodes/AllNodes';
 import { EXPLORER_CONTAINER, updateStage } from './editor/EditorStage';
 import { NODE_WIDTH } from './editor/Nodes';
-import { OutputSocketInformation } from './nodes/Sockets';
 import { getInputInformation } from './nodes/utils';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { PropertiesForm } from './editor/PropertiesForm';
@@ -154,9 +153,7 @@ export class ExplorerEditor extends React.Component<
       document.onkeypress = null;
     }
 
-    const inputs: Map<string, OutputSocketInformation> = node
-      ? getInputInformation({ node, state: this.props })
-      : new Map();
+    const inputs = node ? getInputInformation({ node, state: this.props }) : {};
 
     return (
       <>

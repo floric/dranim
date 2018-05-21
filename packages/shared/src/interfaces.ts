@@ -48,20 +48,28 @@ export enum DataType {
   STRING = 'String'
 }
 
-export interface SocketDef {
+export interface SocketDef<Meta = {}> {
   dataType: DataType;
   name: string;
   order?: number;
+  meta: Meta;
+  isConnected: boolean;
 }
 
-export type SocketDefs<T> = { [P in keyof T]: SocketDef };
-export type FormValues<T> = { [P in keyof T]: string | undefined };
-export type IOValues<T> = { [P in keyof T]: string };
+export type SocketMetaDefs<T> = { [Name in keyof T]: any };
+export type SocketDefs<T, M extends SocketMetaDefs<T>> = {
+  [Name in keyof T]: SocketDef<M[Name]>
+};
+export type FormValues<T> = { [Name in keyof T]: string | undefined };
+export type IOValues<T> = { [Name in keyof T]: string };
+export type ConditionalMetaType<T> = {
+  [Name in keyof T]: T[Name] extends Dataset ? { schema: Array<string> } : {}
+};
 
 export interface NodeDef<NodeInputs = {}, NodeOutputs = {}> {
   name: string;
-  inputs: SocketDefs<NodeInputs>;
-  outputs: SocketDefs<NodeOutputs>;
+  inputs: SocketDefs<NodeInputs, ConditionalMetaType<NodeInputs>>;
+  outputs: SocketDefs<NodeOutputs, ConditionalMetaType<NodeOutputs>>;
   path: Array<string>;
   keywords: Array<string>;
 }

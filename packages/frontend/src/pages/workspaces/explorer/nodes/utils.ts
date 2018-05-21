@@ -1,6 +1,10 @@
-import { OutputSocketInformation } from './Sockets';
 import { nodeTypes, EditorContext } from './AllNodes';
-import { ConnectionInstance, SocketDef } from '@masterthesis/shared';
+import {
+  ConnectionInstance,
+  SocketDef,
+  OutputMetaValues,
+  OutputMetaValue
+} from '@masterthesis/shared';
 
 export const getInputNode = (
   socketName: string,
@@ -34,65 +38,65 @@ export const getOutputNodes = (
 
 export const getInputInformation = (
   context: EditorContext
-): Map<string, OutputSocketInformation> => {
+): OutputMetaValues<any> => {
   const node = nodeTypes.get(context.node.type);
   if (!node) {
     throw new Error('Unknown node type!');
   }
 
-  return new Map<string, OutputSocketInformation>(
-    Array.from<SocketDef>(Object.values(node.inputs))
-      .map(i => {
-        const inputSocketName = i.name;
-        const inputConnection = context.state.connections.find(
-          n =>
-            n.to !== null &&
-            n.to.nodeId === context.node.id &&
-            n.to.name === inputSocketName
-        );
-        if (!inputConnection || inputConnection.from === null) {
-          return null;
-        }
+  const output = {};
 
-        const inputNode = context.state.nodes.find(
-          n => n.id === inputConnection.from!.nodeId
-        );
-        if (!inputNode) {
-          throw new Error('Invalid connection with unknown node.');
-        }
+  Array.from<SocketDef>(Object.values(node.inputs))
+    .map<{ name: string; output: OutputMetaValue }>(i => {
+      const inputSocketName = i.name;
+      const inputConnection = context.state.connections.find(
+        n =>
+          n.to !== null &&
+          n.to.nodeId === context.node.id &&
+          n.to.name === inputSocketName
+      );
+      if (!inputConnection || inputConnection.from === null) {
+        return null;
+      }
 
-        const nodeInputType = nodeTypes.get(inputNode.type);
-        if (!nodeInputType) {
-          throw new Error('Unknown node type!');
-        }
+      const inputNode = context.state.nodes.find(
+        n => n.id === inputConnection.from!.nodeId
+      );
+      if (!inputNode) {
+        throw new Error('Invalid connection with unknown node.');
+      }
 
-        const inputs = getInputInformation({
-          node: inputNode,
-          state: context.state
-        });
+      const nodeInputType = nodeTypes.get(inputNode.type);
+      if (!nodeInputType) {
+        throw new Error('Unknown node type!');
+      }
 
-        const outputs = nodeInputType.onClientExecution
-          ? nodeInputType.onClientExecution(inputs, {
-              state: context.state,
-              node: inputNode
-            })
-          : new Map();
+      const inputs = getInputInformation({
+        node: inputNode,
+        state: context.state
+      });
 
-        return {
-          name: i.name,
-          output: outputs.get(inputConnection.from.name) || null
-        };
-      })
-      .filter(n => n !== null && n.output !== null)
-      .map<[string, OutputSocketInformation]>(v => [v!.name, v!.output!])
-  );
+      const outputs = nodeInputType.onClientExecution
+        ? nodeInputType.onClientExecution(inputs, {
+            state: context.state,
+            node: inputNode
+          })
+        : {};
+
+      return {
+        name: i.name,
+        output: outputs[inputConnection.from.name] || null
+      };
+    })
+    .filter(n => n !== null && n.output !== null)
+    .forEach(v => {
+      output[v.name] = v.output;
+    });
+
+  return output;
 };
 
-export const getValidInput = (
-  name: string,
-  inputs: Map<string, OutputSocketInformation>
-) => {
-  const elem = inputs.get(name);
+export const getValidInput = (elem: OutputMetaValue) => {
   if (elem && elem.isPresent !== false) {
     return elem;
   }

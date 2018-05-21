@@ -2,11 +2,15 @@ import * as React from 'react';
 import { FormComponentProps } from 'antd/lib/form';
 
 import { ExplorerEditorProps } from '../ExplorerEditor';
-import { OutputSocketInformation } from './Sockets';
 import * as AllDatasetNodes from './dataset';
 import * as AllNumberNodes from './number';
 import * as AllStringNodes from './string';
-import { NodeInstance, NodeDef, NodesMap } from '@masterthesis/shared';
+import {
+  NodeInstance,
+  NodeDef,
+  NodesMap,
+  SocketDefs
+} from '@masterthesis/shared';
 import { TreeData } from 'antd/lib/tree-select';
 
 export interface EditorProps {
@@ -20,19 +24,25 @@ export interface EditorContext {
   node: NodeInstance;
 }
 
-export interface RenderFormItemsProps
+export interface RenderFormItemsProps<NodeInputs>
   extends FormComponentProps,
     EditorContext {
-  inputs: Map<string, OutputSocketInformation>;
+  inputs: SocketDefs<NodeInputs>;
 }
 
-export interface ClientNodeDef {
+export interface ClientNodeDef<
+  NodeInputs = {},
+  NodeOutputs = {},
+  NodeForm = {},
+  InputMeta = {},
+  OutputMeta = {}
+> {
   name: string;
   renderFormItems?: (props: RenderFormItemsProps) => JSX.Element;
   onClientExecution?: (
-    inputs: Map<string, OutputSocketInformation>,
+    inputs: SocketDefs<NodeInputs>,
     context: EditorContext
-  ) => Map<string, OutputSocketInformation>;
+  ) => SocketDefs<NodeOutputs>;
 }
 
 const allNodes = [AllDatasetNodes, AllNumberNodes, AllStringNodes];
