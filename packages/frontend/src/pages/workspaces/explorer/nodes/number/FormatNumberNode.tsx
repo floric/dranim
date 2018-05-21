@@ -1,20 +1,21 @@
 import * as React from 'react';
 import { InputNumber, Select, Form, Checkbox } from 'antd';
 import { ClientNodeDef } from '../AllNodes';
-import { OutputSocketInformation } from '../Sockets';
 import {
   getOrDefault,
   formToMap,
-  DataType,
-  FormatNumberNodeDef
+  FormatNumberNodeDef,
+  FormatNumberNodeForm,
+  FormatNumberNodeInputs,
+  FormatNumberNodeOutputs
 } from '@masterthesis/shared';
 
-export const FormatNumberNode: ClientNodeDef = {
+export const FormatNumberNode: ClientNodeDef<
+  FormatNumberNodeInputs,
+  FormatNumberNodeOutputs,
+  FormatNumberNodeForm
+> = {
   name: FormatNumberNodeDef.name,
-  onClientExecution: () =>
-    new Map<string, OutputSocketInformation>([
-      ['Formatted', { dataType: DataType.STRING }]
-    ]),
   renderFormItems: ({ form: { getFieldDecorator }, node: { form } }) => {
     const formMap = formToMap(form);
     const optMantissa = getOrDefault<boolean>(formMap, 'opt-mantissa', true);

@@ -5,12 +5,12 @@ import { ClientNodeDef } from '../AllNodes';
 import {
   getOrDefault,
   formToMap,
-  DatasetOutputNodeDef
+  DatasetOutputNodeDef,
+  DatasetOutputNodeInputs
 } from '@masterthesis/shared';
 
-export const DatasetOutputNode: ClientNodeDef = {
+export const DatasetOutputNode: ClientNodeDef<DatasetOutputNodeInputs, {}> = {
   name: DatasetOutputNodeDef.name,
-  onClientExecution: () => new Map(),
   renderFormItems: ({ form: { getFieldDecorator }, node: { form } }) => (
     <Form.Item label="Name">
       {getFieldDecorator('name', {

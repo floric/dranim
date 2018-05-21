@@ -41,10 +41,10 @@ export const renderConnection = (
     points: getConnectionPoints(
       outputSocket
         ? outputSocket.getAbsolutePosition()
-        : stage.getPointerPosition() || inputSocket!.getAbsolutePosition(),
+        : stage.getPointerPosition() || inputSocket.getAbsolutePosition(),
       inputSocket
         ? inputSocket.getAbsolutePosition()
-        : stage.getPointerPosition() || outputSocket!.getAbsolutePosition()
+        : stage.getPointerPosition() || outputSocket.getAbsolutePosition()
     ),
     ...({ bezier: true } as any)
   });

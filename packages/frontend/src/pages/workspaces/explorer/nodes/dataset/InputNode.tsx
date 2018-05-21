@@ -1,15 +1,14 @@
 import * as React from 'react';
 import { Form, Select } from 'antd';
-import { OutputSocketInformation } from '../Sockets';
 import { ClientNodeDef } from '../AllNodes';
 import {
-  DataType,
   getOrDefault,
   formToMap,
-  DatasetInputNodeDef
+  DatasetInputNodeDef,
+  DatasetInputNodeOutputs
 } from '@masterthesis/shared';
 
-export const DatasetInputNode: ClientNodeDef = {
+export const DatasetInputNode: ClientNodeDef<{}, DatasetInputNodeOutputs> = {
   name: DatasetInputNodeDef.name,
   onClientExecution: (inputs, context) => {
     const dsId = getOrDefault<string | null>(
@@ -18,27 +17,35 @@ export const DatasetInputNode: ClientNodeDef = {
       null
     );
     if (!dsId) {
-      return new Map<string, OutputSocketInformation>([
-        ['Dataset', { dataType: DataType.DATASET, isPresent: false }]
-      ]);
+      return {
+        dataset: {
+          isPresent: false,
+          content: {
+            schema: []
+          }
+        }
+      };
     }
     const ds = context.state.datasets.find(n => n.id === dsId);
     if (!ds) {
-      return new Map<string, OutputSocketInformation>([
-        ['Dataset', { dataType: DataType.DATASET, isPresent: false }]
-      ]);
+      return {
+        dataset: {
+          isPresent: false,
+          content: {
+            schema: []
+          }
+        }
+      };
     }
 
-    return new Map<string, OutputSocketInformation>([
-      [
-        'Dataset',
-        {
-          dataType: DataType.DATASET,
-          isPresent: true,
-          meta: [{ name: 'schemas', info: ds.valueschemas.map(n => n.name) }]
+    return {
+      dataset: {
+        isPresent: true,
+        content: {
+          schema: ds.valueschemas.map(n => n.name)
         }
-      ]
-    ]);
+      }
+    };
   },
   renderFormItems: ({
     form: { getFieldDecorator },

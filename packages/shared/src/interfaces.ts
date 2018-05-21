@@ -1,3 +1,5 @@
+import { DatasetMeta } from './sockets';
+
 export enum NodeState {
   VALID = 'VALID',
   ERROR = 'ERROR',
@@ -50,26 +52,37 @@ export enum DataType {
 
 export interface SocketDef<Meta = {}> {
   dataType: DataType;
-  name: string;
+  displayName: string;
   order?: number;
-  meta: Meta;
+  meta: SocketMetaDef<Meta>;
   isConnected: boolean;
 }
 
-export type SocketMetaDefs<T> = { [Name in keyof T]: any };
-export type SocketDefs<T, M extends SocketMetaDefs<T>> = {
+export interface SocketMetaDef<Meta = {}> {
+  isPresent: boolean;
+  content: Meta;
+}
+
+export type SocketMetaContent<T> = { [Name in keyof T]: any };
+export type SocketDefsGeneric<T, M extends SocketMetaContent<T>> = {
   [Name in keyof T]: SocketDef<M[Name]>
 };
+export type SocketMetasGeneric<T, M extends SocketMetaContent<T>> = {
+  [Name in keyof T]: SocketMetaDef<M[Name]>
+};
+export type SocketDefs<T> = SocketDefsGeneric<T, ConditionalMetaTypes<T>>;
+export type SocketMetas<T> = SocketMetasGeneric<T, ConditionalMetaTypes<T>>;
+
 export type FormValues<T> = { [Name in keyof T]: string | undefined };
 export type IOValues<T> = { [Name in keyof T]: string };
-export type ConditionalMetaType<T> = {
-  [Name in keyof T]: T[Name] extends Dataset ? { schema: Array<string> } : {}
+export type ConditionalMetaTypes<T> = {
+  [Name in keyof T]: T[Name] extends Dataset ? DatasetMeta : {}
 };
 
 export interface NodeDef<NodeInputs = {}, NodeOutputs = {}> {
   name: string;
-  inputs: SocketDefs<NodeInputs, ConditionalMetaType<NodeInputs>>;
-  outputs: SocketDefs<NodeOutputs, ConditionalMetaType<NodeOutputs>>;
+  inputs: SocketDefs<NodeInputs>;
+  outputs: SocketDefs<NodeOutputs>;
   path: Array<string>;
   keywords: Array<string>;
 }

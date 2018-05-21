@@ -2,8 +2,8 @@ import { nodeTypes, EditorContext } from './AllNodes';
 import {
   ConnectionInstance,
   SocketDef,
-  OutputMetaValues,
-  OutputMetaValue
+  SocketMetaDef,
+  SocketMetas
 } from '@masterthesis/shared';
 
 export const getInputNode = (
@@ -36,9 +36,14 @@ export const getOutputNodes = (
   return outputs.map(c => c.to).filter(n => n !== null);
 };
 
+const emptyConnection = {
+  content: {},
+  isPresent: false
+};
+
 export const getInputInformation = (
   context: EditorContext
-): OutputMetaValues<any> => {
+): SocketMetas<any> => {
   const node = nodeTypes.get(context.node.type);
   if (!node) {
     throw new Error('Unknown node type!');
@@ -46,9 +51,9 @@ export const getInputInformation = (
 
   const output = {};
 
-  Array.from<SocketDef>(Object.values(node.inputs))
-    .map<{ name: string; output: OutputMetaValue }>(i => {
-      const inputSocketName = i.name;
+  Array.from<[string, SocketDef]>(Object.entries(node.inputs))
+    .map<{ name: string; output: SocketMetaDef }>(i => {
+      const inputSocketName = i[0];
       const inputConnection = context.state.connections.find(
         n =>
           n.to !== null &&
@@ -56,7 +61,10 @@ export const getInputInformation = (
           n.to.name === inputSocketName
       );
       if (!inputConnection || inputConnection.from === null) {
-        return null;
+        return {
+          name: inputSocketName,
+          output: emptyConnection
+        };
       }
 
       const inputNode = context.state.nodes.find(
@@ -84,21 +92,13 @@ export const getInputInformation = (
         : {};
 
       return {
-        name: i.name,
-        output: outputs[inputConnection.from.name] || null
+        name: inputSocketName,
+        output: outputs[inputConnection.from.name] || emptyConnection
       };
     })
-    .filter(n => n !== null && n.output !== null)
     .forEach(v => {
       output[v.name] = v.output;
     });
 
   return output;
-};
-
-export const getValidInput = (elem: OutputMetaValue) => {
-  if (elem && elem.isPresent !== false) {
-    return elem;
-  }
-  return null;
 };

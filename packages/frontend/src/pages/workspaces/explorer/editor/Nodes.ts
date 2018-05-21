@@ -70,44 +70,66 @@ export const renderNode = (
     x: 0,
     y: SOCKET_DISTANCE + TEXT_HEIGHT
   });
-  const allInputs: Array<SocketDef> = Array.from(Object.values(inputs));
+  const allInputs: Array<[string, SocketDef]> = Array.from(
+    Object.entries(inputs)
+  );
   for (let i = 0; i < allInputs.length; ++i) {
     const input = allInputs[i];
     const socket = renderSocketWithUsages(
-      input,
+      input[1],
+      input[0],
       SocketType.INPUT,
       i,
       server,
       state,
       n.id,
       changeState,
-      (s: SocketDef, nodeId: string) =>
-        onClickSocket(s, SocketType.INPUT, nodeId, server, state, changeState)
+      (nodeId: string) =>
+        onClickSocket(
+          input[1],
+          input[0],
+          SocketType.INPUT,
+          nodeId,
+          server,
+          state,
+          changeState
+        )
     );
     inputsGroup.add(socket);
-    socketsMap.set(getSocketId(SocketType.INPUT, n.id, input.name), socket);
+    socketsMap.set(getSocketId(SocketType.INPUT, n.id, input[0]), socket);
   }
 
   const outputsGroup = new Konva.Group({
     x: NODE_WIDTH,
     y: SOCKET_DISTANCE + TEXT_HEIGHT
   });
-  const allOutputs: Array<SocketDef> = Array.from(Object.values(outputs));
+  const allOutputs: Array<[string, SocketDef]> = Array.from(
+    Object.entries(outputs)
+  );
   for (let i = 0; i < allOutputs.length; ++i) {
     const output = allOutputs[i];
     const socket = renderSocketWithUsages(
-      output,
+      output[1],
+      output[0],
       SocketType.OUTPUT,
       i,
       server,
       state,
       n.id,
       changeState,
-      (s: SocketDef, nodeId: string) =>
-        onClickSocket(s, SocketType.OUTPUT, nodeId, server, state, changeState)
+      (nodeId: string) =>
+        onClickSocket(
+          output[1],
+          output[0],
+          SocketType.OUTPUT,
+          nodeId,
+          server,
+          state,
+          changeState
+        )
     );
     outputsGroup.add(socket);
-    socketsMap.set(getSocketId(SocketType.OUTPUT, n.id, output.name), socket);
+    socketsMap.set(getSocketId(SocketType.OUTPUT, n.id, output[0]), socket);
   }
 
   const stateRect = new Konva.Rect({

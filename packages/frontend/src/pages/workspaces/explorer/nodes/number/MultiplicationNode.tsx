@@ -1,11 +1,13 @@
 import { ClientNodeDef } from '../AllNodes';
-import { OutputSocketInformation } from '../Sockets';
-import { DataType, MultiplicationNodeDef } from '@masterthesis/shared';
+import {
+  MultiplicationNodeDef,
+  MultiplicationNodeInputs,
+  MultiplicationNodeOutputs
+} from '@masterthesis/shared';
 
-export const MultiplicationNode: ClientNodeDef = {
-  name: MultiplicationNodeDef.name,
-  onClientExecution: () =>
-    new Map<string, OutputSocketInformation>([
-      ['Product', { dataType: DataType.NUMBER }]
-    ])
+export const MultiplicationNode: ClientNodeDef<
+  MultiplicationNodeInputs,
+  MultiplicationNodeOutputs
+> = {
+  name: MultiplicationNodeDef.name
 };

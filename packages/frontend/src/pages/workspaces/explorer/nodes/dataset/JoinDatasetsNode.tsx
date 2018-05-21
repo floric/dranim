@@ -1,11 +1,9 @@
 import * as React from 'react';
 import { Form, Select } from 'antd';
-import { getValidInput } from '../utils';
 import { ClientNodeDef } from '../AllNodes';
 import {
   getOrDefault,
   formToMap,
-  DataType,
   JoinDatasetsNodeDef,
   JoinDatasetsNodeInputs,
   JoinDatasetsNodeOutputs
@@ -17,20 +15,16 @@ export const JoinDatasetsNode: ClientNodeDef<
 > = {
   name: JoinDatasetsNodeDef.name,
   onClientExecution: (inputs, context) => {
-    const validInputA = getValidInput(inputs.datasetA);
-    const validInputB = getValidInput(inputs.datasetB);
-    if (!validInputA || !validInputB) {
+    const validInputA = inputs.datasetA;
+    const validInputB = inputs.datasetB;
+    if (!validInputA.isPresent || !validInputB.isPresent) {
       return {
-        joined: { dataType: DataType.DATASET, isPresent: false }
+        joined: { content: { schema: [] }, isPresent: false }
       };
     }
 
-    const inputValuesA = validInputA.meta
-      ? validInputA.meta.filter(m => m.name === 'schema').map(s => s.info)
-      : [];
-    const inputValuesB = validInputB.meta
-      ? validInputB.meta.filter(m => m.name === 'schema').map(s => s.info)
-      : [];
+    const inputValuesA = validInputA.content.schema;
+    const inputValuesB = validInputB.content.schema;
 
     const idValue = getOrDefault<string | null>(
       formToMap(context.node.form),
@@ -39,34 +33,38 @@ export const JoinDatasetsNode: ClientNodeDef<
     );
 
     if (!idValue) {
-      return new Map<string, OutputSocketInformation>([
-        ['Joined', { dataType: DataType.DATASET, isPresent: false }]
-      ]);
+      return {
+        joined: {
+          isPresent: false,
+          content: {
+            schema: []
+          }
+        }
+      };
     }
 
     const isIdPresentInInputs =
       inputValuesA.includes(idValue) && inputValuesB.includes(idValue);
     if (!isIdPresentInInputs) {
-      return new Map<string, OutputSocketInformation>([
-        ['Joined', { dataType: DataType.DATASET, isPresent: false }]
-      ]);
+      return {
+        joined: {
+          isPresent: false,
+          content: {
+            schema: []
+          }
+        }
+      };
     }
 
     const allSchemas = new Set(inputValuesA.concat(inputValuesB));
-    return new Map<string, OutputSocketInformation>([
-      [
-        'Joined',
-        {
-          dataType: DataType.DATASET,
-          meta: [
-            {
-              name: 'schemas',
-              info: Array.from(allSchemas)
-            }
-          ]
+    return {
+      joined: {
+        isPresent: true,
+        content: {
+          schema: Array.from(allSchemas)
         }
-      ]
-    ]);
+      }
+    };
   },
   renderFormItems: ({
     inputs,
@@ -74,18 +72,13 @@ export const JoinDatasetsNode: ClientNodeDef<
     form: { getFieldDecorator },
     state: { datasets }
   }) => {
-    const dsA = inputs.get('Dataset A');
-    const dsB = inputs.get('Dataset B');
+    const dsA = inputs.datasetA;
+    const dsB = inputs.datasetB;
     if (!dsA || !dsB || !dsA.isPresent || !dsB.isPresent) {
       return <p>Plugin the two datasets first.</p>;
     }
-    const schemasA = dsA.meta!.find(n => n.name === 'schemas')
-      ? dsA.meta!.find(n => n.name === 'schemas').info
-      : [];
-    const schemasB = dsB.meta!.find(n => n.name === 'schemas')
-      ? dsB.meta!.find(n => n.name === 'schemas').info
-      : [];
-
+    const schemasA = dsA.content.schema;
+    const schemasB = dsB.content.schema;
     return (
       <>
         <Form.Item label="Value from A">

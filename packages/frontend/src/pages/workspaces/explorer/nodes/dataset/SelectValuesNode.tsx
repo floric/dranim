@@ -1,28 +1,33 @@
 import * as React from 'react';
 import { Form, Select } from 'antd';
-import { OutputSocketInformation } from '../Sockets';
-import { getValidInput } from '../utils';
 import { ClientNodeDef } from '../AllNodes';
 import {
   getOrDefault,
   formToMap,
-  DataType,
+  SelectValuesNodeInputs,
+  SelectValuesNodeOutputs,
   SelectValuesNodeDef
 } from '@masterthesis/shared';
 
-export const DatasetSelectValuesNode: ClientNodeDef = {
+export const DatasetSelectValuesNode: ClientNodeDef<
+  SelectValuesNodeInputs,
+  SelectValuesNodeOutputs
+> = {
   name: SelectValuesNodeDef.name,
   onClientExecution: (inputs, context) => {
-    const validInput = getValidInput('Dataset', inputs);
-    if (!validInput) {
-      return new Map<string, OutputSocketInformation>([
-        ['Dataset', { dataType: DataType.DATASET, isPresent: false }]
-      ]);
+    const validInput = inputs.dataset;
+    if (!validInput || !validInput.isPresent) {
+      return {
+        dataset: {
+          content: {
+            schema: []
+          },
+          isPresent: false
+        }
+      };
     }
 
-    const inputValues = validInput.meta
-      ? validInput.meta.filter(m => m.name === 'schemas').map(s => s.info)[0]
-      : [];
+    const inputValues = validInput.content.schema;
 
     const selectedValues = getOrDefault<Array<string>>(
       formToMap(context.node.form),
@@ -30,22 +35,16 @@ export const DatasetSelectValuesNode: ClientNodeDef = {
       []
     );
 
-    return new Map<string, OutputSocketInformation>([
-      [
-        'Dataset',
-        {
-          dataType: DataType.DATASET,
-          meta: [
-            {
-              name: 'schemas',
-              info: selectedValues
-                ? inputValues.filter(n => selectedValues.includes(n))
-                : []
-            }
-          ]
-        }
-      ]
-    ]);
+    return {
+      dataset: {
+        content: {
+          schema: selectedValues
+            ? inputValues.filter(n => selectedValues.includes(n))
+            : []
+        },
+        isPresent: true
+      }
+    };
   },
   renderFormItems: ({
     form,
@@ -55,12 +54,8 @@ export const DatasetSelectValuesNode: ClientNodeDef = {
     node: { id, type },
     inputs
   }) => {
-    const dsInput = inputs.get('Dataset');
-    const metaValues =
-      dsInput && dsInput.isPresent !== false && dsInput.meta
-        ? dsInput.meta.find(m => m.name === 'schemas') || null
-        : null;
-    const options = metaValues ? metaValues.info : [];
+    const dsInput = inputs.dataset;
+    const options = dsInput.isPresent ? dsInput.content.schema : [];
     return (
       <Form.Item label="Input">
         {getFieldDecorator('values', {
