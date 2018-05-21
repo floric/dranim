@@ -3,7 +3,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { Query, Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
 
-import { ExplorerEditor } from './explorer/ExplorerEditor';
+import { ExplorerEditor } from '../../explorer/ExplorerEditor';
 import {
   LoadingCard,
   UnknownErrorCard,

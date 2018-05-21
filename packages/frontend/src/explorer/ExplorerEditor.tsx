@@ -8,7 +8,7 @@ import { NODE_WIDTH } from './editor/Nodes';
 import { getInputInformation } from './nodes/utils';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { PropertiesForm } from './editor/PropertiesForm';
-import { AsyncButton } from '../../../components/AsyncButton';
+import { AsyncButton } from '../components/AsyncButton';
 import {
   ConnectionInstance,
   NodeInstance,

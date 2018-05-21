@@ -2,7 +2,7 @@ import * as Konva from 'konva';
 import { ExplorerEditorState, ExplorerEditorProps } from '../ExplorerEditor';
 import { socketColors } from '../nodes/Sockets';
 import { NODE_WIDTH } from './Nodes';
-import { showNotificationWithIcon } from '../../../../utils/form';
+import { showNotificationWithIcon } from '../../utils/form';
 import {
   SocketType,
   SocketDef,

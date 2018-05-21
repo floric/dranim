@@ -4,7 +4,7 @@ import { Form, Button } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { RenderFormItemsProps, EditorContext } from '../nodes/AllNodes';
-import { tryOperation } from '../../../../utils/form';
+import { tryOperation } from '../../utils/form';
 import { SocketMetas } from '@masterthesis/shared';
 
 export interface IPropertiesFormProps {
