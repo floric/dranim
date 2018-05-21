@@ -5,6 +5,10 @@ export interface StringInputNodeOutputs {
   string: string;
 }
 
+export interface StringInputNodeForm {
+  value: string;
+}
+
 export const StringInputNodeDef: NodeDef<{}, StringInputNodeOutputs> = {
   name: 'String Input',
   inputs: {},

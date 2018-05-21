@@ -3,9 +3,9 @@ import { getAllNodes, getConnection, getNode } from './workspace';
 import { outputNodes, serverNodeTypes } from '../../nodes/AllNodes';
 import {
   NodeInstance,
-  formToMap,
   CalculationProcessState,
-  CalculationProcess
+  CalculationProcess,
+  parseNodeForm
 } from '@masterthesis/shared';
 
 const startProcess = async (db: Db, processId: string, workspaceId: string) => {
@@ -70,6 +70,7 @@ const executeNode = async (db: Db, node: NodeInstance): Promise<any> => {
     throw new Error('Unknown node type');
   }
 
+  // TODO define IO types for real execution
   const inputValues = await Promise.all(
     node.inputs.map(async i => {
       const c = await getConnection(db, i.connectionId);
@@ -92,17 +93,18 @@ const executeNode = async (db: Db, node: NodeInstance): Promise<any> => {
   const inputsMap = new Map(
     inputValues.map<[string, string]>(i => [i.socketName, i.val])
   );
-  const validForm = type.isFormValid
-    ? type.isFormValid(formToMap(node.form))
+  const nodeForm = parseNodeForm(node);
+  const isValidForm = type.isFormValid
+    ? await type.isFormValid(nodeForm)
     : true;
-  const validInput = type.isInputValid
+  const isValidInput = type.isInputValid
     ? await type.isInputValid(inputsMap)
     : true;
-  if (!validInput || !validForm) {
-    throw new Error('Invalid input.');
+  if (!isValidForm || !isValidInput) {
+    throw new Error('Invalid input or form.');
   }
 
-  const res = await type.onServerExecution(formToMap(node.form), inputsMap);
+  const res = await type.onServerExecution(nodeForm, inputsMap);
 
   return res.outputs;
 };

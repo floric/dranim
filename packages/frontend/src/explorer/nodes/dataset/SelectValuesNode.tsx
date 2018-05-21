@@ -2,19 +2,19 @@ import * as React from 'react';
 import { Form, Select } from 'antd';
 import { ClientNodeDef } from '../AllNodes';
 import {
-  getOrDefault,
-  formToMap,
   SelectValuesNodeInputs,
   SelectValuesNodeOutputs,
-  SelectValuesNodeDef
+  SelectValuesNodeDef,
+  SelectValuesNodeForm
 } from '@masterthesis/shared';
 
 export const DatasetSelectValuesNode: ClientNodeDef<
   SelectValuesNodeInputs,
-  SelectValuesNodeOutputs
+  SelectValuesNodeOutputs,
+  SelectValuesNodeForm
 > = {
   name: SelectValuesNodeDef.name,
-  onClientExecution: (inputs, context) => {
+  onClientExecution: (inputs, nodeForm, context) => {
     const validInput = inputs.dataset;
     if (!validInput || !validInput.isPresent) {
       return {
@@ -28,12 +28,7 @@ export const DatasetSelectValuesNode: ClientNodeDef<
     }
 
     const inputValues = validInput.content.schema;
-
-    const selectedValues = getOrDefault<Array<string>>(
-      formToMap(context.node.form),
-      'values',
-      []
-    );
+    const selectedValues = nodeForm.values;
 
     return {
       dataset: {
@@ -50,8 +45,7 @@ export const DatasetSelectValuesNode: ClientNodeDef<
     form,
     form: { getFieldDecorator },
     state: { datasets, connections, nodes },
-    node,
-    node: { id, type },
+    nodeForm,
     inputs
   }) => {
     const dsInput = inputs.dataset;
@@ -59,11 +53,7 @@ export const DatasetSelectValuesNode: ClientNodeDef<
     return (
       <Form.Item label="Input">
         {getFieldDecorator('values', {
-          initialValue: getOrDefault<Array<string>>(
-            formToMap(node.form),
-            'values',
-            []
-          )
+          initialValue: nodeForm.values || []
         })(
           <Select
             mode="multiple"

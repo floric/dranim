@@ -4,9 +4,9 @@ import {
   NodeInstance,
   SocketInstance,
   NodeState,
-  formToMap,
   ConnectionInstance,
-  Workspace
+  Workspace,
+  parseNodeForm
 } from '@masterthesis/shared';
 
 export const initWorkspaceDb = async (db: Db) => {
@@ -296,16 +296,13 @@ export const getAllNodes = async (
   });
 };
 
-export const getNodeState = async (
-  db: Db,
-  node: Pick<NodeInstance, 'form' | 'inputs' | 'type'>
-) => {
+export const getNodeState = async (db: Db, node: NodeInstance) => {
   const t = serverNodeTypes.get(node.type);
   if (!t) {
     return NodeState.ERROR;
   }
 
-  const isValid = t.isFormValid ? t.isFormValid(formToMap(node.form)) : true;
+  const isValid = t.isFormValid ? t.isFormValid(parseNodeForm(node)) : true;
   if (!isValid) {
     return NodeState.INVALID;
   }

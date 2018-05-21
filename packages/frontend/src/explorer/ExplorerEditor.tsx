@@ -5,7 +5,6 @@ import { css } from 'glamor';
 import { nodeTypes, nodeTypesTree } from './nodes/AllNodes';
 import { EXPLORER_CONTAINER, updateStage } from './editor/EditorStage';
 import { NODE_WIDTH } from './editor/Nodes';
-import { getInputInformation } from './nodes/utils';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { PropertiesForm } from './editor/PropertiesForm';
 import { AsyncButton } from '../components/AsyncButton';
@@ -153,8 +152,6 @@ export class ExplorerEditor extends React.Component<
       document.onkeypress = null;
     }
 
-    const inputs = node ? getInputInformation({ node, state: this.props }) : {};
-
     return (
       <>
         <Row gutter={12}>
@@ -173,7 +170,6 @@ export class ExplorerEditor extends React.Component<
                         renderFormItems={renderFormItems}
                         handleSubmit={this.handleSave}
                         context={{ state: this.props, node }}
-                        inputs={inputs}
                       />
                     ) : null}
                   </Col>

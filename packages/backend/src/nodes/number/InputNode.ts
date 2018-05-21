@@ -13,7 +13,7 @@ export const NumberInputNode: ServerNodeDef<
   name: NumberInputNodeDef.name,
   isFormValid: async form => {
     const input = form.value;
-    if (!input || Number.isNaN(Number.parseFloat(input))) {
+    if (!input || Number.isNaN(input)) {
       return false;
     }
 
@@ -22,7 +22,7 @@ export const NumberInputNode: ServerNodeDef<
   onServerExecution: async (form, values) =>
     Promise.resolve({
       outputs: {
-        val: form.value.toString() || '0'
+        val: form.value ? form.value.toString() : '0'
       }
     })
 };

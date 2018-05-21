@@ -2,20 +2,19 @@ import * as React from 'react';
 import { Form, Select } from 'antd';
 import { ClientNodeDef } from '../AllNodes';
 import {
-  getOrDefault,
-  formToMap,
   DatasetInputNodeDef,
-  DatasetInputNodeOutputs
+  DatasetInputNodeOutputs,
+  DatasetInputNodeForm
 } from '@masterthesis/shared';
 
-export const DatasetInputNode: ClientNodeDef<{}, DatasetInputNodeOutputs> = {
+export const DatasetInputNode: ClientNodeDef<
+  {},
+  DatasetInputNodeOutputs,
+  DatasetInputNodeForm
+> = {
   name: DatasetInputNodeDef.name,
-  onClientExecution: (inputs, context) => {
-    const dsId = getOrDefault<string | null>(
-      formToMap(context.node.form),
-      'dataset',
-      null
-    );
+  onClientExecution: (inputs, nodeForm, context) => {
+    const dsId = nodeForm.dataset;
     if (!dsId) {
       return {
         dataset: {
@@ -50,16 +49,12 @@ export const DatasetInputNode: ClientNodeDef<{}, DatasetInputNodeOutputs> = {
   renderFormItems: ({
     form: { getFieldDecorator },
     state: { datasets },
-    node: { form }
+    nodeForm
   }) => (
     <Form.Item label="Input">
       {getFieldDecorator('dataset', {
         rules: [{ required: true }],
-        initialValue: getOrDefault<string | undefined>(
-          formToMap(form),
-          'dataset',
-          undefined
-        )
+        initialValue: nodeForm.dataset || ''
       })(
         <Select showSearch style={{ width: 200 }} placeholder="Select Dataset">
           {datasets.map(ds => (

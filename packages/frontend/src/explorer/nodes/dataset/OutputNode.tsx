@@ -3,19 +3,22 @@ import { Form, Input } from 'antd';
 
 import { ClientNodeDef } from '../AllNodes';
 import {
-  getOrDefault,
-  formToMap,
   DatasetOutputNodeDef,
-  DatasetOutputNodeInputs
+  DatasetOutputNodeInputs,
+  DatasetOutputNodeForm
 } from '@masterthesis/shared';
 
-export const DatasetOutputNode: ClientNodeDef<DatasetOutputNodeInputs, {}> = {
+export const DatasetOutputNode: ClientNodeDef<
+  DatasetOutputNodeInputs,
+  {},
+  DatasetOutputNodeForm
+> = {
   name: DatasetOutputNodeDef.name,
-  renderFormItems: ({ form: { getFieldDecorator }, node: { form } }) => (
+  renderFormItems: ({ form: { getFieldDecorator }, nodeForm }) => (
     <Form.Item label="Name">
       {getFieldDecorator('name', {
         rules: [{ required: true }],
-        initialValue: getOrDefault<string>(formToMap(form), 'name', '')
+        initialValue: nodeForm.name || ''
       })(<Input />)}
     </Form.Item>
   )

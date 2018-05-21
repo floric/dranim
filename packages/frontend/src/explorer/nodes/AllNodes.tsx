@@ -9,7 +9,8 @@ import {
   NodeInstance,
   NodeDef,
   NodesMap,
-  SocketMetas
+  SocketMetas,
+  FormValues
 } from '@masterthesis/shared';
 import { TreeData } from 'antd/lib/tree-select';
 
@@ -24,10 +25,11 @@ export interface EditorContext {
   node: NodeInstance;
 }
 
-export interface RenderFormItemsProps<NodeInputs>
+export interface RenderFormItemsProps<NodeInputs, NodeForm>
   extends FormComponentProps,
     EditorContext {
   inputs: SocketMetas<NodeInputs>;
+  nodeForm: FormValues<NodeForm>;
 }
 
 export interface ClientNodeDef<
@@ -36,9 +38,12 @@ export interface ClientNodeDef<
   NodeForm = {}
 > {
   name: string;
-  renderFormItems?: (props: RenderFormItemsProps<NodeInputs>) => JSX.Element;
+  renderFormItems?: (
+    props: RenderFormItemsProps<NodeInputs, NodeForm>
+  ) => JSX.Element;
   onClientExecution?: (
     inputs: SocketMetas<NodeInputs>,
+    nodeForm: FormValues<NodeForm>,
     context: EditorContext
   ) => SocketMetas<NodeOutputs>;
 }

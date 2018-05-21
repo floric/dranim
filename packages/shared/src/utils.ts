@@ -1,18 +1,15 @@
-import { FormValue } from './interfaces';
+import { NodeInstance, FormValues } from './interfaces';
 
-export const formToMap = (form: Array<FormValue>): Map<string, string> => {
-  return new Map(form.map<[string, string]>(f => [f.name, f.value]));
-};
+export const parseNodeForm = (node: NodeInstance): FormValues<any> => {
+  const fullForm = {};
+  Array.from(Object.entries(node.form)).forEach(e => {
+    try {
+      fullForm[e[0]] = JSON.parse(e[1].value);
+    } catch (err) {
+      console.error('Invalid value from server.');
+      fullForm[e[0]] = null;
+    }
+  });
 
-export const getOrDefault = <T>(
-  form: Map<string, string>,
-  name: string,
-  defaultVal: T
-): T => {
-  const existingVal = form.get(name);
-  if (existingVal) {
-    return JSON.parse(existingVal);
-  } else {
-    return defaultVal;
-  }
+  return fullForm;
 };

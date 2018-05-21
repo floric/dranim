@@ -20,9 +20,6 @@ export const JoinDatasetsNode: ServerNodeDef<
 
     return true;
   },
-  isFormValid: async form => {
-    return true;
-  },
   onServerExecution: async (form, inputs) => {
     return { outputs: { joined: '{}' } };
   }

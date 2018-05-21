@@ -2,17 +2,21 @@ import * as React from 'react';
 import { Input, Form } from 'antd';
 import { ClientNodeDef } from '../AllNodes';
 import {
-  getOrDefault,
-  formToMap,
-  StringInputNodeDef
+  StringInputNodeDef,
+  StringInputNodeOutputs,
+  StringInputNodeForm
 } from '@masterthesis/shared';
 
-export const StringInputNode: ClientNodeDef = {
+export const StringInputNode: ClientNodeDef<
+  {},
+  StringInputNodeOutputs,
+  StringInputNodeForm
+> = {
   name: StringInputNodeDef.name,
-  renderFormItems: ({ form: { getFieldDecorator }, node: { form } }) => (
+  renderFormItems: ({ form: { getFieldDecorator }, nodeForm }) => (
     <Form.Item label="Value">
       {getFieldDecorator('value', {
-        initialValue: getOrDefault<string>(formToMap(form), 'value', '')
+        initialValue: nodeForm.value || ''
       })(<Input />)}
     </Form.Item>
   )

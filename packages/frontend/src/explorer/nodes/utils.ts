@@ -3,7 +3,8 @@ import {
   ConnectionInstance,
   SocketDef,
   SocketMetaDef,
-  SocketMetas
+  SocketMetas,
+  parseNodeForm
 } from '@masterthesis/shared';
 
 export const getInputNode = (
@@ -83,9 +84,10 @@ export const getInputInformation = (
         node: inputNode,
         state: context.state
       });
+      const nodeForm = parseNodeForm(inputNode);
 
       const outputs = nodeInputType.onClientExecution
-        ? nodeInputType.onClientExecution(inputs, {
+        ? nodeInputType.onClientExecution(inputs, nodeForm, {
             state: context.state,
             node: inputNode
           })

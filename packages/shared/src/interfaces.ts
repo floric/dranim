@@ -73,7 +73,7 @@ export type SocketMetasGeneric<T, M extends SocketMetaContent<T>> = {
 export type SocketDefs<T> = SocketDefsGeneric<T, ConditionalMetaTypes<T>>;
 export type SocketMetas<T> = SocketMetasGeneric<T, ConditionalMetaTypes<T>>;
 
-export type FormValues<T> = { [Name in keyof T]: string | undefined };
+export type FormValues<T> = { [Name in keyof T]: T[Name] | null };
 export type IOValues<T> = { [Name in keyof T]: string };
 export type ConditionalMetaTypes<T> = {
   [Name in keyof T]: T[Name] extends Dataset ? DatasetMeta : {}
@@ -100,7 +100,7 @@ export interface ServerNodeDef<
   isFormValid?: (form: FormValues<NodeForm>) => Promise<boolean>;
   isInputValid?: (inputs: IOValues<NodeInputs>) => Promise<boolean>;
   onServerExecution: (
-    form: NodeForm,
+    form: FormValues<NodeForm>,
     inputs: IOValues<NodeInputs>
   ) => Promise<NodeExecutionResult<NodeOutputs>>;
 }

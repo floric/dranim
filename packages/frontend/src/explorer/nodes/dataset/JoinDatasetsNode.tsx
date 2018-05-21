@@ -2,19 +2,19 @@ import * as React from 'react';
 import { Form, Select } from 'antd';
 import { ClientNodeDef } from '../AllNodes';
 import {
-  getOrDefault,
-  formToMap,
   JoinDatasetsNodeDef,
   JoinDatasetsNodeInputs,
-  JoinDatasetsNodeOutputs
+  JoinDatasetsNodeOutputs,
+  JoinDatasetsNodeForm
 } from '@masterthesis/shared';
 
 export const JoinDatasetsNode: ClientNodeDef<
   JoinDatasetsNodeInputs,
-  JoinDatasetsNodeOutputs
+  JoinDatasetsNodeOutputs,
+  JoinDatasetsNodeForm
 > = {
   name: JoinDatasetsNodeDef.name,
-  onClientExecution: (inputs, context) => {
+  onClientExecution: (inputs, nodeForm, context) => {
     const validInputA = inputs.datasetA;
     const validInputB = inputs.datasetB;
     if (!validInputA.isPresent || !validInputB.isPresent) {
@@ -25,14 +25,10 @@ export const JoinDatasetsNode: ClientNodeDef<
 
     const inputValuesA = validInputA.content.schema;
     const inputValuesB = validInputB.content.schema;
+    const idAValue = nodeForm.valueA;
+    const idBValue = nodeForm.valueB;
 
-    const idValue = getOrDefault<string | null>(
-      formToMap(context.node.form),
-      'value',
-      null
-    );
-
-    if (!idValue) {
+    if (!idAValue || !idBValue) {
       return {
         joined: {
           isPresent: false,
@@ -44,7 +40,7 @@ export const JoinDatasetsNode: ClientNodeDef<
     }
 
     const isIdPresentInInputs =
-      inputValuesA.includes(idValue) && inputValuesB.includes(idValue);
+      inputValuesA.includes(idAValue) && inputValuesB.includes(idBValue);
     if (!isIdPresentInInputs) {
       return {
         joined: {
@@ -68,7 +64,7 @@ export const JoinDatasetsNode: ClientNodeDef<
   },
   renderFormItems: ({
     inputs,
-    node: { form },
+    nodeForm,
     form: { getFieldDecorator },
     state: { datasets }
   }) => {
@@ -84,7 +80,7 @@ export const JoinDatasetsNode: ClientNodeDef<
         <Form.Item label="Value from A">
           {getFieldDecorator('valueA', {
             rules: [{ required: true }],
-            initialValue: getOrDefault<string>(formToMap(form), 'valueA', '')
+            initialValue: nodeForm.valueA || ''
           })(
             <Select
               showSearch
@@ -102,7 +98,7 @@ export const JoinDatasetsNode: ClientNodeDef<
         <Form.Item label="Value from B">
           {getFieldDecorator('valueB', {
             rules: [{ required: true }],
-            initialValue: getOrDefault<string>(formToMap(form), 'valueB', '')
+            initialValue: nodeForm.valueB || ''
           })(
             <Select
               showSearch

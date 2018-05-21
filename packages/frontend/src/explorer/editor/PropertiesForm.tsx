@@ -5,12 +5,12 @@ import { FormComponentProps } from 'antd/lib/form';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { RenderFormItemsProps, EditorContext } from '../nodes/AllNodes';
 import { tryOperation } from '../../utils/form';
-import { SocketMetas } from '@masterthesis/shared';
+import { getInputInformation } from '../nodes/utils';
+import { parseNodeForm } from '@masterthesis/shared';
 
 export interface IPropertiesFormProps {
   handleSubmit: (form: WrappedFormUtils, nodeId: string) => Promise<any>;
-  inputs: SocketMetas<any>;
-  renderFormItems: (props: RenderFormItemsProps<any>) => JSX.Element;
+  renderFormItems: (props: RenderFormItemsProps<any, any>) => JSX.Element;
   context: EditorContext;
 }
 
@@ -69,15 +69,16 @@ class PropertiesFormImpl extends React.Component<
     const {
       form,
       renderFormItems,
-      inputs,
       context: { state, node }
     } = this.props;
     const { saving } = this.state;
     const unsavedChanges = form.isFieldsTouched();
+    const inputs = node ? getInputInformation({ node, state }) : {};
+    const nodeForm = node ? parseNodeForm(node) : {};
 
     return (
       <Form layout="inline" hideRequiredMark onSubmit={this.handleSubmit}>
-        {renderFormItems({ form, inputs, state, node })}
+        {renderFormItems({ form, inputs, state, node, nodeForm })}
         <Form.Item wrapperCol={{ xs: 24 }}>
           <Button.Group>
             <Button

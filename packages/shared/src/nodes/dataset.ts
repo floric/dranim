@@ -5,6 +5,10 @@ export interface DatasetInputNodeOutputs {
   dataset: Dataset;
 }
 
+export interface DatasetInputNodeForm {
+  dataset: string;
+}
+
 export const DatasetInputNodeDef: NodeDef<{}, DatasetInputNodeOutputs> = {
   name: 'Dataset Input',
   inputs: {},
@@ -20,6 +24,11 @@ export interface JoinDatasetsNodeInputs {
 
 export interface JoinDatasetsNodeOutputs {
   joined: Dataset;
+}
+
+export interface JoinDatasetsNodeForm {
+  valueA: string;
+  valueB: string;
 }
 
 export const JoinDatasetsNodeDef: NodeDef<
@@ -46,6 +55,10 @@ export interface SelectValuesNodeOutputs {
   dataset: Dataset;
 }
 
+export interface SelectValuesNodeForm {
+  values: Array<string>;
+}
+
 export const SelectValuesNodeDef: NodeDef<
   SelectValuesNodeInputs,
   SelectValuesNodeOutputs
@@ -63,6 +76,10 @@ export const SelectValuesNodeDef: NodeDef<
 
 export interface DatasetOutputNodeInputs {
   dataset: Dataset;
+}
+
+export interface DatasetOutputNodeForm {
+  name: string;
 }
 
 export const DatasetOutputNodeDef: NodeDef<DatasetOutputNodeInputs, {}> = {
