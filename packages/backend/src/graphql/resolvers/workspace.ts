@@ -100,6 +100,8 @@ export const createConnection = async (
     throw new Error('Nodes live in different workspaes!');
   }
 
+  // TODO check detection
+
   const all = await getAllConnections(db, inputNode.workspaceId);
   let foundCircle = false;
   let curFromSocket: SocketInstance = from;

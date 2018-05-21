@@ -5,7 +5,8 @@ import {
   SocketType,
   NodeInstance,
   NodeState,
-  SocketDef
+  SocketDef,
+  SocketDefs
 } from '@masterthesis/shared';
 import {
   renderSocketWithUsages,
@@ -66,78 +67,36 @@ export const renderNode = (
     y: 10
   });
 
-  const inputsGroup = new Konva.Group({
-    x: 0,
-    y: SOCKET_DISTANCE + TEXT_HEIGHT
-  });
-  const allInputs: Array<[string, SocketDef]> = Array.from(
-    Object.entries(inputs)
+  const inputsGroup = renderSockets(
+    inputs,
+    n,
+    server,
+    state,
+    SocketType.INPUT,
+    socketsMap,
+    changeState
   );
-  for (let i = 0; i < allInputs.length; ++i) {
-    const input = allInputs[i];
-    const socket = renderSocketWithUsages(
-      input[1],
-      input[0],
-      SocketType.INPUT,
-      i,
-      server,
-      state,
-      n.id,
-      changeState,
-      (nodeId: string) =>
-        onClickSocket(
-          input[1],
-          input[0],
-          SocketType.INPUT,
-          nodeId,
-          server,
-          state,
-          changeState
-        )
-    );
-    inputsGroup.add(socket);
-    socketsMap.set(getSocketId(SocketType.INPUT, n.id, input[0]), socket);
-  }
-
-  const outputsGroup = new Konva.Group({
-    x: NODE_WIDTH,
-    y: SOCKET_DISTANCE + TEXT_HEIGHT
-  });
-  const allOutputs: Array<[string, SocketDef]> = Array.from(
-    Object.entries(outputs)
+  const outputsGroup = renderSockets(
+    outputs,
+    n,
+    server,
+    state,
+    SocketType.OUTPUT,
+    socketsMap,
+    changeState
   );
-  for (let i = 0; i < allOutputs.length; ++i) {
-    const output = allOutputs[i];
-    const socket = renderSocketWithUsages(
-      output[1],
-      output[0],
-      SocketType.OUTPUT,
-      i,
-      server,
-      state,
-      n.id,
-      changeState,
-      (nodeId: string) =>
-        onClickSocket(
-          output[1],
-          output[0],
-          SocketType.OUTPUT,
-          nodeId,
-          server,
-          state,
-          changeState
-        )
-    );
-    outputsGroup.add(socket);
-    socketsMap.set(getSocketId(SocketType.OUTPUT, n.id, output[0]), socket);
-  }
 
   const stateRect = new Konva.Rect({
     width: NODE_WIDTH,
     height: STATE_LINE_HEIGHT,
     x: 0,
     y: height - STATE_LINE_HEIGHT,
-    fill: n.state === NodeState.VALID ? 'green' : 'red'
+    fill:
+      n.state === NodeState.VALID
+        ? 'green'
+        : n.state === NodeState.ERROR
+          ? 'red'
+          : 'orange'
   });
 
   nodeGroup.add(bgRect);
@@ -147,4 +106,48 @@ export const renderNode = (
   nodeGroup.add(stateRect);
 
   return nodeGroup;
+};
+
+const renderSockets = (
+  sockets: SocketDefs<any>,
+  n: NodeInstance,
+  server: ExplorerEditorProps,
+  state: ExplorerEditorState,
+  type: SocketType,
+  socketsMap: Map<string, Konva.Group>,
+  changeState: (newState: Partial<ExplorerEditorState>) => void
+) => {
+  const group = new Konva.Group({
+    x: type === SocketType.INPUT ? 0 : NODE_WIDTH,
+    y: SOCKET_DISTANCE + TEXT_HEIGHT
+  });
+
+  const all: Array<[string, SocketDef]> = Array.from(Object.entries(sockets));
+  for (let i = 0; i < all.length; ++i) {
+    const socketDef = all[i];
+    const socket = renderSocketWithUsages(
+      socketDef[1],
+      socketDef[0],
+      type,
+      i,
+      server,
+      state,
+      n.id,
+      changeState,
+      (nodeId: string) =>
+        onClickSocket(
+          socketDef[1],
+          socketDef[0],
+          type,
+          nodeId,
+          server,
+          state,
+          changeState
+        )
+    );
+    group.add(socket);
+    socketsMap.set(getSocketId(type, n.id, socketDef[0]), socket);
+  }
+
+  return group;
 };

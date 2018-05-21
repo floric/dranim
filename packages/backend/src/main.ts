@@ -35,7 +35,6 @@ export const main = async (options: IMainOptions) => {
     app.use(
       cors({
         maxAge: 600,
-        optionsSuccessStatus: 200,
         origin: 'http://localhost:1234'
       })
     );
