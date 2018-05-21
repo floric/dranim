@@ -7,6 +7,7 @@ import {
   FormatNumberNodeInputs,
   FormatNumberNodeOutputs
 } from '@masterthesis/shared';
+import { getValueOrDefault } from '../utils';
 
 export const FormatNumberNode: ClientNodeDef<
   FormatNumberNodeInputs,
@@ -15,41 +16,53 @@ export const FormatNumberNode: ClientNodeDef<
 > = {
   name: FormatNumberNodeDef.name,
   renderFormItems: ({ form: { getFieldDecorator }, nodeForm }) => {
+    const thousandsSeparated = getValueOrDefault(
+      nodeForm,
+      'thousandsSeparated',
+      true
+    );
+    const mantissa = getValueOrDefault(nodeForm, 'mantissa', 3);
+    const optMantissa = getValueOrDefault(nodeForm, 'optMantissa', true);
+    const average = getValueOrDefault(nodeForm, 'average', true);
+    const spaceSeparated = getValueOrDefault(nodeForm, 'spaceSeparated', true);
+    const averageTotal = getValueOrDefault(nodeForm, 'averageTotal', 3);
+    const output = getValueOrDefault(nodeForm, 'output', 'number');
+
     return (
       <>
         <Form.Item label="Thousands separated">
-          {getFieldDecorator('thousands-separated', {
-            initialValue: nodeForm.thousandsSeparated || true
-          })(<Checkbox defaultChecked={nodeForm.thousandsSeparated || true} />)}
+          {getFieldDecorator('thousandsSeparated', {
+            initialValue: thousandsSeparated
+          })(<Checkbox defaultChecked={thousandsSeparated} />)}
         </Form.Item>
         <Form.Item label="Mantissa">
           {getFieldDecorator('mantissa', {
-            initialValue: nodeForm.mantissa || 0
+            initialValue: mantissa
           })(<InputNumber />)}
         </Form.Item>
         <Form.Item label="Optional mantissa">
-          {getFieldDecorator('opt-mantissa', {
-            initialValue: nodeForm.optMantissa || true
-          })(<Checkbox defaultChecked={nodeForm.optMantissa || true} />)}
+          {getFieldDecorator('optMantissa', {
+            initialValue: optMantissa
+          })(<Checkbox defaultChecked={optMantissa} />)}
         </Form.Item>
         <Form.Item label="Average">
           {getFieldDecorator('average', {
-            initialValue: nodeForm.average || true
-          })(<Checkbox defaultChecked={nodeForm.average || true} />)}
+            initialValue: average
+          })(<Checkbox defaultChecked={average} />)}
         </Form.Item>
         <Form.Item label="Space separated">
-          {getFieldDecorator('space-separated', {
-            initialValue: nodeForm.spaceSeparated || true
-          })(<Checkbox defaultChecked={nodeForm.spaceSeparated || true} />)}
+          {getFieldDecorator('spaceSeparated', {
+            initialValue: spaceSeparated
+          })(<Checkbox defaultChecked={spaceSeparated} />)}
         </Form.Item>
         <Form.Item label="Total length">
-          {getFieldDecorator('average-total', {
-            initialValue: nodeForm.averageTotal || 3
+          {getFieldDecorator('averageTotal', {
+            initialValue: averageTotal
           })(<InputNumber />)}
         </Form.Item>
         <Form.Item label="Output">
           {getFieldDecorator('output', {
-            initialValue: nodeForm.output || 'number'
+            initialValue: output
           })(
             <Select style={{ width: 200 }} placeholder="Output">
               <Select.Option value="number" key="number">

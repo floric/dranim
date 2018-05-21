@@ -4,7 +4,8 @@ import {
   SocketDef,
   SocketMetaDef,
   SocketMetas,
-  parseNodeForm
+  parseNodeForm,
+  FormValues
 } from '@masterthesis/shared';
 
 export const getInputNode = (
@@ -103,4 +104,12 @@ export const getInputInformation = (
     });
 
   return output;
+};
+
+export const getValueOrDefault = <T, Name extends keyof T>(
+  form: FormValues<T>,
+  valueName: Name,
+  defaultVal: FormValues<T>[Name]
+) => {
+  return form[valueName] !== null ? form[valueName] : defaultVal;
 };

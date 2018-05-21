@@ -32,7 +32,13 @@ export const main = async (options: IMainOptions) => {
 
   const app = express();
   if (options.env !== 'production') {
-    app.use(cors({ maxAge: 600, origin: 'http://localhost:1234' }));
+    app.use(
+      cors({
+        maxAge: 600,
+        optionsSuccessStatus: 200,
+        origin: 'http://localhost:1234'
+      })
+    );
   }
 
   app.use(helmet());

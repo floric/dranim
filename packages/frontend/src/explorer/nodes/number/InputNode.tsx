@@ -6,6 +6,7 @@ import {
   NumberInputNodeOutputs,
   NumberInputNodeForm
 } from '@masterthesis/shared';
+import { getValueOrDefault } from '../utils';
 
 export const NumberInputNode: ClientNodeDef<
   {},
@@ -17,7 +18,7 @@ export const NumberInputNode: ClientNodeDef<
     <Form.Item label="Value">
       {getFieldDecorator('value', {
         rules: [{ required: true, type: 'number' }],
-        initialValue: nodeForm.value || 0
+        initialValue: getValueOrDefault(nodeForm, 'value', 0)
       })(<InputNumber />)}
     </Form.Item>
   )

@@ -7,6 +7,7 @@ import {
   SelectValuesNodeDef,
   SelectValuesNodeForm
 } from '@masterthesis/shared';
+import { getValueOrDefault } from '../utils';
 
 export const DatasetSelectValuesNode: ClientNodeDef<
   SelectValuesNodeInputs,
@@ -53,7 +54,7 @@ export const DatasetSelectValuesNode: ClientNodeDef<
     return (
       <Form.Item label="Input">
         {getFieldDecorator('values', {
-          initialValue: nodeForm.values || []
+          initialValue: getValueOrDefault(nodeForm, 'values', [])
         })(
           <Select
             mode="multiple"

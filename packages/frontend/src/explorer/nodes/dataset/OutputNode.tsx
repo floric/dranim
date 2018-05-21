@@ -7,6 +7,7 @@ import {
   DatasetOutputNodeInputs,
   DatasetOutputNodeForm
 } from '@masterthesis/shared';
+import { getValueOrDefault } from '../utils';
 
 export const DatasetOutputNode: ClientNodeDef<
   DatasetOutputNodeInputs,
@@ -18,7 +19,7 @@ export const DatasetOutputNode: ClientNodeDef<
     <Form.Item label="Name">
       {getFieldDecorator('name', {
         rules: [{ required: true }],
-        initialValue: nodeForm.name || ''
+        initialValue: getValueOrDefault(nodeForm, 'name', '')
       })(<Input />)}
     </Form.Item>
   )

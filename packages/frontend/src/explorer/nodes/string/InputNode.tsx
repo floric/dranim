@@ -6,6 +6,7 @@ import {
   StringInputNodeOutputs,
   StringInputNodeForm
 } from '@masterthesis/shared';
+import { getValueOrDefault } from '../utils';
 
 export const StringInputNode: ClientNodeDef<
   {},
@@ -16,7 +17,7 @@ export const StringInputNode: ClientNodeDef<
   renderFormItems: ({ form: { getFieldDecorator }, nodeForm }) => (
     <Form.Item label="Value">
       {getFieldDecorator('value', {
-        initialValue: nodeForm.value || ''
+        initialValue: getValueOrDefault(nodeForm, 'value', '')
       })(<Input />)}
     </Form.Item>
   )

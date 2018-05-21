@@ -7,6 +7,7 @@ import {
   JoinDatasetsNodeOutputs,
   JoinDatasetsNodeForm
 } from '@masterthesis/shared';
+import { getValueOrDefault } from '../utils';
 
 export const JoinDatasetsNode: ClientNodeDef<
   JoinDatasetsNodeInputs,
@@ -80,7 +81,7 @@ export const JoinDatasetsNode: ClientNodeDef<
         <Form.Item label="Value from A">
           {getFieldDecorator('valueA', {
             rules: [{ required: true }],
-            initialValue: nodeForm.valueA || ''
+            initialValue: getValueOrDefault(nodeForm, 'valueA', '')
           })(
             <Select
               showSearch
@@ -98,7 +99,7 @@ export const JoinDatasetsNode: ClientNodeDef<
         <Form.Item label="Value from B">
           {getFieldDecorator('valueB', {
             rules: [{ required: true }],
-            initialValue: nodeForm.valueB || ''
+            initialValue: getValueOrDefault(nodeForm, 'valueB', '')
           })(
             <Select
               showSearch

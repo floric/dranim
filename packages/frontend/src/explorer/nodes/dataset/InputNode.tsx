@@ -6,6 +6,7 @@ import {
   DatasetInputNodeOutputs,
   DatasetInputNodeForm
 } from '@masterthesis/shared';
+import { getValueOrDefault } from '../utils';
 
 export const DatasetInputNode: ClientNodeDef<
   {},
@@ -54,7 +55,7 @@ export const DatasetInputNode: ClientNodeDef<
     <Form.Item label="Input">
       {getFieldDecorator('dataset', {
         rules: [{ required: true }],
-        initialValue: nodeForm.dataset || ''
+        initialValue: getValueOrDefault(nodeForm, 'dataset', '')
       })(
         <Select showSearch style={{ width: 200 }} placeholder="Select Dataset">
           {datasets.map(ds => (

@@ -13,7 +13,7 @@ export interface FormatNumberNodeForm {
   thousandsSeparated: boolean;
   average: boolean;
   spaceSeparated: boolean;
-  output: string;
+  output: 'number' | 'ordinal' | 'byte' | 'percent' | 'time';
   averageTotal: number;
 }
 
