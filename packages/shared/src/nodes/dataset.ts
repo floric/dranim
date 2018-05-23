@@ -79,6 +79,10 @@ export interface DatasetOutputNodeInputs {
   dataset: Dataset;
 }
 
+export interface DatasetOutputNodeResults {
+  dataset: 'todo';
+}
+
 export interface DatasetOutputNodeForm {
   name: string;
 }

@@ -1,6 +1,7 @@
 {
   "name": "@masterthesis/frontend",
   "version": "1.0.0",
+  "license": "MIT",
   "main": "dist",
   "dependencies": {
     "@masterthesis/shared": "1.0.0",
@@ -36,6 +37,7 @@
   },
   "scripts": {
     "start": "parcel public/index.html --no-hmr",
+    "lint": "tslint -p .",
     "build": "parcel build public/index.html --no-cache ",
     "clean": "rm -rf build node_modules dist .cache"
   },
@@ -59,8 +61,5 @@
     "tslint-config-prettier": "^1.10.0",
     "tslint-react": "^3.2.0",
     "typescript": "^2.8.3"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
   }
 }

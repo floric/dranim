@@ -1,6 +1,7 @@
 {
   "name": "masterthesis",
   "private": true,
+  "license": "MIT",
   "version": "1.0.0",
   "engines": {
     "node": ">= 6.11.1",
@@ -10,6 +11,7 @@
     "build": "lerna run build --stream",
     "start": "lerna run start --stream",
     "test": "lerna run test --stream",
+    "lint": "lerna run lint --stream",
     "clean":
       "lerna run clean --stream && rm -rf node_modules && sudo rm -rf data",
     "mongodb": "sudo docker run -p 127.0.0.1:27017:27017 mongo:latest"

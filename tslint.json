@@ -16,9 +16,10 @@
   },
   "linterOptions": {
     "exclude": [
-      "packages/frontend/config/**/*.js",
-      "packages/frontend/node_modules/**/*.ts",
-      "node_modules/**/*.ts"
+      "**/dist/**",
+      "**/.cache/**",
+      "**/scripts/**",
+      "**/node_modules/**"
     ]
   }
 }

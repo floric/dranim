@@ -79,6 +79,10 @@ export interface NumberOutputNodeInputs {
   val: number;
 }
 
+export interface NumberOutputNodeResults {
+  value: number;
+}
+
 export interface SumNodeNodeInputs {
   a: number;
   b: number;

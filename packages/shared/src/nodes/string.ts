@@ -23,6 +23,10 @@ export interface StringOutputNodeInputs {
   string: string;
 }
 
+export interface StringOutputNodeResults {
+  value: string;
+}
+
 export const StringOutputNodeDef: NodeDef<StringOutputNodeInputs, {}> = {
   name: 'String Output',
   inputs: {

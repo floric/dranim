@@ -22,14 +22,16 @@ export interface NodeDef<NodeInputs = {}, NodeOutputs = {}> {
   keywords: Array<string>;
 }
 
-export interface NodeExecutionResult<NodeOutputs> {
+export interface NodeExecutionResult<NodeOutputs, NodeResults = {}> {
   outputs: IOValues<NodeOutputs>;
+  results?: NodeResults;
 }
 
 export interface ServerNodeDef<
   NodeInputs = {},
   NodeOutputs = {},
-  NodeForm = {}
+  NodeForm = {},
+  NodeResults = {}
 > {
   name: string;
   isFormValid?: (form: FormValues<NodeForm>) => Promise<boolean>;
@@ -37,7 +39,7 @@ export interface ServerNodeDef<
   onServerExecution: (
     form: FormValues<NodeForm>,
     inputs: IOValues<NodeInputs>
-  ) => Promise<NodeExecutionResult<NodeOutputs>>;
+  ) => Promise<NodeExecutionResult<NodeOutputs, NodeResults>>;
 }
 
 export interface ConnectionDescription {

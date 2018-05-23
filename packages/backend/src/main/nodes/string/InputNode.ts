@@ -1,17 +1,20 @@
 import {
   StringInputNodeDef,
   ServerNodeDef,
-  StringInputNodeOutputs
+  StringInputNodeOutputs,
+  StringInputNodeForm
 } from '@masterthesis/shared';
 
-export const StringInputNode: ServerNodeDef<{}, StringInputNodeOutputs, {}> = {
+export const StringInputNode: ServerNodeDef<
+  {},
+  StringInputNodeOutputs,
+  StringInputNodeForm
+> = {
   name: StringInputNodeDef.name,
-  onServerExecution: async (form, a) => {
-    // TODO fix form
-    const val = 'test';
+  onServerExecution: async form => {
     return {
       outputs: {
-        string: val
+        string: form.value || ''
       }
     };
   }
