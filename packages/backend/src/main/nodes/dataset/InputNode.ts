@@ -1,15 +1,21 @@
 import {
   DatasetInputNodeDef,
   ServerNodeDef,
-  DatasetInputNodeOutputs
+  DatasetInputNodeOutputs,
+  DatasetInputNodeForm
 } from '@masterthesis/shared';
 
-export const DatasetInputNode: ServerNodeDef<{}, DatasetInputNodeOutputs> = {
+export const DatasetInputNode: ServerNodeDef<
+  {},
+  DatasetInputNodeOutputs,
+  DatasetInputNodeForm
+> = {
   name: DatasetInputNodeDef.name,
-  onServerExecution: () =>
+  isFormValid: form => Promise.resolve(form.dataset !== null),
+  onServerExecution: form =>
     Promise.resolve({
       outputs: {
-        dataset: ''
+        dataset: form.dataset || ''
       }
     })
 };

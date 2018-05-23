@@ -55,7 +55,9 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
         }
       }
     );
-    console.error('Finished calculation with errors.', err);
+    if (process.env.NODE_ENV !== 'test') {
+      console.error('Finished calculation with errors.', err);
+    }
   }
 };
 

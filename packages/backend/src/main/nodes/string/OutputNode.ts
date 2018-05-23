@@ -1,15 +1,23 @@
 import {
   StringOutputNodeDef,
   ServerNodeDef,
-  StringOutputNodeInputs
+  StringOutputNodeInputs,
+  StringOutputNodeResults
 } from '@masterthesis/shared';
 
-export const StringOutputNode: ServerNodeDef<StringOutputNodeInputs, {}> = {
+export const StringOutputNode: ServerNodeDef<
+  StringOutputNodeInputs,
+  {},
+  {},
+  StringOutputNodeResults
+> = {
   name: StringOutputNodeDef.name,
-  onServerExecution: (form, values) =>
-    Promise.resolve({
-      outputs: {
-        Result: ''
+  onServerExecution: async (form, values) => {
+    return {
+      outputs: {},
+      results: {
+        value: values.string
       }
-    })
+    };
+  }
 };
