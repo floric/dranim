@@ -9,7 +9,7 @@ import {
   IOValues
 } from '@masterthesis/shared';
 
-import { MONGO_DB_NAME, mongodb } from '../../mongodb';
+import { MONGO_DB_NAME, mongoDbServer } from '../../mongodb';
 
 import {
   startCalculation,
@@ -25,21 +25,17 @@ jest.mock('../../../src/main/calculation/executeNode');
 
 let client: MongoClient;
 let db: Db;
-let uri: string;
 
 beforeEach(async () => {
-  await mongodb.start();
-  uri = await mongodb.getConnectionString();
+  await mongoDbServer.start();
+  const uri = await mongoDbServer.getConnectionString();
   client = await MongoClient.connect(uri);
   db = await client.db(MONGO_DB_NAME);
 });
 
 afterEach(async () => {
   await client.close();
-  await mongodb.stop();
-  client = undefined;
-  db = undefined;
-  uri = undefined;
+  await mongoDbServer.stop();
   jest.resetAllMocks();
 });
 

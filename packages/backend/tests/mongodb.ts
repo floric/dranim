@@ -2,7 +2,7 @@ import MongodbMemoryServer from 'mongodb-memory-server';
 import { MongoClient } from 'mongodb';
 
 export const MONGO_DB_NAME = 'jest';
-export const mongodb = new MongodbMemoryServer({
+export const mongoDbServer = new MongodbMemoryServer({
   instance: {
     dbName: MONGO_DB_NAME
   },
