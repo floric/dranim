@@ -10,12 +10,16 @@ before_script:
   - greenkeeper-lockfile-update
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
-  - ./cc-test-reporter before-build
 script:
   - yarn
   - yarn build
   - yarn test
 after_script:
+  - cd packages/shared
+  - ../../cc-test-reporter format-coverage -t clover -o tmp/codeclimate.shared.json clover.xml
+  - cd ../backend
+  - ../../cc-test-reporter format-coverage -t clover -o tmp/codeclimate.backend.json clover.xml
+  - cd ../../
+  - ./cc-test-reporter sum-coverage tmp/codeclimate.*.json -p 2 -o tmp/codeclimate.total.json
+  - ./cc-test-reporter upload-coverage -i tmp/codeclimate.total.json
   - greenkeeper-lockfile-upload
-  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
-
