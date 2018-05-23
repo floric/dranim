@@ -16,9 +16,9 @@ script:
   - yarn test
 after_script:
   - cd packages/shared/coverage
-  - ../../cc-test-reporter format-coverage -t clover -o tmp/codeclimate.shared.json clover.xml
+  - ../../../cc-test-reporter format-coverage -t clover -o tmp/codeclimate.shared.json clover.xml
   - cd ../../backend/coverage
-  - ../../cc-test-reporter format-coverage -t clover -o tmp/codeclimate.backend.json clover.xml
+  - ../../../cc-test-reporter format-coverage -t clover -o tmp/codeclimate.backend.json clover.xml
   - cd ../../../
   - ./cc-test-reporter sum-coverage tmp/codeclimate.*.json -p 2 -o tmp/codeclimate.total.json
   - ./cc-test-reporter upload-coverage -i tmp/codeclimate.total.json

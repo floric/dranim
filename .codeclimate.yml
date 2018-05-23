@@ -14,7 +14,7 @@ checks:
       threshold: 5
   method-count:
     config:
-      threshold: 20
+      threshold: 15
   method-lines:
     config:
       threshold: 50
@@ -26,10 +26,10 @@ checks:
       threshold: 4
   similar-code:
     config:
-      threshold: # language-specific defaults. an override will affect all languages.
+      enabled: false
   identical-code:
     config:
-      threshold: # language-specific defaults. an override will affect all l
+      threshold: 2
 plugins:
   fixme:
     enabled: true
