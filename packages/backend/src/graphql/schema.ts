@@ -16,21 +16,25 @@ import {
   addValueSchema
 } from './resolvers/dataset';
 import {
-  createNode,
   getWorkspace,
-  updateNode,
   updateWorkspace,
-  createConnection,
-  deleteConnection,
+  getAllWorkspaces,
+  createWorkspace,
+  deleteWorkspace
+} from '../main/workspace/workspace';
+import {
+  createNode,
+  updateNode,
   deleteNode,
   addOrUpdateFormValue,
   getNodeState,
-  getAllWorkspaces,
-  createWorkspace,
-  getAllNodes,
-  getAllConnections,
-  deleteWorkspace
-} from './resolvers/workspace';
+  getAllNodes
+} from '../main/workspace/nodes';
+import {
+  createConnection,
+  deleteConnection,
+  getAllConnections
+} from '../main/workspace/connections';
 import {
   latestEntries,
   deleteEntry,
@@ -38,7 +42,10 @@ import {
   entriesCount
 } from './resolvers/entry';
 import { getAllUploads, uploadEntriesCsv } from './resolvers/upload';
-import { startCalculation, getAllCalculations } from './resolvers/calculation';
+import {
+  startCalculation,
+  getAllCalculations
+} from '../main/calculation/startProcess';
 import { createSTRDemoData } from '../example/str';
 
 export interface ApolloContext {

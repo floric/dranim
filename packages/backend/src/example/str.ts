@@ -4,7 +4,7 @@ import {
   addValueSchema
 } from '../graphql/resolvers/dataset';
 import { Db } from 'mongodb';
-import { createWorkspace } from '../graphql/resolvers/workspace';
+import { createWorkspace } from '../main/workspace/workspace';
 
 export const createSTRDemoData = async (db: Db) => {
   let ds = await createDataset(db, 'Passages');

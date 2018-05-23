@@ -8,22 +8,7 @@ import { LoadingCard, UnknownErrorCard } from '../../components/CustomCards';
 import { ProcessTime } from '../../components/ProcessTime';
 import { RouteComponentProps } from 'react-router-dom';
 import { NumberInfo } from '../../components/NumberInfo';
-
-export enum CalculationProcessState {
-  STARTED = 'STARTED',
-  PROCESSING = 'PROCESSING',
-  ERROR = 'ERROR',
-  SUCCESSFUL = 'SUCCESSFUL'
-}
-
-export interface CalculationProcess {
-  id: string;
-  start: string;
-  finish: string | null;
-  processedOutputs: number;
-  totalOutputs: number;
-  state: CalculationProcessState;
-}
+import { CalculationProcess, ProcessState } from '@masterthesis/shared';
 
 const CALCULATIONS = gql`
   query calculations($workspaceId: String!) {
@@ -67,9 +52,9 @@ export default class WorkspaceCalculationsPage extends Component<
             key: e.id,
             time: { start: e.start, finish: e.finish },
             state:
-              e.state === CalculationProcessState.SUCCESSFUL ? (
+              e.state === ProcessState.SUCCESSFUL ? (
                 <Icon type="check-circle" />
-              ) : e.state === CalculationProcessState.PROCESSING ? (
+              ) : e.state === ProcessState.PROCESSING ? (
                 <Icon type="clock-circle" />
               ) : (
                 <Icon type="warning-circle" />

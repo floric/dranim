@@ -2,6 +2,7 @@ node_modules/
 coverage/
 build/
 dist/
+lib/
 .tmp/
 *.d.ts
 *.log

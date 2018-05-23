@@ -14,12 +14,29 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "clean": "rm -rf dist node_modules .cache"
+    "clean": "rm -rf dist node_modules .cache",
+    "test": "jest --coverage --detectLeaks"
   },
   "devDependencies": {
+    "@types/jest": "^22.2.3",
     "@types/uuid": "^3.4.3",
+    "jest": "^22.4.4",
+    "ts-jest": "^22.4.6",
     "tslint": "^5.2.0",
     "tslint-config-prettier": "^1.10.0",
-    "typescript": "^2.8.3"
+    "typescript": "^2.8.3",
+    "weak": "^1.0.1"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.{ts,tsx}",
+      "!**/node_modules/**",
+      "!**/lib/**"
+    ],
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"]
   }
 }

@@ -1,12 +1,8 @@
 import { Db, ObjectID, Collection } from 'mongodb';
-import { getAllNodes, getConnection, getNode } from './workspace';
-import { outputNodes, serverNodeTypes } from '../../nodes/AllNodes';
-import {
-  NodeInstance,
-  CalculationProcessState,
-  CalculationProcess,
-  parseNodeForm
-} from '@masterthesis/shared';
+import { outputNodes } from '../nodes/AllNodes';
+import { ProcessState, CalculationProcess } from '@masterthesis/shared';
+import { executeNode } from '../calculation/executeNode';
+import { getAllNodes } from '../workspace/nodes';
 
 const startProcess = async (db: Db, processId: string, workspaceId: string) => {
   const processCollection = getCalculationsCollection(db);
@@ -20,13 +16,15 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
       {
         $set: {
           totalOutputs: outputs.length,
-          state: CalculationProcessState.PROCESSING
+          state: ProcessState.PROCESSING
         }
       }
     );
 
     await Promise.all(
       outputs.map(async o => {
+        await executeNode(db, o);
+        // TODO process res
         await processCollection.updateOne(
           { _id: new ObjectID(processId) },
           {
@@ -43,70 +41,22 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
       {
         $set: {
           finish: new Date(),
-          state: CalculationProcessState.SUCCESSFUL
+          state: ProcessState.SUCCESSFUL
         }
       }
     );
-
-    console.log('Finished calculation.');
   } catch (err) {
-    console.log(err);
     await processCollection.updateOne(
       { _id: new ObjectID(processId) },
       {
         $set: {
           finish: new Date(),
-          state: CalculationProcessState.ERROR
+          state: ProcessState.ERROR
         }
       }
     );
-    console.log(`Finished calculation with errors: ${JSON.stringify(err)}`);
+    console.error('Finished calculation with errors.', err);
   }
-};
-
-const executeNode = async (db: Db, node: NodeInstance): Promise<any> => {
-  const type = serverNodeTypes.get(node.type);
-  if (!type) {
-    throw new Error('Unknown node type');
-  }
-
-  // TODO define IO types for real execution
-  const inputValues = await Promise.all(
-    node.inputs.map(async i => {
-      const c = await getConnection(db, i.connectionId);
-      if (!c) {
-        throw new Error('Invalid connection.');
-      }
-
-      const inputNodeId = c.from.nodeId;
-      const inputNode = await getNode(db, inputNodeId);
-      if (!inputNode) {
-        throw new Error('Node not found!');
-      }
-
-      const nodeRes = await executeNode(db, inputNode);
-
-      return { socketName: i.name, val: nodeRes[c.from.name] };
-    })
-  );
-
-  const inputsMap = new Map(
-    inputValues.map<[string, string]>(i => [i.socketName, i.val])
-  );
-  const nodeForm = parseNodeForm(node);
-  const isValidForm = type.isFormValid
-    ? await type.isFormValid(nodeForm)
-    : true;
-  const isValidInput = type.isInputValid
-    ? await type.isInputValid(inputsMap)
-    : true;
-  if (!isValidForm || !isValidInput) {
-    throw new Error('Invalid input or form.');
-  }
-
-  const res = await type.onServerExecution(nodeForm, inputsMap);
-
-  return res.outputs;
 };
 
 export const getCalculationsCollection = (
@@ -117,7 +67,8 @@ export const getCalculationsCollection = (
 
 export const startCalculation = async (
   db: Db,
-  workspaceId: string
+  workspaceId: string,
+  awaitResult?: boolean
 ): Promise<CalculationProcess> => {
   const coll = getCalculationsCollection(db);
   const newProcess = await coll.insertOne({
@@ -126,7 +77,7 @@ export const startCalculation = async (
     workspaceId,
     processedOutputs: 0,
     totalOutputs: 0,
-    state: CalculationProcessState.STARTED
+    state: ProcessState.STARTED
   });
 
   if (newProcess.result.ok !== 1 || newProcess.ops.length !== 1) {
@@ -135,7 +86,11 @@ export const startCalculation = async (
 
   const id = newProcess.ops[0]._id.toHexString();
 
-  startProcess(db, id, workspaceId);
+  if (awaitResult === true) {
+    await startProcess(db, id, workspaceId);
+  } else {
+    startProcess(db, id, workspaceId);
+  }
 
   return {
     id,

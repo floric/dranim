@@ -10,7 +10,8 @@ import { apolloUploadExpress } from 'apollo-upload-server';
 import { mongoDbClient } from './config/db';
 import Schema from './graphql/schema';
 import { Db } from 'mongodb';
-import { initWorkspaceDb } from './graphql/resolvers/workspace';
+import { initWorkspaceDb } from './main/workspace/workspace';
+
 export const GRAPHQL_ROUTE = '/api/graphql';
 
 export interface IMainOptions {

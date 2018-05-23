@@ -37,7 +37,7 @@ export interface Workspace {
   connections: Array<ConnectionInstance>;
 }
 
-export enum CalculationProcessState {
+export enum ProcessState {
   STARTED = 'STARTED',
   PROCESSING = 'PROCESSING',
   ERROR = 'ERROR',
@@ -50,7 +50,7 @@ export interface CalculationProcess {
   finish: string | null;
   processedOutputs: number;
   totalOutputs: number;
-  state: CalculationProcessState;
+  state: ProcessState;
 }
 
 export interface UploadProcess {
@@ -58,7 +58,7 @@ export interface UploadProcess {
   start: string;
   finish: string | null;
   errors: Array<{ name: string; message: string; count: number }>;
-  state: 'STARTED' | 'PROCESSING' | 'FINISHED' | 'ERROR';
+  state: ProcessState;
   addedEntries: number;
   failedEntries: number;
   invalidEntries: number;

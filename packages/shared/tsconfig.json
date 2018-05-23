@@ -16,5 +16,5 @@
     "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": true
   },
-  "exclude": ["node_modules", "lib"]
+  "exclude": ["node_modules", "lib", "tests"]
 }
