@@ -1,11 +1,21 @@
 language: node_js
+env:
+  global:
+    - CC_TEST_REPORTER_ID=fc64d003bdf120b91db2a980408cf2073efe351171845840b1fa6a0d87b658ea
 node_js:
   - "9"
 cache: yarn
+before_install: yarn global add greenkeeper-lockfile@1
+before_script:
+  - greenkeeper-lockfile-update
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
 script:
   - yarn
   - yarn build
   - yarn test
-before_install: yarn global add greenkeeper-lockfile@1
-before_script: greenkeeper-lockfile-update
-after_script: greenkeeper-lockfile-upload
+after_script:
+  - greenkeeper-lockfile-upload
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+
