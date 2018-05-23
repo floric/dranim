@@ -25,8 +25,7 @@ checks:
     config:
       threshold: 4
   similar-code:
-    config:
-      enabled: false
+    enabled: false
   identical-code:
     config:
       threshold: 2
