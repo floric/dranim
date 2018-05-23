@@ -16,7 +16,7 @@ import { AsyncButton } from '../../components/AsyncButton';
 import { UnknownErrorCard, LoadingCard } from '../../components/CustomCards';
 import { ProcessTime } from '../../components/ProcessTime';
 import { NumberInfo } from '../../components/NumberInfo';
-import { Dataset, UploadProcess } from '@masterthesis/shared';
+import { Dataset, UploadProcess, ProcessState } from '@masterthesis/shared';
 
 const UPLOAD_ENTRIES_CSV = gql`
   mutation($files: [Upload!]!, $datasetId: String!) {
@@ -143,9 +143,9 @@ export const DatasetActions = withApollo<DataActionsProps>(
               key: u.id,
               time: { start: u.start, finish: u.finish },
               state:
-                u.state === 'FINISHED' ? (
+                u.state === ProcessState.SUCCESSFUL ? (
                   <Icon type="check-circle" />
-                ) : u.state === 'ERROR' ? (
+                ) : u.state === ProcessState.ERROR ? (
                   <Icon type="exclamation-circle" />
                 ) : (
                   <Icon type="clock-circle" />

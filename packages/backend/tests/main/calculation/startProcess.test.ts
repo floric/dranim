@@ -9,8 +9,6 @@ import {
   IOValues
 } from '@masterthesis/shared';
 
-import { MONGO_DB_NAME, mongoDbServer } from '../../mongodb';
-
 import {
   startCalculation,
   getAllCalculations
@@ -23,29 +21,33 @@ const WORKSPACE = 'test';
 jest.mock('../../../src/main/workspace/nodes');
 jest.mock('../../../src/main/calculation/executeNode');
 
-let client: MongoClient;
+let connection;
 let db: Db;
 
-beforeEach(async () => {
-  await mongoDbServer.start();
-  const uri = await mongoDbServer.getConnectionString();
-  client = await MongoClient.connect(uri);
-  db = await client.db(MONGO_DB_NAME);
-});
+describe('StartProcess', () => {
+  beforeAll(async () => {
+    connection = await MongoClient.connect((global as any).__MONGO_URI__);
+    db = await connection.db((global as any).__MONGO_DB_NAME__);
+  });
 
-afterEach(async () => {
-  await client.close();
-  await mongoDbServer.stop();
-  jest.resetAllMocks();
-});
+  afterAll(async () => {
+    await connection.close();
+    // await db.close();
+  });
 
-describe('Calculation', () => {
-  it('should get empty calculations collection', async () => {
+  beforeEach(async () => {
+    await db.dropDatabase();
+    jest.resetAllMocks();
+  });
+
+  test('should get empty calculations collection', async () => {
+    expect.assertions(1);
     const processes = await getAllCalculations(db, WORKSPACE);
     expect(processes.length).toBe(0);
   });
 
-  it('should start new calculation process without any nodes', async () => {
+  test('should start new calculation process without any nodes', async () => {
+    expect.assertions(13);
     (getAllNodes as jest.Mock).mockImplementation((a, b) =>
       Promise.resolve([])
     );
@@ -71,7 +73,8 @@ describe('Calculation', () => {
     expect((executeNode as jest.Mock).mock.calls.length).toBe(0);
   });
 
-  it('should start new calculation process with one node', async () => {
+  test('should start new calculation process with one node', async done => {
+    expect.assertions(13);
     (getAllNodes as jest.Mock).mockImplementation((a, b) =>
       Promise.resolve<Array<NodeInstance>>([
         {
@@ -132,9 +135,11 @@ describe('Calculation', () => {
 
     expect((getAllNodes as jest.Mock).mock.calls.length).toBe(1);
     expect((executeNode as jest.Mock).mock.calls.length).toBe(2);
+
+    done();
   });
 
-  it('should catch error for failed node execution', async () => {
+  test('should catch error for failed node execution', async () => {
     (getAllNodes as jest.Mock).mockImplementation((a, b) =>
       Promise.resolve<Array<NodeInstance>>([
         {
