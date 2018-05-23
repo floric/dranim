@@ -1,4 +1,4 @@
-import { NodeDef } from '../interfaces';
+import { NodeDef } from '../nodes';
 import { NumberSocket, StringSocket } from '../sockets';
 
 export interface FormatNumberNodeInputs {

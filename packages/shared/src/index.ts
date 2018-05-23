@@ -12,7 +12,7 @@ import {
   MultiplicationNodeDef,
   SumNodeDef
 } from './nodes/number';
-import { NodeDef } from './interfaces';
+import { NodeDef } from './nodes';
 
 export const NodesMap = new Map<string, NodeDef>(
   [
@@ -36,8 +36,10 @@ export const NodesMap = new Map<string, NodeDef>(
     .map<[string, NodeDef]>(n => [n.name, n])
 );
 
-export * from './interfaces';
+export * from './workspace';
 export * from './utils';
+export * from './nodes';
+export * from './sockets';
 export * from './nodes/dataset';
 export * from './nodes/number';
 export * from './nodes/string';

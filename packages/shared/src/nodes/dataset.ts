@@ -1,5 +1,6 @@
-import { NodeDef, Dataset } from '../interfaces';
+import { NodeDef } from '../nodes';
 import { DataSocket } from '../sockets';
+import { Dataset } from '../workspace';
 
 export interface DatasetInputNodeOutputs {
   dataset: Dataset;

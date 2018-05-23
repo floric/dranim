@@ -1,4 +1,4 @@
-import { NodeDef } from '../interfaces';
+import { NodeDef } from '../nodes';
 import { StringSocket } from '../sockets';
 
 export interface StringInputNodeOutputs {

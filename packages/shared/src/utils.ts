@@ -1,4 +1,4 @@
-import { NodeInstance, FormValues } from './interfaces';
+import { NodeInstance, FormValues } from './nodes';
 
 export const parseNodeForm = (node: NodeInstance): FormValues<any> => {
   const fullForm = {};
