@@ -32,7 +32,6 @@ describe('StartProcess', () => {
 
   afterAll(async () => {
     await connection.close();
-    // await db.close();
   });
 
   beforeEach(async () => {

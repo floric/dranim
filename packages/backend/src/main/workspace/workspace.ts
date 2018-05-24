@@ -24,7 +24,7 @@ export const createWorkspace = async (
   db: Db,
   name: string,
   description: string | null
-) => {
+): Promise<Workspace> => {
   const wsCollection = getWorkspacesCollection(db);
   if (!name.length) {
     throw new Error('Name of workspace must not be empty.');

@@ -43,6 +43,7 @@ export const createNode = async (
   const newItem = res.ops[0];
   return {
     id: newItem._id.toHexString(),
+    form: [],
     ...newItem
   };
 };
@@ -81,7 +82,7 @@ export const updateNode = async (db: Db, id: string, x: number, y: number) => {
     throw new Error('Updating node failed');
   }
 
-  wsCollection.findOneAndUpdate(
+  await wsCollection.findOneAndUpdate(
     { _id: new ObjectID(res.value!.workspaceId) },
     { $set: { lastChange: new Date() } }
   );
