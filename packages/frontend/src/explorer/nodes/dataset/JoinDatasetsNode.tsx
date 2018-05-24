@@ -8,6 +8,7 @@ import {
   JoinDatasetsNodeForm
 } from '@masterthesis/shared';
 import { getValueOrDefault } from '../utils';
+import { FormSelect } from '../../utils/form-utils';
 
 export const JoinDatasetsNode: ClientNodeDef<
   JoinDatasetsNodeInputs,
@@ -74,8 +75,8 @@ export const JoinDatasetsNode: ClientNodeDef<
     if (!dsA || !dsB || !dsA.isPresent || !dsB.isPresent) {
       return <p>Plugin the two datasets first.</p>;
     }
-    const schemasA = dsA.content.schema;
-    const schemasB = dsB.content.schema;
+    const schemasA = dsA.content.schema.map(s => ({ key: s }));
+    const schemasB = dsB.content.schema.map(s => ({ key: s }));
     return (
       <>
         <Form.Item label="Value from A">
@@ -83,17 +84,7 @@ export const JoinDatasetsNode: ClientNodeDef<
             rules: [{ required: true }],
             initialValue: getValueOrDefault(nodeForm, 'valueA', '')
           })(
-            <Select
-              showSearch
-              style={{ width: 200 }}
-              placeholder="Select Value"
-            >
-              {schemasA.map(ds => (
-                <Select.Option value={ds} key={ds}>
-                  {ds}
-                </Select.Option>
-              ))}
-            </Select>
+            <FormSelect values={schemasA} placeholder="Select first column" />
           )}
         </Form.Item>
         <Form.Item label="Value from B">
@@ -101,17 +92,7 @@ export const JoinDatasetsNode: ClientNodeDef<
             rules: [{ required: true }],
             initialValue: getValueOrDefault(nodeForm, 'valueB', '')
           })(
-            <Select
-              showSearch
-              style={{ width: 200 }}
-              placeholder="Select Value"
-            >
-              {schemasB.map(ds => (
-                <Select.Option value={ds} key={ds}>
-                  {ds}
-                </Select.Option>
-              ))}
-            </Select>
+            <FormSelect values={schemasB} placeholder="Select second column" />
           )}
         </Form.Item>
       </>

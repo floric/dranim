@@ -8,6 +8,7 @@ import {
   SelectValuesNodeForm
 } from '@masterthesis/shared';
 import { getValueOrDefault } from '../utils';
+import { FormSelect } from '../../utils/form-utils';
 
 export const DatasetSelectValuesNode: ClientNodeDef<
   SelectValuesNodeInputs,
@@ -50,19 +51,15 @@ export const DatasetSelectValuesNode: ClientNodeDef<
     inputs
   }) => {
     const dsInput = inputs.dataset;
-    const options = dsInput.isPresent ? dsInput.content.schema : [];
+    const options = dsInput.isPresent
+      ? dsInput.content.schema.map(s => ({ key: s }))
+      : [];
     return (
       <Form.Item label="Input">
         {getFieldDecorator('values', {
           initialValue: getValueOrDefault(nodeForm, 'values', [])
         })(
-          <Select
-            mode="multiple"
-            style={{ width: 200 }}
-            placeholder="Select Values"
-          >
-            {options.map(c => <Select.Option key={c}>{c}</Select.Option>)}
-          </Select>
+          <FormSelect multiple values={options} placeholder="Select values" />
         )}
       </Form.Item>
     );

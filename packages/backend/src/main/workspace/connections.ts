@@ -39,44 +39,14 @@ export const createConnection = async (
   const inputNode = await nodesCollection.findOne<NodeInstance>({
     _id: new ObjectID(to.nodeId)
   });
-  if (!outputNode || !inputNode) {
-    throw new Error('Unknown node!');
-  }
 
-  if (inputNode.workspaceId !== outputNode.workspaceId) {
-    throw new Error('Nodes live in different workspaes!');
-  }
-
-  // TODO check detection
-
-  const all = await getAllConnections(db, inputNode.workspaceId);
-  let foundCircle = false;
-  let curFromSocket: SocketInstance = from;
-  while (foundCircle === false) {
-    if (curFromSocket.nodeId === to.nodeId) {
-      foundCircle = true;
-      break;
-    } else {
-      const inputConnection = all.find(
-        s => s.to.nodeId === curFromSocket.nodeId
-      );
-      if (inputConnection !== undefined) {
-        curFromSocket = inputConnection.from;
-      } else {
-        // nothing found
-        break;
-      }
-    }
-  }
-
-  if (foundCircle) {
-    throw new Error('Cyclic dependencies not allowed!');
-  }
+  checkConnectedNodes(inputNode, outputNode);
+  checkForCycles(db, inputNode!, from, to);
 
   const insertRes = await collection.insertOne({
     from,
     to,
-    workspaceId: inputNode.workspaceId
+    workspaceId: inputNode!.workspaceId
   });
 
   if (insertRes.result.ok !== 1 || insertRes.ops.length !== 1) {
@@ -101,6 +71,50 @@ export const createConnection = async (
     id: newItem._id.toHexString(),
     ...newItem
   };
+};
+
+const checkConnectedNodes = async (
+  inputNode: NodeInstance | null,
+  outputNode: NodeInstance | null
+) => {
+  if (!outputNode || !inputNode) {
+    throw new Error('Unknown node!');
+  }
+
+  if (inputNode.workspaceId !== outputNode.workspaceId) {
+    throw new Error('Nodes live in different workspaes!');
+  }
+};
+
+const checkForCycles = async (
+  db: Db,
+  inputNode: NodeInstance,
+  from: SocketInstance,
+  to: SocketInstance
+) => {
+  const all = await getAllConnections(db, inputNode.workspaceId);
+  let foundCircle = false;
+  let curFromSocket: SocketInstance = from;
+  while (foundCircle === false) {
+    if (curFromSocket.nodeId === to.nodeId) {
+      foundCircle = true;
+      break;
+    } else {
+      const inputConnection = all.find(
+        s => s.to.nodeId === curFromSocket.nodeId
+      );
+      if (inputConnection !== undefined) {
+        curFromSocket = inputConnection.from;
+      } else {
+        // nothing found
+        break;
+      }
+    }
+  }
+
+  if (foundCircle) {
+    throw new Error('Cyclic dependencies not allowed!');
+  }
 };
 
 export const deleteConnection = async (db: Db, id: string) => {
