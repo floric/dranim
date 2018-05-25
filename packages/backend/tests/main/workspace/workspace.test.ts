@@ -10,7 +10,7 @@ import {
   StringInputNodeDef,
   Workspace
 } from '@masterthesis/shared';
-import { Db, MongoClient } from 'mongodb';
+import { Db } from 'mongodb';
 import sleep from 'sleep-promise';
 
 import {

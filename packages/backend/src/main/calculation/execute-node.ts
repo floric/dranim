@@ -3,6 +3,7 @@ import {
   FormValues,
   IOValues,
   NodeDef,
+  NodeExecutionResult,
   parseNodeForm,
   ServerNodeDef
 } from '@masterthesis/shared';
@@ -12,7 +13,10 @@ import { serverNodeTypes } from '../nodes/AllNodes';
 import { getConnection } from '../workspace/connections';
 import { getNode } from '../workspace/nodes';
 
-export const executeNode = async (db: Db, nodeId: string) => {
+export const executeNode = async (
+  db: Db,
+  nodeId: string
+): Promise<NodeExecutionResult<{}, {}>> => {
   const node = await getNode(db, nodeId);
   if (!node) {
     throw new Error('Node not found!');
