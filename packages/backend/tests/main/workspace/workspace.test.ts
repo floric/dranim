@@ -11,8 +11,8 @@ import {
   Workspace
 } from '@masterthesis/shared';
 import { Db, MongoClient } from 'mongodb';
+import sleep from 'sleep-promise';
 
-import { all } from 'async';
 import { createNode, deleteNode } from '../../../src/main/workspace/nodes';
 import {
   createWorkspace,
@@ -25,7 +25,7 @@ import {
 let connection;
 let db: Db;
 
-describe('Nodes', () => {
+describe('Workspaces', () => {
   beforeAll(async () => {
     connection = await MongoClient.connect((global as any).__MONGO_URI__);
     db = await connection.db((global as any).__MONGO_DB_NAME__);
@@ -74,7 +74,7 @@ describe('Nodes', () => {
       const ws = await createWorkspace(db, name, description);
       throw new Error('Should fail');
     } catch (err) {
-      expect(err).toEqual(new Error('Name of workspace must not be empty.'));
+      expect(err.message).toEqual('Name of workspace must not be empty.');
     }
   });
 
@@ -83,7 +83,7 @@ describe('Nodes', () => {
       const ws = await deleteWorkspace(db, 'abc');
       throw new Error('Should fail');
     } catch (err) {
-      expect(err).toEqual(new Error('Invalid ID'));
+      expect(err.message).toEqual('Invalid ID');
     }
   });
 
@@ -106,6 +106,8 @@ describe('Nodes', () => {
 
     const res = await updateWorkspace(db, ws.id, [], []);
     expect(res).toBe(true);
+
+    await sleep(1100);
 
     const newWs = await getWorkspace(db, ws.id);
     expect(new Date(ws.lastChange).getTime()).toBeLessThan(

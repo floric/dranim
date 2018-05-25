@@ -16,7 +16,7 @@ export const createConnection = async (
   db: Db,
   from: SocketInstance,
   to: SocketInstance
-) => {
+): Promise<ConnectionInstance> => {
   if (!from || !to) {
     throw new Error('Invalid connection');
   }
@@ -40,8 +40,18 @@ export const createConnection = async (
     _id: new ObjectID(to.nodeId)
   });
 
-  checkConnectedNodes(inputNode, outputNode);
-  checkForCycles(db, inputNode!, from, to);
+  if (!outputNode || !inputNode) {
+    throw new Error('Unknown node!');
+  }
+
+  if (inputNode.workspaceId !== outputNode.workspaceId) {
+    throw new Error('Nodes live in different workspaes!');
+  }
+
+  const hasFoundCycles = await containsCycles(db, inputNode!, from, to);
+  if (hasFoundCycles) {
+    throw new Error('Cyclic dependencies not allowed!');
+  }
 
   const insertRes = await collection.insertOne({
     from,
@@ -73,31 +83,20 @@ export const createConnection = async (
   };
 };
 
-const checkConnectedNodes = async (
-  inputNode: NodeInstance | null,
-  outputNode: NodeInstance | null
-) => {
-  if (!outputNode || !inputNode) {
-    throw new Error('Unknown node!');
-  }
-
-  if (inputNode.workspaceId !== outputNode.workspaceId) {
-    throw new Error('Nodes live in different workspaes!');
-  }
-};
-
-const checkForCycles = async (
+const containsCycles = async (
   db: Db,
   inputNode: NodeInstance,
   from: SocketInstance,
   to: SocketInstance
-) => {
+): Promise<boolean> => {
   const all = await getAllConnections(db, inputNode.workspaceId);
-  let foundCircle = false;
+
+  let foundCycle = false;
   let curFromSocket: SocketInstance = from;
-  while (foundCircle === false) {
+
+  while (foundCycle === false) {
     if (curFromSocket.nodeId === to.nodeId) {
-      foundCircle = true;
+      foundCycle = true;
       break;
     } else {
       const inputConnection = all.find(
@@ -112,9 +111,7 @@ const checkForCycles = async (
     }
   }
 
-  if (foundCircle) {
-    throw new Error('Cyclic dependencies not allowed!');
-  }
+  return foundCycle;
 };
 
 export const deleteConnection = async (db: Db, id: string) => {
