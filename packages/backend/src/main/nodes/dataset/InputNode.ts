@@ -4,6 +4,7 @@ import {
   DatasetInputNodeOutputs,
   ServerNodeDef
 } from '@masterthesis/shared';
+import { validateDataset } from './utils';
 
 export const DatasetInputNode: ServerNodeDef<
   {},
@@ -12,12 +13,15 @@ export const DatasetInputNode: ServerNodeDef<
 > = {
   name: DatasetInputNodeDef.name,
   isFormValid: form => Promise.resolve(form.dataset !== null),
-  onServerExecution: form =>
-    Promise.resolve({
+  onServerExecution: async (form, inputs, db) => {
+    await validateDataset(form.dataset!, db);
+
+    return {
       outputs: {
         dataset: {
-          id: form.dataset || 'new'
+          id: form.dataset!
         }
       }
-    })
+    };
+  }
 };

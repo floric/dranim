@@ -1,12 +1,12 @@
+import { UploadProcess } from '@masterthesis/shared';
 import fastCsv from 'fast-csv';
 import { Collection, Db, ObjectID } from 'mongodb';
 import * as promisesAll from 'promises-all';
 import { Readable } from 'stream';
 
-import { UploadProcess } from '@masterthesis/shared';
-import { getDataset } from '../resolvers/dataset';
-import { Dataset, Valueschema } from './dataset';
-import { createEntry } from './entry';
+import { getDataset } from '../../main/workspace/dataset';
+import { Dataset, Valueschema } from '../../main/workspace/dataset';
+import { createEntry } from '../../main/workspace/entry';
 
 export class UploadEntryError extends Error {
   constructor(customMessage: string, errorName: string) {

@@ -14,7 +14,8 @@ describe('SumNode', () => {
       {
         a: 17,
         b: 15
-      }
+      },
+      null
     );
 
     expect(res.outputs.sum).toBe(32);

@@ -14,7 +14,8 @@ describe('MultiplicationNode', () => {
       {
         a: 3,
         b: 2
-      }
+      },
+      null
     );
 
     expect(res.outputs.product).toBe(6);
@@ -26,7 +27,8 @@ describe('MultiplicationNode', () => {
       {
         a: -12,
         b: 12
-      }
+      },
+      null
     );
 
     expect(res.outputs.product).toBe(-144);

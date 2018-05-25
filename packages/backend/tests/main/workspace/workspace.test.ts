@@ -21,6 +21,7 @@ import {
   getWorkspacesCollection,
   updateWorkspace
 } from '../../../src/main/workspace/workspace';
+import { NeverGoHereError } from '../../test-utils';
 
 let connection;
 let db: Db;
@@ -72,7 +73,7 @@ describe('Workspaces', () => {
 
     try {
       const ws = await createWorkspace(db, name, description);
-      throw new Error('Should fail');
+      throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toEqual('Name of workspace must not be empty.');
     }
@@ -81,7 +82,7 @@ describe('Workspaces', () => {
   test('should not delete unknown workspace', async () => {
     try {
       const ws = await deleteWorkspace(db, 'abc');
-      throw new Error('Should fail');
+      throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toEqual('Invalid ID');
     }

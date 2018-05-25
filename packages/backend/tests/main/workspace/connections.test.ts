@@ -1,18 +1,8 @@
 import {
-  DatasetOutputNodeDef,
-  IOValues,
-  JoinDatasetsNodeDef,
-  NodeInstance,
-  NodeState,
   NumberInputNodeDef,
   NumberOutputNodeDef,
-  ProcessState,
-  SocketInstance,
-  StringInputNodeDef,
-  Workspace
-} from '@masterthesis/shared';
+  SocketInstance} from '@masterthesis/shared';
 import { Db, MongoClient } from 'mongodb';
-import sleep from 'sleep-promise';
 import {
   createConnection,
   deleteConnection,
@@ -20,6 +10,7 @@ import {
 } from '../../../src/main/workspace/connections';
 import { createNode } from '../../../src/main/workspace/nodes';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
+import { NeverGoHereError, VALID_OBJECT_ID } from '../../test-utils';
 
 let connection;
 let db: Db;
@@ -76,7 +67,7 @@ describe('Connections', () => {
 
     try {
       await createConnection(db, toSocket, fromSocket);
-      throw new Error('Should not happen');
+      throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Cyclic dependencies not allowed!');
     }
@@ -90,12 +81,12 @@ describe('Connections', () => {
     const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
     const toSocket: SocketInstance = {
       name: 'val',
-      nodeId: '5b07b3129ba658500b75a29a'
+      nodeId: VALID_OBJECT_ID
     };
 
     try {
       await createConnection(db, toSocket, fromSocket);
-      throw new Error('Should not happen');
+      throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unknown node!');
     }
@@ -116,7 +107,7 @@ describe('Connections', () => {
 
     try {
       await createConnection(db, toSocket, fromSocket);
-      throw new Error('Should not happen');
+      throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Nodes live in different workspaes!');
     }

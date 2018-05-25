@@ -26,6 +26,7 @@ import {
   getWorkspace,
   getWorkspacesCollection
 } from '../../../src/main/workspace/workspace';
+import { NeverGoHereError } from '../../test-utils';
 
 let connection;
 let db: Db;
@@ -72,7 +73,7 @@ describe('Nodes', () => {
   test('should not create node for unknown workspace', async () => {
     try {
       await createNode(db, NumberInputNodeDef.name, '123', 0, 0);
-      throw new Error('Should not get through');
+      throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unknown workspace!');
     }
@@ -101,7 +102,7 @@ describe('Nodes', () => {
   test('should not delete unknown node', async () => {
     try {
       const ws = await deleteNode(db, 'abc');
-      throw new Error('Should fail');
+      throw NeverGoHereError;
     } catch (err) {
       expect(err).toEqual(new Error('Invalid ID'));
     }

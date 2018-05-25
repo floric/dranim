@@ -21,9 +21,13 @@ describe('StringOutputNode', () => {
     const inputValue = 'a huge text';
     const form = { value: inputValue };
 
-    const res = await StringOutputNode.onServerExecution(form, {
-      string: inputValue
-    });
+    const res = await StringOutputNode.onServerExecution(
+      form,
+      {
+        string: inputValue
+      },
+      null
+    );
 
     expect(res.results.value).toBe(inputValue);
     expect(Object.keys(res.outputs).length).toBe(0);

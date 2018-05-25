@@ -1,6 +1,6 @@
 import { Collection, Db, ObjectID } from 'mongodb';
 
-import { getDataset } from './dataset';
+import { getDataset } from '../../main/workspace/dataset';
 import { UploadEntryError } from './upload';
 
 export interface Entry {
