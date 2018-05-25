@@ -1,9 +1,12 @@
 import { NodeDef } from '../nodes';
 import { DataSocket } from '../sockets';
-import { Dataset } from '../workspace';
+
+export interface DatasetRef {
+  id: string;
+}
 
 export interface DatasetInputNodeOutputs {
-  dataset: Dataset;
+  dataset: DatasetRef;
 }
 
 export interface DatasetInputNodeForm {
@@ -19,12 +22,12 @@ export const DatasetInputNodeDef: NodeDef<{}, DatasetInputNodeOutputs> = {
 };
 
 export interface JoinDatasetsNodeInputs {
-  datasetA: Dataset;
-  datasetB: Dataset;
+  datasetA: DatasetRef;
+  datasetB: DatasetRef;
 }
 
 export interface JoinDatasetsNodeOutputs {
-  joined: Dataset;
+  joined: DatasetRef;
 }
 
 export interface JoinDatasetsNodeForm {
@@ -49,11 +52,11 @@ export const JoinDatasetsNodeDef: NodeDef<
 };
 
 export interface SelectValuesNodeInputs {
-  dataset: Dataset;
+  dataset: DatasetRef;
 }
 
 export interface SelectValuesNodeOutputs {
-  dataset: Dataset;
+  dataset: DatasetRef;
 }
 
 export interface SelectValuesNodeForm {
@@ -76,11 +79,11 @@ export const SelectValuesNodeDef: NodeDef<
 };
 
 export interface DatasetOutputNodeInputs {
-  dataset: Dataset;
+  dataset: DatasetRef;
 }
 
 export interface DatasetOutputNodeResults {
-  dataset: 'todo';
+  dataset: DatasetRef;
 }
 
 export interface DatasetOutputNodeForm {

@@ -1,14 +1,15 @@
-import * as React from 'react';
-import { Form, Select } from 'antd';
-import { ClientNodeDef } from '../AllNodes';
 import {
-  SelectValuesNodeInputs,
-  SelectValuesNodeOutputs,
   SelectValuesNodeDef,
-  SelectValuesNodeForm
+  SelectValuesNodeForm,
+  SelectValuesNodeInputs,
+  SelectValuesNodeOutputs
 } from '@masterthesis/shared';
-import { getValueOrDefault } from '../utils';
+import { Form } from 'antd';
+import * as React from 'react';
+
 import { FormSelect } from '../../utils/form-utils';
+import { ClientNodeDef } from '../AllNodes';
+import { getValueOrDefault } from '../utils';
 
 export const DatasetSelectValuesNode: ClientNodeDef<
   SelectValuesNodeInputs,

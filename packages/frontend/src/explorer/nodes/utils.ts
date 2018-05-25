@@ -1,12 +1,13 @@
-import { nodeTypes, EditorContext } from './AllNodes';
 import {
   ConnectionInstance,
+  FormValues,
+  parseNodeForm,
   SocketDef,
   SocketMetaDef,
-  SocketMetas,
-  parseNodeForm,
-  FormValues
+  SocketMetas
 } from '@masterthesis/shared';
+
+import { EditorContext, nodeTypes } from './AllNodes';
 
 export const getInputNode = (
   socketName: string,

@@ -1,20 +1,19 @@
-import * as React from 'react';
-import { Card, Row, Col, TreeSelect } from 'antd';
-import { css } from 'glamor';
-
-import { nodeTypes, nodeTypesTree } from './nodes/AllNodes';
-import { EXPLORER_CONTAINER, updateStage } from './editor/EditorStage';
-import { NODE_WIDTH } from './editor/Nodes';
-import { WrappedFormUtils } from 'antd/lib/form/Form';
-import { PropertiesForm } from './editor/PropertiesForm';
-import { AsyncButton } from '../components/AsyncButton';
 import {
   ConnectionInstance,
+  Dataset,
   NodeInstance,
-  SocketInstance,
-  Dataset
+  SocketInstance
 } from '@masterthesis/shared';
-import { Ref } from 'react';
+import { Card, Col, Row, TreeSelect } from 'antd';
+import { css } from 'glamor';
+import React, { Ref } from 'react';
+
+import { WrappedFormUtils } from 'antd/lib/form/Form';
+import { AsyncButton } from '../components/AsyncButton';
+import { EXPLORER_CONTAINER, updateStage } from './editor/EditorStage';
+import { NODE_WIDTH } from './editor/Nodes';
+import { PropertiesForm } from './editor/PropertiesForm';
+import { nodeTypes, nodeTypesTree } from './nodes/AllNodes';
 
 const filterTreeNode = (inputValue: string, treeNode: any) => {
   if (!treeNode.props.index) {
@@ -84,13 +83,13 @@ export class ExplorerEditor extends React.Component<
     }
   }
 
-  private changeState = async (newState: ExplorerEditorState) => {
-    this.setState(newState);
-  };
-
   public updateCanvas() {
     updateStage(EXPLORER_CONTAINER, this.props, this.state, this.changeState);
   }
+
+  private changeState = async (newState: ExplorerEditorState) => {
+    this.setState(newState);
+  };
 
   private handleDeleteSelectedNode = async () => {
     const { selectedNode } = this.state;

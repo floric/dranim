@@ -11,6 +11,6 @@ describe('DatasetInputNode', () => {
   test('should get output value from form', async () => {
     const dsId = 'abc-cde';
     const res = await DatasetInputNode.onServerExecution({ dataset: dsId }, {});
-    expect(res.outputs.dataset).toBe(dsId);
+    expect(res.outputs.dataset).toEqual({ id: dsId });
   });
 });

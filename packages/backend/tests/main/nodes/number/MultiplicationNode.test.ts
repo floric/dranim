@@ -12,23 +12,23 @@ describe('MultiplicationNode', () => {
     const res = await MultiplicationNode.onServerExecution(
       {},
       {
-        a: '3',
-        b: '2'
+        a: 3,
+        b: 2
       }
     );
 
-    expect(res.outputs.product).toBe('6');
+    expect(res.outputs.product).toBe(6);
   });
 
   test('should multiply two numbers with negative value', async () => {
     const res = await MultiplicationNode.onServerExecution(
       {},
       {
-        a: '-12',
-        b: '12'
+        a: -12,
+        b: 12
       }
     );
 
-    expect(res.outputs.product).toBe('-144');
+    expect(res.outputs.product).toBe(-144);
   });
 });

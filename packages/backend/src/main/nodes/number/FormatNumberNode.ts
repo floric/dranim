@@ -2,7 +2,7 @@ const numbro = require('numbro');
 import { FormatNumberNodeDef, ServerNodeDef } from '@masterthesis/shared';
 
 export const FormatNumberNode: ServerNodeDef<
-  { number: string },
+  { number: number },
   { formatted: string },
   {
     mantissa?: number;
@@ -16,16 +16,13 @@ export const FormatNumberNode: ServerNodeDef<
 > = {
   name: FormatNumberNodeDef.name,
   isInputValid: async input => {
-    const val = input.number;
-
-    if (!val || Number.isNaN(Number.parseFloat(val))) {
+    if (Number.isNaN(input.number)) {
       return false;
     }
 
     return true;
   },
   onServerExecution: async (form, inputs) => {
-    const val = Number.parseFloat(inputs.number);
     const mantissa = form.mantissa || 0;
     const optionalMantissa = form['opt-mantissa'] || true;
     const thousandSeparated = form['thousands-separated'] || true;
@@ -34,7 +31,7 @@ export const FormatNumberNode: ServerNodeDef<
     const output = form.output || 'number';
     const totalLength = form['average-total'] || 1;
 
-    const formatted = numbro(val).format({
+    const formatted = numbro(inputs.number).format({
       thousandSeparated,
       spaceSeparated,
       mantissa,

@@ -1,4 +1,4 @@
-import { Dataset } from './workspace';
+import { DatasetRef } from './nodes/dataset';
 
 export enum SocketType {
   INPUT = 'INPUT',
@@ -37,7 +37,7 @@ export type SocketMetasGeneric<T, M extends SocketMetaContent<T>> = {
   [Name in keyof T]: SocketMetaDef<M[Name]>
 };
 export type ConditionalMetaTypes<T> = {
-  [Name in keyof T]: T[Name] extends Dataset ? DatasetMeta : {}
+  [Name in keyof T]: T[Name] extends DatasetRef ? DatasetMeta : {}
 };
 export type SocketDefs<T> = SocketDefsGeneric<T, ConditionalMetaTypes<T>>;
 export type SocketMetas<T> = SocketMetasGeneric<T, ConditionalMetaTypes<T>>;

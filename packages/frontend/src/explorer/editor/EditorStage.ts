@@ -1,6 +1,6 @@
 import * as Konva from 'konva';
 
-import { ExplorerEditorState, ExplorerEditorProps } from '../ExplorerEditor';
+import { ExplorerEditorProps, ExplorerEditorState } from '../ExplorerEditor';
 import { renderConnection } from './Connections';
 import { renderNode } from './Nodes';
 

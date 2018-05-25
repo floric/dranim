@@ -1,12 +1,12 @@
-import * as React from 'react';
-import { Form, Input } from 'antd';
-
-import { ClientNodeDef } from '../AllNodes';
 import {
   DatasetOutputNodeDef,
-  DatasetOutputNodeInputs,
-  DatasetOutputNodeForm
+  DatasetOutputNodeForm,
+  DatasetOutputNodeInputs
 } from '@masterthesis/shared';
+import { Form, Input } from 'antd';
+import * as React from 'react';
+
+import { ClientNodeDef } from '../AllNodes';
 import { getValueOrDefault } from '../utils';
 
 export const DatasetOutputNode: ClientNodeDef<

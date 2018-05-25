@@ -1,12 +1,14 @@
-import * as React from 'react';
-import { InputNumber, Select, Form, Checkbox } from 'antd';
-import { ClientNodeDef } from '../AllNodes';
 import {
   FormatNumberNodeDef,
   FormatNumberNodeForm,
   FormatNumberNodeInputs,
   FormatNumberNodeOutputs
 } from '@masterthesis/shared';
+import { Checkbox, Form, InputNumber } from 'antd';
+import * as React from 'react';
+
+import { FormSelect } from '../../utils/form-utils';
+import { ClientNodeDef } from '../AllNodes';
 import { getValueOrDefault } from '../utils';
 
 export const FormatNumberNode: ClientNodeDef<
@@ -64,23 +66,16 @@ export const FormatNumberNode: ClientNodeDef<
           {getFieldDecorator('output', {
             initialValue: output
           })(
-            <Select style={{ width: 200 }} placeholder="Output">
-              <Select.Option value="number" key="number">
-                Number
-              </Select.Option>
-              <Select.Option value="ordinal" key="ordinal">
-                Ordinal
-              </Select.Option>
-              <Select.Option value="byte" key="byte">
-                Bytes
-              </Select.Option>
-              <Select.Option value="percent" key="percent">
-                Percentage
-              </Select.Option>
-              <Select.Option value="time" key="time">
-                Time from seconds
-              </Select.Option>
-            </Select>
+            <FormSelect
+              placeholder="Select output type"
+              values={[
+                { key: 'number', display: 'Number' },
+                { key: 'ordinal', display: 'Ordinal' },
+                { key: 'byte', display: 'Bytes' },
+                { key: 'percent', display: 'Percentage' },
+                { key: 'time', display: 'Time from seconds' }
+              ]}
+            />
           )}
         </Form.Item>
       </>
