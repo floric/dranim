@@ -32,6 +32,3 @@ checks:
 plugins:
   fixme:
     enabled: true
-  tslint:
-    enabled: true
-    config: tslint.json
