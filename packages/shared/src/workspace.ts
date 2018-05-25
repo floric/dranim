@@ -1,5 +1,5 @@
+import { ConnectionInstance, NodeInstance } from './nodes';
 import { DataType } from './sockets';
-import { NodeInstance, ConnectionInstance } from './nodes';
 
 export interface Value {
   val: string;

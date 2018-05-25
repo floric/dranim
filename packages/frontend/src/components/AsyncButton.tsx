@@ -1,7 +1,7 @@
-import * as React from 'react';
-import { Component } from 'react';
 import { Button, Popconfirm } from 'antd';
 import { ButtonProps } from 'antd/lib/button';
+import * as React from 'react';
+import { Component } from 'react';
 
 interface AsyncButtonState {
   isLoading: boolean;

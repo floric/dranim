@@ -1,18 +1,18 @@
+import { NodeDef } from './nodes';
 import {
   DatasetInputNodeDef,
   DatasetOutputNodeDef,
   JoinDatasetsNodeDef,
   SelectValuesNodeDef
 } from './nodes/dataset';
-import { StringInputNodeDef, StringOutputNodeDef } from './nodes/string';
 import {
-  NumberInputNodeDef,
-  NumberOutputNodeDef,
   FormatNumberNodeDef,
   MultiplicationNodeDef,
+  NumberInputNodeDef,
+  NumberOutputNodeDef,
   SumNodeDef
 } from './nodes/number';
-import { NodeDef } from './nodes';
+import { StringInputNodeDef, StringOutputNodeDef } from './nodes/string';
 
 export const NodesMap = new Map<string, NodeDef>(
   [
