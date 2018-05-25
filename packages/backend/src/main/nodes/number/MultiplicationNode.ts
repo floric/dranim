@@ -5,18 +5,15 @@ import {
   ServerNodeDef
 } from '@masterthesis/shared';
 
+import { validateNumber } from './utils';
+
 export const MultiplicationNode: ServerNodeDef<
   MultiplicationNodeInputs,
   MultiplicationNodeOutputs
 > = {
   name: MultiplicationNodeDef.name,
-  isInputValid: async values => {
-    if (Number.isNaN(values.a) || Number.isNaN(values.b)) {
-      return false;
-    }
-
-    return true;
-  },
+  isInputValid: async values =>
+    validateNumber(values.a) && validateNumber(values.b),
   onServerExecution: async (form, values) => {
     return {
       outputs: {

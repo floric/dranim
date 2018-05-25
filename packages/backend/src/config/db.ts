@@ -10,7 +10,7 @@ const config = {
 
 export const mongoDbClient = async (): Promise<MongoClient> => {
   return promiseRetry(async (retry, i) => {
-    console.log(`Retry ${i} connect to DB`);
+    console.log(`Retry ${i} connect to MongoDB`);
     try {
       return await tryConnectoDb();
     } catch (err) {

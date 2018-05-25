@@ -8,6 +8,17 @@ describe('SumNode', () => {
     expect(SumNode.isInputValid).toBeDefined();
   });
 
+  test('should validate input', async () => {
+    let res = await SumNode.isInputValid({ a: 3, b: 2 });
+    expect(res).toBe(true);
+
+    res = await SumNode.isInputValid({ a: -3, b: 2 });
+    expect(res).toBe(true);
+
+    res = await SumNode.isInputValid({ a: null, b: 2 });
+    expect(res).toBe(false);
+  });
+
   test('should sum two numbers', async () => {
     const res = await SumNode.onServerExecution(
       {},

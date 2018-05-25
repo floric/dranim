@@ -4,6 +4,7 @@ import {
   NumberInputNodeOutputs,
   ServerNodeDef
 } from '@masterthesis/shared';
+import { validateNumber } from './utils';
 
 export const NumberInputNode: ServerNodeDef<
   {},
@@ -11,18 +12,11 @@ export const NumberInputNode: ServerNodeDef<
   NumberInputNodeForm
 > = {
   name: NumberInputNodeDef.name,
-  isFormValid: async form => {
-    const input = form.value;
-    if (!input || Number.isNaN(input)) {
-      return false;
-    }
-
-    return true;
-  },
-  onServerExecution: async (form, values) =>
+  isFormValid: async form => validateNumber(form.value),
+  onServerExecution: (form, values) =>
     Promise.resolve({
       outputs: {
-        val: form.value ? form.value : 0
+        val: form.value!
       }
     })
 };

@@ -1,12 +1,13 @@
 import * as React from 'react';
-import { ApolloQueryResult } from 'apollo-client';
-import { Row, Table, Col, Card, Tag } from 'antd';
-import { Mutation } from 'react-apollo';
-import gql from 'graphql-tag';
 
-import { CreateValueSchemaForm } from '../forms/CreateValueSchemaForm';
-import { tryOperation } from '../../utils/form';
 import { Dataset } from '@masterthesis/shared';
+import { Card, Col, Row, Table, Tag } from 'antd';
+import { ApolloQueryResult } from 'apollo-client';
+import gql from 'graphql-tag';
+import { Mutation } from 'react-apollo';
+
+import { tryOperation } from '../../utils/form';
+import { CreateValueSchemaForm } from '../forms/CreateValueSchemaForm';
 
 const ADD_VALUE_SCHEMA = gql`
   mutation addValueSchema(

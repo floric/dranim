@@ -8,6 +8,17 @@ describe('MultiplicationNode', () => {
     expect(MultiplicationNode.isInputValid).toBeDefined();
   });
 
+  test('should validate input', async () => {
+    let res = await MultiplicationNode.isInputValid({ a: 3, b: 2 });
+    expect(res).toBe(true);
+
+    res = await MultiplicationNode.isInputValid({ a: -3, b: 2 });
+    expect(res).toBe(true);
+
+    res = await MultiplicationNode.isInputValid({ a: null, b: 2 });
+    expect(res).toBe(false);
+  });
+
   test('should multiply two numbers', async () => {
     const res = await MultiplicationNode.onServerExecution(
       {},

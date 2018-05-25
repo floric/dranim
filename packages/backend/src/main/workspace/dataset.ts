@@ -1,10 +1,11 @@
+import { DataType } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { getEntryCollection } from './entry';
 
 export interface Valueschema {
   name: string;
-  type: 'String' | 'Boolean' | 'Date' | 'Number';
+  type: DataType;
   required: boolean;
   fallback: string;
   unique: boolean;
@@ -15,7 +16,6 @@ export interface Dataset {
   id: string;
   name: string;
   valueschemas: Array<Valueschema>;
-  entries: Array<number>;
 }
 
 export const getDatasetsCollection = (db: Db): Collection<Dataset> => {
@@ -25,7 +25,7 @@ export const getDatasetsCollection = (db: Db): Collection<Dataset> => {
 export const createDataset = async (db: Db, name: string): Promise<Dataset> => {
   const collection = getDatasetsCollection(db);
   if (name.length === 0) {
-    throw new Error("Name mustn't be empty.");
+    throw new Error('Name must not be empty.');
   }
 
   const existingDatasetsWithSameName = await collection.findOne({ name });
@@ -106,7 +106,7 @@ export const addValueSchema = async (
   }
 
   if (schema.name.length === 0) {
-    throw new Error("Name mustn't be empty.");
+    throw new Error('Name must not be empty.');
   }
 
   if (ds.valueschemas.find(s => s.name === schema.name)) {

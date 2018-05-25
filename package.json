@@ -12,16 +12,18 @@
     "start": "lerna run start --stream",
     "test": "lerna run test --stream",
     "lint": "lerna run lint --stream",
-    "clean": "lerna run clean --stream && rm -rf node_modules && sudo rm -rf data",
+    "clean":
+      "lerna run clean --stream && rm -rf node_modules && sudo rm -rf data",
     "mongodb": "sudo docker run -p 127.0.0.1:27017:27017 mongo:latest"
   },
   "author": {
     "name": "Florian Richter",
     "email": "floririchte@gmail.com"
   },
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": ["packages/*"],
+  "prettier": {
+    "singleQuote": true
+  },
   "devDependencies": {
     "apollo-codegen": "^0.19.1",
     "lerna": "^2.11.0",

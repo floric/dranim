@@ -1,14 +1,15 @@
 import * as React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-import { Query, Mutation } from 'react-apollo';
-import gql from 'graphql-tag';
 
-import { ExplorerEditor } from '../../explorer/ExplorerEditor';
+import gql from 'graphql-tag';
+import { Mutation, Query } from 'react-apollo';
+import { RouteComponentProps } from 'react-router';
+
 import {
+  CustomErrorCard,
   LoadingCard,
-  UnknownErrorCard,
-  CustomErrorCard
+  UnknownErrorCard
 } from '../../components/CustomCards';
+import { ExplorerEditor } from '../../explorer/ExplorerEditor';
 import { deepCopyResponse, tryOperation } from '../../utils/form';
 
 const WORKSPACE_NODE_SELECTION = gql`

@@ -6,6 +6,7 @@
     "array-type": {
       "options": "generic"
     },
+    "quotemark": [true, "single", "jsx-double"],
     "member-ordering": false,
     "no-console": false,
     "jsx-boolean-value": false,

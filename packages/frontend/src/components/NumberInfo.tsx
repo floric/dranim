@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { Row, Col } from 'antd';
 import { SFC } from 'react';
+
+import { Col, Row } from 'antd';
 
 export interface INumberInfoProps {
   total: number;

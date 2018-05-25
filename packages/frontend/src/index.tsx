@@ -1,14 +1,14 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { BrowserRouter } from 'react-router-dom';
 import { ApolloProvider } from 'react-apollo';
+import { BrowserRouter } from 'react-router-dom';
 
 import App from './App';
 import { client } from './io/apolloClient';
 
-import 'antd/dist/antd.css';
 import 'ant-design-pro/dist/ant-design-pro.css';
+import 'antd/dist/antd.css';
 
 ReactDOM.render(
   <BrowserRouter>

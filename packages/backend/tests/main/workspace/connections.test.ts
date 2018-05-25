@@ -1,7 +1,8 @@
 import {
   NumberInputNodeDef,
   NumberOutputNodeDef,
-  SocketInstance} from '@masterthesis/shared';
+  SocketInstance
+} from '@masterthesis/shared';
 import { Db, MongoClient } from 'mongodb';
 import {
   createConnection,
@@ -63,7 +64,7 @@ describe('Connections', () => {
     const toSocket: SocketInstance = { name: 'val', nodeId: nodeB.id };
 
     const newConn = await createConnection(db, fromSocket, toSocket);
-    expect(newConn).toBeDefined();
+    expect(newConn).not.toBe(null);
 
     try {
       await createConnection(db, toSocket, fromSocket);

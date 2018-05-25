@@ -1,11 +1,13 @@
 import * as React from 'react';
 import { SFC } from 'react';
-import { Spin, Icon, Row, Col, Card, Button, List } from 'antd';
+
+import { Button, Card, Col, Icon, List, Row, Spin } from 'antd';
 import { SpinProps } from 'antd/lib/spin';
 import { css } from 'glamor';
-import { isApolloError, ApolloError } from 'apollo-client/errors/ApolloError';
 import { History } from 'history';
 import { withRouter } from 'react-router';
+
+import { ApolloError, isApolloError } from 'apollo-client/errors/ApolloError';
 
 export const LoadingIcon = (
   <Icon type="loading" style={{ fontSize: 24 }} spin />

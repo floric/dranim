@@ -1,16 +1,18 @@
 import * as React from 'react';
-import { RouteComponentProps, Link } from 'react-router-dom';
-import { Row, Col, Card, Tooltip } from 'antd';
-import { Mutation, Query } from 'react-apollo';
-import gql from 'graphql-tag';
-import { distanceInWordsToNow } from 'date-fns';
 
+import { Workspace } from '@masterthesis/shared';
+import { Card, Col, Row, Tooltip } from 'antd';
+import { distanceInWordsToNow } from 'date-fns';
+import gql from 'graphql-tag';
+import { Mutation, Query } from 'react-apollo';
+import { RouteComponentProps } from 'react-router';
+import { Link } from 'react-router-dom';
+
+import { PageHeaderCard } from '../components/PageHeaderCard';
+import { AsyncButton } from './../components/AsyncButton';
 import { LoadingCard, UnknownErrorCard } from './../components/CustomCards';
 import { tryOperation } from './../utils/form';
-import { AsyncButton } from './../components/AsyncButton';
 import { CreateWorkspaceForm } from './forms/CreateWorkspaceForm';
-import { PageHeaderCard } from '../components/PageHeaderCard';
-import { Workspace } from '@masterthesis/shared';
 
 export const ALL_WORKSPACES = gql`
   {

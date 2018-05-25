@@ -4,14 +4,14 @@ import {
   SelectValuesNodeInputs,
   SelectValuesNodeOutputs,
   ServerNodeDef
-} from "@masterthesis/shared";
+} from '@masterthesis/shared';
 
 import {
   addValueSchema,
   createDataset,
   getDataset
-} from "../../../main/workspace/dataset";
-import { validateDataset } from "./utils";
+} from '../../../main/workspace/dataset';
+import { validateDataset, validateDatasetId } from './utils';
 
 export const SelectValuesNode: ServerNodeDef<
   SelectValuesNodeInputs,
@@ -19,13 +19,7 @@ export const SelectValuesNode: ServerNodeDef<
   SelectValuesNodeForm
 > = {
   name: SelectValuesNodeDef.name,
-  isInputValid: async inputs => {
-    if (!inputs.dataset || !inputs.dataset.id) {
-      return false;
-    }
-
-    return true;
-  },
+  isInputValid: async inputs => validateDatasetId(inputs.dataset),
   isFormValid: async form => {
     if (!form.values) {
       return false;
@@ -44,11 +38,11 @@ export const SelectValuesNode: ServerNodeDef<
     const schemasOnDs = existingDs!.valueschemas.map(n => n.name);
     const unknownValues = form.values!.filter(n => !schemasOnDs.includes(n));
     if (unknownValues.length > 0) {
-      throw new Error("Unknown value specified");
+      throw new Error('Unknown value specified');
     }
 
     // TODO proper dynamic naming of generated datasets
-    const newDs = await createDataset(db, "created-name");
+    const newDs = await createDataset(db, 'created-name');
     await Promise.all(
       existingDs!.valueschemas
         .filter(s => form.values!.includes(s.name))

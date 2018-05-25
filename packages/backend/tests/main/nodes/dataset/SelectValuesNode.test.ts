@@ -1,18 +1,18 @@
-import { DataType, SelectValuesNodeDef } from "@masterthesis/shared";
-import { Db, MongoClient } from "mongodb";
+import { DataType, SelectValuesNodeDef } from '@masterthesis/shared';
+import { Db, MongoClient } from 'mongodb';
 
-import { SelectValuesNode } from "../../../../src/main/nodes/dataset/SelectValuesNode";
+import { SelectValuesNode } from '../../../../src/main/nodes/dataset/SelectValuesNode';
 import {
   addValueSchema,
   createDataset,
   getDataset
-} from "../../../../src/main/workspace/dataset";
-import { NeverGoHereError } from "../../../test-utils";
+} from '../../../../src/main/workspace/dataset';
+import { NeverGoHereError } from '../../../test-utils';
 
 let connection;
 let db: Db;
 
-describe("SelectValuesNode", () => {
+describe('SelectValuesNode', () => {
   beforeAll(async () => {
     connection = await MongoClient.connect((global as any).__MONGO_URI__);
     db = await connection.db((global as any).__MONGO_DB_NAME__);
@@ -27,14 +27,14 @@ describe("SelectValuesNode", () => {
     jest.resetAllMocks();
   });
 
-  test("should have correct properties", () => {
+  test('should have correct properties', () => {
     expect(SelectValuesNode.name).toBe(SelectValuesNodeDef.name);
     expect(SelectValuesNode.isFormValid).toBeDefined();
     expect(SelectValuesNode.isInputValid).toBeDefined();
   });
 
-  test("should have valid inputs and invalid inputs", async () => {
-    let res = await SelectValuesNode.isInputValid({ dataset: { id: "test" } });
+  test('should have valid inputs and invalid inputs', async () => {
+    let res = await SelectValuesNode.isInputValid({ dataset: { id: 'test' } });
     expect(res).toBe(true);
 
     res = await SelectValuesNode.isInputValid({ dataset: { id: null } });
@@ -44,36 +44,36 @@ describe("SelectValuesNode", () => {
     expect(res).toBe(false);
   });
 
-  test("should validate form", async () => {
+  test('should validate form', async () => {
     let res = await SelectValuesNode.isFormValid({ values: [] });
     expect(res).toBe(false);
 
     res = await SelectValuesNode.isFormValid({ values: null });
     expect(res).toBe(false);
 
-    res = await SelectValuesNode.isFormValid({ values: ["test"] });
+    res = await SelectValuesNode.isFormValid({ values: ['test'] });
     expect(res).toBe(true);
   });
 
-  test("should select values from dataset and create new", async () => {
-    const ds = await createDataset(db, "test");
+  test('should select values from dataset and create new', async () => {
+    const ds = await createDataset(db, 'test');
     await addValueSchema(db, ds.id, {
-      name: "test",
+      name: 'test',
       required: true,
       type: DataType.STRING,
-      fallback: "",
+      fallback: '',
       unique: false
     });
     await addValueSchema(db, ds.id, {
-      name: "abc",
+      name: 'abc',
       required: false,
       type: DataType.STRING,
-      fallback: "",
+      fallback: '',
       unique: false
     });
 
     const res = await SelectValuesNode.onServerExecution(
-      { values: ["test"] },
+      { values: ['test'] },
       { dataset: { id: ds.id } },
       db
     );
@@ -82,43 +82,43 @@ describe("SelectValuesNode", () => {
     const newDsId = res.outputs.dataset.id;
     const newDs = await getDataset(db, newDsId);
 
-    expect(newDs).toBeDefined();
+    expect(newDs).not.toBe(null);
     expect(newDs.valueschemas.length).toBe(1);
-    expect(newDs.valueschemas[0].name).toBe("test");
+    expect(newDs.valueschemas[0].name).toBe('test');
   });
 
-  test("should select values from dataset and create new", async () => {
-    const ds = await createDataset(db, "test");
+  test('should select values from dataset and create new', async () => {
+    const ds = await createDataset(db, 'test');
     await addValueSchema(db, ds.id, {
-      name: "test",
+      name: 'test',
       required: true,
       type: DataType.STRING,
-      fallback: "",
+      fallback: '',
       unique: false
     });
 
     try {
       await SelectValuesNode.onServerExecution(
-        { values: ["bla", "test"] },
+        { values: ['bla', 'test'] },
         { dataset: { id: ds.id } },
         db
       );
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe("Unknown value specified");
+      expect(err.message).toBe('Unknown value specified');
     }
   });
 
-  test("should validate dataset", async () => {
+  test('should validate dataset', async () => {
     try {
       const res = await SelectValuesNode.onServerExecution(
-        { values: ["test"] },
-        { dataset: { id: "ds.id" } },
+        { values: ['test'] },
+        { dataset: { id: 'ds.id' } },
         db
       );
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe("Unknown dataset");
+      expect(err.message).toBe('Unknown dataset');
     }
   });
 });

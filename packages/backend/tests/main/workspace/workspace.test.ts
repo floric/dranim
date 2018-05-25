@@ -13,12 +13,10 @@ import {
 import { Db, MongoClient } from 'mongodb';
 import sleep from 'sleep-promise';
 
-import { createNode, deleteNode } from '../../../src/main/workspace/nodes';
 import {
   createWorkspace,
   deleteWorkspace,
   getWorkspace,
-  getWorkspacesCollection,
   updateWorkspace
 } from '../../../src/main/workspace/workspace';
 import { NeverGoHereError } from '../../test-utils';

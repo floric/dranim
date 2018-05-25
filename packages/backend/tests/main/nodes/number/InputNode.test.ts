@@ -8,6 +8,17 @@ describe('NumberInputNode', () => {
     expect(NumberInputNode.isInputValid).toBeUndefined();
   });
 
+  test('should validate input', async () => {
+    let res = await NumberInputNode.isFormValid({ value: 3 });
+    expect(res).toBe(true);
+
+    res = await NumberInputNode.isFormValid({ value: -123.3 });
+    expect(res).toBe(true);
+
+    res = await NumberInputNode.isFormValid({ value: null });
+    expect(res).toBe(false);
+  });
+
   test('should get output value from form', async () => {
     const res = await NumberInputNode.onServerExecution({ value: 2 }, {}, null);
     expect(res.outputs.val).toBe(2);

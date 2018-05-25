@@ -1,4 +1,6 @@
+import { DataType } from '@masterthesis/shared';
 import { Db } from 'mongodb';
+
 import {
   addValueSchema,
   createDataset,
@@ -17,7 +19,7 @@ export const createSTRDemoData = async (db: Db) => {
   }
   await createWorkspace(
     db,
-    'Trade volumes over time',
+    'Trade volumes',
     'Contains aggregation and filtering for trading development from 1600 until 1800.'
   );
   return true;
@@ -26,280 +28,280 @@ export const createSTRDemoData = async (db: Db) => {
 export const passagesSchemas: Array<Valueschema> = [
   {
     name: 'passage_id',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: true
   },
   {
     name: 'pass_day',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '1',
     unique: false
   },
   {
     name: 'pass_month',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '1',
     unique: false
   },
   {
     name: 'pass_year',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '1',
     unique: false
   },
   {
     name: 'master_firstname',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'master_patronymic',
-    type: 'String',
+    type: DataType.STRING,
     required: false,
     fallback: '',
     unique: false
   },
   {
     name: 'master_article',
-    type: 'String',
+    type: DataType.STRING,
     required: false,
     fallback: '',
     unique: false
   },
   {
     name: 'master_surname',
-    type: 'String',
+    type: DataType.STRING,
     required: false,
     fallback: '',
     unique: false
   },
   {
     name: 'domicile_city',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'domicile_region',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'domicile_country_1763',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'domicile_country_1795',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'domicile_country_1815',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'domicile_country_1830',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'domicile_latitude',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'domicile_longitude',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'domicile_decLatitude',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '0',
     unique: false
   },
   {
     name: 'domicile_decLongitude',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '0',
     unique: false
   },
   {
     name: 'departure_city',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'departure_region',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'departure_country_1763',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'departure_country_1795',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'departure_country_1815',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'departure_country_1830',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'departure_coords_latitude',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'departure_coords_longitude',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'departure_coords_decLatitude',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '0',
     unique: false
   },
   {
     name: 'departure_coords_decLongitude',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '0',
     unique: false
   },
   {
     name: 'destination_city',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'destination_region',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'destination_country_1763',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'destination_country_1795',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'destination_country_1815',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'destination_country_1830',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'destination_coords_latitude',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'destination_coords_longitude',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'destination_coords_decLatitude',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '0',
     unique: false
   },
   {
     name: 'destination_coords_decLongitude',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '0',
     unique: false
   },
   {
     name: 'commodities_number',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '1',
     unique: false
   },
   {
     name: 'tonnes',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '0',
     unique: false
@@ -309,301 +311,301 @@ export const passagesSchemas: Array<Valueschema> = [
 export const commoditiesSchemas: Array<Valueschema> = [
   {
     name: 'commodity_id',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: true
   },
   {
     name: 'passage_id',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'pass_day',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '1',
     unique: false
   },
   {
     name: 'pass_month',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '1',
     unique: false
   },
   {
     name: 'pass_year',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '1',
     unique: false
   },
   {
     name: 'master_firstname',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'master_patronymic',
-    type: 'String',
+    type: DataType.STRING,
     required: false,
     fallback: '',
     unique: false
   },
   {
     name: 'master_article',
-    type: 'String',
+    type: DataType.STRING,
     required: false,
     fallback: '',
     unique: false
   },
   {
     name: 'master_surname',
-    type: 'String',
+    type: DataType.STRING,
     required: false,
     fallback: '',
     unique: false
   },
   {
     name: 'domicile_city',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'domicile_region',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'domicile_country_1763',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'domicile_country_1795',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'domicile_country_1815',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'domicile_country_1830',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'domicile_latitude',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'domicile_longitude',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'domicile_decLatitude',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '0',
     unique: false
   },
   {
     name: 'domicile_decLongitude',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '0',
     unique: false
   },
   {
     name: 'departure_city',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'departure_region',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'departure_country_1763',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'departure_country_1795',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'departure_country_1815',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'departure_country_1830',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'departure_coords_latitude',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'departure_coords_longitude',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'departure_coords_decLatitude',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '0',
     unique: false
   },
   {
     name: 'departure_coords_decLongitude',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '0',
     unique: false
   },
   {
     name: 'destination_city',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'destination_region',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'destination_country_1763',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'destination_country_1795',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'destination_country_1815',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'destination_country_1830',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'destination_coords_latitude',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'destination_coords_longitude',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'destination_coords_decLatitude',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '0',
     unique: false
   },
   {
     name: 'destination_coords_decLongitude',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '0',
     unique: false
   },
   {
     name: 'measure',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'Commodity',
-    type: 'String',
+    type: DataType.STRING,
     required: true,
     fallback: '',
     unique: false
   },
   {
     name: 'quantity',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '1',
     unique: false
   },
   {
     name: 'tonnes',
-    type: 'Number',
+    type: DataType.NUMBER,
     required: true,
     fallback: '0',
     unique: false

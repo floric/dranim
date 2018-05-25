@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import {
   ConnectionInstance,
   Dataset,
@@ -6,7 +8,6 @@ import {
 } from '@masterthesis/shared';
 import { Card, Col, Row, TreeSelect } from 'antd';
 import { css } from 'glamor';
-import React, { Ref } from 'react';
 
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { AsyncButton } from '../components/AsyncButton';
@@ -58,7 +59,7 @@ export class ExplorerEditor extends React.Component<
   ExplorerEditorProps,
   ExplorerEditorState
 > {
-  private selectNodeRef: Ref<TreeSelect> = React.createRef<TreeSelect>();
+  private selectNodeRef: React.Ref<TreeSelect> = React.createRef<TreeSelect>();
 
   public componentWillMount() {
     this.setState({

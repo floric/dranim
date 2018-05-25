@@ -1,24 +1,25 @@
 import * as React from 'react';
-import { SFC, Component } from 'react';
+
+import { Dataset } from '@masterthesis/shared';
 import { Button, Tabs } from 'antd';
-import { RouteComponentProps } from 'react-router-dom';
-import { History } from 'history';
 import gql from 'graphql-tag';
+import { History } from 'history';
+import { Component, SFC } from 'react';
 import { Query } from 'react-apollo';
+import { RouteComponentProps } from 'react-router';
 
 import {
+  CustomErrorCard,
   LoadingCard,
-  UnknownErrorCard,
-  CustomErrorCard
+  UnknownErrorCard
 } from '../components/CustomCards';
+import { PageHeaderCard } from '../components/PageHeaderCard';
+import { DatasetActions } from './dataset-details/ActionsPage';
 import { DataEntries } from './dataset-details/EntriesPage';
 import { DataSchemas } from './dataset-details/SchemasPage';
-import { DatasetActions } from './dataset-details/ActionsPage';
-import { PageHeaderCard } from '../components/PageHeaderCard';
-import { Dataset } from '@masterthesis/shared';
 
 export interface IDataDetailPageProps
-  extends RouteComponentProps<{ id: string }> {}
+  extends RouteComponentProps<{ id: string }, {}> {}
 
 const NoDatasetExceptionActions: SFC<{ history: History }> = ({ history }) => (
   <Button type="primary" onClick={() => history.push('/data')}>

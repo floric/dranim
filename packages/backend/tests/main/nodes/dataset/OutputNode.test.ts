@@ -28,28 +28,32 @@ describe('DatasetOutputNode', () => {
     expect(DatasetOutputNode.isInputValid).toBeDefined();
     expect(DatasetOutputNode.isFormValid).toBeUndefined();
   });
-  
-  test("should have valid input", async () => {
-    const validInput = await DatasetOutputNode.isInputValid({dataset: {id: "test"}})
+
+  test('should have valid input', async () => {
+    const validInput = await DatasetOutputNode.isInputValid({
+      dataset: { id: 'test' }
+    });
 
     expect(validInput).toBe(true);
-  })
+  });
 
-  test("should have invalid inputs", async () => {
-    let isValid = await DatasetOutputNode.isInputValid({dataset: {id: null}})
-
-    expect(isValid).toBe(false);
-
-    isValid = await DatasetOutputNode.isInputValid({dataset: null})
+  test('should have invalid inputs', async () => {
+    let isValid = await DatasetOutputNode.isInputValid({
+      dataset: { id: null }
+    });
 
     expect(isValid).toBe(false);
-  })
+
+    isValid = await DatasetOutputNode.isInputValid({ dataset: null });
+
+    expect(isValid).toBe(false);
+  });
 
   test('should have invalid dataset', async () => {
     try {
       await DatasetOutputNode.onServerExecution(
-        { },
-        { dataset: {id: "test"}},
+        {},
+        { dataset: { id: 'test' } },
         db
       );
       throw NeverGoHereError;
@@ -59,11 +63,11 @@ describe('DatasetOutputNode', () => {
   });
 
   test('should have valid dataset', async () => {
-    const ds = await createDataset(db, "test");
+    const ds = await createDataset(db, 'test');
 
     const res = await DatasetOutputNode.onServerExecution(
-      { },
-      { dataset: {id: ds.id}},
+      {},
+      { dataset: { id: ds.id } },
       db
     );
 

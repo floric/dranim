@@ -12,7 +12,6 @@ import {
 } from '@masterthesis/shared';
 import { Db, MongoClient } from 'mongodb';
 
-import { all } from 'async';
 import {
   createNode,
   deleteNode,
@@ -21,11 +20,7 @@ import {
   getNodesCollection,
   updateNode
 } from '../../../src/main/workspace/nodes';
-import {
-  createWorkspace,
-  getWorkspace,
-  getWorkspacesCollection
-} from '../../../src/main/workspace/workspace';
+import { createWorkspace } from '../../../src/main/workspace/workspace';
 import { NeverGoHereError } from '../../test-utils';
 
 let connection;
@@ -87,7 +82,7 @@ describe('Nodes', () => {
 
     const newNode = await createNode(db, NumberInputNodeDef.name, ws.id, 0, 0);
 
-    expect(newNode).toBeDefined();
+    expect(newNode).not.toBe(null);
 
     nrOfNodes = await getNodesCollection(db).count({});
     expect(nrOfNodes).toBe(1);

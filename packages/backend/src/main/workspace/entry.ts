@@ -23,6 +23,22 @@ export const getEntryCollection = (
   return db.collection(`Entries_${datasetId}`);
 };
 
+export const getEntryByUniqueValue = async (
+  db: Db,
+  datasetId: string,
+  value: Value
+): Promise<Entry> => {
+  const collection = getEntryCollection(db, datasetId);
+  const obj = await collection.findOne({ [`values.${value.name}`]: value.val });
+  if (!obj) {
+    throw new Error('Entry not found!');
+  }
+  return {
+    id: obj._id.toHexString(),
+    ...obj
+  };
+};
+
 export const getEntry = async (
   db: Db,
   datasetId: string,
@@ -31,12 +47,24 @@ export const getEntry = async (
   const collection = getEntryCollection(db, datasetId);
   const obj = await collection.findOne({ _id: new ObjectID(id) });
   if (!obj) {
-    throw new Error('Dataset not found!');
+    throw new Error('Entry not found!');
   }
   return {
     id: obj._id.toHexString(),
     ...obj
   };
+};
+
+export const getAllEntries = async (
+  db: Db,
+  datasetId: string
+): Promise<Array<Entry>> => {
+  const collection = getEntryCollection(db, datasetId);
+  const obj = await collection.find().toArray();
+  if (!obj) {
+    throw new Error('Entries not found!');
+  }
+  return obj;
 };
 
 export const entriesCount = async (

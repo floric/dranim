@@ -1,5 +1,7 @@
 const MongodbMemoryServer = require('mongodb-memory-server');
 
+console.log('Setup test environment.');
+
 const MONGO_DB_NAME = 'jest';
 const mongod = new MongodbMemoryServer.default({
   instance: {

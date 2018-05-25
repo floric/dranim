@@ -1,12 +1,12 @@
 import { Button, Popconfirm } from 'antd';
 import { ButtonProps } from 'antd/lib/button';
-import React, { Component } from 'react';
+import * as React from 'react';
 
 interface AsyncButtonState {
   isLoading: boolean;
 }
 
-export class AsyncButton extends Component<
+export class AsyncButton extends React.Component<
   ButtonProps & { onClick: () => Promise<any> } & {
     confirmClick?: boolean;
     confirmMessage?: string;

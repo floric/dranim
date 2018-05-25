@@ -1,5 +1,7 @@
+import * as React from 'react';
+import { SFC } from 'react';
+
 import { Select } from 'antd';
-import React, { SFC } from 'react';
 
 export interface FormSelectProps {
   placeholder?: string;

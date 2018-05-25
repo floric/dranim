@@ -1,25 +1,26 @@
 import * as React from 'react';
 import { SFC } from 'react';
 
-import { Switch, Route, NavLink, RouteComponentProps } from 'react-router-dom';
-import { withRouter } from 'react-router';
+import { Workspace } from '@masterthesis/shared';
 import { Icon, Layout, Menu } from 'antd';
 import { css } from 'glamor';
-import { Query } from 'react-apollo';
 import gql from 'graphql-tag';
+import { Query } from 'react-apollo';
+import { withRouter } from 'react-router';
+import { RouteComponentProps } from 'react-router';
+import { NavLink, Route, Switch } from 'react-router-dom';
 
-import StartPage from './pages/StartPage';
-import DataPage from './pages/DataPage';
-import WorkspacesOverviewPage from './pages/WorkspacesOverviewPage';
-import WorkspaceDetailPage from './pages/workspaces/WorkspaceDetailPage';
-import VisPage from './pages/VisPage';
 import DataDetailPage from './pages/DataDetailPage';
-import { Workspace } from '@masterthesis/shared';
+import DataPage from './pages/DataPage';
+import StartPage from './pages/StartPage';
+import VisPage from './pages/VisPage';
+import WorkspaceDetailPage from './pages/workspaces/WorkspaceDetailPage';
+import WorkspacesOverviewPage from './pages/WorkspacesOverviewPage';
 
 const { Content, Footer, Sider } = Layout;
 const SubMenu = Menu.SubMenu;
 
-export interface IAppProps extends RouteComponentProps<{}> {}
+export interface IAppProps extends RouteComponentProps<{}, {}> {}
 
 export const ALL_DATASETS = gql`
   {

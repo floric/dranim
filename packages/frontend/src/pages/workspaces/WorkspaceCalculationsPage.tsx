@@ -1,14 +1,15 @@
 import * as React from 'react';
-import { Component } from 'react';
+
+import { CalculationProcess, ProcessState } from '@masterthesis/shared';
+import { Card, Col, Icon, Row, Table } from 'antd';
 import gql from 'graphql-tag';
-import { Row, Col, Card, Table, Icon } from 'antd';
+import { Component } from 'react';
 import { Query } from 'react-apollo';
+import { RouteComponentProps } from 'react-router';
 
 import { LoadingCard, UnknownErrorCard } from '../../components/CustomCards';
-import { ProcessTime } from '../../components/ProcessTime';
-import { RouteComponentProps } from 'react-router-dom';
 import { NumberInfo } from '../../components/NumberInfo';
-import { CalculationProcess, ProcessState } from '@masterthesis/shared';
+import { ProcessTime } from '../../components/ProcessTime';
 
 const CALCULATIONS = gql`
   query calculations($workspaceId: String!) {

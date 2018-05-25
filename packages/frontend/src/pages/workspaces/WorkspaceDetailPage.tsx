@@ -1,10 +1,12 @@
 import * as React from 'react';
-import { Tabs } from 'antd';
-import { Switch, Route, RouteComponentProps } from 'react-router-dom';
 
-import WorkspaceEditorPage from './WorkspaceEditorPage';
-import WorkspaceCalculationsPage from './WorkspaceCalculationsPage';
+import { Tabs } from 'antd';
+import { RouteComponentProps } from 'react-router';
+import { Route, Switch } from 'react-router-dom';
+
 import { PageHeaderCard } from '../../components/PageHeaderCard';
+import WorkspaceCalculationsPage from './WorkspaceCalculationsPage';
+import WorkspaceEditorPage from './WorkspaceEditorPage';
 
 export interface IWorkspacesPageProps
   extends RouteComponentProps<{ id: string }> {}

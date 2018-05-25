@@ -5,15 +5,12 @@ import {
   SumNodeNodeOutputs
 } from '@masterthesis/shared';
 
+import { validateNumber } from './utils';
+
 export const SumNode: ServerNodeDef<SumNodeNodeInputs, SumNodeNodeOutputs> = {
   name: SumNodeDef.name,
-  isInputValid: async values => {
-    if (Number.isNaN(values.a) || Number.isNaN(values.b)) {
-      return false;
-    }
-
-    return true;
-  },
+  isInputValid: async values =>
+    validateNumber(values.a) && validateNumber(values.b),
   onServerExecution: async (form, values) => {
     return {
       outputs: { sum: values.a + values.b }
