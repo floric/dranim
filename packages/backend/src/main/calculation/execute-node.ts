@@ -1,51 +1,76 @@
-import { NodeInstance, parseNodeForm } from '@masterthesis/shared';
+import {
+  ConnectionDescription,
+  FormValues,
+  IOValues,
+  NodeDef,
+  parseNodeForm,
+  ServerNodeDef
+} from '@masterthesis/shared';
 import { Db } from 'mongodb';
+
 import { serverNodeTypes } from '../nodes/AllNodes';
 import { getConnection } from '../workspace/connections';
 import { getNode } from '../workspace/nodes';
 
-export const executeNode = async (db: Db, node: NodeInstance) => {
+export const executeNode = async (db: Db, nodeId: string) => {
+  const node = await getNode(db, nodeId);
+  if (!node) {
+    throw new Error('Node not found!');
+  }
+
   const type = serverNodeTypes.get(node.type);
   if (!type) {
     throw new Error('Unknown node type');
   }
 
-  // TODO define IO types for real execution
   const inputValues = await Promise.all(
-    node.inputs.map(async i => {
-      const c = await getConnection(db, i.connectionId);
-      if (!c) {
-        throw new Error('Invalid connection.');
-      }
-
-      const inputNodeId = c.from.nodeId;
-      const inputNode = await getNode(db, inputNodeId);
-      if (!inputNode) {
-        throw new Error('Node not found!');
-      }
-
-      const nodeRes = await executeNode(db, inputNode);
-
-      return { socketName: i.name, val: nodeRes[c.from.name] };
-    })
+    node.inputs.map(i => getConnectionResult(i, db))
   );
 
+  const nodeInputs = inputValuesToObject(inputValues);
+  const nodeForm = parseNodeForm(node);
+
+  await checkValidInputAndForm(type, nodeInputs, nodeForm);
+
+  return await type.onServerExecution(nodeForm, nodeInputs, db);
+};
+
+const getConnectionResult = async (i: ConnectionDescription, db: Db) => {
+  const c = await getConnection(db, i.connectionId);
+  if (!c) {
+    throw new Error('Invalid connection.');
+  }
+
+  const nodeRes = await executeNode(db, c.from.nodeId);
+
+  return { socketName: i.name, val: nodeRes.outputs[c.from.name] };
+};
+
+const inputValuesToObject = (
+  inputValues: Array<{ socketName: string; val: string }>
+) => {
   const inputs = {};
   inputValues.forEach(i => {
     inputs[i.socketName] = i.val;
   });
-  const nodeForm = parseNodeForm(node);
-  const isValidForm = type.isFormValid
-    ? await type.isFormValid(nodeForm)
-    : true;
+  return inputs;
+};
+
+const checkValidInputAndForm = async (
+  type: NodeDef & ServerNodeDef,
+  inputs: IOValues<{}>,
+  form: FormValues<{}>
+) => {
+  const isValidForm = type.isFormValid ? await type.isFormValid(form) : true;
   const isValidInput = type.isInputValid
     ? await type.isInputValid(inputs)
     : true;
-  if (!isValidForm || !isValidInput) {
-    throw new Error('Invalid input or form.');
+
+  if (!isValidForm) {
+    throw new Error('Invalid form.');
   }
 
-  const res = await type.onServerExecution(nodeForm, inputs, db);
-
-  return res.outputs;
+  if (!isValidInput) {
+    throw new Error('Invalid input.');
+  }
 };

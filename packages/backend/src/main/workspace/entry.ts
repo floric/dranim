@@ -95,14 +95,14 @@ export const createEntry = async (
   db: Db,
   datasetId: string,
   valuesArr: Array<Value>
-) => {
+): Promise<Entry> => {
   if (!valuesArr.length) {
     throw new UploadEntryError('No values specified for entry.', 'no-values');
   }
 
   valuesArr.forEach(v => {
-    if (v.name === undefined || v.val === undefined) {
-      throw new Error(`Value "${v.name}" malformed.`);
+    if (!v.name || v.val === undefined || v.val === null) {
+      throw new Error('Value malformed');
     }
 
     if (Object.keys(v).length !== 2) {

@@ -12,7 +12,7 @@ import {
   getAllCalculations,
   startCalculation
 } from '../../../src/main/calculation/start-process';
-import { createNode, getAllNodes } from '../../../src/main/workspace/nodes';
+import { createNode } from '../../../src/main/workspace/nodes';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
 import { getTestMongoDb } from '../../test-utils';
 
@@ -22,7 +22,7 @@ let server;
 
 jest.mock('../../../src/main/calculation/execute-node');
 
-describe('SelectValuesNode', () => {
+describe('Start Process', () => {
   beforeAll(async () => {
     const { connection, database, mongodbServer } = await getTestMongoDb();
     conn = connection;
@@ -49,11 +49,11 @@ describe('SelectValuesNode', () => {
   });
 
   test('should start new calculation process without any nodes', async () => {
-    const ws = await createWorkspace(db, 'test', '');
     (executeNode as jest.Mock).mockImplementation(n =>
-      Promise.resolve<IOValues<{}>>({})
+      Promise.resolve<IOValues<{}>>({ outputs: {}, results: {} })
     );
 
+    const ws = await createWorkspace(db, 'test', '');
     const newProcess = await startCalculation(db, ws.id, true);
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
@@ -76,8 +76,11 @@ describe('SelectValuesNode', () => {
   });
 
   test('should start new calculation process with one node', async done => {
-    const ws = await createWorkspace(db, 'test', '');
+    (executeNode as jest.Mock).mockImplementation(n =>
+      Promise.resolve<IOValues<{}>>({ outputs: {}, results: {} })
+    );
 
+    const ws = await createWorkspace(db, 'test', '');
     await Promise.all(
       [
         {
@@ -101,9 +104,6 @@ describe('SelectValuesNode', () => {
       ].map(n => createNode(db, n.type, n.workspaceId, n.x, n.y))
     );
 
-    (executeNode as jest.Mock).mockImplementation(n =>
-      Promise.resolve<IOValues<{}>>({})
-    );
     const newProcess = await startCalculation(db, ws.id, true);
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
@@ -128,8 +128,11 @@ describe('SelectValuesNode', () => {
   });
 
   test('should catch error for failed node execution', async () => {
-    const ws = await createWorkspace(db, 'test', '');
+    (executeNode as jest.Mock).mockImplementation(n => {
+      throw new Error('Something went wrong during node execution.');
+    });
 
+    const ws = await createWorkspace(db, 'test', '');
     await Promise.all(
       [
         {
@@ -140,10 +143,6 @@ describe('SelectValuesNode', () => {
         }
       ].map(n => createNode(db, n.type, n.workspaceId, n.x, n.y))
     );
-
-    (executeNode as jest.Mock).mockImplementation(n => {
-      throw new Error('Something went wrong during node execution.');
-    });
 
     const newProcess = await startCalculation(db, ws.id, true);
 
