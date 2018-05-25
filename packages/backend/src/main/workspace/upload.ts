@@ -1,5 +1,5 @@
 import { UploadProcess } from '@masterthesis/shared';
-import fastCsv from 'fast-csv';
+import * as fastCsv from 'fast-csv';
 import { Collection, Db, ObjectID } from 'mongodb';
 import * as promisesAll from 'promises-all';
 import { Readable } from 'stream';

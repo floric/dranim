@@ -23,20 +23,20 @@ export const getEntryCollection = (
   return db.collection(`Entries_${datasetId}`);
 };
 
-export const getEntryByUniqueValue = async (
+export const getEntriesByUniqueValue = async (
   db: Db,
   datasetId: string,
   value: Value
-): Promise<Entry> => {
+): Promise<Array<Entry>> => {
   const collection = getEntryCollection(db, datasetId);
-  const obj = await collection.findOne({ [`values.${value.name}`]: value.val });
-  if (!obj) {
-    throw new Error('Entry not found!');
-  }
-  return {
+  const all = await collection
+    .find({ [`values.${value.name}`]: value.val })
+    .toArray();
+
+  return all.map(obj => ({
     id: obj._id.toHexString(),
     ...obj
-  };
+  }));
 };
 
 export const getEntry = async (

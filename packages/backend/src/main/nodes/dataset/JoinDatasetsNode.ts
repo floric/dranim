@@ -18,7 +18,7 @@ import {
 import {
   createEntry,
   getAllEntries,
-  getEntryByUniqueValue
+  getEntriesByUniqueValue
 } from '../../workspace/entry';
 import { validateNonEmptyString } from '../string/utils';
 import { validateDatasetId } from './utils';
@@ -41,7 +41,7 @@ export const JoinDatasetsNode: ServerNodeDef<
 
     await validateSchemas(form, dsA!, dsB!);
 
-    const newDs = await createDataset(db, 'stupid-name');
+    const newDs = await createDataset(db, new Date().toISOString());
     await addSchemasFromBothDatasets(db, newDs, dsA!, dsB!);
     await joinEntries(db, form.valueA!, form.valueB!, newDs, dsA!, dsB!);
 
@@ -58,25 +58,33 @@ const joinEntries = async (
   dsB: Dataset
 ) => {
   const allEntriesFromA = await getAllEntries(db, dsA.id);
-  await Promise.all(
-    allEntriesFromA.map(async e => {
-      const valFromA = e.values[valNameA];
-      const matchingEntryFromB = await getEntryByUniqueValue(db, dsB.id, {
-        name: valNameB,
-        val: valFromA
-      });
-      const allFromA = Array.from(Object.entries(e.values));
-      const allFromB = Array.from(
-        Object.entries(matchingEntryFromB.values)
-      ).filter(n => !Object.keys(allFromA).includes(n[0]));
+  for (let i = 0; i < allEntriesFromA.length / 500; ++i) {
+    await Promise.all(
+      allEntriesFromA.slice(i * 500, (i + 1) * 500).map(async e => {
+        const valFromA = e.values[valNameA];
+        const matchingEntriesFromB = await getEntriesByUniqueValue(db, dsB.id, {
+          name: valNameB,
+          val: valFromA
+        });
 
-      await createEntry(
-        db,
-        newDs.id,
-        allFromA.concat(allFromB).map(n => ({ name: n[0], val: n[1] }))
-      );
-    })
-  );
+        await Promise.all(
+          matchingEntriesFromB.map(async matchedE => {
+            const allFromA = Array.from(Object.entries(e.values));
+            const allFromB = Array.from(Object.entries(matchedE.values)).filter(
+              n => !Object.keys(allFromA).includes(n[0])
+            );
+
+            await createEntry(
+              db,
+              newDs.id,
+              allFromA.concat(allFromB).map(n => ({ name: n[0], val: n[1] }))
+            );
+          })
+        );
+      })
+    );
+    console.log(`${i} of ${allEntriesFromA.length / 500}`);
+  }
 };
 
 const addSchemasFromBothDatasets = async (
@@ -114,8 +122,8 @@ const validateSchemas = async (
     throw new Error('Schemas should have same type');
   }
 
-  if (schemaA.unique !== true || schemaB.unique !== true) {
-    throw new Error('Schemas need to be unique');
+  if (schemaA.unique !== true) {
+    throw new Error('First schema needs to be unique');
   }
 };
 

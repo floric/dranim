@@ -153,7 +153,7 @@ describe('JoinDatasetsNode', () => {
     ]);
     const schemaA: ValueSchema = {
       name: 'colA',
-      unique: true,
+      unique: false,
       fallback: '',
       type: DataType.STRING,
       required: true
@@ -179,7 +179,7 @@ describe('JoinDatasetsNode', () => {
       );
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Schemas need to be unique');
+      expect(err.message).toBe('First schema needs to be unique');
     }
   });
 

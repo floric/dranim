@@ -1,10 +1,11 @@
 import * as React from 'react';
 
-import { Form, Input, Button, Checkbox, DatePicker, InputNumber } from 'antd';
+import { DataType, Value, ValueSchema } from '@masterthesis/shared';
+import { Button, Checkbox, DatePicker, Form, Input, InputNumber } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import * as moment from 'moment';
+
 import { hasErrors } from '../../utils/form';
-import { Value, ValueSchema, DataType } from '@masterthesis/shared';
 
 export interface CreateEntryFormProps extends FormComponentProps {
   handleCreateEntry: (data: Array<Value>) => Promise<any>;

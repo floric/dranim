@@ -20,6 +20,7 @@ const WORKSPACE_NODE_SELECTION = gql`
       entriesCount
       valueschemas {
         name
+        unique
       }
     }
     workspace(id: $workspaceId) {
