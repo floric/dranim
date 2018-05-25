@@ -1,31 +1,31 @@
-import { MongoClient, Db } from 'mongodb';
 import {
-  ProcessState,
-  NodeInstance,
-  NodeState,
-  NumberOutputNodeDef,
-  NumberInputNodeDef,
   DatasetOutputNodeDef,
   IOValues,
-  Workspace,
   JoinDatasetsNodeDef,
-  StringInputNodeDef
+  NodeInstance,
+  NodeState,
+  NumberInputNodeDef,
+  NumberOutputNodeDef,
+  ProcessState,
+  StringInputNodeDef,
+  Workspace
 } from '@masterthesis/shared';
+import { Db, MongoClient } from 'mongodb';
 
+import { all } from 'async';
 import {
   createNode,
   deleteNode,
-  getNodesCollection,
-  updateNode,
+  getAllNodes,
   getNode,
-  getAllNodes
+  getNodesCollection,
+  updateNode
 } from '../../../src/main/workspace/nodes';
 import {
+  createWorkspace,
   getWorkspace,
-  getWorkspacesCollection,
-  createWorkspace
+  getWorkspacesCollection
 } from '../../../src/main/workspace/workspace';
-import { all } from 'async';
 
 let connection;
 let db: Db;
@@ -96,6 +96,15 @@ describe('Nodes', () => {
 
     nrOfNodes = await getNodesCollection(db).count({});
     expect(nrOfNodes).toBe(0);
+  });
+
+  test('should not delete unknown node', async () => {
+    try {
+      const ws = await deleteNode(db, 'abc');
+      throw new Error('Should fail');
+    } catch (err) {
+      expect(err).toEqual(new Error('Invalid ID'));
+    }
   });
 
   test('should update node and change x and y', async () => {

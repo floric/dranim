@@ -1,31 +1,26 @@
-import { MongoClient, Db } from 'mongodb';
 import {
-  ProcessState,
-  NodeInstance,
-  NodeState,
-  NumberOutputNodeDef,
-  NumberInputNodeDef,
   DatasetOutputNodeDef,
   IOValues,
-  Workspace,
   JoinDatasetsNodeDef,
-  StringInputNodeDef
+  NodeInstance,
+  NodeState,
+  NumberInputNodeDef,
+  NumberOutputNodeDef,
+  ProcessState,
+  StringInputNodeDef,
+  Workspace
 } from '@masterthesis/shared';
+import { Db, MongoClient } from 'mongodb';
 
+import { all } from 'async';
+import { createNode, deleteNode } from '../../../src/main/workspace/nodes';
 import {
-  createNode,
-  deleteNode,
-  getNodesCollection,
-  updateNode,
-  getNode,
-  getAllNodes
-} from '../../../src/main/workspace/nodes';
-import {
+  createWorkspace,
+  deleteWorkspace,
   getWorkspace,
   getWorkspacesCollection,
-  createWorkspace
+  updateWorkspace
 } from '../../../src/main/workspace/workspace';
-import { all } from 'async';
 
 let connection;
 let db: Db;
@@ -45,19 +40,76 @@ describe('Nodes', () => {
     jest.resetAllMocks();
   });
 
-  test('should create and get node', async () => {
-    const ws = await createWorkspace(db, 'test', '');
+  test('should create and delete workspace', async () => {
+    const description = 'desc';
+    const name = 'wsname';
 
-    const newNode = await createNode(db, NumberInputNodeDef.name, ws.id, 0, 0);
+    const ws = await createWorkspace(db, name, description);
 
-    expect(newNode.id).toBeDefined();
-    expect(newNode.outputs).toEqual([]);
-    expect(newNode.inputs).toEqual([]);
-    expect(newNode.workspaceId).toBe(ws.id);
-    expect(newNode.type).toBe(NumberInputNodeDef.name);
+    expect(ws.id).toBeDefined();
+    expect(ws.connections).toBeUndefined();
+    expect(ws.created).toBeDefined();
+    expect(ws.description).toBe(description);
+    expect(ws.name).toEqual(name);
+    expect(ws.lastChange).toBeDefined();
+    expect(ws.nodes).toBeUndefined();
 
-    const node = await getNode(db, newNode.id);
+    const createdWs = await getWorkspace(db, ws.id);
+    expect(createdWs).toEqual(ws);
 
-    expect(node).toEqual(newNode);
+    const res = await deleteWorkspace(db, ws.id);
+
+    expect(res).toBe(true);
+
+    const unknownWs = await getWorkspace(db, ws.id);
+
+    expect(unknownWs).toBe(null);
+  });
+
+  test('should not create workspace with empty name', async () => {
+    const description = 'desc';
+    const name = '';
+
+    try {
+      const ws = await createWorkspace(db, name, description);
+      throw new Error('Should fail');
+    } catch (err) {
+      expect(err).toEqual(new Error('Name of workspace must not be empty.'));
+    }
+  });
+
+  test('should not delete unknown workspace', async () => {
+    try {
+      const ws = await deleteWorkspace(db, 'abc');
+      throw new Error('Should fail');
+    } catch (err) {
+      expect(err).toEqual(new Error('Invalid ID'));
+    }
+  });
+
+  test('should get all workspaces', async () => {
+    const allWs = await Promise.all([
+      createWorkspace(db, 'a', 'aDesc'),
+      createWorkspace(db, 'b', 'bDesc'),
+      createWorkspace(db, 'c', 'cDesc')
+    ]);
+
+    const wsA = allWs.filter(n => n.name === 'a');
+    expect(wsA.length).toBe(1);
+  });
+
+  test('should update only lastChange in workspace', async () => {
+    const description = 'desc';
+    const name = 'wsname';
+
+    const ws = await createWorkspace(db, name, description);
+
+    const res = await updateWorkspace(db, ws.id, [], []);
+    expect(res).toBe(true);
+
+    const newWs = await getWorkspace(db, ws.id);
+    expect(new Date(ws.lastChange).getTime()).toBeLessThan(
+      new Date(newWs.lastChange).getTime()
+    );
   });
 });

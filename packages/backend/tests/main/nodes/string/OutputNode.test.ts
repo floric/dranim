@@ -1,11 +1,11 @@
 import {
-  ProcessState,
-  NodeInstance,
-  NodeState,
-  NumberOutputNodeDef,
-  NumberInputNodeDef,
   DatasetOutputNodeDef,
   IOValues,
+  NodeInstance,
+  NodeState,
+  NumberInputNodeDef,
+  NumberOutputNodeDef,
+  ProcessState,
   StringOutputNodeDef
 } from '@masterthesis/shared';
 import { StringOutputNode } from '../../../../src/main/nodes/string/OutputNode';
