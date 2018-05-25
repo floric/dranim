@@ -1,8 +1,8 @@
 import {
-  StringInputNodeDef,
   ServerNodeDef,
-  StringInputNodeOutputs,
-  StringInputNodeForm
+  StringInputNodeDef,
+  StringInputNodeForm,
+  StringInputNodeOutputs
 } from '@masterthesis/shared';
 
 export const StringInputNode: ServerNodeDef<

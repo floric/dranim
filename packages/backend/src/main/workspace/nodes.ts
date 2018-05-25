@@ -1,8 +1,8 @@
-import { Db, Collection, ObjectID } from 'mongodb';
 import { NodeInstance, NodeState, parseNodeForm } from '@masterthesis/shared';
-import { getWorkspace, getWorkspacesCollection } from './workspace';
-import { getConnectionsCollection } from './connections';
+import { Collection, Db, ObjectID } from 'mongodb';
 import { serverNodeTypes } from '../nodes/AllNodes';
+import { getConnectionsCollection } from './connections';
+import { getWorkspace, getWorkspacesCollection } from './workspace';
 
 export const getNodesCollection = (
   db: Db

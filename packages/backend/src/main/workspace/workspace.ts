@@ -1,9 +1,9 @@
-import { ObjectID, Db, Collection } from 'mongodb';
 import {
-  NodeInstance,
   ConnectionInstance,
+  NodeInstance,
   Workspace
 } from '@masterthesis/shared';
+import { Collection, Db, ObjectID } from 'mongodb';
 import { getConnectionsCollection } from './connections';
 import { getNodesCollection } from './nodes';
 

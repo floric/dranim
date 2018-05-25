@@ -1,10 +1,10 @@
-import { getNodesCollection, getNode } from './nodes';
 import {
+  ConnectionInstance,
   NodeInstance,
-  SocketInstance,
-  ConnectionInstance
+  SocketInstance
 } from '@masterthesis/shared';
-import { ObjectID, Db, Collection } from 'mongodb';
+import { Collection, Db, ObjectID } from 'mongodb';
+import { getNode, getNodesCollection } from './nodes';
 
 export const getConnectionsCollection = (
   db: Db

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Form, Select } from 'antd';
+import { Form } from 'antd';
 import { ClientNodeDef } from '../AllNodes';
 import {
   JoinDatasetsNodeDef,

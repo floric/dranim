@@ -1,9 +1,9 @@
-import {
-  Valueschema,
-  createDataset,
-  addValueSchema
-} from '../graphql/resolvers/dataset';
 import { Db } from 'mongodb';
+import {
+  addValueSchema,
+  createDataset,
+  Valueschema
+} from '../graphql/resolvers/dataset';
 import { createWorkspace } from '../main/workspace/workspace';
 
 export const createSTRDemoData = async (db: Db) => {

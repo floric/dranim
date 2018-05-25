@@ -15,7 +15,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "lint": "tslint -p .",
+    "lint": "tslint -p . --fix",
     "clean": "rm -rf dist node_modules .cache",
     "test": "jest --coverage --detectLeaks"
   },

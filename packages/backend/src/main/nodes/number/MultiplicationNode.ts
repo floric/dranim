@@ -1,8 +1,8 @@
 import {
   MultiplicationNodeDef,
-  ServerNodeDef,
   MultiplicationNodeInputs,
-  MultiplicationNodeOutputs
+  MultiplicationNodeOutputs,
+  ServerNodeDef
 } from '@masterthesis/shared';
 
 export const MultiplicationNode: ServerNodeDef<

@@ -1,7 +1,7 @@
 import {
   DatasetOutputNodeDef,
-  ServerNodeDef,
-  DatasetOutputNodeInputs
+  DatasetOutputNodeInputs,
+  ServerNodeDef
 } from '@masterthesis/shared';
 
 export const DatasetOutputNode: ServerNodeDef<DatasetOutputNodeInputs, {}> = {

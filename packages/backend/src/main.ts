@@ -1,15 +1,15 @@
-import * as express from 'express';
 import * as bodyParser from 'body-parser';
+import * as cors from 'cors';
+import * as express from 'express';
 import * as helmet from 'helmet';
 import * as morgan from 'morgan';
-import * as cors from 'cors';
 
 import { graphqlExpress } from 'apollo-server-express';
 import { apolloUploadExpress } from 'apollo-upload-server';
 
+import { Db } from 'mongodb';
 import { mongoDbClient } from './config/db';
 import Schema from './graphql/schema';
-import { Db } from 'mongodb';
 import { initWorkspaceDb } from './main/workspace/workspace';
 
 export const GRAPHQL_ROUTE = '/api/graphql';

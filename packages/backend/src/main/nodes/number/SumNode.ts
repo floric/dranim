@@ -1,6 +1,6 @@
 import {
-  SumNodeDef,
   ServerNodeDef,
+  SumNodeDef,
   SumNodeNodeInputs,
   SumNodeNodeOutputs
 } from '@masterthesis/shared';

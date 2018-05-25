@@ -1,6 +1,6 @@
 import {
-  StringOutputNodeDef,
   ServerNodeDef,
+  StringOutputNodeDef,
   StringOutputNodeInputs,
   StringOutputNodeResults
 } from '@masterthesis/shared';

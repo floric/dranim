@@ -1,52 +1,52 @@
-import { makeExecutableSchema, IResolvers } from 'graphql-tools';
 import { GraphQLUpload } from 'apollo-upload-server';
+import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { Db } from 'mongodb';
 
-import Dataset from './schemas/dataset';
-import Valueschema from './schemas/valueschema';
-import Entry from './schemas/entry';
-import UploadProcess from './schemas/upload';
-import Workspace from './schemas/workspace';
-import CalculationProcess from './schemas/calculation';
+import { createSTRDemoData } from '../example/str';
 import {
-  getAllDatasets,
-  getDataset,
-  createDataset,
-  deleteDataset,
-  addValueSchema
-} from './resolvers/dataset';
-import {
-  getWorkspace,
-  updateWorkspace,
-  getAllWorkspaces,
-  createWorkspace,
-  deleteWorkspace
-} from '../main/workspace/workspace';
-import {
-  createNode,
-  updateNode,
-  deleteNode,
-  addOrUpdateFormValue,
-  getNodeState,
-  getAllNodes
-} from '../main/workspace/nodes';
+  getAllCalculations,
+  startCalculation
+} from '../main/calculation/startProcess';
 import {
   createConnection,
   deleteConnection,
   getAllConnections
 } from '../main/workspace/connections';
 import {
-  latestEntries,
-  deleteEntry,
+  addOrUpdateFormValue,
+  createNode,
+  deleteNode,
+  getAllNodes,
+  getNodeState,
+  updateNode
+} from '../main/workspace/nodes';
+import {
+  createWorkspace,
+  deleteWorkspace,
+  getAllWorkspaces,
+  getWorkspace,
+  updateWorkspace
+} from '../main/workspace/workspace';
+import {
+  addValueSchema,
+  createDataset,
+  deleteDataset,
+  getAllDatasets,
+  getDataset
+} from './resolvers/dataset';
+import {
   createEntryFromJSON,
-  entriesCount
+  deleteEntry,
+  entriesCount,
+  latestEntries
 } from './resolvers/entry';
 import { getAllUploads, uploadEntriesCsv } from './resolvers/upload';
-import {
-  startCalculation,
-  getAllCalculations
-} from '../main/calculation/startProcess';
-import { createSTRDemoData } from '../example/str';
+import CalculationProcess from './schemas/calculation';
+import Dataset from './schemas/dataset';
+import Entry from './schemas/entry';
+import UploadProcess from './schemas/upload';
+import Valueschema from './schemas/valueschema';
+import Workspace from './schemas/workspace';
 
 export interface ApolloContext {
   db: Db;

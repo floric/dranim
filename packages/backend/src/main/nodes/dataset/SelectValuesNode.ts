@@ -1,9 +1,9 @@
 import {
-  ServerNodeDef,
   SelectValuesNodeDef,
   SelectValuesNodeForm,
   SelectValuesNodeInputs,
-  SelectValuesNodeOutputs
+  SelectValuesNodeOutputs,
+  ServerNodeDef
 } from '@masterthesis/shared';
 
 export const SelectValuesNode: ServerNodeDef<

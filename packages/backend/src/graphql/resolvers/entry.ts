@@ -1,4 +1,4 @@
-import { ObjectID, Db, Collection } from 'mongodb';
+import { Collection, Db, ObjectID } from 'mongodb';
 
 import { getDataset } from './dataset';
 import { UploadEntryError } from './upload';

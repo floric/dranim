@@ -1,5 +1,5 @@
-import Valueschema from './valueschema';
 import Entry from './entry';
+import Valueschema from './valueschema';
 
 const Dataset = `
   type Dataset {

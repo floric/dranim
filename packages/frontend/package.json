@@ -37,7 +37,7 @@
   },
   "scripts": {
     "start": "parcel public/index.html --no-hmr",
-    "lint": "tslint -p .",
+    "lint": "tslint -p . --fix",
     "build": "parcel build public/index.html --no-cache ",
     "clean": "rm -rf build node_modules dist .cache"
   },

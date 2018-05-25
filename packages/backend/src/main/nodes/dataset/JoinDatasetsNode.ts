@@ -1,8 +1,8 @@
 import {
   JoinDatasetsNodeDef,
-  ServerNodeDef,
   JoinDatasetsNodeInputs,
-  JoinDatasetsNodeOutputs
+  JoinDatasetsNodeOutputs,
+  ServerNodeDef
 } from '@masterthesis/shared';
 
 export const JoinDatasetsNode: ServerNodeDef<

@@ -1,10 +1,10 @@
+import { NodeDef, NodesMap, ServerNodeDef } from '@masterthesis/shared';
 import * as AllDatasetNodes from './dataset';
-import * as AllNumberNodes from './number';
-import * as AllStringNodes from './string';
-import { NumberOutputNode } from './number/OutputNode';
 import { DatasetOutputNode } from './dataset/OutputNode';
+import * as AllNumberNodes from './number';
+import { NumberOutputNode } from './number/OutputNode';
+import * as AllStringNodes from './string';
 import { StringOutputNode } from './string/OutputNode';
-import { ServerNodeDef, NodesMap, NodeDef } from '@masterthesis/shared';
 
 const allNodes = [AllDatasetNodes, AllNumberNodes, AllStringNodes];
 

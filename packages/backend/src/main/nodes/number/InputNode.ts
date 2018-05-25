@@ -1,8 +1,8 @@
 import {
   NumberInputNodeDef,
-  ServerNodeDef,
+  NumberInputNodeForm,
   NumberInputNodeOutputs,
-  NumberInputNodeForm
+  ServerNodeDef
 } from '@masterthesis/shared';
 
 export const NumberInputNode: ServerNodeDef<

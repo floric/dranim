@@ -1,8 +1,8 @@
 import {
   DatasetInputNodeDef,
-  ServerNodeDef,
+  DatasetInputNodeForm,
   DatasetInputNodeOutputs,
-  DatasetInputNodeForm
+  ServerNodeDef
 } from '@masterthesis/shared';
 
 export const DatasetInputNode: ServerNodeDef<
