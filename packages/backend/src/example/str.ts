@@ -3,7 +3,7 @@ import {
   addValueSchema,
   createDataset,
   Valueschema
-} from '../graphql/resolvers/dataset';
+} from '../main/workspace/dataset';
 import { createWorkspace } from '../main/workspace/workspace';
 
 export const createSTRDemoData = async (db: Db) => {

@@ -45,7 +45,7 @@ export const executeNode = async (db: Db, node: NodeInstance) => {
     throw new Error('Invalid input or form.');
   }
 
-  const res = await type.onServerExecution(nodeForm, inputs);
+  const res = await type.onServerExecution(nodeForm, inputs, db);
 
   return res.outputs;
 };

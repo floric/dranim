@@ -28,7 +28,8 @@ describe('NumberOutputNode', () => {
       {},
       {
         val: 2
-      }
+      },
+      null
     );
 
     expect(res.results.value).toBe(2);
@@ -40,7 +41,8 @@ describe('NumberOutputNode', () => {
       {},
       {
         val: -2.34
-      }
+      },
+      null
     );
 
     expect(res.results.value).toBe(-2.34);

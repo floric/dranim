@@ -13,7 +13,8 @@ describe('FormatNumberNode', () => {
       {},
       {
         number: 123
-      }
+      },
+      null
     );
 
     expect(res.outputs.formatted).toBe('123');
@@ -26,7 +27,8 @@ describe('FormatNumberNode', () => {
       },
       {
         number: 123456
-      }
+      },
+      null
     );
 
     expect(res.outputs.formatted).toBe('123 k');
@@ -39,7 +41,8 @@ describe('FormatNumberNode', () => {
       },
       {
         number: 60 * 60 * 12
-      }
+      },
+      null
     );
 
     expect(res.outputs.formatted).toBe('12:00:00');

@@ -1,3 +1,5 @@
+import { Db } from 'mongodb';
+
 import { SocketDefs } from './sockets';
 
 export enum NodeState {
@@ -38,7 +40,8 @@ export interface ServerNodeDef<
   isInputValid?: (inputs: IOValues<NodeInputs>) => Promise<boolean>;
   onServerExecution: (
     form: FormValues<NodeForm>,
-    inputs: IOValues<NodeInputs>
+    inputs: IOValues<NodeInputs>,
+    db: Db
   ) => Promise<NodeExecutionResult<NodeOutputs, NodeResults>>;
 }
 

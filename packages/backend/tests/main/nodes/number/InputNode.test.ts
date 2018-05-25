@@ -9,7 +9,7 @@ describe('NumberInputNode', () => {
   });
 
   test('should get output value from form', async () => {
-    const res = await NumberInputNode.onServerExecution({ value: 2 }, {});
+    const res = await NumberInputNode.onServerExecution({ value: 2 }, {}, null);
     expect(res.outputs.val).toBe(2);
   });
 });

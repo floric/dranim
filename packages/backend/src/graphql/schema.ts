@@ -13,6 +13,19 @@ import {
   getAllConnections
 } from '../main/workspace/connections';
 import {
+  addValueSchema,
+  createDataset,
+  deleteDataset,
+  getAllDatasets,
+  getDataset
+} from '../main/workspace/dataset';
+import {
+  createEntryFromJSON,
+  deleteEntry,
+  entriesCount,
+  latestEntries
+} from '../main/workspace/entry';
+import {
   addOrUpdateFormValue,
   createNode,
   deleteNode,
@@ -20,6 +33,7 @@ import {
   getNodeState,
   updateNode
 } from '../main/workspace/nodes';
+import { getAllUploads, uploadEntriesCsv } from '../main/workspace/upload';
 import {
   createWorkspace,
   deleteWorkspace,
@@ -27,20 +41,6 @@ import {
   getWorkspace,
   updateWorkspace
 } from '../main/workspace/workspace';
-import {
-  addValueSchema,
-  createDataset,
-  deleteDataset,
-  getAllDatasets,
-  getDataset
-} from './resolvers/dataset';
-import {
-  createEntryFromJSON,
-  deleteEntry,
-  entriesCount,
-  latestEntries
-} from './resolvers/entry';
-import { getAllUploads, uploadEntriesCsv } from './resolvers/upload';
 import CalculationProcess from './schemas/calculation';
 import Dataset from './schemas/dataset';
 import Entry from './schemas/entry';

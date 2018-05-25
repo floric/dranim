@@ -1,31 +1,32 @@
-import { MongoClient, Db } from 'mongodb';
 import {
-  ProcessState,
-  NodeInstance,
-  NodeState,
-  NumberOutputNodeDef,
-  NumberInputNodeDef,
   DatasetOutputNodeDef,
   IOValues,
-  Workspace,
   JoinDatasetsNodeDef,
-  StringInputNodeDef
+  NodeInstance,
+  NodeState,
+  NumberInputNodeDef,
+  NumberOutputNodeDef,
+  ProcessState,
+  StringInputNodeDef,
+  Workspace
 } from '@masterthesis/shared';
+import { Db, MongoClient } from 'mongodb';
 
+import { all } from 'async';
 import {
   createNode,
   deleteNode,
-  getNodesCollection,
-  updateNode,
+  getAllNodes,
   getNode,
-  getAllNodes
+  getNodesCollection,
+  updateNode
 } from '../../../src/main/workspace/nodes';
 import {
+  createWorkspace,
   getWorkspace,
-  getWorkspacesCollection,
-  createWorkspace
+  getWorkspacesCollection
 } from '../../../src/main/workspace/workspace';
-import { all } from 'async';
+import { NeverGoHereError } from '../../test-utils';
 
 let connection;
 let db: Db;
@@ -72,7 +73,7 @@ describe('Nodes', () => {
   test('should not create node for unknown workspace', async () => {
     try {
       await createNode(db, NumberInputNodeDef.name, '123', 0, 0);
-      throw new Error('Should not get through');
+      throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unknown workspace!');
     }
@@ -96,6 +97,15 @@ describe('Nodes', () => {
 
     nrOfNodes = await getNodesCollection(db).count({});
     expect(nrOfNodes).toBe(0);
+  });
+
+  test('should not delete unknown node', async () => {
+    try {
+      const ws = await deleteNode(db, 'abc');
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err).toEqual(new Error('Invalid ID'));
+    }
   });
 
   test('should update node and change x and y', async () => {
