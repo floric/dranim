@@ -6,7 +6,7 @@ import { createSTRDemoData } from '../example/str';
 import {
   getAllCalculations,
   startCalculation
-} from '../main/calculation/startProcess';
+} from '../main/calculation/start-process';
 import {
   createConnection,
   deleteConnection,

@@ -1,6 +1,6 @@
 import { CalculationProcess, ProcessState } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
-import { executeNode } from '../calculation/executeNode';
+import { executeNode } from '../calculation/execute-node';
 import { outputNodes } from '../nodes/AllNodes';
 import { getAllNodes } from '../workspace/nodes';
 
