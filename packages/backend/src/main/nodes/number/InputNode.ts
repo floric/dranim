@@ -22,7 +22,7 @@ export const NumberInputNode: ServerNodeDef<
   onServerExecution: async (form, values) =>
     Promise.resolve({
       outputs: {
-        val: form.value ? form.value.toString() : '0'
+        val: form.value ? form.value : 0
       }
     })
 };

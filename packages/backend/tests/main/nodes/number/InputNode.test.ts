@@ -10,6 +10,6 @@ describe('NumberInputNode', () => {
 
   test('should get output value from form', async () => {
     const res = await NumberInputNode.onServerExecution({ value: 2 }, {});
-    expect(res.outputs.val).toBe('2');
+    expect(res.outputs.val).toBe(2);
   });
 });

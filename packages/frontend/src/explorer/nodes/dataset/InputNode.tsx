@@ -1,11 +1,12 @@
-import * as React from 'react';
-import { Form, Select } from 'antd';
-import { ClientNodeDef } from '../AllNodes';
 import {
   DatasetInputNodeDef,
-  DatasetInputNodeOutputs,
-  DatasetInputNodeForm
+  DatasetInputNodeForm,
+  DatasetInputNodeOutputs
 } from '@masterthesis/shared';
+import { Form } from 'antd';
+import * as React from 'react';
+import { FormSelect } from '../../utils/form-utils';
+import { ClientNodeDef } from '../AllNodes';
 import { getValueOrDefault } from '../utils';
 
 export const DatasetInputNode: ClientNodeDef<
@@ -57,13 +58,10 @@ export const DatasetInputNode: ClientNodeDef<
         rules: [{ required: true }],
         initialValue: getValueOrDefault(nodeForm, 'dataset', '')
       })(
-        <Select showSearch style={{ width: 200 }} placeholder="Select Dataset">
-          {datasets.map(ds => (
-            <Select.Option value={ds.id} key={ds.id}>
-              {ds.name}
-            </Select.Option>
-          ))}
-        </Select>
+        <FormSelect
+          values={datasets.map(n => ({ key: n.id, name: n.name }))}
+          placeholder="Select Dataset"
+        />
       )}
     </Form.Item>
   )

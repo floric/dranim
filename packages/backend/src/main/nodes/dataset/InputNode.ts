@@ -15,7 +15,9 @@ export const DatasetInputNode: ServerNodeDef<
   onServerExecution: form =>
     Promise.resolve({
       outputs: {
-        dataset: form.dataset || ''
+        dataset: {
+          id: form.dataset || 'new'
+        }
       }
     })
 };

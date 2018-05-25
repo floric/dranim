@@ -12,7 +12,7 @@ export interface FormValue {
 }
 
 export type FormValues<T> = { [Name in keyof T]: T[Name] | null };
-export type IOValues<T> = { [Name in keyof T]: string };
+export type IOValues<T> = { [Name in keyof T]: T[Name] };
 
 export interface NodeDef<NodeInputs = {}, NodeOutputs = {}> {
   name: string;

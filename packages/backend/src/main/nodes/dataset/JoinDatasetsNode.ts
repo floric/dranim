@@ -21,6 +21,6 @@ export const JoinDatasetsNode: ServerNodeDef<
     return true;
   },
   onServerExecution: async (form, inputs) => {
-    return { outputs: { joined: '{}' } };
+    return { outputs: { joined: { id: 'newid' } } };
   }
 };

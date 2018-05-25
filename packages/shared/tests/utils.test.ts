@@ -1,5 +1,5 @@
+import { FormValue, NodeInstance, NodeState } from '../src';
 import { parseNodeForm } from '../src/utils';
-import { NodeInstance, NodeState, FormValue } from '../src';
 
 const createNodeWithForm = (form: Array<FormValue>): NodeInstance => ({
   id: '1',

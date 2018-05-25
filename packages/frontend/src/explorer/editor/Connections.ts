@@ -1,7 +1,8 @@
+import { ConnectionWithoutId, SocketType } from '@masterthesis/shared';
 import * as Konva from 'konva';
-import { ExplorerEditorState, ExplorerEditorProps } from '../ExplorerEditor';
+
+import { ExplorerEditorProps, ExplorerEditorState } from '../ExplorerEditor';
 import { getSocketId } from './Sockets';
-import { SocketType, ConnectionWithoutId } from '@masterthesis/shared';
 
 const CONNECTION_STIFFNESS = 0.7;
 

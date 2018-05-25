@@ -1,14 +1,15 @@
-import * as React from 'react';
-import { Form } from 'antd';
-import { ClientNodeDef } from '../AllNodes';
 import {
   JoinDatasetsNodeDef,
+  JoinDatasetsNodeForm,
   JoinDatasetsNodeInputs,
-  JoinDatasetsNodeOutputs,
-  JoinDatasetsNodeForm
+  JoinDatasetsNodeOutputs
 } from '@masterthesis/shared';
-import { getValueOrDefault } from '../utils';
+import { Form } from 'antd';
+import * as React from 'react';
+
 import { FormSelect } from '../../utils/form-utils';
+import { ClientNodeDef } from '../AllNodes';
+import { getValueOrDefault } from '../utils';
 
 export const JoinDatasetsNode: ClientNodeDef<
   JoinDatasetsNodeInputs,

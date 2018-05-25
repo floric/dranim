@@ -8,17 +8,15 @@ describe('SumNode', () => {
     expect(SumNode.isInputValid).toBeDefined();
   });
 
-  // TODO add always tests for number checks or refactor to trust socket types
-
   test('should sum two numbers', async () => {
     const res = await SumNode.onServerExecution(
       {},
       {
-        a: '1',
-        b: '2'
+        a: 17,
+        b: 15
       }
     );
 
-    expect(res.outputs.sum).toBe('3');
+    expect(res.outputs.sum).toBe(32);
   });
 });

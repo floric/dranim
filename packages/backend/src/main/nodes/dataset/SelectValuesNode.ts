@@ -21,6 +21,12 @@ export const SelectValuesNode: ServerNodeDef<
     return true;
   },
   onServerExecution: async (form, inputs) => {
-    return { outputs: { dataset: '{}' } };
+    return {
+      outputs: {
+        dataset: {
+          id: 'new id'
+        }
+      }
+    };
   }
 };

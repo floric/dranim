@@ -1,18 +1,18 @@
-import * as React from 'react';
+import {
+  FormValues,
+  NodeDef,
+  NodeInstance,
+  NodesMap,
+  SocketMetas
+} from '@masterthesis/shared';
 import { FormComponentProps } from 'antd/lib/form';
+import { TreeData } from 'antd/lib/tree-select';
+import * as React from 'react';
 
 import { ExplorerEditorProps } from '../ExplorerEditor';
 import * as AllDatasetNodes from './dataset';
 import * as AllNumberNodes from './number';
 import * as AllStringNodes from './string';
-import {
-  NodeInstance,
-  NodeDef,
-  NodesMap,
-  SocketMetas,
-  FormValues
-} from '@masterthesis/shared';
-import { TreeData } from 'antd/lib/tree-select';
 
 export interface EditorProps {
   x?: number;

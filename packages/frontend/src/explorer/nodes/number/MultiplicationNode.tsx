@@ -1,9 +1,10 @@
-import { ClientNodeDef } from '../AllNodes';
 import {
   MultiplicationNodeDef,
   MultiplicationNodeInputs,
   MultiplicationNodeOutputs
 } from '@masterthesis/shared';
+
+import { ClientNodeDef } from '../AllNodes';
 
 export const MultiplicationNode: ClientNodeDef<
   MultiplicationNodeInputs,

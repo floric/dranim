@@ -13,9 +13,7 @@ export const NumberOutputNode: ServerNodeDef<
 > = {
   name: NumberOutputNodeDef.name,
   isInputValid: async input => {
-    const val = input.val;
-
-    if (!val || Number.isNaN(Number.parseFloat(val))) {
+    if (Number.isNaN(input.val)) {
       return false;
     }
 
@@ -25,7 +23,7 @@ export const NumberOutputNode: ServerNodeDef<
     Promise.resolve({
       outputs: {},
       results: {
-        value: Number.parseFloat(inputs.val)
+        value: inputs.val
       }
     })
 };

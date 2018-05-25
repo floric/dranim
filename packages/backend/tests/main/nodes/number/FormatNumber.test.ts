@@ -12,7 +12,7 @@ describe('FormatNumberNode', () => {
     const res = await FormatNumberNode.onServerExecution(
       {},
       {
-        number: '123'
+        number: 123
       }
     );
 
@@ -25,7 +25,7 @@ describe('FormatNumberNode', () => {
         average: false
       },
       {
-        number: '123456'
+        number: 123456
       }
     );
 
@@ -38,7 +38,7 @@ describe('FormatNumberNode', () => {
         output: 'time'
       },
       {
-        number: (60 * 60 * 12).toString()
+        number: 60 * 60 * 12
       }
     );
 

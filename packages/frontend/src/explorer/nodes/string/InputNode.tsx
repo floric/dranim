@@ -1,11 +1,12 @@
-import * as React from 'react';
-import { Input, Form } from 'antd';
-import { ClientNodeDef } from '../AllNodes';
 import {
   StringInputNodeDef,
-  StringInputNodeOutputs,
-  StringInputNodeForm
+  StringInputNodeForm,
+  StringInputNodeOutputs
 } from '@masterthesis/shared';
+import { Form, Input } from 'antd';
+import * as React from 'react';
+
+import { ClientNodeDef } from '../AllNodes';
 import { getValueOrDefault } from '../utils';
 
 export const StringInputNode: ClientNodeDef<
