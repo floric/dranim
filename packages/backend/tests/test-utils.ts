@@ -7,6 +7,8 @@ export const MONGO_DB_NAME = 'jest';
 export const NeverGoHereError = new Error('Should never reach this line!');
 
 export const getTestMongoDb = async () => {
+  jest.setTimeout(10000);
+
   const mongodbServer = new MongodbMemoryServer({
     instance: {
       dbName: MONGO_DB_NAME
