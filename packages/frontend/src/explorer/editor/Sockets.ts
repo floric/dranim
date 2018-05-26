@@ -1,14 +1,15 @@
+import {
+  ConnectionInstance,
+  ConnectionWithoutId,
+  SocketDef,
+  SocketType
+} from '@masterthesis/shared';
 import * as Konva from 'konva';
-import { ExplorerEditorState, ExplorerEditorProps } from '../ExplorerEditor';
+
+import { showNotificationWithIcon } from '../../utils/form';
+import { ExplorerEditorProps, ExplorerEditorState } from '../ExplorerEditor';
 import { socketColors } from '../nodes/Sockets';
 import { NODE_WIDTH } from './Nodes';
-import { showNotificationWithIcon } from '../../utils/form';
-import {
-  SocketType,
-  SocketDef,
-  ConnectionInstance,
-  ConnectionWithoutId
-} from '@masterthesis/shared';
 
 export const SOCKET_RADIUS = 8;
 export const SOCKET_DISTANCE = 30;
@@ -64,10 +65,8 @@ export const renderSocketWithUsages = (
   type: SocketType,
   i: number,
   server: ExplorerEditorProps,
-  state: ExplorerEditorState,
   nodeId: string,
-  changeState: (newState: Partial<ExplorerEditorState>) => void,
-  onClick: (nodeId: string) => void
+  onClick: () => void
 ) => {
   const { connections } = server;
   const isUsed =
@@ -79,7 +78,7 @@ export const renderSocketWithUsages = (
             c.from.nodeId === nodeId &&
             c.from.name === socketName
     ) !== undefined;
-  return renderSocket(s, type, i, isUsed, () => onClick(nodeId));
+  return renderSocket(s, type, i, isUsed, onClick);
 };
 
 const beginNewConnection = (
@@ -87,8 +86,6 @@ const beginNewConnection = (
   s: SocketDef,
   socketName: string,
   type: SocketType,
-  server: ExplorerEditorProps,
-  state: ExplorerEditorState,
   changeState: (newState: Partial<ExplorerEditorState>) => void
 ) => {
   changeState({
@@ -107,7 +104,6 @@ const beginEditExistingConnection = async (
   type: SocketType,
   nodeId: string,
   server: ExplorerEditorProps,
-  state: ExplorerEditorState,
   changeState: (newState: Partial<ExplorerEditorState>) => void
 ) => {
   const { connections } = server;
@@ -159,22 +155,12 @@ export const onClickSocket = (
         type,
         nodeId,
         server,
-        state,
         changeState
       );
     } else {
-      beginNewConnection(
-        nodeId,
-        s,
-        socketName,
-        type,
-        server,
-        state,
-        changeState
-      );
+      beginNewConnection(nodeId, s, socketName, type, changeState);
     }
   } else {
-    // TODO prevent circles (using ID lists)
     if (s.dataType !== openConnection.dataType) {
       showNotificationWithIcon({
         title: 'Connection not allowed',

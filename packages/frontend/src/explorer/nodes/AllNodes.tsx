@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import {
   FormValues,
   NodeDef,
@@ -7,7 +9,6 @@ import {
 } from '@masterthesis/shared';
 import { FormComponentProps } from 'antd/lib/form';
 import { TreeData } from 'antd/lib/tree-select';
-import * as React from 'react';
 
 import { ExplorerEditorProps } from '../ExplorerEditor';
 import * as AllDatasetNodes from './dataset';

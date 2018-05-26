@@ -1,12 +1,13 @@
 import * as React from 'react';
 
-import { Form, Button } from 'antd';
+import { parseNodeForm } from '@masterthesis/shared';
+import { Button, Form } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
-import { RenderFormItemsProps, EditorContext } from '../nodes/AllNodes';
+
 import { tryOperation } from '../../utils/form';
+import { EditorContext, RenderFormItemsProps } from '../nodes/AllNodes';
 import { getInputInformation } from '../nodes/utils';
-import { parseNodeForm } from '@masterthesis/shared';
 
 export interface IPropertiesFormProps {
   handleSubmit: (form: WrappedFormUtils, nodeId: string) => Promise<any>;

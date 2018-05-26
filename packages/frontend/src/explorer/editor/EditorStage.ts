@@ -7,7 +7,6 @@ import { renderNode } from './Nodes';
 export const EXPLORER_CONTAINER = 'explcontainer';
 
 export const updateStage = (
-  canvasId: string,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   changeState: (newState: Partial<ExplorerEditorState>) => void
@@ -35,14 +34,7 @@ export const updateStage = (
   const socketsMap: Map<string, Konva.Group> = new Map();
 
   nodes.forEach(n => {
-    const nodeGroup = renderNode(
-      n,
-      server,
-      state,
-      changeState,
-      nodeMap,
-      socketsMap
-    );
+    const nodeGroup = renderNode(n, server, state, changeState, socketsMap);
     nodesLayer.add(nodeGroup);
     nodeMap.set(n.id, nodeGroup);
   });
@@ -50,8 +42,6 @@ export const updateStage = (
   connections.forEach(c => {
     const line = renderConnection(
       c,
-      server,
-      state,
       stage,
       connsLayer,
       socketsMap,
@@ -65,8 +55,6 @@ export const updateStage = (
     openConnection.outputs.forEach(c => {
       const line = renderConnection(
         { from: { name: c.name, nodeId: c.nodeId }, to: null },
-        server,
-        state,
         stage,
         connsLayer,
         socketsMap,
@@ -79,8 +67,6 @@ export const updateStage = (
     openConnection.inputs.forEach(c => {
       const line = renderConnection(
         { from: null, to: { name: c.name, nodeId: c.nodeId } },
-        server,
-        state,
         stage,
         connsLayer,
         socketsMap,
