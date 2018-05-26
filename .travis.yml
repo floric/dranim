@@ -4,7 +4,10 @@ env:
     - CC_TEST_REPORTER_ID=fc64d003bdf120b91db2a980408cf2073efe351171845840b1fa6a0d87b658ea
 node_js:
   - "9"
-cache: yarn
+cache:
+  yarn: true
+  directories:
+    - $HOME/.mongodb-binaries
 before_install: yarn global add greenkeeper-lockfile@1
 before_script:
   - greenkeeper-lockfile-update

@@ -27,8 +27,7 @@ checks:
   similar-code:
     enabled: false
   identical-code:
-    config:
-      threshold: 2
+    enabled: false
 plugins:
   fixme:
     enabled: true
