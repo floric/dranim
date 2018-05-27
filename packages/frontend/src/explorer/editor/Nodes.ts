@@ -1,17 +1,19 @@
-import * as Konva from 'konva';
-import { ExplorerEditorState, ExplorerEditorProps } from '../ExplorerEditor';
-import { nodeTypes } from '../nodes/AllNodes';
 import {
-  SocketType,
+  ConditionalMetaTypes,
   NodeInstance,
   NodeState,
   SocketDef,
-  SocketDefs
+  SocketDefs,
+  SocketType
 } from '@masterthesis/shared';
+import * as Konva from 'konva';
+
+import { ExplorerEditorProps, ExplorerEditorState } from '../ExplorerEditor';
+import { nodeTypes } from '../nodes/AllNodes';
 import {
-  renderSocketWithUsages,
-  onClickSocket,
   getSocketId,
+  onClickSocket,
+  renderSocketWithUsages,
   SOCKET_DISTANCE
 } from './Sockets';
 
@@ -24,7 +26,6 @@ export const renderNode = (
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   changeState: (newState: Partial<ExplorerEditorState>) => void,
-  nodeMap: Map<string, Konva.Group>,
   socketsMap: Map<string, Konva.Group>
 ) => {
   const nodeType = nodeTypes.get(n.type);
@@ -32,23 +33,22 @@ export const renderNode = (
     throw new Error('Unknown node type');
   }
 
+  const nodeGroup = new Konva.Group({ draggable: true, x: n.x, y: n.y });
+
   const { inputs, outputs, name } = nodeType;
-  const minSocketsNr =
-    Object.keys(inputs).length > Object.keys(outputs).length
-      ? Object.keys(inputs).length
-      : Object.keys(outputs).length;
-  const height = (minSocketsNr + 1) * SOCKET_DISTANCE + TEXT_HEIGHT;
+  const height = getNodeHeight(inputs, outputs);
   const isSelected = state.selectedNode !== null && state.selectedNode === n.id;
 
-  const nodeGroup = new Konva.Group({ draggable: true, x: n.x, y: n.y });
   nodeGroup.on('dragend', ev => {
     server.onNodeUpdate(n.id, ev.target.x(), ev.target.y());
   });
+
   nodeGroup.on('click', ev => {
     changeState({
       selectedNode: n.id
     });
   });
+
   const bgRect = new Konva.Rect({
     width: NODE_WIDTH,
     height,
@@ -57,6 +57,7 @@ export const renderNode = (
     shadowBlur: 5,
     fill: '#FFF'
   });
+
   const nodeTitle = new Konva.Text({
     fill: isSelected ? '#1890ff' : '#000',
     align: 'center',
@@ -69,7 +70,7 @@ export const renderNode = (
 
   const inputsGroup = renderSockets(
     inputs,
-    n,
+    n.id,
     server,
     state,
     SocketType.INPUT,
@@ -78,7 +79,7 @@ export const renderNode = (
   );
   const outputsGroup = renderSockets(
     outputs,
-    n,
+    n.id,
     server,
     state,
     SocketType.OUTPUT,
@@ -108,9 +109,22 @@ export const renderNode = (
   return nodeGroup;
 };
 
+const getNodeHeight = (
+  inputs: ConditionalMetaTypes<{}>,
+  outputs: ConditionalMetaTypes<{}>
+) => {
+  const inputsCount = Object.keys(inputs).length;
+  const outputsCount = Object.keys(outputs).length;
+
+  const maxSocketsCount =
+    inputsCount > outputsCount ? inputsCount : outputsCount;
+
+  return (maxSocketsCount + 1) * SOCKET_DISTANCE + TEXT_HEIGHT;
+};
+
 const renderSockets = (
   sockets: SocketDefs<any>,
-  n: NodeInstance,
+  nodeId: string,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   type: SocketType,
@@ -131,10 +145,8 @@ const renderSockets = (
       type,
       i,
       server,
-      state,
-      n.id,
-      changeState,
-      (nodeId: string) =>
+      nodeId,
+      () =>
         onClickSocket(
           socketDef[1],
           socketDef[0],
@@ -146,7 +158,7 @@ const renderSockets = (
         )
     );
     group.add(socket);
-    socketsMap.set(getSocketId(type, n.id, socketDef[0]), socket);
+    socketsMap.set(getSocketId(type, nodeId, socketDef[0]), socket);
   }
 
   return group;

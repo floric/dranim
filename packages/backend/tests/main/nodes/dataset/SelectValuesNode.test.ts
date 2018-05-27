@@ -1,5 +1,5 @@
 import { DataType, SelectValuesNodeDef } from '@masterthesis/shared';
-import { Db, MongoClient } from 'mongodb';
+import { Db } from 'mongodb';
 
 import { SelectValuesNode } from '../../../../src/main/nodes/dataset/SelectValuesNode';
 import {
@@ -7,19 +7,23 @@ import {
   createDataset,
   getDataset
 } from '../../../../src/main/workspace/dataset';
-import { NeverGoHereError } from '../../../test-utils';
+import { getTestMongoDb, NeverGoHereError } from '../../../test-utils';
 
-let connection;
+let conn;
 let db: Db;
+let server;
 
 describe('SelectValuesNode', () => {
   beforeAll(async () => {
-    connection = await MongoClient.connect((global as any).__MONGO_URI__);
-    db = await connection.db((global as any).__MONGO_DB_NAME__);
+    const { connection, database, mongodbServer } = await getTestMongoDb();
+    conn = connection;
+    db = database;
+    server = mongodbServer;
   });
 
   afterAll(async () => {
-    await connection.close();
+    await conn.close();
+    await server.stop();
   });
 
   beforeEach(async () => {

@@ -17,3 +17,5 @@ export const parseNodeForm = (node: NodeInstance): FormValues<any> => {
 
   return fullForm;
 };
+
+export const isNumeric = (n: any) => !isNaN(parseFloat(n)) && isFinite(n);

@@ -85,7 +85,7 @@ export class ExplorerEditor extends React.Component<
   }
 
   public updateCanvas() {
-    updateStage(EXPLORER_CONTAINER, this.props, this.state, this.changeState);
+    updateStage(this.props, this.state, this.changeState);
   }
 
   private changeState = async (newState: ExplorerEditorState) => {

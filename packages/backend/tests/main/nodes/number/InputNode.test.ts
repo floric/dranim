@@ -1,4 +1,5 @@
 import { NumberInputNodeDef } from '@masterthesis/shared';
+
 import { NumberInputNode } from '../../../../src/main/nodes/number/InputNode';
 
 describe('NumberInputNode', () => {
@@ -16,6 +17,9 @@ describe('NumberInputNode', () => {
     expect(res).toBe(true);
 
     res = await NumberInputNode.isFormValid({ value: null });
+    expect(res).toBe(false);
+
+    res = await NumberInputNode.isFormValid({ value: 'test' as any });
     expect(res).toBe(false);
   });
 

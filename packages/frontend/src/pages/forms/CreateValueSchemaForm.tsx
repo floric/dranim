@@ -1,19 +1,20 @@
 import * as React from 'react';
+import { FormEvent } from 'react';
 
+import { DataType, ValueSchema } from '@masterthesis/shared';
 import {
-  Form,
-  Input,
   Button,
-  Select,
   Checkbox,
   DatePicker,
-  InputNumber
+  Form,
+  Input,
+  InputNumber,
+  Select
 } from 'antd';
-import * as moment from 'moment';
 import { FormComponentProps } from 'antd/lib/form';
-import { FormEvent } from 'react';
+import * as moment from 'moment';
+
 import { hasErrors } from '../../utils/form';
-import { DataType, ValueSchema } from '@masterthesis/shared';
 
 export interface CreateValueSchemaFormProps extends FormComponentProps {
   handleCreateValueSchema: (val: ValueSchema) => void;

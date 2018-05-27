@@ -1,37 +1,38 @@
-import { MongoClient, Db } from 'mongodb';
 import {
-  ProcessState,
-  NodeInstance,
-  NodeState,
-  NumberOutputNodeDef,
-  NumberInputNodeDef,
   DatasetOutputNodeDef,
-  IOValues
+  IOValues,
+  NumberInputNodeDef,
+  NumberOutputNodeDef,
+  ProcessState
 } from '@masterthesis/shared';
+import { Db } from 'mongodb';
 
+import { executeNode } from '../../../src/main/calculation/execute-node';
 import {
-  startCalculation,
-  getAllCalculations
-} from '../../../src/main/calculation/startProcess';
-import { getAllNodes } from '../../../src/main/workspace/nodes';
-import { executeNode } from '../../../src/main/calculation/executeNode';
+  getAllCalculations,
+  startCalculation
+} from '../../../src/main/calculation/start-process';
+import { createNode } from '../../../src/main/workspace/nodes';
+import { createWorkspace } from '../../../src/main/workspace/workspace';
+import { getTestMongoDb } from '../../test-utils';
 
-const WORKSPACE = 'test';
-
-jest.mock('../../../src/main/workspace/nodes');
-jest.mock('../../../src/main/calculation/executeNode');
-
-let connection;
+let conn;
 let db: Db;
+let server;
 
-describe('StartProcess', () => {
+jest.mock('../../../src/main/calculation/execute-node');
+
+describe('Start Process', () => {
   beforeAll(async () => {
-    connection = await MongoClient.connect((global as any).__MONGO_URI__);
-    db = await connection.db((global as any).__MONGO_DB_NAME__);
+    const { connection, database, mongodbServer } = await getTestMongoDb();
+    conn = connection;
+    db = database;
+    server = mongodbServer;
   });
 
   afterAll(async () => {
-    await connection.close();
+    await conn.close();
+    await server.stop();
   });
 
   beforeEach(async () => {
@@ -40,17 +41,20 @@ describe('StartProcess', () => {
   });
 
   test('should get empty calculations collection', async () => {
-    expect.assertions(1);
-    const processes = await getAllCalculations(db, WORKSPACE);
+    const ws = await createWorkspace(db, 'test', '');
+
+    const processes = await getAllCalculations(db, ws.id);
+
     expect(processes.length).toBe(0);
   });
 
   test('should start new calculation process without any nodes', async () => {
-    expect.assertions(13);
-    (getAllNodes as jest.Mock).mockImplementation((a, b) =>
-      Promise.resolve([])
+    (executeNode as jest.Mock).mockImplementation(n =>
+      Promise.resolve<IOValues<{}>>({ outputs: {}, results: {} })
     );
-    const newProcess = await startCalculation(db, WORKSPACE, true);
+
+    const ws = await createWorkspace(db, 'test', '');
+    const newProcess = await startCalculation(db, ws.id, true);
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
     expect(newProcess.finish).toBeNull();
@@ -58,7 +62,7 @@ describe('StartProcess', () => {
     expect(newProcess.totalOutputs).toBe(0);
     expect(newProcess.start).toBeDefined();
 
-    const processes = await getAllCalculations(db, WORKSPACE);
+    const processes = await getAllCalculations(db, ws.id);
     expect(processes.length).toBe(1);
 
     const finishedProcess = processes[0];
@@ -68,53 +72,39 @@ describe('StartProcess', () => {
     expect(finishedProcess.totalOutputs).toBe(0);
     expect(finishedProcess.start).toBeDefined();
 
-    expect((getAllNodes as jest.Mock).mock.calls.length).toBe(1);
     expect((executeNode as jest.Mock).mock.calls.length).toBe(0);
   });
 
   test('should start new calculation process with one node', async done => {
-    expect.assertions(13);
-    (getAllNodes as jest.Mock).mockImplementation((a, b) =>
-      Promise.resolve<Array<NodeInstance>>([
+    (executeNode as jest.Mock).mockImplementation(n =>
+      Promise.resolve<IOValues<{}>>({ outputs: {}, results: {} })
+    );
+
+    const ws = await createWorkspace(db, 'test', '');
+    await Promise.all(
+      [
         {
-          id: '1',
-          form: [],
-          inputs: [],
-          outputs: [],
-          state: NodeState.VALID,
           type: NumberOutputNodeDef.name,
-          workspaceId: WORKSPACE,
+          workspaceId: ws.id,
           x: 0,
           y: 0
         },
         {
-          id: '2',
-          form: [],
-          inputs: [],
-          outputs: [],
-          state: NodeState.VALID,
           type: DatasetOutputNodeDef.name,
-          workspaceId: WORKSPACE,
+          workspaceId: ws.id,
           x: 0,
           y: 0
         },
         {
-          id: '3',
-          form: [],
-          inputs: [],
-          outputs: [],
-          state: NodeState.VALID,
           type: NumberInputNodeDef.name,
-          workspaceId: WORKSPACE,
+          workspaceId: ws.id,
           x: 0,
           y: 0
         }
-      ])
+      ].map(n => createNode(db, n.type, n.workspaceId, n.x, n.y))
     );
-    (executeNode as jest.Mock).mockImplementation(n =>
-      Promise.resolve<IOValues<{}>>({})
-    );
-    const newProcess = await startCalculation(db, WORKSPACE, true);
+
+    const newProcess = await startCalculation(db, ws.id, true);
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
     expect(newProcess.finish).toBeNull();
@@ -122,7 +112,7 @@ describe('StartProcess', () => {
     expect(newProcess.totalOutputs).toBe(0);
     expect(newProcess.start).toBeDefined();
 
-    const processes = await getAllCalculations(db, WORKSPACE);
+    const processes = await getAllCalculations(db, ws.id);
     expect(processes.length).toBe(1);
 
     const finishedProcess = processes[0];
@@ -132,32 +122,29 @@ describe('StartProcess', () => {
     expect(finishedProcess.totalOutputs).toBe(2);
     expect(finishedProcess.start).toBeDefined();
 
-    expect((getAllNodes as jest.Mock).mock.calls.length).toBe(1);
     expect((executeNode as jest.Mock).mock.calls.length).toBe(2);
 
     done();
   });
 
   test('should catch error for failed node execution', async () => {
-    (getAllNodes as jest.Mock).mockImplementation((a, b) =>
-      Promise.resolve<Array<NodeInstance>>([
-        {
-          id: '1',
-          form: [],
-          inputs: [],
-          outputs: [],
-          state: NodeState.VALID,
-          type: NumberOutputNodeDef.name,
-          workspaceId: WORKSPACE,
-          x: 0,
-          y: 0
-        }
-      ])
-    );
     (executeNode as jest.Mock).mockImplementation(n => {
       throw new Error('Something went wrong during node execution.');
     });
-    const newProcess = await startCalculation(db, WORKSPACE, true);
+
+    const ws = await createWorkspace(db, 'test', '');
+    await Promise.all(
+      [
+        {
+          type: NumberOutputNodeDef.name,
+          workspaceId: ws.id,
+          x: 0,
+          y: 0
+        }
+      ].map(n => createNode(db, n.type, n.workspaceId, n.x, n.y))
+    );
+
+    const newProcess = await startCalculation(db, ws.id, true);
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
     expect(newProcess.finish).toBeNull();
@@ -165,7 +152,7 @@ describe('StartProcess', () => {
     expect(newProcess.totalOutputs).toBe(0);
     expect(newProcess.start).toBeDefined();
 
-    const processes = await getAllCalculations(db, WORKSPACE);
+    const processes = await getAllCalculations(db, ws.id);
     expect(processes.length).toBe(1);
 
     const finishedProcess = processes[0];
@@ -175,7 +162,6 @@ describe('StartProcess', () => {
     expect(finishedProcess.totalOutputs).toBe(1);
     expect(finishedProcess.start).toBeDefined();
 
-    expect((getAllNodes as jest.Mock).mock.calls.length).toBe(1);
     expect((executeNode as jest.Mock).mock.calls.length).toBe(1);
   });
 });

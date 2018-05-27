@@ -1,6 +1,6 @@
 import { CalculationProcess, ProcessState } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
-import { executeNode } from '../calculation/executeNode';
+import { executeNode } from '../calculation/execute-node';
 import { outputNodes } from '../nodes/AllNodes';
 import { getAllNodes } from '../workspace/nodes';
 
@@ -9,22 +9,25 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
 
   try {
     const nodes = await getAllNodes(db, workspaceId);
-    const outputs = nodes.filter(n => outputNodes.includes(n.type));
+    const outputNodesInstances = nodes.filter(n =>
+      outputNodes.includes(n.type)
+    );
 
     await processCollection.updateOne(
       { _id: new ObjectID(processId) },
       {
         $set: {
-          totalOutputs: outputs.length,
+          totalOutputs: outputNodesInstances.length,
           state: ProcessState.PROCESSING
         }
       }
     );
 
     await Promise.all(
-      outputs.map(async o => {
-        await executeNode(db, o);
-        // TODO process res
+      outputNodesInstances.map(async o => {
+        const { results } = await executeNode(db, o.id);
+        console.log(results);
+
         await processCollection.updateOne(
           { _id: new ObjectID(processId) },
           {

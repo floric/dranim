@@ -1,4 +1,5 @@
 import { DatasetRef } from './nodes/dataset';
+import { ValueSchema } from './workspace';
 
 export enum SocketType {
   INPUT = 'INPUT',
@@ -13,7 +14,7 @@ export enum DataType {
   STRING = 'String'
 }
 export interface DatasetMeta {
-  schema: Array<string>;
+  schema: Array<ValueSchema>;
 }
 
 export interface SocketDef<Meta = {}> {

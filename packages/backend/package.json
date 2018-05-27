@@ -9,7 +9,8 @@
     "lint": "tslint -p . --fix",
     "start":
       "concurrently \"tsc -w\" \"cross-env NODE_ENV=development nodemon dist/main.js\"",
-    "test": "jest --coverage --maxWorkers=1"
+    "test": "jest --coverage --maxWorkers=1",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@masterthesis/shared": "1.0.0",
@@ -64,9 +65,6 @@
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
-    "globalSetup": "./tests/setup.js",
-    "globalTeardown": "./tests/teardown.js",
-    "testEnvironment": "./tests/node-env.js",
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
     "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"]
   }

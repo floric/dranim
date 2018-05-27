@@ -1,12 +1,14 @@
 import * as React from 'react';
-import { Mutation } from 'react-apollo';
+
+import { Dataset, Value } from '@masterthesis/shared';
+import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
-import { Col, Row, Table, Card } from 'antd';
+import { Mutation } from 'react-apollo';
+
+import { Card, Col, Row, Table } from 'antd';
+import { AsyncButton } from '../../components/AsyncButton';
 import { tryOperation } from '../../utils/form';
 import { CreateEntryForm } from '../forms/CreateEntryForm';
-import { ApolloQueryResult } from 'apollo-client';
-import { AsyncButton } from '../../components/AsyncButton';
-import { Dataset, Value } from '@masterthesis/shared';
 
 export interface DataEntriesProps {
   dataset: Dataset;

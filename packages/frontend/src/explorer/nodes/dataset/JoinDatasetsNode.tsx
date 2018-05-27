@@ -1,13 +1,13 @@
+import * as React from 'react';
+
 import {
   JoinDatasetsNodeDef,
   JoinDatasetsNodeForm,
   JoinDatasetsNodeInputs,
   JoinDatasetsNodeOutputs
 } from '@masterthesis/shared';
-import { Form } from 'antd';
-import * as React from 'react';
+import { Form, Select } from 'antd';
 
-import { FormSelect } from '../../utils/form-utils';
 import { ClientNodeDef } from '../AllNodes';
 import { getValueOrDefault } from '../utils';
 
@@ -43,7 +43,8 @@ export const JoinDatasetsNode: ClientNodeDef<
     }
 
     const isIdPresentInInputs =
-      inputValuesA.includes(idAValue) && inputValuesB.includes(idBValue);
+      inputValuesA.map(n => n.name).includes(idAValue) &&
+      inputValuesB.map(n => n.name).includes(idBValue);
     if (!isIdPresentInInputs) {
       return {
         joined: {
@@ -76,8 +77,10 @@ export const JoinDatasetsNode: ClientNodeDef<
     if (!dsA || !dsB || !dsA.isPresent || !dsB.isPresent) {
       return <p>Plugin the two datasets first.</p>;
     }
-    const schemasA = dsA.content.schema.map(s => ({ key: s }));
-    const schemasB = dsB.content.schema.map(s => ({ key: s }));
+
+    const schemasA = dsA.content.schema;
+    const schemasB = dsB.content.schema;
+
     return (
       <>
         <Form.Item label="Value from A">
@@ -85,7 +88,17 @@ export const JoinDatasetsNode: ClientNodeDef<
             rules: [{ required: true }],
             initialValue: getValueOrDefault(nodeForm, 'valueA', '')
           })(
-            <FormSelect values={schemasA} placeholder="Select first column" />
+            <Select
+              showSearch
+              style={{ width: 200 }}
+              placeholder="Select first column"
+            >
+              {schemasA.map(ds => (
+                <Select.Option value={ds.name} key={ds.name}>
+                  {ds.name}
+                </Select.Option>
+              ))}
+            </Select>
           )}
         </Form.Item>
         <Form.Item label="Value from B">
@@ -93,7 +106,17 @@ export const JoinDatasetsNode: ClientNodeDef<
             rules: [{ required: true }],
             initialValue: getValueOrDefault(nodeForm, 'valueB', '')
           })(
-            <FormSelect values={schemasB} placeholder="Select second column" />
+            <Select
+              showSearch
+              style={{ width: 200 }}
+              placeholder="Select second column"
+            >
+              {schemasB.map(ds => (
+                <Select.Option value={ds.name} key={ds.name}>
+                  {ds.name}
+                </Select.Option>
+              ))}
+            </Select>
           )}
         </Form.Item>
       </>

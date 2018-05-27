@@ -7,13 +7,10 @@ import { renderNode } from './Nodes';
 export const EXPLORER_CONTAINER = 'explcontainer';
 
 export const updateStage = (
-  canvasId: string,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   changeState: (newState: Partial<ExplorerEditorState>) => void
 ) => {
-  const { connections, nodes } = server;
-  const { openConnection } = state;
   const canvasContainer = document.getElementById(EXPLORER_CONTAINER);
   if (!canvasContainer) {
     throw new Error('Canvas container not found.');
@@ -28,30 +25,66 @@ export const updateStage = (
     height: canvasHeight
   });
 
-  const nodesLayer = new Konva.Layer();
-  const connsLayer = new Konva.Layer();
-
   const nodeMap: Map<string, Konva.Group> = new Map();
   const socketsMap: Map<string, Konva.Group> = new Map();
 
+  const nodesLayer = createNodesLayer(
+    server,
+    state,
+    socketsMap,
+    nodeMap,
+    changeState
+  );
+
+  const connsLayer = createConnectionsLayer(
+    server,
+    state,
+    stage,
+    socketsMap,
+    nodeMap,
+    changeState
+  );
+
+  stage.add(connsLayer);
+  stage.add(nodesLayer);
+};
+
+const createNodesLayer = (
+  server: ExplorerEditorProps,
+  state: ExplorerEditorState,
+  socketsMap: Map<string, Konva.Group>,
+  nodeMap: Map<string, Konva.Group>,
+  changeState: (newState: Partial<ExplorerEditorState>) => void
+) => {
+  const nodesLayer = new Konva.Layer();
+
+  const { nodes } = server;
+
   nodes.forEach(n => {
-    const nodeGroup = renderNode(
-      n,
-      server,
-      state,
-      changeState,
-      nodeMap,
-      socketsMap
-    );
+    const nodeGroup = renderNode(n, server, state, changeState, socketsMap);
     nodesLayer.add(nodeGroup);
     nodeMap.set(n.id, nodeGroup);
   });
 
+  return nodesLayer;
+};
+
+const createConnectionsLayer = (
+  server: ExplorerEditorProps,
+  state: ExplorerEditorState,
+  stage: Konva.Stage,
+  socketsMap: Map<string, Konva.Group>,
+  nodeMap: Map<string, Konva.Group>,
+  changeState: (newState: Partial<ExplorerEditorState>) => void
+) => {
+  const connsLayer = new Konva.Layer();
+
+  const { connections } = server;
+  const { openConnection } = state;
+
   connections.forEach(c => {
     const line = renderConnection(
       c,
-      server,
-      state,
       stage,
       connsLayer,
       socketsMap,
@@ -65,8 +98,6 @@ export const updateStage = (
     openConnection.outputs.forEach(c => {
       const line = renderConnection(
         { from: { name: c.name, nodeId: c.nodeId }, to: null },
-        server,
-        state,
         stage,
         connsLayer,
         socketsMap,
@@ -79,8 +110,6 @@ export const updateStage = (
     openConnection.inputs.forEach(c => {
       const line = renderConnection(
         { from: null, to: { name: c.name, nodeId: c.nodeId } },
-        server,
-        state,
         stage,
         connsLayer,
         socketsMap,
@@ -91,6 +120,5 @@ export const updateStage = (
     });
   }
 
-  stage.add(connsLayer);
-  stage.add(nodesLayer);
+  return connsLayer;
 };

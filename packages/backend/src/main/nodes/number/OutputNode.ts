@@ -4,6 +4,7 @@ import {
   NumberOutputNodeResults,
   ServerNodeDef
 } from '@masterthesis/shared';
+import { validateNumber } from './utils';
 
 export const NumberOutputNode: ServerNodeDef<
   NumberOutputNodeInputs,
@@ -12,13 +13,7 @@ export const NumberOutputNode: ServerNodeDef<
   NumberOutputNodeResults
 > = {
   name: NumberOutputNodeDef.name,
-  isInputValid: async input => {
-    if (Number.isNaN(input.val)) {
-      return false;
-    }
-
-    return true;
-  },
+  isInputValid: async input => validateNumber(input.val),
   onServerExecution: (form, inputs) =>
     Promise.resolve({
       outputs: {},

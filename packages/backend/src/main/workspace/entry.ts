@@ -23,20 +23,20 @@ export const getEntryCollection = (
   return db.collection(`Entries_${datasetId}`);
 };
 
-export const getEntryByUniqueValue = async (
+export const getEntriesByValue = async (
   db: Db,
   datasetId: string,
   value: Value
-): Promise<Entry> => {
+): Promise<Array<Entry>> => {
   const collection = getEntryCollection(db, datasetId);
-  const obj = await collection.findOne({ [`values.${value.name}`]: value.val });
-  if (!obj) {
-    throw new Error('Entry not found!');
-  }
-  return {
+  const all = await collection
+    .find({ [`values.${value.name}`]: value.val })
+    .toArray();
+
+  return all.map(obj => ({
     id: obj._id.toHexString(),
     ...obj
-  };
+  }));
 };
 
 export const getEntry = async (
@@ -95,14 +95,14 @@ export const createEntry = async (
   db: Db,
   datasetId: string,
   valuesArr: Array<Value>
-) => {
+): Promise<Entry> => {
   if (!valuesArr.length) {
     throw new UploadEntryError('No values specified for entry.', 'no-values');
   }
 
   valuesArr.forEach(v => {
-    if (v.name === undefined || v.val === undefined) {
-      throw new Error(`Value "${v.name}" malformed.`);
+    if (!v.name || v.val === undefined || v.val === null) {
+      throw new Error('Value malformed');
     }
 
     if (Object.keys(v).length !== 2) {

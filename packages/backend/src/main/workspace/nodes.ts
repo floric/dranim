@@ -1,5 +1,6 @@
 import { NodeInstance, NodeState, parseNodeForm } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
+
 import { serverNodeTypes } from '../nodes/AllNodes';
 import { getConnectionsCollection } from './connections';
 import { getWorkspace, getWorkspacesCollection } from './workspace';
@@ -19,7 +20,7 @@ export const createNode = async (
 ): Promise<NodeInstance> => {
   const collection = getNodesCollection(db);
   if (type.length === 0) {
-    throw new Error('Name mustn\'t be empty.');
+    throw new Error('Name must not be empty.');
   }
 
   const ws = await getWorkspace(db, workspaceId);
@@ -159,12 +160,14 @@ export const addOrUpdateFormValue = async (
 
   const node = await getNode(db, nodeId);
   if (!node) {
-    throw new Error('Node doesn\'t exist.');
+    throw new Error('Node does not exist.');
   }
 
   const nodeObjId = new ObjectID(nodeId);
 
   const collection = getNodesCollection(db);
+
+  // TODO Add validation here or comparable
 
   const res = await collection.updateOne(
     { _id: nodeObjId },

@@ -3,7 +3,8 @@ import {
   NumberOutputNodeDef,
   SocketInstance
 } from '@masterthesis/shared';
-import { Db, MongoClient } from 'mongodb';
+import { Db } from 'mongodb';
+
 import {
   createConnection,
   deleteConnection,
@@ -11,19 +12,27 @@ import {
 } from '../../../src/main/workspace/connections';
 import { createNode } from '../../../src/main/workspace/nodes';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
-import { NeverGoHereError, VALID_OBJECT_ID } from '../../test-utils';
+import {
+  getTestMongoDb,
+  NeverGoHereError,
+  VALID_OBJECT_ID
+} from '../../test-utils';
 
-let connection;
+let conn;
 let db: Db;
+let server;
 
 describe('Connections', () => {
   beforeAll(async () => {
-    connection = await MongoClient.connect((global as any).__MONGO_URI__);
-    db = await connection.db((global as any).__MONGO_DB_NAME__);
+    const { connection, database, mongodbServer } = await getTestMongoDb();
+    conn = connection;
+    db = database;
+    server = mongodbServer;
   });
 
   afterAll(async () => {
-    await connection.close();
+    await conn.close();
+    await server.stop();
   });
 
   beforeEach(async () => {
