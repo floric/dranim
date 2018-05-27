@@ -138,14 +138,13 @@ export const onClickSocket = (
 ) => {
   const { openConnection } = state;
   const { connections } = server;
+
   if (openConnection === null) {
-    const connectionsInSocket = connections.filter(
-      c =>
-        type === SocketType.OUTPUT
-          ? c.from !== null &&
-            c.from.nodeId === nodeId &&
-            c.from.name === socketName
-          : c.to !== null && c.to.nodeId === nodeId && c.to.name === socketName
+    const connectionsInSocket = getConnectionsInSocket(
+      connections,
+      type,
+      nodeId,
+      socketName
     );
     if (connectionsInSocket.length > 0) {
       beginEditExistingConnection(
@@ -158,6 +157,7 @@ export const onClickSocket = (
         changeState
       );
     } else {
+      console.log('new conn');
       beginNewConnection(nodeId, s, socketName, type, changeState);
     }
   } else {
@@ -224,3 +224,18 @@ export const onClickSocket = (
     });
   }
 };
+
+const getConnectionsInSocket = (
+  connections: Array<ConnectionInstance>,
+  type: SocketType,
+  nodeId: string,
+  socketName: string
+) =>
+  connections.filter(
+    c =>
+      type === SocketType.OUTPUT
+        ? c.from !== null &&
+          c.from.nodeId === nodeId &&
+          c.from.name === socketName
+        : c.to !== null && c.to.nodeId === nodeId && c.to.name === socketName
+  );

@@ -23,6 +23,8 @@ import {
 import { validateNonEmptyString } from '../string/utils';
 import { validateDatasetId } from './utils';
 
+const JOIN_ENTRIES_BATCH_COUNT = 200;
+
 export const JoinDatasetsNode: ServerNodeDef<
   JoinDatasetsNodeInputs,
   JoinDatasetsNodeOutputs,
@@ -58,9 +60,9 @@ const joinEntries = async (
   dsB: Dataset
 ) => {
   const allEntriesFromA = await getAllEntries(db, dsA.id);
-  for (let i = 0; i < allEntriesFromA.length / 500; ++i) {
+  for (let i = 0; i < allEntriesFromA.length / JOIN_ENTRIES_BATCH_COUNT; ++i) {
     await Promise.all(
-      allEntriesFromA.slice(i * 500, (i + 1) * 500).map(async e => {
+      allEntriesFromA.slice(i * JOIN_ENTRIES_BATCH_COUNT, (i + 1) * JOIN_ENTRIES_BATCH_COUNT).map(async e => {
         const valFromA = e.values[valNameA];
         const matchingEntriesFromB = await getEntriesByUniqueValue(db, dsB.id, {
           name: valNameB,
@@ -83,7 +85,7 @@ const joinEntries = async (
         );
       })
     );
-    console.log(`${i} of ${allEntriesFromA.length / 500}`);
+    console.log(`${i} of ${allEntriesFromA.length / JOIN_ENTRIES_BATCH_COUNT}`);
   }
 };
 

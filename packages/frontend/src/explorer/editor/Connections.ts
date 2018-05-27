@@ -1,4 +1,8 @@
-import { ConnectionWithoutId, SocketType } from '@masterthesis/shared';
+import {
+  ConnectionWithoutId,
+  SocketInstance,
+  SocketType
+} from '@masterthesis/shared';
 import * as Konva from 'konva';
 
 import { ExplorerEditorState } from '../ExplorerEditor';
@@ -25,21 +29,18 @@ export const renderConnection = (
   nodeMap: Map<string, Konva.Group>,
   changeState: (newState: Partial<ExplorerEditorState>) => void
 ) => {
-  const outputSocket = c.from
-    ? socketsMap.get(getSocketId(SocketType.OUTPUT, c.from.nodeId, c.from.name))
-    : null;
-  const inputSocket = c.to
-    ? socketsMap.get(getSocketId(SocketType.INPUT, c.to.nodeId, c.to.name))
-    : null;
-
-  const line = renderLine(inputSocket, outputSocket, stage);
+  const fromSocket = c.from;
+  const toSocket = c.to;
+  const outputSocket = getSocket(fromSocket, SocketType.OUTPUT, socketsMap);
+  const inputSocket = getSocket(toSocket, SocketType.INPUT, socketsMap);
+  const connectionLine = renderLine(inputSocket, outputSocket, stage);
 
   const adjustPoint = e => {
     if (!outputSocket || !inputSocket) {
       return;
     }
 
-    line.points(
+    connectionLine.points(
       getConnectionPoints(
         outputSocket.getAbsolutePosition(),
         inputSocket.getAbsolutePosition()
@@ -49,20 +50,18 @@ export const renderConnection = (
     connsLayer.draw();
   };
 
-  if (c.from) {
-    nodeMap.get(c.from.nodeId)!.on('dragmove', adjustPoint);
-  } else if (c.to) {
-    nodeMap.get(c.to.nodeId)!.on('dragmove', adjustPoint);
-  } else if (!c.to || !c.from) {
+  if (fromSocket) {
+    nodeMap.get(fromSocket.nodeId)!.on('dragmove', adjustPoint);
+  }
+  if (toSocket) {
+    nodeMap.get(toSocket.nodeId)!.on('dragmove', adjustPoint);
+  }
+  if (!toSocket || !fromSocket) {
     stage.on('mousemove', () => {
-      line.points(
+      connectionLine.points(
         getConnectionPoints(
-          outputSocket
-            ? outputSocket.getAbsolutePosition()
-            : stage.getPointerPosition(),
-          inputSocket
-            ? inputSocket.getAbsolutePosition()
-            : stage.getPointerPosition()
+          getSocketPositionOrPointer(outputSocket, stage),
+          getSocketPositionOrPointer(inputSocket, stage)
         )
       );
       connsLayer.draw();
@@ -75,8 +74,20 @@ export const renderConnection = (
     });
   }
 
-  return line;
+  return connectionLine;
 };
+
+const getSocketPositionOrPointer = (
+  socket: Konva.Group | null,
+  stage: Konva.Stage
+) => (socket ? socket.getAbsolutePosition() : stage.getPointerPosition());
+
+const getSocket = (
+  socket: SocketInstance,
+  type: SocketType,
+  socketsMap: Map<string, Konva.Group>
+): Konva.Group | null =>
+  socket ? socketsMap.get(getSocketId(type, socket.nodeId, socket.name)) : null;
 
 const renderLine = (
   inputSocket: Konva.Group | null,
@@ -84,20 +95,18 @@ const renderLine = (
   stage: Konva.Stage
 ) => {
   const isCurrentlyChanged = !inputSocket || !outputSocket;
-
   const line = new Konva.Line({
     strokeWidth: isCurrentlyChanged ? 4 : 2,
     strokeEnabled: true,
     stroke: isCurrentlyChanged ? '#666' : '#999',
     points: getConnectionPoints(
-      outputSocket
-        ? outputSocket.getAbsolutePosition()
-        : stage.getPointerPosition() || inputSocket.getAbsolutePosition(),
-      inputSocket
-        ? inputSocket.getAbsolutePosition()
-        : stage.getPointerPosition() || outputSocket.getAbsolutePosition()
+      getSocketPositionOrPointer(outputSocket, stage) ||
+        inputSocket.getAbsolutePosition(),
+      getSocketPositionOrPointer(inputSocket, stage) ||
+        outputSocket.getAbsolutePosition()
     ),
     ...({ bezier: true } as any)
   });
+
   return line;
 };
