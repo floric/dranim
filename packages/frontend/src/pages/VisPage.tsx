@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { Col, Row, Card, Select, Form, Button } from 'antd';
+
+import { Button, Card, Col, Form, Row, Select } from 'antd';
+
 import { PageHeaderCard } from '../components/PageHeaderCard';
 
 export default class VisPage extends React.Component<{}, {}> {

@@ -23,7 +23,7 @@ export const getEntryCollection = (
   return db.collection(`Entries_${datasetId}`);
 };
 
-export const getEntriesByUniqueValue = async (
+export const getEntriesByValue = async (
   db: Db,
   datasetId: string,
   value: Value

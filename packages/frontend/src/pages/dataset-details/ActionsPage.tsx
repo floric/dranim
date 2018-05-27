@@ -1,22 +1,23 @@
 import * as React from 'react';
+
+import { Dataset, ProcessState, UploadProcess } from '@masterthesis/shared';
+import { Button, Card, Col, Form, Icon, Row, Table, Upload } from 'antd';
 import { ApolloQueryResult } from 'apollo-client';
-import { Row, Col, Card, Upload, Button, Icon, Table, Form } from 'antd';
+import gql from 'graphql-tag';
 import {
   Mutation,
   MutationFn,
-  WithApolloClient,
+  Query,
   withApollo,
-  Query
+  WithApolloClient
 } from 'react-apollo';
-import gql from 'graphql-tag';
 
 import { UploadFile } from 'antd/lib/upload/interface';
-import { tryOperation } from '../../utils/form';
 import { AsyncButton } from '../../components/AsyncButton';
-import { UnknownErrorCard, LoadingCard } from '../../components/CustomCards';
-import { ProcessTime } from '../../components/ProcessTime';
+import { LoadingCard, UnknownErrorCard } from '../../components/CustomCards';
 import { NumberInfo } from '../../components/NumberInfo';
-import { Dataset, UploadProcess, ProcessState } from '@masterthesis/shared';
+import { ProcessTime } from '../../components/ProcessTime';
+import { tryOperation } from '../../utils/form';
 
 const UPLOAD_ENTRIES_CSV = gql`
   mutation($files: [Upload!]!, $datasetId: String!) {
@@ -254,6 +255,7 @@ export const DatasetActions = withApollo<DataActionsProps>(
                                 <Col span={12}>
                                   <AsyncButton
                                     type="primary"
+                                    disabled
                                     onClick={async () => console.log('TODO')}
                                   >
                                     as CSV
@@ -262,6 +264,7 @@ export const DatasetActions = withApollo<DataActionsProps>(
                                 <Col span={12}>
                                   <AsyncButton
                                     type="primary"
+                                    disabled
                                     onClick={async () => console.log('TODO')}
                                   >
                                     as ZIP

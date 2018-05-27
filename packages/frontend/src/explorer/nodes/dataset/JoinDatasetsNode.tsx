@@ -78,7 +78,7 @@ export const JoinDatasetsNode: ClientNodeDef<
       return <p>Plugin the two datasets first.</p>;
     }
 
-    const schemasA = dsA.content.schema.filter(n => n.unique);
+    const schemasA = dsA.content.schema;
     const schemasB = dsB.content.schema;
 
     return (

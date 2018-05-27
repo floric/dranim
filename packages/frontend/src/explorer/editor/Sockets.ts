@@ -157,7 +157,6 @@ export const onClickSocket = (
         changeState
       );
     } else {
-      console.log('new conn');
       beginNewConnection(nodeId, s, socketName, type, changeState);
     }
   } else {

@@ -18,7 +18,7 @@ import {
 import {
   createEntry,
   getAllEntries,
-  getEntriesByUniqueValue
+  getEntriesByValue
 } from '../../workspace/entry';
 import { validateNonEmptyString } from '../string/utils';
 import { validateDatasetId } from './utils';
@@ -44,7 +44,14 @@ export const JoinDatasetsNode: ServerNodeDef<
     await validateSchemas(form, dsA!, dsB!);
 
     const newDs = await createDataset(db, new Date().toISOString());
-    await addSchemasFromBothDatasets(db, newDs, dsA!, dsB!);
+    await addSchemasFromBothDatasets(
+      db,
+      newDs,
+      dsA!,
+      dsB!,
+      form.valueA!,
+      form.valueB!
+    );
     await joinEntries(db, form.valueA!, form.valueB!, newDs, dsA!, dsB!);
 
     return { outputs: { joined: { id: newDs.id } } };
@@ -62,30 +69,31 @@ const joinEntries = async (
   const allEntriesFromA = await getAllEntries(db, dsA.id);
   for (let i = 0; i < allEntriesFromA.length / JOIN_ENTRIES_BATCH_COUNT; ++i) {
     await Promise.all(
-      allEntriesFromA.slice(i * JOIN_ENTRIES_BATCH_COUNT, (i + 1) * JOIN_ENTRIES_BATCH_COUNT).map(async e => {
-        const valFromA = e.values[valNameA];
-        const matchingEntriesFromB = await getEntriesByUniqueValue(db, dsB.id, {
-          name: valNameB,
-          val: valFromA
-        });
+      allEntriesFromA
+        .slice(i * JOIN_ENTRIES_BATCH_COUNT, (i + 1) * JOIN_ENTRIES_BATCH_COUNT)
+        .map(async e => {
+          const valFromA = e.values[valNameA];
+          const matchingEntriesFromB = await getEntriesByValue(db, dsB.id, {
+            name: valNameB,
+            val: valFromA
+          });
 
-        await Promise.all(
-          matchingEntriesFromB.map(async matchedE => {
-            const allFromA = Array.from(Object.entries(e.values));
-            const allFromB = Array.from(Object.entries(matchedE.values)).filter(
-              n => !Object.keys(allFromA).includes(n[0])
-            );
+          await Promise.all(
+            matchingEntriesFromB.map(async matchedE => {
+              const allFromA = Array.from(Object.entries(e.values));
+              const allFromB = Array.from(
+                Object.entries(matchedE.values)
+              ).filter(n => !Object.keys(allFromA).includes(n[0]));
 
-            await createEntry(
-              db,
-              newDs.id,
-              allFromA.concat(allFromB).map(n => ({ name: n[0], val: n[1] }))
-            );
-          })
-        );
-      })
+              await createEntry(
+                db,
+                newDs.id,
+                allFromA.concat(allFromB).map(n => ({ name: n[0], val: n[1] }))
+              );
+            })
+          );
+        })
     );
-    console.log(`${i} of ${allEntriesFromA.length / JOIN_ENTRIES_BATCH_COUNT}`);
   }
 };
 
@@ -93,13 +101,34 @@ const addSchemasFromBothDatasets = async (
   db: Db,
   newDs: Dataset,
   dsA: Dataset,
-  dsB: Dataset
+  dsB: Dataset,
+  valueAName: string,
+  valueBName: string
 ) => {
-  await Promise.all(dsA.valueschemas.map(s => addValueSchema(db, newDs.id, s)));
-  // add only non used keys -> use RenameValueNode to change value names
+  await addValueSchema(db, newDs.id, {
+    ...dsA.valueschemas.find(n => n.name === valueAName)!,
+    unique: false
+  });
+  if (valueAName !== valueBName) {
+    await addValueSchema(db, newDs.id, {
+      ...dsB.valueschemas.find(n => n.name === valueBName)!,
+      unique: false
+    });
+  }
+
+  await Promise.all(
+    dsA.valueschemas
+      .filter(n => n.name !== valueAName && n.name !== valueBName)
+      .map(s => addValueSchema(db, newDs.id, s))
+  );
   await Promise.all(
     dsB.valueschemas
-      .filter(s => !dsA.valueschemas.map(n => n.name).includes(s.name))
+      .filter(
+        s =>
+          !dsA.valueschemas.map(n => n.name).includes(s.name) &&
+          s.name !== valueAName &&
+          s.name !== valueBName
+      )
       .map(s => addValueSchema(db, newDs.id, s))
   );
 };
@@ -122,10 +151,6 @@ const validateSchemas = async (
 
   if (schemaA.type !== schemaB.type) {
     throw new Error('Schemas should have same type');
-  }
-
-  if (schemaA.unique !== true) {
-    throw new Error('First schema needs to be unique');
   }
 };
 

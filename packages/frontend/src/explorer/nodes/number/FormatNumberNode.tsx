@@ -4,10 +4,9 @@ import {
   FormatNumberNodeInputs,
   FormatNumberNodeOutputs
 } from '@masterthesis/shared';
-import { Checkbox, Form, InputNumber } from 'antd';
+import { Checkbox, Form, InputNumber, Select } from 'antd';
 import * as React from 'react';
 
-import { FormSelect } from '../../utils/form-utils';
 import { ClientNodeDef } from '../AllNodes';
 import { getValueOrDefault } from '../utils';
 
@@ -29,6 +28,14 @@ export const FormatNumberNode: ClientNodeDef<
     const spaceSeparated = getValueOrDefault(nodeForm, 'spaceSeparated', true);
     const averageTotal = getValueOrDefault(nodeForm, 'averageTotal', 3);
     const output = getValueOrDefault(nodeForm, 'output', 'number');
+
+    const outputOptions = [
+      { key: 'number', display: 'Number' },
+      { key: 'ordinal', display: 'Ordinal' },
+      { key: 'byte', display: 'Bytes' },
+      { key: 'percent', display: 'Percentage' },
+      { key: 'time', display: 'Time from seconds' }
+    ];
 
     return (
       <>
@@ -66,16 +73,17 @@ export const FormatNumberNode: ClientNodeDef<
           {getFieldDecorator('output', {
             initialValue: output
           })(
-            <FormSelect
+            <Select
+              showSearch
+              style={{ width: 200 }}
               placeholder="Select output type"
-              values={[
-                { key: 'number', display: 'Number' },
-                { key: 'ordinal', display: 'Ordinal' },
-                { key: 'byte', display: 'Bytes' },
-                { key: 'percent', display: 'Percentage' },
-                { key: 'time', display: 'Time from seconds' }
-              ]}
-            />
+            >
+              {outputOptions.map(ds => (
+                <Select.Option value={ds.key} key={ds.key}>
+                  {ds.display}
+                </Select.Option>
+              ))}
+            </Select>
           )}
         </Form.Item>
       </>
