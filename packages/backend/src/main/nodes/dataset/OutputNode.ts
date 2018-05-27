@@ -14,13 +14,14 @@ export const DatasetOutputNode: ServerNodeDef<
   DatasetOutputNodeResults
 > = {
   name: DatasetOutputNodeDef.name,
-  isInputValid: inputs => Promise.resolve(inputs.dataset !== null && inputs.dataset.id !== null),
-  onServerExecution: async (form, inputs,db) => {
+  isInputValid: inputs =>
+    Promise.resolve(!!inputs.dataset && !!inputs.dataset.id),
+  onServerExecution: async (form, inputs, db) => {
     await validateDataset(inputs.dataset.id, db);
 
-    return ({
+    return {
       outputs: {},
-      results: {dataset: {id: inputs.dataset.id}}
-    })
+      results: { dataset: { id: inputs.dataset.id } }
+    };
   }
 };

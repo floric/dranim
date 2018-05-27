@@ -107,10 +107,10 @@ describe('Workspaces', () => {
 
     const ws = await createWorkspace(db, name, description);
 
+    await sleep(1000);
+
     const res = await updateWorkspace(db, ws.id, [], []);
     expect(res).toBe(true);
-
-    await sleep(1100);
 
     const newWs = await getWorkspace(db, ws.id);
     expect(new Date(ws.lastChange).getTime()).toBeLessThan(

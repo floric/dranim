@@ -39,6 +39,10 @@ export interface ClientNodeDef<
   NodeForm = {}
 > {
   name: string;
+  renderName?: (
+    context: EditorContext,
+    nodeForm: FormValues<NodeForm>
+  ) => string;
   renderFormItems?: (
     props: RenderFormItemsProps<NodeInputs, NodeForm>
   ) => JSX.Element;

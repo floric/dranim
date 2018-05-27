@@ -9,6 +9,7 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
+import { getCreatedDatasetName } from '../../calculation/utils';
 import {
   addValueSchema,
   createDataset,
@@ -23,7 +24,7 @@ import {
 import { validateNonEmptyString } from '../string/utils';
 import { validateDatasetId } from './utils';
 
-const JOIN_ENTRIES_BATCH_COUNT = 200;
+const JOIN_ENTRIES_BATCH_COUNT = 500;
 
 export const JoinDatasetsNode: ServerNodeDef<
   JoinDatasetsNodeInputs,
@@ -43,7 +44,10 @@ export const JoinDatasetsNode: ServerNodeDef<
 
     await validateSchemas(form, dsA!, dsB!);
 
-    const newDs = await createDataset(db, new Date().toISOString());
+    const newDs = await createDataset(
+      db,
+      getCreatedDatasetName(JoinDatasetsNodeDef.name)
+    );
     await addSchemasFromBothDatasets(
       db,
       newDs,

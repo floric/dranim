@@ -113,7 +113,9 @@ export const getNodeState = async (db: Db, node: NodeInstance) => {
     return NodeState.ERROR;
   }
 
-  const isValid = t.isFormValid ? t.isFormValid(parseNodeForm(node)) : true;
+  const isValid = t.isFormValid
+    ? await t.isFormValid(parseNodeForm(node))
+    : true;
   if (!isValid) {
     return NodeState.INVALID;
   }

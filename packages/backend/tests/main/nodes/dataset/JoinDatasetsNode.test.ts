@@ -157,7 +157,7 @@ describe('JoinDatasetsNode', () => {
       expect(err.message).toBe('Schemas should have same type');
     }
   });
-  test('should validate datasets and if values exist on each of them', async () => {
+  test('should validate datasets and join valueschemas', async () => {
     const [dsA, dsB] = await Promise.all([
       createDataset(db, 'a'),
       createDataset(db, 'b')
@@ -226,6 +226,56 @@ describe('JoinDatasetsNode', () => {
     expect(newColASchema.unique).toBe(false);
     expect(newColBSchema.unique).toBe(false);
     expect(newDs.valueschemas.length).toBe(4);
+  });
+
+  test('should support same column names', async () => {
+    const [dsA, dsB] = await Promise.all([
+      createDataset(db, 'a'),
+      createDataset(db, 'b')
+    ]);
+    const sharedName = 'colx';
+
+    const schemaA: ValueSchema = {
+      name: sharedName,
+      unique: true,
+      fallback: '',
+      type: DataType.STRING,
+      required: true
+    };
+    const schemaB: ValueSchema = {
+      name: sharedName,
+      unique: true,
+      fallback: '',
+      type: DataType.STRING,
+      required: true
+    };
+    const schemaOnlyB: ValueSchema = {
+      name: 'colOnlyB',
+      unique: false,
+      fallback: '',
+      type: DataType.NUMBER,
+      required: false
+    };
+
+    await Promise.all([
+      addValueSchema(db, dsA.id, schemaA),
+      addValueSchema(db, dsB.id, schemaB),
+      addValueSchema(db, dsB.id, schemaOnlyB)
+    ]);
+
+    const res = await JoinDatasetsNode.onServerExecution(
+      { valueA: schemaA.name, valueB: schemaB.name },
+      { datasetA: { id: dsA.id }, datasetB: { id: dsB.id } },
+      db
+    );
+
+    const newDs = await getDataset(db, res.outputs.joined.id);
+
+    const newColASchema = newDs.valueschemas.find(n => n.name === sharedName);
+    expect(newDs).not.toBe(null);
+    expect(newColASchema).toBeDefined();
+    expect(newColASchema.unique).toBe(false);
+    expect(newDs.valueschemas.length).toBe(2);
   });
 
   test('should add joined entries', async () => {
