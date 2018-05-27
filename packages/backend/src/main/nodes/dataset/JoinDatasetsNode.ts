@@ -24,7 +24,7 @@ import {
 import { validateNonEmptyString } from '../string/utils';
 import { validateDatasetId } from './utils';
 
-const JOIN_ENTRIES_BATCH_COUNT = 500;
+const JOIN_ENTRIES_BATCH_COUNT = 200;
 
 export const JoinDatasetsNode: ServerNodeDef<
   JoinDatasetsNodeInputs,
