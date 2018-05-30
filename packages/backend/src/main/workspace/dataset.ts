@@ -112,6 +112,7 @@ export const addValueSchema = async (
   if (ds.valueschemas.find(s => s.name === schema.name)) {
     throw new Error('Schema already exists.');
   }
+
   const res = await collection.updateOne(
     { _id: new ObjectID(datasetId) },
     {

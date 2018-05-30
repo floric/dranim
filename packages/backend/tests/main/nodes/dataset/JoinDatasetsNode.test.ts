@@ -18,6 +18,7 @@ import {
 import {
   getTestMongoDb,
   NeverGoHereError,
+  sleep,
   VALID_OBJECT_ID
 } from '../../../test-utils';
 
@@ -93,7 +94,7 @@ describe('JoinDatasetsNode', () => {
     const dsA = await createDataset(db, 'a');
 
     try {
-      const res = await JoinDatasetsNode.onServerExecution(
+      await JoinDatasetsNode.onServerExecution(
         { valueA: 'TEST', valueB: 'else' },
         { datasetA: { id: dsA.id }, datasetB: { id: VALID_OBJECT_ID } },
         db
@@ -111,7 +112,7 @@ describe('JoinDatasetsNode', () => {
     ]);
 
     try {
-      const res = await JoinDatasetsNode.onServerExecution(
+      await JoinDatasetsNode.onServerExecution(
         { valueA: 'TEST', valueB: 'else' },
         { datasetA: { id: dsA.id }, datasetB: { id: dsB.id } },
         db
@@ -121,6 +122,7 @@ describe('JoinDatasetsNode', () => {
       expect(err.message).toBe('Schema not found');
     }
   });
+
   test('should throw error for unequal datatypes of values', async () => {
     const [dsA, dsB] = await Promise.all([
       createDataset(db, 'a'),
@@ -157,6 +159,7 @@ describe('JoinDatasetsNode', () => {
       expect(err.message).toBe('Schemas should have same type');
     }
   });
+
   test('should validate datasets and join valueschemas', async () => {
     const [dsA, dsB] = await Promise.all([
       createDataset(db, 'a'),
@@ -321,39 +324,39 @@ describe('JoinDatasetsNode', () => {
 
     await Promise.all(
       [
-        [
-          { name: schemaA.name, val: 'test' },
-          { name: schemaOnlyA.name, val: 'true' }
-        ],
-        [
-          { name: schemaA.name, val: 'test2' },
-          { name: schemaOnlyA.name, val: 'false' }
-        ],
-        [
-          { name: schemaA.name, val: 'otherA' },
-          { name: schemaOnlyA.name, val: 'false' }
-        ]
+        {
+          [schemaA.name]: 'test',
+          [schemaOnlyA.name]: 'true'
+        },
+        {
+          [schemaA.name]: 'test2',
+          [schemaOnlyA.name]: 'false'
+        },
+        {
+          [schemaA.name]: 'otherA',
+          [schemaOnlyA.name]: 'false'
+        }
       ].map(n => createEntry(db, dsA.id, n))
     );
 
     await Promise.all(
       [
-        [
-          { name: schemaB.name, val: 'test' },
-          { name: schemaOnlyB.name, val: 'true' }
-        ],
-        [
-          { name: schemaB.name, val: 'test' },
-          { name: schemaOnlyB.name, val: '1' }
-        ],
-        [
-          { name: schemaB.name, val: 'test2' },
-          { name: schemaOnlyB.name, val: '2' }
-        ],
-        [
-          { name: schemaB.name, val: 'otherB' },
-          { name: schemaOnlyB.name, val: '3' }
-        ]
+        {
+          [schemaB.name]: 'test',
+          [schemaOnlyB.name]: 'true'
+        },
+        {
+          [schemaB.name]: 'test',
+          [schemaOnlyB.name]: '1'
+        },
+        {
+          [schemaB.name]: 'test2',
+          [schemaOnlyB.name]: '2'
+        },
+        {
+          [schemaB.name]: 'otherB',
+          [schemaOnlyB.name]: '3'
+        }
       ].map(n => createEntry(db, dsB.id, n))
     );
 
@@ -365,6 +368,8 @@ describe('JoinDatasetsNode', () => {
 
     const newDs = await getDataset(db, res.outputs.joined.id);
     expect(newDs).not.toBe(null);
+
+    await sleep(100);
 
     const allEntries = await getAllEntries(db, newDs.id);
     expect(allEntries.length).toBe(3);

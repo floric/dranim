@@ -33,7 +33,7 @@ export const FormatNumberNodeDef: NodeDef<
 };
 
 export interface NumberInputNodeOutputs {
-  val: number;
+  value: number;
 }
 
 export interface NumberInputNodeForm {
@@ -44,7 +44,7 @@ export const NumberInputNodeDef: NodeDef<{}, NumberInputNodeOutputs> = {
   name: 'Number Input',
   inputs: {},
   outputs: {
-    val: NumberSocket('Number')
+    value: NumberSocket('Number')
   },
   path: ['Numbers'],
   keywords: []
@@ -76,7 +76,7 @@ export const MultiplicationNodeDef: NodeDef<
 };
 
 export interface NumberOutputNodeInputs {
-  val: number;
+  value: number;
 }
 
 export interface NumberOutputNodeResults {
@@ -95,7 +95,7 @@ export interface SumNodeNodeOutputs {
 export const NumberOutputNodeDef: NodeDef<NumberOutputNodeInputs, {}> = {
   name: 'Number Output',
   inputs: {
-    val: NumberSocket('Number')
+    value: NumberSocket('Number')
   },
   outputs: {},
   keywords: [],

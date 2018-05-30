@@ -13,15 +13,21 @@ import {
 import { Db, MongoClient } from 'mongodb';
 
 import {
+  addOrUpdateFormValue,
   createNode,
   deleteNode,
   getAllNodes,
   getNode,
   getNodesCollection,
+  getNodeState,
   updateNode
 } from '../../../src/main/workspace/nodes';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
-import { getTestMongoDb, NeverGoHereError } from '../../test-utils';
+import {
+  getTestMongoDb,
+  NeverGoHereError,
+  VALID_OBJECT_ID
+} from '../../test-utils';
 
 let conn;
 let db: Db;
@@ -67,6 +73,42 @@ describe('Nodes', () => {
     const unknownNode = await getNode(db, '123');
 
     expect(unknownNode).toBe(null);
+  });
+
+  test('should get valid node state', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const node = await createNode(db, NumberInputNodeDef.name, ws.id, 0, 0);
+    await addOrUpdateFormValue(db, node.id, 'value', '1');
+    const updatedNode = await getNode(db, node.id);
+
+    const state = await getNodeState(updatedNode);
+
+    expect(state).toBe(NodeState.VALID);
+  });
+
+  test('should get invalid node state', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const node = await createNode(db, NumberInputNodeDef.name, ws.id, 0, 0);
+
+    const state = await getNodeState(node);
+
+    expect(state).toBe(NodeState.INVALID);
+  });
+
+  test('should get error node state', async () => {
+    const state = await getNodeState({
+      id: VALID_OBJECT_ID,
+      form: [],
+      inputs: [],
+      outputs: [],
+      state: NodeState.VALID,
+      type: 'unknown',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    });
+
+    expect(state).toBe(NodeState.ERROR);
   });
 
   test('should not create node for unknown workspace', async () => {
@@ -140,5 +182,16 @@ describe('Nodes', () => {
 
     const allNodes = await getAllNodes(db, ws.id);
     nodes.forEach(n => expect(allNodes).toContainEqual(n));
+  });
+
+  test('should throw error for invalid node type', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+
+    try {
+      await createNode(db, 'unknown', ws.id, 0, 0);
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Invalid node type');
+    }
   });
 });

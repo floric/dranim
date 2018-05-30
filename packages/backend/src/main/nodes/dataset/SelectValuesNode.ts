@@ -5,13 +5,16 @@ import {
   SelectValuesNodeOutputs,
   ServerNodeDef
 } from '@masterthesis/shared';
+import { Db } from 'mongodb';
 
 import {
   addValueSchema,
   createDataset,
+  Dataset,
   getDataset
 } from '../../../main/workspace/dataset';
 import { getCreatedDatasetName } from '../../calculation/utils';
+import { copyTransformedToOtherDataset } from '../../workspace/entry';
 import { validateDataset, validateDatasetId } from './utils';
 
 export const SelectValuesNode: ServerNodeDef<
@@ -32,16 +35,14 @@ export const SelectValuesNode: ServerNodeDef<
       throw new Error('Unknown value specified');
     }
 
+    const usedValues = new Set(form.values!);
     const newDs = await createDataset(
       db,
       getCreatedDatasetName(SelectValuesNodeDef.name)
     );
-    await Promise.all(
-      existingDs!.valueschemas
-        .filter(s => form.values!.includes(s.name))
-        .map(s => addValueSchema(db, newDs.id, s))
-    );
-    // TODO copy entries and test
+
+    await filterSchema(existingDs!, newDs, usedValues, db);
+    await copyEntries(existingDs!, newDs, usedValues, db);
 
     return {
       outputs: {
@@ -52,3 +53,31 @@ export const SelectValuesNode: ServerNodeDef<
     };
   }
 };
+
+const filterSchema = async (
+  existingDs: Dataset,
+  newDs: Dataset,
+  usedValues: Set<string>,
+  db: Db
+) => {
+  await Promise.all(
+    existingDs!.valueschemas
+      .filter(s => usedValues.has(s.name))
+      .map(s => addValueSchema(db, newDs.id, s))
+  );
+};
+
+const copyEntries = (
+  existingDs: Dataset,
+  newDs: Dataset,
+  usedValues: Set<string>,
+  db: Db
+) =>
+  copyTransformedToOtherDataset(db, existingDs.id, newDs.id, e => {
+    const newValues = {};
+    usedValues.forEach(u => {
+      newValues[u] = e.values[u];
+    });
+
+    return newValues;
+  });

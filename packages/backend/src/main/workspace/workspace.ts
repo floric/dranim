@@ -102,7 +102,7 @@ export const updateWorkspace = async (
   );
 
   const wsCollection = getWorkspacesCollection(db);
-  wsCollection.findOneAndUpdate(
+  await wsCollection.findOneAndUpdate(
     { _id: new ObjectID(id) },
     { $set: { lastChange: new Date() } }
   );
