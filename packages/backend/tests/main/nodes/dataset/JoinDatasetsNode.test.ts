@@ -1,6 +1,7 @@
 import {
   DataType,
   JoinDatasetsNodeDef,
+  sleep,
   ValueSchema
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
@@ -18,7 +19,6 @@ import {
 import {
   getTestMongoDb,
   NeverGoHereError,
-  sleep,
   VALID_OBJECT_ID
 } from '../../../test-utils';
 

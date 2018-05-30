@@ -1,3 +1,4 @@
+import { DatasetRef } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import { getDataset } from '../../../main/workspace/dataset';
@@ -15,3 +16,6 @@ export const validateDatasetId = (value: { id: string } | null) => {
 
   return true;
 };
+
+export const validateDatasetInput = (inputs: { dataset: DatasetRef }) =>
+  Promise.resolve(!!inputs.dataset && !!inputs.dataset.id);

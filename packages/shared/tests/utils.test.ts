@@ -1,5 +1,5 @@
 import { FormValue, NodeInstance, NodeState } from '../src';
-import { parseNodeForm } from '../src/utils';
+import { isNumeric, parseNodeForm, sleep } from '../src/utils';
 
 const createNodeWithForm = (form: Array<FormValue>): NodeInstance => ({
   id: '1',
@@ -59,5 +59,30 @@ describe('Utils', () => {
 
     expect(res.test).toBe(123);
     expect(res.car).toBe(null);
+  });
+
+  it('should be numeric', () => {
+    expect(isNumeric(3)).toBe(true);
+    expect(isNumeric(-3)).toBe(true);
+    expect(isNumeric(3.14)).toBe(true);
+    expect(isNumeric(34125)).toBe(true);
+    expect(isNumeric('3')).toBe(true);
+    expect(isNumeric('-3.14')).toBe(true);
+  });
+
+  it('should not be numeric', () => {
+    expect(isNumeric('')).toBe(false);
+    expect(isNumeric('a')).toBe(false);
+    expect(isNumeric(null)).toBe(false);
+    expect(isNumeric(undefined)).toBe(false);
+    expect(isNumeric(NaN)).toBe(false);
+  });
+
+  it('should sleep', async () => {
+    const now = new Date().getTime();
+    await sleep(500);
+    const later = new Date().getTime();
+
+    expect(later - now).toBeGreaterThan(499);
   });
 });

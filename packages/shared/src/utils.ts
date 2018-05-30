@@ -1,3 +1,5 @@
+const sleepPromise = require('sleep-promise');
+
 import { FormValues, NodeInstance } from './nodes';
 
 export const parseNodeForm = (node: NodeInstance): FormValues<any> => {
@@ -19,3 +21,5 @@ export const parseNodeForm = (node: NodeInstance): FormValues<any> => {
 };
 
 export const isNumeric = (n: any) => !isNaN(parseFloat(n)) && isFinite(n);
+
+export const sleep = (ms: number): Promise<void> => sleepPromise(ms);

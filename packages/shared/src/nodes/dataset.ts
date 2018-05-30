@@ -47,7 +47,7 @@ export const JoinDatasetsNodeDef: NodeDef<
   outputs: {
     joined: DataSocket('Joined')
   },
-  path: ['Dataset'],
+  path: ['Dataset', 'Operators'],
   keywords: []
 };
 
@@ -74,7 +74,7 @@ export const SelectValuesNodeDef: NodeDef<
   outputs: {
     dataset: DataSocket('Dataset')
   },
-  path: ['Dataset'],
+  path: ['Dataset', 'Operators'],
   keywords: []
 };
 
@@ -97,5 +97,42 @@ export const DatasetOutputNodeDef: NodeDef<DatasetOutputNodeInputs, {}> = {
   },
   outputs: {},
   path: ['Dataset'],
+  keywords: []
+};
+
+export interface FilterDatasetNodeInputs {
+  dataset: DatasetRef;
+}
+
+export interface FilterDatasetNodeOutputs {
+  dataset: DatasetRef;
+}
+
+export interface ConditionRule<T> {
+  name: string;
+  value: T;
+}
+
+export interface FilterDatasetNodeForm {
+  conditions: {
+    equals: Array<ConditionRule<string>>;
+    greaterThan: Array<ConditionRule<string>>;
+    lessThan: Array<ConditionRule<string>>;
+    isPresent: Array<ConditionRule<boolean>>;
+  };
+}
+
+export const FilterDatasetNodeDef: NodeDef<
+  FilterDatasetNodeInputs,
+  FilterDatasetNodeOutputs
+> = {
+  name: 'Filter Dataset',
+  inputs: {
+    dataset: DataSocket('Dataset')
+  },
+  outputs: {
+    dataset: DataSocket('Dataset')
+  },
+  path: ['Dataset', 'Filters'],
   keywords: []
 };

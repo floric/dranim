@@ -5,7 +5,7 @@ import {
   ServerNodeDef
 } from '@masterthesis/shared';
 
-import { validateDataset } from './utils';
+import { validateDataset, validateDatasetInput } from './utils';
 
 export const DatasetOutputNode: ServerNodeDef<
   DatasetOutputNodeInputs,
@@ -14,8 +14,7 @@ export const DatasetOutputNode: ServerNodeDef<
   DatasetOutputNodeResults
 > = {
   name: DatasetOutputNodeDef.name,
-  isInputValid: inputs =>
-    Promise.resolve(!!inputs.dataset && !!inputs.dataset.id),
+  isInputValid: inputs => validateDatasetInput(inputs),
   onServerExecution: async (form, inputs, db) => {
     await validateDataset(inputs.dataset.id, db);
 

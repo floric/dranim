@@ -1,4 +1,4 @@
-import { Entry, Values } from '@masterthesis/shared';
+import { Entry, sleep, Values } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { getDataset } from '../../main/workspace/dataset';
@@ -157,7 +157,8 @@ export const copyTransformedToOtherDataset = async (
       const newValues = transformFn(chunk);
       await createEntry(db, newDsId, newValues);
     });
-    col.on('end', () => {
+    col.on('end', async () => {
+      await sleep(500);
       resolve();
     });
     col.on('error', () => {

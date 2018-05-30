@@ -1,16 +1,10 @@
 import {
-  DatasetOutputNodeDef,
-  IOValues,
   JoinDatasetsNodeDef,
-  NodeInstance,
   NodeState,
   NumberInputNodeDef,
-  NumberOutputNodeDef,
-  ProcessState,
-  StringInputNodeDef,
-  Workspace
+  StringInputNodeDef
 } from '@masterthesis/shared';
-import { Db, MongoClient } from 'mongodb';
+import { Db } from 'mongodb';
 
 import {
   addOrUpdateFormValue,

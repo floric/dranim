@@ -1,3 +1,4 @@
+import { sleep } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import {
@@ -6,7 +7,7 @@ import {
   getWorkspace,
   updateWorkspace
 } from '../../../src/main/workspace/workspace';
-import { getTestMongoDb, NeverGoHereError, sleep } from '../../test-utils';
+import { getTestMongoDb, NeverGoHereError } from '../../test-utils';
 
 let conn;
 let db: Db;
@@ -94,7 +95,7 @@ describe('Workspaces', () => {
 
     const ws = await createWorkspace(db, name, description);
 
-    await sleep(1100);
+    await sleep(100);
 
     const res = await updateWorkspace(db, ws.id, [], []);
     expect(res).toBe(true);
