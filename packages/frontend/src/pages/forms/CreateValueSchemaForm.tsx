@@ -17,7 +17,7 @@ import * as moment from 'moment';
 import { hasErrors } from '../../utils/form';
 
 export interface CreateValueSchemaFormProps extends FormComponentProps {
-  handleCreateValueSchema: (val: ValueSchema) => void;
+  handleCreateValueSchema: (value: ValueSchema) => void;
 }
 
 class CreateValueSchemaFormImpl extends React.Component<

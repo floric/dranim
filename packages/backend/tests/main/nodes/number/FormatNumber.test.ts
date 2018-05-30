@@ -1,4 +1,5 @@
 import { FormatNumberNodeDef } from '@masterthesis/shared';
+
 import { FormatNumberNode } from '../../../../src/main/nodes/number/FormatNumberNode';
 
 describe('FormatNumberNode', () => {

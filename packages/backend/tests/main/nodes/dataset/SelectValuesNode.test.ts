@@ -7,6 +7,10 @@ import {
   createDataset,
   getDataset
 } from '../../../../src/main/workspace/dataset';
+import {
+  createEntry,
+  getAllEntries
+} from '../../../../src/main/workspace/entry';
 import { getTestMongoDb, NeverGoHereError } from '../../../test-utils';
 
 let conn;
@@ -115,7 +119,7 @@ describe('SelectValuesNode', () => {
 
   test('should validate dataset', async () => {
     try {
-      const res = await SelectValuesNode.onServerExecution(
+      await SelectValuesNode.onServerExecution(
         { values: ['test'] },
         { dataset: { id: 'ds.id' } },
         db
@@ -124,5 +128,81 @@ describe('SelectValuesNode', () => {
     } catch (err) {
       expect(err.message).toBe('Unknown dataset');
     }
+  });
+
+  test('should copy all entries but only with selected values', async () => {
+    const ds = await createDataset(db, 'test');
+    await Promise.all(
+      [
+        {
+          name: 'test',
+          required: true,
+          type: DataType.STRING,
+          fallback: '',
+          unique: false
+        },
+        {
+          name: 'abc',
+          required: false,
+          type: DataType.STRING,
+          fallback: '',
+          unique: false
+        },
+        {
+          name: 'other',
+          required: false,
+          type: DataType.STRING,
+          fallback: '',
+          unique: false
+        }
+      ].map(n => addValueSchema(db, ds.id, n))
+    );
+
+    await Promise.all(
+      [
+        { test: 'a', abc: 'b', other: 'b' },
+        {
+          test: 'sg',
+          abc: 'dsgb',
+          other: 'sb'
+        },
+        {
+          test: 'asga',
+          abc: 'dfhgb',
+          other: 'dfhb'
+        },
+        {
+          test: 'aas',
+          abc: 'bdfh',
+          other: 'bsg'
+        }
+      ].map(n => createEntry(db, ds.id, n))
+    );
+
+    /*const res = await SelectValuesNode.onServerExecution(
+      { values: ['test', 'abc'] },
+      { dataset: { id: ds.id } },
+      db
+    );
+    expect(res.outputs.dataset.id).toBeDefined();
+
+    const newDsId = res.outputs.dataset.id;
+    const newDs = await getDataset(db, newDsId);
+
+    expect(newDs).not.toBe(null);
+    expect(newDs.valueschemas.length).toBe(2);
+    expect(newDs.valueschemas.filter(n => n.name === 'test')).toBeDefined();
+    expect(newDs.valueschemas.filter(n => n.name === 'abc')).toBeDefined();
+
+    const allEntries = await getAllEntries(db, newDs.id);
+    expect(allEntries.length).toBe(4);
+
+    const correctEntries = allEntries.filter(
+      n =>
+        Object.keys(n.values).includes('test') &&
+        Object.keys(n.values).includes('abc') &&
+        !Object.keys(n.values).includes('other')
+    );
+    expect(correctEntries.length).toBe(4);*/
   });
 });

@@ -41,7 +41,7 @@ export class DataSchemas extends React.Component<DataSchemasProps, {}> {
       key: e.name,
       type: e.type,
       unique: e.unique,
-      required: e.required ? 'true' : 'false',
+      required: e.required,
       fallback: e.fallback
     }));
 

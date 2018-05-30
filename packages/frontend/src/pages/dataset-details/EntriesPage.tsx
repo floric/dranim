@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Dataset, Value } from '@masterthesis/shared';
+import { Dataset, Values } from '@masterthesis/shared';
 import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
 import { Mutation } from 'react-apollo';
@@ -29,17 +29,19 @@ const DELETE_ENTRY = gql`
   }
 `;
 
-const expandedRowRender = (e: { values: Array<Value>; key: string }) => {
+const expandedRowRender = (e: { values: Values; key: string }) => {
   const columns = [
     { title: 'Name', dataIndex: 'name', key: 'name' },
     { title: 'Value', dataIndex: 'value', key: 'value' }
   ];
 
-  const data = e.values.map(v => ({
-    key: `${e.key}-${v.name}`,
-    name: v.name,
-    value: v.val
-  }));
+  const data = Array.from(
+    Object.entries(e.values).map(v => ({
+      key: `${e.key}-${v[0]}`,
+      name: v[0],
+      value: v[1]
+    }))
+  );
 
   return (
     <Table
@@ -63,11 +65,14 @@ export class DataEntries extends React.Component<
 
   public render() {
     const { dataset, refetch } = this.props;
-    const entriesDataSource = dataset.latestEntries.map(e => ({
-      key: e.id,
-      summary: `${e.values.length} values`,
-      values: e.values
-    }));
+    const entriesDataSource = dataset.latestEntries.map(e => {
+      const values = JSON.parse(e.values as any);
+      return {
+        key: e.id,
+        summary: `${Object.keys(values).length} values`,
+        values
+      };
+    });
 
     const entriesColumns = [
       {

@@ -8,8 +8,8 @@ export const validateDataset = async (id: string, db: Db) => {
     throw new Error('Unknown dataset');
   }
 };
-export const validateDatasetId = (val: { id: string } | null) => {
-  if (!val || !val.id) {
+export const validateDatasetId = (value: { id: string } | null) => {
+  if (!value || !value.id) {
     return false;
   }
 

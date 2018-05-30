@@ -47,15 +47,15 @@ const getConnectionResult = async (i: ConnectionDescription, db: Db) => {
 
   const nodeRes = await executeNode(db, c.from.nodeId);
 
-  return { socketName: i.name, val: nodeRes.outputs[c.from.name] };
+  return { socketName: i.name, value: nodeRes.outputs[c.from.name] };
 };
 
 const inputValuesToObject = (
-  inputValues: Array<{ socketName: string; val: string }>
+  inputValues: Array<{ socketName: string; value: string }>
 ) => {
   const inputs = {};
   inputValues.forEach(i => {
-    inputs[i.socketName] = i.val;
+    inputs[i.socketName] = i.value;
   });
   return inputs;
 };

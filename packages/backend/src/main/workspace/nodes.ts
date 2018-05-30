@@ -23,6 +23,10 @@ export const createNode = async (
     throw new Error('Name must not be empty.');
   }
 
+  if (!serverNodeTypes.has(type)) {
+    throw new Error('Invalid node type');
+  }
+
   const ws = await getWorkspace(db, workspaceId);
   if (!ws) {
     throw new Error('Unknown workspace!');
@@ -107,13 +111,15 @@ export const getAllNodes = async (
   });
 };
 
-export const getNodeState = async (db: Db, node: NodeInstance) => {
+export const getNodeState = async (node: NodeInstance) => {
   const t = serverNodeTypes.get(node.type);
   if (!t) {
     return NodeState.ERROR;
   }
 
-  const isValid = t.isFormValid ? t.isFormValid(parseNodeForm(node)) : true;
+  const isValid = t.isFormValid
+    ? await t.isFormValid(parseNodeForm(node))
+    : true;
   if (!isValid) {
     return NodeState.INVALID;
   }

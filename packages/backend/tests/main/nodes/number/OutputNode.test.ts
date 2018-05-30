@@ -1,4 +1,5 @@
 import { NumberOutputNodeDef } from '@masterthesis/shared';
+
 import { NumberOutputNode } from '../../../../src/main/nodes/number/OutputNode';
 
 describe('NumberOutputNode', () => {
@@ -9,17 +10,17 @@ describe('NumberOutputNode', () => {
   });
 
   test('should check valid int number', async () => {
-    const res = await NumberOutputNode.isInputValid({ val: 1 });
+    const res = await NumberOutputNode.isInputValid({ value: 1 });
     expect(res).toBe(true);
   });
 
   test('should check valid float number', async () => {
-    const res = await NumberOutputNode.isInputValid({ val: -1.23 });
+    const res = await NumberOutputNode.isInputValid({ value: -1.23 });
     expect(res).toBe(true);
   });
 
   test('should check invalid number', async () => {
-    const res = await NumberOutputNode.isInputValid({ val: NaN });
+    const res = await NumberOutputNode.isInputValid({ value: NaN });
     expect(res).toBe(false);
   });
 
@@ -27,7 +28,7 @@ describe('NumberOutputNode', () => {
     const res = await NumberOutputNode.onServerExecution(
       {},
       {
-        val: 2
+        value: 2
       },
       null
     );
@@ -40,7 +41,7 @@ describe('NumberOutputNode', () => {
     const res = await NumberOutputNode.onServerExecution(
       {},
       {
-        val: -2.34
+        value: -2.34
       },
       null
     );

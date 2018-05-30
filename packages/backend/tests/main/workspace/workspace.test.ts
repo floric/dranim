@@ -1,17 +1,4 @@
-import {
-  DatasetOutputNodeDef,
-  IOValues,
-  JoinDatasetsNodeDef,
-  NodeInstance,
-  NodeState,
-  NumberInputNodeDef,
-  NumberOutputNodeDef,
-  ProcessState,
-  StringInputNodeDef,
-  Workspace
-} from '@masterthesis/shared';
 import { Db } from 'mongodb';
-import sleep from 'sleep-promise';
 
 import {
   createWorkspace,
@@ -19,7 +6,7 @@ import {
   getWorkspace,
   updateWorkspace
 } from '../../../src/main/workspace/workspace';
-import { getTestMongoDb, NeverGoHereError } from '../../test-utils';
+import { getTestMongoDb, NeverGoHereError, sleep } from '../../test-utils';
 
 let conn;
 let db: Db;
@@ -74,7 +61,7 @@ describe('Workspaces', () => {
     const name = '';
 
     try {
-      const ws = await createWorkspace(db, name, description);
+      await createWorkspace(db, name, description);
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toEqual('Name of workspace must not be empty.');
@@ -83,7 +70,7 @@ describe('Workspaces', () => {
 
   test('should not delete unknown workspace', async () => {
     try {
-      const ws = await deleteWorkspace(db, 'abc');
+      await deleteWorkspace(db, 'abc');
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toEqual('Invalid ID');
@@ -107,10 +94,10 @@ describe('Workspaces', () => {
 
     const ws = await createWorkspace(db, name, description);
 
+    await sleep(1100);
+
     const res = await updateWorkspace(db, ws.id, [], []);
     expect(res).toBe(true);
-
-    await sleep(1100);
 
     const newWs = await getWorkspace(db, ws.id);
     expect(new Date(ws.lastChange).getTime()).toBeLessThan(

@@ -1,14 +1,13 @@
 import { ConnectionInstance, NodeInstance } from './nodes';
 import { DataType } from './sockets';
 
-export interface Value {
-  val: string;
-  name: string;
+export interface Values {
+  [name: string]: any;
 }
 
 export interface Entry {
   id: string;
-  values: Array<Value>;
+  values: Values;
 }
 
 export interface ValueSchema {

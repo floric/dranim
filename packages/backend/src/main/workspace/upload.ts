@@ -70,18 +70,10 @@ const processValidEntry = async (
   db: Db,
   processId: ObjectID
 ) => {
-  const valueKeys = Object.keys(values);
   const collection = getUploadsCollection(db);
 
   try {
-    await createEntry(
-      db,
-      ds.id,
-      valueKeys.map(k => ({
-        name: k,
-        val: values[k]
-      }))
-    );
+    await createEntry(db, ds.id, values);
     await collection.updateOne(
       { _id: processId },
       { $inc: { addedEntries: 1 } }

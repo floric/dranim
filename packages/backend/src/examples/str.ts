@@ -25,7 +25,7 @@ export const createSTRDemoData = async (db: Db) => {
   return true;
 };
 
-export const passagesSchemas: Array<Valueschema> = [
+const passagesSchemas: Array<Valueschema> = [
   {
     name: 'passage_id',
     type: DataType.STRING,
@@ -308,7 +308,7 @@ export const passagesSchemas: Array<Valueschema> = [
   }
 ];
 
-export const commoditiesSchemas: Array<Valueschema> = [
+const commoditiesSchemas: Array<Valueschema> = [
   {
     name: 'commodity_id',
     type: DataType.STRING,

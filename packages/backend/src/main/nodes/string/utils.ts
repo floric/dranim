@@ -1,5 +1,5 @@
-export const validateNonEmptyString = (val: any) => {
-  if (!val) {
+export const validateNonEmptyString = (value: any) => {
+  if (!value) {
     return false;
   }
 
