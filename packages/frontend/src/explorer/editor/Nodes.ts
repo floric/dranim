@@ -2,6 +2,7 @@ import {
   ConditionalMetaTypes,
   NodeInstance,
   NodeState,
+  parseNodeForm,
   SocketDef,
   SocketDefs,
   SocketType
@@ -35,7 +36,7 @@ export const renderNode = (
 
   const nodeGroup = new Konva.Group({ draggable: true, x: n.x, y: n.y });
 
-  const { inputs, outputs, name } = nodeType;
+  const { inputs, outputs, name, renderName } = nodeType;
   const height = getNodeHeight(inputs, outputs);
   const isSelected = state.selectedNode !== null && state.selectedNode === n.id;
 
@@ -61,7 +62,9 @@ export const renderNode = (
   const nodeTitle = new Konva.Text({
     fill: isSelected ? '#1890ff' : '#000',
     align: 'center',
-    text: name,
+    text: renderName
+      ? renderName({ node: n, state: server }, parseNodeForm(n))
+      : name,
     fontStyle: 'bold',
     height: TEXT_HEIGHT,
     width: NODE_WIDTH,

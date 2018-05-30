@@ -1,13 +1,5 @@
-import {
-  DatasetOutputNodeDef,
-  IOValues,
-  NodeInstance,
-  NodeState,
-  NumberInputNodeDef,
-  NumberOutputNodeDef,
-  ProcessState,
-  StringInputNodeDef
-} from '@masterthesis/shared';
+import { StringInputNodeDef } from '@masterthesis/shared';
+
 import { StringInputNode } from '../../../../src/main/nodes/string/InputNode';
 
 describe('StringInputNode', () => {

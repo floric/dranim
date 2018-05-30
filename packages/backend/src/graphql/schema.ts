@@ -2,7 +2,8 @@ import { GraphQLUpload } from 'apollo-upload-server';
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { Db } from 'mongodb';
 
-import { createSTRDemoData } from '../example/str';
+import { createBirthdaysDemoData } from '../examples/birthdays';
+import { createSTRDemoData } from '../examples/str';
 import {
   getAllCalculations,
   startCalculation
@@ -22,8 +23,8 @@ import {
 import {
   createEntryFromJSON,
   deleteEntry,
-  entriesCount,
-  latestEntries
+  getEntriesCount,
+  getLatestEntries
 } from '../main/workspace/entry';
 import {
   addOrUpdateFormValue,
@@ -126,6 +127,7 @@ export const Mutation = `
       connections: [ConnectionInput!]!
     ): Boolean!
     createSTRDemoData: Boolean!
+    createBirthdaysDemoData: Boolean!
     uploadEntriesCsv (files: [Upload!]!, datasetId: String!): UploadProcess!
     startCalculation (workspaceId: String!): CalculationProcess!
   }
@@ -142,7 +144,7 @@ const resolvers: IResolvers<any, ApolloContext> = {
   Query: {
     datasets: (_, __, { db }) => getAllDatasets(db),
     dataset: (_, { id }, { db }) => getDataset(db, id),
-    entry: (_, { datasetId, entryId }) => null,
+    entry: (_, {}) => null,
     workspaces: (_, __, { db }) => getAllWorkspaces(db),
     workspace: (_, { id }, { db }) => getWorkspace(db, id),
     uploads: (_, { datasetId }, { db }) => getAllUploads(db, datasetId),
@@ -150,15 +152,14 @@ const resolvers: IResolvers<any, ApolloContext> = {
       getAllCalculations(db, workspaceId)
   },
   Entry: {
-    values: ({ values }, __, { db }) =>
-      Object.keys(values).map(k => ({ name: k, val: values[k] }))
+    values: ({ values }) => JSON.stringify(values)
   },
   Dataset: {
-    entriesCount: ({ _id }, __, { db }) => entriesCount(db, _id),
-    latestEntries: ({ _id }, __, { db }) => latestEntries(db, _id)
+    entriesCount: ({ _id }, __, { db }) => getEntriesCount(db, _id),
+    latestEntries: ({ _id }, __, { db }) => getLatestEntries(db, _id)
   },
   UploadProcess: {
-    errors: ({ errors }, __, { db }) =>
+    errors: ({ errors }) =>
       Object.keys(errors).map(name => ({
         name,
         message: errors[name].message,
@@ -166,7 +167,7 @@ const resolvers: IResolvers<any, ApolloContext> = {
       }))
   },
   Node: {
-    state: (node, __, { db }) => getNodeState(db, node),
+    state: node => getNodeState(node),
     workspace: ({ workspaceId }, __, { db }) => getWorkspace(db, workspaceId)
   },
   Workspace: {
@@ -195,6 +196,7 @@ const resolvers: IResolvers<any, ApolloContext> = {
     uploadEntriesCsv: (obj, { files, datasetId }, { db }) =>
       uploadEntriesCsv(db, files, datasetId),
     createSTRDemoData: (_, {}, { db }) => createSTRDemoData(db),
+    createBirthdaysDemoData: (_, {}, { db }) => createBirthdaysDemoData(db),
     createNode: (_, { type, x, y, workspaceId }, { db }) =>
       createNode(db, type, workspaceId, x, y),
     updateNode: (_, { id, x, y }, { db }) => updateNode(db, id, x, y),

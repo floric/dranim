@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { DataType, Value, ValueSchema } from '@masterthesis/shared';
+import { DataType, Values, ValueSchema } from '@masterthesis/shared';
 import { Button, Checkbox, DatePicker, Form, Input, InputNumber } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import * as moment from 'moment';
@@ -8,7 +8,7 @@ import * as moment from 'moment';
 import { hasErrors } from '../../utils/form';
 
 export interface CreateEntryFormProps extends FormComponentProps {
-  handleCreateEntry: (data: Array<Value>) => Promise<any>;
+  handleCreateEntry: (data: Values) => Promise<any>;
   schema: Array<ValueSchema>;
 }
 
@@ -34,10 +34,10 @@ class CreateEntryFormImpl extends React.Component<
         return;
       }
 
-      const values = schema.map(s => ({
-        val: form.getFieldValue(s.name),
-        name: s.name
-      }));
+      const values = {};
+      schema.forEach(s => {
+        values[s.name] = form.getFieldValue(s.name);
+      });
 
       await this.setState({
         saving: true

@@ -42,10 +42,7 @@ const DATASET = gql`
       entriesCount
       latestEntries {
         id
-        values {
-          name
-          val
-        }
+        values
       }
     }
   }

@@ -1,54 +1,27 @@
+import { Entry, Values } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { getDataset } from '../../main/workspace/dataset';
 import { UploadEntryError } from './upload';
 
-export interface Entry {
-  _id: ObjectID;
-  id: string;
-  values: {
-    [name: string]: any;
-  };
-}
-
-export interface Value {
-  name: string;
-  val: string;
-}
-
 export const getEntryCollection = (
   db: Db,
   datasetId: string
-): Collection<Entry> => {
+): Collection<Entry & { _id: ObjectID }> => {
   return db.collection(`Entries_${datasetId}`);
-};
-
-export const getEntriesByValue = async (
-  db: Db,
-  datasetId: string,
-  value: Value
-): Promise<Array<Entry>> => {
-  const collection = getEntryCollection(db, datasetId);
-  const all = await collection
-    .find({ [`values.${value.name}`]: value.val })
-    .toArray();
-
-  return all.map(obj => ({
-    id: obj._id.toHexString(),
-    ...obj
-  }));
 };
 
 export const getEntry = async (
   db: Db,
   datasetId: string,
   id: string
-): Promise<Entry> => {
+): Promise<Entry & { _id: ObjectID } | null> => {
   const collection = getEntryCollection(db, datasetId);
   const obj = await collection.findOne({ _id: new ObjectID(id) });
   if (!obj) {
-    throw new Error('Entry not found!');
+    return null;
   }
+
   return {
     id: obj._id.toHexString(),
     ...obj
@@ -62,12 +35,13 @@ export const getAllEntries = async (
   const collection = getEntryCollection(db, datasetId);
   const obj = await collection.find().toArray();
   if (!obj) {
-    throw new Error('Entries not found!');
+    return [];
   }
+
   return obj;
 };
 
-export const entriesCount = async (
+export const getEntriesCount = async (
   db: Db,
   datasetId: string
 ): Promise<number> => {
@@ -75,7 +49,7 @@ export const entriesCount = async (
   return await collection.count({});
 };
 
-export const latestEntries = async (
+export const getLatestEntries = async (
   db: Db,
   datasetId: string
 ): Promise<Array<Entry>> => {
@@ -94,19 +68,23 @@ export const latestEntries = async (
 export const createEntry = async (
   db: Db,
   datasetId: string,
-  valuesArr: Array<Value>
+  values: Values
 ): Promise<Entry> => {
-  if (!valuesArr.length) {
+  const valuesArr = Array.from(Object.entries(values));
+
+  if (valuesArr.length === 0) {
     throw new UploadEntryError('No values specified for entry.', 'no-values');
   }
 
   valuesArr.forEach(v => {
-    if (!v.name || v.val === undefined || v.val === null) {
+    if (
+      !v ||
+      v[0] === null ||
+      v[0] === undefined ||
+      v[1] === null ||
+      v[1] === undefined
+    ) {
       throw new Error('Value malformed');
-    }
-
-    if (Object.keys(v).length !== 2) {
-      throw new Error('Other keys then "val" or "name" provided.');
     }
   });
 
@@ -118,7 +96,7 @@ export const createEntry = async (
   // check required schemas which are not set
   const missedSchemas = ds.valueschemas
     .filter(s => s.required)
-    .filter(s => !valuesArr.map(v => v.name).includes(s.name));
+    .filter(s => !valuesArr.map(v => v[0]).includes(s.name));
   if (missedSchemas.length > 0) {
     throw new UploadEntryError(
       'Values from Schema not set',
@@ -129,7 +107,7 @@ export const createEntry = async (
   // check values which are not specified in the schema
   const allValueNames = ds.valueschemas.map(v => v.name);
   const unsupportedValues = valuesArr.filter(
-    v => !allValueNames.includes(v.name)
+    v => !allValueNames.includes(v[0])
   );
   if (unsupportedValues.length > 0) {
     throw new UploadEntryError(
@@ -137,11 +115,6 @@ export const createEntry = async (
       'unsupported-values'
     );
   }
-
-  const values = {};
-  valuesArr.forEach(v => {
-    values[v.name] = v.val;
-  });
 
   const collection = getEntryCollection(db, datasetId);
   try {
@@ -170,12 +143,35 @@ export const createEntry = async (
   }
 };
 
+export const copyTransformedToOtherDataset = async (
+  db: Db,
+  oldDsId: string,
+  newDsId: string,
+  transformFn: (obj: Entry) => Values
+) => {
+  const oldCollection = getEntryCollection(db, oldDsId);
+
+  return new Promise((resolve, reject) => {
+    const col = oldCollection.find();
+    col.on('data', async (chunk: Entry) => {
+      const newValues = transformFn(chunk);
+      await createEntry(db, newDsId, newValues);
+    });
+    col.on('end', () => {
+      resolve();
+    });
+    col.on('error', () => {
+      reject();
+    });
+  });
+};
+
 export const createEntryFromJSON = async (
   db: Db,
   datasetId: string,
   values: string
 ): Promise<Entry> => {
-  const parsedValues: Array<Value> = JSON.parse(values);
+  const parsedValues: Values = JSON.parse(values);
   return await createEntry(db, datasetId, parsedValues);
 };
 

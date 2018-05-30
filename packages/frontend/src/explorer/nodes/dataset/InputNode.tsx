@@ -16,6 +16,10 @@ export const DatasetInputNode: ClientNodeDef<
   DatasetInputNodeForm
 > = {
   name: DatasetInputNodeDef.name,
+  renderName: ({ state: { datasets } }, nodeForm) => {
+    const ds = datasets.find(n => n.id === nodeForm.dataset);
+    return !ds ? DatasetInputNodeDef.name : ds.name;
+  },
   onClientExecution: (inputs, nodeForm, context) => {
     const dsId = nodeForm.dataset;
     if (!dsId) {

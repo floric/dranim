@@ -1,4 +1,5 @@
 import { MultiplicationNodeDef } from '@masterthesis/shared';
+
 import { MultiplicationNode } from '../../../../src/main/nodes/number/MultiplicationNode';
 
 describe('MultiplicationNode', () => {

@@ -118,18 +118,18 @@ describe('Execute Node', () => {
 
     await createConnection(
       db,
-      { name: 'val', nodeId: nodeA.id },
+      { name: 'value', nodeId: nodeA.id },
       { name: 'a', nodeId: sumNode.id }
     );
     await createConnection(
       db,
-      { name: 'val', nodeId: nodeB.id },
+      { name: 'value', nodeId: nodeB.id },
       { name: 'b', nodeId: sumNode.id }
     );
     await createConnection(
       db,
       { name: 'sum', nodeId: sumNode.id },
-      { name: 'val', nodeId: outputNode.id }
+      { name: 'value', nodeId: outputNode.id }
     );
 
     const { outputs, results } = await executeNode(db, outputNode.id);

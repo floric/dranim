@@ -13,12 +13,12 @@ export const NumberOutputNode: ServerNodeDef<
   NumberOutputNodeResults
 > = {
   name: NumberOutputNodeDef.name,
-  isInputValid: async input => validateNumber(input.val),
+  isInputValid: async input => validateNumber(input.value),
   onServerExecution: (form, inputs) =>
     Promise.resolve({
       outputs: {},
       results: {
-        value: inputs.val
+        value: inputs.value
       }
     })
 };
