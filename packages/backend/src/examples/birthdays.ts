@@ -1,4 +1,5 @@
 import { DataType, Values } from '@masterthesis/shared';
+import * as casual from 'casual';
 import { Db } from 'mongodb';
 
 import {
@@ -8,6 +9,8 @@ import {
 } from '../main/workspace/dataset';
 import { createEntry } from '../main/workspace/entry';
 import { createWorkspace } from '../main/workspace/workspace';
+
+const ENTRIES_COUNT = 100;
 
 export const createBirthdaysDemoData = async (db: Db) => {
   const ds = await createDataset(db, 'Birthdays');
@@ -21,11 +24,13 @@ export const createBirthdaysDemoData = async (db: Db) => {
   return true;
 };
 
-const birthdaysEntries: Array<Values> = [
-  { id: '1', name: 'Florian Richter', birthday: '1993-08-30T06:35:55.410Z' },
-  { id: '2', name: 'Donald Trump', birthday: '1880-02-30T06:35:55.410Z' },
-  { id: '3', name: 'Fred Feuerstein', birthday: '1900-01-30T06:35:55.410Z' }
-];
+const birthdaysEntries: Array<Values> = Array(ENTRIES_COUNT)
+  .fill(0)
+  .map((_, i) => ({
+    id: i.toString(),
+    name: casual.name,
+    birthday: casual.date('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
+  }));
 
 const birthdaysSchema: Array<Valueschema> = [
   {
