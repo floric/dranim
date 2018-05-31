@@ -11,7 +11,8 @@ export enum DataType {
   NUMBER = 'Number',
   BOOLEAN = 'Boolean',
   DATE = 'Date',
-  STRING = 'String'
+  STRING = 'String',
+  ENTRY = 'Entry'
 }
 export interface DatasetMeta {
   schema: Array<ValueSchema>;
@@ -22,7 +23,6 @@ export interface SocketDef<Meta = {}> {
   displayName: string;
   order?: number;
   meta: SocketMetaDef<Meta>;
-  isConnected: boolean;
 }
 
 export interface SocketMetaDef<Meta = {}> {
@@ -45,7 +45,6 @@ export type SocketMetas<T> = SocketMetasGeneric<T, ConditionalMetaTypes<T>>;
 
 export const DataSocket = (name: string): SocketDef<DatasetMeta> => ({
   dataType: DataType.DATASET,
-  isConnected: false,
   meta: {
     content: { schema: [] },
     isPresent: false
@@ -55,14 +54,24 @@ export const DataSocket = (name: string): SocketDef<DatasetMeta> => ({
 
 export const NumberSocket = (name: string): SocketDef => ({
   dataType: DataType.NUMBER,
-  isConnected: false,
   meta: { content: {}, isPresent: false },
   displayName: name
 });
 
 export const StringSocket = (name: string): SocketDef => ({
   dataType: DataType.STRING,
-  isConnected: false,
+  meta: { content: {}, isPresent: false },
+  displayName: name
+});
+
+export const BooleanSocket = (name: string): SocketDef => ({
+  dataType: DataType.BOOLEAN,
+  meta: { content: {}, isPresent: false },
+  displayName: name
+});
+
+export const EntrySocket = (name: string): SocketDef => ({
+  dataType: DataType.ENTRY,
   meta: { content: {}, isPresent: false },
   displayName: name
 });

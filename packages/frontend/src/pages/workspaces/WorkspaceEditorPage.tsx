@@ -65,10 +65,17 @@ const CREATE_NODE = gql`
   mutation createNode(
     $type: String!
     $workspaceId: String!
+    $contextId: String
     $x: Float!
     $y: Float!
   ) {
-    createNode(type: $type, workspaceId: $workspaceId, x: $x, y: $y) {
+    createNode(
+      type: $type
+      workspaceId: $workspaceId
+      contextId: $contextId
+      x: $x
+      y: $y
+    ) {
       id
       x
       y
@@ -186,7 +193,12 @@ export default class WorkspaceEditorPage extends React.Component<
                                           nodes={deepCopyResponse(
                                             data.workspace.nodes
                                           )}
-                                          onNodeCreate={(type, x, y) =>
+                                          onNodeCreate={(
+                                            type,
+                                            x,
+                                            y,
+                                            contextId
+                                          ) =>
                                             tryOperation({
                                               op: () =>
                                                 createNode({
@@ -194,6 +206,9 @@ export default class WorkspaceEditorPage extends React.Component<
                                                     type,
                                                     x,
                                                     y,
+                                                    contextId: contextId
+                                                      ? contextId
+                                                      : null,
                                                     workspaceId: id
                                                   }
                                                 }),

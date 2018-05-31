@@ -12,6 +12,7 @@ import { TreeData } from 'antd/lib/tree-select';
 
 import { ExplorerEditorProps } from '../ExplorerEditor';
 import * as AllDatasetNodes from './dataset';
+import * as AllEntryNodes from './entry';
 import * as AllNumberNodes from './number';
 import * as AllStringNodes from './string';
 
@@ -55,7 +56,12 @@ export interface ClientNodeDef<
   ) => SocketMetas<NodeOutputs>;
 }
 
-const allNodes = [AllDatasetNodes, AllNumberNodes, AllStringNodes];
+const allNodes = [
+  AllDatasetNodes,
+  AllNumberNodes,
+  AllStringNodes,
+  AllEntryNodes
+];
 
 const buildTree = (
   elems: Array<ClientNodeDef & NodeDef>,

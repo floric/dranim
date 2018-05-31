@@ -18,7 +18,7 @@ import {
   SOCKET_DISTANCE
 } from './Sockets';
 
-export const NODE_WIDTH = 160;
+export const NODE_WIDTH = 180;
 const TEXT_HEIGHT = 20;
 const STATE_LINE_HEIGHT = 1;
 
@@ -38,7 +38,7 @@ export const renderNode = (
 
   const { inputs, outputs, name, renderName } = nodeType;
   const height = getNodeHeight(inputs, outputs);
-  const isSelected = state.selectedNode !== null && state.selectedNode === n.id;
+  const isSelected = state.contextId !== null && state.contextId === n.id;
 
   nodeGroup.on('dragend', ev => {
     server.onNodeUpdate(n.id, ev.target.x(), ev.target.y());
@@ -46,7 +46,7 @@ export const renderNode = (
 
   nodeGroup.on('click', ev => {
     changeState({
-      selectedNode: n.id
+      contextId: n.id
     });
   });
 

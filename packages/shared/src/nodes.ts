@@ -16,10 +16,17 @@ export interface FormValue {
 export type FormValues<T> = { [Name in keyof T]: T[Name] | null };
 export type IOValues<T> = { [Name in keyof T]: T[Name] };
 
-export interface NodeDef<NodeInputs = {}, NodeOutputs = {}> {
+export interface NodeDef<
+  NodeInputs = {},
+  NodeOutputs = {},
+  FunctionInputs = null,
+  FunctionOutputs = null
+> {
   name: string;
   inputs: SocketDefs<NodeInputs>;
   outputs: SocketDefs<NodeOutputs>;
+  fnInputs?: FunctionInputs;
+  fnOutputs?: FunctionOutputs;
   path: Array<string>;
   keywords: Array<string>;
 }
@@ -56,6 +63,7 @@ export interface NodeInstance {
   y: number;
   state: NodeState;
   workspaceId: string;
+  contextId: string | null;
   outputs: Array<ConnectionDescription>;
   inputs: Array<ConnectionDescription>;
   type: string;

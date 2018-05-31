@@ -28,7 +28,12 @@ export interface ExplorerEditorProps {
   connections: Array<ConnectionInstance>;
   nodes: Array<NodeInstance>;
   datasets: Array<Dataset>;
-  onNodeCreate: (type: string, x: number, y: number) => Promise<any>;
+  onNodeCreate: (
+    type: string,
+    x: number,
+    y: number,
+    contextId: string | null
+  ) => Promise<any>;
   onNodeDelete: (id: string) => Promise<any>;
   onNodeUpdate: (id: string, x: number, y: number) => Promise<any>;
   onConnectionCreate: (
@@ -52,7 +57,8 @@ export interface OpenConnection {
 
 export interface ExplorerEditorState {
   openConnection: OpenConnection | null;
-  selectedNode: string | null;
+  contextId: string | null;
+  enteredFunction: string | null;
 }
 
 export class ExplorerEditor extends React.Component<
@@ -64,7 +70,8 @@ export class ExplorerEditor extends React.Component<
   public componentWillMount() {
     this.setState({
       openConnection: null,
-      selectedNode: null
+      contextId: null,
+      enteredFunction: null
     });
   }
 
@@ -93,13 +100,13 @@ export class ExplorerEditor extends React.Component<
   };
 
   private handleDeleteSelectedNode = async () => {
-    const { selectedNode } = this.state;
-    if (selectedNode === null) {
+    const { contextId } = this.state;
+    if (contextId === null) {
       return;
     }
 
-    await this.props.onNodeDelete(selectedNode);
-    await this.setState({ selectedNode: null });
+    await this.props.onNodeDelete(contextId);
+    await this.setState({ contextId: null });
   };
 
   private handleStartCalulcation = async () => {
@@ -115,7 +122,20 @@ export class ExplorerEditor extends React.Component<
     const x = canvas ? canvas.clientWidth / 2 - NODE_WIDTH / 2 : 50;
     const y = canvas ? canvas.clientHeight / 2 : 50;
 
-    this.props.onNodeCreate(type, x, y);
+    this.props.onNodeCreate(
+      type,
+      x,
+      y,
+      this.state.contextId ? this.state.contextId : null
+    );
+  };
+
+  private handleEnterFunction = async () => {
+    if (!this.state.contextId) {
+      return;
+    }
+
+    await this.setState({ enteredFunction: this.state.contextId });
   };
 
   private handleSave = (form: WrappedFormUtils, nodeId: string) => {
@@ -133,16 +153,17 @@ export class ExplorerEditor extends React.Component<
   };
 
   public render() {
-    const { selectedNode } = this.state;
+    const { contextId } = this.state;
     const { nodes } = this.props;
 
-    const node = selectedNode ? nodes.find(n => n.id === selectedNode) : null;
+    const node = contextId ? nodes.find(n => n.id === contextId) : null;
+    const nodeType = node ? nodeTypes.get(node.type) || null : null;
 
     const renderFormItems = node
       ? nodeTypes.get(node.type)!.renderFormItems || null
       : null;
 
-    if (selectedNode) {
+    if (contextId) {
       document.onkeypress = (ev: KeyboardEvent) => {
         if (ev.code === 'Delete') {
           this.handleDeleteSelectedNode();
@@ -186,6 +207,14 @@ export class ExplorerEditor extends React.Component<
                       Delete Selected
                     </AsyncButton>
                   )}
+                  {nodeType && !!nodeType.fnInputs && !!nodeType.fnOutputs ? (
+                    <AsyncButton
+                      icon="plus-square"
+                      onClick={this.handleEnterFunction}
+                    >
+                      Enter function
+                    </AsyncButton>
+                  ) : null}
                   <AsyncButton
                     icon="rocket"
                     onClick={this.handleStartCalulcation}

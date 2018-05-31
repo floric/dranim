@@ -15,21 +15,29 @@ export const createNode = async (
   db: Db,
   type: string,
   workspaceId: string,
+  contextNodeId: string | null,
   x: number,
   y: number
 ): Promise<NodeInstance> => {
   const collection = getNodesCollection(db);
   if (type.length === 0) {
-    throw new Error('Name must not be empty.');
+    throw new Error('Name must not be empty');
   }
 
   if (!serverNodeTypes.has(type)) {
     throw new Error('Invalid node type');
   }
 
+  if (contextNodeId) {
+    const contextNode = await getNode(db, contextNodeId);
+    if (!contextNode) {
+      throw new Error('Unknown context node');
+    }
+  }
+
   const ws = await getWorkspace(db, workspaceId);
   if (!ws) {
-    throw new Error('Unknown workspace!');
+    throw new Error('Unknown workspace');
   }
 
   const res = await collection.insertOne({
@@ -37,6 +45,7 @@ export const createNode = async (
     y,
     outputs: [],
     inputs: [],
+    contextId: contextNodeId || null,
     workspaceId,
     type
   });
@@ -161,12 +170,12 @@ export const addOrUpdateFormValue = async (
   value: string
 ) => {
   if (name.length === 0) {
-    throw new Error('Not form value name specified.');
+    throw new Error('No form value name specified');
   }
 
   const node = await getNode(db, nodeId);
   if (!node) {
-    throw new Error('Node does not exist.');
+    throw new Error('Node does not exist');
   }
 
   const nodeObjId = new ObjectID(nodeId);
@@ -181,7 +190,7 @@ export const addOrUpdateFormValue = async (
   );
 
   if (res.result.ok !== 1) {
-    throw new Error('Adding or updating form value failed.');
+    throw new Error('Adding or updating form value failed');
   }
 
   return true;

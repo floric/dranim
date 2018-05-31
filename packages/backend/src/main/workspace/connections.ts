@@ -45,7 +45,11 @@ export const createConnection = async (
   }
 
   if (inputNode.workspaceId !== outputNode.workspaceId) {
-    throw new Error('Nodes live in different workspaes!');
+    throw new Error('Nodes live in different workspaces!');
+  }
+
+  if (inputNode.contextId !== outputNode.contextId) {
+    throw new Error('Nodes live in different contexts!');
   }
 
   const hasFoundCycles = await containsCycles(db, inputNode!, from, to);

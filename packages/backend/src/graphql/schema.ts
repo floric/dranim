@@ -95,6 +95,7 @@ export const Mutation = `
     createNode (
       type: String!
       workspaceId: String!
+      contextId: String
       x: Float!
       y: Float!
     ): Node!
@@ -197,8 +198,8 @@ const resolvers: IResolvers<any, ApolloContext> = {
       uploadEntriesCsv(db, files, datasetId),
     createSTRDemoData: (_, {}, { db }) => createSTRDemoData(db),
     createBirthdaysDemoData: (_, {}, { db }) => createBirthdaysDemoData(db),
-    createNode: (_, { type, x, y, workspaceId }, { db }) =>
-      createNode(db, type, workspaceId, x, y),
+    createNode: (_, { type, x, y, workspaceId, contextId }, { db }) =>
+      createNode(db, type, workspaceId, contextId, x, y),
     updateNode: (_, { id, x, y }, { db }) => updateNode(db, id, x, y),
     deleteNode: (_, { id }, { db }) => deleteNode(db, id),
     addOrUpdateFormValue: (_, { nodeId, name, value }, { db }) =>

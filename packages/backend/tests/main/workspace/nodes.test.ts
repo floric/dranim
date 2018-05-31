@@ -48,12 +48,50 @@ describe('Nodes', () => {
   test('should create and get node', async () => {
     const ws = await createWorkspace(db, 'test', '');
 
-    const newNode = await createNode(db, NumberInputNodeDef.name, ws.id, 0, 0);
+    const newNode = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      ws.id,
+      null,
+      0,
+      0
+    );
 
     expect(newNode.id).toBeDefined();
     expect(newNode.outputs).toEqual([]);
     expect(newNode.inputs).toEqual([]);
     expect(newNode.workspaceId).toBe(ws.id);
+    expect(newNode.type).toBe(NumberInputNodeDef.name);
+
+    const node = await getNode(db, newNode.id);
+
+    expect(node).toEqual(newNode);
+  });
+
+  test('should create and get node in context', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const contextNode = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      ws.id,
+      null,
+      0,
+      0
+    );
+    const newNode = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      ws.id,
+      contextNode.id,
+      0,
+      0
+    );
+
+    expect(newNode.id).toBeDefined();
+    expect(newNode.outputs).toEqual([]);
+    expect(newNode.inputs).toEqual([]);
+    expect(newNode.workspaceId).toBe(ws.id);
+    expect(newNode.contextId).toBe(contextNode.id);
     expect(newNode.type).toBe(NumberInputNodeDef.name);
 
     const node = await getNode(db, newNode.id);
@@ -71,7 +109,14 @@ describe('Nodes', () => {
 
   test('should get valid node state', async () => {
     const ws = await createWorkspace(db, 'test', '');
-    const node = await createNode(db, NumberInputNodeDef.name, ws.id, 0, 0);
+    const node = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      ws.id,
+      null,
+      0,
+      0
+    );
     await addOrUpdateFormValue(db, node.id, 'value', '1');
     const updatedNode = await getNode(db, node.id);
 
@@ -82,7 +127,14 @@ describe('Nodes', () => {
 
   test('should get invalid node state', async () => {
     const ws = await createWorkspace(db, 'test', '');
-    const node = await createNode(db, NumberInputNodeDef.name, ws.id, 0, 0);
+    const node = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      ws.id,
+      null,
+      0,
+      0
+    );
 
     const state = await getNodeState(node);
 
@@ -96,6 +148,7 @@ describe('Nodes', () => {
       inputs: [],
       outputs: [],
       state: NodeState.VALID,
+      contextId: null,
       type: 'unknown',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
@@ -107,10 +160,27 @@ describe('Nodes', () => {
 
   test('should not create node for unknown workspace', async () => {
     try {
-      await createNode(db, NumberInputNodeDef.name, '123', 0, 0);
+      await createNode(db, NumberInputNodeDef.name, '123', null, 0, 0);
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Unknown workspace!');
+      expect(err.message).toBe('Unknown workspace');
+    }
+  });
+
+  test('should not create node for unknown context node', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    try {
+      await createNode(
+        db,
+        NumberInputNodeDef.name,
+        ws.id,
+        VALID_OBJECT_ID,
+        0,
+        0
+      );
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Unknown context node');
     }
   });
 
@@ -120,7 +190,14 @@ describe('Nodes', () => {
     let nrOfNodes = await getNodesCollection(db).count({});
     expect(nrOfNodes).toBe(0);
 
-    const newNode = await createNode(db, NumberInputNodeDef.name, ws.id, 0, 0);
+    const newNode = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      ws.id,
+      null,
+      0,
+      0
+    );
 
     expect(newNode).not.toBe(null);
 
@@ -150,6 +227,7 @@ describe('Nodes', () => {
       db,
       NumberInputNodeDef.name,
       ws.id,
+      null,
       0,
       0
     );
@@ -169,9 +247,9 @@ describe('Nodes', () => {
   test('should get all nodes', async () => {
     const ws = await createWorkspace(db, 'test', '');
     const nodes = await Promise.all([
-      createNode(db, NumberInputNodeDef.name, ws.id, 0, 0),
-      createNode(db, StringInputNodeDef.name, ws.id, 0, 0),
-      createNode(db, JoinDatasetsNodeDef.name, ws.id, 0, 0)
+      createNode(db, NumberInputNodeDef.name, ws.id, null, 0, 0),
+      createNode(db, StringInputNodeDef.name, ws.id, null, 0, 0),
+      createNode(db, JoinDatasetsNodeDef.name, ws.id, null, 0, 0)
     ]);
 
     const allNodes = await getAllNodes(db, ws.id);
@@ -182,7 +260,7 @@ describe('Nodes', () => {
     const ws = await createWorkspace(db, 'test', '');
 
     try {
-      await createNode(db, 'unknown', ws.id, 0, 0);
+      await createNode(db, 'unknown', ws.id, null, 0, 0);
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Invalid node type');

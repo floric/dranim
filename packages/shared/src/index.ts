@@ -2,10 +2,10 @@ import { NodeDef } from './nodes';
 import {
   DatasetInputNodeDef,
   DatasetOutputNodeDef,
-  FilterDatasetNodeDef,
   JoinDatasetsNodeDef,
   SelectValuesNodeDef
 } from './nodes/dataset';
+import { ForEachEntryNodeDef } from './nodes/entry';
 import {
   FormatNumberNodeDef,
   MultiplicationNodeDef,
@@ -21,8 +21,7 @@ export const NodesMap = new Map<string, NodeDef>(
       DatasetInputNodeDef,
       DatasetOutputNodeDef,
       JoinDatasetsNodeDef,
-      SelectValuesNodeDef,
-      FilterDatasetNodeDef
+      SelectValuesNodeDef
     },
     { StringInputNodeDef, StringOutputNodeDef },
     {
@@ -31,6 +30,9 @@ export const NodesMap = new Map<string, NodeDef>(
       FormatNumberNodeDef,
       MultiplicationNodeDef,
       SumNodeDef
+    },
+    {
+      ForEachEntryNodeDef
     }
   ]
     .map(n => Object.values(n))
@@ -46,3 +48,4 @@ export * from './filters';
 export * from './nodes/dataset';
 export * from './nodes/number';
 export * from './nodes/string';
+export * from './nodes/entry';
