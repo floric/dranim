@@ -2,6 +2,7 @@ import { NodeDef } from './nodes';
 import {
   DatasetInputNodeDef,
   DatasetOutputNodeDef,
+  FilterDatasetNodeDef,
   JoinDatasetsNodeDef,
   SelectValuesNodeDef
 } from './nodes/dataset';
@@ -20,7 +21,8 @@ export const NodesMap = new Map<string, NodeDef>(
       DatasetInputNodeDef,
       DatasetOutputNodeDef,
       JoinDatasetsNodeDef,
-      SelectValuesNodeDef
+      SelectValuesNodeDef,
+      FilterDatasetNodeDef
     },
     { StringInputNodeDef, StringOutputNodeDef },
     {
@@ -40,6 +42,7 @@ export * from './workspace';
 export * from './utils';
 export * from './nodes';
 export * from './sockets';
+export * from './filters';
 export * from './nodes/dataset';
 export * from './nodes/number';
 export * from './nodes/string';

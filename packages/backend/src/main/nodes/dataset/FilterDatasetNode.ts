@@ -4,17 +4,11 @@ import {
   FilterDatasetNodeForm,
   FilterDatasetNodeInputs,
   FilterDatasetNodeOutputs,
-  ServerNodeDef,
-  sleep
+  ServerNodeDef
 } from '@masterthesis/shared';
 
 import { getCreatedDatasetName } from '../../calculation/utils';
-import {
-  addValueSchema,
-  createDataset,
-  getDataset
-} from '../../workspace/dataset';
-import { createEntry, getEntryCollection } from '../../workspace/entry';
+import { createDataset, getDataset } from '../../workspace/dataset';
 import { validateDatasetInput } from './utils';
 
 interface MappedConditionRule {
@@ -36,19 +30,13 @@ export const FilterDatasetNode: ServerNodeDef<
   name: FilterDatasetNodeDef.name,
   isInputValid: inputs => validateDatasetInput(inputs),
   isFormValid: form => {
-    const conditions = form.conditions;
-    if (!conditions) {
-      return Promise.resolve(false);
-    }
-
-    const rulesCount = [
-      conditions.equals,
-      conditions.greaterThan,
-      conditions.isPresent,
-      conditions.lessThan
-    ]
-      .map(n => n.length)
+    const rulesCount = Object.keys(form)
+      .map(type =>
+        Object.keys(form[type]).map(method => form[type][method].length)
+      )
+      .reduce((a, b) => a.concat(b), [])
       .reduce((a, b) => a + b, 0);
+
     if (rulesCount === 0) {
       return Promise.resolve(false);
     }
@@ -65,31 +53,6 @@ export const FilterDatasetNode: ServerNodeDef<
       db,
       getCreatedDatasetName(FilterDatasetNode.name)
     );
-
-    const mappedConditions = convertConditionRules(form.conditions!);
-
-    await Promise.all(
-      oldDs.valueschemas.map(v => addValueSchema(db, newDs.id, v))
-    );
-
-    const oldCollection = getEntryCollection(db, inputs.dataset.id);
-
-    await new Promise((resolve, reject) => {
-      const col = oldCollection.find();
-      col.on('data', async (e: Entry) => {
-        const newValues = getFilteredValues(e, mappedConditions);
-        if (Object.keys(newValues).length > 0) {
-          await createEntry(db, newDs.id, newValues);
-        }
-      });
-      col.on('end', async () => {
-        await sleep(500);
-        resolve();
-      });
-      col.on('error', () => {
-        reject();
-      });
-    });
 
     return {
       outputs: {

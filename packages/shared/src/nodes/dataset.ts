@@ -1,3 +1,4 @@
+import { FilterMethodsPayload } from '../filters';
 import { NodeDef } from '../nodes';
 import { DataSocket } from '../sockets';
 
@@ -108,19 +109,8 @@ export interface FilterDatasetNodeOutputs {
   dataset: DatasetRef;
 }
 
-export interface ConditionRule<T> {
-  name: string;
-  value: T;
-}
-
-export interface FilterDatasetNodeForm {
-  conditions: {
-    equals: Array<ConditionRule<string>>;
-    greaterThan: Array<ConditionRule<string>>;
-    lessThan: Array<ConditionRule<string>>;
-    isPresent: Array<ConditionRule<boolean>>;
-  };
-}
+// tslint:disable-next-line:no-empty-interface
+export interface FilterDatasetNodeForm extends FilterMethodsPayload {}
 
 export const FilterDatasetNodeDef: NodeDef<
   FilterDatasetNodeInputs,

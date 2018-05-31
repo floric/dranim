@@ -11,7 +11,7 @@ import { Form, Select } from 'antd';
 import { ClientNodeDef } from '../AllNodes';
 import { getValueOrDefault } from '../utils';
 
-export const DatasetSelectValuesNode: ClientNodeDef<
+export const SelectValuesNode: ClientNodeDef<
   SelectValuesNodeInputs,
   SelectValuesNodeOutputs,
   SelectValuesNodeForm
@@ -47,7 +47,6 @@ export const DatasetSelectValuesNode: ClientNodeDef<
   renderFormItems: ({
     form,
     form: { getFieldDecorator },
-    state: { datasets, connections, nodes },
     nodeForm,
     inputs
   }) => {

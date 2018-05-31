@@ -1,6 +1,7 @@
 import {
   DataType,
   FilterDatasetNodeDef,
+  ThresholdFilterOperator,
   ValueSchema
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
@@ -71,30 +72,16 @@ describe('FilterDatasetNode', () => {
 
   test('should have valid form', async () => {
     const res = await FilterDatasetNode.isFormValid({
-      conditions: {
-        equals: [{ name: 'test', value: '42' }],
-        greaterThan: [],
-        isPresent: [],
-        lessThan: []
+      [DataType.STRING]: {
+        equals: [{ name: 'test', compareTo: '42' }],
+        contains: []
       }
     });
     expect(res).toBe(true);
   });
 
   test('should have valid form', async () => {
-    let res = await FilterDatasetNode.isFormValid({
-      conditions: {
-        equals: [],
-        greaterThan: [],
-        isPresent: [],
-        lessThan: []
-      }
-    });
-    expect(res).toBe(false);
-
-    res = await FilterDatasetNode.isFormValid({
-      conditions: null
-    });
+    const res = await FilterDatasetNode.isFormValid({});
     expect(res).toBe(false);
   });
 
@@ -118,11 +105,20 @@ describe('FilterDatasetNode', () => {
 
     const res = await FilterDatasetNode.onServerExecution(
       {
-        conditions: {
+        [DataType.NUMBER]: {
           equals: [],
-          greaterThan: [{ name: schema.name, value: '1.9' }],
-          isPresent: [],
-          lessThan: [{ name: schema.name, value: '2.1' }]
+          threshold: [
+            {
+              name: schema.name,
+              operator: ThresholdFilterOperator.GREATER_THAN,
+              threshold: 1.9
+            },
+            {
+              name: schema.name,
+              operator: ThresholdFilterOperator.GREATER_THAN,
+              threshold: 2.1
+            }
+          ]
         }
       },
       { dataset: { id: ds.id } },
@@ -161,11 +157,15 @@ describe('FilterDatasetNode', () => {
 
     const res = await FilterDatasetNode.onServerExecution(
       {
-        conditions: {
+        [DataType.NUMBER]: {
           equals: [],
-          greaterThan: [{ name: schema.name, value: '9.9' }],
-          isPresent: [],
-          lessThan: []
+          threshold: [
+            {
+              name: schema.name,
+              operator: ThresholdFilterOperator.GREATER_THAN,
+              threshold: 9.9
+            }
+          ]
         }
       },
       { dataset: { id: ds.id } },
@@ -204,11 +204,14 @@ describe('FilterDatasetNode', () => {
 
     const res = await FilterDatasetNode.onServerExecution(
       {
-        conditions: {
-          equals: [{ name: schema.name, value: '10' }],
-          greaterThan: [],
-          isPresent: [],
-          lessThan: []
+        [DataType.NUMBER]: {
+          equals: [
+            {
+              name: schema.name,
+              compareTo: 10
+            }
+          ],
+          threshold: []
         }
       },
       { dataset: { id: ds.id } },

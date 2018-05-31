@@ -17,11 +17,12 @@ export interface IPropertiesFormProps {
 
 class PropertiesFormImpl extends React.Component<
   IPropertiesFormProps & FormComponentProps,
-  { saving: boolean }
+  { saving: boolean; temp: any }
 > {
   public componentWillMount() {
     this.setState({
-      saving: false
+      saving: false,
+      temp: {}
     });
   }
 
@@ -47,9 +48,7 @@ class PropertiesFormImpl extends React.Component<
         saving: true
       });
       await tryOperation({
-        op: async () => {
-          await handleSubmit(form, id);
-        },
+        op: () => handleSubmit(form, id),
         successTitle: () => 'Properties saved',
         successMessage: () => `Properties saved successfully.`,
         failedTitle: 'Properties not saved.',
@@ -79,7 +78,16 @@ class PropertiesFormImpl extends React.Component<
 
     return (
       <Form layout="inline" hideRequiredMark onSubmit={this.handleSubmit}>
-        {renderFormItems({ form, inputs, state, node, nodeForm })}
+        {renderFormItems({
+          form,
+          inputs,
+          state,
+          node,
+          nodeForm,
+          getTempState: () => this.state.temp,
+          setTempState: s =>
+            this.setState({ temp: { ...this.state.temp, ...s } })
+        })}
         <Form.Item wrapperCol={{ xs: 24 }}>
           <Button.Group>
             <Button

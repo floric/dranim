@@ -66,12 +66,7 @@ export const JoinDatasetsNode: ClientNodeDef<
       }
     };
   },
-  renderFormItems: ({
-    inputs,
-    nodeForm,
-    form: { getFieldDecorator },
-    state: { datasets }
-  }) => {
+  renderFormItems: ({ inputs, nodeForm, form: { getFieldDecorator } }) => {
     const dsA = inputs.datasetA;
     const dsB = inputs.datasetB;
     if (!dsA || !dsB || !dsA.isPresent || !dsB.isPresent) {

@@ -15,10 +15,16 @@ export const FilterDatasetNode: ClientNodeDef<
   FilterDatasetNodeForm
 > = {
   name: FilterDatasetNodeDef.name,
-  onClientExecution: (inputs, nodeForm, context) => {
+  onClientExecution: inputs => {
     return {
       dataset: inputs.dataset
     };
   },
-  renderFormItems: () => <p>TODO</p>
+  renderFormItems: ({ inputs: { dataset } }) => {
+    if (!dataset.isPresent) {
+      return <p>Plugin a dataset first</p>;
+    }
+
+    return <p>Test</p>;
+  }
 };

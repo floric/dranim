@@ -31,6 +31,8 @@ export interface RenderFormItemsProps<NodeInputs, NodeForm>
     EditorContext {
   inputs: SocketMetas<NodeInputs>;
   nodeForm: FormValues<NodeForm>;
+  setTempState: (state: any) => void;
+  getTempState: () => any;
 }
 
 export interface ClientNodeDef<
