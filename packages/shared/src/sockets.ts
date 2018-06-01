@@ -23,7 +23,7 @@ export interface DatasetMeta {
 export interface SocketDef<Meta = {}> {
   dataType: DataType;
   displayName: string;
-  order?: number;
+  isDynamic?: boolean;
   meta: SocketMetaDef<Meta>;
 }
 

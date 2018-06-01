@@ -35,7 +35,7 @@ export const isEntryMeta = (
 ): n is { [x: string]: SocketMetaDef<DatasetMeta> } => {
   const keys = Object.keys(n as { [x: string]: SocketMetaDef<DatasetMeta> });
   return (
-    keys.length === 1 &&
+    keys.length >= 1 &&
     (n as { [x: string]: SocketMetaDef<DatasetMeta> })[keys[0]].content
       .schema !== undefined
   );
@@ -70,8 +70,9 @@ export const renderContextNode = (
       dynamicSockets[s.name] = {
         dataType: s.type,
         displayName: s.name,
+        isDynamic: true,
         meta: {}
-      };
+      } as SocketDef<{}>;
     });
   }
 
@@ -161,9 +162,6 @@ export const renderNode = (
   if (!nodeType) {
     throw new Error('Unknown node type');
   }
-
-  const res = getClientNodeInputs(n, server);
-  console.log(res);
 
   const nodeGroup = new Konva.Group({ draggable: true, x: n.x, y: n.y });
 

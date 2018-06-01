@@ -21,16 +21,12 @@ export interface FormValue {
 export type FormValues<T> = { [Name in keyof T]: T[Name] | null };
 export type IOValues<T> = { [Name in keyof T]: T[Name] };
 
-export interface NodeDef<
-  NodeInputs = {},
-  NodeOutputs = {},
-  ContextInputs = {},
-  ContextOutputs = {}
-> {
+export interface NodeDef<NodeInputs = {}, NodeOutputs = {}> {
   name: string;
   inputs: SocketDefs<NodeInputs>;
   outputs: SocketDefs<NodeOutputs>;
   isOutputNode?: boolean;
+  supportsDynamicSockets?: boolean;
   path: Array<string>;
   keywords: Array<string>;
 }

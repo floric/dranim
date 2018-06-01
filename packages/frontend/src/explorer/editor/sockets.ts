@@ -32,6 +32,7 @@ const renderSocket = (
   const text = new Konva.Text({
     fill: Colors.GrayDark,
     text: s.displayName,
+    fontStyle: s.isDynamic ? 'italic' : undefined,
     align: type === SocketType.INPUT ? 'left' : 'right',
     width: NODE_WIDTH / 2,
     x:
