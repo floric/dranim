@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import {
+  Colors,
   ConnectionInstance,
   Dataset,
   NodeInstance,
@@ -57,8 +58,8 @@ export interface OpenConnection {
 
 export interface ExplorerEditorState {
   openConnection: OpenConnection | null;
+  selectedNodeId: string | null;
   contextId: string | null;
-  enteredFunction: string | null;
 }
 
 export class ExplorerEditor extends React.Component<
@@ -70,8 +71,8 @@ export class ExplorerEditor extends React.Component<
   public componentWillMount() {
     this.setState({
       openConnection: null,
-      contextId: null,
-      enteredFunction: null
+      selectedNodeId: null,
+      contextId: null
     });
   }
 
@@ -100,13 +101,13 @@ export class ExplorerEditor extends React.Component<
   };
 
   private handleDeleteSelectedNode = async () => {
-    const { contextId } = this.state;
-    if (contextId === null) {
+    const { selectedNodeId } = this.state;
+    if (selectedNodeId === null) {
       return;
     }
 
-    await this.props.onNodeDelete(contextId);
-    await this.setState({ contextId: null });
+    await this.props.onNodeDelete(selectedNodeId);
+    await this.setState({ selectedNodeId: null });
   };
 
   private handleStartCalulcation = async () => {
@@ -115,28 +116,25 @@ export class ExplorerEditor extends React.Component<
 
   private handleSelectCreateNode = (type: string) => {
     if (!nodeTypes.has(type)) {
-      return;
+      throw new Error('Unknown node type!');
     }
 
     const canvas = document.getElementById(EXPLORER_CONTAINER);
     const x = canvas ? canvas.clientWidth / 2 - NODE_WIDTH / 2 : 50;
     const y = canvas ? canvas.clientHeight / 2 : 50;
 
-    this.props.onNodeCreate(
-      type,
-      x,
-      y,
-      this.state.contextId ? this.state.contextId : null
-    );
+    this.props.onNodeCreate(type, x, y, this.state.contextId);
   };
 
   private handleEnterFunction = async () => {
-    if (!this.state.contextId) {
+    if (!this.state.selectedNodeId) {
       return;
     }
 
-    await this.setState({ enteredFunction: this.state.contextId });
+    await this.setState({ contextId: this.state.selectedNodeId });
   };
+
+  private handleLeaveFunction = async () => this.setState({ contextId: null });
 
   private handleSave = (form: WrappedFormUtils, nodeId: string) => {
     const changedNames = Object.keys(form.getFieldsValue());
@@ -153,17 +151,19 @@ export class ExplorerEditor extends React.Component<
   };
 
   public render() {
-    const { contextId } = this.state;
+    const { selectedNodeId, contextId } = this.state;
     const { nodes } = this.props;
 
-    const node = contextId ? nodes.find(n => n.id === contextId) : null;
+    const node = selectedNodeId
+      ? nodes.find(n => n.id === selectedNodeId)
+      : null;
     const nodeType = node ? nodeTypes.get(node.type) || null : null;
 
     const renderFormItems = node
       ? nodeTypes.get(node.type)!.renderFormItems || null
       : null;
 
-    if (contextId) {
+    if (selectedNodeId) {
       document.onkeypress = (ev: KeyboardEvent) => {
         if (ev.code === 'Delete') {
           this.handleDeleteSelectedNode();
@@ -207,14 +207,24 @@ export class ExplorerEditor extends React.Component<
                       Delete Selected
                     </AsyncButton>
                   )}
-                  {nodeType && !!nodeType.fnInputs && !!nodeType.fnOutputs ? (
+                  {nodeType &&
+                    !!nodeType.contextFn &&
+                    contextId !== selectedNodeId && (
+                      <AsyncButton
+                        icon="plus-square"
+                        onClick={this.handleEnterFunction}
+                      >
+                        Enter Selected
+                      </AsyncButton>
+                    )}
+                  {contextId !== null && (
                     <AsyncButton
-                      icon="plus-square"
-                      onClick={this.handleEnterFunction}
+                      icon="minus-square"
+                      onClick={this.handleLeaveFunction}
                     >
-                      Enter function
+                      Return to Root
                     </AsyncButton>
-                  ) : null}
+                  )}
                   <AsyncButton
                     icon="rocket"
                     onClick={this.handleStartCalulcation}
@@ -245,7 +255,7 @@ export class ExplorerEditor extends React.Component<
           {...css({
             width: '100%',
             height: '800px',
-            border: '1px solid #CCC',
+            border: `1px solid ${Colors.GrayLight}`,
             marginBottom: 12
           })}
         />

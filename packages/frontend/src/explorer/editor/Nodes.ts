@@ -1,4 +1,5 @@
 import {
+  Colors,
   ConditionalMetaTypes,
   NodeInstance,
   NodeState,
@@ -38,7 +39,8 @@ export const renderNode = (
 
   const { inputs, outputs, name, renderName } = nodeType;
   const height = getNodeHeight(inputs, outputs);
-  const isSelected = state.contextId !== null && state.contextId === n.id;
+  const isSelected =
+    state.selectedNodeId !== null && state.selectedNodeId === n.id;
 
   nodeGroup.on('dragend', ev => {
     server.onNodeUpdate(n.id, ev.target.x(), ev.target.y());
@@ -46,21 +48,21 @@ export const renderNode = (
 
   nodeGroup.on('click', ev => {
     changeState({
-      contextId: n.id
+      selectedNodeId: n.id
     });
   });
 
   const bgRect = new Konva.Rect({
     width: NODE_WIDTH,
     height,
-    shadowColor: '#000',
+    shadowColor: Colors.Black,
     shadowOpacity: 0.1,
     shadowBlur: 5,
-    fill: '#FFF'
+    fill: Colors.White
   });
 
   const nodeTitle = new Konva.Text({
-    fill: isSelected ? '#1890ff' : '#000',
+    fill: isSelected ? Colors.Selection : Colors.Black,
     align: 'center',
     text: renderName
       ? renderName({ node: n, state: server }, parseNodeForm(n))
@@ -105,6 +107,21 @@ export const renderNode = (
 
   nodeGroup.add(bgRect);
   nodeGroup.add(nodeTitle);
+
+  if (!!nodeType.contextFn) {
+    const fnInfo = new Konva.Text({
+      fill: Colors.Black,
+      align: 'right',
+      text: 'f(n)',
+      height: TEXT_HEIGHT,
+      width: NODE_WIDTH / 2 - 5,
+      y: 10,
+      x: NODE_WIDTH / 2 - 5
+    });
+
+    nodeGroup.add(fnInfo);
+  }
+
   nodeGroup.add(inputsGroup);
   nodeGroup.add(outputsGroup);
   nodeGroup.add(stateRect);

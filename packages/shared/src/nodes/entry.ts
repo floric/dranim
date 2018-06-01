@@ -1,11 +1,9 @@
 import { NodeDef } from '../nodes';
-import { DataSocket } from '../sockets';
+import { DataSocket, EntrySocket } from '../sockets';
 import { DatasetRef } from './dataset';
 
-export interface EntryModification<Args> {
-  name: string;
-  discardNode: boolean;
-  args: Args;
+export interface EntryRef {
+  entryId: string;
 }
 
 export interface ForEachEntryNodeInputs {
@@ -16,24 +14,34 @@ export interface ForEachEntryNodeOutputs {
   dataset: DatasetRef;
 }
 
-export const ForEachEntryNodeDef: NodeDef<
+export interface EditEntriesFnInputs {
+  entry: EntryRef;
+}
+
+export interface EditEntriesFnOutputs {
+  entry: EntryRef;
+}
+
+export const EditEntriesNodeDef: NodeDef<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
-  { test: number },
-  { abc: number }
+  EditEntriesFnInputs,
+  EditEntriesFnOutputs
 > = {
-  name: 'For each Entry',
+  name: 'Edit Entries',
   inputs: {
     dataset: DataSocket('Dataset')
   },
   outputs: {
     dataset: DataSocket('Dataset')
   },
-  fnInputs: {
-    test: 9
-  },
-  fnOutputs: {
-    abc: 9
+  contextFn: {
+    inputs: {
+      entry: EntrySocket('Entry')
+    },
+    outputs: {
+      entry: EntrySocket('Entry')
+    }
   },
   path: ['Entry'],
   keywords: []

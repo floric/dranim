@@ -5,7 +5,7 @@ import {
   JoinDatasetsNodeDef,
   SelectValuesNodeDef
 } from './nodes/dataset';
-import { ForEachEntryNodeDef } from './nodes/entry';
+import { EditEntriesNodeDef } from './nodes/entry';
 import {
   FormatNumberNodeDef,
   MultiplicationNodeDef,
@@ -14,6 +14,9 @@ import {
   SumNodeDef
 } from './nodes/number';
 import { StringInputNodeDef, StringOutputNodeDef } from './nodes/string';
+import * as ColorsDef from './styles/colors';
+
+export const Colors = ColorsDef;
 
 export const NodesMap = new Map<string, NodeDef>(
   [
@@ -32,7 +35,7 @@ export const NodesMap = new Map<string, NodeDef>(
       SumNodeDef
     },
     {
-      ForEachEntryNodeDef
+      EditEntriesNodeDef
     }
   ]
     .map(n => Object.values(n))

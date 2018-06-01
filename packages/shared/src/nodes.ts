@@ -19,14 +19,16 @@ export type IOValues<T> = { [Name in keyof T]: T[Name] };
 export interface NodeDef<
   NodeInputs = {},
   NodeOutputs = {},
-  FunctionInputs = null,
-  FunctionOutputs = null
+  FunctionInputs = {},
+  FunctionOutputs = {}
 > {
   name: string;
   inputs: SocketDefs<NodeInputs>;
   outputs: SocketDefs<NodeOutputs>;
-  fnInputs?: FunctionInputs;
-  fnOutputs?: FunctionOutputs;
+  contextFn?: {
+    inputs: SocketDefs<FunctionInputs>;
+    outputs: SocketDefs<FunctionOutputs>;
+  };
   path: Array<string>;
   keywords: Array<string>;
 }
@@ -77,6 +79,7 @@ export interface SocketInstance {
 
 export interface ConnectionInstance extends ConnectionWithoutId {
   id: string;
+  contextId: string | null;
   workspaceId: string;
 }
 

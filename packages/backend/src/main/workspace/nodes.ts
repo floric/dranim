@@ -45,7 +45,7 @@ export const createNode = async (
     y,
     outputs: [],
     inputs: [],
-    contextId: contextNodeId || null,
+    contextId: contextNodeId,
     workspaceId,
     type
   });

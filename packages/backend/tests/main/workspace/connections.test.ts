@@ -69,12 +69,53 @@ describe('Connections', () => {
     expect(newConn.from).toEqual(fromSocket);
     expect(newConn.to).toEqual(toSocket);
     expect(newConn.workspaceId).toBe(ws.id);
+    expect(newConn.contextId).toBe(null);
 
     const res = await deleteConnection(db, newConn.id);
     expect(res).toBe(true);
 
     const unknownConn = await getConnection(db, newConn.id);
     expect(unknownConn).toBe(null);
+  });
+
+  test('should create connection in context', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+
+    const contextNode = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      ws.id,
+      null,
+      0,
+      0
+    );
+    const nodeA = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      ws.id,
+      contextNode.id,
+      0,
+      0
+    );
+    const nodeB = await createNode(
+      db,
+      NumberOutputNodeDef.name,
+      ws.id,
+      contextNode.id,
+      0,
+      0
+    );
+
+    const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
+    const toSocket: SocketInstance = { name: 'val', nodeId: nodeB.id };
+
+    const newConn = await createConnection(db, fromSocket, toSocket);
+
+    expect(newConn.id).toBeDefined();
+    expect(newConn.from).toEqual(fromSocket);
+    expect(newConn.to).toEqual(toSocket);
+    expect(newConn.workspaceId).toBe(ws.id);
+    expect(newConn.contextId).toBe(contextNode.id);
   });
 
   test('should find cycle and prevent connection creation', async () => {

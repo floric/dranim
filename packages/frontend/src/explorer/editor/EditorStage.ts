@@ -1,3 +1,4 @@
+import { NodeState } from '@masterthesis/shared';
 import * as Konva from 'konva';
 
 import { ExplorerEditorProps, ExplorerEditorState } from '../ExplorerEditor';
@@ -85,7 +86,7 @@ const createConnectionsLayer = (
   const { connections } = server;
   const { openConnection } = state;
 
-  connections.forEach(c => {
+  connections.filter(c => c.contextId === state.contextId).forEach(c => {
     const line = renderConnection(
       c,
       stage,

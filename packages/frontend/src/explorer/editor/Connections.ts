@@ -1,4 +1,5 @@
 import {
+  Colors,
   ConnectionWithoutId,
   SocketInstance,
   SocketType
@@ -100,7 +101,7 @@ const renderLine = (
   const line = new Konva.Line({
     strokeWidth: isCurrentlyChanged ? 4 : 2,
     strokeEnabled: true,
-    stroke: isCurrentlyChanged ? '#666' : '#999',
+    stroke: isCurrentlyChanged ? Colors.GrayDark : Colors.GrayMedium,
     points: getConnectionPoints(
       getSocketPositionOrPointer(outputSocket, stage) ||
         inputSocket.getAbsolutePosition(),

@@ -60,6 +60,7 @@ export const createConnection = async (
   const insertRes = await collection.insertOne({
     from,
     to,
+    contextId: inputNode!.contextId,
     workspaceId: inputNode!.workspaceId
   });
 

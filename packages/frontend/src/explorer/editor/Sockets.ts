@@ -1,4 +1,5 @@
 import {
+  Colors,
   ConnectionInstance,
   ConnectionWithoutId,
   SocketDef,
@@ -29,7 +30,7 @@ const renderSocket = (
     y: i * SOCKET_DISTANCE
   });
   const text = new Konva.Text({
-    fill: '#666',
+    fill: Colors.GrayDark,
     text: s.displayName,
     align: type === SocketType.INPUT ? 'left' : 'right',
     width: NODE_WIDTH / 2,
@@ -41,7 +42,7 @@ const renderSocket = (
   });
   const col = socketColors.get(s.dataType);
   const socket = new Konva.Circle({
-    fill: isConnected ? col : '#FFF',
+    fill: isConnected ? col : Colors.White,
     stroke: col,
     strokeEnabled: !isConnected,
     strokeWidth: 3,

@@ -33,6 +33,7 @@ const WORKSPACE_NODE_SELECTION = gql`
         x
         y
         state
+        contextId
         inputs {
           name
           connectionId
@@ -56,6 +57,7 @@ const WORKSPACE_NODE_SELECTION = gql`
           nodeId
           name
         }
+        contextId
       }
     }
   }

@@ -36,6 +36,8 @@ export const executeNode = async (
 
   await checkValidInputAndForm(type, nodeInputs, nodeForm);
 
+  // TODO execute nested functions here
+
   return await type.onServerExecution(nodeForm, nodeInputs, db);
 };
 
