@@ -2,19 +2,21 @@ import {
   Colors,
   ConditionalMetaTypes,
   ContextNodeType,
-  DataType,
+  DatasetMeta,
   hasContextFn,
   NodeInstance,
   NodeState,
   parseNodeForm,
   SocketDef,
   SocketDefs,
+  SocketMetaDef,
   SocketType
 } from '@masterthesis/shared';
 import * as Konva from 'konva';
 
 import { ExplorerEditorProps, ExplorerEditorState } from '../ExplorerEditor';
 import { nodeTypes } from '../nodes/all-nodes';
+import { getClientNodeInputs } from '../nodes/client-execution';
 import {
   getSocketId,
   onClickSocket,
@@ -25,6 +27,19 @@ import {
 export const NODE_WIDTH = 180;
 const TEXT_HEIGHT = 20;
 const STATE_LINE_HEIGHT = 1;
+
+export const isEntryMeta = (
+  n:
+    | { [x: string]: SocketMetaDef<{}> }
+    | { [x: string]: SocketMetaDef<DatasetMeta> }
+): n is { [x: string]: SocketMetaDef<DatasetMeta> } => {
+  const keys = Object.keys(n as { [x: string]: SocketMetaDef<DatasetMeta> });
+  return (
+    keys.length === 1 &&
+    (n as { [x: string]: SocketMetaDef<DatasetMeta> })[keys[0]].content
+      .schema !== undefined
+  );
+};
 
 export const renderContextNode = (
   n: NodeInstance,
@@ -47,26 +62,27 @@ export const renderContextNode = (
     throw new Error('Invalid context node type');
   }
 
-  // merge static with dynamic inputs and outputs
-  // TODO check possible key naming cases
-  const dynamicInputs: SocketDefs<{ test: string }> = {
-    test: {
-      dataType: DataType.STRING,
-      displayName: 'Test ABC',
-      meta: {
-        content: {},
-        isPresent: true
-      }
-    }
-  };
-  const inputs = {
-    ...dynamicInputs,
-    ...(n.type === ContextNodeType.OUTPUT
-      ? contextNodeType.contextFn.outputs
-      : {})
-  };
+  const res = getClientNodeInputs(n, server);
+  const dynamicSockets: SocketDefs<{}> = {};
+
+  if (isEntryMeta(res)) {
+    res.entry.content.schema.forEach(s => {
+      dynamicSockets[s.name] = {
+        dataType: s.type,
+        displayName: s.name,
+        meta: {}
+      };
+    });
+  }
+
+  const inputs =
+    n.type === ContextNodeType.OUTPUT
+      ? { ...dynamicSockets, ...contextNodeType.contextFn.outputs }
+      : {};
   const outputs =
-    n.type === ContextNodeType.INPUT ? contextNodeType.contextFn.inputs : {};
+    n.type === ContextNodeType.INPUT
+      ? { ...dynamicSockets, ...contextNodeType.contextFn.inputs }
+      : {};
 
   const height = getNodeHeight(inputs, outputs);
 
@@ -145,6 +161,9 @@ export const renderNode = (
   if (!nodeType) {
     throw new Error('Unknown node type');
   }
+
+  const res = getClientNodeInputs(n, server);
+  console.log(res);
 
   const nodeGroup = new Konva.Group({ draggable: true, x: n.x, y: n.y });
 

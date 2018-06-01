@@ -75,6 +75,15 @@ export interface ClientNodeWithContextFnDef<
   ) => SocketMetas<NodeOutputs>;
 }
 
+export const hasClientContextFn = (
+  n: ClientNodeDef | ClientNodeWithContextFnDef
+): n is ClientNodeWithContextFnDef => {
+  return (
+    (n as ClientNodeWithContextFnDef).onClientAfterContextFnExecution !==
+    undefined
+  );
+};
+
 const allNodes = [
   AllDatasetNodes,
   AllNumberNodes,
@@ -124,17 +133,26 @@ const buildTree = (
 
 export const nodeTypes: Map<
   string,
-  ClientNodeDef & (NodeDef | NodeWithContextFnDef)
+  | (ClientNodeDef & NodeDef)
+  | (ClientNodeWithContextFnDef & NodeWithContextFnDef)
 > = new Map(
   allNodes
-    .map<Array<[string, ClientNodeDef]>>(nodes =>
-      Object.values(nodes).map<[string, ClientNodeDef]>(n => [n.name, n])
+    .map<Array<[string, (ClientNodeDef | ClientNodeWithContextFnDef)]>>(nodes =>
+      Object.values(nodes).map<
+        [string, (ClientNodeDef | ClientNodeWithContextFnDef)]
+      >(n => [n.name, n])
     )
-    .reduce<Array<[string, ClientNodeDef]>>((a, b) => [...a, ...b], [])
-    .map<[string, (ClientNodeDef & (NodeDef | NodeWithContextFnDef))]>(n => [
-      n[0],
-      { ...NodesMap.get(n[0]), ...n[1] }
-    ])
+    .reduce<Array<[string, (ClientNodeDef | ClientNodeWithContextFnDef)]>>(
+      (a, b) => [...a, ...b],
+      []
+    )
+    .map<
+      [
+        string,
+        ((ClientNodeDef | ClientNodeWithContextFnDef) &
+          (NodeDef | NodeWithContextFnDef))
+      ]
+    >(n => [n[0], { ...NodesMap.get(n[0]), ...n[1] }])
     .sort((a, b) => a[0].localeCompare(b[0]))
 );
 

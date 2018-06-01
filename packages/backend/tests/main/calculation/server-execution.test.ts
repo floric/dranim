@@ -7,7 +7,7 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { executeNode } from '../../../src/main/calculation/execute-node';
+import { executeServerNode } from '../../../src/main/calculation/server-execution';
 import { createConnection } from '../../../src/main/workspace/connections';
 import {
   addOrUpdateFormValue,
@@ -20,7 +20,7 @@ let conn;
 let db: Db;
 let server;
 
-describe('Execute Node', () => {
+describe('Server Execution', () => {
   beforeAll(async () => {
     const { connection, database, mongodbServer } = await getTestMongoDb();
     conn = connection;
@@ -40,9 +40,9 @@ describe('Execute Node', () => {
 
   test('should execute simple node', async () => {
     const ws = await createWorkspace(db, 'test', '');
-    const node = await createNode(db, StringInputNodeDef.name, ws.id, 0, 0);
+    const node = await createNode(db, StringInputNodeDef.name, ws.id, [], 0, 0);
 
-    const { outputs, results } = await executeNode(db, node.id);
+    const { outputs, results } = await executeServerNode(db, node.id);
 
     expect(outputs).toBeDefined();
     expect(results).toBeUndefined();
@@ -51,15 +51,29 @@ describe('Execute Node', () => {
 
   test('should execute connected nodes', async () => {
     const ws = await createWorkspace(db, 'test', '');
-    const nodeA = await createNode(db, StringInputNodeDef.name, ws.id, 0, 0);
-    const nodeB = await createNode(db, StringOutputNodeDef.name, ws.id, 0, 0);
+    const nodeA = await createNode(
+      db,
+      StringInputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+    const nodeB = await createNode(
+      db,
+      StringOutputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
     await createConnection(
       db,
       { name: 'string', nodeId: nodeA.id },
       { name: 'string', nodeId: nodeB.id }
     );
 
-    const { outputs, results } = await executeNode(db, nodeB.id);
+    const { outputs, results } = await executeServerNode(db, nodeB.id);
 
     expect(outputs).toBeDefined();
     expect(results).toBeDefined();
@@ -69,11 +83,11 @@ describe('Execute Node', () => {
 
   test('should fail for invalid form', async () => {
     const ws = await createWorkspace(db, 'test', '');
-    const node = await createNode(db, NumberInputNodeDef.name, ws.id, 0, 0);
+    const node = await createNode(db, NumberInputNodeDef.name, ws.id, [], 0, 0);
     await addOrUpdateFormValue(db, node.id, 'value', '{NaN');
 
     try {
-      await executeNode(db, node.id);
+      await executeServerNode(db, node.id);
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Invalid form.');
@@ -82,8 +96,22 @@ describe('Execute Node', () => {
 
   test('should fail for invalid input', async () => {
     const ws = await createWorkspace(db, 'test', '');
-    const nodeA = await createNode(db, StringInputNodeDef.name, ws.id, 0, 0);
-    const nodeB = await createNode(db, NumberOutputNodeDef.name, ws.id, 0, 0);
+    const nodeA = await createNode(
+      db,
+      StringInputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+    const nodeB = await createNode(
+      db,
+      NumberOutputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
     await addOrUpdateFormValue(db, nodeA.id, 'value', 'NaN');
 
     await createConnection(
@@ -93,7 +121,7 @@ describe('Execute Node', () => {
     );
 
     try {
-      await executeNode(db, nodeB.id);
+      await executeServerNode(db, nodeB.id);
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Invalid input.');
@@ -102,13 +130,28 @@ describe('Execute Node', () => {
 
   test('should wait for inputs and combine them as sum', async () => {
     const ws = await createWorkspace(db, 'test', '');
-    const nodeA = await createNode(db, NumberInputNodeDef.name, ws.id, 0, 0);
-    const nodeB = await createNode(db, NumberInputNodeDef.name, ws.id, 0, 0);
-    const sumNode = await createNode(db, SumNodeDef.name, ws.id, 0, 0);
+    const nodeA = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+    const nodeB = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+    const sumNode = await createNode(db, SumNodeDef.name, ws.id, [], 0, 0);
     const outputNode = await createNode(
       db,
       NumberOutputNodeDef.name,
       ws.id,
+      [],
       0,
       0
     );
@@ -132,7 +175,7 @@ describe('Execute Node', () => {
       { name: 'value', nodeId: outputNode.id }
     );
 
-    const { outputs, results } = await executeNode(db, outputNode.id);
+    const { outputs, results } = await executeServerNode(db, outputNode.id);
 
     expect(outputs).toBeDefined();
     expect(results).toBeDefined();

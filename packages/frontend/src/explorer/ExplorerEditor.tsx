@@ -173,7 +173,8 @@ export class ExplorerEditor extends React.Component<
       ? nodeTypes.get(node.type)!.renderFormItems || null
       : null;
 
-    const contextFn = hasContextFn(nodeType) ? nodeType.contextFn : null;
+    const contextFn =
+      nodeType && hasContextFn(nodeType) ? nodeType.contextFn : null;
 
     if (selectedNodeId) {
       document.onkeypress = (ev: KeyboardEvent) => {

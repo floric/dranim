@@ -5,7 +5,7 @@ import {
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
-import { executeNode } from '../calculation/execute-node';
+import { executeServerNode } from '../calculation/server-execution';
 import { serverNodeTypes } from '../nodes/all-nodes';
 import { getAllNodes } from '../workspace/nodes';
 
@@ -51,7 +51,7 @@ const executeOutputNode = async (
 ) => {
   const processCollection = getCalculationsCollection(db);
 
-  const { results } = await executeNode(db, o.id);
+  const { results } = await executeServerNode(db, o.id);
   console.log(results);
 
   await processCollection.updateOne(

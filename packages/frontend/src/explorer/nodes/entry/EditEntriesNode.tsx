@@ -16,10 +16,13 @@ export const EditEntriesNode: ClientNodeWithContextFnDef<
   EditEntriesFnOutputs
 > = {
   name: EditEntriesNodeDef.name,
-  onClientBeforeContextFnExecution: inputs => ({
-    entry: inputs.dataset
-  }),
+  onClientBeforeContextFnExecution: inputs => {
+    console.log(inputs);
+    return {
+      entry: inputs.dataset || null
+    };
+  },
   onClientAfterContextFnExecution: inputs => ({
-    dataset: inputs.entry
+    dataset: inputs.entry || null
   })
 };

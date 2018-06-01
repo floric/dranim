@@ -13,7 +13,7 @@ import { serverNodeTypes } from '../nodes/all-nodes';
 import { getConnection } from '../workspace/connections';
 import { getNode } from '../workspace/nodes';
 
-export const executeNode = async (
+export const executeServerNode = async (
   db: Db,
   nodeId: string
 ): Promise<NodeExecutionResult<{}, {}>> => {
@@ -47,7 +47,7 @@ const getConnectionResult = async (i: ConnectionDescription, db: Db) => {
     throw new Error('Invalid connection.');
   }
 
-  const nodeRes = await executeNode(db, c.from.nodeId);
+  const nodeRes = await executeServerNode(db, c.from.nodeId);
 
   return { socketName: i.name, value: nodeRes.outputs[c.from.name] };
 };
