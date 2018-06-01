@@ -1,10 +1,9 @@
-import * as React from 'react';
-
 import {
   FormValues,
   NodeDef,
   NodeInstance,
   NodesMap,
+  NodeWithContextFnDef,
   SocketMetas
 } from '@masterthesis/shared';
 import { FormComponentProps } from 'antd/lib/form';
@@ -56,6 +55,26 @@ export interface ClientNodeDef<
   ) => SocketMetas<NodeOutputs>;
 }
 
+export interface ClientNodeWithContextFnDef<
+  NodeInputs = {},
+  NodeOutputs = {},
+  NodeForm = {},
+  ContextInputs = {},
+  ContextOutputs = {}
+> extends ClientNodeDef<NodeInputs, NodeOutputs, NodeForm> {
+  onClientBeforeContextFnExecution: (
+    inputs: SocketMetas<NodeInputs>,
+    nodeForm: FormValues<NodeForm>,
+    context: EditorContext
+  ) => SocketMetas<ContextInputs>;
+  onClientAfterContextFnExecution: (
+    inputs: SocketMetas<ContextOutputs>,
+    originalInputs: SocketMetas<NodeInputs>,
+    nodeForm: FormValues<NodeForm>,
+    context: EditorContext
+  ) => SocketMetas<NodeOutputs>;
+}
+
 const allNodes = [
   AllDatasetNodes,
   AllNumberNodes,
@@ -64,7 +83,7 @@ const allNodes = [
 ];
 
 const buildTree = (
-  elems: Array<ClientNodeDef & NodeDef>,
+  elems: Array<ClientNodeDef & (NodeDef | NodeWithContextFnDef)>,
   curPath: Array<string>
 ): Array<TreeData> => {
   const nextPaths = elems
@@ -82,7 +101,7 @@ const buildTree = (
   );
 
   return distinctPaths.map(e => ({
-    label: <strong>{e[e.length - 1]}</strong>,
+    label: e[e.length - 1],
     value: e.join('-'),
     key: e.join('-'),
     selectable: false,
@@ -103,13 +122,16 @@ const buildTree = (
   }));
 };
 
-export const nodeTypes: Map<string, ClientNodeDef & NodeDef> = new Map(
+export const nodeTypes: Map<
+  string,
+  ClientNodeDef & (NodeDef | NodeWithContextFnDef)
+> = new Map(
   allNodes
     .map<Array<[string, ClientNodeDef]>>(nodes =>
       Object.values(nodes).map<[string, ClientNodeDef]>(n => [n.name, n])
     )
     .reduce<Array<[string, ClientNodeDef]>>((a, b) => [...a, ...b], [])
-    .map<[string, (ClientNodeDef & NodeDef)]>(n => [
+    .map<[string, (ClientNodeDef & (NodeDef | NodeWithContextFnDef))]>(n => [
       n[0],
       { ...NodesMap.get(n[0]), ...n[1] }
     ])

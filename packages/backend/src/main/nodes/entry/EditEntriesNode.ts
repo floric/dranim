@@ -14,7 +14,7 @@ export const EditEntriesNode: ServerNodeDef<
     return {
       outputs: {
         dataset: {
-          id: ''
+          datasetId: ''
         }
       }
     };

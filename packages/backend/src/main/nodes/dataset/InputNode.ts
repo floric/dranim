@@ -19,7 +19,7 @@ export const DatasetInputNode: ServerNodeDef<
     return {
       outputs: {
         dataset: {
-          id: form.dataset!
+          datasetId: form.dataset!
         }
       }
     };

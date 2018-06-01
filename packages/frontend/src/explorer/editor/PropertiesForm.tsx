@@ -6,7 +6,7 @@ import { FormComponentProps } from 'antd/lib/form';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 
 import { tryOperation } from '../../utils/form';
-import { EditorContext, RenderFormItemsProps } from '../nodes/AllNodes';
+import { EditorContext, RenderFormItemsProps } from '../nodes/all-nodes';
 import { getInputInformation } from '../nodes/utils';
 
 export interface IPropertiesFormProps {

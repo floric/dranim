@@ -6,7 +6,7 @@ import {
 import { Form, Input } from 'antd';
 import * as React from 'react';
 
-import { ClientNodeDef } from '../AllNodes';
+import { ClientNodeDef } from '../all-nodes';
 import { getValueOrDefault } from '../utils';
 
 export const StringInputNode: ClientNodeDef<

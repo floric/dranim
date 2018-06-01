@@ -52,20 +52,20 @@ describe('JoinDatasetsNode', () => {
 
   test('should have valid inputs and invalid inputs', async () => {
     let res = await JoinDatasetsNode.isInputValid({
-      datasetA: { id: 'a' },
-      datasetB: { id: 'b' }
+      datasetA: { datasetId: 'a' },
+      datasetB: { datasetId: 'b' }
     });
     expect(res).toBe(true);
 
     res = await JoinDatasetsNode.isInputValid({
-      datasetA: { id: null },
-      datasetB: { id: 'a' }
+      datasetA: { datasetId: null },
+      datasetB: { datasetId: 'a' }
     });
     expect(res).toBe(false);
 
     res = await JoinDatasetsNode.isInputValid({
       datasetA: null,
-      datasetB: { id: 't' }
+      datasetB: { datasetId: 't' }
     });
     expect(res).toBe(false);
   });
@@ -96,7 +96,10 @@ describe('JoinDatasetsNode', () => {
     try {
       await JoinDatasetsNode.onServerExecution(
         { valueA: 'TEST', valueB: 'else' },
-        { datasetA: { id: dsA.id }, datasetB: { id: VALID_OBJECT_ID } },
+        {
+          datasetA: { datasetId: dsA.id },
+          datasetB: { datasetId: VALID_OBJECT_ID }
+        },
         db
       );
       throw NeverGoHereError;
@@ -114,7 +117,7 @@ describe('JoinDatasetsNode', () => {
     try {
       await JoinDatasetsNode.onServerExecution(
         { valueA: 'TEST', valueB: 'else' },
-        { datasetA: { id: dsA.id }, datasetB: { id: dsB.id } },
+        { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
         db
       );
       throw NeverGoHereError;
@@ -151,7 +154,7 @@ describe('JoinDatasetsNode', () => {
     try {
       await JoinDatasetsNode.onServerExecution(
         { valueA: schemaA.name, valueB: schemaB.name },
-        { datasetA: { id: dsA.id }, datasetB: { id: dsB.id } },
+        { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
         db
       );
       throw NeverGoHereError;
@@ -211,11 +214,11 @@ describe('JoinDatasetsNode', () => {
 
     const res = await JoinDatasetsNode.onServerExecution(
       { valueA: schemaA.name, valueB: schemaB.name },
-      { datasetA: { id: dsA.id }, datasetB: { id: dsB.id } },
+      { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
       db
     );
 
-    const newDs = await getDataset(db, res.outputs.joined.id);
+    const newDs = await getDataset(db, res.outputs.joined.datasetId);
 
     const newColASchema = newDs.valueschemas.find(
       n => n.name === schemaOnlyA.name
@@ -268,11 +271,11 @@ describe('JoinDatasetsNode', () => {
 
     const res = await JoinDatasetsNode.onServerExecution(
       { valueA: schemaA.name, valueB: schemaB.name },
-      { datasetA: { id: dsA.id }, datasetB: { id: dsB.id } },
+      { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
       db
     );
 
-    const newDs = await getDataset(db, res.outputs.joined.id);
+    const newDs = await getDataset(db, res.outputs.joined.datasetId);
 
     const newColASchema = newDs.valueschemas.find(n => n.name === sharedName);
     expect(newDs).not.toBe(null);
@@ -362,11 +365,11 @@ describe('JoinDatasetsNode', () => {
 
     const res = await JoinDatasetsNode.onServerExecution(
       { valueA: schemaA.name, valueB: schemaB.name },
-      { datasetA: { id: dsA.id }, datasetB: { id: dsB.id } },
+      { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
       db
     );
 
-    const newDs = await getDataset(db, res.outputs.joined.id);
+    const newDs = await getDataset(db, res.outputs.joined.datasetId);
     expect(newDs).not.toBe(null);
 
     await sleep(100);

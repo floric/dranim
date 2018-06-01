@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Dataset, Colors } from '@masterthesis/shared';
+import { Colors, Dataset } from '@masterthesis/shared';
 import { Card, Col, Row, Table, Tag } from 'antd';
 import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';

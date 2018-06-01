@@ -2,8 +2,8 @@ import { ContextNodeType } from '@masterthesis/shared';
 import * as Konva from 'konva';
 
 import { ExplorerEditorProps, ExplorerEditorState } from '../ExplorerEditor';
-import { renderConnection } from './Connections';
-import { renderContextNode, renderNode } from './Nodes';
+import { renderConnection } from './connections';
+import { renderContextNode, renderNode } from './nodes';
 
 export const EXPLORER_CONTAINER = 'explcontainer';
 

@@ -1,17 +1,25 @@
-import * as React from 'react';
-
 import {
+  EditEntriesFnInputs,
+  EditEntriesFnOutputs,
   EditEntriesNodeDef,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs
 } from '@masterthesis/shared';
 
-import { ClientNodeDef } from '../AllNodes';
+import { ClientNodeWithContextFnDef } from '../all-nodes';
 
-export const EditEntriesNode: ClientNodeDef<
+export const EditEntriesNode: ClientNodeWithContextFnDef<
   ForEachEntryNodeInputs,
-  ForEachEntryNodeOutputs
+  ForEachEntryNodeOutputs,
+  {},
+  EditEntriesFnInputs,
+  EditEntriesFnOutputs
 > = {
   name: EditEntriesNodeDef.name,
-  renderFormItems: () => <p />
+  onClientBeforeContextFnExecution: inputs => ({
+    entry: inputs.dataset
+  }),
+  onClientAfterContextFnExecution: inputs => ({
+    dataset: inputs.entry
+  })
 };

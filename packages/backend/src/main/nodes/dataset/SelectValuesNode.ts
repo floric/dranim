@@ -26,9 +26,9 @@ export const SelectValuesNode: ServerNodeDef<
   isInputValid: async inputs => validateDatasetId(inputs.dataset),
   isFormValid: form => Promise.resolve(!!form.values && form.values.length > 0),
   onServerExecution: async (form, inputs, db) => {
-    await validateDataset(inputs.dataset.id, db);
+    await validateDataset(inputs.dataset.datasetId, db);
 
-    const existingDs = await getDataset(db, inputs.dataset.id);
+    const existingDs = await getDataset(db, inputs.dataset.datasetId);
     const schemasOnDs = existingDs!.valueschemas.map(n => n.name);
     const unknownValues = form.values!.filter(n => !schemasOnDs.includes(n));
     if (unknownValues.length > 0) {
@@ -47,7 +47,7 @@ export const SelectValuesNode: ServerNodeDef<
     return {
       outputs: {
         dataset: {
-          id: newDs.id
+          datasetId: newDs.id
         }
       }
     };

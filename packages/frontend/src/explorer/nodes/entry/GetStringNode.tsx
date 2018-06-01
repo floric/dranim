@@ -1,17 +1,14 @@
-import * as React from 'react';
-
 import {
   GetStringNodeDef,
   GetStringNodeOutputs,
   GetterNodeInputs
 } from '@masterthesis/shared';
 
-import { ClientNodeDef } from '../AllNodes';
+import { ClientNodeDef } from '../all-nodes';
 
 export const GetStringNode: ClientNodeDef<
   GetterNodeInputs,
   GetStringNodeOutputs
 > = {
-  name: GetStringNodeDef.name,
-  renderFormItems: () => <p />
+  name: GetStringNodeDef.name
 };

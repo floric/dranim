@@ -42,10 +42,12 @@ describe('SelectValuesNode', () => {
   });
 
   test('should have valid inputs and invalid inputs', async () => {
-    let res = await SelectValuesNode.isInputValid({ dataset: { id: 'test' } });
+    let res = await SelectValuesNode.isInputValid({
+      dataset: { datasetId: 'test' }
+    });
     expect(res).toBe(true);
 
-    res = await SelectValuesNode.isInputValid({ dataset: { id: null } });
+    res = await SelectValuesNode.isInputValid({ dataset: { datasetId: null } });
     expect(res).toBe(false);
 
     res = await SelectValuesNode.isInputValid({ dataset: null });
@@ -82,12 +84,12 @@ describe('SelectValuesNode', () => {
 
     const res = await SelectValuesNode.onServerExecution(
       { values: ['test'] },
-      { dataset: { id: ds.id } },
+      { dataset: { datasetId: ds.id } },
       db
     );
-    expect(res.outputs.dataset.id).toBeDefined();
+    expect(res.outputs.dataset.datasetId).toBeDefined();
 
-    const newDsId = res.outputs.dataset.id;
+    const newDsId = res.outputs.dataset.datasetId;
     const newDs = await getDataset(db, newDsId);
 
     expect(newDs).not.toBe(null);
@@ -108,7 +110,7 @@ describe('SelectValuesNode', () => {
     try {
       await SelectValuesNode.onServerExecution(
         { values: ['bla', 'test'] },
-        { dataset: { id: ds.id } },
+        { dataset: { datasetId: ds.id } },
         db
       );
       throw NeverGoHereError;
@@ -121,7 +123,7 @@ describe('SelectValuesNode', () => {
     try {
       await SelectValuesNode.onServerExecution(
         { values: ['test'] },
-        { dataset: { id: 'ds.id' } },
+        { dataset: { datasetId: 'ds.id' } },
         db
       );
       throw NeverGoHereError;

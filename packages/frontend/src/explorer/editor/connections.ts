@@ -7,7 +7,7 @@ import {
 import * as Konva from 'konva';
 
 import { ExplorerEditorState } from '../ExplorerEditor';
-import { getSocketId } from './Sockets';
+import { getSocketId } from './sockets';
 
 const CONNECTION_STIFFNESS = 0.7;
 

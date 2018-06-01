@@ -16,11 +16,11 @@ export const DatasetOutputNode: ServerNodeDef<
   name: DatasetOutputNodeDef.name,
   isInputValid: inputs => validateDatasetInput(inputs),
   onServerExecution: async (form, inputs, db) => {
-    await validateDataset(inputs.dataset.id, db);
+    await validateDataset(inputs.dataset.datasetId, db);
 
     return {
       outputs: {},
-      results: { dataset: { id: inputs.dataset.id } }
+      results: { dataset: inputs.dataset }
     };
   }
 };

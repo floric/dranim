@@ -9,8 +9,8 @@ import * as Konva from 'konva';
 
 import { showNotificationWithIcon } from '../../utils/form';
 import { ExplorerEditorProps, ExplorerEditorState } from '../ExplorerEditor';
-import { socketColors } from '../nodes/Sockets';
-import { NODE_WIDTH } from './Nodes';
+import { socketColors } from '../nodes/sockets';
+import { NODE_WIDTH } from './nodes';
 
 export const SOCKET_RADIUS = 8;
 export const SOCKET_DISTANCE = 30;

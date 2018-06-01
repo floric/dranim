@@ -9,8 +9,8 @@ export const validateDataset = async (id: string, db: Db) => {
     throw new Error('Unknown dataset');
   }
 };
-export const validateDatasetId = (value: { id: string } | null) => {
-  if (!value || !value.id) {
+export const validateDatasetId = (value: { datasetId: string } | null) => {
+  if (!value || !value.datasetId) {
     return false;
   }
 
@@ -18,4 +18,4 @@ export const validateDatasetId = (value: { id: string } | null) => {
 };
 
 export const validateDatasetInput = (inputs: { dataset: DatasetRef }) =>
-  Promise.resolve(!!inputs.dataset && !!inputs.dataset.id);
+  Promise.resolve(!!inputs.dataset && !!inputs.dataset.datasetId);

@@ -14,7 +14,7 @@ export const FilterEntriesNode: ServerNodeDef<
     return {
       outputs: {
         dataset: {
-          id: ''
+          datasetId: ''
         }
       }
     };

@@ -36,7 +36,7 @@ describe('DatasetOutputNode', () => {
 
   test('should have valid input', async () => {
     const validInput = await DatasetOutputNode.isInputValid({
-      dataset: { id: 'test' }
+      dataset: { datasetId: 'test' }
     });
 
     expect(validInput).toBe(true);
@@ -44,7 +44,7 @@ describe('DatasetOutputNode', () => {
 
   test('should have invalid inputs', async () => {
     let isValid = await DatasetOutputNode.isInputValid({
-      dataset: { id: null }
+      dataset: { datasetId: null }
     });
 
     expect(isValid).toBe(false);
@@ -58,7 +58,7 @@ describe('DatasetOutputNode', () => {
     try {
       await DatasetOutputNode.onServerExecution(
         {},
-        { dataset: { id: 'test' } },
+        { dataset: { datasetId: 'test' } },
         db
       );
       throw NeverGoHereError;
@@ -72,11 +72,11 @@ describe('DatasetOutputNode', () => {
 
     const res = await DatasetOutputNode.onServerExecution(
       {},
-      { dataset: { id: ds.id } },
+      { dataset: { datasetId: ds.id } },
       db
     );
 
     expect(res.outputs).toBeDefined();
-    expect(res.results.dataset.id).toBe(ds.id);
+    expect(res.results.dataset.datasetId).toBe(ds.id);
   });
 });

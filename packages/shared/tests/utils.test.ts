@@ -1,5 +1,11 @@
-import { FormValue, NodeInstance, NodeState } from '../src';
-import { isNumeric, parseNodeForm, sleep } from '../src/utils';
+import {
+  EditEntriesNodeDef,
+  FormValue,
+  NodeInstance,
+  NodeState,
+  NumberInputNodeDef
+} from '../src';
+import { hasContextFn, isNumeric, parseNodeForm, sleep } from '../src/utils';
 
 const createNodeWithForm = (form: Array<FormValue>): NodeInstance => ({
   id: '1',
@@ -7,6 +13,7 @@ const createNodeWithForm = (form: Array<FormValue>): NodeInstance => ({
   outputs: [],
   state: NodeState.VALID,
   type: 'Node',
+  contextIds: [],
   workspaceId: '2',
   x: 0,
   y: 0,
@@ -84,5 +91,15 @@ describe('Utils', () => {
     const later = new Date().getTime();
 
     expect(later - now).toBeGreaterThan(499);
+  });
+
+  it('should return true for node with context function', () => {
+    const res = hasContextFn(EditEntriesNodeDef);
+    expect(res).toBe(true);
+  });
+
+  it('should return false for node without context function', () => {
+    const res = hasContextFn(NumberInputNodeDef);
+    expect(res).toBe(false);
   });
 });

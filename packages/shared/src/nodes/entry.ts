@@ -1,7 +1,7 @@
-import { NodeDef } from '../nodes';
+import { NodeDef, NodeWithContextFnDef } from '../nodes';
 import {
   BooleanSocket,
-  DataSocket,
+  DatasetSocket,
   DateSocket,
   EntrySocket,
   NumberSocket,
@@ -29,7 +29,7 @@ export interface EditEntriesFnOutputs {
   entry: EntryRef;
 }
 
-export const EditEntriesNodeDef: NodeDef<
+export const EditEntriesNodeDef: NodeWithContextFnDef<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
   EditEntriesFnInputs,
@@ -37,10 +37,10 @@ export const EditEntriesNodeDef: NodeDef<
 > = {
   name: 'Edit Entries',
   inputs: {
-    dataset: DataSocket('Dataset')
+    dataset: DatasetSocket('Dataset')
   },
   outputs: {
-    dataset: DataSocket('Dataset')
+    dataset: DatasetSocket('Dataset')
   },
   contextFn: {
     inputs: {
@@ -62,7 +62,7 @@ export interface FilterEntriesFnOutputs {
   keepEntry: boolean;
 }
 
-export const FilterEntriesNodeDef: NodeDef<
+export const FilterEntriesNodeDef: NodeWithContextFnDef<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
   FilterEntriesFnInputs,
@@ -70,10 +70,10 @@ export const FilterEntriesNodeDef: NodeDef<
 > = {
   name: 'Filter Entries',
   inputs: {
-    dataset: DataSocket('Dataset')
+    dataset: DatasetSocket('Dataset')
   },
   outputs: {
-    dataset: DataSocket('Dataset')
+    dataset: DatasetSocket('Dataset')
   },
   contextFn: {
     inputs: {

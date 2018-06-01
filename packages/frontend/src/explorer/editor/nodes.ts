@@ -2,6 +2,8 @@ import {
   Colors,
   ConditionalMetaTypes,
   ContextNodeType,
+  DataType,
+  hasContextFn,
   NodeInstance,
   NodeState,
   parseNodeForm,
@@ -12,13 +14,13 @@ import {
 import * as Konva from 'konva';
 
 import { ExplorerEditorProps, ExplorerEditorState } from '../ExplorerEditor';
-import { nodeTypes } from '../nodes/AllNodes';
+import { nodeTypes } from '../nodes/all-nodes';
 import {
   getSocketId,
   onClickSocket,
   renderSocketWithUsages,
   SOCKET_DISTANCE
-} from './Sockets';
+} from './sockets';
 
 export const NODE_WIDTH = 180;
 const TEXT_HEIGHT = 20;
@@ -41,12 +43,28 @@ export const renderContextNode = (
   }
 
   const contextNodeType = nodeTypes.get(contextNode.type);
-  if (!contextNodeType) {
+  if (!contextNodeType || !hasContextFn(contextNodeType)) {
     throw new Error('Invalid context node type');
   }
 
-  const inputs =
-    n.type === ContextNodeType.OUTPUT ? contextNodeType.contextFn.outputs : {};
+  // merge static with dynamic inputs and outputs
+  // TODO check possible key naming cases
+  const dynamicInputs: SocketDefs<{ test: string }> = {
+    test: {
+      dataType: DataType.STRING,
+      displayName: 'Test ABC',
+      meta: {
+        content: {},
+        isPresent: true
+      }
+    }
+  };
+  const inputs = {
+    ...dynamicInputs,
+    ...(n.type === ContextNodeType.OUTPUT
+      ? contextNodeType.contextFn.outputs
+      : {})
+  };
   const outputs =
     n.type === ContextNodeType.INPUT ? contextNodeType.contextFn.inputs : {};
 
@@ -201,7 +219,7 @@ export const renderNode = (
   nodeGroup.add(bgRect);
   nodeGroup.add(nodeTitle);
 
-  if (!!nodeType.contextFn) {
+  if (hasContextFn(nodeType)) {
     const fnInfo = new Konva.Text({
       fill: Colors.Black,
       align: 'right',

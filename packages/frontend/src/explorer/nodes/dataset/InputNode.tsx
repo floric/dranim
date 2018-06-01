@@ -7,7 +7,7 @@ import {
 } from '@masterthesis/shared';
 import { Form, Select } from 'antd';
 
-import { ClientNodeDef } from '../AllNodes';
+import { ClientNodeDef } from '../all-nodes';
 import { getValueOrDefault } from '../utils';
 
 export const DatasetInputNode: ClientNodeDef<

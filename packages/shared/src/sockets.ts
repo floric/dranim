@@ -1,4 +1,5 @@
 import { DatasetRef } from './nodes/dataset';
+import { EntryRef } from './nodes/entry';
 import { ValueSchema } from './workspace';
 
 export enum SocketType {
@@ -14,6 +15,7 @@ export enum DataType {
   STRING = 'String',
   ENTRY = 'Entry'
 }
+
 export interface DatasetMeta {
   schema: Array<ValueSchema>;
 }
@@ -38,12 +40,14 @@ export type SocketMetasGeneric<T, M extends SocketMetaContent<T>> = {
   [Name in keyof T]: SocketMetaDef<M[Name]>
 };
 export type ConditionalMetaTypes<T> = {
-  [Name in keyof T]: T[Name] extends DatasetRef ? DatasetMeta : {}
+  [Name in keyof T]: T[Name] extends DatasetRef
+    ? DatasetMeta
+    : (T[Name] extends EntryRef ? DatasetMeta : {})
 };
 export type SocketDefs<T> = SocketDefsGeneric<T, ConditionalMetaTypes<T>>;
 export type SocketMetas<T> = SocketMetasGeneric<T, ConditionalMetaTypes<T>>;
 
-export const DataSocket = (name: string): SocketDef<DatasetMeta> => ({
+export const DatasetSocket = (name: string): SocketDef<DatasetMeta> => ({
   dataType: DataType.DATASET,
   meta: {
     content: { schema: [] },
@@ -70,9 +74,9 @@ export const BooleanSocket = (name: string): SocketDef => ({
   displayName: name
 });
 
-export const EntrySocket = (name: string): SocketDef => ({
+export const EntrySocket = (name: string): SocketDef<DatasetMeta> => ({
   dataType: DataType.ENTRY,
-  meta: { content: {}, isPresent: false },
+  meta: { content: { schema: [] }, isPresent: false },
   displayName: name
 });
 

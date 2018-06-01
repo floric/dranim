@@ -6,7 +6,7 @@ import {
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { executeNode } from '../calculation/execute-node';
-import { serverNodeTypes } from '../nodes/AllNodes';
+import { serverNodeTypes } from '../nodes/all-nodes';
 import { getAllNodes } from '../workspace/nodes';
 
 const startProcess = async (db: Db, processId: string, workspaceId: string) => {

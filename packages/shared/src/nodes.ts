@@ -24,20 +24,27 @@ export type IOValues<T> = { [Name in keyof T]: T[Name] };
 export interface NodeDef<
   NodeInputs = {},
   NodeOutputs = {},
-  FunctionInputs = {},
-  FunctionOutputs = {}
+  ContextInputs = {},
+  ContextOutputs = {}
 > {
   name: string;
   inputs: SocketDefs<NodeInputs>;
   outputs: SocketDefs<NodeOutputs>;
-  contextFn?: {
-    inputs: SocketDefs<FunctionInputs>;
-    outputs: SocketDefs<FunctionOutputs>;
-  };
   isOutputNode?: boolean;
   path: Array<string>;
   keywords: Array<string>;
-  isContextNode?: boolean;
+}
+
+export interface NodeWithContextFnDef<
+  NodeInputs = {},
+  NodeOutputs = {},
+  ContextInputs = {},
+  ContextOutputs = {}
+> extends NodeDef<NodeInputs, NodeOutputs> {
+  contextFn: {
+    inputs: SocketDefs<ContextInputs>;
+    outputs: SocketDefs<ContextOutputs>;
+  };
 }
 
 export interface NodeExecutionResult<NodeOutputs, NodeResults = {}> {

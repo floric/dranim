@@ -2,11 +2,9 @@ import {
   DatasetOutputNodeDef,
   DatasetOutputNodeInputs
 } from '@masterthesis/shared';
-import * as React from 'react';
 
-import { ClientNodeDef } from '../AllNodes';
+import { ClientNodeDef } from '../all-nodes';
 
 export const DatasetOutputNode: ClientNodeDef<DatasetOutputNodeInputs> = {
-  name: DatasetOutputNodeDef.name,
-  renderFormItems: ({ form: { getFieldDecorator }, nodeForm }) => <p />
+  name: DatasetOutputNodeDef.name
 };

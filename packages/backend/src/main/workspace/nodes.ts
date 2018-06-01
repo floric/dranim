@@ -1,12 +1,13 @@
 import {
   ContextNodeType,
+  hasContextFn,
   NodeInstance,
   NodeState,
   parseNodeForm
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
-import { serverNodeTypes } from '../nodes/AllNodes';
+import { serverNodeTypes } from '../nodes/all-nodes';
 import { getConnectionsCollection } from './connections';
 import { getWorkspace, getWorkspacesCollection } from './workspace';
 
@@ -65,8 +66,7 @@ export const createNode = async (
 
   const newNodeId = res.ops[0]._id.toHexString();
 
-  const hasContextFn = !!nodeType.contextFn;
-  if (hasContextFn) {
+  if (hasContextFn(nodeType)) {
     const nestedContextIds = [...contextNodeIds, newNodeId];
     const contextNodes = [ContextNodeType.INPUT, ContextNodeType.OUTPUT].map(
       contextType => ({

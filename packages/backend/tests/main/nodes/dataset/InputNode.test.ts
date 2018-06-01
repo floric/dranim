@@ -45,7 +45,7 @@ describe('DatasetInputNode', () => {
       {},
       db
     );
-    expect(res.outputs.dataset).toEqual({ id: newDs.id });
+    expect(res.outputs.dataset).toEqual({ datasetId: newDs.id });
   });
 
   test('should get output value from form', async () => {

@@ -1,17 +1,25 @@
-import * as React from 'react';
-
 import {
+  FilterEntriesFnInputs,
+  FilterEntriesFnOutputs,
   FilterEntriesNodeDef,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs
 } from '@masterthesis/shared';
 
-import { ClientNodeDef } from '../AllNodes';
+import { ClientNodeWithContextFnDef } from '../all-nodes';
 
-export const FilterEntriesNode: ClientNodeDef<
+export const FilterEntriesNode: ClientNodeWithContextFnDef<
   ForEachEntryNodeInputs,
-  ForEachEntryNodeOutputs
+  ForEachEntryNodeOutputs,
+  {},
+  FilterEntriesFnInputs,
+  FilterEntriesFnOutputs
 > = {
   name: FilterEntriesNodeDef.name,
-  renderFormItems: () => <p />
+  onClientBeforeContextFnExecution: (inputs, form) => ({
+    entry: inputs.dataset
+  }),
+  onClientAfterContextFnExecution: (inputs, originalInputs) => ({
+    dataset: originalInputs.dataset
+  })
 };

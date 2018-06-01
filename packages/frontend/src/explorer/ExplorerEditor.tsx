@@ -4,6 +4,7 @@ import {
   Colors,
   ConnectionInstance,
   Dataset,
+  hasContextFn,
   NodeInstance,
   SocketInstance
 } from '@masterthesis/shared';
@@ -12,10 +13,10 @@ import { css } from 'glamor';
 
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { AsyncButton } from '../components/AsyncButton';
-import { EXPLORER_CONTAINER, updateStage } from './editor/EditorStage';
-import { NODE_WIDTH } from './editor/Nodes';
+import { EXPLORER_CONTAINER, updateStage } from './editor/editor-stage';
+import { NODE_WIDTH } from './editor/nodes';
 import { PropertiesForm } from './editor/PropertiesForm';
-import { nodeTypes, nodeTypesTree } from './nodes/AllNodes';
+import { nodeTypes, nodeTypesTree } from './nodes/all-nodes';
 
 const filterTreeNode = (inputValue: string, treeNode: any) => {
   if (!treeNode.props.index) {
@@ -172,6 +173,8 @@ export class ExplorerEditor extends React.Component<
       ? nodeTypes.get(node.type)!.renderFormItems || null
       : null;
 
+    const contextFn = hasContextFn(nodeType) ? nodeType.contextFn : null;
+
     if (selectedNodeId) {
       document.onkeypress = (ev: KeyboardEvent) => {
         if (ev.code === 'Delete') {
@@ -248,17 +251,16 @@ export class ExplorerEditor extends React.Component<
                     </AsyncButton>
                   </Col>
                 )}
-                {nodeType &&
-                  !!nodeType.contextFn && (
-                    <Col>
-                      <AsyncButton
-                        icon="plus-square"
-                        onClick={this.handleEnterContext}
-                      >
-                        Enter Node
-                      </AsyncButton>
-                    </Col>
-                  )}
+                {contextFn && (
+                  <Col>
+                    <AsyncButton
+                      icon="plus-square"
+                      onClick={this.handleEnterContext}
+                    >
+                      Enter Node
+                    </AsyncButton>
+                  </Col>
+                )}
                 <Col>
                   <AsyncButton
                     icon="rocket"

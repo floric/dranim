@@ -1,8 +1,8 @@
 import { NodeDef } from '../nodes';
-import { DataSocket } from '../sockets';
+import { DatasetSocket } from '../sockets';
 
 export interface DatasetRef {
-  id: string;
+  datasetId: string;
 }
 
 export interface DatasetInputNodeOutputs {
@@ -16,7 +16,7 @@ export interface DatasetInputNodeForm {
 export const DatasetInputNodeDef: NodeDef<{}, DatasetInputNodeOutputs> = {
   name: 'Dataset Input',
   inputs: {},
-  outputs: { dataset: DataSocket('Dataset') },
+  outputs: { dataset: DatasetSocket('Dataset') },
   path: ['Dataset'],
   keywords: []
 };
@@ -41,11 +41,11 @@ export const JoinDatasetsNodeDef: NodeDef<
 > = {
   name: 'Join Datasets',
   inputs: {
-    datasetA: DataSocket('Dataset A'),
-    datasetB: DataSocket('Dataset B')
+    datasetA: DatasetSocket('Dataset A'),
+    datasetB: DatasetSocket('Dataset B')
   },
   outputs: {
-    joined: DataSocket('Joined')
+    joined: DatasetSocket('Joined')
   },
   path: ['Dataset', 'Operators'],
   keywords: []
@@ -69,10 +69,10 @@ export const SelectValuesNodeDef: NodeDef<
 > = {
   name: 'Select Values',
   inputs: {
-    dataset: DataSocket('Dataset')
+    dataset: DatasetSocket('Dataset')
   },
   outputs: {
-    dataset: DataSocket('Dataset')
+    dataset: DatasetSocket('Dataset')
   },
   path: ['Dataset', 'Operators'],
   keywords: []
@@ -89,7 +89,7 @@ export interface DatasetOutputNodeResults {
 export const DatasetOutputNodeDef: NodeDef<DatasetOutputNodeInputs, {}> = {
   name: 'Dataset Output',
   inputs: {
-    dataset: DataSocket('Dataset')
+    dataset: DatasetSocket('Dataset')
   },
   isOutputNode: true,
   outputs: {},

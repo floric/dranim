@@ -1,17 +1,14 @@
-import * as React from 'react';
-
 import {
   GetDateNodeDef,
   GetDateNodeOutputs,
   GetterNodeInputs
 } from '@masterthesis/shared';
 
-import { ClientNodeDef } from '../AllNodes';
+import { ClientNodeDef } from '../all-nodes';
 
 export const GetDateNode: ClientNodeDef<
   GetterNodeInputs,
   GetDateNodeOutputs
 > = {
-  name: GetDateNodeDef.name,
-  renderFormItems: () => <p />
+  name: GetDateNodeDef.name
 };

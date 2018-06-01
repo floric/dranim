@@ -9,7 +9,7 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { serverNodeTypes } from '../nodes/AllNodes';
+import { serverNodeTypes } from '../nodes/all-nodes';
 import { getConnection } from '../workspace/connections';
 import { getNode } from '../workspace/nodes';
 

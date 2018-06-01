@@ -1,6 +1,11 @@
 const sleepPromise = require('sleep-promise');
 
-import { FormValues, NodeInstance } from './nodes';
+import {
+  FormValues,
+  NodeDef,
+  NodeInstance,
+  NodeWithContextFnDef
+} from './nodes';
 
 export const parseNodeForm = (node: NodeInstance): FormValues<any> => {
   const fullForm = {};
@@ -18,6 +23,12 @@ export const parseNodeForm = (node: NodeInstance): FormValues<any> => {
   });
 
   return fullForm;
+};
+
+export const hasContextFn = (
+  n: NodeDef | NodeWithContextFnDef
+): n is NodeWithContextFnDef => {
+  return (n as NodeWithContextFnDef).contextFn !== undefined;
 };
 
 export const isNumeric = (n: any) => !isNaN(parseFloat(n)) && isFinite(n);

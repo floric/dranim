@@ -33,8 +33,8 @@ export const JoinDatasetsNode: ServerNodeDef<
     validateNonEmptyString(form.valueA) && validateNonEmptyString(form.valueB),
   onServerExecution: async (form, inputs, db) => {
     const [dsA, dsB] = await Promise.all([
-      getDataset(db, inputs.datasetA.id),
-      getDataset(db, inputs.datasetB.id)
+      getDataset(db, inputs.datasetA.datasetId),
+      getDataset(db, inputs.datasetB.datasetId)
     ]);
 
     await validateSchemas(form, dsA!, dsB!);
@@ -53,7 +53,7 @@ export const JoinDatasetsNode: ServerNodeDef<
     );
     await joinEntries(db, form.valueA!, form.valueB!, newDs, dsA!, dsB!);
 
-    return { outputs: { joined: { id: newDs.id } } };
+    return { outputs: { joined: { datasetId: newDs.id } } };
   }
 };
 

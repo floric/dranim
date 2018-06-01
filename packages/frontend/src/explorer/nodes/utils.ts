@@ -7,7 +7,7 @@ import {
   SocketMetas
 } from '@masterthesis/shared';
 
-import { EditorContext, nodeTypes } from './AllNodes';
+import { EditorContext, nodeTypes } from './all-nodes';
 
 export const getInputNode = (
   socketName: string,
@@ -34,7 +34,7 @@ export const getInputInformation = (
 ): SocketMetas<any> => {
   const node = nodeTypes.get(context.node.type);
   if (!node) {
-    throw new Error('Unknown node type!');
+    throw new Error('Unknown node type: ' + context.node.type);
   }
 
   const output = {};
@@ -62,9 +62,13 @@ export const getInputInformation = (
         throw new Error('Invalid connection with unknown node.');
       }
 
+      // This happens for context input nodes!
       const nodeInputType = nodeTypes.get(inputNode.type);
       if (!nodeInputType) {
-        throw new Error('Unknown node type!');
+        return {
+          name: inputSocketName,
+          output: emptyConnection
+        };
       }
 
       const inputs = getInputInformation({
