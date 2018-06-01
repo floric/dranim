@@ -204,9 +204,48 @@ describe('Nodes', () => {
     expect(nrOfNodes).toBe(0);
   });
 
+  test('should throw error when deleting node with unknown id', async () => {
+    try {
+      await deleteNode(db, VALID_OBJECT_ID);
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err).toEqual(new Error('Node does not exist'));
+    }
+  });
+
+  test('should throw error when deleting context type node', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const newRootNode = await createNode(
+      db,
+      EditEntriesNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+    const allNodes = await getAllNodes(db, ws.id);
+
+    const contextNodes = allNodes.filter(
+      n => n.type !== EditEntriesNodeDef.name
+    );
+
+    await Promise.all(
+      contextNodes.map(async c => {
+        try {
+          await deleteNode(db, c.id);
+          throw NeverGoHereError;
+        } catch (err) {
+          expect(err).toEqual(
+            new Error('Must not delete context nodes separately')
+          );
+        }
+      })
+    );
+  });
+
   test('should not delete unknown node', async () => {
     try {
-      const ws = await deleteNode(db, 'abc');
+      await deleteNode(db, 'abc');
       throw NeverGoHereError;
     } catch (err) {
       expect(err).toEqual(new Error('Invalid ID'));

@@ -29,7 +29,7 @@ export const updateStage = (
   const nodeMap: Map<string, Konva.Group> = new Map();
   const socketsMap: Map<string, Konva.Group> = new Map();
 
-  // render borders for context as well as sockets based on fnInputs/fnOutputs
+  // TODO render borders for context as well as sockets based on fnInputs/fnOutputs
   // and add sockets to socketsmap
 
   const nodesLayer = createNodesLayer(
@@ -67,7 +67,7 @@ const createNodesLayer = (
   nodes
     .filter(
       n =>
-        n.contextIds === state.contextIds &&
+        JSON.stringify(n.contextIds) === JSON.stringify(state.contextIds) &&
         n.type !== ContextNodeType.INPUT &&
         n.type !== ContextNodeType.OUTPUT
     )
@@ -81,7 +81,7 @@ const createNodesLayer = (
   nodes
     .filter(
       n =>
-        n.contextIds === state.contextIds &&
+        JSON.stringify(n.contextIds) === JSON.stringify(state.contextIds) &&
         (n.type === ContextNodeType.INPUT || n.type === ContextNodeType.OUTPUT)
     )
     .forEach(n => {
@@ -112,17 +112,21 @@ const createConnectionsLayer = (
   const { connections } = server;
   const { openConnection } = state;
 
-  connections.filter(c => c.contextIds === state.contextIds).forEach(c => {
-    const line = renderConnection(
-      c,
-      stage,
-      connsLayer,
-      socketsMap,
-      nodeMap,
-      changeState
-    );
-    connsLayer.add(line);
-  });
+  connections
+    .filter(
+      c => JSON.stringify(c.contextIds) === JSON.stringify(state.contextIds)
+    )
+    .forEach(c => {
+      const line = renderConnection(
+        c,
+        stage,
+        connsLayer,
+        socketsMap,
+        nodeMap,
+        changeState
+      );
+      connsLayer.add(line);
+    });
 
   if (openConnection && openConnection.outputs) {
     openConnection.outputs.forEach(c => {

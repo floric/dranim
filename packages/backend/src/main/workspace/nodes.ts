@@ -70,7 +70,7 @@ export const createNode = async (
     const nestedContextIds = [...contextNodeIds, newNodeId];
     const contextNodes = [ContextNodeType.INPUT, ContextNodeType.OUTPUT].map(
       contextType => ({
-        x: 100,
+        x: contextType === ContextNodeType.INPUT ? 100 : 600,
         y: 100,
         outputs: [],
         inputs: [],
@@ -93,6 +93,18 @@ export const createNode = async (
 export const deleteNode = async (db: Db, id: string) => {
   if (!ObjectID.isValid(id)) {
     throw new Error('Invalid ID');
+  }
+
+  const nodeToDelete = await getNode(db, id);
+  if (!nodeToDelete) {
+    throw new Error('Node does not exist');
+  }
+
+  if (
+    nodeToDelete.type === ContextNodeType.INPUT ||
+    nodeToDelete.type === ContextNodeType.OUTPUT
+  ) {
+    throw new Error('Must not delete context nodes separately');
   }
 
   const connectionsCollection = getConnectionsCollection(db);

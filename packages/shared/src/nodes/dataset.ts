@@ -86,10 +86,6 @@ export interface DatasetOutputNodeResults {
   dataset: DatasetRef;
 }
 
-export interface DatasetOutputNodeForm {
-  name: string;
-}
-
 export const DatasetOutputNodeDef: NodeDef<DatasetOutputNodeInputs, {}> = {
   name: 'Dataset Output',
   inputs: {

@@ -217,9 +217,7 @@ export class ExplorerEditor extends React.Component<
                     </AsyncButton>
                   )}
                   {nodeType &&
-                    !!nodeType.contextFn &&
-                    contextIds.length > 0 &&
-                    contextIds[contextIds.length - 1] !== selectedNodeId && (
+                    !!nodeType.contextFn && (
                       <AsyncButton
                         icon="plus-square"
                         onClick={this.handleEnterContext}
