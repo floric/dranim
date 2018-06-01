@@ -20,7 +20,7 @@ const Node = `
     y: Float!
     inputs: [SocketValue!]!
     outputs: [SocketValue!]!
-    contextId: String
+    contextIds: [String!]!
     state: String!
     form: [FormValue!]!
     workspace: Workspace!
@@ -55,7 +55,7 @@ const Connection = `
     id: String!
     from: Socket
     to: Socket
-    contextId: String
+    contextIds: [String!]!
     workspace: Workspace!
   }
 `;

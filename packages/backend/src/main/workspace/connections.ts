@@ -48,7 +48,10 @@ export const createConnection = async (
     throw new Error('Nodes live in different workspaces!');
   }
 
-  if (inputNode.contextId !== outputNode.contextId) {
+  if (
+    inputNode.contextIds[inputNode.contextIds.length - 1] !==
+    outputNode.contextIds[outputNode.contextIds.length - 1]
+  ) {
     throw new Error('Nodes live in different contexts!');
   }
 
@@ -60,7 +63,7 @@ export const createConnection = async (
   const insertRes = await collection.insertOne({
     from,
     to,
-    contextId: inputNode!.contextId,
+    contextIds: inputNode!.contextIds,
     workspaceId: inputNode!.workspaceId
   });
 

@@ -47,7 +47,7 @@ describe('Connections', () => {
       db,
       NumberInputNodeDef.name,
       ws.id,
-      null,
+      [],
       0,
       0
     );
@@ -55,7 +55,7 @@ describe('Connections', () => {
       db,
       NumberOutputNodeDef.name,
       ws.id,
-      null,
+      [],
       0,
       0
     );
@@ -69,7 +69,7 @@ describe('Connections', () => {
     expect(newConn.from).toEqual(fromSocket);
     expect(newConn.to).toEqual(toSocket);
     expect(newConn.workspaceId).toBe(ws.id);
-    expect(newConn.contextId).toBe(null);
+    expect(newConn.contextIds).toEqual([]);
 
     const res = await deleteConnection(db, newConn.id);
     expect(res).toBe(true);
@@ -85,7 +85,7 @@ describe('Connections', () => {
       db,
       NumberInputNodeDef.name,
       ws.id,
-      null,
+      [],
       0,
       0
     );
@@ -93,7 +93,7 @@ describe('Connections', () => {
       db,
       NumberInputNodeDef.name,
       ws.id,
-      contextNode.id,
+      [contextNode.id],
       0,
       0
     );
@@ -101,7 +101,7 @@ describe('Connections', () => {
       db,
       NumberOutputNodeDef.name,
       ws.id,
-      contextNode.id,
+      [contextNode.id],
       0,
       0
     );
@@ -115,7 +115,7 @@ describe('Connections', () => {
     expect(newConn.from).toEqual(fromSocket);
     expect(newConn.to).toEqual(toSocket);
     expect(newConn.workspaceId).toBe(ws.id);
-    expect(newConn.contextId).toBe(contextNode.id);
+    expect(newConn.contextIds).toEqual([contextNode.id]);
   });
 
   test('should find cycle and prevent connection creation', async () => {
@@ -125,7 +125,7 @@ describe('Connections', () => {
       db,
       NumberInputNodeDef.name,
       ws.id,
-      null,
+      [],
       0,
       0
     );
@@ -133,7 +133,7 @@ describe('Connections', () => {
       db,
       NumberOutputNodeDef.name,
       ws.id,
-      null,
+      [],
       0,
       0
     );
@@ -159,7 +159,7 @@ describe('Connections', () => {
       db,
       NumberInputNodeDef.name,
       ws.id,
-      null,
+      [],
       0,
       0
     );
@@ -186,7 +186,7 @@ describe('Connections', () => {
       db,
       NumberInputNodeDef.name,
       wsA.id,
-      null,
+      [],
       0,
       0
     );
@@ -194,7 +194,7 @@ describe('Connections', () => {
       db,
       NumberInputNodeDef.name,
       wsB.id,
-      null,
+      [],
       0,
       0
     );
@@ -219,7 +219,7 @@ describe('Connections', () => {
       db,
       NumberInputNodeDef.name,
       ws.id,
-      null,
+      [],
       0,
       0
     );
@@ -228,7 +228,7 @@ describe('Connections', () => {
       db,
       NumberInputNodeDef.name,
       ws.id,
-      null,
+      [],
       0,
       0
     );
@@ -236,7 +236,7 @@ describe('Connections', () => {
       db,
       NumberInputNodeDef.name,
       ws.id,
-      contextNode.id,
+      [contextNode.id],
       0,
       0
     );

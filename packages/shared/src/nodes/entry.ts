@@ -1,5 +1,5 @@
 import { NodeDef } from '../nodes';
-import { DataSocket, EntrySocket } from '../sockets';
+import { BooleanSocket, DataSocket, EntrySocket } from '../sockets';
 import { DatasetRef } from './dataset';
 
 export interface EntryRef {
@@ -41,6 +41,39 @@ export const EditEntriesNodeDef: NodeDef<
     },
     outputs: {
       entry: EntrySocket('Entry')
+    }
+  },
+  path: ['Entry'],
+  keywords: []
+};
+
+export interface FilterEntriesFnInputs {
+  entry: EntryRef;
+}
+
+export interface FilterEntriesFnOutputs {
+  keepEntry: boolean;
+}
+
+export const FilterEntriesNodeDef: NodeDef<
+  ForEachEntryNodeInputs,
+  ForEachEntryNodeOutputs,
+  FilterEntriesFnInputs,
+  FilterEntriesFnOutputs
+> = {
+  name: 'Filter Entries',
+  inputs: {
+    dataset: DataSocket('Dataset')
+  },
+  outputs: {
+    dataset: DataSocket('Dataset')
+  },
+  contextFn: {
+    inputs: {
+      entry: EntrySocket('Entry')
+    },
+    outputs: {
+      keepEntry: BooleanSocket('Keep Entry')
     }
   },
   path: ['Entry'],

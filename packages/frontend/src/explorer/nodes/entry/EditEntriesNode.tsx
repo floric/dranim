@@ -1,17 +1,17 @@
 import * as React from 'react';
 
 import {
-  ForEachEntryNodeDef,
+  EditEntriesNodeDef,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs
 } from '@masterthesis/shared';
 
 import { ClientNodeDef } from '../AllNodes';
 
-export const ForEachEntryNode: ClientNodeDef<
+export const EditEntriesNode: ClientNodeDef<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs
 > = {
-  name: ForEachEntryNodeDef.name,
+  name: EditEntriesNodeDef.name,
   renderFormItems: () => <p />
 };

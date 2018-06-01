@@ -1,4 +1,9 @@
-import { NodeInstance, NodeState, parseNodeForm } from '@masterthesis/shared';
+import {
+  ContextNodeType,
+  NodeInstance,
+  NodeState,
+  parseNodeForm
+} from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { serverNodeTypes } from '../nodes/AllNodes';
@@ -15,7 +20,7 @@ export const createNode = async (
   db: Db,
   type: string,
   workspaceId: string,
-  contextNodeId: string | null,
+  contextNodeIds: Array<string>,
   x: number,
   y: number
 ): Promise<NodeInstance> => {
@@ -24,12 +29,16 @@ export const createNode = async (
     throw new Error('Name must not be empty');
   }
 
-  if (!serverNodeTypes.has(type)) {
+  const nodeType = serverNodeTypes.get(type);
+  if (!nodeType) {
     throw new Error('Invalid node type');
   }
 
-  if (contextNodeId) {
-    const contextNode = await getNode(db, contextNodeId);
+  if (contextNodeIds.length > 0) {
+    const contextNode = await getNode(
+      db,
+      contextNodeIds[contextNodeIds.length - 1]
+    );
     if (!contextNode) {
       throw new Error('Unknown context node');
     }
@@ -45,7 +54,7 @@ export const createNode = async (
     y,
     outputs: [],
     inputs: [],
-    contextId: contextNodeId,
+    contextIds: contextNodeIds,
     workspaceId,
     type
   });
@@ -54,11 +63,39 @@ export const createNode = async (
     throw new Error('Writing node failed');
   }
 
-  const newItem = res.ops[0];
+  const newNodeId = res.ops[0]._id.toHexString();
+
+  const hasContextFn = !!nodeType.contextFn;
+  if (hasContextFn) {
+    const nestedContextIds = [...contextNodeIds, newNodeId];
+    const contextNodes = [
+      {
+        x: 100,
+        y: 100,
+        outputs: [],
+        inputs: [],
+        contextIds: nestedContextIds,
+        workspaceId,
+        type: ContextNodeType.INPUT
+      },
+      {
+        x: 600,
+        y: 100,
+        outputs: [],
+        inputs: [],
+        contextIds: nestedContextIds,
+        workspaceId,
+        type: ContextNodeType.OUTPUT
+      }
+    ];
+
+    await collection.insertMany(contextNodes);
+  }
+
   return {
-    id: newItem._id.toHexString(),
+    id: newNodeId,
     form: [],
-    ...newItem
+    ...res.ops[0]
   };
 };
 
@@ -68,12 +105,22 @@ export const deleteNode = async (db: Db, id: string) => {
   }
 
   const connectionsCollection = getConnectionsCollection(db);
-  await connectionsCollection.deleteMany({ 'from.nodeId': id });
-  await connectionsCollection.deleteMany({ 'to.nodeId': id });
+  await connectionsCollection.deleteMany({
+    $or: [
+      { 'from.nodeId': id },
+      { 'to.nodeId': id },
+      { contextIds: { $elemMatch: { $eq: id } } }
+    ]
+  });
 
   const nodesCollection = getNodesCollection(db);
-  const res = await nodesCollection.deleteOne({ _id: new ObjectID(id) });
-  if (res.deletedCount !== 1) {
+  const res = await nodesCollection.deleteMany({
+    $or: [
+      { _id: new ObjectID(id) },
+      { contextIds: { $elemMatch: { $eq: id } } }
+    ]
+  });
+  if (!res || !res.deletedCount || res.deletedCount < 1) {
     throw new Error('Deleting node failed');
   }
 

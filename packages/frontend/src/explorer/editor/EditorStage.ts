@@ -1,9 +1,9 @@
-import { NodeState } from '@masterthesis/shared';
+import { ContextNodeType } from '@masterthesis/shared';
 import * as Konva from 'konva';
 
 import { ExplorerEditorProps, ExplorerEditorState } from '../ExplorerEditor';
 import { renderConnection } from './Connections';
-import { renderNode } from './Nodes';
+import { renderContextNode, renderNode } from './Nodes';
 
 export const EXPLORER_CONTAINER = 'explcontainer';
 
@@ -64,11 +64,37 @@ const createNodesLayer = (
 
   const { nodes } = server;
 
-  nodes.filter(n => n.contextId === state.contextId).forEach(n => {
-    const nodeGroup = renderNode(n, server, state, changeState, socketsMap);
-    nodesLayer.add(nodeGroup);
-    nodeMap.set(n.id, nodeGroup);
-  });
+  nodes
+    .filter(
+      n =>
+        n.contextIds === state.contextIds &&
+        n.type !== ContextNodeType.INPUT &&
+        n.type !== ContextNodeType.OUTPUT
+    )
+    .forEach(n => {
+      const nodeGroup = renderNode(n, server, state, changeState, socketsMap);
+      nodesLayer.add(nodeGroup);
+      nodeMap.set(n.id, nodeGroup);
+    });
+
+  // render context nodes
+  nodes
+    .filter(
+      n =>
+        n.contextIds === state.contextIds &&
+        (n.type === ContextNodeType.INPUT || n.type === ContextNodeType.OUTPUT)
+    )
+    .forEach(n => {
+      const nodeGroup = renderContextNode(
+        n,
+        server,
+        state,
+        changeState,
+        socketsMap
+      );
+      nodesLayer.add(nodeGroup);
+      nodeMap.set(n.id, nodeGroup);
+    });
 
   return nodesLayer;
 };
@@ -86,7 +112,7 @@ const createConnectionsLayer = (
   const { connections } = server;
   const { openConnection } = state;
 
-  connections.filter(c => c.contextId === state.contextId).forEach(c => {
+  connections.filter(c => c.contextIds === state.contextIds).forEach(c => {
     const line = renderConnection(
       c,
       stage,

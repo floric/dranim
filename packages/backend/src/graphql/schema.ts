@@ -95,7 +95,7 @@ export const Mutation = `
     createNode (
       type: String!
       workspaceId: String!
-      contextId: String
+      contextIds: [String!]!
       x: Float!
       y: Float!
     ): Node!

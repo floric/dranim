@@ -1,4 +1,3 @@
-import { FilterMethodsPayload } from '../filters';
 import { NodeDef } from '../nodes';
 import { DataSocket } from '../sockets';
 
@@ -98,31 +97,5 @@ export const DatasetOutputNodeDef: NodeDef<DatasetOutputNodeInputs, {}> = {
   },
   outputs: {},
   path: ['Dataset'],
-  keywords: []
-};
-
-export interface FilterDatasetNodeInputs {
-  dataset: DatasetRef;
-}
-
-export interface FilterDatasetNodeOutputs {
-  dataset: DatasetRef;
-}
-
-// tslint:disable-next-line:no-empty-interface
-export interface FilterDatasetNodeForm extends FilterMethodsPayload {}
-
-export const FilterDatasetNodeDef: NodeDef<
-  FilterDatasetNodeInputs,
-  FilterDatasetNodeOutputs
-> = {
-  name: 'Filter Dataset',
-  inputs: {
-    dataset: DataSocket('Dataset')
-  },
-  outputs: {
-    dataset: DataSocket('Dataset')
-  },
-  path: ['Dataset', 'Filters'],
   keywords: []
 };

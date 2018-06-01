@@ -8,6 +8,11 @@ export enum NodeState {
   INVALID = 'INVALID'
 }
 
+export enum ContextNodeType {
+  INPUT = 'ContextInputNode',
+  OUTPUT = 'ContextOutputNode'
+}
+
 export interface FormValue {
   name: string;
   value: string;
@@ -31,6 +36,7 @@ export interface NodeDef<
   };
   path: Array<string>;
   keywords: Array<string>;
+  isContextNode?: boolean;
 }
 
 export interface NodeExecutionResult<NodeOutputs, NodeResults = {}> {
@@ -65,7 +71,7 @@ export interface NodeInstance {
   y: number;
   state: NodeState;
   workspaceId: string;
-  contextId: string | null;
+  contextIds: Array<string>;
   outputs: Array<ConnectionDescription>;
   inputs: Array<ConnectionDescription>;
   type: string;
@@ -79,7 +85,7 @@ export interface SocketInstance {
 
 export interface ConnectionInstance extends ConnectionWithoutId {
   id: string;
-  contextId: string | null;
+  contextIds: Array<string>;
   workspaceId: string;
 }
 

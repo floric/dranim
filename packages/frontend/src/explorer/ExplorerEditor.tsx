@@ -33,7 +33,7 @@ export interface ExplorerEditorProps {
     type: string,
     x: number,
     y: number,
-    contextId: string | null
+    contextIds: Array<string>
   ) => Promise<any>;
   onNodeDelete: (id: string) => Promise<any>;
   onNodeUpdate: (id: string, x: number, y: number) => Promise<any>;
@@ -59,7 +59,7 @@ export interface OpenConnection {
 export interface ExplorerEditorState {
   openConnection: OpenConnection | null;
   selectedNodeId: string | null;
-  contextId: string | null;
+  contextIds: Array<string>;
 }
 
 export class ExplorerEditor extends React.Component<
@@ -72,7 +72,7 @@ export class ExplorerEditor extends React.Component<
     this.setState({
       openConnection: null,
       selectedNodeId: null,
-      contextId: null
+      contextIds: []
     });
   }
 
@@ -123,18 +123,27 @@ export class ExplorerEditor extends React.Component<
     const x = canvas ? canvas.clientWidth / 2 - NODE_WIDTH / 2 : 50;
     const y = canvas ? canvas.clientHeight / 2 : 50;
 
-    this.props.onNodeCreate(type, x, y, this.state.contextId);
+    this.props.onNodeCreate(type, x, y, this.state.contextIds);
   };
 
-  private handleEnterFunction = async () => {
+  private handleEnterContext = async () => {
     if (!this.state.selectedNodeId) {
       return;
     }
 
-    await this.setState({ contextId: this.state.selectedNodeId });
+    await this.setState({
+      contextIds: [...this.state.contextIds, this.state.selectedNodeId],
+      selectedNodeId: null
+    });
   };
 
-  private handleLeaveFunction = async () => this.setState({ contextId: null });
+  private handleLeaveContext = async () =>
+    this.setState({
+      contextIds: this.state.contextIds.slice(
+        0,
+        this.state.contextIds.length - 1
+      )
+    });
 
   private handleSave = (form: WrappedFormUtils, nodeId: string) => {
     const changedNames = Object.keys(form.getFieldsValue());
@@ -151,7 +160,7 @@ export class ExplorerEditor extends React.Component<
   };
 
   public render() {
-    const { selectedNodeId, contextId } = this.state;
+    const { selectedNodeId, contextIds } = this.state;
     const { nodes } = this.props;
 
     const node = selectedNodeId
@@ -209,20 +218,21 @@ export class ExplorerEditor extends React.Component<
                   )}
                   {nodeType &&
                     !!nodeType.contextFn &&
-                    contextId !== selectedNodeId && (
+                    contextIds.length > 0 &&
+                    contextIds[contextIds.length - 1] !== selectedNodeId && (
                       <AsyncButton
                         icon="plus-square"
-                        onClick={this.handleEnterFunction}
+                        onClick={this.handleEnterContext}
                       >
-                        Enter Selected
+                        Enter Node
                       </AsyncButton>
                     )}
-                  {contextId !== null && (
+                  {contextIds.length > 0 && (
                     <AsyncButton
                       icon="minus-square"
-                      onClick={this.handleLeaveFunction}
+                      onClick={this.handleLeaveContext}
                     >
-                      Return to Root
+                      Leave Node
                     </AsyncButton>
                   )}
                   <AsyncButton

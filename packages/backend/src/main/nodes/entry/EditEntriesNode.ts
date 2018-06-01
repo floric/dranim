@@ -1,15 +1,15 @@
 import {
-  ForEachEntryNodeDef,
+  EditEntriesNodeDef,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
   ServerNodeDef
 } from '@masterthesis/shared';
 
-export const ForEachEntryNode: ServerNodeDef<
+export const EditEntriesNode: ServerNodeDef<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs
 > = {
-  name: ForEachEntryNodeDef.name,
+  name: EditEntriesNodeDef.name,
   onServerExecution: async (form, inputs, db) => {
     return {
       outputs: {

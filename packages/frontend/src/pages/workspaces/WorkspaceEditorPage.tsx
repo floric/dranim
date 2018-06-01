@@ -67,14 +67,14 @@ const CREATE_NODE = gql`
   mutation createNode(
     $type: String!
     $workspaceId: String!
-    $contextId: String
+    $contextIds: [String!]!
     $x: Float!
     $y: Float!
   ) {
     createNode(
       type: $type
       workspaceId: $workspaceId
-      contextId: $contextId
+      contextIds: $contextIds
       x: $x
       y: $y
     ) {
@@ -199,7 +199,7 @@ export default class WorkspaceEditorPage extends React.Component<
                                             type,
                                             x,
                                             y,
-                                            contextId
+                                            contextIds
                                           ) =>
                                             tryOperation({
                                               op: () =>
@@ -208,9 +208,7 @@ export default class WorkspaceEditorPage extends React.Component<
                                                     type,
                                                     x,
                                                     y,
-                                                    contextId: contextId
-                                                      ? contextId
-                                                      : null,
+                                                    contextIds,
                                                     workspaceId: id
                                                   }
                                                 }),
