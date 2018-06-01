@@ -12,6 +12,7 @@ export const initWorkspaceDb = async (db: Db) => {
   const nodesCollection = getNodesCollection(db);
   await connCollection.createIndex('workspaceId');
   await nodesCollection.createIndex('workspaceId');
+  return true;
 };
 
 export const getWorkspacesCollection = (

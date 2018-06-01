@@ -3,7 +3,9 @@ import {
   NodeState,
   NumberInputNodeDef,
   NumberOutputNodeDef,
-  StringInputNodeDef
+  StringInputNodeDef,
+  EditEntriesNodeDef,
+  ContextNodeType
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
@@ -256,6 +258,33 @@ describe('Nodes', () => {
     } catch (err) {
       expect(err.message).toBe('Invalid node type');
     }
+  });
+
+  test('should create node and nested context nodes', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const contextNode = await createNode(
+      db,
+      EditEntriesNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+
+    const allNodes = await getAllNodes(db, ws.id);
+    expect(allNodes.length).toBe(3);
+
+    const rootNodes = allNodes.filter(n => n.contextIds.length === 0);
+    expect(rootNodes.length).toBe(1);
+
+    const contextNodes = allNodes.filter(n => n.contextIds.length === 1);
+    expect(contextNodes.length).toBe(2);
+    expect(
+      contextNodes.find(n => n.type === ContextNodeType.OUTPUT).contextIds
+    ).toEqual([rootNodes[0].id]);
+    expect(
+      contextNodes.find(n => n.type === ContextNodeType.INPUT).contextIds
+    ).toEqual([rootNodes[0].id]);
   });
 
   test('should delete all context nodes and connections', async () => {

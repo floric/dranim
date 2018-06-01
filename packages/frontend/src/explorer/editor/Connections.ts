@@ -32,7 +32,6 @@ export const renderConnection = (
 ) => {
   const fromSocket = c.from;
   const toSocket = c.to;
-  // TODO don't render connection if this connection is part of other context
 
   const outputSocket = getSocket(fromSocket, SocketType.OUTPUT, socketsMap);
   const inputSocket = getSocket(toSocket, SocketType.INPUT, socketsMap);

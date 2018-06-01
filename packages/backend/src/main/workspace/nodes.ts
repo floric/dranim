@@ -68,26 +68,17 @@ export const createNode = async (
   const hasContextFn = !!nodeType.contextFn;
   if (hasContextFn) {
     const nestedContextIds = [...contextNodeIds, newNodeId];
-    const contextNodes = [
-      {
+    const contextNodes = [ContextNodeType.INPUT, ContextNodeType.OUTPUT].map(
+      contextType => ({
         x: 100,
         y: 100,
         outputs: [],
         inputs: [],
         contextIds: nestedContextIds,
         workspaceId,
-        type: ContextNodeType.INPUT
-      },
-      {
-        x: 600,
-        y: 100,
-        outputs: [],
-        inputs: [],
-        contextIds: nestedContextIds,
-        workspaceId,
-        type: ContextNodeType.OUTPUT
-      }
-    ];
+        type: contextType
+      })
+    );
 
     await collection.insertMany(contextNodes);
   }
