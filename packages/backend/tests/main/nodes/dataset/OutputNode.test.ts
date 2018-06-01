@@ -31,6 +31,7 @@ describe('DatasetOutputNode', () => {
     expect(DatasetOutputNode.name).toBe(DatasetOutputNodeDef.name);
     expect(DatasetOutputNode.isInputValid).toBeDefined();
     expect(DatasetOutputNode.isFormValid).toBeUndefined();
+    expect(DatasetOutputNodeDef.isOutputNode).toBe(true);
   });
 
   test('should have valid input', async () => {

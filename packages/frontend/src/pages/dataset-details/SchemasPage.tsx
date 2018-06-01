@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Dataset } from '@masterthesis/shared';
+import { Dataset, Colors } from '@masterthesis/shared';
 import { Card, Col, Row, Table, Tag } from 'antd';
 import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
@@ -50,13 +50,16 @@ export class DataSchemas extends React.Component<DataSchemasProps, {}> {
         title: 'Name',
         dataIndex: 'key',
         key: 'key',
-        render: (name, record) =>
-          record.unique === true ? <strong>{name}</strong> : name
+        render: (name, { unique }) =>
+          unique === true ? <strong>{name}</strong> : name
       },
       {
         title: 'Type',
         dataIndex: 'type',
-        key: 'type'
+        key: 'type',
+        render: (_, record) => (
+          <Tag color={Colors[record.type]}>{record.type}</Tag>
+        )
       },
       {
         title: 'Fallback',
@@ -67,10 +70,10 @@ export class DataSchemas extends React.Component<DataSchemasProps, {}> {
         title: 'Properties',
         dataIndex: 'properties',
         key: 'properties',
-        render: (_, record) => (
+        render: (_, { unique, required }) => (
           <>
-            {record.unique && <Tag>Unique</Tag>}
-            {record.required && <Tag>Required</Tag>}
+            {unique && <Tag>Unique</Tag>}
+            {required && <Tag>Required</Tag>}
           </>
         )
       }

@@ -7,6 +7,7 @@ describe('StringOutputNode', () => {
     expect(StringOutputNode.name).toBe(StringOutputNodeDef.name);
     expect(StringOutputNode.isFormValid).toBeUndefined();
     expect(StringOutputNode.isInputValid).toBeUndefined();
+    expect(StringOutputNodeDef.isOutputNode).toBe(true);
   });
 
   test('should get output value from input', async () => {

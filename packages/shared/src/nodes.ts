@@ -34,6 +34,7 @@ export interface NodeDef<
     inputs: SocketDefs<FunctionInputs>;
     outputs: SocketDefs<FunctionOutputs>;
   };
+  isOutputNode?: boolean;
   path: Array<string>;
   keywords: Array<string>;
   isContextNode?: boolean;

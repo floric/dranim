@@ -75,3 +75,9 @@ export const EntrySocket = (name: string): SocketDef => ({
   meta: { content: {}, isPresent: false },
   displayName: name
 });
+
+export const DateSocket = (name: string): SocketDef => ({
+  dataType: DataType.DATE,
+  meta: { content: {}, isPresent: false },
+  displayName: name
+});

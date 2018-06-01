@@ -7,6 +7,7 @@ describe('NumberOutputNode', () => {
     expect(NumberOutputNode.name).toBe(NumberOutputNodeDef.name);
     expect(NumberOutputNode.isFormValid).toBeUndefined();
     expect(NumberOutputNode.isInputValid).toBeDefined();
+    expect(NumberOutputNodeDef.isOutputNode).toBe(true);
   });
 
   test('should check valid int number', async () => {

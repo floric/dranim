@@ -32,6 +32,7 @@ export const StringOutputNodeDef: NodeDef<StringOutputNodeInputs, {}> = {
   inputs: {
     string: StringSocket('String')
   },
+  isOutputNode: true,
   outputs: {},
   keywords: [],
   path: ['String']

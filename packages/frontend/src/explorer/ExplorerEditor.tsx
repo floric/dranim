@@ -192,18 +192,20 @@ export class ExplorerEditor extends React.Component<
               style={{ marginBottom: 12 }}
             >
               <Row>
-                {node && (
-                  <Col xs={16}>
-                    <h4>Properties</h4>
-                    {renderFormItems ? (
-                      <PropertiesForm
-                        renderFormItems={renderFormItems}
-                        handleSubmit={this.handleSave}
-                        context={{ state: this.props, node }}
-                      />
-                    ) : null}
-                  </Col>
-                )}
+                <Col xs={16}>
+                  {node && (
+                    <>
+                      <h4>Properties</h4>
+                      {renderFormItems ? (
+                        <PropertiesForm
+                          renderFormItems={renderFormItems}
+                          handleSubmit={this.handleSave}
+                          context={{ state: this.props, node }}
+                        />
+                      ) : null}
+                    </>
+                  )}
+                </Col>
                 <Col xs={8}>
                   <h4>Actions</h4>
                   {node && (
@@ -216,23 +218,48 @@ export class ExplorerEditor extends React.Component<
                       Delete Selected
                     </AsyncButton>
                   )}
-                  {nodeType &&
-                    !!nodeType.contextFn && (
-                      <AsyncButton
-                        icon="plus-square"
-                        onClick={this.handleEnterContext}
-                      >
-                        Enter Node
-                      </AsyncButton>
-                    )}
-                  {contextIds.length > 0 && (
+                </Col>
+              </Row>
+            </Card>
+          </Col>
+          <Col xs={24} md={12} xl={6}>
+            <Card bordered={false} title="Editor" style={{ marginBottom: 12 }}>
+              <h4>Properties</h4>
+              <Row>
+                <Col>
+                  <TreeSelect
+                    ref={this.selectNodeRef}
+                    allowClear
+                    showSearch
+                    filterTreeNode={filterTreeNode}
+                    treeData={nodeTypesTree}
+                    style={{ width: 200 }}
+                    placeholder="Add Node"
+                    onSelect={this.handleSelectCreateNode}
+                  />
+                </Col>
+                {contextIds.length > 0 && (
+                  <Col>
                     <AsyncButton
                       icon="minus-square"
                       onClick={this.handleLeaveContext}
                     >
                       Leave Node
                     </AsyncButton>
+                  </Col>
+                )}
+                {nodeType &&
+                  !!nodeType.contextFn && (
+                    <Col>
+                      <AsyncButton
+                        icon="plus-square"
+                        onClick={this.handleEnterContext}
+                      >
+                        Enter Node
+                      </AsyncButton>
+                    </Col>
                   )}
+                <Col>
                   <AsyncButton
                     icon="rocket"
                     onClick={this.handleStartCalulcation}
@@ -241,20 +268,6 @@ export class ExplorerEditor extends React.Component<
                   </AsyncButton>
                 </Col>
               </Row>
-            </Card>
-          </Col>
-          <Col xs={24} md={12} xl={6}>
-            <Card bordered={false} title="Editor" style={{ marginBottom: 12 }}>
-              <TreeSelect
-                ref={this.selectNodeRef}
-                allowClear
-                showSearch
-                filterTreeNode={filterTreeNode}
-                treeData={nodeTypesTree}
-                style={{ width: 200 }}
-                placeholder="Add Node"
-                onSelect={this.handleSelectCreateNode}
-              />
             </Card>
           </Col>
         </Row>

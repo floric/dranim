@@ -121,9 +121,14 @@ class CreateValueSchemaFormImpl extends React.Component<
               style={{ width: 120 }}
             >
               <Select.OptGroup label="Primitive">
-                {Object.keys(DataType).map(t => (
-                  <Select.Option value={DataType[t]} key={`option-${t}`}>
-                    {DataType[t]}
+                {[
+                  DataType.STRING,
+                  DataType.NUMBER,
+                  DataType.BOOLEAN,
+                  DataType.DATE
+                ].map(type => (
+                  <Select.Option value={type} key={`option-${type}`}>
+                    {type}
                   </Select.Option>
                 ))}
               </Select.OptGroup>

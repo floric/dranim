@@ -101,7 +101,7 @@ describe('Start Process', () => {
           x: 0,
           y: 0
         }
-      ].map(n => createNode(db, n.type, n.workspaceId, n.x, n.y))
+      ].map(n => createNode(db, n.type, n.workspaceId, [], n.x, n.y))
     );
 
     const newProcess = await startCalculation(db, ws.id, true);
@@ -141,7 +141,7 @@ describe('Start Process', () => {
           x: 0,
           y: 0
         }
-      ].map(n => createNode(db, n.type, n.workspaceId, n.x, n.y))
+      ].map(n => createNode(db, n.type, n.workspaceId, [], n.x, n.y))
     );
 
     const newProcess = await startCalculation(db, ws.id, true);

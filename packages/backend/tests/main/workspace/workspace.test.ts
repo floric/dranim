@@ -16,8 +16,8 @@ import {
   deleteWorkspace,
   getAllWorkspaces,
   getWorkspace,
-  updateWorkspace,
-  initWorkspaceDb
+  initWorkspaceDb,
+  updateWorkspace
 } from '../../../src/main/workspace/workspace';
 import { getTestMongoDb, NeverGoHereError } from '../../test-utils';
 

@@ -91,6 +91,7 @@ export const DatasetOutputNodeDef: NodeDef<DatasetOutputNodeInputs, {}> = {
   inputs: {
     dataset: DataSocket('Dataset')
   },
+  isOutputNode: true,
   outputs: {},
   path: ['Dataset'],
   keywords: []

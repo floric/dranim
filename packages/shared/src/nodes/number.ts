@@ -97,6 +97,7 @@ export const NumberOutputNodeDef: NodeDef<NumberOutputNodeInputs, {}> = {
   inputs: {
     value: NumberSocket('Number')
   },
+  isOutputNode: true,
   outputs: {},
   keywords: [],
   path: ['Numbers']

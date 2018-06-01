@@ -1,11 +1,11 @@
 import {
+  ContextNodeType,
+  EditEntriesNodeDef,
   JoinDatasetsNodeDef,
   NodeState,
   NumberInputNodeDef,
   NumberOutputNodeDef,
-  StringInputNodeDef,
-  EditEntriesNodeDef,
-  ContextNodeType
+  StringInputNodeDef
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 

@@ -24,21 +24,6 @@ export const getInputNode = (
   return inputs[0].from;
 };
 
-export const getOutputNodes = (
-  socketName: string,
-  nodeId: string,
-  connections: Array<ConnectionInstance>
-) => {
-  const outputs = connections.filter(
-    n => n.from && n.from.nodeId === nodeId && n.from.name === socketName
-  );
-  if (outputs.length === 0) {
-    return null;
-  }
-
-  return outputs.map(c => c.to).filter(n => n !== null);
-};
-
 const emptyConnection = {
   content: {},
   isPresent: false
