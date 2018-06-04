@@ -19,3 +19,10 @@ export const validateDatasetId = (value: { datasetId: string } | null) => {
 
 export const validateDatasetInput = (inputs: { dataset: DatasetRef }) =>
   Promise.resolve(!!inputs.dataset && !!inputs.dataset.datasetId);
+
+export const absentDataset = {
+  content: {
+    schema: []
+  },
+  isPresent: false
+};

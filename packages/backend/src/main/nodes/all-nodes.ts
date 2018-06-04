@@ -22,5 +22,14 @@ export const serverNodeTypes: Map<string, ServerNodeDef & NodeDef> = new Map(
       n[0],
       { ...NodesMap.get(n[0])!, ...n[1] }
     ])
-    .sort((a, b) => a[0].localeCompare(b[0]))
 );
+
+export const absentMeta = {
+  content: {},
+  isPresent: false
+};
+
+export const presentMeta = {
+  content: {},
+  isPresent: true
+};

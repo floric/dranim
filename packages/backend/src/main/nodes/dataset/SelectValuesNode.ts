@@ -15,7 +15,7 @@ import {
 } from '../../../main/workspace/dataset';
 import { getCreatedDatasetName } from '../../calculation/utils';
 import { copyTransformedToOtherDataset } from '../../workspace/entry';
-import { validateDataset, validateDatasetId } from './utils';
+import { absentDataset, validateDataset, validateDatasetId } from './utils';
 
 export const SelectValuesNode: ServerNodeDef<
   SelectValuesNodeInputs,
@@ -25,6 +25,29 @@ export const SelectValuesNode: ServerNodeDef<
   name: SelectValuesNodeDef.name,
   isInputValid: async inputs => validateDatasetId(inputs.dataset),
   isFormValid: form => Promise.resolve(!!form.values && form.values.length > 0),
+  onMetaExecution: async (form, inputs, db) => {
+    if (!form.values || form.values.length === 0) {
+      return { dataset: absentDataset };
+    }
+
+    if (!inputs.dataset || !inputs.dataset.datasetId) {
+      return { dataset: absentDataset };
+    }
+
+    const ds = await getDataset(db, inputs.dataset.datasetId);
+    if (!ds) {
+      return { dataset: absentDataset };
+    }
+
+    return {
+      dataset: {
+        content: {
+          schema: ds.valueschemas.filter(n => form.values!.includes(n.name))
+        },
+        isPresent: true
+      }
+    };
+  },
   onServerExecution: async (form, inputs, db) => {
     await validateDataset(inputs.dataset.datasetId, db);
 

@@ -1,6 +1,6 @@
 import { Db } from 'mongodb';
 
-import { SocketDefs } from './sockets';
+import { SocketDefs, SocketMetas } from './sockets';
 
 export enum NodeState {
   VALID = 'VALID',
@@ -31,18 +31,6 @@ export interface NodeDef<NodeInputs = {}, NodeOutputs = {}> {
   keywords: Array<string>;
 }
 
-export interface NodeWithContextFnDef<
-  NodeInputs = {},
-  NodeOutputs = {},
-  ContextInputs = {},
-  ContextOutputs = {}
-> extends NodeDef<NodeInputs, NodeOutputs> {
-  contextFn: {
-    inputs: SocketDefs<ContextInputs>;
-    outputs: SocketDefs<ContextOutputs>;
-  };
-}
-
 export interface NodeExecutionResult<NodeOutputs, NodeResults = {}> {
   outputs: IOValues<NodeOutputs>;
   results?: NodeResults;
@@ -62,6 +50,30 @@ export interface ServerNodeDef<
     inputs: IOValues<NodeInputs>,
     db: Db
   ) => Promise<NodeExecutionResult<NodeOutputs, NodeResults>>;
+  onMetaExecution: (
+    form: FormValues<NodeForm>,
+    inputs: IOValues<NodeInputs>,
+    db: Db
+  ) => Promise<SocketMetas<NodeOutputs>>;
+}
+
+export interface ServerNodeDefWithContextFn<
+  NodeInputs = {},
+  NodeOutputs = {},
+  NodeForm = {}
+> extends ServerNodeDef<NodeInputs, NodeOutputs, NodeForm> {
+  transformInputDefsToContextInputDefs: (
+    inputsDefs: SocketDefs<NodeInputs>,
+    inputs: SocketMetas<NodeInputs>,
+    db: Db
+  ) => Promise<SocketDefs<{}>>;
+  transformContextInputDefsToContextOutputDefs: (
+    inputsDefs: SocketDefs<NodeInputs>,
+    inputs: SocketMetas<NodeInputs>,
+    contextInputDefs: SocketDefs<{}>,
+    contextInputs: SocketMetas<{}>,
+    db: Db
+  ) => Promise<SocketDefs<{}>>;
 }
 
 export interface ConnectionDescription {
@@ -80,6 +92,7 @@ export interface NodeInstance {
   inputs: Array<ConnectionDescription>;
   type: string;
   form: Array<FormValue>;
+  meta: SocketMetas<any>;
 }
 
 export interface SocketInstance {

@@ -4,7 +4,6 @@ import {
   Colors,
   ConnectionInstance,
   Dataset,
-  hasContextFn,
   NodeInstance,
   SocketInstance
 } from '@masterthesis/shared';
@@ -167,14 +166,13 @@ export class ExplorerEditor extends React.Component<
     const node = selectedNodeId
       ? nodes.find(n => n.id === selectedNodeId)
       : null;
-    const nodeType = node ? nodeTypes.get(node.type) || null : null;
 
     const renderFormItems = node
       ? nodeTypes.get(node.type)!.renderFormItems || null
       : null;
 
-    const contextFn =
-      nodeType && hasContextFn(nodeType) ? nodeType.contextFn : null;
+    // TODO Client verification of context functions
+    const contextFn = false;
 
     if (selectedNodeId) {
       document.onkeypress = (ev: KeyboardEvent) => {

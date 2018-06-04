@@ -1,12 +1,5 @@
-import { NodeDef, NodeWithContextFnDef } from '../nodes';
-import {
-  BooleanSocket,
-  DatasetSocket,
-  DateSocket,
-  EntrySocket,
-  NumberSocket,
-  StringSocket
-} from '../sockets';
+import { NodeDef } from '../nodes';
+import { DatasetSocket } from '../sockets';
 import { DatasetRef } from './dataset';
 
 export interface EntryRef {
@@ -21,19 +14,9 @@ export interface ForEachEntryNodeOutputs {
   dataset: DatasetRef;
 }
 
-export interface EditEntriesFnInputs {
-  entry: EntryRef;
-}
-
-export interface EditEntriesFnOutputs {
-  entry: EntryRef;
-}
-
-export const EditEntriesNodeDef: NodeWithContextFnDef<
+export const EditEntriesNodeDef: NodeDef<
   ForEachEntryNodeInputs,
-  ForEachEntryNodeOutputs,
-  EditEntriesFnInputs,
-  EditEntriesFnOutputs
+  ForEachEntryNodeOutputs
 > = {
   name: 'Edit Entries',
   inputs: {
@@ -42,31 +25,13 @@ export const EditEntriesNodeDef: NodeWithContextFnDef<
   outputs: {
     dataset: DatasetSocket('Dataset')
   },
-  contextFn: {
-    inputs: {
-      entry: EntrySocket('Entry')
-    },
-    outputs: {
-      entry: EntrySocket('Entry')
-    }
-  },
   path: ['Entry'],
   keywords: []
 };
 
-export interface FilterEntriesFnInputs {
-  entry: EntryRef;
-}
-
-export interface FilterEntriesFnOutputs {
-  keepEntry: boolean;
-}
-
-export const FilterEntriesNodeDef: NodeWithContextFnDef<
+export const FilterEntriesNodeDef: NodeDef<
   ForEachEntryNodeInputs,
-  ForEachEntryNodeOutputs,
-  FilterEntriesFnInputs,
-  FilterEntriesFnOutputs
+  ForEachEntryNodeOutputs
 > = {
   name: 'Filter Entries',
   inputs: {
@@ -75,70 +40,6 @@ export const FilterEntriesNodeDef: NodeWithContextFnDef<
   outputs: {
     dataset: DatasetSocket('Dataset')
   },
-  contextFn: {
-    inputs: {
-      entry: EntrySocket('Entry')
-    },
-    outputs: {
-      keepEntry: BooleanSocket('Keep Entry')
-    }
-  },
   path: ['Entry'],
-  keywords: []
-};
-
-export interface GetterNodeInputs {
-  entry: EntryRef;
-}
-
-export interface GetterNodeOutputs<T> {
-  value: T;
-}
-
-export interface GetStringNodeOutputs extends GetterNodeOutputs<string> {}
-
-export const GetStringNodeDef: NodeDef<
-  GetterNodeInputs,
-  GetStringNodeOutputs
-> = {
-  name: 'Get String',
-  inputs: {
-    entry: EntrySocket('Entry')
-  },
-  outputs: {
-    value: StringSocket('String')
-  },
-  path: ['Entry', 'Getters'],
-  keywords: []
-};
-
-export interface GetNumberNodeOutputs extends GetterNodeOutputs<number> {}
-
-export const GetNumberNodeDef: NodeDef<
-  GetterNodeInputs,
-  GetNumberNodeOutputs
-> = {
-  name: 'Get Number',
-  inputs: {
-    entry: EntrySocket('Entry')
-  },
-  outputs: {
-    value: NumberSocket('Number')
-  },
-  path: ['Entry', 'Getters'],
-  keywords: []
-};
-
-export interface GetDateNodeOutputs extends GetterNodeOutputs<Date> {}
-
-export const GetDateNodeDef: NodeDef<GetterNodeInputs, GetStringNodeOutputs> = {
-  name: 'Get Date',
-  inputs: {
-    entry: EntrySocket('Entry')
-  },
-  outputs: {
-    value: DateSocket('Date')
-  },
-  path: ['Entry', 'Getters'],
   keywords: []
 };

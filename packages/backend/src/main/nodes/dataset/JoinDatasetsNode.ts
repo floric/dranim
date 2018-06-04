@@ -19,7 +19,7 @@ import {
 } from '../../workspace/dataset';
 import { createEntry, getEntryCollection } from '../../workspace/entry';
 import { validateNonEmptyString } from '../string/utils';
-import { validateDatasetId } from './utils';
+import { absentDataset, validateDatasetId } from './utils';
 
 export const JoinDatasetsNode: ServerNodeDef<
   JoinDatasetsNodeInputs,
@@ -31,6 +31,39 @@ export const JoinDatasetsNode: ServerNodeDef<
     validateDatasetId(inputs.datasetA) && validateDatasetId(inputs.datasetB),
   isFormValid: async form =>
     validateNonEmptyString(form.valueA) && validateNonEmptyString(form.valueB),
+  onMetaExecution: async (form, inputs, db) => {
+    if (!form.valueA || !form.valueB) {
+      return { joined: absentDataset };
+    }
+    if (
+      !inputs.datasetA ||
+      !inputs.datasetA.datasetId ||
+      !inputs.datasetB ||
+      !inputs.datasetB.datasetId
+    ) {
+      return {
+        joined: absentDataset
+      };
+    }
+
+    const [dsA, dsB] = await Promise.all([
+      getDataset(db, inputs.datasetA.datasetId),
+      getDataset(db, inputs.datasetB.datasetId)
+    ]);
+    if (!dsA || !dsB) {
+      return { joined: absentDataset };
+    }
+
+    // TODO implement special key transform to support all keys from both ds
+    return {
+      joined: {
+        content: {
+          schema: [...dsA.valueschemas, ...dsB.valueschemas]
+        },
+        isPresent: true
+      }
+    };
+  },
   onServerExecution: async (form, inputs, db) => {
     const [dsA, dsB] = await Promise.all([
       getDataset(db, inputs.datasetA.datasetId),

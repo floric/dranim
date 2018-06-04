@@ -14,6 +14,7 @@ export const NumberOutputNode: ServerNodeDef<
 > = {
   name: NumberOutputNodeDef.name,
   isInputValid: async input => validateNumber(input.value),
+  onMetaExecution: () => Promise.resolve({}),
   onServerExecution: (form, inputs) =>
     Promise.resolve({
       outputs: {},

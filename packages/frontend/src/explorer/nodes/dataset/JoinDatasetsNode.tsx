@@ -17,55 +17,6 @@ export const JoinDatasetsNode: ClientNodeDef<
   JoinDatasetsNodeForm
 > = {
   name: JoinDatasetsNodeDef.name,
-  onClientExecution: (inputs, nodeForm, context) => {
-    const validInputA = inputs.datasetA;
-    const validInputB = inputs.datasetB;
-    if (!validInputA.isPresent || !validInputB.isPresent) {
-      return {
-        joined: { content: { schema: [] }, isPresent: false }
-      };
-    }
-
-    const inputValuesA = validInputA.content.schema;
-    const inputValuesB = validInputB.content.schema;
-    const idAValue = nodeForm.valueA;
-    const idBValue = nodeForm.valueB;
-
-    if (!idAValue || !idBValue) {
-      return {
-        joined: {
-          isPresent: false,
-          content: {
-            schema: []
-          }
-        }
-      };
-    }
-
-    const isIdPresentInInputs =
-      inputValuesA.map(n => n.name).includes(idAValue) &&
-      inputValuesB.map(n => n.name).includes(idBValue);
-    if (!isIdPresentInInputs) {
-      return {
-        joined: {
-          isPresent: false,
-          content: {
-            schema: []
-          }
-        }
-      };
-    }
-
-    const allSchemas = new Set(inputValuesA.concat(inputValuesB));
-    return {
-      joined: {
-        isPresent: true,
-        content: {
-          schema: Array.from(allSchemas)
-        }
-      }
-    };
-  },
   renderFormItems: ({ inputs, nodeForm, form: { getFieldDecorator } }) => {
     const dsA = inputs.datasetA;
     const dsB = inputs.datasetB;

@@ -3,7 +3,6 @@ import {
   NodeDef,
   NodeInstance,
   NodesMap,
-  NodeWithContextFnDef,
   SocketMetas
 } from '@masterthesis/shared';
 import { FormComponentProps } from 'antd/lib/form';
@@ -48,41 +47,7 @@ export interface ClientNodeDef<
   renderFormItems?: (
     props: RenderFormItemsProps<NodeInputs, NodeForm>
   ) => JSX.Element;
-  onClientExecution?: (
-    inputs: SocketMetas<NodeInputs>,
-    nodeForm: FormValues<NodeForm>,
-    context: EditorContext
-  ) => SocketMetas<NodeOutputs>;
 }
-
-export interface ClientNodeWithContextFnDef<
-  NodeInputs = {},
-  NodeOutputs = {},
-  NodeForm = {},
-  ContextInputs = {},
-  ContextOutputs = {}
-> extends ClientNodeDef<NodeInputs, NodeOutputs, NodeForm> {
-  onClientBeforeContextFnExecution: (
-    inputs: SocketMetas<NodeInputs>,
-    nodeForm: FormValues<NodeForm>,
-    context: EditorContext
-  ) => SocketMetas<ContextInputs>;
-  onClientAfterContextFnExecution: (
-    inputs: SocketMetas<ContextOutputs>,
-    originalInputs: SocketMetas<NodeInputs>,
-    nodeForm: FormValues<NodeForm>,
-    context: EditorContext
-  ) => SocketMetas<NodeOutputs>;
-}
-
-export const hasClientContextFn = (
-  n: ClientNodeDef | ClientNodeWithContextFnDef
-): n is ClientNodeWithContextFnDef => {
-  return (
-    (n as ClientNodeWithContextFnDef).onClientAfterContextFnExecution !==
-    undefined
-  );
-};
 
 const allNodes = [
   AllDatasetNodes,
@@ -92,7 +57,7 @@ const allNodes = [
 ];
 
 const buildTree = (
-  elems: Array<ClientNodeDef & (NodeDef | NodeWithContextFnDef)>,
+  elems: Array<ClientNodeDef & NodeDef>,
   curPath: Array<string>
 ): Array<TreeData> => {
   const nextPaths = elems
@@ -131,28 +96,16 @@ const buildTree = (
   }));
 };
 
-export const nodeTypes: Map<
-  string,
-  | (ClientNodeDef & NodeDef)
-  | (ClientNodeWithContextFnDef & NodeWithContextFnDef)
-> = new Map(
+export const nodeTypes: Map<string, ClientNodeDef & NodeDef> = new Map(
   allNodes
-    .map<Array<[string, (ClientNodeDef | ClientNodeWithContextFnDef)]>>(nodes =>
-      Object.values(nodes).map<
-        [string, (ClientNodeDef | ClientNodeWithContextFnDef)]
-      >(n => [n.name, n])
+    .map<Array<[string, ClientNodeDef]>>(nodes =>
+      Object.values(nodes).map<[string, ClientNodeDef]>(n => [n.name, n])
     )
-    .reduce<Array<[string, (ClientNodeDef | ClientNodeWithContextFnDef)]>>(
-      (a, b) => [...a, ...b],
-      []
-    )
-    .map<
-      [
-        string,
-        ((ClientNodeDef | ClientNodeWithContextFnDef) &
-          (NodeDef | NodeWithContextFnDef))
-      ]
-    >(n => [n[0], { ...NodesMap.get(n[0]), ...n[1] }])
+    .reduce<Array<[string, ClientNodeDef]>>((a, b) => [...a, ...b], [])
+    .map<[string, ClientNodeDef & NodeDef]>(n => [
+      n[0],
+      { ...NodesMap.get(n[0]), ...n[1] }
+    ])
     .sort((a, b) => a[0].localeCompare(b[0]))
 );
 

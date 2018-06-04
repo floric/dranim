@@ -145,7 +145,8 @@ describe('Nodes', () => {
       type: 'unknown',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      meta: {}
     });
 
     expect(state).toBe(NodeState.ERROR);

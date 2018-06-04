@@ -17,33 +17,6 @@ export const SelectValuesNode: ClientNodeDef<
   SelectValuesNodeForm
 > = {
   name: SelectValuesNodeDef.name,
-  onClientExecution: (inputs, nodeForm, context) => {
-    const validInput = inputs.dataset;
-    if (!validInput || !validInput.isPresent) {
-      return {
-        dataset: {
-          content: {
-            schema: []
-          },
-          isPresent: false
-        }
-      };
-    }
-
-    const inputValues = validInput.content.schema;
-    const selectedValues = nodeForm.values;
-
-    return {
-      dataset: {
-        content: {
-          schema: selectedValues
-            ? inputValues.filter(n => selectedValues.includes(n.name))
-            : []
-        },
-        isPresent: true
-      }
-    };
-  },
   renderFormItems: ({
     form,
     form: { getFieldDecorator },

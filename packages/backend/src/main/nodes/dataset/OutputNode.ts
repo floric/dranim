@@ -15,6 +15,7 @@ export const DatasetOutputNode: ServerNodeDef<
 > = {
   name: DatasetOutputNodeDef.name,
   isInputValid: inputs => validateDatasetInput(inputs),
+  onMetaExecution: () => Promise.resolve({}),
   onServerExecution: async (form, inputs, db) => {
     await validateDataset(inputs.dataset.datasetId, db);
 

@@ -17,7 +17,8 @@ const createNodeWithForm = (form: Array<FormValue>): NodeInstance => ({
   workspaceId: '2',
   x: 0,
   y: 0,
-  form
+  form,
+  meta: {}
 });
 
 describe('Utils', () => {
@@ -94,12 +95,26 @@ describe('Utils', () => {
   });
 
   it('should return true for node with context function', () => {
-    const res = hasContextFn(EditEntriesNodeDef);
+    const res = hasContextFn({
+      name: 'test',
+      isFormValid: () => Promise.resolve(true),
+      isInputValid: () => Promise.resolve(true),
+      onMetaExecution: () => Promise.resolve({}),
+      onServerExecution: () => Promise.resolve({ outputs: {} }),
+      transformContextInputDefsToContextOutputDefs: () => Promise.resolve({}),
+      transformInputDefsToContextInputDefs: () => Promise.resolve({})
+    });
     expect(res).toBe(true);
   });
 
   it('should return false for node without context function', () => {
-    const res = hasContextFn(NumberInputNodeDef);
+    const res = hasContextFn({
+      name: 'test',
+      isFormValid: () => Promise.resolve(true),
+      isInputValid: () => Promise.resolve(true),
+      onMetaExecution: () => Promise.resolve({}),
+      onServerExecution: () => Promise.resolve({ outputs: {} })
+    });
     expect(res).toBe(false);
   });
 });

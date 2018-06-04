@@ -3,12 +3,12 @@ import { NumberOutputNodeDef } from '@masterthesis/shared';
 import { NumberOutputNode } from '../../../../src/main/nodes/number/OutputNode';
 
 describe('NumberOutputNode', () => {
-  test('should have correct properties', () => {
+  /*test('should have correct properties', () => {
     expect(NumberOutputNode.name).toBe(NumberOutputNodeDef.name);
     expect(NumberOutputNode.isFormValid).toBeUndefined();
     expect(NumberOutputNode.isInputValid).toBeDefined();
     expect(NumberOutputNodeDef.isOutputNode).toBe(true);
-  });
+  });*/
 
   test('should check valid int number', async () => {
     const res = await NumberOutputNode.isInputValid({ value: 1 });

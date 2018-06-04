@@ -1,25 +1,15 @@
 import {
-  EditEntriesFnInputs,
-  EditEntriesFnOutputs,
   EditEntriesNodeDef,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs
 } from '@masterthesis/shared';
 
-import { ClientNodeWithContextFnDef } from '../all-nodes';
+import { ClientNodeDef } from '../all-nodes';
 
-export const EditEntriesNode: ClientNodeWithContextFnDef<
+export const EditEntriesNode: ClientNodeDef<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
-  {},
-  EditEntriesFnInputs,
-  EditEntriesFnOutputs
+  {}
 > = {
-  name: EditEntriesNodeDef.name,
-  onClientBeforeContextFnExecution: inputs => ({
-    entry: inputs.dataset || null
-  }),
-  onClientAfterContextFnExecution: inputs => ({
-    dataset: inputs.entry || null
-  })
+  name: EditEntriesNodeDef.name
 };

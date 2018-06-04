@@ -7,7 +7,6 @@ import { WrappedFormUtils } from 'antd/lib/form/Form';
 
 import { tryOperation } from '../../utils/form';
 import { EditorContext, RenderFormItemsProps } from '../nodes/all-nodes';
-import { getClientNodeInputs } from '../nodes/client-execution';
 
 export interface IPropertiesFormProps {
   handleSubmit: (form: WrappedFormUtils, nodeId: string) => Promise<any>;
@@ -73,7 +72,7 @@ class PropertiesFormImpl extends React.Component<
     } = this.props;
     const { saving } = this.state;
     const unsavedChanges = form.isFieldsTouched();
-    const inputs = node ? getClientNodeInputs(node, state) : {};
+    const inputs = {};
     const nodeForm = node ? parseNodeForm(node) : {};
 
     return (
