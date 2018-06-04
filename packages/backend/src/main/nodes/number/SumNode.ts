@@ -10,8 +10,8 @@ import { validateNumber } from './utils';
 
 export const SumNode: ServerNodeDef<SumNodeNodeInputs, SumNodeNodeOutputs> = {
   name: SumNodeDef.name,
-  isInputValid: async values =>
-    validateNumber(values.a) && validateNumber(values.b),
+  isInputValid: values =>
+    Promise.resolve(validateNumber(values.a) && validateNumber(values.b)),
   onMetaExecution: async (form, inputs) => {
     if (
       inputs.a === null ||
@@ -28,9 +28,8 @@ export const SumNode: ServerNodeDef<SumNodeNodeInputs, SumNodeNodeOutputs> = {
       sum: presentMeta
     };
   },
-  onServerExecution: async (form, values) => {
-    return {
+  onServerExecution: (form, values) =>
+    Promise.resolve({
       outputs: { sum: values.a + values.b }
-    };
-  }
+    })
 };

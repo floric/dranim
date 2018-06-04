@@ -13,12 +13,11 @@ export const StringOutputNode: ServerNodeDef<
 > = {
   name: StringOutputNodeDef.name,
   onMetaExecution: () => Promise.resolve({}),
-  onServerExecution: async (form, values) => {
-    return {
+  onServerExecution: (form, values) =>
+    Promise.resolve({
       outputs: {},
       results: {
         value: values.string
       }
-    };
-  }
+    })
 };

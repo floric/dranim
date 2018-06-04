@@ -4,6 +4,7 @@ import {
   NumberOutputNodeResults,
   ServerNodeDef
 } from '@masterthesis/shared';
+
 import { validateNumber } from './utils';
 
 export const NumberOutputNode: ServerNodeDef<
@@ -13,7 +14,7 @@ export const NumberOutputNode: ServerNodeDef<
   NumberOutputNodeResults
 > = {
   name: NumberOutputNodeDef.name,
-  isInputValid: async input => validateNumber(input.value),
+  isInputValid: input => Promise.resolve(validateNumber(input.value)),
   onMetaExecution: () => Promise.resolve({}),
   onServerExecution: (form, inputs) =>
     Promise.resolve({

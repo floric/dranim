@@ -3,11 +3,11 @@ import { SumNodeDef } from '@masterthesis/shared';
 import { SumNode } from '../../../../src/main/nodes/number/SumNode';
 
 describe('SumNode', () => {
-  /*test('should have correct properties', () => {
-    expect(SumNode.name).toBe(SumNodeDef.name);
+  test('should have correct properties', () => {
+    expect(SumNodeDef.name).toBe(SumNodeDef.name);
     expect(SumNode.isFormValid).toBeUndefined();
     expect(SumNode.isInputValid).toBeDefined();
-  });*/
+  });
 
   test('should validate input', async () => {
     let res = await SumNode.isInputValid({ a: 3, b: 2 });

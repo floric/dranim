@@ -14,7 +14,7 @@ export const NumberInputNode: ServerNodeDef<
   NumberInputNodeForm
 > = {
   name: NumberInputNodeDef.name,
-  isFormValid: async form => validateNumber(form.value),
+  isFormValid: form => Promise.resolve(validateNumber(form.value)),
   onMetaExecution: async form => {
     if (form.value === null || form.value === undefined) {
       return {

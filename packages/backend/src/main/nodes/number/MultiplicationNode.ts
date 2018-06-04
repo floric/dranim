@@ -13,8 +13,8 @@ export const MultiplicationNode: ServerNodeDef<
   MultiplicationNodeOutputs
 > = {
   name: MultiplicationNodeDef.name,
-  isInputValid: async values =>
-    validateNumber(values.a) && validateNumber(values.b),
+  isInputValid: values =>
+    Promise.resolve(validateNumber(values.a) && validateNumber(values.b)),
   onMetaExecution: async (form, inputs) => {
     if (
       inputs.a === null ||
@@ -31,11 +31,10 @@ export const MultiplicationNode: ServerNodeDef<
       product: presentMeta
     };
   },
-  onServerExecution: async (form, values) => {
-    return {
+  onServerExecution: (form, values) =>
+    Promise.resolve({
       outputs: {
         product: values.a * values.b
       }
-    };
-  }
+    })
 };

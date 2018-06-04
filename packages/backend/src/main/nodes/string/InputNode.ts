@@ -24,11 +24,10 @@ export const StringInputNode: ServerNodeDef<
       string: presentMeta
     };
   },
-  onServerExecution: async form => {
-    return {
+  onServerExecution: form =>
+    Promise.resolve({
       outputs: {
         string: form.value || ''
       }
-    };
-  }
+    })
 };
