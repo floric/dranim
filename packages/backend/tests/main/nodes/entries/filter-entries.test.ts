@@ -1,12 +1,12 @@
 import {
   DatasetSocket,
   DataType,
-  EditEntriesNodeDef,
+  FilterEntriesNodeDef,
   ValueSchema
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { EditEntriesNode } from '../../../../src/main/nodes/entries/EditEntriesNode';
+import { FilterEntriesNode } from '../../../../src/main/nodes/entries/filter-entries';
 import { createDataset } from '../../../../src/main/workspace/dataset';
 import { getTestMongoDb, VALID_OBJECT_ID } from '../../../test-utils';
 
@@ -14,7 +14,7 @@ let conn;
 let db: Db;
 let server;
 
-describe('EditEntriesNode', () => {
+describe('FilterEntriesNode', () => {
   beforeAll(async () => {
     const { connection, database, mongodbServer } = await getTestMongoDb();
     conn = connection;
@@ -33,19 +33,21 @@ describe('EditEntriesNode', () => {
   });
 
   test('should have correct properties', () => {
-    expect(EditEntriesNode.name).toBe(EditEntriesNodeDef.name);
-    expect(EditEntriesNode.isFormValid).toBeUndefined();
-    expect(EditEntriesNode.isInputValid).toBeDefined();
+    expect(FilterEntriesNode.name).toBe(FilterEntriesNodeDef.name);
+    expect(FilterEntriesNode.isFormValid).toBeUndefined();
+    expect(FilterEntriesNode.isInputValid).toBeDefined();
     expect(
-      EditEntriesNode.transformContextInputDefsToContextOutputDefs
+      FilterEntriesNode.transformContextInputDefsToContextOutputDefs
     ).toBeDefined();
-    expect(EditEntriesNode.transformInputDefsToContextInputDefs).toBeDefined();
+    expect(
+      FilterEntriesNode.transformInputDefsToContextInputDefs
+    ).toBeDefined();
   });
 
   test('should create new DS and do changes on this one', async () => {
     const ds = await createDataset(db, 'newds');
 
-    const res = await EditEntriesNode.onNodeExecution(
+    const res = await FilterEntriesNode.onNodeExecution(
       {},
       { dataset: { datasetId: ds.id } },
       db
@@ -70,7 +72,7 @@ describe('EditEntriesNode', () => {
       },
       isPresent: true
     };
-    const res = await EditEntriesNode.onMetaExecution(
+    const res = await FilterEntriesNode.onMetaExecution(
       {},
       { dataset: validDs },
       db
@@ -80,27 +82,37 @@ describe('EditEntriesNode', () => {
   });
 
   test('should return empty object on onMetaExecution', async () => {
-    let res = await EditEntriesNode.onMetaExecution({}, { dataset: null }, db);
+    let res = await FilterEntriesNode.onMetaExecution(
+      {},
+      { dataset: null },
+      db
+    );
     expect(res.dataset.isPresent).toBe(false);
     expect(res.dataset.content.schema).toEqual([]);
 
-    res = await EditEntriesNode.onMetaExecution({}, { dataset: undefined }, db);
+    res = await FilterEntriesNode.onMetaExecution(
+      {},
+      { dataset: undefined },
+      db
+    );
     expect(res.dataset.isPresent).toBe(false);
     expect(res.dataset.content.schema).toEqual([]);
   });
 
   test('should have valid input', async () => {
-    const res = await EditEntriesNode.isInputValid({
+    const res = await FilterEntriesNode.isInputValid({
       dataset: { datasetId: VALID_OBJECT_ID }
     });
     expect(res).toBe(true);
   });
 
   test('should have invalid input', async () => {
-    let res = await EditEntriesNode.isInputValid({ dataset: undefined });
+    let res = await FilterEntriesNode.isInputValid({ dataset: undefined });
     expect(res).toBe(false);
 
-    res = await EditEntriesNode.isInputValid({ dataset: { datasetId: null } });
+    res = await FilterEntriesNode.isInputValid({
+      dataset: { datasetId: null }
+    });
     expect(res).toBe(false);
   });
 
@@ -120,7 +132,7 @@ describe('EditEntriesNode', () => {
       isPresent: true
     };
 
-    const res = await EditEntriesNode.transformInputDefsToContextInputDefs(
+    const res = await FilterEntriesNode.transformInputDefsToContextInputDefs(
       { dataset: DatasetSocket('Ds') },
       { dataset: validDs },
       db
@@ -135,7 +147,23 @@ describe('EditEntriesNode', () => {
     });
   });
 
-  test('should passthrough dynamic inputs of context input node', async () => {
+  test('should return absent meta if dataset input is missing', async () => {
+    let res = await FilterEntriesNode.transformInputDefsToContextInputDefs(
+      { dataset: DatasetSocket('Ds') },
+      { dataset: { content: { schema: [] }, isPresent: false } },
+      db
+    );
+    expect(res).toEqual({});
+
+    res = await FilterEntriesNode.transformInputDefsToContextInputDefs(
+      { dataset: DatasetSocket('Ds') },
+      { dataset: null },
+      db
+    );
+    expect(res).toEqual({});
+  });
+
+  test('should always have keepEntries socket as output', async () => {
     const validDs = {
       content: {
         schema: [
@@ -151,13 +179,13 @@ describe('EditEntriesNode', () => {
       isPresent: true
     };
 
-    const inputRes = await EditEntriesNode.transformInputDefsToContextInputDefs(
+    const inputRes = await FilterEntriesNode.transformInputDefsToContextInputDefs(
       { dataset: DatasetSocket('Ds') },
       { dataset: validDs },
       db
     );
 
-    const res = await EditEntriesNode.transformContextInputDefsToContextOutputDefs(
+    const res = await FilterEntriesNode.transformContextInputDefsToContextOutputDefs(
       { dataset: DatasetSocket('Ds') },
       { dataset: validDs },
       inputRes,
@@ -166,10 +194,9 @@ describe('EditEntriesNode', () => {
     );
 
     expect(res).toEqual({
-      super: {
+      keepEntries: {
         dataType: DataType.BOOLEAN,
-        displayName: 'super',
-        isDynamic: true
+        displayName: 'Keep entries'
       }
     });
   });

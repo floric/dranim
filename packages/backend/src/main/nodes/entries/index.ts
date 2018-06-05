@@ -1,2 +1,2 @@
-export * from './EditEntriesNode';
-export * from './FilterEntriesNode';
+export * from './edit-entries';
+export * from './filter-entries';

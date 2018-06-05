@@ -1,6 +1,6 @@
 import { NumberOutputNodeDef } from '@masterthesis/shared';
 
-import { NumberOutputNode } from '../../../../src/main/nodes/number/OutputNode';
+import { NumberOutputNode } from '../../../../src/main/nodes/number/output';
 
 describe('NumberOutputNode', () => {
   test('should have correct properties', () => {

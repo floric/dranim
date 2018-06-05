@@ -1,7 +1,7 @@
 import { DataType, SelectValuesNodeDef } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { SelectValuesNode } from '../../../../src/main/nodes/dataset/SelectValuesNode';
+import { SelectValuesNode } from '../../../../src/main/nodes/dataset/select-values';
 import {
   addValueSchema,
   createDataset,

@@ -1,6 +1,6 @@
 import { StringInputNodeDef } from '@masterthesis/shared';
 
-import { StringInputNode } from '../../../../src/main/nodes/string/InputNode';
+import { StringInputNode } from '../../../../src/main/nodes/string/input';
 
 describe('StringInputNode', () => {
   test('should have correct properties', () => {

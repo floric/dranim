@@ -1,7 +1,7 @@
 import { DatasetOutputNodeDef, DataType } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { DatasetOutputNode } from '../../../../src/main/nodes/dataset/OutputNode';
+import { DatasetOutputNode } from '../../../../src/main/nodes/dataset/output';
 import { createDataset } from '../../../../src/main/workspace/dataset';
 import { getTestMongoDb, NeverGoHereError } from '../../../test-utils';
 

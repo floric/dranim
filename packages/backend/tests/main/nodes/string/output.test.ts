@@ -1,6 +1,6 @@
 import { StringOutputNodeDef } from '@masterthesis/shared';
 
-import { StringOutputNode } from '../../../../src/main/nodes/string/OutputNode';
+import { StringOutputNode } from '../../../../src/main/nodes/string/output';
 
 describe('StringOutputNode', () => {
   test('should have correct properties', () => {

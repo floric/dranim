@@ -1,7 +1,7 @@
 import { DatasetInputNodeDef } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { DatasetInputNode } from '../../../../src/main/nodes/dataset/InputNode';
+import { DatasetInputNode } from '../../../../src/main/nodes/dataset/input';
 import { createDataset } from '../../../../src/main/workspace/dataset';
 import {
   getTestMongoDb,

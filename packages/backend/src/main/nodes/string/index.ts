@@ -1,2 +1,2 @@
-export * from './InputNode';
-export * from './OutputNode';
+export * from './input';
+export * from './output';

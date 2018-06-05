@@ -6,7 +6,7 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { JoinDatasetsNode } from '../../../../src/main/nodes/dataset/JoinDatasetsNode';
+import { JoinDatasetsNode } from '../../../../src/main/nodes/dataset/join-datasets';
 import {
   addValueSchema,
   createDataset,

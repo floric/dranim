@@ -1,6 +1,6 @@
 import { FormatNumberNodeDef } from '@masterthesis/shared';
 
-import { FormatNumberNode } from '../../../../src/main/nodes/number/FormatNumberNode';
+import { FormatNumberNode } from '../../../../src/main/nodes/number/format-number';
 
 describe('FormatNumberNode', () => {
   test('should have correct properties', () => {

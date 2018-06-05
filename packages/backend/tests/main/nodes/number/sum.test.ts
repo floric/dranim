@@ -1,6 +1,6 @@
 import { SumNodeDef } from '@masterthesis/shared';
 
-import { SumNode } from '../../../../src/main/nodes/number/SumNode';
+import { SumNode } from '../../../../src/main/nodes/number/sum';
 
 describe('SumNode', () => {
   test('should have correct properties', () => {
