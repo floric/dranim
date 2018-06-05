@@ -68,7 +68,6 @@ export interface ServerNodeDefWithContextFn<
     inputs: IOValues<NodeInputs>,
     db: Db,
     context?: {
-      nodeId: string;
       onContextFnExecution: (
         input: IOValues<any>
       ) => Promise<NodeExecutionResult<any>>;

@@ -78,12 +78,14 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
     await copySchemas(oldDs.valueschemas, newDs.id, db);
 
     if (context) {
-      await copyFilteredToOtherDataset(
+      await copyEditedToOtherDataset(
         db,
         inputs.dataset.datasetId,
         newDs.id,
         context.onContextFnExecution
       );
+    } else {
+      throw new Error('Missing context');
     }
 
     return {
@@ -99,7 +101,7 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
 const copySchemas = (schemas: Array<ValueSchema>, newDsId: string, db: Db) =>
   Promise.all(schemas.map(s => addValueSchema(db, newDsId, s)));
 
-const copyFilteredToOtherDataset = async (
+const copyEditedToOtherDataset = async (
   db: Db,
   oldDsId: string,
   newDsId: string,

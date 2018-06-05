@@ -78,7 +78,6 @@ export const executeServerNode = async (
     }
 
     return await type.onNodeExecution(nodeForm, nodeInputs, db, {
-      nodeId,
       onContextFnExecution: inputs =>
         executeServerNode(db, outputNode._id.toHexString(), inputs)
     });

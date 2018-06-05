@@ -10,6 +10,13 @@ export const EqualsStringNode: ServerNodeDef<
   EqualsStringNodeOutputs
 > = {
   name: EqualsStringNodeDef.name,
+  isInputValid: async inputs => {
+    if (inputs.valueA == null || inputs.valueB == null) {
+      return false;
+    }
+
+    return true;
+  },
   onMetaExecution: async (form, inputs, db) => {
     if (
       !inputs.valueA ||

@@ -43,7 +43,7 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
   },
   transformContextInputDefsToContextOutputDefs: () =>
     Promise.resolve({
-      keepEntries: { dataType: DataType.BOOLEAN, displayName: 'Keep entries' }
+      keepEntry: { dataType: DataType.BOOLEAN, displayName: 'Keep entry' }
     }),
   isInputValid: async inputs => {
     if (!inputs.dataset || !inputs.dataset.datasetId) {
@@ -78,6 +78,8 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
         newDs.id,
         context.onContextFnExecution
       );
+    } else {
+      throw new Error('Missing context');
     }
 
     return {
@@ -105,7 +107,7 @@ const copyFilteredToOtherDataset = async (
     const col = oldCollection.find();
     col.on('data', async (entry: Entry) => {
       const result = await onContextFnExecution(entry.values);
-      if (result.outputs.keepEntries) {
+      if (result.outputs.keepEntry) {
         createEntry(db, newDsId, entry.values);
       }
     });

@@ -626,9 +626,9 @@ describe('Nodes', () => {
     });
     const outputRes = await getContextOutputDefs(contextInputNode, db);
     expect(outputRes).toEqual({
-      keepEntries: {
+      keepEntry: {
         dataType: DataType.BOOLEAN,
-        displayName: 'Keep entries'
+        displayName: 'Keep entry'
       }
     });
   });

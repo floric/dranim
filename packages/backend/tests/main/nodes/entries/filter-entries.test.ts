@@ -7,8 +7,21 @@ import {
 import { Db } from 'mongodb';
 
 import { FilterEntriesNode } from '../../../../src/main/nodes/entries/filter-entries';
-import { createDataset } from '../../../../src/main/workspace/dataset';
-import { getTestMongoDb, VALID_OBJECT_ID } from '../../../test-utils';
+import {
+  addValueSchema,
+  createDataset,
+  getDataset
+} from '../../../../src/main/workspace/dataset';
+import {
+  createEntry,
+  getAllEntries
+} from '../../../../src/main/workspace/entry';
+import { createWorkspace } from '../../../../src/main/workspace/workspace';
+import {
+  getTestMongoDb,
+  NeverGoHereError,
+  VALID_OBJECT_ID
+} from '../../../test-utils';
 
 let conn;
 let db: Db;
@@ -50,7 +63,11 @@ describe('FilterEntriesNode', () => {
     const res = await FilterEntriesNode.onNodeExecution(
       {},
       { dataset: { datasetId: ds.id } },
-      db
+      db,
+      {
+        onContextFnExecution: input =>
+          Promise.resolve({ outputs: { keepEntry: true } })
+      }
     );
     expect(res.outputs.dataset.datasetId).toBeDefined();
     expect(res.outputs.dataset.datasetId).not.toBe(ds.id);
@@ -163,7 +180,7 @@ describe('FilterEntriesNode', () => {
     expect(res).toEqual({});
   });
 
-  test('should always have keepEntries socket as output', async () => {
+  test('should always have keepEntry socket as output', async () => {
     const validDs = {
       content: {
         schema: [
@@ -194,10 +211,76 @@ describe('FilterEntriesNode', () => {
     );
 
     expect(res).toEqual({
-      keepEntries: {
+      keepEntry: {
         dataType: DataType.BOOLEAN,
-        displayName: 'Keep entries'
+        displayName: 'Keep entry'
       }
     });
+  });
+
+  test('should edit entries', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const ds = await createDataset(db, 'ds 1');
+    await addValueSchema(db, ds.id, {
+      name: 'val',
+      fallback: '0',
+      required: true,
+      type: DataType.NUMBER,
+      unique: false
+    });
+
+    await Promise.all(
+      Array(20)
+        .fill(0)
+        .map((e, i) => createEntry(db, ds.id, { val: JSON.stringify(i) }))
+    );
+
+    const res = await FilterEntriesNode.onNodeExecution(
+      {},
+      { dataset: { datasetId: ds.id } },
+      db,
+      {
+        onContextFnExecution: input =>
+          Promise.resolve({
+            outputs: { keepEntry: input.val < 10 }
+          })
+      }
+    );
+    expect(res.outputs.dataset).toBeDefined();
+
+    const newDs = await getDataset(db, res.outputs.dataset.datasetId);
+    const oldDs = await getDataset(db, ds.id);
+    expect(newDs.valueschemas).toEqual(oldDs.valueschemas);
+
+    const allEntries = await getAllEntries(db, newDs.id);
+    expect(allEntries.length).toBe(10);
+  });
+
+  test('should throw errors for missing context', async () => {
+    const ds = await createDataset(db, 'ds 1');
+
+    try {
+      await FilterEntriesNode.onNodeExecution(
+        {},
+        { dataset: { datasetId: ds.id } },
+        db
+      );
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Missing context');
+    }
+  });
+
+  test('should throw errors for missing context', async () => {
+    try {
+      await FilterEntriesNode.onNodeExecution(
+        {},
+        { dataset: { datasetId: VALID_OBJECT_ID } },
+        db
+      );
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Unknown dataset source');
+    }
   });
 });

@@ -2,13 +2,30 @@ import {
   DatasetSocket,
   DataType,
   EditEntriesNodeDef,
+  sleep,
+  StringInputNodeDef,
   ValueSchema
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import { EditEntriesNode } from '../../../../src/main/nodes/entries/edit-entries';
-import { createDataset } from '../../../../src/main/workspace/dataset';
-import { getTestMongoDb, VALID_OBJECT_ID } from '../../../test-utils';
+import { StringInputNode } from '../../../../src/main/nodes/string';
+import {
+  addValueSchema,
+  createDataset,
+  getDataset
+} from '../../../../src/main/workspace/dataset';
+import {
+  createEntry,
+  getAllEntries
+} from '../../../../src/main/workspace/entry';
+import { createNode } from '../../../../src/main/workspace/nodes';
+import { createWorkspace } from '../../../../src/main/workspace/workspace';
+import {
+  getTestMongoDb,
+  NeverGoHereError,
+  VALID_OBJECT_ID
+} from '../../../test-utils';
 
 let conn;
 let db: Db;
@@ -48,7 +65,10 @@ describe('EditEntriesNode', () => {
     const res = await EditEntriesNode.onNodeExecution(
       {},
       { dataset: { datasetId: ds.id } },
-      db
+      db,
+      {
+        onContextFnExecution: () => Promise.resolve({ outputs: {} })
+      }
     );
     expect(res.outputs.dataset.datasetId).toBeDefined();
     expect(res.outputs.dataset.datasetId).not.toBe(ds.id);
@@ -172,5 +192,71 @@ describe('EditEntriesNode', () => {
         isDynamic: true
       }
     });
+  });
+
+  test('should edit entries', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const ds = await createDataset(db, 'ds 1');
+    await addValueSchema(db, ds.id, {
+      name: 'val',
+      fallback: '',
+      required: true,
+      type: DataType.STRING,
+      unique: false
+    });
+
+    await Promise.all(
+      Array(20)
+        .fill(0)
+        .map((e, i) => createEntry(db, ds.id, { val: JSON.stringify(i) }))
+    );
+
+    const res = await EditEntriesNode.onNodeExecution(
+      {},
+      { dataset: { datasetId: ds.id } },
+      db,
+      {
+        onContextFnExecution: input =>
+          Promise.resolve({ outputs: { val: ':)' } })
+      }
+    );
+    expect(res.outputs.dataset).toBeDefined();
+
+    const newDs = await getDataset(db, res.outputs.dataset.datasetId);
+    const oldDs = await getDataset(db, ds.id);
+    expect(newDs.valueschemas).toEqual(oldDs.valueschemas);
+
+    const allEntries = await getAllEntries(db, newDs.id);
+    expect(allEntries.length).toBe(20);
+
+    expect(allEntries[0].values.val).toBe(':)');
+  });
+
+  test('should throw errors for missing context', async () => {
+    const ds = await createDataset(db, 'ds 1');
+
+    try {
+      await EditEntriesNode.onNodeExecution(
+        {},
+        { dataset: { datasetId: ds.id } },
+        db
+      );
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Missing context');
+    }
+  });
+
+  test('should throw error for invalid dataset', async () => {
+    try {
+      await EditEntriesNode.onNodeExecution(
+        {},
+        { dataset: { datasetId: VALID_OBJECT_ID } },
+        db
+      );
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Unknown dataset source');
+    }
   });
 });
