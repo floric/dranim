@@ -24,6 +24,8 @@ const Node = `
     state: String!
     form: [FormValue!]!
     workspace: Workspace!
+    metaInputs: Meta!
+    metaOutputs: Meta!
   }
 `;
 
@@ -79,7 +81,12 @@ const Workspace = `
   }
 `;
 
+const Meta = `
+  scalar Meta
+`;
+
 export default () => [
+  Meta,
   FormValue,
   SocketValue,
   Node,

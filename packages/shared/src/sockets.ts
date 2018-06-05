@@ -20,11 +20,10 @@ export interface DatasetMeta {
   schema: Array<ValueSchema>;
 }
 
-export interface SocketDef<Meta = {}> {
+export interface SocketDef {
   dataType: DataType;
   displayName: string;
   isDynamic?: boolean;
-  meta: SocketMetaDef<Meta>;
 }
 
 export interface SocketMetaDef<Meta = {}> {
@@ -32,9 +31,8 @@ export interface SocketMetaDef<Meta = {}> {
   content: Meta;
 }
 
-// export type SocketMetaContent<T> = { [Name in keyof T]: any };
-export type SocketDefsGeneric<M> = { [Name in keyof M]: SocketDef<M[Name]> } & {
-  [x: string]: SocketDef<any>;
+export type SocketDefsGeneric<M> = { [Name in keyof M]: SocketDef } & {
+  [x: string]: SocketDef;
 };
 export type SocketMetasGeneric<M> = {
   [Name in keyof M]: SocketMetaDef<M[Name]>
@@ -47,41 +45,32 @@ export type ConditionalMetaTypes<T> = {
 export type SocketDefs<T> = SocketDefsGeneric<ConditionalMetaTypes<T>>;
 export type SocketMetas<T> = SocketMetasGeneric<ConditionalMetaTypes<T>>;
 
-export const DatasetSocket = (name: string): SocketDef<DatasetMeta> => ({
+export const DatasetSocket = (name: string): SocketDef => ({
   dataType: DataType.DATASET,
-  meta: {
-    content: { schema: [] },
-    isPresent: false
-  },
   displayName: name
 });
 
 export const NumberSocket = (name: string): SocketDef => ({
   dataType: DataType.NUMBER,
-  meta: { content: {}, isPresent: false },
   displayName: name
 });
 
 export const StringSocket = (name: string): SocketDef => ({
   dataType: DataType.STRING,
-  meta: { content: {}, isPresent: false },
   displayName: name
 });
 
 export const BooleanSocket = (name: string): SocketDef => ({
   dataType: DataType.BOOLEAN,
-  meta: { content: {}, isPresent: false },
   displayName: name
 });
 
-export const EntrySocket = (name: string): SocketDef<DatasetMeta> => ({
+export const EntrySocket = (name: string): SocketDef => ({
   dataType: DataType.ENTRY,
-  meta: { content: { schema: [] }, isPresent: false },
   displayName: name
 });
 
 export const DateSocket = (name: string): SocketDef => ({
   dataType: DataType.DATE,
-  meta: { content: {}, isPresent: false },
   displayName: name
 });

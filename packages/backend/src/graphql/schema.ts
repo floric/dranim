@@ -1,3 +1,4 @@
+import { SocketMetas } from '@masterthesis/shared';
 import { GraphQLUpload } from 'apollo-upload-server';
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { Db } from 'mongodb';
@@ -31,6 +32,8 @@ import {
   createNode,
   deleteNode,
   getAllNodes,
+  getNodeMetaInputs,
+  getNodeMetaOutputs,
   getNodeState,
   updateNode
 } from '../main/workspace/nodes';
@@ -169,7 +172,9 @@ const resolvers: IResolvers<any, ApolloContext> = {
   },
   Node: {
     state: node => getNodeState(node),
-    workspace: ({ workspaceId }, __, { db }) => getWorkspace(db, workspaceId)
+    workspace: ({ workspaceId }, __, { db }) => getWorkspace(db, workspaceId),
+    metaOutputs: ({ id }, _, { db }) => getNodeMetaOutputs(db, id),
+    metaInputs: ({ id, inputs }, _, { db }) => getNodeMetaInputs(db, id, inputs)
   },
   Workspace: {
     nodes: ({ id }, __, { db }) => getAllNodes(db, id),
@@ -215,7 +220,24 @@ const resolvers: IResolvers<any, ApolloContext> = {
     startCalculation: (_, { workspaceId }, { db }) =>
       startCalculation(db, workspaceId)
   },
-  Upload: GraphQLUpload
+  Upload: GraphQLUpload,
+  Meta: {
+    name: 'Meta',
+    description: 'Date custom scalar type',
+    parseValue(value: string) {
+      return JSON.parse(value);
+    },
+    serialize(value: SocketMetas<any>) {
+      return JSON.stringify(value);
+    },
+    parseLiteral(ast) {
+      if (ast.kind === 'StringValue') {
+        return JSON.parse(ast.value);
+      }
+
+      return null;
+    }
+  }
 };
 
 const typeDefs = [

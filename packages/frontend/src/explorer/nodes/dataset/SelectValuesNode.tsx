@@ -24,6 +24,10 @@ export const SelectValuesNode: ClientNodeDef<
     inputs
   }) => {
     const dsInput = inputs.dataset;
+    if (!dsInput) {
+      return <p>Error</p>;
+    }
+
     const options = dsInput.isPresent ? dsInput.content.schema : [];
     return (
       <Form.Item label="Input">

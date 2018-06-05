@@ -5,7 +5,6 @@ import {
   ServerNodeDef
 } from '@masterthesis/shared';
 
-import { absentMeta, presentMeta } from '../all-nodes';
 import { validateNumber } from './utils';
 
 export const NumberInputNode: ServerNodeDef<
@@ -18,12 +17,12 @@ export const NumberInputNode: ServerNodeDef<
   onMetaExecution: async form => {
     if (form.value === null || form.value === undefined) {
       return {
-        value: absentMeta
+        value: { content: {}, isPresent: false }
       };
     }
 
     return {
-      value: presentMeta
+      value: { content: {}, isPresent: true }
     };
   },
   onServerExecution: (form, values) =>

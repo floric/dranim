@@ -1,8 +1,6 @@
 const numbro = require('numbro');
 import { FormatNumberNodeDef, ServerNodeDef } from '@masterthesis/shared';
 
-import { absentMeta, presentMeta } from '../all-nodes';
-
 export const FormatNumberNode: ServerNodeDef<
   { number: number },
   { formatted: string },
@@ -27,12 +25,12 @@ export const FormatNumberNode: ServerNodeDef<
   onMetaExecution: async (form, inputs) => {
     if (inputs.number === null || inputs.number === undefined) {
       return {
-        formatted: absentMeta
+        formatted: { content: {}, isPresent: false }
       };
     }
 
     return {
-      formatted: presentMeta
+      formatted: { content: {}, isPresent: true }
     };
   },
   onServerExecution: async (form, inputs) => {

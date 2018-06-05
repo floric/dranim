@@ -5,8 +5,6 @@ import {
   StringInputNodeOutputs
 } from '@masterthesis/shared';
 
-import { absentMeta, presentMeta } from '../all-nodes';
-
 export const StringInputNode: ServerNodeDef<
   {},
   StringInputNodeOutputs,
@@ -16,12 +14,12 @@ export const StringInputNode: ServerNodeDef<
   onMetaExecution: async form => {
     if (form.value === undefined || form.value === null) {
       return {
-        string: absentMeta
+        string: { content: {}, isPresent: false }
       };
     }
 
     return {
-      string: presentMeta
+      string: { content: {}, isPresent: true }
     };
   },
   onServerExecution: form =>

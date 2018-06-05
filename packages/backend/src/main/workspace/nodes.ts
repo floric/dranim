@@ -1,20 +1,66 @@
 import {
+  ConnectionDescription,
   ContextNodeType,
   hasContextFn,
   NodeInstance,
   NodeState,
-  parseNodeForm
+  parseNodeForm,
+  SocketMetaDef,
+  SocketMetas
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { serverNodeTypes } from '../nodes/all-nodes';
-import { getConnectionsCollection } from './connections';
+import { getConnection, getConnectionsCollection } from './connections';
 import { getWorkspace, getWorkspacesCollection } from './workspace';
 
 export const getNodesCollection = (
   db: Db
 ): Collection<NodeInstance & { _id: ObjectID }> => {
   return db.collection('Nodes');
+};
+
+export const getNodeMetaOutputs = async (
+  db: Db,
+  nodeId: string
+): Promise<SocketMetas<{}>> => {
+  const node = await getNode(db, nodeId);
+  if (!node) {
+    return {};
+  }
+
+  const nodeType = serverNodeTypes.get(node.type);
+  if (!nodeType) {
+    return {};
+  }
+
+  const allInputs = await getNodeMetaInputs(db, nodeId, node.inputs);
+
+  return await nodeType.onMetaExecution(parseNodeForm(node), allInputs, db);
+};
+
+export const getNodeMetaInputs = async (
+  db: Db,
+  nodeId: string,
+  inputConnections: Array<ConnectionDescription>
+) => {
+  const inputs = {};
+
+  await Promise.all(
+    inputConnections.map(async c => {
+      const connId = c.connectionId;
+      const conn = await getConnection(db, connId);
+      if (!conn) {
+        throw new Error('Invalid connection');
+      }
+
+      inputs[c.name] = (await getNodeMetaOutputs(db, conn.from.nodeId))[
+        conn.from.name
+      ];
+    })
+  );
+
+  return inputs;
 };
 
 export const createNode = async (

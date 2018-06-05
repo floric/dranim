@@ -52,7 +52,7 @@ export interface ServerNodeDef<
   ) => Promise<NodeExecutionResult<NodeOutputs, NodeResults>>;
   onMetaExecution: (
     form: FormValues<NodeForm>,
-    inputs: IOValues<NodeInputs>,
+    inputs: SocketMetas<NodeInputs>,
     db: Db
   ) => Promise<SocketMetas<NodeOutputs>>;
 }
@@ -92,7 +92,8 @@ export interface NodeInstance {
   inputs: Array<ConnectionDescription>;
   type: string;
   form: Array<FormValue>;
-  meta: SocketMetas<any>;
+  metaInputs: string;
+  metaOutputs: string;
 }
 
 export interface SocketInstance {

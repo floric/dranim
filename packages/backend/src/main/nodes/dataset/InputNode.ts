@@ -6,7 +6,7 @@ import {
 } from '@masterthesis/shared';
 
 import { getDataset } from '../../workspace/dataset';
-import { absentDataset, validateDataset } from './utils';
+import { validateDataset } from './utils';
 
 export const DatasetInputNode: ServerNodeDef<
   {},
@@ -19,14 +19,14 @@ export const DatasetInputNode: ServerNodeDef<
     const dsId = form.dataset;
     if (!dsId) {
       return {
-        dataset: absentDataset
+        dataset: { isPresent: false, content: { schema: [] } }
       };
     }
 
     const ds = await getDataset(db, dsId);
     if (!ds) {
       return {
-        dataset: absentDataset
+        dataset: { isPresent: false, content: { schema: [] } }
       };
     }
 

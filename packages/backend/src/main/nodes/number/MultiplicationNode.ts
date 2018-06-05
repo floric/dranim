@@ -5,7 +5,6 @@ import {
   ServerNodeDef
 } from '@masterthesis/shared';
 
-import { absentMeta, presentMeta } from '../all-nodes';
 import { validateNumber } from './utils';
 
 export const MultiplicationNode: ServerNodeDef<
@@ -23,12 +22,12 @@ export const MultiplicationNode: ServerNodeDef<
       inputs.b === undefined
     ) {
       return {
-        product: absentMeta
+        product: { content: {}, isPresent: false }
       };
     }
 
     return {
-      product: presentMeta
+      product: { content: {}, isPresent: true }
     };
   },
   onServerExecution: (form, values) =>

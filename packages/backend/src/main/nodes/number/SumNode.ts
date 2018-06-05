@@ -5,7 +5,6 @@ import {
   SumNodeNodeOutputs
 } from '@masterthesis/shared';
 
-import { absentMeta, presentMeta } from '../all-nodes';
 import { validateNumber } from './utils';
 
 export const SumNode: ServerNodeDef<SumNodeNodeInputs, SumNodeNodeOutputs> = {
@@ -20,12 +19,12 @@ export const SumNode: ServerNodeDef<SumNodeNodeInputs, SumNodeNodeOutputs> = {
       inputs.b === undefined
     ) {
       return {
-        sum: absentMeta
+        sum: { content: {}, isPresent: false }
       };
     }
 
     return {
-      sum: presentMeta
+      sum: { content: {}, isPresent: true }
     };
   },
   onServerExecution: (form, values) =>

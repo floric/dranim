@@ -23,13 +23,3 @@ export const serverNodeTypes: Map<string, ServerNodeDef & NodeDef> = new Map(
       { ...NodesMap.get(n[0])!, ...n[1] }
     ])
 );
-
-export const absentMeta = {
-  content: {},
-  isPresent: false
-};
-
-export const presentMeta = {
-  content: {},
-  isPresent: true
-};

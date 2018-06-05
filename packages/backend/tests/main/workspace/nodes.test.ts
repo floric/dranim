@@ -1,5 +1,7 @@
 import {
   ContextNodeType,
+  DatasetInputNodeDef,
+  DatasetOutputNodeDef,
   EditEntriesNodeDef,
   JoinDatasetsNodeDef,
   NodeState,
@@ -9,15 +11,18 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
+import { DatasetOutputNode } from '../../../src/main/nodes/dataset';
 import {
   createConnection,
   getAllConnections
 } from '../../../src/main/workspace/connections';
+import { createDataset } from '../../../src/main/workspace/dataset';
 import {
   addOrUpdateFormValue,
   createNode,
   deleteNode,
   getAllNodes,
+  getMetas,
   getNode,
   getNodesCollection,
   getNodeState,
@@ -417,5 +422,46 @@ describe('Nodes', () => {
 
     const allConnections = await getAllConnections(db, ws.id);
     expect(allConnections.length).toBe(0);
+  });
+
+  test('should get meta dataset nodes', async () => {
+    const ds = await createDataset(db, 't');
+    const ws = await createWorkspace(db, 'test', '');
+    const dsInputNode = await createNode(
+      db,
+      DatasetInputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+
+    const dsOutputNode = await createNode(
+      db,
+      DatasetOutputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+
+    await addOrUpdateFormValue(
+      db,
+      dsInputNode.id,
+      'dataset',
+      JSON.stringify(ds.id)
+    );
+
+    await createConnection(
+      db,
+      { name: 'dataset', nodeId: dsInputNode.id },
+      { name: 'dataset', nodeId: dsOutputNode.id }
+    );
+
+    const res = await getMetas(db, dsOutputNode.id);
+
+    expect(res.dataset).toBeDefined();
+    expect(res.dataset.isPresent).toBe(true);
+    expect(res.dataset.content.schema).toEqual([]);
   });
 });

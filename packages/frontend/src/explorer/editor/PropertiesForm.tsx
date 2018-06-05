@@ -72,8 +72,10 @@ class PropertiesFormImpl extends React.Component<
     } = this.props;
     const { saving } = this.state;
     const unsavedChanges = form.isFieldsTouched();
-    const inputs = {};
+    const inputs = node ? JSON.parse(node.metaInputs as any) : {};
     const nodeForm = node ? parseNodeForm(node) : {};
+
+    console.log(inputs);
 
     return (
       <Form layout="inline" hideRequiredMark onSubmit={this.handleSubmit}>
