@@ -50,13 +50,18 @@ export const JoinDatasetsNode: ServerNodeDef<
       };
     }
 
-    // TODO implement special key transform to support all keys from both ds
     return {
       joined: {
         content: {
           schema: [
-            ...inputs.datasetA.content.schema,
-            ...inputs.datasetB.content.schema
+            ...inputs.datasetA.content.schema.map(s => ({
+              ...s,
+              name: `A_${s.name}`
+            })),
+            ...inputs.datasetB.content.schema.map(s => ({
+              ...s,
+              name: `B_${s.name}`
+            }))
           ]
         },
         isPresent: true

@@ -12,8 +12,7 @@ export enum DataType {
   NUMBER = 'Number',
   BOOLEAN = 'Boolean',
   DATE = 'Date',
-  STRING = 'String',
-  ENTRY = 'Entry'
+  STRING = 'String'
 }
 
 export interface DatasetMeta {
@@ -62,11 +61,6 @@ export const StringSocket = (name: string): SocketDef => ({
 
 export const BooleanSocket = (name: string): SocketDef => ({
   dataType: DataType.BOOLEAN,
-  displayName: name
-});
-
-export const EntrySocket = (name: string): SocketDef => ({
-  dataType: DataType.ENTRY,
   displayName: name
 });
 

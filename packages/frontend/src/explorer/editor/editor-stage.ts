@@ -29,9 +29,6 @@ export const updateStage = (
   const nodeMap: Map<string, Konva.Group> = new Map();
   const socketsMap: Map<string, Konva.Group> = new Map();
 
-  // TODO render borders for context as well as sockets based on fnInputs/fnOutputs
-  // and add sockets to socketsmap
-
   const nodesLayer = createNodesLayer(
     server,
     state,
