@@ -5,12 +5,11 @@ import {
   NodeInstance,
   NodeState,
   parseNodeForm,
+  ServerNodeDef,
   SocketDef,
   SocketDefs,
   SocketMetaDef,
-  SocketMetas,
-  NodeDef,
-  ServerNodeDef
+  SocketMetas
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 

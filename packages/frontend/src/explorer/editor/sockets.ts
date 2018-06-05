@@ -1,7 +1,6 @@
 import {
   Colors,
   ConnectionInstance,
-  ConnectionWithoutId,
   SocketDef,
   SocketType
 } from '@masterthesis/shared';
