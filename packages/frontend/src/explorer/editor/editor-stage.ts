@@ -74,7 +74,6 @@ const createNodesLayer = (
       nodeMap.set(n.id, nodeGroup);
     });
 
-  // render context nodes
   nodes
     .filter(
       n =>

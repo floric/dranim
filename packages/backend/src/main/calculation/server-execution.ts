@@ -6,8 +6,10 @@ import {
   IOValues,
   NodeDef,
   NodeExecutionResult,
+  NodeInstance,
   parseNodeForm,
-  ServerNodeDef
+  ServerNodeDef,
+  ServerNodeDefWithContextFn
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
@@ -29,7 +31,6 @@ export const executeServerNode = async (
     if (!contextInputs) {
       throw new Error('Context needs context inputs');
     }
-
     return {
       outputs: contextInputs
     };
@@ -40,13 +41,7 @@ export const executeServerNode = async (
   );
 
   if (node.type === ContextNodeType.OUTPUT) {
-    const res = {};
-    inputValues.forEach(i => {
-      res[i.socketName] = i.value;
-    });
-    return {
-      outputs: res
-    };
+    return getContextNodeOutputs(inputValues);
   }
 
   const type = serverNodeTypes.get(node.type);
@@ -60,30 +55,55 @@ export const executeServerNode = async (
   await checkValidInputAndForm(type, nodeInputs, nodeForm);
 
   if (hasContextFn(type)) {
-    const nodesColl = getNodesCollection(db);
-    const outputNode = await nodesColl.findOne({
-      contextIds: [...node.contextIds, nodeId],
-      type: ContextNodeType.OUTPUT
-    });
-    if (outputNode === null) {
-      throw Error('Missing output node');
-    }
-
-    const inputNode = await nodesColl.findOne({
-      contextIds: [...node.contextIds, nodeId],
-      type: ContextNodeType.INPUT
-    });
-    if (inputNode === null) {
-      throw Error('Missing input node');
-    }
-
-    return await type.onNodeExecution(nodeForm, nodeInputs, db, {
-      onContextFnExecution: inputs =>
-        executeServerNode(db, outputNode._id.toHexString(), inputs)
-    });
+    return await calculateContext(node, type, nodeForm, nodeInputs, db);
   }
 
   return await type.onNodeExecution(nodeForm, nodeInputs, db);
+};
+
+const calculateContext = async (
+  node: NodeInstance,
+  type: ServerNodeDefWithContextFn,
+  nodeForm: FormValues<any>,
+  nodeInputs: IOValues<any>,
+  db: Db
+) => {
+  const nodesColl = getNodesCollection(db);
+  const outputNode = await nodesColl.findOne({
+    contextIds: [...node.contextIds, node.id],
+    type: ContextNodeType.OUTPUT
+  });
+  if (outputNode === null) {
+    throw Error('Missing output node');
+  }
+
+  const inputNode = await nodesColl.findOne({
+    contextIds: [...node.contextIds, node.id],
+    type: ContextNodeType.INPUT
+  });
+  if (inputNode === null) {
+    throw Error('Missing input node');
+  }
+
+  return await type.onNodeExecution(nodeForm, nodeInputs, db, {
+    onContextFnExecution: inputs =>
+      executeServerNode(db, outputNode._id.toHexString(), inputs)
+  });
+};
+
+const getContextNodeOutputs = (
+  inputValues: Array<{
+    socketName: string;
+    value: string;
+  }>
+) => {
+  const res = {};
+  inputValues.forEach(i => {
+    res[i.socketName] = i.value;
+  });
+  return {
+    outputs: res
+  };
 };
 
 const getConnectionResult = async (

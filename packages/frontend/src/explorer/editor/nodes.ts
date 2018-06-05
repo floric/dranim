@@ -59,25 +59,8 @@ export const renderContextNode = (
     server.onNodeUpdate(n.id, ev.target.x(), ev.target.y());
   });
 
-  const bgRect = new Konva.Rect({
-    width: NODE_WIDTH,
-    height,
-    shadowColor: Colors.Black,
-    shadowOpacity: 0.1,
-    shadowBlur: 5,
-    fill: Colors.White
-  });
-
-  const nodeTitle = new Konva.Text({
-    fill: Colors.Black,
-    align: 'center',
-    text: n.type,
-    fontStyle: 'bold',
-    height: TEXT_HEIGHT,
-    width: NODE_WIDTH,
-    y: 10
-  });
-
+  const bgRect = getBackgroundRect(height);
+  const nodeTitle = getHeaderText(false, n.type);
   const inputsGroup = renderSockets(
     inputs,
     n.id,
@@ -96,19 +79,7 @@ export const renderContextNode = (
     socketsMap,
     changeState
   );
-
-  const stateRect = new Konva.Rect({
-    width: NODE_WIDTH,
-    height: STATE_LINE_HEIGHT,
-    x: 0,
-    y: height - STATE_LINE_HEIGHT,
-    fill:
-      n.state === NodeState.VALID
-        ? 'green'
-        : n.state === NodeState.ERROR
-          ? 'red'
-          : 'orange'
-  });
+  const stateRect = getStateRect(height, n.state);
 
   nodeGroup.add(bgRect);
   nodeGroup.add(nodeTitle);
@@ -148,27 +119,11 @@ export const renderNode = (
     });
   });
 
-  const bgRect = new Konva.Rect({
-    width: NODE_WIDTH,
-    height,
-    shadowColor: Colors.Black,
-    shadowOpacity: 0.1,
-    shadowBlur: 5,
-    fill: Colors.White
-  });
-
-  const nodeTitle = new Konva.Text({
-    fill: isSelected ? Colors.Selection : Colors.Black,
-    align: 'center',
-    text: renderName
-      ? renderName({ node: n, state: server }, parseNodeForm(n))
-      : name,
-    fontStyle: 'bold',
-    height: TEXT_HEIGHT,
-    width: NODE_WIDTH,
-    y: 10
-  });
-
+  const bgRect = getBackgroundRect(height);
+  const nodeTitle = getHeaderText(
+    isSelected,
+    renderName ? renderName({ node: n, state: server }, parseNodeForm(n)) : name
+  );
   const inputsGroup = renderSockets(
     inputs,
     n.id,
@@ -187,35 +142,12 @@ export const renderNode = (
     socketsMap,
     changeState
   );
-
-  const stateRect = new Konva.Rect({
-    width: NODE_WIDTH,
-    height: STATE_LINE_HEIGHT,
-    x: 0,
-    y: height - STATE_LINE_HEIGHT,
-    fill:
-      n.state === NodeState.VALID
-        ? 'green'
-        : n.state === NodeState.ERROR
-          ? 'red'
-          : 'orange'
-  });
-
+  const stateRect = getStateRect(height, n.state);
   nodeGroup.add(bgRect);
   nodeGroup.add(nodeTitle);
 
   if (n.hasContextFn) {
-    const fnInfo = new Konva.Text({
-      fill: Colors.Black,
-      align: 'right',
-      text: 'f(n)',
-      height: TEXT_HEIGHT,
-      width: NODE_WIDTH / 2 - 5,
-      y: 10,
-      x: NODE_WIDTH / 2 - 5
-    });
-
-    nodeGroup.add(fnInfo);
+    nodeGroup.add(getContextFunctionNote());
   }
 
   nodeGroup.add(inputsGroup);
@@ -224,6 +156,52 @@ export const renderNode = (
 
   return nodeGroup;
 };
+
+const getContextFunctionNote = () =>
+  new Konva.Text({
+    fill: Colors.Black,
+    align: 'right',
+    text: 'f(n)',
+    height: TEXT_HEIGHT,
+    width: NODE_WIDTH / 2 - 5,
+    y: 10,
+    x: NODE_WIDTH / 2 - 5
+  });
+
+const getStateRect = (height: number, state: NodeState) =>
+  new Konva.Rect({
+    width: NODE_WIDTH,
+    height: STATE_LINE_HEIGHT,
+    x: 0,
+    y: height - STATE_LINE_HEIGHT,
+    fill:
+      state === NodeState.VALID
+        ? 'green'
+        : state === NodeState.ERROR
+          ? 'red'
+          : 'orange'
+  });
+
+const getBackgroundRect = (height: number) =>
+  new Konva.Rect({
+    width: NODE_WIDTH,
+    height,
+    shadowColor: Colors.Black,
+    shadowOpacity: 0.1,
+    shadowBlur: 5,
+    fill: Colors.White
+  });
+
+const getHeaderText = (isSelected: boolean, text: string) =>
+  new Konva.Text({
+    fill: isSelected ? Colors.Selection : Colors.Black,
+    align: 'center',
+    text,
+    fontStyle: 'bold',
+    height: TEXT_HEIGHT,
+    width: NODE_WIDTH,
+    y: 10
+  });
 
 const getNodeHeight = (
   inputs: ConditionalMetaTypes<{}>,

@@ -161,69 +161,81 @@ export const onClickSocket = (
     } else {
       beginNewConnection(nodeId, s, socketName, type, changeState);
     }
-  } else {
-    if (s.dataType !== openConnection.dataType) {
-      showNotificationWithIcon({
-        title: 'Connection not allowed',
-        icon: 'warning',
-        content: 'Connections between different data types are not supported.'
-      });
-      return;
-    }
 
-    if (
-      type === SocketType.INPUT
-        ? openConnection.inputs !== null
-        : openConnection.outputs !== null
-    ) {
-      showNotificationWithIcon({
-        title: 'Connection not allowed',
-        icon: 'warning',
-        content: 'Connections only between inputs or outputs are not possible.'
-      });
-      return;
-    }
+    return;
+  }
 
-    if (
-      type === SocketType.INPUT &&
-      connections.filter(
-        c => c.to && c.to.nodeId === nodeId && c.to.name === socketName
-      ).length > 0
-    ) {
-      showNotificationWithIcon({
-        title: 'Connection not allowed',
-        icon: 'warning',
-        content: 'Multiple inputs are not possible.'
-      });
-      return;
-    }
+  if (s.dataType !== openConnection.dataType) {
+    handleDifferentDataTypes();
+    return;
+  }
 
-    let openConnections: Array<ConnectionWithoutId> = [];
-    openConnections = openConnections.concat(
-      openConnection.inputs
-        ? openConnection.inputs.map(c => ({
-            to: { nodeId: c.nodeId, name: c.name },
-            from: { nodeId, name: socketName }
-          }))
-        : []
-    );
-    openConnections = openConnections.concat(
+  if (
+    type === SocketType.INPUT
+      ? openConnection.inputs !== null
+      : openConnection.outputs !== null
+  ) {
+    handleNotAllowedConnection();
+    return;
+  }
+
+  if (
+    type === SocketType.INPUT &&
+    connections.filter(
+      c => c.to && c.to.nodeId === nodeId && c.to.name === socketName
+    ).length > 0
+  ) {
+    handleMultipleInputs();
+    return;
+  }
+
+  (openConnection.inputs
+    ? openConnection.inputs.map(c => ({
+        to: { nodeId: c.nodeId, name: c.name },
+        from: { nodeId, name: socketName }
+      }))
+    : []
+  )
+    .concat(
       openConnection.outputs
         ? openConnection.outputs.map(c => ({
             to: { nodeId, name: socketName },
             from: { nodeId: c.nodeId, name: c.name }
           }))
         : []
-    );
-
-    openConnections.filter(c => c.to !== null && c.from !== null).forEach(c => {
+    )
+    .filter(c => c.to !== null && c.from !== null)
+    .forEach(c => {
       server.onConnectionCreate(c.from!, c.to!);
     });
 
-    changeState({
-      openConnection: null
-    });
-  }
+  changeState({
+    openConnection: null
+  });
+};
+
+const handleMultipleInputs = () => {
+  showNotificationWithIcon({
+    title: 'Connection not allowed',
+    icon: 'warning',
+    content: 'Multiple inputs are not possible.'
+  });
+};
+
+const handleDifferentDataTypes = () => {
+  showNotificationWithIcon({
+    title: 'Connection not allowed',
+    icon: 'warning',
+    content: 'Connections between different data types are not supported.'
+  });
+};
+
+const handleNotAllowedConnection = () => {
+  showNotificationWithIcon({
+    title: 'Connection not allowed',
+    icon: 'warning',
+    content: 'Connections only between inputs or outputs are not possible.'
+  });
 };
 
 const getConnectionsInSocket = (

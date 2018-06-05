@@ -8,7 +8,9 @@ import {
   SocketDef,
   SocketDefs,
   SocketMetaDef,
-  SocketMetas
+  SocketMetas,
+  NodeDef,
+  ServerNodeDef
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
@@ -165,31 +167,15 @@ export const createNode = async (
   x: number,
   y: number
 ): Promise<NodeInstance> => {
-  const collection = getNodesCollection(db);
-  if (type.length === 0) {
-    throw new Error('Name must not be empty');
-  }
-
   const nodeType = serverNodeTypes.get(type);
   if (!nodeType) {
     throw new Error('Invalid node type');
   }
 
-  if (contextNodeIds.length > 0) {
-    const contextNode = await getNode(
-      db,
-      contextNodeIds[contextNodeIds.length - 1]
-    );
-    if (!contextNode) {
-      throw new Error('Unknown context node');
-    }
-  }
+  await checkValidContextNode(contextNodeIds, db);
+  await checkValidWorkspace(workspaceId, db);
 
-  const ws = await getWorkspace(db, workspaceId);
-  if (!ws) {
-    throw new Error('Unknown workspace');
-  }
-
+  const collection = getNodesCollection(db);
   const res = await collection.insertOne({
     x,
     y,
@@ -206,7 +192,30 @@ export const createNode = async (
 
   const newNodeId = res.ops[0]._id.toHexString();
 
+  await addContextNodesIfNecessary(
+    nodeType,
+    newNodeId,
+    contextNodeIds,
+    workspaceId,
+    db
+  );
+
+  return {
+    id: newNodeId,
+    form: [],
+    ...res.ops[0]
+  };
+};
+
+const addContextNodesIfNecessary = async (
+  nodeType: ServerNodeDef,
+  newNodeId: string,
+  contextNodeIds: Array<string>,
+  workspaceId: string,
+  db: Db
+) => {
   if (hasContextFn(nodeType)) {
+    const collection = getNodesCollection(db);
     const nestedContextIds = [...contextNodeIds, newNodeId];
     const contextNodes = [ContextNodeType.INPUT, ContextNodeType.OUTPUT].map(
       contextType => ({
@@ -222,12 +231,25 @@ export const createNode = async (
 
     await collection.insertMany(contextNodes);
   }
+};
 
-  return {
-    id: newNodeId,
-    form: [],
-    ...res.ops[0]
-  };
+const checkValidContextNode = async (contextNodeIds: Array<string>, db: Db) => {
+  if (contextNodeIds.length > 0) {
+    const contextNode = await getNode(
+      db,
+      contextNodeIds[contextNodeIds.length - 1]
+    );
+    if (!contextNode) {
+      throw new Error('Unknown context node');
+    }
+  }
+};
+
+const checkValidWorkspace = async (workspaceId: string, db: Db) => {
+  const ws = await getWorkspace(db, workspaceId);
+  if (!ws) {
+    throw new Error('Unknown workspace');
+  }
 };
 
 export const deleteNode = async (db: Db, id: string) => {
