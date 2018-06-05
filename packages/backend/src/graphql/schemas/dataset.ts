@@ -1,7 +1,7 @@
-import Entry from './entry';
-import Valueschema from './valueschema';
+import EntryDef from './entry';
+import ValueschemaDef from './valueschema';
 
-const Dataset = `
+const DatasetDef = `
   type Dataset {
     id: String!
     name: String!
@@ -11,4 +11,4 @@ const Dataset = `
   }
 `;
 
-export default () => [Dataset, Valueschema, Entry];
+export default () => [DatasetDef, ValueschemaDef, EntryDef];

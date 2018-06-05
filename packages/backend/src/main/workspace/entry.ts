@@ -1,4 +1,4 @@
-import { Entry, Values } from '@masterthesis/shared';
+import { Entry, sleep, Values } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { getDataset } from '../../main/workspace/dataset';
@@ -77,13 +77,7 @@ export const createEntry = async (
   }
 
   valuesArr.forEach(v => {
-    if (
-      !v ||
-      v[0] === null ||
-      v[0] === undefined ||
-      v[1] === null ||
-      v[1] === undefined
-    ) {
+    if (!v || v[0] == null || v[1] == null) {
       throw new Error('Value malformed');
     }
   });
@@ -157,7 +151,8 @@ export const copyTransformedToOtherDataset = async (
       const newValues = transformFn(chunk);
       await createEntry(db, newDsId, newValues);
     });
-    col.on('end', () => {
+    col.on('end', async () => {
+      await sleep(500);
       resolve();
     });
     col.on('error', () => {

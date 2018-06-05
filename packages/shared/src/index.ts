@@ -1,36 +1,15 @@
 import { NodeDef } from './nodes';
-import {
-  DatasetInputNodeDef,
-  DatasetOutputNodeDef,
-  JoinDatasetsNodeDef,
-  SelectValuesNodeDef
-} from './nodes/dataset';
-import {
-  FormatNumberNodeDef,
-  MultiplicationNodeDef,
-  NumberInputNodeDef,
-  NumberOutputNodeDef,
-  SumNodeDef
-} from './nodes/number';
-import { StringInputNodeDef, StringOutputNodeDef } from './nodes/string';
+import * as BooleanNodes from './nodes/boolean';
+import * as DatasetNodes from './nodes/dataset';
+import * as EntryNodes from './nodes/entries';
+import * as NumberNodes from './nodes/number';
+import * as StringNodes from './nodes/string';
+import * as ColorsDef from './styles/colors';
+
+export const Colors = ColorsDef;
 
 export const NodesMap = new Map<string, NodeDef>(
-  [
-    {
-      DatasetInputNodeDef,
-      DatasetOutputNodeDef,
-      JoinDatasetsNodeDef,
-      SelectValuesNodeDef
-    },
-    { StringInputNodeDef, StringOutputNodeDef },
-    {
-      NumberInputNodeDef,
-      NumberOutputNodeDef,
-      FormatNumberNodeDef,
-      MultiplicationNodeDef,
-      SumNodeDef
-    }
-  ]
+  [EntryNodes, StringNodes, NumberNodes, DatasetNodes, BooleanNodes]
     .map(n => Object.values(n))
     .reduce<Array<NodeDef>>((list, elem, _, all) => [...list, ...elem], [])
     .map<[string, NodeDef]>(n => [n.name, n])
@@ -43,3 +22,5 @@ export * from './sockets';
 export * from './nodes/dataset';
 export * from './nodes/number';
 export * from './nodes/string';
+export * from './nodes/entries';
+export * from './nodes/boolean';

@@ -43,8 +43,22 @@ describe('Connections', () => {
   test('should create and delete connection', async () => {
     const ws = await createWorkspace(db, 'test', '');
 
-    const nodeA = await createNode(db, NumberInputNodeDef.name, ws.id, 0, 0);
-    const nodeB = await createNode(db, NumberOutputNodeDef.name, ws.id, 0, 0);
+    const nodeA = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+    const nodeB = await createNode(
+      db,
+      NumberOutputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
 
     const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
     const toSocket: SocketInstance = { name: 'val', nodeId: nodeB.id };
@@ -55,6 +69,7 @@ describe('Connections', () => {
     expect(newConn.from).toEqual(fromSocket);
     expect(newConn.to).toEqual(toSocket);
     expect(newConn.workspaceId).toBe(ws.id);
+    expect(newConn.contextIds).toEqual([]);
 
     const res = await deleteConnection(db, newConn.id);
     expect(res).toBe(true);
@@ -63,11 +78,65 @@ describe('Connections', () => {
     expect(unknownConn).toBe(null);
   });
 
+  test('should create connection in context', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+
+    const contextNode = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+    const nodeA = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      ws.id,
+      [contextNode.id],
+      0,
+      0
+    );
+    const nodeB = await createNode(
+      db,
+      NumberOutputNodeDef.name,
+      ws.id,
+      [contextNode.id],
+      0,
+      0
+    );
+
+    const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
+    const toSocket: SocketInstance = { name: 'val', nodeId: nodeB.id };
+
+    const newConn = await createConnection(db, fromSocket, toSocket);
+
+    expect(newConn.id).toBeDefined();
+    expect(newConn.from).toEqual(fromSocket);
+    expect(newConn.to).toEqual(toSocket);
+    expect(newConn.workspaceId).toBe(ws.id);
+    expect(newConn.contextIds).toEqual([contextNode.id]);
+  });
+
   test('should find cycle and prevent connection creation', async () => {
     const ws = await createWorkspace(db, 'test', '');
 
-    const nodeA = await createNode(db, NumberInputNodeDef.name, ws.id, 0, 0);
-    const nodeB = await createNode(db, NumberOutputNodeDef.name, ws.id, 0, 0);
+    const nodeA = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+    const nodeB = await createNode(
+      db,
+      NumberOutputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
 
     const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
     const toSocket: SocketInstance = { name: 'val', nodeId: nodeB.id };
@@ -86,7 +155,14 @@ describe('Connections', () => {
   test('should not create connection for unknown nodes', async () => {
     const ws = await createWorkspace(db, 'test', '');
 
-    const nodeA = await createNode(db, NumberInputNodeDef.name, ws.id, 0, 0);
+    const nodeA = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
 
     const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
     const toSocket: SocketInstance = {
@@ -106,8 +182,22 @@ describe('Connections', () => {
     const wsA = await createWorkspace(db, 'test', '');
     const wsB = await createWorkspace(db, 'test', '');
 
-    const nodeA = await createNode(db, NumberInputNodeDef.name, wsA.id, 0, 0);
-    const nodeB = await createNode(db, NumberInputNodeDef.name, wsB.id, 0, 0);
+    const nodeA = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      wsA.id,
+      [],
+      0,
+      0
+    );
+    const nodeB = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      wsB.id,
+      [],
+      0,
+      0
+    );
 
     const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
     const toSocket: SocketInstance = {
@@ -119,7 +209,49 @@ describe('Connections', () => {
       await createConnection(db, toSocket, fromSocket);
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Nodes live in different workspaes!');
+      expect(err.message).toBe('Nodes live in different workspaces!');
+    }
+  });
+
+  test('should not create connection for nodes in different contexts', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const contextNode = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+
+    const nodeA = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+    const nodeB = await createNode(
+      db,
+      NumberInputNodeDef.name,
+      ws.id,
+      [contextNode.id],
+      0,
+      0
+    );
+
+    const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
+    const toSocket: SocketInstance = {
+      name: 'val',
+      nodeId: nodeB.id
+    };
+
+    try {
+      await createConnection(db, toSocket, fromSocket);
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Nodes live in different contexts!');
     }
   });
 });

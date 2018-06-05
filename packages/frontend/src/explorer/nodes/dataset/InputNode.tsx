@@ -7,7 +7,7 @@ import {
 } from '@masterthesis/shared';
 import { Form, Select } from 'antd';
 
-import { ClientNodeDef } from '../AllNodes';
+import { ClientNodeDef } from '../all-nodes';
 import { getValueOrDefault } from '../utils';
 
 export const DatasetInputNode: ClientNodeDef<
@@ -19,39 +19,6 @@ export const DatasetInputNode: ClientNodeDef<
   renderName: ({ state: { datasets } }, nodeForm) => {
     const ds = datasets.find(n => n.id === nodeForm.dataset);
     return !ds ? DatasetInputNodeDef.name : ds.name;
-  },
-  onClientExecution: (inputs, nodeForm, context) => {
-    const dsId = nodeForm.dataset;
-    if (!dsId) {
-      return {
-        dataset: {
-          isPresent: false,
-          content: {
-            schema: []
-          }
-        }
-      };
-    }
-    const ds = context.state.datasets.find(n => n.id === dsId);
-    if (!ds) {
-      return {
-        dataset: {
-          isPresent: false,
-          content: {
-            schema: []
-          }
-        }
-      };
-    }
-
-    return {
-      dataset: {
-        isPresent: true,
-        content: {
-          schema: ds.valueschemas
-        }
-      }
-    };
   },
   renderFormItems: ({
     form: { getFieldDecorator },

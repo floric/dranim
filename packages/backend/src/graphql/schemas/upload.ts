@@ -1,6 +1,6 @@
-const Upload = `scalar Upload`;
+const UploadDef = `scalar Upload`;
 
-const UploadError = `
+const UploadErrorDef = `
   type UploadError {
     name: String!
     message: String!
@@ -8,7 +8,7 @@ const UploadError = `
   }
 `;
 
-const UploadProcess = `
+const UploadProcessDef = `
   type UploadProcess {
     id: String!
     start: String!
@@ -23,4 +23,4 @@ const UploadProcess = `
   }
 `;
 
-export default () => [Upload, UploadError, UploadProcess];
+export default () => [UploadDef, UploadErrorDef, UploadProcessDef];

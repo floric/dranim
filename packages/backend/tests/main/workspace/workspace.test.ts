@@ -1,12 +1,25 @@
+import {
+  NumberInputNodeDef,
+  NumberOutputNodeDef,
+  sleep
+} from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
+import { createConnection } from '../../../src/main/workspace/connections';
+import {
+  createNode,
+  getAllNodes,
+  getNode
+} from '../../../src/main/workspace/nodes';
 import {
   createWorkspace,
   deleteWorkspace,
+  getAllWorkspaces,
   getWorkspace,
+  initWorkspaceDb,
   updateWorkspace
 } from '../../../src/main/workspace/workspace';
-import { getTestMongoDb, NeverGoHereError, sleep } from '../../test-utils';
+import { getTestMongoDb, NeverGoHereError } from '../../test-utils';
 
 let conn;
 let db: Db;
@@ -78,11 +91,15 @@ describe('Workspaces', () => {
   });
 
   test('should get all workspaces', async () => {
-    const allWs = await Promise.all([
+    await Promise.all([
       createWorkspace(db, 'a', 'aDesc'),
       createWorkspace(db, 'b', 'bDesc'),
       createWorkspace(db, 'c', 'cDesc')
     ]);
+
+    const allWs = await getAllWorkspaces(db);
+
+    expect(allWs.length).toBe(3);
 
     const wsA = allWs.filter(n => n.name === 'a');
     expect(wsA.length).toBe(1);
@@ -94,7 +111,7 @@ describe('Workspaces', () => {
 
     const ws = await createWorkspace(db, name, description);
 
-    await sleep(1100);
+    await sleep(100);
 
     const res = await updateWorkspace(db, ws.id, [], []);
     expect(res).toBe(true);
@@ -103,5 +120,43 @@ describe('Workspaces', () => {
     expect(new Date(ws.lastChange).getTime()).toBeLessThan(
       new Date(newWs.lastChange).getTime()
     );
+  });
+
+  test('should move nodes with update workspace', async () => {
+    const description = 'desc';
+    const name = 'wsname';
+
+    const ws = await createWorkspace(db, name, description);
+    const [nodeA, nodeB] = await Promise.all([
+      createNode(db, NumberInputNodeDef.name, ws.id, [], 0, 0),
+      createNode(db, NumberOutputNodeDef.name, ws.id, [], 0, 0)
+    ]);
+    const nodeConn = await createConnection(
+      db,
+      { name: 'value', nodeId: nodeA.id },
+      { name: 'value', nodeId: nodeB.id }
+    );
+
+    const res = await updateWorkspace(
+      db,
+      ws.id,
+      [{ ...nodeA, x: 1, y: 2 }, { ...nodeB, x: 3, y: 4 }],
+      [nodeConn]
+    );
+    expect(res).toBe(true);
+
+    const [updatedNodeA, updatedNodeB] = await Promise.all([
+      getNode(db, nodeA.id),
+      getNode(db, nodeB.id)
+    ]);
+    expect(updatedNodeA.x).toBe(1);
+    expect(updatedNodeA.y).toBe(2);
+    expect(updatedNodeB.x).toBe(3);
+    expect(updatedNodeB.y).toBe(4);
+  });
+
+  test('should return true after initializing workspaces', async () => {
+    const res = await initWorkspaceDb(db);
+    expect(res).toBe(true);
   });
 });

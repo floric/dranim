@@ -21,6 +21,7 @@ const WORKSPACE_NODE_SELECTION = gql`
       valueschemas {
         name
         unique
+        type
       }
     }
     workspace(id: $workspaceId) {
@@ -32,6 +33,7 @@ const WORKSPACE_NODE_SELECTION = gql`
         x
         y
         state
+        contextIds
         inputs {
           name
           connectionId
@@ -44,6 +46,10 @@ const WORKSPACE_NODE_SELECTION = gql`
           name
           value
         }
+        metaInputs
+        hasContextFn
+        contextInputDefs
+        contextOutputDefs
       }
       connections {
         id
@@ -55,6 +61,7 @@ const WORKSPACE_NODE_SELECTION = gql`
           nodeId
           name
         }
+        contextIds
       }
     }
   }
@@ -64,10 +71,17 @@ const CREATE_NODE = gql`
   mutation createNode(
     $type: String!
     $workspaceId: String!
+    $contextIds: [String!]!
     $x: Float!
     $y: Float!
   ) {
-    createNode(type: $type, workspaceId: $workspaceId, x: $x, y: $y) {
+    createNode(
+      type: $type
+      workspaceId: $workspaceId
+      contextIds: $contextIds
+      x: $x
+      y: $y
+    ) {
       id
       x
       y
@@ -185,7 +199,12 @@ export default class WorkspaceEditorPage extends React.Component<
                                           nodes={deepCopyResponse(
                                             data.workspace.nodes
                                           )}
-                                          onNodeCreate={(type, x, y) =>
+                                          onNodeCreate={(
+                                            type,
+                                            x,
+                                            y,
+                                            contextIds
+                                          ) =>
                                             tryOperation({
                                               op: () =>
                                                 createNode({
@@ -193,6 +212,7 @@ export default class WorkspaceEditorPage extends React.Component<
                                                     type,
                                                     x,
                                                     y,
+                                                    contextIds,
                                                     workspaceId: id
                                                   }
                                                 }),

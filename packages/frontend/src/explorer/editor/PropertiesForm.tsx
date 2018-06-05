@@ -6,8 +6,7 @@ import { FormComponentProps } from 'antd/lib/form';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 
 import { tryOperation } from '../../utils/form';
-import { EditorContext, RenderFormItemsProps } from '../nodes/AllNodes';
-import { getInputInformation } from '../nodes/utils';
+import { EditorContext, RenderFormItemsProps } from '../nodes/all-nodes';
 
 export interface IPropertiesFormProps {
   handleSubmit: (form: WrappedFormUtils, nodeId: string) => Promise<any>;
@@ -17,11 +16,12 @@ export interface IPropertiesFormProps {
 
 class PropertiesFormImpl extends React.Component<
   IPropertiesFormProps & FormComponentProps,
-  { saving: boolean }
+  { saving: boolean; temp: any }
 > {
   public componentWillMount() {
     this.setState({
-      saving: false
+      saving: false,
+      temp: {}
     });
   }
 
@@ -47,9 +47,7 @@ class PropertiesFormImpl extends React.Component<
         saving: true
       });
       await tryOperation({
-        op: async () => {
-          await handleSubmit(form, id);
-        },
+        op: () => handleSubmit(form, id),
         successTitle: () => 'Properties saved',
         successMessage: () => `Properties saved successfully.`,
         failedTitle: 'Properties not saved.',
@@ -74,12 +72,21 @@ class PropertiesFormImpl extends React.Component<
     } = this.props;
     const { saving } = this.state;
     const unsavedChanges = form.isFieldsTouched();
-    const inputs = node ? getInputInformation({ node, state }) : {};
+    const inputs = node ? JSON.parse(node.metaInputs as any) : {};
     const nodeForm = node ? parseNodeForm(node) : {};
 
     return (
       <Form layout="inline" hideRequiredMark onSubmit={this.handleSubmit}>
-        {renderFormItems({ form, inputs, state, node, nodeForm })}
+        {renderFormItems({
+          form,
+          inputs,
+          state,
+          node,
+          nodeForm,
+          getTempState: () => this.state.temp,
+          setTempState: s =>
+            this.setState({ temp: { ...this.state.temp, ...s } })
+        })}
         <Form.Item wrapperCol={{ xs: 24 }}>
           <Button.Group>
             <Button

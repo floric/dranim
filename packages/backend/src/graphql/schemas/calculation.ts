@@ -1,4 +1,4 @@
-const CalculationProcess = `
+const CalculationProcessDef = `
   type CalculationProcess {
     id: String!
     start: String!
@@ -9,4 +9,4 @@ const CalculationProcess = `
   }
 `;
 
-export default () => [CalculationProcess];
+export default () => [CalculationProcessDef];

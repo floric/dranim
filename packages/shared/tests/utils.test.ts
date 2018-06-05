@@ -1,5 +1,11 @@
-import { FormValue, NodeInstance, NodeState } from '../src';
-import { parseNodeForm } from '../src/utils';
+import {
+  EditEntriesNodeDef,
+  FormValue,
+  NodeInstance,
+  NodeState,
+  NumberInputNodeDef
+} from '../src';
+import { hasContextFn, isNumeric, parseNodeForm, sleep } from '../src/utils';
 
 const createNodeWithForm = (form: Array<FormValue>): NodeInstance => ({
   id: '1',
@@ -7,10 +13,12 @@ const createNodeWithForm = (form: Array<FormValue>): NodeInstance => ({
   outputs: [],
   state: NodeState.VALID,
   type: 'Node',
+  contextIds: [],
   workspaceId: '2',
   x: 0,
   y: 0,
-  form
+  form,
+  meta: {}
 });
 
 describe('Utils', () => {
@@ -59,5 +67,54 @@ describe('Utils', () => {
 
     expect(res.test).toBe(123);
     expect(res.car).toBe(null);
+  });
+
+  it('should be numeric', () => {
+    expect(isNumeric(3)).toBe(true);
+    expect(isNumeric(-3)).toBe(true);
+    expect(isNumeric(3.14)).toBe(true);
+    expect(isNumeric(34125)).toBe(true);
+    expect(isNumeric('3')).toBe(true);
+    expect(isNumeric('-3.14')).toBe(true);
+  });
+
+  it('should not be numeric', () => {
+    expect(isNumeric('')).toBe(false);
+    expect(isNumeric('a')).toBe(false);
+    expect(isNumeric(null)).toBe(false);
+    expect(isNumeric(undefined)).toBe(false);
+    expect(isNumeric(NaN)).toBe(false);
+  });
+
+  it('should sleep', async () => {
+    const now = new Date().getTime();
+    await sleep(500);
+    const later = new Date().getTime();
+
+    expect(later - now).toBeGreaterThan(499);
+  });
+
+  it('should return true for node with context function', () => {
+    const res = hasContextFn({
+      name: 'test',
+      isFormValid: () => Promise.resolve(true),
+      isInputValid: () => Promise.resolve(true),
+      onMetaExecution: () => Promise.resolve({}),
+      onNodeExecution: () => Promise.resolve({ outputs: {} }),
+      transformContextInputDefsToContextOutputDefs: () => Promise.resolve({}),
+      transformInputDefsToContextInputDefs: () => Promise.resolve({})
+    });
+    expect(res).toBe(true);
+  });
+
+  it('should return false for node without context function', () => {
+    const res = hasContextFn({
+      name: 'test',
+      isFormValid: () => Promise.resolve(true),
+      isInputValid: () => Promise.resolve(true),
+      onMetaExecution: () => Promise.resolve({}),
+      onNodeExecution: () => Promise.resolve({ outputs: {} })
+    });
+    expect(res).toBe(false);
   });
 });

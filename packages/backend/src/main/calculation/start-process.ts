@@ -1,7 +1,12 @@
-import { CalculationProcess, ProcessState } from '@masterthesis/shared';
+import {
+  CalculationProcess,
+  NodeInstance,
+  ProcessState
+} from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
-import { executeNode } from '../calculation/execute-node';
-import { outputNodes } from '../nodes/AllNodes';
+
+import { executeServerNode } from '../calculation/server-execution';
+import { serverNodeTypes } from '../nodes/all-nodes';
 import { getAllNodes } from '../workspace/nodes';
 
 const startProcess = async (db: Db, processId: string, workspaceId: string) => {
@@ -9,8 +14,11 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
 
   try {
     const nodes = await getAllNodes(db, workspaceId);
-    const outputNodesInstances = nodes.filter(n =>
-      outputNodes.includes(n.type)
+    const outputNodesInstances = nodes.filter(
+      n =>
+        serverNodeTypes.has(n.type)
+          ? serverNodeTypes.get(n.type)!.isOutputNode === true
+          : false
     );
 
     await processCollection.updateOne(
@@ -24,47 +32,56 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
     );
 
     await Promise.all(
-      outputNodesInstances.map(async o => {
-        const { results } = await executeNode(db, o.id);
-        console.log(results);
-
-        await processCollection.updateOne(
-          { _id: new ObjectID(processId) },
-          {
-            $inc: {
-              processedOutputs: 1
-            }
-          }
-        );
-      })
+      outputNodesInstances.map(o => executeOutputNode(db, o, processId))
     );
 
-    await processCollection.updateOne(
-      { _id: new ObjectID(processId) },
-      {
-        $set: {
-          finish: new Date(),
-          state: ProcessState.SUCCESSFUL
-        }
-      }
-    );
+    await updateFinishedProcess(db, processId, ProcessState.SUCCESSFUL);
+    console.log('Finished calcuation successfully.');
   } catch (err) {
-    await processCollection.updateOne(
-      { _id: new ObjectID(processId) },
-      {
-        $set: {
-          finish: new Date(),
-          state: ProcessState.ERROR
-        }
-      }
-    );
+    await updateFinishedProcess(db, processId, ProcessState.ERROR);
     if (process.env.NODE_ENV !== 'test') {
       console.error('Finished calculation with errors.', err);
     }
   }
 };
 
-export const getCalculationsCollection = (
+const executeOutputNode = async (
+  db: Db,
+  o: NodeInstance,
+  processId: string
+) => {
+  const processCollection = getCalculationsCollection(db);
+
+  // TODO Display results somewhere
+  await executeServerNode(db, o.id);
+  await processCollection.updateOne(
+    { _id: new ObjectID(processId) },
+    {
+      $inc: {
+        processedOutputs: 1
+      }
+    }
+  );
+};
+
+const updateFinishedProcess = async (
+  db: Db,
+  processId: string,
+  state: ProcessState
+) => {
+  const processCollection = getCalculationsCollection(db);
+  await processCollection.updateOne(
+    { _id: new ObjectID(processId) },
+    {
+      $set: {
+        finish: new Date(),
+        state
+      }
+    }
+  );
+};
+
+const getCalculationsCollection = (
   db: Db
 ): Collection<CalculationProcess & { _id: ObjectID }> => {
   return db.collection('Calculations');

@@ -1,10 +1,10 @@
-import Dataset from './dataset';
+import DatasetDef from './dataset';
 
-const Entry = `
+const EntryDef = `
   type Entry {
     id: String!
     values: String!
   }
 `;
 
-export default () => [Entry, Dataset];
+export default () => [EntryDef, DatasetDef];

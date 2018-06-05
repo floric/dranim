@@ -45,7 +45,14 @@ export const createConnection = async (
   }
 
   if (inputNode.workspaceId !== outputNode.workspaceId) {
-    throw new Error('Nodes live in different workspaes!');
+    throw new Error('Nodes live in different workspaces!');
+  }
+
+  if (
+    inputNode.contextIds[inputNode.contextIds.length - 1] !==
+    outputNode.contextIds[outputNode.contextIds.length - 1]
+  ) {
+    throw new Error('Nodes live in different contexts!');
   }
 
   const hasFoundCycles = await containsCycles(db, inputNode!, from, to);
@@ -56,6 +63,7 @@ export const createConnection = async (
   const insertRes = await collection.insertOne({
     from,
     to,
+    contextIds: inputNode!.contextIds,
     workspaceId: inputNode!.workspaceId
   });
 

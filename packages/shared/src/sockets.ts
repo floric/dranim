@@ -1,4 +1,5 @@
 import { DatasetRef } from './nodes/dataset';
+import { EntryRef } from './nodes/entries';
 import { ValueSchema } from './workspace';
 
 export enum SocketType {
@@ -13,16 +14,15 @@ export enum DataType {
   DATE = 'Date',
   STRING = 'String'
 }
+
 export interface DatasetMeta {
   schema: Array<ValueSchema>;
 }
 
-export interface SocketDef<Meta = {}> {
+export interface SocketDef {
   dataType: DataType;
   displayName: string;
-  order?: number;
-  meta: SocketMetaDef<Meta>;
-  isConnected: boolean;
+  isDynamic?: boolean;
 }
 
 export interface SocketMetaDef<Meta = {}> {
@@ -30,39 +30,41 @@ export interface SocketMetaDef<Meta = {}> {
   content: Meta;
 }
 
-export type SocketMetaContent<T> = { [Name in keyof T]: any };
-export type SocketDefsGeneric<T, M extends SocketMetaContent<T>> = {
-  [Name in keyof T]: SocketDef<M[Name]>
+export type SocketDefsGeneric<M> = { [Name in keyof M]: SocketDef } & {
+  [x: string]: SocketDef;
 };
-export type SocketMetasGeneric<T, M extends SocketMetaContent<T>> = {
-  [Name in keyof T]: SocketMetaDef<M[Name]>
-};
+export type SocketMetasGeneric<M> = {
+  [Name in keyof M]: SocketMetaDef<M[Name]>
+} & { [x: string]: SocketMetaDef<any> };
 export type ConditionalMetaTypes<T> = {
-  [Name in keyof T]: T[Name] extends DatasetRef ? DatasetMeta : {}
+  [Name in keyof T]: T[Name] extends DatasetRef
+    ? DatasetMeta
+    : (T[Name] extends EntryRef ? DatasetMeta : {})
 };
-export type SocketDefs<T> = SocketDefsGeneric<T, ConditionalMetaTypes<T>>;
-export type SocketMetas<T> = SocketMetasGeneric<T, ConditionalMetaTypes<T>>;
+export type SocketDefs<T> = SocketDefsGeneric<ConditionalMetaTypes<T>>;
+export type SocketMetas<T> = SocketMetasGeneric<ConditionalMetaTypes<T>>;
 
-export const DataSocket = (name: string): SocketDef<DatasetMeta> => ({
+export const DatasetSocket = (name: string): SocketDef => ({
   dataType: DataType.DATASET,
-  isConnected: false,
-  meta: {
-    content: { schema: [] },
-    isPresent: false
-  },
   displayName: name
 });
 
 export const NumberSocket = (name: string): SocketDef => ({
   dataType: DataType.NUMBER,
-  isConnected: false,
-  meta: { content: {}, isPresent: false },
   displayName: name
 });
 
 export const StringSocket = (name: string): SocketDef => ({
   dataType: DataType.STRING,
-  isConnected: false,
-  meta: { content: {}, isPresent: false },
+  displayName: name
+});
+
+export const BooleanSocket = (name: string): SocketDef => ({
+  dataType: DataType.BOOLEAN,
+  displayName: name
+});
+
+export const DateSocket = (name: string): SocketDef => ({
+  dataType: DataType.DATE,
   displayName: name
 });

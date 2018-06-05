@@ -18,7 +18,6 @@ import {
 import {
   getTestMongoDb,
   NeverGoHereError,
-  sleep,
   VALID_OBJECT_ID
 } from '../../test-utils';
 
@@ -127,8 +126,6 @@ describe('Entry', () => {
     await copyTransformedToOtherDataset(db, dsA.id, dsB.id, (e: Entry) => ({
       test: e.values.test * 100
     }));
-
-    await sleep(500);
 
     const all = await getAllEntries(db, dsB.id);
     expect(all.map(e => e.values.test).sort()).toEqual(

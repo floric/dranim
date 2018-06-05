@@ -1,4 +1,4 @@
-const Valueschema = `
+const ValueschemaDef = `
   type Valueschema {
     name: String!
     type: String!
@@ -8,4 +8,4 @@ const Valueschema = `
   }
 `;
 
-export default () => [Valueschema];
+export default () => [ValueschemaDef];

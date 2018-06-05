@@ -31,12 +31,13 @@ export default class StartPage extends React.Component<{}> {
               <Mutation mutation={CREATE_STR_DEMO_DATA}>
                 {(createSTRDemoData, b) => (
                   <AsyncButton
+                    icon="plus"
                     onClick={async () => {
                       await createSTRDemoData();
                       await client.reFetchObservableQueries();
                     }}
                   >
-                    Add Demo Data
+                    Create
                   </AsyncButton>
                 )}
               </Mutation>
@@ -48,12 +49,13 @@ export default class StartPage extends React.Component<{}> {
               <Mutation mutation={CREATE_BIRTHDAYS_DEMO_DATA}>
                 {(createBirthdaysDemoData, b) => (
                   <AsyncButton
+                    icon="plus"
                     onClick={async () => {
                       await createBirthdaysDemoData();
                       await client.reFetchObservableQueries();
                     }}
                   >
-                    Add Demo Data
+                    Create
                   </AsyncButton>
                 )}
               </Mutation>

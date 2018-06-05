@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import {
+  Colors,
   ConnectionInstance,
   Dataset,
   NodeInstance,
@@ -11,10 +12,10 @@ import { css } from 'glamor';
 
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { AsyncButton } from '../components/AsyncButton';
-import { EXPLORER_CONTAINER, updateStage } from './editor/EditorStage';
-import { NODE_WIDTH } from './editor/Nodes';
+import { EXPLORER_CONTAINER, updateStage } from './editor/editor-stage';
+import { NODE_WIDTH } from './editor/nodes';
 import { PropertiesForm } from './editor/PropertiesForm';
-import { nodeTypes, nodeTypesTree } from './nodes/AllNodes';
+import { nodeTypes, nodeTypesTree } from './nodes/all-nodes';
 
 const filterTreeNode = (inputValue: string, treeNode: any) => {
   if (!treeNode.props.index) {
@@ -28,7 +29,12 @@ export interface ExplorerEditorProps {
   connections: Array<ConnectionInstance>;
   nodes: Array<NodeInstance>;
   datasets: Array<Dataset>;
-  onNodeCreate: (type: string, x: number, y: number) => Promise<any>;
+  onNodeCreate: (
+    type: string,
+    x: number,
+    y: number,
+    contextIds: Array<string>
+  ) => Promise<any>;
   onNodeDelete: (id: string) => Promise<any>;
   onNodeUpdate: (id: string, x: number, y: number) => Promise<any>;
   onConnectionCreate: (
@@ -52,7 +58,8 @@ export interface OpenConnection {
 
 export interface ExplorerEditorState {
   openConnection: OpenConnection | null;
-  selectedNode: string | null;
+  selectedNodeId: string | null;
+  contextIds: Array<string>;
 }
 
 export class ExplorerEditor extends React.Component<
@@ -64,7 +71,8 @@ export class ExplorerEditor extends React.Component<
   public componentWillMount() {
     this.setState({
       openConnection: null,
-      selectedNode: null
+      selectedNodeId: null,
+      contextIds: []
     });
   }
 
@@ -93,13 +101,13 @@ export class ExplorerEditor extends React.Component<
   };
 
   private handleDeleteSelectedNode = async () => {
-    const { selectedNode } = this.state;
-    if (selectedNode === null) {
+    const { selectedNodeId } = this.state;
+    if (selectedNodeId === null) {
       return;
     }
 
-    await this.props.onNodeDelete(selectedNode);
-    await this.setState({ selectedNode: null });
+    await this.props.onNodeDelete(selectedNodeId);
+    await this.setState({ selectedNodeId: null });
   };
 
   private handleStartCalulcation = async () => {
@@ -108,15 +116,34 @@ export class ExplorerEditor extends React.Component<
 
   private handleSelectCreateNode = (type: string) => {
     if (!nodeTypes.has(type)) {
-      return;
+      throw new Error('Unknown node type!');
     }
 
     const canvas = document.getElementById(EXPLORER_CONTAINER);
     const x = canvas ? canvas.clientWidth / 2 - NODE_WIDTH / 2 : 50;
     const y = canvas ? canvas.clientHeight / 2 : 50;
 
-    this.props.onNodeCreate(type, x, y);
+    this.props.onNodeCreate(type, x, y, this.state.contextIds);
   };
+
+  private handleEnterContext = async () => {
+    if (!this.state.selectedNodeId) {
+      return;
+    }
+
+    await this.setState({
+      contextIds: [...this.state.contextIds, this.state.selectedNodeId],
+      selectedNodeId: null
+    });
+  };
+
+  private handleLeaveContext = async () =>
+    this.setState({
+      contextIds: this.state.contextIds.slice(
+        0,
+        this.state.contextIds.length - 1
+      )
+    });
 
   private handleSave = (form: WrappedFormUtils, nodeId: string) => {
     const changedNames = Object.keys(form.getFieldsValue());
@@ -133,16 +160,18 @@ export class ExplorerEditor extends React.Component<
   };
 
   public render() {
-    const { selectedNode } = this.state;
+    const { selectedNodeId, contextIds } = this.state;
     const { nodes } = this.props;
 
-    const node = selectedNode ? nodes.find(n => n.id === selectedNode) : null;
+    const node = selectedNodeId
+      ? nodes.find(n => n.id === selectedNodeId)
+      : null;
 
     const renderFormItems = node
       ? nodeTypes.get(node.type)!.renderFormItems || null
       : null;
 
-    if (selectedNode) {
+    if (selectedNodeId) {
       document.onkeypress = (ev: KeyboardEvent) => {
         if (ev.code === 'Delete') {
           this.handleDeleteSelectedNode();
@@ -162,18 +191,20 @@ export class ExplorerEditor extends React.Component<
               style={{ marginBottom: 12 }}
             >
               <Row>
-                {node && (
-                  <Col xs={16}>
-                    <h4>Properties</h4>
-                    {renderFormItems ? (
-                      <PropertiesForm
-                        renderFormItems={renderFormItems}
-                        handleSubmit={this.handleSave}
-                        context={{ state: this.props, node }}
-                      />
-                    ) : null}
-                  </Col>
-                )}
+                <Col xs={16}>
+                  {node && (
+                    <>
+                      <h4>Properties</h4>
+                      {renderFormItems ? (
+                        <PropertiesForm
+                          renderFormItems={renderFormItems}
+                          handleSubmit={this.handleSave}
+                          context={{ state: this.props, node }}
+                        />
+                      ) : null}
+                    </>
+                  )}
+                </Col>
                 <Col xs={8}>
                   <h4>Actions</h4>
                   {node && (
@@ -186,6 +217,48 @@ export class ExplorerEditor extends React.Component<
                       Delete Selected
                     </AsyncButton>
                   )}
+                </Col>
+              </Row>
+            </Card>
+          </Col>
+          <Col xs={24} md={12} xl={6}>
+            <Card bordered={false} title="Editor" style={{ marginBottom: 12 }}>
+              <h4>Properties</h4>
+              <Row>
+                <Col>
+                  <TreeSelect
+                    ref={this.selectNodeRef}
+                    allowClear
+                    showSearch
+                    filterTreeNode={filterTreeNode}
+                    treeData={nodeTypesTree}
+                    style={{ width: 200 }}
+                    placeholder="Add Node"
+                    onSelect={this.handleSelectCreateNode}
+                  />
+                </Col>
+                {contextIds.length > 0 && (
+                  <Col>
+                    <AsyncButton
+                      icon="minus-square"
+                      onClick={this.handleLeaveContext}
+                    >
+                      Leave Node
+                    </AsyncButton>
+                  </Col>
+                )}
+                {!!node &&
+                  node.hasContextFn && (
+                    <Col>
+                      <AsyncButton
+                        icon="plus-square"
+                        onClick={this.handleEnterContext}
+                      >
+                        Enter Node
+                      </AsyncButton>
+                    </Col>
+                  )}
+                <Col>
                   <AsyncButton
                     icon="rocket"
                     onClick={this.handleStartCalulcation}
@@ -196,27 +269,13 @@ export class ExplorerEditor extends React.Component<
               </Row>
             </Card>
           </Col>
-          <Col xs={24} md={12} xl={6}>
-            <Card bordered={false} title="Editor" style={{ marginBottom: 12 }}>
-              <TreeSelect
-                ref={this.selectNodeRef}
-                allowClear
-                showSearch
-                filterTreeNode={filterTreeNode}
-                treeData={nodeTypesTree}
-                style={{ width: 200 }}
-                placeholder="Add Node"
-                onSelect={this.handleSelectCreateNode}
-              />
-            </Card>
-          </Col>
         </Row>
         <div
           id={EXPLORER_CONTAINER}
           {...css({
             width: '100%',
             height: '800px',
-            border: '1px solid #CCC',
+            border: `1px solid ${Colors.GrayLight}`,
             marginBottom: 12
           })}
         />

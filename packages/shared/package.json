@@ -6,6 +6,7 @@
   "dependencies": {
     "date-fns": "^1.29.0",
     "moment": "^2.22.1",
+    "sleep-promise": "^6.0.0",
     "uuid": "^3.2.1"
   },
   "typings": "lib/index.d.ts",

@@ -1,6 +1,5 @@
 import { Db, MongoClient } from 'mongodb';
 import MongodbMemoryServer from 'mongodb-memory-server';
-import sleepPromise from 'sleep-promise';
 
 export const VALID_OBJECT_ID = '5b07b3129ba658500b75a29a';
 export const MONGO_DB_NAME = 'jest';
@@ -27,5 +26,3 @@ export const getTestMongoDb = async () => {
     mongodbServer
   };
 };
-
-export const sleep = (ms: number): Promise<void> => sleepPromise(ms);
