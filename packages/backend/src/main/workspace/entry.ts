@@ -77,13 +77,7 @@ export const createEntry = async (
   }
 
   valuesArr.forEach(v => {
-    if (
-      !v ||
-      v[0] === null ||
-      v[0] === undefined ||
-      v[1] === null ||
-      v[1] === undefined
-    ) {
+    if (!v || v[0] == null || v[1] == null) {
       throw new Error('Value malformed');
     }
   });

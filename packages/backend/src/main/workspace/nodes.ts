@@ -132,7 +132,7 @@ export const getMetaInputs = async (
   if (!inputConnections) {
     const node = await getNode(db, nodeId);
     if (!node) {
-      throw new Error('Node not found');
+      throw new Error('Metas: Node not found');
     }
 
     inputConns = node.inputs;

@@ -33,7 +33,7 @@ export interface NodeDef<NodeInputs = {}, NodeOutputs = {}> {
 
 export interface NodeExecutionResult<NodeOutputs, NodeResults = {}> {
   outputs: IOValues<NodeOutputs>;
-  results?: NodeResults;
+  results?: IOValues<NodeResults>;
 }
 
 export interface ServerNodeDef<
@@ -60,8 +60,20 @@ export interface ServerNodeDef<
 export interface ServerNodeDefWithContextFn<
   NodeInputs = {},
   NodeOutputs = {},
-  NodeForm = {}
-> extends ServerNodeDef<NodeInputs, NodeOutputs, NodeForm> {
+  NodeForm = {},
+  NodeResults = {}
+> extends ServerNodeDef<NodeInputs, NodeOutputs, NodeForm, NodeResults> {
+  onServerExecution: (
+    form: FormValues<NodeForm>,
+    inputs: IOValues<NodeInputs>,
+    db: Db,
+    context?: {
+      nodeId: string;
+      onContextFnExecution: (
+        input: IOValues<any>
+      ) => Promise<NodeExecutionResult<any>>;
+    }
+  ) => Promise<NodeExecutionResult<NodeOutputs, NodeResults>>;
   transformInputDefsToContextInputDefs: (
     inputsDefs: SocketDefs<NodeInputs>,
     inputs: SocketMetas<NodeInputs>,

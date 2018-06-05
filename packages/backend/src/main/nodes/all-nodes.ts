@@ -1,15 +1,17 @@
 import { NodeDef, NodesMap, ServerNodeDef } from '@masterthesis/shared';
 
-import * as AllDatasetNodes from './dataset';
-import * as AllEntryNodes from './entries';
-import * as AllNumberNodes from './number';
-import * as AllStringNodes from './string';
+import * as BooleanNodes from './boolean';
+import * as DatasetNodes from './dataset';
+import * as EntryNodes from './entries';
+import * as NumberNodes from './number';
+import * as StringNodes from './string';
 
 const allNodes = [
-  AllDatasetNodes,
-  AllNumberNodes,
-  AllStringNodes,
-  AllEntryNodes
+  DatasetNodes,
+  NumberNodes,
+  StringNodes,
+  EntryNodes,
+  BooleanNodes
 ];
 
 export const serverNodeTypes: Map<string, ServerNodeDef & NodeDef> = new Map(

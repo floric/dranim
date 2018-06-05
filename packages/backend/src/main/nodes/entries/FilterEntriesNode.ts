@@ -1,12 +1,21 @@
 import {
   DataType,
+  Entry,
   FilterEntriesNodeDef,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
-  ServerNodeDefWithContextFn
+  ServerNodeDefWithContextFn,
+  sleep,
+  ValueSchema
 } from '@masterthesis/shared';
+import { Db } from 'mongodb';
 
-import { createDataset } from '../../workspace/dataset';
+import {
+  addValueSchema,
+  createDataset,
+  getDataset
+} from '../../workspace/dataset';
+import { createEntry, getEntryCollection } from '../../workspace/entry';
 
 export const FilterEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
@@ -47,11 +56,26 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
 
     return inputs;
   },
-  onServerExecution: async (form, inputs, db) => {
-    const newDs = await createDataset(db, 'random-name-filter');
+  onServerExecution: async (form, inputs, db, context) => {
+    const newDs = await createDataset(db, (Math.random() * 10000).toString());
+    const oldDs = await getDataset(db, inputs.dataset.datasetId);
+    if (!oldDs) {
+      throw new Error('Unknown dataset source');
+    }
 
-    // TODO
-    // * execute context functions
+    await copySchema(oldDs.valueschemas, newDs.id, db);
+
+    if (context) {
+      await copyFilteredToOtherDataset(
+        db,
+        inputs.dataset.datasetId,
+        newDs.id,
+        async (entry: Entry) => {
+          const res = await context.onContextFnExecution(entry.values);
+          return res.outputs.keepEntries;
+        }
+      );
+    }
 
     return {
       outputs: {
@@ -61,4 +85,38 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
       }
     };
   }
+};
+
+const copySchema = async (
+  schemas: Array<ValueSchema>,
+  newDsId: string,
+  db: Db
+) => {
+  await Promise.all(schemas.map(s => addValueSchema(db, newDsId, s)));
+};
+
+const copyFilteredToOtherDataset = async (
+  db: Db,
+  oldDsId: string,
+  newDsId: string,
+  keepEntryFn: (obj: Entry) => Promise<boolean>
+) => {
+  const oldCollection = getEntryCollection(db, oldDsId);
+
+  return new Promise((resolve, reject) => {
+    const col = oldCollection.find();
+    col.on('data', async (chunk: Entry) => {
+      const keepEntry = await keepEntryFn(chunk);
+      if (keepEntry) {
+        createEntry(db, newDsId, chunk.values);
+      }
+    });
+    col.on('end', async () => {
+      await sleep(500);
+      resolve();
+    });
+    col.on('error', () => {
+      reject();
+    });
+  });
 };

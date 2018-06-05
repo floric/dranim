@@ -51,9 +51,8 @@ const executeOutputNode = async (
 ) => {
   const processCollection = getCalculationsCollection(db);
 
-  const { results } = await executeServerNode(db, o.id);
-  console.log(results);
-
+  // TODO Display results somewhere
+  await executeServerNode(db, o.id);
   await processCollection.updateOne(
     { _id: new ObjectID(processId) },
     {

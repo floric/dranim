@@ -6,6 +6,7 @@ import {
   JoinDatasetsNodeInputs,
   JoinDatasetsNodeOutputs,
   ServerNodeDef,
+  Values,
   ValueSchema
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
@@ -112,12 +113,13 @@ const joinEntries = async (
 
       await new Promise((resolveB, rejectB) => {
         const bCursor = bColl.find({ [`values.${valNameB}`]: valFromA });
-        bCursor.on('data', (chunkB: Entry) =>
-          createEntry(db, newDs.id, {
-            ...chunkB.values,
-            ...chunkA.values
-          })
-        );
+        bCursor.on('data', async (chunkB: Entry) => {
+          createEntry(
+            db,
+            newDs.id,
+            await joinEntry(chunkA.values, chunkB.values)
+          );
+        });
         bCursor.on('error', () => {
           rejectB();
         });
@@ -135,6 +137,23 @@ const joinEntries = async (
   });
 };
 
+const joinEntry = async (valuesA: Values, valuesB: Values) => {
+  const res = {};
+
+  await Promise.all(
+    Object.entries(valuesA).map(val => {
+      res[`A_${val[0]}`] = val[1];
+    })
+  );
+  await Promise.all(
+    Object.entries(valuesB).map(val => {
+      res[`B_${val[0]}`] = val[1];
+    })
+  );
+
+  return res;
+};
+
 const addSchemasFromBothDatasets = async (
   db: Db,
   newDs: Dataset,
@@ -143,32 +162,15 @@ const addSchemasFromBothDatasets = async (
   valueAName: string,
   valueBName: string
 ) => {
-  await addValueSchema(db, newDs.id, {
-    ...dsA.valueschemas.find(n => n.name === valueAName)!,
-    unique: false
-  });
-
-  if (valueAName !== valueBName) {
-    await addValueSchema(db, newDs.id, {
-      ...dsB.valueschemas.find(n => n.name === valueBName)!,
-      unique: false
-    });
-  }
-
   await Promise.all(
-    dsA.valueschemas
-      .filter(n => n.name !== valueAName && n.name !== valueBName)
-      .map(s => addValueSchema(db, newDs.id, s))
+    Object.entries(dsA.valueschemas).map(val =>
+      addValueSchema(db, newDs.id, { ...val[1], name: `A_${val[1].name}` })
+    )
   );
   await Promise.all(
-    dsB.valueschemas
-      .filter(
-        s =>
-          !dsA.valueschemas.map(n => n.name).includes(s.name) &&
-          s.name !== valueAName &&
-          s.name !== valueBName
-      )
-      .map(s => addValueSchema(db, newDs.id, s))
+    Object.entries(dsB.valueschemas).map(val =>
+      addValueSchema(db, newDs.id, { ...val[1], name: `B_${val[1].name}` })
+    )
   );
 };
 

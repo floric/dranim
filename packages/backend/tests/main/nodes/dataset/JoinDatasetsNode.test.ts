@@ -219,19 +219,19 @@ describe('JoinDatasetsNode', () => {
     );
 
     const newDs = await getDataset(db, res.outputs.joined.datasetId);
-
     const newColASchema = newDs.valueschemas.find(
-      n => n.name === schemaOnlyA.name
+      n => n.name === `A_${schemaOnlyA.name}`
     );
     const newColBSchema = newDs.valueschemas.find(
-      n => n.name === schemaOnlyB.name
+      n => n.name === `B_${schemaOnlyB.name}`
     );
+
     expect(newDs).not.toBe(null);
     expect(newColASchema).toBeDefined();
     expect(newColBSchema).toBeDefined();
     expect(newColASchema.unique).toBe(false);
     expect(newColBSchema.unique).toBe(false);
-    expect(newDs.valueschemas.length).toBe(4);
+    expect(newDs.valueschemas.length).toBe(5);
   });
 
   test('should support same column names', async () => {
@@ -277,11 +277,18 @@ describe('JoinDatasetsNode', () => {
 
     const newDs = await getDataset(db, res.outputs.joined.datasetId);
 
-    const newColASchema = newDs.valueschemas.find(n => n.name === sharedName);
+    const newColASchema = newDs.valueschemas.find(
+      n => n.name === `A_${sharedName}`
+    );
+    const newColBSchema = newDs.valueschemas.find(
+      n => n.name === `B_${sharedName}`
+    );
     expect(newDs).not.toBe(null);
     expect(newColASchema).toBeDefined();
-    expect(newColASchema.unique).toBe(false);
-    expect(newDs.valueschemas.length).toBe(2);
+    expect(newColASchema.unique).toBe(true);
+    expect(newColBSchema).toBeDefined();
+    expect(newColBSchema.unique).toBe(true);
+    expect(newDs.valueschemas.length).toBe(3);
   });
 
   test('should add joined entries', async () => {
@@ -291,7 +298,7 @@ describe('JoinDatasetsNode', () => {
     ]);
     const schemaA: ValueSchema = {
       name: 'colA',
-      unique: true,
+      unique: false,
       fallback: '',
       type: DataType.STRING,
       required: true
@@ -376,6 +383,10 @@ describe('JoinDatasetsNode', () => {
 
     const allEntries = await getAllEntries(db, newDs.id);
     expect(allEntries.length).toBe(3);
+    expect(allEntries[0].values.A_colA).toBeDefined();
+    expect(allEntries[0].values.A_colOnlyA).toBeDefined();
+    expect(allEntries[0].values.B_colB).toBeDefined();
+    expect(allEntries[0].values.B_colOnlyB).toBeDefined();
   });
 
   test('should have absent metas', async () => {
