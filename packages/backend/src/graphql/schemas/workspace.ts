@@ -26,6 +26,9 @@ const Node = `
     workspace: Workspace!
     metaInputs: Meta!
     metaOutputs: Meta!
+    hasContextFn: Boolean!
+    contextInputDefs: SocketDefs
+    contextOutputDefs: SocketDefs
   }
 `;
 
@@ -85,8 +88,13 @@ const Meta = `
   scalar Meta
 `;
 
+const SocketDefs = `
+  scalar SocketDefs
+`;
+
 export default () => [
   Meta,
+  SocketDefs,
   FormValue,
   SocketValue,
   Node,

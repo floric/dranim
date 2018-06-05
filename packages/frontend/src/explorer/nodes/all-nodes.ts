@@ -10,7 +10,7 @@ import { TreeData } from 'antd/lib/tree-select';
 
 import { ExplorerEditorProps } from '../ExplorerEditor';
 import * as AllDatasetNodes from './dataset';
-import * as AllEntryNodes from './entry';
+import * as AllEntryNodes from './entries';
 import * as AllNumberNodes from './number';
 import * as AllStringNodes from './string';
 

@@ -48,4 +48,36 @@ describe('FormatNumberNode', () => {
 
     expect(res.outputs.formatted).toBe('12:00:00');
   });
+
+  test('should return absent meta on onMetaExecution', async () => {
+    let res = await FormatNumberNode.onMetaExecution(
+      {},
+      { number: null },
+      null
+    );
+    expect(res).toEqual({ formatted: { content: {}, isPresent: false } });
+
+    res = await FormatNumberNode.onMetaExecution(
+      {},
+      { number: undefined },
+      null
+    );
+    expect(res).toEqual({ formatted: { content: {}, isPresent: false } });
+
+    res = await FormatNumberNode.onMetaExecution(
+      {},
+      { number: { isPresent: false, content: {} } },
+      null
+    );
+    expect(res).toEqual({ formatted: { content: {}, isPresent: false } });
+  });
+
+  test('should return valid object for onMetaExecution', async () => {
+    const res = await FormatNumberNode.onMetaExecution(
+      {},
+      { number: { content: {}, isPresent: true } },
+      null
+    );
+    expect(res).toEqual({ formatted: { content: {}, isPresent: true } });
+  });
 });

@@ -14,7 +14,11 @@ import {
   createNode
 } from '../../../src/main/workspace/nodes';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
-import { getTestMongoDb, NeverGoHereError } from '../../test-utils';
+import {
+  getTestMongoDb,
+  NeverGoHereError,
+  VALID_OBJECT_ID
+} from '../../test-utils';
 
 let conn;
 let db: Db;
@@ -90,7 +94,16 @@ describe('Server Execution', () => {
       await executeServerNode(db, node.id);
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Invalid form.');
+      expect(err.message).toBe('Invalid form');
+    }
+  });
+
+  test('should fail for invalid node', async () => {
+    try {
+      await executeServerNode(db, VALID_OBJECT_ID);
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Node not found');
     }
   });
 
@@ -124,7 +137,7 @@ describe('Server Execution', () => {
       await executeServerNode(db, nodeB.id);
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Invalid input.');
+      expect(err.message).toBe('Invalid input');
     }
   });
 

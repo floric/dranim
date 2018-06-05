@@ -1,6 +1,6 @@
 import { NodeDef } from './nodes';
 import * as DatasetNodes from './nodes/dataset';
-import * as EntryNodes from './nodes/entry';
+import * as EntryNodes from './nodes/entries';
 import * as NumberNodes from './nodes/number';
 import * as StringNodes from './nodes/string';
 import * as ColorsDef from './styles/colors';
@@ -22,4 +22,4 @@ export * from './filters';
 export * from './nodes/dataset';
 export * from './nodes/number';
 export * from './nodes/string';
-export * from './nodes/entry';
+export * from './nodes/entries';

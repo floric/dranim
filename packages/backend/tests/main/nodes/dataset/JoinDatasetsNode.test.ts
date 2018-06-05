@@ -377,4 +377,140 @@ describe('JoinDatasetsNode', () => {
     const allEntries = await getAllEntries(db, newDs.id);
     expect(allEntries.length).toBe(3);
   });
+
+  test('should have absent metas', async () => {
+    let res = await JoinDatasetsNode.onMetaExecution(
+      { valueA: null, valueB: 'test' },
+      {
+        datasetA: { content: { schema: [] }, isPresent: true },
+        datasetB: { content: { schema: [] }, isPresent: true }
+      },
+      db
+    );
+    expect(res).toEqual({
+      joined: { isPresent: false, content: { schema: [] } }
+    });
+
+    res = await JoinDatasetsNode.onMetaExecution(
+      { valueA: 'test', valueB: undefined },
+      {
+        datasetA: { content: { schema: [] }, isPresent: true },
+        datasetB: { content: { schema: [] }, isPresent: true }
+      },
+      db
+    );
+    expect(res).toEqual({
+      joined: { isPresent: false, content: { schema: [] } }
+    });
+
+    res = await JoinDatasetsNode.onMetaExecution(
+      { valueA: 'test', valueB: '' },
+      {
+        datasetA: { content: { schema: [] }, isPresent: true },
+        datasetB: { content: { schema: [] }, isPresent: true }
+      },
+      db
+    );
+    expect(res).toEqual({
+      joined: { isPresent: false, content: { schema: [] } }
+    });
+
+    res = await JoinDatasetsNode.onMetaExecution(
+      { valueA: 'test', valueB: 'test' },
+      {
+        datasetA: { content: { schema: [] }, isPresent: false },
+        datasetB: { content: { schema: [] }, isPresent: true }
+      },
+      db
+    );
+    expect(res).toEqual({
+      joined: { isPresent: false, content: { schema: [] } }
+    });
+
+    res = await JoinDatasetsNode.onMetaExecution(
+      { valueA: 'test', valueB: 'test' },
+      {
+        datasetA: { content: { schema: [] }, isPresent: true },
+        datasetB: { content: { schema: [] }, isPresent: false }
+      },
+      db
+    );
+    expect(res).toEqual({
+      joined: { isPresent: false, content: { schema: [] } }
+    });
+  });
+
+  test('should have valid metas with joined keys', async () => {
+    const res = await JoinDatasetsNode.onMetaExecution(
+      { valueA: 'testA', valueB: 'testB' },
+      {
+        datasetA: {
+          content: {
+            schema: [
+              {
+                name: 'testA',
+                type: DataType.STRING,
+                unique: false,
+                required: true,
+                fallback: ''
+              },
+              {
+                name: 'other',
+                type: DataType.STRING,
+                unique: false,
+                required: true,
+                fallback: ''
+              }
+            ]
+          },
+          isPresent: true
+        },
+        datasetB: {
+          content: {
+            schema: [
+              {
+                name: 'testB',
+                type: DataType.STRING,
+                unique: false,
+                required: true,
+                fallback: ''
+              }
+            ]
+          },
+          isPresent: true
+        }
+      },
+      db
+    );
+    expect(res).toEqual({
+      joined: {
+        isPresent: true,
+        content: {
+          schema: [
+            {
+              fallback: '',
+              name: 'testA',
+              required: true,
+              type: 'String',
+              unique: false
+            },
+            {
+              fallback: '',
+              name: 'other',
+              required: true,
+              type: 'String',
+              unique: false
+            },
+            {
+              fallback: '',
+              name: 'testB',
+              required: true,
+              type: 'String',
+              unique: false
+            }
+          ]
+        }
+      }
+    });
+  });
 });

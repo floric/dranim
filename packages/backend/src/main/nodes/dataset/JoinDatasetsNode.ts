@@ -27,15 +27,24 @@ export const JoinDatasetsNode: ServerNodeDef<
   JoinDatasetsNodeForm
 > = {
   name: JoinDatasetsNodeDef.name,
-  isInputValid: async inputs =>
-    validateDatasetId(inputs.datasetA) && validateDatasetId(inputs.datasetB),
-  isFormValid: async form =>
-    validateNonEmptyString(form.valueA) && validateNonEmptyString(form.valueB),
+  isInputValid: inputs =>
+    Promise.resolve(
+      validateDatasetId(inputs.datasetA) && validateDatasetId(inputs.datasetB)
+    ),
+  isFormValid: form =>
+    Promise.resolve(
+      validateNonEmptyString(form.valueA) && validateNonEmptyString(form.valueB)
+    ),
   onMetaExecution: async (form, inputs, db) => {
     if (!form.valueA || !form.valueB) {
       return { joined: { isPresent: false, content: { schema: [] } } };
     }
-    if (!inputs.datasetA || !inputs.datasetB) {
+    if (
+      !inputs.datasetA ||
+      !inputs.datasetB ||
+      !inputs.datasetA.isPresent ||
+      !inputs.datasetB.isPresent
+    ) {
       return {
         joined: { isPresent: false, content: { schema: [] } }
       };

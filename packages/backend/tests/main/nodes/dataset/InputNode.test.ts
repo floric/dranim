@@ -72,4 +72,47 @@ describe('DatasetInputNode', () => {
 
     expect(res).toBe(false);
   });
+
+  test('should have absent meta for missing dataset', async () => {
+    let res = await DatasetInputNode.onMetaExecution({ dataset: null }, {}, db);
+    expect(res).toEqual({
+      dataset: { isPresent: false, content: { schema: [] } }
+    });
+
+    res = await DatasetInputNode.onMetaExecution(
+      { dataset: undefined },
+      {},
+      db
+    );
+    expect(res).toEqual({
+      dataset: { isPresent: false, content: { schema: [] } }
+    });
+
+    res = await DatasetInputNode.onMetaExecution({ dataset: '' }, {}, db);
+    expect(res).toEqual({
+      dataset: { isPresent: false, content: { schema: [] } }
+    });
+
+    res = await DatasetInputNode.onMetaExecution(
+      { dataset: VALID_OBJECT_ID },
+      {},
+      db
+    );
+    expect(res).toEqual({
+      dataset: { isPresent: false, content: { schema: [] } }
+    });
+  });
+
+  test('should have valid meta for dataset', async () => {
+    const ds = await createDataset(db, 'test');
+
+    const res = await DatasetInputNode.onMetaExecution(
+      { dataset: ds.id },
+      {},
+      db
+    );
+    expect(res).toEqual({
+      dataset: { isPresent: true, content: { schema: [] } }
+    });
+  });
 });

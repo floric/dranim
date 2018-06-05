@@ -14,7 +14,22 @@ describe('StringInputNode', () => {
     const form = { value: inputValue };
 
     const res = await StringInputNode.onServerExecution(form, {}, null);
-
     expect(res.outputs.string).toBe(inputValue);
+  });
+
+  test('should return nothing onMetaExecution', async () => {
+    let res = await StringInputNode.onMetaExecution({ value: null }, {}, null);
+    expect(res).toEqual({ string: { content: {}, isPresent: false } });
+
+    res = await StringInputNode.onMetaExecution({ value: null }, {}, null);
+    expect(res).toEqual({ string: { content: {}, isPresent: false } });
+  });
+
+  test('should return valid output onMetaExecution', async () => {
+    let res = await StringInputNode.onMetaExecution({ value: '' }, {}, null);
+    expect(res).toEqual({ string: { content: {}, isPresent: true } });
+
+    res = await StringInputNode.onMetaExecution({ value: 'test' }, {}, null);
+    expect(res).toEqual({ string: { content: {}, isPresent: true } });
   });
 });

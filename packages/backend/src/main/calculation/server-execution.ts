@@ -19,7 +19,7 @@ export const executeServerNode = async (
 ): Promise<NodeExecutionResult<{}, {}>> => {
   const node = await getNode(db, nodeId);
   if (!node) {
-    throw new Error('Node not found!');
+    throw new Error('Node not found');
   }
 
   const type = serverNodeTypes.get(node.type);
@@ -44,7 +44,7 @@ export const executeServerNode = async (
 const getConnectionResult = async (i: ConnectionDescription, db: Db) => {
   const c = await getConnection(db, i.connectionId);
   if (!c) {
-    throw new Error('Invalid connection.');
+    throw new Error('Invalid connection');
   }
 
   const nodeRes = await executeServerNode(db, c.from.nodeId);
@@ -73,10 +73,10 @@ const checkValidInputAndForm = async (
     : true;
 
   if (!isValidForm) {
-    throw new Error('Invalid form.');
+    throw new Error('Invalid form');
   }
 
   if (!isValidInput) {
-    throw new Error('Invalid input.');
+    throw new Error('Invalid input');
   }
 };

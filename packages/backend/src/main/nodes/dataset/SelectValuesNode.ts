@@ -30,7 +30,7 @@ export const SelectValuesNode: ServerNodeDef<
       return { dataset: { isPresent: false, content: { schema: [] } } };
     }
 
-    if (!inputs.dataset) {
+    if (!inputs.dataset || !inputs.dataset.isPresent) {
       return { dataset: { isPresent: false, content: { schema: [] } } };
     }
 

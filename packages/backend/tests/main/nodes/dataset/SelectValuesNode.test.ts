@@ -181,14 +181,14 @@ describe('SelectValuesNode', () => {
       ].map(n => createEntry(db, ds.id, n))
     );
 
-    /*const res = await SelectValuesNode.onServerExecution(
+    const res = await SelectValuesNode.onServerExecution(
       { values: ['test', 'abc'] },
-      { dataset: { id: ds.id } },
+      { dataset: { datasetId: ds.id } },
       db
     );
-    expect(res.outputs.dataset.id).toBeDefined();
+    expect(res.outputs.dataset.datasetId).toBeDefined();
 
-    const newDsId = res.outputs.dataset.id;
+    const newDsId = res.outputs.dataset.datasetId;
     const newDs = await getDataset(db, newDsId);
 
     expect(newDs).not.toBe(null);
@@ -205,6 +205,113 @@ describe('SelectValuesNode', () => {
         Object.keys(n.values).includes('abc') &&
         !Object.keys(n.values).includes('other')
     );
-    expect(correctEntries.length).toBe(4);*/
+    expect(correctEntries.length).toBe(4);
+  });
+
+  test('should return absent meta if dataset is missing', async () => {
+    let res = await SelectValuesNode.onMetaExecution(
+      { values: ['test', 'abc'] },
+      { dataset: null },
+      db
+    );
+    expect(res).toEqual({
+      dataset: { isPresent: false, content: { schema: [] } }
+    });
+
+    res = await SelectValuesNode.onMetaExecution(
+      { values: ['test', 'abc'] },
+      { dataset: undefined },
+      db
+    );
+    expect(res).toEqual({
+      dataset: { isPresent: false, content: { schema: [] } }
+    });
+
+    res = await SelectValuesNode.onMetaExecution(
+      { values: ['test', 'abc'] },
+      { dataset: { content: { schema: [] }, isPresent: false } },
+      db
+    );
+    expect(res).toEqual({
+      dataset: { isPresent: false, content: { schema: [] } }
+    });
+  });
+
+  test('should return absent meta if values are empty', async () => {
+    const res = await SelectValuesNode.onMetaExecution(
+      { values: [] },
+      { dataset: { content: { schema: [] }, isPresent: true } },
+      db
+    );
+    expect(res).toEqual({
+      dataset: { isPresent: false, content: { schema: [] } }
+    });
+  });
+
+  test('should return filtered meta data', async () => {
+    const res = await SelectValuesNode.onMetaExecution(
+      { values: ['a', 'b'] },
+      {
+        dataset: {
+          content: {
+            schema: [
+              {
+                name: 'a',
+                type: DataType.STRING,
+                unique: false,
+                required: false,
+                fallback: ''
+              },
+              {
+                name: 'b',
+                type: DataType.STRING,
+                unique: false,
+                required: false,
+                fallback: ''
+              },
+              {
+                name: 'c',
+                type: DataType.STRING,
+                unique: false,
+                required: false,
+                fallback: ''
+              },
+              {
+                name: 'd',
+                type: DataType.STRING,
+                unique: false,
+                required: false,
+                fallback: ''
+              }
+            ]
+          },
+          isPresent: true
+        }
+      },
+      db
+    );
+    expect(res).toEqual({
+      dataset: {
+        isPresent: true,
+        content: {
+          schema: [
+            {
+              name: 'a',
+              type: DataType.STRING,
+              unique: false,
+              required: false,
+              fallback: ''
+            },
+            {
+              name: 'b',
+              type: DataType.STRING,
+              unique: false,
+              required: false,
+              fallback: ''
+            }
+          ]
+        }
+      }
+    });
   });
 });

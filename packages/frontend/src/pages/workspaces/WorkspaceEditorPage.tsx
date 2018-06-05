@@ -47,7 +47,9 @@ const WORKSPACE_NODE_SELECTION = gql`
           value
         }
         metaInputs
-        metaOutputs
+        hasContextFn
+        contextInputDefs
+        contextOutputDefs
       }
       connections {
         id

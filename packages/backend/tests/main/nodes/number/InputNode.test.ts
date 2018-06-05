@@ -27,4 +27,20 @@ describe('NumberInputNode', () => {
     const res = await NumberInputNode.onServerExecution({ value: 2 }, {}, null);
     expect(res.outputs.value).toBe(2);
   });
+
+  test('should return empty object for onMetaExecution', async () => {
+    let res = await NumberInputNode.onMetaExecution({ value: null }, {}, null);
+    expect(res).toEqual({ value: { content: {}, isPresent: false } });
+
+    res = await NumberInputNode.onMetaExecution({ value: undefined }, {}, null);
+    expect(res).toEqual({ value: { content: {}, isPresent: false } });
+  });
+
+  test('should valid empty object for onMetaExecution', async () => {
+    let res = await NumberInputNode.onMetaExecution({ value: 0 }, {}, null);
+    expect(res).toEqual({ value: { content: {}, isPresent: true } });
+
+    res = await NumberInputNode.onMetaExecution({ value: -1.2 }, {}, null);
+    expect(res).toEqual({ value: { content: {}, isPresent: true } });
+  });
 });

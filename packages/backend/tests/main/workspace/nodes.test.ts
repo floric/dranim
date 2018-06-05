@@ -2,27 +2,36 @@ import {
   ContextNodeType,
   DatasetInputNodeDef,
   DatasetOutputNodeDef,
+  DataType,
   EditEntriesNodeDef,
+  FilterEntriesNodeDef,
   JoinDatasetsNodeDef,
   NodeState,
   NumberInputNodeDef,
   NumberOutputNodeDef,
+  SelectValuesNodeDef,
   StringInputNodeDef
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
+import { select } from 'async';
 import { DatasetOutputNode } from '../../../src/main/nodes/dataset';
 import {
   createConnection,
   getAllConnections
 } from '../../../src/main/workspace/connections';
-import { createDataset } from '../../../src/main/workspace/dataset';
+import {
+  addValueSchema,
+  createDataset
+} from '../../../src/main/workspace/dataset';
 import {
   addOrUpdateFormValue,
   createNode,
   deleteNode,
   getAllNodes,
-  getMetas,
+  getContextInputDefs,
+  getContextOutputDefs,
+  getMetaInputs,
   getNode,
   getNodesCollection,
   getNodeState,
@@ -151,7 +160,11 @@ describe('Nodes', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      meta: {}
+      metaInputs: JSON.stringify({}),
+      metaOutputs: JSON.stringify({}),
+      hasContextFn: false,
+      contextInputDefs: '',
+      contextOutputDefs: ''
     });
 
     expect(state).toBe(NodeState.ERROR);
@@ -332,6 +345,36 @@ describe('Nodes', () => {
     ).toEqual([rootNodes[0].id]);
   });
 
+  test('should delete connection infos on nodes', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const [inputNode, selectNode, outputNode] = await Promise.all([
+      createNode(db, DatasetInputNodeDef.name, ws.id, [], 0, 0),
+      createNode(db, SelectValuesNodeDef.name, ws.id, [], 0, 0),
+      createNode(db, DatasetOutputNodeDef.name, ws.id, [], 0, 0)
+    ]);
+
+    await createConnection(
+      db,
+      { name: 'dataset', nodeId: inputNode.id },
+      { name: 'dataset', nodeId: selectNode.id }
+    );
+    await createConnection(
+      db,
+      { name: 'dataset', nodeId: selectNode.id },
+      { name: 'dataset', nodeId: outputNode.id }
+    );
+
+    const res = await deleteNode(db, selectNode.id);
+    expect(res).toBe(true);
+
+    const [newInputNode, newOutputNode] = await Promise.all([
+      getNode(db, inputNode.id),
+      getNode(db, outputNode.id)
+    ]);
+    expect(newInputNode.outputs.length).toBe(0);
+    expect(newOutputNode.inputs.length).toBe(0);
+  });
+
   test('should delete all context nodes and connections', async () => {
     const ws = await createWorkspace(db, 'test', '');
     const contextNode = await createNode(
@@ -458,10 +501,135 @@ describe('Nodes', () => {
       { name: 'dataset', nodeId: dsOutputNode.id }
     );
 
-    const res = await getMetas(db, dsOutputNode.id);
+    const res = await getMetaInputs(db, dsOutputNode.id);
 
     expect(res.dataset).toBeDefined();
     expect(res.dataset.isPresent).toBe(true);
     expect(res.dataset.content.schema).toEqual([]);
+  });
+
+  test('should get null for nodes without contexts', async () => {
+    const ws = await createWorkspace(db, 'Ws', '');
+    const dsInput = await createNode(
+      db,
+      DatasetInputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+    const inputRes = await getContextInputDefs(dsInput, db);
+    expect(inputRes).toBe(null);
+
+    const outputRes = await getContextOutputDefs(dsInput, db);
+    expect(outputRes).toBe(null);
+  });
+
+  test('should get empty context inputs', async () => {
+    const ws = await createWorkspace(db, 'Ws', '');
+    const dsInput = await createNode(
+      db,
+      DatasetInputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+    const editEntriesNode = await createNode(
+      db,
+      EditEntriesNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+
+    const allNodes = await getAllNodes(db, ws.id);
+    const contextInputNode = allNodes.find(
+      n => n.type === ContextNodeType.INPUT
+    );
+    const contextOutputNode = allNodes.find(
+      n => n.type === ContextNodeType.OUTPUT
+    );
+    expect(contextInputNode).toBeDefined();
+    expect(contextOutputNode).toBeDefined();
+
+    const inputRes = await getContextInputDefs(contextInputNode, db);
+    expect(inputRes).toEqual({});
+    const outputRes = await getContextOutputDefs(contextInputNode, db);
+    expect(outputRes).toEqual({});
+  });
+
+  test('should get context inputs with dataset schema', async () => {
+    const ws = await createWorkspace(db, 'Ws', '');
+    const ds = await createDataset(db, 'DsA');
+    const valA = {
+      name: 'testA',
+      type: DataType.BOOLEAN,
+      required: true,
+      fallback: 'true',
+      unique: false
+    };
+    const valB = {
+      name: 'testB',
+      type: DataType.STRING,
+      required: true,
+      fallback: 'true',
+      unique: false
+    };
+
+    await Promise.all([
+      addValueSchema(db, ds.id, valA),
+      addValueSchema(db, ds.id, valB)
+    ]);
+
+    const [dsInput, filterEntries] = await Promise.all([
+      createNode(db, DatasetInputNodeDef.name, ws.id, [], 0, 0),
+      createNode(db, FilterEntriesNodeDef.name, ws.id, [], 0, 0)
+    ]);
+
+    await addOrUpdateFormValue(
+      db,
+      dsInput.id,
+      'dataset',
+      JSON.stringify(ds.id)
+    );
+
+    await createConnection(
+      db,
+      { name: 'dataset', nodeId: dsInput.id },
+      { name: 'dataset', nodeId: filterEntries.id }
+    );
+
+    const allNodes = await getAllNodes(db, ws.id);
+    const contextInputNode = allNodes.find(
+      n => n.type === ContextNodeType.INPUT
+    );
+    const contextOutputNode = allNodes.find(
+      n => n.type === ContextNodeType.OUTPUT
+    );
+    expect(contextInputNode).toBeDefined();
+    expect(contextOutputNode).toBeDefined();
+
+    const inputRes = await getContextInputDefs(contextInputNode, db);
+    expect(inputRes).toEqual({
+      [valA.name]: {
+        dataType: valA.type,
+        displayName: valA.name,
+        isDynamic: true
+      },
+      [valB.name]: {
+        dataType: valB.type,
+        displayName: valB.name,
+        isDynamic: true
+      }
+    });
+    const outputRes = await getContextOutputDefs(contextInputNode, db);
+    expect(outputRes).toEqual({
+      keepEntries: {
+        dataType: DataType.BOOLEAN,
+        displayName: 'Keep entries'
+      }
+    });
   });
 });

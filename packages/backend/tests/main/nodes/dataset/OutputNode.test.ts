@@ -1,4 +1,4 @@
-import { DatasetOutputNodeDef } from '@masterthesis/shared';
+import { DatasetOutputNodeDef, DataType } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import { DatasetOutputNode } from '../../../../src/main/nodes/dataset/OutputNode';
@@ -78,5 +78,56 @@ describe('DatasetOutputNode', () => {
 
     expect(res.outputs).toBeDefined();
     expect(res.results.dataset.datasetId).toBe(ds.id);
+  });
+
+  test('should return absent meta for missing dataset', async () => {
+    let res = await DatasetOutputNode.onMetaExecution(
+      {},
+      { dataset: null },
+      db
+    );
+    expect(res).toEqual({
+      dataset: { content: { schema: [] }, isPresent: false }
+    });
+
+    res = await DatasetOutputNode.onMetaExecution(
+      {},
+      { dataset: undefined },
+      db
+    );
+    expect(res).toEqual({
+      dataset: { content: { schema: [] }, isPresent: false }
+    });
+
+    res = await DatasetOutputNode.onMetaExecution(
+      {},
+      { dataset: { content: { schema: [] }, isPresent: false } },
+      db
+    );
+    expect(res).toEqual({
+      dataset: { content: { schema: [] }, isPresent: false }
+    });
+  });
+
+  test('should return valid meta for dataset', async () => {
+    const inputDef = {
+      dataset: {
+        isPresent: true,
+        content: {
+          schema: [
+            {
+              name: 'test',
+              fallback: '',
+              required: false,
+              unique: true,
+              type: DataType.STRING
+            }
+          ]
+        }
+      }
+    };
+
+    const res = await DatasetOutputNode.onMetaExecution({}, inputDef, db);
+    expect(res).toEqual(inputDef);
   });
 });

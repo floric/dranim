@@ -75,8 +75,6 @@ class PropertiesFormImpl extends React.Component<
     const inputs = node ? JSON.parse(node.metaInputs as any) : {};
     const nodeForm = node ? parseNodeForm(node) : {};
 
-    console.log(inputs);
-
     return (
       <Form layout="inline" hideRequiredMark onSubmit={this.handleSubmit}>
         {renderFormItems({

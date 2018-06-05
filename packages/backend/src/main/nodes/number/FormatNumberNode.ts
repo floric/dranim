@@ -23,7 +23,7 @@ export const FormatNumberNode: ServerNodeDef<
     return true;
   },
   onMetaExecution: async (form, inputs) => {
-    if (inputs.number === null || inputs.number === undefined) {
+    if (inputs.number == null || !inputs.number.isPresent) {
       return {
         formatted: { content: {}, isPresent: false }
       };

@@ -5,13 +5,19 @@ import {
   NodeInstance,
   NodeState,
   parseNodeForm,
+  SocketDef,
+  SocketDefs,
   SocketMetaDef,
   SocketMetas
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { serverNodeTypes } from '../nodes/all-nodes';
-import { getConnection, getConnectionsCollection } from './connections';
+import {
+  deleteConnection,
+  getConnection,
+  getConnectionsCollection
+} from './connections';
 import { getWorkspace, getWorkspacesCollection } from './workspace';
 
 export const getNodesCollection = (
@@ -20,7 +26,83 @@ export const getNodesCollection = (
   return db.collection('Nodes');
 };
 
-export const getNodeMetaOutputs = async (
+export const getContextInputDefs = async (
+  node: NodeInstance,
+  db: Db
+): Promise<SocketDefs<any> | null> => {
+  if (serverNodeTypes.has(node.type)) {
+    return null;
+  }
+
+  const parentNodeId = node.contextIds[node.contextIds.length - 1];
+  const parent = await getNode(db, parentNodeId);
+  if (parent === null) {
+    throw new Error('Invalid node B');
+  }
+
+  const parentType = serverNodeTypes.get(parent.type)!;
+  if (!hasContextFn(parentType)) {
+    return null;
+  }
+
+  const parentInputs = await getMetaInputs(db, parentNodeId);
+  return await parentType.transformInputDefsToContextInputDefs(
+    parentType.inputs,
+    parentInputs,
+    db
+  );
+};
+
+export const getContextOutputDefs = async (
+  node: NodeInstance,
+  db: Db
+): Promise<SocketDefs<any> | null> => {
+  if (serverNodeTypes.has(node.type)) {
+    return null;
+  }
+
+  const parentNodeId = node.contextIds[node.contextIds.length - 1];
+  const parent = await getNode(db, parentNodeId);
+  if (parent === null) {
+    throw new Error('Invalid node A');
+  }
+
+  const parentType = serverNodeTypes.get(parent.type)!;
+  if (!hasContextFn(parentType)) {
+    return null;
+  }
+
+  const parentInputs = await getMetaInputs(db, parentNodeId);
+  const contextInputDefs = await parentType.transformInputDefsToContextInputDefs(
+    parentType.inputs,
+    parentInputs,
+    db
+  );
+
+  const nodesColl = getNodesCollection(db);
+  const contextInputNode = await nodesColl.findOne({
+    contextIds: node.contextIds,
+    type: ContextNodeType.INPUT
+  });
+  if (!contextInputNode) {
+    throw new Error('Context input node unknown');
+  }
+
+  const contextInputs = await getMetaInputs(
+    db,
+    contextInputNode._id.toHexString()
+  );
+
+  return await parentType.transformContextInputDefsToContextOutputDefs(
+    parentType.inputs,
+    parentInputs,
+    contextInputDefs,
+    contextInputs,
+    db
+  );
+};
+
+export const getMetaOutputs = async (
   db: Db,
   nodeId: string
 ): Promise<SocketMetas<{}>> => {
@@ -34,27 +116,39 @@ export const getNodeMetaOutputs = async (
     return {};
   }
 
-  const allInputs = await getNodeMetaInputs(db, nodeId, node.inputs);
+  const allInputs = await getMetaInputs(db, nodeId, node.inputs);
 
   return await nodeType.onMetaExecution(parseNodeForm(node), allInputs, db);
 };
 
-export const getNodeMetaInputs = async (
+export const getMetaInputs = async (
   db: Db,
   nodeId: string,
-  inputConnections: Array<ConnectionDescription>
-) => {
+  inputConnections?: Array<ConnectionDescription>
+): Promise<SocketMetas<{}>> => {
   const inputs = {};
 
+  let inputConns;
+  if (!inputConnections) {
+    const node = await getNode(db, nodeId);
+    if (!node) {
+      throw new Error('Node not found');
+    }
+
+    inputConns = node.inputs;
+  } else {
+    inputConns = inputConnections;
+  }
+
   await Promise.all(
-    inputConnections.map(async c => {
+    inputConns.map(async c => {
       const connId = c.connectionId;
       const conn = await getConnection(db, connId);
       if (!conn) {
         throw new Error('Invalid connection');
       }
 
-      inputs[c.name] = (await getNodeMetaOutputs(db, conn.from.nodeId))[
+      inputs[c.name] = (await getMetaOutputs(db, conn.from.nodeId))[
         conn.from.name
       ];
     })
@@ -153,13 +247,15 @@ export const deleteNode = async (db: Db, id: string) => {
     throw new Error('Must not delete context nodes separately');
   }
 
+  await Promise.all(
+    [...nodeToDelete.inputs, ...nodeToDelete.outputs].map(c =>
+      deleteConnection(db, c.connectionId)
+    )
+  );
+
   const connectionsCollection = getConnectionsCollection(db);
   await connectionsCollection.deleteMany({
-    $or: [
-      { 'from.nodeId': id },
-      { 'to.nodeId': id },
-      { contextIds: { $elemMatch: { $eq: id } } }
-    ]
+    contextIds: { $elemMatch: { $eq: id } }
   });
 
   const nodesCollection = getNodesCollection(db);
@@ -277,9 +373,6 @@ export const addOrUpdateFormValue = async (
   const nodeObjId = new ObjectID(nodeId);
 
   const collection = getNodesCollection(db);
-
-  // TODO Add validation here or comparable
-
   const res = await collection.updateOne(
     { _id: nodeObjId },
     { $set: { [`form.${name}`]: value } }

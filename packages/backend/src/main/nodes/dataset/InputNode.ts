@@ -16,14 +16,13 @@ export const DatasetInputNode: ServerNodeDef<
   name: DatasetInputNodeDef.name,
   isFormValid: form => Promise.resolve(!!form.dataset),
   onMetaExecution: async (form, inputs, db) => {
-    const dsId = form.dataset;
-    if (!dsId) {
+    if (!form.dataset) {
       return {
         dataset: { isPresent: false, content: { schema: [] } }
       };
     }
 
-    const ds = await getDataset(db, dsId);
+    const ds = await getDataset(db, form.dataset);
     if (!ds) {
       return {
         dataset: { isPresent: false, content: { schema: [] } }

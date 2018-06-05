@@ -1,4 +1,4 @@
-import { SocketMetas } from '@masterthesis/shared';
+import { hasContextFn, SocketDefs, SocketMetas } from '@masterthesis/shared';
 import { GraphQLUpload } from 'apollo-upload-server';
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { Db } from 'mongodb';
@@ -9,6 +9,7 @@ import {
   getAllCalculations,
   startCalculation
 } from '../main/calculation/start-process';
+import { serverNodeTypes } from '../main/nodes/all-nodes';
 import {
   createConnection,
   deleteConnection,
@@ -32,8 +33,10 @@ import {
   createNode,
   deleteNode,
   getAllNodes,
-  getNodeMetaInputs,
-  getNodeMetaOutputs,
+  getContextInputDefs,
+  getContextOutputDefs,
+  getMetaInputs,
+  getMetaOutputs,
   getNodeState,
   updateNode
 } from '../main/workspace/nodes';
@@ -173,8 +176,14 @@ const resolvers: IResolvers<any, ApolloContext> = {
   Node: {
     state: node => getNodeState(node),
     workspace: ({ workspaceId }, __, { db }) => getWorkspace(db, workspaceId),
-    metaOutputs: ({ id }, _, { db }) => getNodeMetaOutputs(db, id),
-    metaInputs: ({ id, inputs }, _, { db }) => getNodeMetaInputs(db, id, inputs)
+    metaOutputs: ({ id }, _, { db }) => getMetaOutputs(db, id),
+    metaInputs: ({ id, inputs }, _, { db }) => getMetaInputs(db, id, inputs),
+    contextInputDefs: (node, _, { db }) => getContextInputDefs(node, db),
+    contextOutputDefs: (node, _, { db }) => getContextOutputDefs(node, db),
+    hasContextFn: ({ type }) =>
+      serverNodeTypes.has(type)
+        ? hasContextFn(serverNodeTypes.get(type)!)
+        : false
   },
   Workspace: {
     nodes: ({ id }, __, { db }) => getAllNodes(db, id),
@@ -221,9 +230,24 @@ const resolvers: IResolvers<any, ApolloContext> = {
       startCalculation(db, workspaceId)
   },
   Upload: GraphQLUpload,
+  SocketDefs: {
+    name: 'SocketDefs',
+    parseValue(value: string) {
+      return JSON.parse(value);
+    },
+    serialize(value: SocketDefs<any>) {
+      return JSON.stringify(value);
+    },
+    parseLiteral(ast) {
+      if (ast.kind === 'StringValue') {
+        return JSON.parse(ast.value);
+      }
+
+      return null;
+    }
+  },
   Meta: {
     name: 'Meta',
-    description: 'Date custom scalar type',
     parseValue(value: string) {
       return JSON.parse(value);
     },

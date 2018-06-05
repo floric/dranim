@@ -1,6 +1,7 @@
 import {
   Colors,
   ConditionalMetaTypes,
+  ContextNodeType,
   DatasetMeta,
   NodeInstance,
   NodeState,
@@ -36,6 +37,86 @@ export const isEntryMeta = (
     (n as { [x: string]: SocketMetaDef<DatasetMeta> })[keys[0]].content
       .schema !== undefined
   );
+};
+
+export const renderContextNode = (
+  n: NodeInstance,
+  server: ExplorerEditorProps,
+  state: ExplorerEditorState,
+  changeState: (newState: Partial<ExplorerEditorState>) => void,
+  socketsMap: Map<string, Konva.Group>
+) => {
+  const nodeGroup = new Konva.Group({ draggable: true, x: n.x, y: n.y });
+
+  const inputs =
+    n.type === ContextNodeType.INPUT ? {} : JSON.parse(n.contextOutputDefs);
+  const outputs =
+    n.type === ContextNodeType.OUTPUT ? {} : JSON.parse(n.contextInputDefs);
+
+  const height = getNodeHeight(inputs, outputs);
+
+  nodeGroup.on('dragend', ev => {
+    server.onNodeUpdate(n.id, ev.target.x(), ev.target.y());
+  });
+
+  const bgRect = new Konva.Rect({
+    width: NODE_WIDTH,
+    height,
+    shadowColor: Colors.Black,
+    shadowOpacity: 0.1,
+    shadowBlur: 5,
+    fill: Colors.White
+  });
+
+  const nodeTitle = new Konva.Text({
+    fill: Colors.Black,
+    align: 'center',
+    text: n.type,
+    fontStyle: 'bold',
+    height: TEXT_HEIGHT,
+    width: NODE_WIDTH,
+    y: 10
+  });
+
+  const inputsGroup = renderSockets(
+    inputs,
+    n.id,
+    server,
+    state,
+    SocketType.INPUT,
+    socketsMap,
+    changeState
+  );
+  const outputsGroup = renderSockets(
+    outputs,
+    n.id,
+    server,
+    state,
+    SocketType.OUTPUT,
+    socketsMap,
+    changeState
+  );
+
+  const stateRect = new Konva.Rect({
+    width: NODE_WIDTH,
+    height: STATE_LINE_HEIGHT,
+    x: 0,
+    y: height - STATE_LINE_HEIGHT,
+    fill:
+      n.state === NodeState.VALID
+        ? 'green'
+        : n.state === NodeState.ERROR
+          ? 'red'
+          : 'orange'
+  });
+
+  nodeGroup.add(bgRect);
+  nodeGroup.add(nodeTitle);
+  nodeGroup.add(inputsGroup);
+  nodeGroup.add(outputsGroup);
+  nodeGroup.add(stateRect);
+
+  return nodeGroup;
 };
 
 export const renderNode = (
@@ -123,8 +204,7 @@ export const renderNode = (
   nodeGroup.add(bgRect);
   nodeGroup.add(nodeTitle);
 
-  // TODO Client verification of context functions
-  /*if (hasContextFn(nodeType)) {
+  if (n.hasContextFn) {
     const fnInfo = new Konva.Text({
       fill: Colors.Black,
       align: 'right',
@@ -136,7 +216,7 @@ export const renderNode = (
     });
 
     nodeGroup.add(fnInfo);
-  }*/
+  }
 
   nodeGroup.add(inputsGroup);
   nodeGroup.add(outputsGroup);

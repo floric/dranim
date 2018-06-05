@@ -12,7 +12,7 @@ export const StringInputNode: ServerNodeDef<
 > = {
   name: StringInputNodeDef.name,
   onMetaExecution: async form => {
-    if (form.value === undefined || form.value === null) {
+    if (form.value == null) {
       return {
         string: { content: {}, isPresent: false }
       };

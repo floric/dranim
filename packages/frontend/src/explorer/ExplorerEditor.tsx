@@ -171,9 +171,6 @@ export class ExplorerEditor extends React.Component<
       ? nodeTypes.get(node.type)!.renderFormItems || null
       : null;
 
-    // TODO Client verification of context functions
-    const contextFn = false;
-
     if (selectedNodeId) {
       document.onkeypress = (ev: KeyboardEvent) => {
         if (ev.code === 'Delete') {
@@ -250,16 +247,17 @@ export class ExplorerEditor extends React.Component<
                     </AsyncButton>
                   </Col>
                 )}
-                {contextFn && (
-                  <Col>
-                    <AsyncButton
-                      icon="plus-square"
-                      onClick={this.handleEnterContext}
-                    >
-                      Enter Node
-                    </AsyncButton>
-                  </Col>
-                )}
+                {!!node &&
+                  node.hasContextFn && (
+                    <Col>
+                      <AsyncButton
+                        icon="plus-square"
+                        onClick={this.handleEnterContext}
+                      >
+                        Enter Node
+                      </AsyncButton>
+                    </Col>
+                  )}
                 <Col>
                   <AsyncButton
                     icon="rocket"

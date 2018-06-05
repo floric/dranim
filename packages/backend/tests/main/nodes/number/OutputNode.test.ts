@@ -50,4 +50,23 @@ describe('NumberOutputNode', () => {
     expect(res.results.value).toBe(-2.34);
     expect(Object.keys(res.outputs).length).toBe(0);
   });
+
+  test('should always return empty object for onMetaExecution', async () => {
+    let res = await NumberOutputNode.onMetaExecution({}, { value: null }, null);
+    expect(res).toEqual({});
+
+    res = await NumberOutputNode.onMetaExecution(
+      {},
+      { value: { content: {}, isPresent: false } },
+      null
+    );
+    expect(res).toEqual({});
+
+    res = await NumberOutputNode.onMetaExecution(
+      {},
+      { value: { content: {}, isPresent: true } },
+      null
+    );
+    expect(res).toEqual({});
+  });
 });

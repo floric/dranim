@@ -25,4 +25,14 @@ describe('StringOutputNode', () => {
     expect(res.results.value).toBe(inputValue);
     expect(Object.keys(res.outputs).length).toBe(0);
   });
+
+  test('should return nothing onMetaExecution', async () => {
+    const res = await StringOutputNode.onMetaExecution(
+      {},
+      { string: { content: {}, isPresent: true } },
+      null
+    );
+
+    expect(res).toEqual({});
+  });
 });

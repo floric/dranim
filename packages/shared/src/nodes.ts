@@ -94,6 +94,9 @@ export interface NodeInstance {
   form: Array<FormValue>;
   metaInputs: string;
   metaOutputs: string;
+  hasContextFn: boolean;
+  contextInputDefs: string | null;
+  contextOutputDefs: string | null;
 }
 
 export interface SocketInstance {
