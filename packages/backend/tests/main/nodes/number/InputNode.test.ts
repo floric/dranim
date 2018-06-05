@@ -24,7 +24,7 @@ describe('NumberInputNode', () => {
   });
 
   test('should get output value from form', async () => {
-    const res = await NumberInputNode.onServerExecution({ value: 2 }, {}, null);
+    const res = await NumberInputNode.onNodeExecution({ value: 2 }, {}, null);
     expect(res.outputs.value).toBe(2);
   });
 

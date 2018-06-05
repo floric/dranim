@@ -56,7 +56,7 @@ describe('DatasetOutputNode', () => {
 
   test('should have invalid dataset', async () => {
     try {
-      await DatasetOutputNode.onServerExecution(
+      await DatasetOutputNode.onNodeExecution(
         {},
         { dataset: { datasetId: 'test' } },
         db
@@ -70,7 +70,7 @@ describe('DatasetOutputNode', () => {
   test('should have valid dataset', async () => {
     const ds = await createDataset(db, 'test');
 
-    const res = await DatasetOutputNode.onServerExecution(
+    const res = await DatasetOutputNode.onNodeExecution(
       {},
       { dataset: { datasetId: ds.id } },
       db

@@ -21,7 +21,7 @@ describe('MultiplicationNode', () => {
   });
 
   test('should multiply two numbers', async () => {
-    const res = await MultiplicationNode.onServerExecution(
+    const res = await MultiplicationNode.onNodeExecution(
       {},
       {
         a: 3,
@@ -34,7 +34,7 @@ describe('MultiplicationNode', () => {
   });
 
   test('should multiply two numbers with negative value', async () => {
-    const res = await MultiplicationNode.onServerExecution(
+    const res = await MultiplicationNode.onNodeExecution(
       {},
       {
         a: -12,

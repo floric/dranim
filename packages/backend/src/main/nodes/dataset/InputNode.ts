@@ -38,7 +38,7 @@ export const DatasetInputNode: ServerNodeDef<
       }
     };
   },
-  onServerExecution: async (form, inputs, db) => {
+  onNodeExecution: async (form, inputs, db) => {
     await validateDataset(form.dataset!, db);
 
     return {

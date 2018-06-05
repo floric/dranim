@@ -33,7 +33,7 @@ export const FormatNumberNode: ServerNodeDef<
       formatted: { content: {}, isPresent: true }
     };
   },
-  onServerExecution: async (form, inputs) => {
+  onNodeExecution: async (form, inputs) => {
     const mantissa = form.mantissa || 0;
     const optionalMantissa = form['opt-mantissa'] || true;
     const thousandSeparated = form['thousands-separated'] || true;

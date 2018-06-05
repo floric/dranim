@@ -4,12 +4,15 @@ import {
   FilterEntriesNodeDef,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
+  NodeExecutionResult,
   ServerNodeDefWithContextFn,
   sleep,
+  Values,
   ValueSchema
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
+import { getCreatedDatasetName } from '../../calculation/utils';
 import {
   addValueSchema,
   createDataset,
@@ -56,24 +59,24 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
 
     return inputs;
   },
-  onServerExecution: async (form, inputs, db, context) => {
-    const newDs = await createDataset(db, (Math.random() * 10000).toString());
+  onNodeExecution: async (form, inputs, db, context) => {
+    const newDs = await createDataset(
+      db,
+      getCreatedDatasetName(FilterEntriesNodeDef.name)
+    );
     const oldDs = await getDataset(db, inputs.dataset.datasetId);
     if (!oldDs) {
       throw new Error('Unknown dataset source');
     }
 
-    await copySchema(oldDs.valueschemas, newDs.id, db);
+    await copySchemas(oldDs.valueschemas, newDs.id, db);
 
     if (context) {
       await copyFilteredToOtherDataset(
         db,
         inputs.dataset.datasetId,
         newDs.id,
-        async (entry: Entry) => {
-          const res = await context.onContextFnExecution(entry.values);
-          return res.outputs.keepEntries;
-        }
+        context.onContextFnExecution
       );
     }
 
@@ -87,28 +90,23 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
   }
 };
 
-const copySchema = async (
-  schemas: Array<ValueSchema>,
-  newDsId: string,
-  db: Db
-) => {
-  await Promise.all(schemas.map(s => addValueSchema(db, newDsId, s)));
-};
+const copySchemas = (schemas: Array<ValueSchema>, newDsId: string, db: Db) =>
+  Promise.all(schemas.map(s => addValueSchema(db, newDsId, s)));
 
 const copyFilteredToOtherDataset = async (
   db: Db,
   oldDsId: string,
   newDsId: string,
-  keepEntryFn: (obj: Entry) => Promise<boolean>
+  onContextFnExecution: (inputs: Values) => Promise<NodeExecutionResult<any>>
 ) => {
   const oldCollection = getEntryCollection(db, oldDsId);
 
   return new Promise((resolve, reject) => {
     const col = oldCollection.find();
-    col.on('data', async (chunk: Entry) => {
-      const keepEntry = await keepEntryFn(chunk);
-      if (keepEntry) {
-        createEntry(db, newDsId, chunk.values);
+    col.on('data', async (entry: Entry) => {
+      const result = await onContextFnExecution(entry.values);
+      if (result.outputs.keepEntries) {
+        createEntry(db, newDsId, entry.values);
       }
     });
     col.on('end', async () => {

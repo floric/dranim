@@ -94,7 +94,7 @@ describe('JoinDatasetsNode', () => {
     const dsA = await createDataset(db, 'a');
 
     try {
-      await JoinDatasetsNode.onServerExecution(
+      await JoinDatasetsNode.onNodeExecution(
         { valueA: 'TEST', valueB: 'else' },
         {
           datasetA: { datasetId: dsA.id },
@@ -115,7 +115,7 @@ describe('JoinDatasetsNode', () => {
     ]);
 
     try {
-      await JoinDatasetsNode.onServerExecution(
+      await JoinDatasetsNode.onNodeExecution(
         { valueA: 'TEST', valueB: 'else' },
         { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
         db
@@ -152,7 +152,7 @@ describe('JoinDatasetsNode', () => {
     ]);
 
     try {
-      await JoinDatasetsNode.onServerExecution(
+      await JoinDatasetsNode.onNodeExecution(
         { valueA: schemaA.name, valueB: schemaB.name },
         { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
         db
@@ -212,7 +212,7 @@ describe('JoinDatasetsNode', () => {
       addValueSchema(db, dsB.id, otherColAinB)
     ]);
 
-    const res = await JoinDatasetsNode.onServerExecution(
+    const res = await JoinDatasetsNode.onNodeExecution(
       { valueA: schemaA.name, valueB: schemaB.name },
       { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
       db
@@ -269,7 +269,7 @@ describe('JoinDatasetsNode', () => {
       addValueSchema(db, dsB.id, schemaOnlyB)
     ]);
 
-    const res = await JoinDatasetsNode.onServerExecution(
+    const res = await JoinDatasetsNode.onNodeExecution(
       { valueA: schemaA.name, valueB: schemaB.name },
       { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
       db
@@ -370,7 +370,7 @@ describe('JoinDatasetsNode', () => {
       ].map(n => createEntry(db, dsB.id, n))
     );
 
-    const res = await JoinDatasetsNode.onServerExecution(
+    const res = await JoinDatasetsNode.onNodeExecution(
       { valueA: schemaA.name, valueB: schemaB.name },
       { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
       db

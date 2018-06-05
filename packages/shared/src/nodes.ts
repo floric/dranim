@@ -45,7 +45,7 @@ export interface ServerNodeDef<
   name: string;
   isFormValid?: (form: FormValues<NodeForm>) => Promise<boolean>;
   isInputValid?: (inputs: IOValues<NodeInputs>) => Promise<boolean>;
-  onServerExecution: (
+  onNodeExecution: (
     form: FormValues<NodeForm>,
     inputs: IOValues<NodeInputs>,
     db: Db
@@ -63,7 +63,7 @@ export interface ServerNodeDefWithContextFn<
   NodeForm = {},
   NodeResults = {}
 > extends ServerNodeDef<NodeInputs, NodeOutputs, NodeForm, NodeResults> {
-  onServerExecution: (
+  onNodeExecution: (
     form: FormValues<NodeForm>,
     inputs: IOValues<NodeInputs>,
     db: Db,

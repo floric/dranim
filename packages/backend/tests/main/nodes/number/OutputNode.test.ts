@@ -26,7 +26,7 @@ describe('NumberOutputNode', () => {
   });
 
   test('should get output int value from input', async () => {
-    const res = await NumberOutputNode.onServerExecution(
+    const res = await NumberOutputNode.onNodeExecution(
       {},
       {
         value: 2
@@ -39,7 +39,7 @@ describe('NumberOutputNode', () => {
   });
 
   test('should get output negative float value from input', async () => {
-    const res = await NumberOutputNode.onServerExecution(
+    const res = await NumberOutputNode.onNodeExecution(
       {},
       {
         value: -2.34

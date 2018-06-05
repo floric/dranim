@@ -82,7 +82,7 @@ describe('SelectValuesNode', () => {
       unique: false
     });
 
-    const res = await SelectValuesNode.onServerExecution(
+    const res = await SelectValuesNode.onNodeExecution(
       { values: ['test'] },
       { dataset: { datasetId: ds.id } },
       db
@@ -108,7 +108,7 @@ describe('SelectValuesNode', () => {
     });
 
     try {
-      await SelectValuesNode.onServerExecution(
+      await SelectValuesNode.onNodeExecution(
         { values: ['bla', 'test'] },
         { dataset: { datasetId: ds.id } },
         db
@@ -121,7 +121,7 @@ describe('SelectValuesNode', () => {
 
   test('should validate dataset', async () => {
     try {
-      await SelectValuesNode.onServerExecution(
+      await SelectValuesNode.onNodeExecution(
         { values: ['test'] },
         { dataset: { datasetId: 'ds.id' } },
         db
@@ -181,7 +181,7 @@ describe('SelectValuesNode', () => {
       ].map(n => createEntry(db, ds.id, n))
     );
 
-    const res = await SelectValuesNode.onServerExecution(
+    const res = await SelectValuesNode.onNodeExecution(
       { values: ['test', 'abc'] },
       { dataset: { datasetId: ds.id } },
       db

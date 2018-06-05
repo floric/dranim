@@ -32,7 +32,7 @@ export const EqualsStringNode: ServerNodeDef<
       }
     };
   },
-  onServerExecution: (form, inputs) =>
+  onNodeExecution: (form, inputs) =>
     Promise.resolve({
       outputs: {
         equals: inputs.valueA === inputs.valueB

@@ -25,7 +25,7 @@ export const NumberInputNode: ServerNodeDef<
       value: { content: {}, isPresent: true }
     };
   },
-  onServerExecution: (form, values) =>
+  onNodeExecution: (form, values) =>
     Promise.resolve({
       outputs: {
         value: form.value!

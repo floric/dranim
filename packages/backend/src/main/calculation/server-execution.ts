@@ -77,14 +77,14 @@ export const executeServerNode = async (
       throw Error('Missing input node');
     }
 
-    return await type.onServerExecution(nodeForm, nodeInputs, db, {
+    return await type.onNodeExecution(nodeForm, nodeInputs, db, {
       nodeId,
       onContextFnExecution: inputs =>
         executeServerNode(db, outputNode._id.toHexString(), inputs)
     });
   }
 
-  return await type.onServerExecution(nodeForm, nodeInputs, db);
+  return await type.onNodeExecution(nodeForm, nodeInputs, db);
 };
 
 const getConnectionResult = async (

@@ -100,7 +100,7 @@ describe('Utils', () => {
       isFormValid: () => Promise.resolve(true),
       isInputValid: () => Promise.resolve(true),
       onMetaExecution: () => Promise.resolve({}),
-      onServerExecution: () => Promise.resolve({ outputs: {} }),
+      onNodeExecution: () => Promise.resolve({ outputs: {} }),
       transformContextInputDefsToContextOutputDefs: () => Promise.resolve({}),
       transformInputDefsToContextInputDefs: () => Promise.resolve({})
     });
@@ -113,7 +113,7 @@ describe('Utils', () => {
       isFormValid: () => Promise.resolve(true),
       isInputValid: () => Promise.resolve(true),
       onMetaExecution: () => Promise.resolve({}),
-      onServerExecution: () => Promise.resolve({ outputs: {} })
+      onNodeExecution: () => Promise.resolve({ outputs: {} })
     });
     expect(res).toBe(false);
   });

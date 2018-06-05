@@ -45,7 +45,7 @@ export const SelectValuesNode: ServerNodeDef<
       }
     };
   },
-  onServerExecution: async (form, inputs, db) => {
+  onNodeExecution: async (form, inputs, db) => {
     await validateDataset(inputs.dataset.datasetId, db);
 
     const existingDs = await getDataset(db, inputs.dataset.datasetId);

@@ -10,7 +10,7 @@ describe('FormatNumberNode', () => {
   });
 
   test('should print number default', async () => {
-    const res = await FormatNumberNode.onServerExecution(
+    const res = await FormatNumberNode.onNodeExecution(
       {},
       {
         number: 123
@@ -22,7 +22,7 @@ describe('FormatNumberNode', () => {
   });
 
   test('should print number as average', async () => {
-    const res = await FormatNumberNode.onServerExecution(
+    const res = await FormatNumberNode.onNodeExecution(
       {
         average: false
       },
@@ -36,7 +36,7 @@ describe('FormatNumberNode', () => {
   });
 
   test('should print number with mantissa', async () => {
-    const res = await FormatNumberNode.onServerExecution(
+    const res = await FormatNumberNode.onNodeExecution(
       {
         output: 'time'
       },

@@ -40,7 +40,7 @@ describe('DatasetInputNode', () => {
   test('should get output value from form with valid dataset', async () => {
     const newDs = await createDataset(db, 'testA');
 
-    const res = await DatasetInputNode.onServerExecution(
+    const res = await DatasetInputNode.onNodeExecution(
       { dataset: newDs.id },
       {},
       db
@@ -50,7 +50,7 @@ describe('DatasetInputNode', () => {
 
   test('should get output value from form', async () => {
     try {
-      await DatasetInputNode.onServerExecution(
+      await DatasetInputNode.onNodeExecution(
         { dataset: VALID_OBJECT_ID },
         {},
         db

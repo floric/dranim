@@ -27,7 +27,7 @@ export const SumNode: ServerNodeDef<SumNodeNodeInputs, SumNodeNodeOutputs> = {
       sum: { content: {}, isPresent: true }
     };
   },
-  onServerExecution: (form, values) =>
+  onNodeExecution: (form, values) =>
     Promise.resolve({
       outputs: { sum: values.a + values.b }
     })

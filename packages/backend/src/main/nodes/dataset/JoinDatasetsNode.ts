@@ -69,7 +69,7 @@ export const JoinDatasetsNode: ServerNodeDef<
       }
     };
   },
-  onServerExecution: async (form, inputs, db) => {
+  onNodeExecution: async (form, inputs, db) => {
     const [dsA, dsB] = await Promise.all([
       getDataset(db, inputs.datasetA.datasetId),
       getDataset(db, inputs.datasetB.datasetId)

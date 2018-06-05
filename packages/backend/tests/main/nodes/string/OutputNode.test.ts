@@ -14,7 +14,7 @@ describe('StringOutputNode', () => {
     const inputValue = 'a huge text';
     const form = { value: inputValue };
 
-    const res = await StringOutputNode.onServerExecution(
+    const res = await StringOutputNode.onNodeExecution(
       form,
       {
         string: inputValue

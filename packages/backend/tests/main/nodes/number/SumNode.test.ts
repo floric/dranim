@@ -21,7 +21,7 @@ describe('SumNode', () => {
   });
 
   test('should sum two numbers', async () => {
-    const res = await SumNode.onServerExecution(
+    const res = await SumNode.onNodeExecution(
       {},
       {
         a: 17,

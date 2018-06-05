@@ -13,7 +13,7 @@ describe('StringInputNode', () => {
     const inputValue = 'a huge text';
     const form = { value: inputValue };
 
-    const res = await StringInputNode.onServerExecution(form, {}, null);
+    const res = await StringInputNode.onNodeExecution(form, {}, null);
     expect(res.outputs.string).toBe(inputValue);
   });
 

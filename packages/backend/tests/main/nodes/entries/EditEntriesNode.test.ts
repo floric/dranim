@@ -45,7 +45,7 @@ describe('EditEntriesNode', () => {
   test('should create new DS and do changes on this one', async () => {
     const ds = await createDataset(db, 'newds');
 
-    const res = await EditEntriesNode.onServerExecution(
+    const res = await EditEntriesNode.onNodeExecution(
       {},
       { dataset: { datasetId: ds.id } },
       db

@@ -30,7 +30,7 @@ export const MultiplicationNode: ServerNodeDef<
       product: { content: {}, isPresent: true }
     };
   },
-  onServerExecution: (form, values) =>
+  onNodeExecution: (form, values) =>
     Promise.resolve({
       outputs: {
         product: values.a * values.b

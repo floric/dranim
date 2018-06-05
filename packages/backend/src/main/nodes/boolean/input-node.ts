@@ -22,7 +22,7 @@ export const BooleanInputNode: ServerNodeDef<
       value: { content: {}, isPresent: true }
     };
   },
-  onServerExecution: form =>
+  onNodeExecution: form =>
     Promise.resolve({
       outputs: {
         value: form.value || false

@@ -22,7 +22,7 @@ export const StringInputNode: ServerNodeDef<
       string: { content: {}, isPresent: true }
     };
   },
-  onServerExecution: form =>
+  onNodeExecution: form =>
     Promise.resolve({
       outputs: {
         string: form.value || ''
