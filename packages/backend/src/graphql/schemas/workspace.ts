@@ -1,18 +1,18 @@
-const FormValue = `
+const FormValueDef = `
   type FormValue {
     name: String!
     value: String!
   }
 `;
 
-const SocketValue = `
+const SocketValueDef = `
   type SocketValue {
     name: String!
     connectionId: String!
   }
 `;
 
-const Node = `
+const NodeDef = `
   type Node {
     id: String!
     type: String!
@@ -32,7 +32,7 @@ const Node = `
   }
 `;
 
-const NodeInput = `
+const NodeInputDef = `
   input NodeInput {
     id: String!
     type: String!
@@ -41,21 +41,21 @@ const NodeInput = `
   }
 `;
 
-const Socket = `
+const SocketDef = `
   type Socket {
     nodeId: String!
     name: String!
   }
 `;
 
-const SocketInput = `
+const SocketInputDef = `
   input SocketInput {
     nodeId: String!
     name: String!
   }
 `;
 
-const Connection = `
+const ConnectionDef = `
   type Connection {
     id: String!
     from: Socket
@@ -65,14 +65,14 @@ const Connection = `
   }
 `;
 
-const ConnectionInput = `
+const ConnectionInputDef = `
   input ConnectionInput {
     from: SocketInput
     to: SocketInput
   }
 `;
 
-const Workspace = `
+const WorkspaceDef = `
   type Workspace {
     id: String!
     name: String!
@@ -84,24 +84,24 @@ const Workspace = `
   }
 `;
 
-const Meta = `
+const MetaDef = `
   scalar Meta
 `;
 
-const SocketDefs = `
+const SocketDefsDef = `
   scalar SocketDefs
 `;
 
 export default () => [
-  Meta,
-  SocketDefs,
-  FormValue,
-  SocketValue,
-  Node,
-  NodeInput,
-  Socket,
-  SocketInput,
-  Connection,
-  ConnectionInput,
-  Workspace
+  MetaDef,
+  SocketDefsDef,
+  FormValueDef,
+  SocketValueDef,
+  NodeDef,
+  NodeInputDef,
+  SocketDef,
+  SocketInputDef,
+  ConnectionDef,
+  ConnectionInputDef,
+  WorkspaceDef
 ];

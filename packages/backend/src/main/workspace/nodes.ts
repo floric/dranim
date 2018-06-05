@@ -56,7 +56,7 @@ export const getContextInputDefs = async (
 export const getContextOutputDefs = async (
   node: NodeInstance,
   db: Db
-): Promise<SocketDefs<any> | null> => {
+): Promise<(SocketDefs<any> & { [name: string]: SocketDef }) | null> => {
   if (serverNodeTypes.has(node.type)) {
     return null;
   }
@@ -105,7 +105,7 @@ export const getContextOutputDefs = async (
 export const getMetaOutputs = async (
   db: Db,
   nodeId: string
-): Promise<SocketMetas<{}>> => {
+): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> => {
   const node = await getNode(db, nodeId);
   if (!node) {
     return {};
@@ -125,7 +125,7 @@ export const getMetaInputs = async (
   db: Db,
   nodeId: string,
   inputConnections?: Array<ConnectionDescription>
-): Promise<SocketMetas<{}>> => {
+): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> => {
   const inputs = {};
 
   let inputConns;

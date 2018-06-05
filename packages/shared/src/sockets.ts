@@ -1,5 +1,5 @@
 import { DatasetRef } from './nodes/dataset';
-import { EntryRef } from './nodes/entry';
+import { EntryRef } from './nodes/entries';
 import { ValueSchema } from './workspace';
 
 export enum SocketType {
