@@ -1,6 +1,6 @@
 import { EqualsStringNodeDef } from '@masterthesis/shared';
 
-import { EqualsStringNode } from '../../../../src/main/nodes/boolean/equals-string';
+import { EqualsStringNode } from '../../../../../src/main/nodes/boolean/comparisons/equals-string';
 
 describe('EqualsStringNode', () => {
   test('should have correct properties', () => {

@@ -2,7 +2,7 @@ import { NodeDef } from '../nodes';
 import { StringSocket } from '../sockets';
 
 export interface StringInputNodeOutputs {
-  string: string;
+  value: string;
 }
 
 export interface StringInputNodeForm {
@@ -13,14 +13,14 @@ export const StringInputNodeDef: NodeDef<{}, StringInputNodeOutputs> = {
   name: 'String Input',
   inputs: {},
   outputs: {
-    string: StringSocket('String')
+    value: StringSocket('String')
   },
   keywords: [],
   path: ['String']
 };
 
 export interface StringOutputNodeInputs {
-  string: string;
+  value: string;
 }
 
 export interface StringOutputNodeResults {
@@ -30,7 +30,7 @@ export interface StringOutputNodeResults {
 export const StringOutputNodeDef: NodeDef<StringOutputNodeInputs, {}> = {
   name: 'String Output',
   inputs: {
-    string: StringSocket('String')
+    value: StringSocket('String')
   },
   isOutputNode: true,
   outputs: {},

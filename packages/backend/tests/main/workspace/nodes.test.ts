@@ -10,7 +10,9 @@ import {
   NumberInputNodeDef,
   NumberOutputNodeDef,
   SelectValuesNodeDef,
-  StringInputNodeDef
+  StringInputNodeDef,
+  StringOutputNodeDef,
+  SumNodeDef
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
@@ -295,6 +297,14 @@ describe('Nodes', () => {
     expect(updatedNode.type).toBe(NumberInputNodeDef.name);
   });
 
+  test('should throw error for invalid ID in updateNode', async () => {
+    try {
+      await updateNode(db, 'test', 0, 0);
+    } catch (err) {
+      expect(err.message).toBe('Invalid ID');
+    }
+  });
+
   test('should get all nodes', async () => {
     const ws = await createWorkspace(db, 'test', '');
     const nodes = await Promise.all([
@@ -315,6 +325,32 @@ describe('Nodes', () => {
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Invalid node type');
+    }
+  });
+
+  test('should throw error for output node in context', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const contextNode = await createNode(
+      db,
+      EditEntriesNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+
+    try {
+      await createNode(
+        db,
+        StringOutputNodeDef.name,
+        ws.id,
+        [contextNode.id],
+        0,
+        0
+      );
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Output nodes only on root level allowed');
     }
   });
 
@@ -395,7 +431,7 @@ describe('Nodes', () => {
     );
     const nodeB = await createNode(
       db,
-      NumberOutputNodeDef.name,
+      SumNodeDef.name,
       ws.id,
       [contextNode.id],
       0,
@@ -445,7 +481,7 @@ describe('Nodes', () => {
     );
     const nodeB = await createNode(
       db,
-      NumberOutputNodeDef.name,
+      SumNodeDef.name,
       ws.id,
       [contextANode.id, contextBNode.id],
       0,
@@ -525,6 +561,64 @@ describe('Nodes', () => {
     expect(outputRes).toBe(null);
   });
 
+  test('should throw error for missing parent node', async () => {
+    const ws = await createWorkspace(db, 'Ws', '');
+    try {
+      await getContextInputDefs(
+        {
+          type: ContextNodeType.INPUT,
+          state: NodeState.VALID,
+          contextIds: [VALID_OBJECT_ID],
+          inputs: [],
+          outputs: [],
+          form: [],
+          metaInputs: '',
+          metaOutputs: '',
+          hasContextFn: false,
+          contextInputDefs: '',
+          contextOutputDefs: '',
+          x: 0,
+          y: 0,
+          workspaceId: ws.id,
+          id: VALID_OBJECT_ID
+        },
+        db
+      );
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Parent node missing');
+    }
+  });
+
+  test('should throw error for missing parent node', async () => {
+    const ws = await createWorkspace(db, 'Ws', '');
+    try {
+      await getContextOutputDefs(
+        {
+          type: ContextNodeType.INPUT,
+          state: NodeState.VALID,
+          contextIds: [VALID_OBJECT_ID],
+          inputs: [],
+          outputs: [],
+          form: [],
+          metaInputs: '',
+          metaOutputs: '',
+          hasContextFn: false,
+          contextInputDefs: '',
+          contextOutputDefs: '',
+          x: 0,
+          y: 0,
+          workspaceId: ws.id,
+          id: VALID_OBJECT_ID
+        },
+        db
+      );
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Parent node missing');
+    }
+  });
+
   test('should get empty context inputs', async () => {
     const ws = await createWorkspace(db, 'Ws', '');
     const dsInput = await createNode(
@@ -558,6 +652,26 @@ describe('Nodes', () => {
     expect(inputRes).toEqual({});
     const outputRes = await getContextOutputDefs(contextInputNode, db);
     expect(outputRes).toEqual({});
+  });
+
+  test('should throw error for empty value names', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const node = await createNode(db, StringInputNodeDef.name, ws.id, [], 0, 0);
+    try {
+      await addOrUpdateFormValue(db, node.id, '', 'test');
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('No form value name specified');
+    }
+  });
+
+  test('should throw error for invalid node id', async () => {
+    try {
+      await addOrUpdateFormValue(db, VALID_OBJECT_ID, 'test', 'test');
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Node does not exist');
+    }
   });
 
   test('should get context inputs with dataset schema', async () => {
