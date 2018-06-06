@@ -139,7 +139,7 @@ export default class DataPage extends React.Component<{}, { saving: boolean }> {
                               successTitle: () => 'Dataset created',
                               successMessage: () =>
                                 `Dataset "${name}" created successfully.`,
-                              failedTitle: 'Dataset not deleted.',
+                              failedTitle: 'Dataset not created.',
                               failedMessage: `Dataset  "${name}" creation failed.`
                             })
                           }

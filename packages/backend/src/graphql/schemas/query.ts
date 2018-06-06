@@ -7,5 +7,7 @@ export const QueryDef = `
     entry(datasetId: String!, entryId: String!): Entry
     uploads(datasetId: String): [UploadProcess!]!
     calculations(workspaceId: String!): [CalculationProcess!]!
+    visualizations: [Visualization!]!
+    visualization(visId: String!): Visualization
   }
 `;

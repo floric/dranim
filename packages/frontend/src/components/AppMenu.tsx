@@ -14,7 +14,11 @@ export const AppMenu: SFC<{
     name: string;
     id: string;
   }>;
-}> = ({ datasets, workspaces, collapsed }) => (
+  visualizations?: Array<{
+    name: string;
+    id: string;
+  }>;
+}> = ({ datasets, workspaces, visualizations, collapsed }) => (
   <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
     <Menu.Item key="menu_start">
       <MenuItemContent
@@ -68,13 +72,29 @@ export const AppMenu: SFC<{
           </Menu.Item>
         ))}
     </Menu.SubMenu>
-    <Menu.Item key="menu_vis">
-      <MenuItemContent
-        collapsed={collapsed}
-        href="/visualizations"
-        iconName="area-chart"
-        title="Visualizations"
-      />
-    </Menu.Item>
+    <Menu.SubMenu
+      key="sub3"
+      title={
+        <span>
+          <Icon type="area-chart" />
+          {!collapsed ? ' Visualizations' : null}
+        </span>
+      }
+    >
+      <Menu.Item key="menu_vis">
+        <MenuItemContent
+          collapsed={collapsed}
+          href="/visualizations"
+          title="Visualizations"
+        />
+      </Menu.Item>
+      {visualizations && visualizations.length > 0 && <Menu.Divider />}
+      {visualizations &&
+        visualizations.map(({ name, id }) => (
+          <Menu.Item key={`menu_vis+${id}`}>
+            <NavLink to={`/visualizations/${id}`}>{name}</NavLink>
+          </Menu.Item>
+        ))}
+    </Menu.SubMenu>
   </Menu>
 );

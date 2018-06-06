@@ -19,6 +19,7 @@ export * from './workspace';
 export * from './utils';
 export * from './nodes';
 export * from './sockets';
+export * from './visualizations';
 export * from './nodes/dataset';
 export * from './nodes/number';
 export * from './nodes/string';

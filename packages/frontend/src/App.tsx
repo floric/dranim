@@ -35,6 +35,10 @@ export const ALL_DATASETS = gql`
       id
       name
     }
+    visualizations {
+      id
+      name
+    }
   }
 `;
 
@@ -76,6 +80,7 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
 
               return (
                 <AppMenu
+                  visualizations={res.data!.visualizations}
                   datasets={res.data!.datasets}
                   workspaces={res.data!.workspaces}
                   collapsed={collapsed}
