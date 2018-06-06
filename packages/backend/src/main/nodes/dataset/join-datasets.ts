@@ -1,4 +1,5 @@
 import {
+  Dataset,
   Entry,
   FormValues,
   JoinDatasetsNodeDef,
@@ -15,7 +16,6 @@ import { getCreatedDatasetName } from '../../calculation/utils';
 import {
   addValueSchema,
   createDataset,
-  Dataset,
   getDataset
 } from '../../workspace/dataset';
 import { createEntry, getEntryCollection } from '../../workspace/entry';

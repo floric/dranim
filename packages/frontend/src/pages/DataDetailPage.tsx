@@ -59,7 +59,6 @@ export default class DataDetailPage extends Component<IDataDetailPageProps> {
 
     return (
       <>
-        <PageHeaderCard title="Dataset" />
         <Query query={DATASET} variables={{ id }}>
           {({ loading, error, data, refetch }) => {
             if (loading) {
@@ -83,27 +82,30 @@ export default class DataDetailPage extends Component<IDataDetailPageProps> {
             const dataset: Dataset = data.dataset;
 
             return (
-              <Tabs
-                type="card"
-                animated={{ inkBar: true, tabPane: false }}
-                tabBarStyle={{ marginBottom: 0 }}
-              >
-                <Tabs.TabPane
-                  tab={`${dataset.valueschemas.length} Schemas`}
-                  key="schemas"
+              <>
+                <PageHeaderCard title={dataset.name} typeTitle="Dataset" />
+                <Tabs
+                  type="card"
+                  animated={{ inkBar: true, tabPane: false }}
+                  tabBarStyle={{ marginBottom: 0 }}
                 >
-                  <DataSchemas dataset={dataset} refetch={refetch} />
-                </Tabs.TabPane>
-                <Tabs.TabPane
-                  tab={`${dataset.entriesCount} Entries`}
-                  key="entries"
-                >
-                  <DataEntries dataset={dataset} refetch={refetch} />
-                </Tabs.TabPane>
-                <Tabs.TabPane tab="Actions" key="actions">
-                  <DatasetActions dataset={dataset} refetch={refetch} />
-                </Tabs.TabPane>
-              </Tabs>
+                  <Tabs.TabPane
+                    tab={`${dataset.valueschemas.length} Schemas`}
+                    key="schemas"
+                  >
+                    <DataSchemas dataset={dataset} refetch={refetch} />
+                  </Tabs.TabPane>
+                  <Tabs.TabPane
+                    tab={`${dataset.entriesCount} Entries`}
+                    key="entries"
+                  >
+                    <DataEntries dataset={dataset} refetch={refetch} />
+                  </Tabs.TabPane>
+                  <Tabs.TabPane tab="Actions" key="actions">
+                    <DatasetActions dataset={dataset} refetch={refetch} />
+                  </Tabs.TabPane>
+                </Tabs>
+              </>
             );
           }}
         </Query>

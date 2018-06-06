@@ -1,5 +1,6 @@
 import {
   CalculationProcess,
+  Dataset,
   UploadProcess,
   Visualization,
   Workspace
@@ -10,11 +11,7 @@ import {
   getAllVisualizations,
   getVisualization
 } from '../../main/visualizations/visualizations';
-import {
-  Dataset,
-  getAllDatasets,
-  getDataset
-} from '../../main/workspace/dataset';
+import { getAllDatasets, getDataset } from '../../main/workspace/dataset';
 import { getAllUploads } from '../../main/workspace/upload';
 import { getAllWorkspaces, getWorkspace } from '../../main/workspace/workspace';
 

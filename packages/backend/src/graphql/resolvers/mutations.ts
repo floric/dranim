@@ -1,6 +1,7 @@
 import {
   CalculationProcess,
   ConnectionInstance,
+  Dataset,
   Entry,
   NodeInstance,
   UploadProcess,
@@ -22,7 +23,6 @@ import {
 import {
   addValueSchema,
   createDataset,
-  Dataset,
   deleteDataset
 } from '../../main/workspace/dataset';
 import { createEntryFromJSON, deleteEntry } from '../../main/workspace/entry';

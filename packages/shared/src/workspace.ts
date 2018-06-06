@@ -26,6 +26,14 @@ export interface Dataset {
   latestEntries: Array<Entry>;
 }
 
+export interface GQLDataset {
+  id: string;
+  name: string;
+  entriesCount: number;
+  valueschemas: Array<ValueSchema>;
+  latestEntries: Array<Entry>;
+}
+
 export interface Workspace {
   id: string;
   name: string;

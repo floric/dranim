@@ -96,13 +96,16 @@ export interface NodeInstance {
   id: string;
   x: number;
   y: number;
-  state: NodeState;
   workspaceId: string;
   contextIds: Array<string>;
   outputs: Array<ConnectionDescription>;
   inputs: Array<ConnectionDescription>;
   type: string;
   form: Array<FormValue>;
+}
+
+export interface GQLNodeInstance extends NodeInstance {
+  state: NodeState;
   metaInputs: string;
   metaOutputs: string;
   hasContextFn: boolean;

@@ -1,4 +1,5 @@
 import {
+  Dataset,
   SelectValuesNodeDef,
   SelectValuesNodeForm,
   SelectValuesNodeInputs,
@@ -10,7 +11,6 @@ import { Db } from 'mongodb';
 import {
   addValueSchema,
   createDataset,
-  Dataset,
   getDataset
 } from '../../../main/workspace/dataset';
 import { getCreatedDatasetName } from '../../calculation/utils';
