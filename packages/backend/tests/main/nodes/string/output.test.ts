@@ -17,7 +17,7 @@ describe('StringOutputNode', () => {
     const res = await StringOutputNode.onNodeExecution(
       form,
       {
-        string: inputValue
+        value: inputValue
       },
       null
     );
@@ -29,7 +29,7 @@ describe('StringOutputNode', () => {
   test('should return nothing onMetaExecution', async () => {
     const res = await StringOutputNode.onMetaExecution(
       {},
-      { string: { content: {}, isPresent: true } },
+      { value: { content: {}, isPresent: true } },
       null
     );
 

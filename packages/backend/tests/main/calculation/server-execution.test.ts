@@ -84,8 +84,8 @@ describe('Server Execution', () => {
     );
     await createConnection(
       db,
-      { name: 'string', nodeId: nodeA.id },
-      { name: 'string', nodeId: nodeB.id }
+      { name: 'value', nodeId: nodeA.id },
+      { name: 'value', nodeId: nodeB.id }
     );
 
     const { outputs, results } = await executeServerNode(db, nodeB.id);
@@ -259,7 +259,7 @@ describe('Server Execution', () => {
     );
     await createConnection(
       db,
-      { name: 'string', nodeId: stringInputNode.id },
+      { name: 'value', nodeId: stringInputNode.id },
       { name: 'val', nodeId: contextOutputNode!._id.toHexString() }
     );
 

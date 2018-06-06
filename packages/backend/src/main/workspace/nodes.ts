@@ -35,18 +35,13 @@ export const getContextInputDefs = async (
     return null;
   }
 
-  const parentNodeId = node.contextIds[node.contextIds.length - 1];
-  const parent = await getNode(db, parentNodeId);
-  if (parent === null) {
-    throw new Error('Invalid node B');
-  }
-
+  const parent = await getParentNode(node, db);
   const parentType = serverNodeTypes.get(parent.type)!;
   if (!hasContextFn(parentType)) {
     return null;
   }
 
-  const parentInputs = await getMetaInputs(db, parentNodeId);
+  const parentInputs = await getMetaInputs(db, parent.id);
   return await parentType.transformInputDefsToContextInputDefs(
     parentType.inputs,
     parentInputs,
@@ -62,18 +57,13 @@ export const getContextOutputDefs = async (
     return null;
   }
 
-  const parentNodeId = node.contextIds[node.contextIds.length - 1];
-  const parent = await getNode(db, parentNodeId);
-  if (parent === null) {
-    throw new Error('Invalid node A');
-  }
-
+  const parent = await getParentNode(node, db);
   const parentType = serverNodeTypes.get(parent.type)!;
   if (!hasContextFn(parentType)) {
     return null;
   }
 
-  const parentInputs = await getMetaInputs(db, parentNodeId);
+  const parentInputs = await getMetaInputs(db, parent.id);
   const contextInputDefs = await parentType.transformInputDefsToContextInputDefs(
     parentType.inputs,
     parentInputs,
@@ -101,6 +91,16 @@ export const getContextOutputDefs = async (
     contextInputs,
     db
   );
+};
+
+const getParentNode = async (node: NodeInstance, db: Db) => {
+  const parentNodeId = node.contextIds[node.contextIds.length - 1];
+  const parent = await getNode(db, parentNodeId);
+  if (parent === null) {
+    throw new Error('Parent node missing');
+  }
+
+  return parent;
 };
 
 export const getMetaOutputs = async (
@@ -171,6 +171,7 @@ export const createNode = async (
     throw new Error('Invalid node type');
   }
 
+  await checkNoOutputNodeInContexts(type, contextNodeIds);
   await checkValidContextNode(contextNodeIds, db);
   await checkValidWorkspace(workspaceId, db);
 
@@ -244,6 +245,24 @@ const checkValidContextNode = async (contextNodeIds: Array<string>, db: Db) => {
   }
 };
 
+const checkNoOutputNodeInContexts = async (
+  type: string,
+  contextNodeIds: Array<string>
+) => {
+  if (contextNodeIds.length === 0) {
+    return;
+  }
+
+  const nodeType = serverNodeTypes.get(type);
+  if (!nodeType) {
+    return;
+  }
+
+  if (nodeType.isOutputNode === true) {
+    throw new Error('Output nodes only on root level allowed');
+  }
+};
+
 const checkValidWorkspace = async (workspaceId: string, db: Db) => {
   const ws = await getWorkspace(db, workspaceId);
   if (!ws) {
@@ -295,7 +314,7 @@ export const deleteNode = async (db: Db, id: string) => {
 
 export const updateNode = async (db: Db, id: string, x: number, y: number) => {
   if (!ObjectID.isValid(id)) {
-    throw new Error('Invalid ID.');
+    throw new Error('Invalid ID');
   }
 
   const collection = getNodesCollection(db);
@@ -343,10 +362,6 @@ export const getNodeState = async (node: NodeInstance) => {
     ? await t.isFormValid(parseNodeForm(node))
     : true;
   if (!isValid) {
-    return NodeState.INVALID;
-  }
-
-  if (node.inputs.length !== Object.keys(t.inputs).length) {
     return NodeState.INVALID;
   }
 

@@ -14,18 +14,18 @@ export const StringInputNode: ServerNodeDef<
   onMetaExecution: async form => {
     if (form.value == null) {
       return {
-        string: { content: {}, isPresent: false }
+        value: { content: {}, isPresent: false }
       };
     }
 
     return {
-      string: { content: {}, isPresent: true }
+      value: { content: {}, isPresent: true }
     };
   },
   onNodeExecution: form =>
     Promise.resolve({
       outputs: {
-        string: form.value || ''
+        value: form.value || ''
       }
     })
 };

@@ -502,21 +502,21 @@ describe('JoinDatasetsNode', () => {
               fallback: '',
               name: 'A_testA',
               required: true,
-              type: 'String',
+              type: DataType.STRING,
               unique: false
             },
             {
               fallback: '',
               name: 'A_other',
               required: true,
-              type: 'String',
+              type: DataType.STRING,
               unique: false
             },
             {
               fallback: '',
               name: 'B_testB',
               required: true,
-              type: 'String',
+              type: DataType.STRING,
               unique: false
             }
           ]
