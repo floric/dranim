@@ -4,7 +4,7 @@ import {
   Colors,
   ConnectionInstance,
   Dataset,
-  NodeInstance,
+  GQLNodeInstance,
   SocketInstance
 } from '@masterthesis/shared';
 import { Card, Col, Row, TreeSelect } from 'antd';
@@ -27,7 +27,7 @@ const filterTreeNode = (inputValue: string, treeNode: any) => {
 
 export interface ExplorerEditorProps {
   connections: Array<ConnectionInstance>;
-  nodes: Array<NodeInstance>;
+  nodes: Array<GQLNodeInstance>;
   datasets: Array<Dataset>;
   onNodeCreate: (
     type: string,
