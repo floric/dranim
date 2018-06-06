@@ -11,7 +11,6 @@ import { TreeData } from 'antd/lib/tree-select';
 import { ExplorerEditorProps } from '../ExplorerEditor';
 import * as BooleanNodes from './boolean';
 import * as DatasetNodes from './dataset';
-import * as EntryNodes from './entries';
 import * as NumberNodes from './number';
 import * as StringNodes from './string';
 
@@ -50,13 +49,7 @@ export interface ClientNodeDef<
   ) => JSX.Element;
 }
 
-const allNodes = [
-  DatasetNodes,
-  NumberNodes,
-  StringNodes,
-  EntryNodes,
-  BooleanNodes
-];
+const allNodes = [DatasetNodes, NumberNodes, StringNodes, BooleanNodes];
 
 const buildTree = (
   elems: Array<ClientNodeDef & NodeDef>,
@@ -98,15 +91,20 @@ const buildTree = (
   }));
 };
 
-export const nodeTypes: Map<string, ClientNodeDef & NodeDef> = new Map(
+const clientNodeMap: Map<string, ClientNodeDef> = new Map(
   allNodes
     .map<Array<[string, ClientNodeDef]>>(nodes =>
       Object.values(nodes).map<[string, ClientNodeDef]>(n => [n.name, n])
     )
     .reduce<Array<[string, ClientNodeDef]>>((a, b) => [...a, ...b], [])
+);
+
+export const nodeTypes: Map<string, ClientNodeDef & NodeDef> = new Map(
+  Array.from(NodesMap.entries())
+    .map<[string, NodeDef]>(n => [n[0], n[1]])
     .map<[string, ClientNodeDef & NodeDef]>(n => [
       n[0],
-      { ...NodesMap.get(n[0]), ...n[1] }
+      { ...(clientNodeMap.get(n[0]) || {}), ...n[1] }
     ])
     .sort((a, b) => a[0].localeCompare(b[0]))
 );

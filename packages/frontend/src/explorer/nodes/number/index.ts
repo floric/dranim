@@ -1,5 +1,2 @@
-export * from './FormatNumberNode';
-export * from './InputNode';
-export * from './OutputNode';
-export * from './SumNode';
-export * from './MultiplicationNode';
+export * from './format-number';
+export * from './input';

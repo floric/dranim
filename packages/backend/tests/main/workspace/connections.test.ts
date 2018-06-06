@@ -1,7 +1,8 @@
 import {
   NumberInputNodeDef,
   NumberOutputNodeDef,
-  SocketInstance
+  SocketInstance,
+  SumNodeDef
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
@@ -99,7 +100,7 @@ describe('Connections', () => {
     );
     const nodeB = await createNode(
       db,
-      NumberOutputNodeDef.name,
+      SumNodeDef.name,
       ws.id,
       [contextNode.id],
       0,
