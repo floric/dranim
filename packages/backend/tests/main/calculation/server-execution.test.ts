@@ -12,7 +12,7 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { executeServerNode } from '../../../src/main/calculation/server-execution';
+import { executeServerNode } from '../../../src/main/calculation/execution';
 import { createConnection } from '../../../src/main/workspace/connections';
 import {
   addValueSchema,

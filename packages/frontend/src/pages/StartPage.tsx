@@ -6,7 +6,7 @@ import { Mutation } from 'react-apollo';
 
 import { AsyncButton } from '../components/AsyncButton';
 import { PageHeaderCard } from '../components/PageHeaderCard';
-import { client } from '../io/apolloClient';
+import { client } from '../io/apollo-client';
 
 const CREATE_STR_DEMO_DATA = gql`
   mutation createSTRDemoData {

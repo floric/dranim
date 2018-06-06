@@ -5,7 +5,7 @@ import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter } from 'react-router-dom';
 
 import App from './App';
-import { client } from './io/apolloClient';
+import { client } from './io/apollo-client';
 
 import 'ant-design-pro/dist/ant-design-pro.css';
 import 'antd/dist/antd.css';
