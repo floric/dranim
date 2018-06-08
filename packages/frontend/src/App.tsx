@@ -10,12 +10,13 @@ import { RouteComponentProps } from 'react-router';
 import { Route, Switch } from 'react-router-dom';
 
 import { AppMenu } from './components/AppMenu';
-import DataDetailPage from './pages/DataDetailPage';
 import DataPage from './pages/DataPage';
+import DataDetailPage from './pages/dataset/DataDetailPage';
 import StartPage from './pages/StartPage';
 import VisPage from './pages/VisPage';
+import VisDetailPage from './pages/visualizations/VisDetailPage';
 import WorkspaceDetailPage from './pages/workspaces/WorkspaceDetailPage';
-import WorkspacesOverviewPage from './pages/WorkspacesOverviewPage';
+import WorkspacesPage from './pages/WorkspacesPage';
 
 const { Content, Footer, Sider } = Layout;
 
@@ -95,13 +96,14 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
               <Route exact path="/" component={StartPage} />
               <Route exact path="/data" component={DataPage} />
               <Route path="/data/:id" component={DataDetailPage} />
-              <Route
-                exact
-                path="/workspaces"
-                component={WorkspacesOverviewPage}
-              />
+              <Route exact path="/workspaces" component={WorkspacesPage} />
               <Route path="/workspaces/:id" component={WorkspaceDetailPage} />
               <Route exact path="/visualizations" component={VisPage} />
+              <Route
+                exact
+                path="/visualizations/:id"
+                component={VisDetailPage}
+              />
             </Switch>
           </Content>
           <Footer style={{ textAlign: 'center' }}>Florian Richter</Footer>
