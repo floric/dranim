@@ -256,7 +256,7 @@ export const DatasetActions = withApollo<DataActionsProps>(
                                   <AsyncButton
                                     type="primary"
                                     disabled
-                                    onClick={async () => console.log('TODO')}
+                                    onClick={async () => 0}
                                   >
                                     as CSV
                                   </AsyncButton>
@@ -265,7 +265,7 @@ export const DatasetActions = withApollo<DataActionsProps>(
                                   <AsyncButton
                                     type="primary"
                                     disabled
-                                    onClick={async () => console.log('TODO')}
+                                    onClick={async () => 0}
                                   >
                                     as ZIP
                                   </AsyncButton>

@@ -1,3 +1,4 @@
+import { NodeInstance } from '@masterthesis/shared';
 import { Db, MongoClient } from 'mongodb';
 import MongodbMemoryServer from 'mongodb-memory-server';
 
@@ -25,4 +26,16 @@ export const getTestMongoDb = async () => {
     database,
     mongodbServer
   };
+};
+
+export const NODE: NodeInstance = {
+  id: VALID_OBJECT_ID,
+  contextIds: [],
+  form: [],
+  inputs: [],
+  outputs: [],
+  type: '',
+  workspaceId: VALID_OBJECT_ID,
+  x: 0,
+  y: 9
 };

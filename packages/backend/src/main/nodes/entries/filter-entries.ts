@@ -12,7 +12,7 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { getCreatedDatasetName } from '../../calculation/utils';
+import { createDynamicDatasetName } from '../../calculation/utils';
 import {
   addValueSchema,
   createDataset,
@@ -59,10 +59,10 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
 
     return inputs;
   },
-  onNodeExecution: async (form, inputs, db, context) => {
+  onNodeExecution: async (form, inputs, { db, onContextFnExecution, node }) => {
     const newDs = await createDataset(
       db,
-      getCreatedDatasetName(FilterEntriesNodeDef.name)
+      createDynamicDatasetName(FilterEntriesNodeDef.name, node.id)
     );
     const oldDs = await getDataset(db, inputs.dataset.datasetId);
     if (!oldDs) {
@@ -71,15 +71,15 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
 
     await copySchemas(oldDs.valueschemas, newDs.id, db);
 
-    if (context) {
+    if (onContextFnExecution) {
       await copyFilteredToOtherDataset(
         db,
         inputs.dataset.datasetId,
         newDs.id,
-        context.onContextFnExecution
+        onContextFnExecution
       );
     } else {
-      throw new Error('Missing context');
+      throw new Error('Missing context function');
     }
 
     return {

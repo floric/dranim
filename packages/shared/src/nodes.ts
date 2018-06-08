@@ -48,7 +48,7 @@ export interface ServerNodeDef<
   onNodeExecution: (
     form: FormValues<NodeForm>,
     inputs: IOValues<NodeInputs>,
-    db: Db
+    context: { db: Db; node: NodeInstance }
   ) => Promise<NodeExecutionResult<NodeOutputs, NodeResults>>;
   onMetaExecution: (
     form: FormValues<NodeForm>,
@@ -66,9 +66,10 @@ export interface ServerNodeDefWithContextFn<
   onNodeExecution: (
     form: FormValues<NodeForm>,
     inputs: IOValues<NodeInputs>,
-    db: Db,
-    context?: {
-      onContextFnExecution: (
+    context: {
+      node: NodeInstance;
+      db: Db;
+      onContextFnExecution?: (
         input: IOValues<any>
       ) => Promise<NodeExecutionResult<any>>;
     }

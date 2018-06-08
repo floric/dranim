@@ -2,6 +2,7 @@ import {
   DatasetSocket,
   DataType,
   FilterEntriesNodeDef,
+  NodeInstance,
   ValueSchema
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
@@ -20,6 +21,7 @@ import { createWorkspace } from '../../../../src/main/workspace/workspace';
 import {
   getTestMongoDb,
   NeverGoHereError,
+  NODE,
   VALID_OBJECT_ID
 } from '../../../test-utils';
 
@@ -63,8 +65,9 @@ describe('FilterEntriesNode', () => {
     const res = await FilterEntriesNode.onNodeExecution(
       {},
       { dataset: { datasetId: ds.id } },
-      db,
       {
+        db,
+        node: NODE,
         onContextFnExecution: input =>
           Promise.resolve({ outputs: { keepEntry: true } })
       }
@@ -238,8 +241,9 @@ describe('FilterEntriesNode', () => {
     const res = await FilterEntriesNode.onNodeExecution(
       {},
       { dataset: { datasetId: ds.id } },
-      db,
       {
+        db,
+        node: NODE,
         onContextFnExecution: input =>
           Promise.resolve({
             outputs: { keepEntry: input.val < 10 }
@@ -263,11 +267,14 @@ describe('FilterEntriesNode', () => {
       await FilterEntriesNode.onNodeExecution(
         {},
         { dataset: { datasetId: ds.id } },
-        db
+        {
+          db,
+          node: NODE
+        }
       );
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Missing context');
+      expect(err.message).toBe('Missing context function');
     }
   });
 
@@ -276,7 +283,7 @@ describe('FilterEntriesNode', () => {
       await FilterEntriesNode.onNodeExecution(
         {},
         { dataset: { datasetId: VALID_OBJECT_ID } },
-        db
+        { db, node: NODE }
       );
       throw NeverGoHereError;
     } catch (err) {

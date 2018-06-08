@@ -58,7 +58,7 @@ export const executeServerNode = async (
     return await calculateContext(node, type, nodeForm, nodeInputs, db);
   }
 
-  return await type.onNodeExecution(nodeForm, nodeInputs, db);
+  return await type.onNodeExecution(nodeForm, nodeInputs, { db, node });
 };
 
 const calculateContext = async (
@@ -85,7 +85,9 @@ const calculateContext = async (
     throw Error('Missing input node');
   }
 
-  return await type.onNodeExecution(nodeForm, nodeInputs, db, {
+  return await type.onNodeExecution(nodeForm, nodeInputs, {
+    db,
+    node,
     onContextFnExecution: inputs =>
       executeServerNode(db, outputNode._id.toHexString(), inputs)
   });

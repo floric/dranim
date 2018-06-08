@@ -6,6 +6,7 @@ import { createDataset } from '../../../../src/main/workspace/dataset';
 import {
   getTestMongoDb,
   NeverGoHereError,
+  NODE,
   VALID_OBJECT_ID
 } from '../../../test-utils';
 
@@ -43,7 +44,7 @@ describe('DatasetInputNode', () => {
     const res = await DatasetInputNode.onNodeExecution(
       { dataset: newDs.id },
       {},
-      db
+      { db, node: NODE }
     );
     expect(res.outputs.dataset).toEqual({ datasetId: newDs.id });
   });
@@ -53,7 +54,7 @@ describe('DatasetInputNode', () => {
       await DatasetInputNode.onNodeExecution(
         { dataset: VALID_OBJECT_ID },
         {},
-        db
+        { db, node: NODE }
       );
       throw NeverGoHereError;
     } catch (err) {
