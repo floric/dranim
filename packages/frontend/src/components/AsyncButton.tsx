@@ -2,19 +2,19 @@ import * as React from 'react';
 
 import { Button, Popconfirm } from 'antd';
 import { ButtonProps } from 'antd/lib/button';
-import { css } from 'glamor';
 
 interface AsyncButtonState {
   isLoading: boolean;
 }
 
-const FULL_WIDTH = css({ width: '100%' });
+export interface AsyncButtonProps {
+  onClick: () => Promise<any>;
+  confirmClick?: boolean;
+  confirmMessage?: string;
+}
 
 export class AsyncButton extends React.Component<
-  ButtonProps & { onClick: () => Promise<any> } & {
-    confirmClick?: boolean;
-    confirmMessage?: string;
-  },
+  AsyncButtonProps & ButtonProps,
   AsyncButtonState
 > {
   private mounted = false;
@@ -66,7 +66,7 @@ export class AsyncButton extends React.Component<
           cancelText="Cancel"
         >
           <Button
-            {...FULL_WIDTH}
+            style={{ width: '100%' }}
             type={type}
             icon={icon}
             disabled={disabled}
@@ -80,7 +80,7 @@ export class AsyncButton extends React.Component<
 
     return (
       <Button
-        {...FULL_WIDTH}
+        style={{ width: '100%' }}
         type={type}
         icon={icon}
         disabled={disabled}

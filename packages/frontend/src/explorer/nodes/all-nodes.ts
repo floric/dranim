@@ -11,6 +11,7 @@ import { TreeData } from 'antd/lib/tree-select';
 import { ExplorerEditorProps } from '../ExplorerEditor';
 import * as BooleanNodes from './boolean';
 import * as DatasetNodes from './dataset';
+import * as EntriesNodes from './entries';
 import * as NumberNodes from './number';
 import * as StringNodes from './string';
 
@@ -30,6 +31,7 @@ export interface RenderFormItemsProps<NodeInputs, NodeForm>
     EditorContext {
   inputs: SocketMetas<NodeInputs>;
   nodeForm: FormValues<NodeForm>;
+  touchForm: () => void;
   setTempState: (state: any) => void;
   getTempState: () => any;
 }
@@ -49,7 +51,13 @@ export interface ClientNodeDef<
   ) => JSX.Element;
 }
 
-const allNodes = [DatasetNodes, NumberNodes, StringNodes, BooleanNodes];
+const allNodes = [
+  DatasetNodes,
+  NumberNodes,
+  StringNodes,
+  BooleanNodes,
+  EntriesNodes
+];
 
 const buildTree = (
   elems: Array<ClientNodeDef & NodeDef>,

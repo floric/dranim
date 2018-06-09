@@ -184,14 +184,14 @@ export class ExplorerEditor extends React.Component<
     return (
       <>
         <Row gutter={12}>
-          <Col xs={24} md={12} xl={18}>
+          <Col xs={24} md={16} lg={18} xxl={20}>
             <Card
               bordered={false}
               title={node ? node.type : 'Nothing selected'}
               style={{ marginBottom: 12 }}
             >
-              <Row>
-                <Col xs={16}>
+              <Row gutter={12}>
+                <Col xs={24} md={16} xl={20}>
                   {node && (
                     <>
                       <h4>Properties</h4>
@@ -205,7 +205,7 @@ export class ExplorerEditor extends React.Component<
                     </>
                   )}
                 </Col>
-                <Col xs={8}>
+                <Col xs={24} md={8} xl={4}>
                   <h4>Actions</h4>
                   {node && (
                     <AsyncButton
@@ -214,14 +214,14 @@ export class ExplorerEditor extends React.Component<
                       confirmClick
                       onClick={this.handleDeleteSelectedNode}
                     >
-                      Delete Selected
+                      Delete
                     </AsyncButton>
                   )}
                 </Col>
               </Row>
             </Card>
           </Col>
-          <Col xs={24} md={12} xl={6}>
+          <Col xs={24} md={8} lg={6} xxl={4}>
             <Card bordered={false} title="Editor" style={{ marginBottom: 12 }}>
               <h4>Properties</h4>
               <Row>
@@ -232,7 +232,7 @@ export class ExplorerEditor extends React.Component<
                     showSearch
                     filterTreeNode={filterTreeNode}
                     treeData={nodeTypesTree}
-                    style={{ width: 200 }}
+                    style={{ width: '100%' }}
                     placeholder="Add Node"
                     onSelect={this.handleSelectCreateNode}
                   />

@@ -185,6 +185,7 @@ describe('EditEntriesNode', () => {
       { dataset: validDs },
       inputRes,
       {},
+      [],
       db
     );
 

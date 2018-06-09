@@ -1,5 +1,5 @@
 import {
-  EditEntriesNodeDef,
+  AddValuesNodeDef,
   Entry,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
@@ -15,21 +15,23 @@ import { createDataset, getDataset } from '../../workspace/dataset';
 import { createEntry, getEntryCollection } from '../../workspace/entry';
 import { copySchemas, getDynamicEntryContextInputs } from './util';
 
-export const EditEntriesNode: ServerNodeDefWithContextFn<
+export const AddValuesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs
 > = {
-  name: EditEntriesNodeDef.name,
+  name: AddValuesNodeDef.name,
   transformContextInputDefsToContextOutputDefs: async (
     inputDefs,
     inputs,
-    contextInputDefs
+    contextInputDefs,
+    contextInputs,
+    form
   ) => {
     if (!inputs.dataset || !inputs.dataset.isPresent) {
       return {};
     }
 
-    return contextInputDefs;
+    return { ...contextInputDefs };
   },
   transformInputDefsToContextInputDefs: getDynamicEntryContextInputs,
   isInputValid: async inputs => {
@@ -49,7 +51,7 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
   onNodeExecution: async (form, inputs, { db, onContextFnExecution, node }) => {
     const newDs = await createDataset(
       db,
-      createDynamicDatasetName(EditEntriesNodeDef.name, node.id)
+      createDynamicDatasetName(AddValuesNodeDef.name, node.id)
     );
     const oldDs = await getDataset(db, inputs.dataset.datasetId);
     if (!oldDs) {
@@ -57,6 +59,8 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
     }
 
     await copySchemas(oldDs.valueschemas, newDs.id, db);
+
+    // TODO add new schemas
 
     if (onContextFnExecution) {
       await copyEditedToOtherDataset(

@@ -89,6 +89,7 @@ export const getContextOutputDefs = async (
     parentInputs,
     contextInputDefs,
     contextInputs,
+    node.form,
     db
   );
 };
