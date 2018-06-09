@@ -25,589 +25,113 @@ export const createSTRDemoData = async (db: Db) => {
   return true;
 };
 
+const createNumberValueSchema = (
+  name: string,
+  required: boolean = false,
+  unique: boolean = false
+) => ({
+  name,
+  type: DataType.NUMBER,
+  required,
+  fallback: '1',
+  unique
+});
+const createStringValueSchema = (
+  name: string,
+  required: boolean = false,
+  unique: boolean = false
+) => ({
+  name,
+  type: DataType.STRING,
+  required,
+  fallback: '',
+  unique
+});
+
 const passagesSchemas: Array<Valueschema> = [
-  {
-    name: 'passage_id',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: true
-  },
-  {
-    name: 'pass_day',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '1',
-    unique: false
-  },
-  {
-    name: 'pass_month',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '1',
-    unique: false
-  },
-  {
-    name: 'pass_year',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '1',
-    unique: false
-  },
-  {
-    name: 'master_firstname',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'master_patronymic',
-    type: DataType.STRING,
-    required: false,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'master_article',
-    type: DataType.STRING,
-    required: false,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'master_surname',
-    type: DataType.STRING,
-    required: false,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'domicile_city',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'domicile_region',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'domicile_country_1763',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'domicile_country_1795',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'domicile_country_1815',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'domicile_country_1830',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'domicile_latitude',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'domicile_longitude',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'domicile_decLatitude',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '0',
-    unique: false
-  },
-  {
-    name: 'domicile_decLongitude',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '0',
-    unique: false
-  },
-  {
-    name: 'departure_city',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'departure_region',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'departure_country_1763',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'departure_country_1795',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'departure_country_1815',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'departure_country_1830',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'departure_coords_latitude',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'departure_coords_longitude',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'departure_coords_decLatitude',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '0',
-    unique: false
-  },
-  {
-    name: 'departure_coords_decLongitude',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '0',
-    unique: false
-  },
-  {
-    name: 'destination_city',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'destination_region',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'destination_country_1763',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'destination_country_1795',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'destination_country_1815',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'destination_country_1830',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'destination_coords_latitude',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'destination_coords_longitude',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'destination_coords_decLatitude',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '0',
-    unique: false
-  },
-  {
-    name: 'destination_coords_decLongitude',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '0',
-    unique: false
-  },
-  {
-    name: 'commodities_number',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '1',
-    unique: false
-  },
-  {
-    name: 'tonnes',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '0',
-    unique: false
-  }
+  createStringValueSchema('passage_id', true, true),
+  createNumberValueSchema('pass_day', true),
+  createNumberValueSchema('pass_month', true),
+  createNumberValueSchema('pass_year', true),
+  createStringValueSchema('master_firstname', true),
+  createStringValueSchema('master_patronymic'),
+  createStringValueSchema('master_article'),
+  createStringValueSchema('master_surname'),
+  createStringValueSchema('domicile_city', true),
+  createStringValueSchema('domicile_region', true),
+  createStringValueSchema('domicile_country_1763', true),
+  createStringValueSchema('domicile_country_1795', true),
+  createStringValueSchema('domicile_country_1815', true),
+  createStringValueSchema('domicile_country_1830', true),
+  createStringValueSchema('domicile_latitude', true),
+  createStringValueSchema('domicile_longitude', true),
+  createNumberValueSchema('domicile_decLatitude', true),
+  createNumberValueSchema('domicile_decLongitude', true),
+  createStringValueSchema('departure_city', true),
+  createStringValueSchema('departure_region', true),
+  createStringValueSchema('departure_country_1763', true),
+  createStringValueSchema('departure_country_1795', true),
+  createStringValueSchema('departure_country_1815', true),
+  createStringValueSchema('departure_country_1830', true),
+  createStringValueSchema('departure_latitude', true),
+  createStringValueSchema('departure_longitude', true),
+  createNumberValueSchema('departure_decLatitude', true),
+  createNumberValueSchema('departure_decLongitude', true),
+  createStringValueSchema('destination_city', true),
+  createStringValueSchema('destination_region', true),
+  createStringValueSchema('destination_country_1763', true),
+  createStringValueSchema('destination_country_1795', true),
+  createStringValueSchema('destination_country_1815', true),
+  createStringValueSchema('destination_country_1830', true),
+  createStringValueSchema('destination_latitude', true),
+  createStringValueSchema('destination_longitude', true),
+  createNumberValueSchema('destination_decLatitude', true),
+  createNumberValueSchema('destination_decLongitude', true),
+  createNumberValueSchema('commodities_number', true),
+  createNumberValueSchema('tonnes', true)
 ];
 
 const commoditiesSchemas: Array<Valueschema> = [
-  {
-    name: 'commodity_id',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: true
-  },
-  {
-    name: 'passage_id',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'pass_day',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '1',
-    unique: false
-  },
-  {
-    name: 'pass_month',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '1',
-    unique: false
-  },
-  {
-    name: 'pass_year',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '1',
-    unique: false
-  },
-  {
-    name: 'master_firstname',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'master_patronymic',
-    type: DataType.STRING,
-    required: false,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'master_article',
-    type: DataType.STRING,
-    required: false,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'master_surname',
-    type: DataType.STRING,
-    required: false,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'domicile_city',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'domicile_region',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'domicile_country_1763',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'domicile_country_1795',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'domicile_country_1815',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'domicile_country_1830',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'domicile_latitude',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'domicile_longitude',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'domicile_decLatitude',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '0',
-    unique: false
-  },
-  {
-    name: 'domicile_decLongitude',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '0',
-    unique: false
-  },
-  {
-    name: 'departure_city',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'departure_region',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'departure_country_1763',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'departure_country_1795',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'departure_country_1815',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'departure_country_1830',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'departure_coords_latitude',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'departure_coords_longitude',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'departure_coords_decLatitude',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '0',
-    unique: false
-  },
-  {
-    name: 'departure_coords_decLongitude',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '0',
-    unique: false
-  },
-  {
-    name: 'destination_city',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'destination_region',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'destination_country_1763',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'destination_country_1795',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'destination_country_1815',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'destination_country_1830',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'destination_coords_latitude',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'destination_coords_longitude',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'destination_coords_decLatitude',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '0',
-    unique: false
-  },
-  {
-    name: 'destination_coords_decLongitude',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '0',
-    unique: false
-  },
-  {
-    name: 'measure',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'Commodity',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: false
-  },
-  {
-    name: 'quantity',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '1',
-    unique: false
-  },
-  {
-    name: 'tonnes',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '0',
-    unique: false
-  }
+  createStringValueSchema('commodity_id', true, true),
+  createStringValueSchema('passage_id', true),
+  createNumberValueSchema('pass_day', true),
+  createNumberValueSchema('pass_month', true),
+  createNumberValueSchema('pass_year', true),
+  createStringValueSchema('master_firstname', true),
+  createStringValueSchema('master_patronymic'),
+  createStringValueSchema('master_article'),
+  createStringValueSchema('master_surname'),
+  createStringValueSchema('domicile_city', true),
+  createStringValueSchema('domicile_region', true),
+  createStringValueSchema('domicile_country_1763', true),
+  createStringValueSchema('domicile_country_1795', true),
+  createStringValueSchema('domicile_country_1815', true),
+  createStringValueSchema('domicile_country_1830', true),
+  createStringValueSchema('domicile_latitude', true),
+  createStringValueSchema('domicile_longitude', true),
+  createNumberValueSchema('domicile_decLatitude', true),
+  createNumberValueSchema('domicile_decLongitude', true),
+  createStringValueSchema('departure_city', true),
+  createStringValueSchema('departure_region', true),
+  createStringValueSchema('departure_country_1763', true),
+  createStringValueSchema('departure_country_1795', true),
+  createStringValueSchema('departure_country_1815', true),
+  createStringValueSchema('departure_country_1830', true),
+  createStringValueSchema('departure_latitude', true),
+  createStringValueSchema('departure_longitude', true),
+  createNumberValueSchema('departure_decLatitude', true),
+  createNumberValueSchema('departure_decLongitude', true),
+  createStringValueSchema('destination_city', true),
+  createStringValueSchema('destination_region', true),
+  createStringValueSchema('destination_country_1763', true),
+  createStringValueSchema('destination_country_1795', true),
+  createStringValueSchema('destination_country_1815', true),
+  createStringValueSchema('destination_country_1830', true),
+  createStringValueSchema('destination_latitude', true),
+  createStringValueSchema('destination_longitude', true),
+  createNumberValueSchema('destination_decLatitude', true),
+  createNumberValueSchema('measure', true),
+  createStringValueSchema('commodity', true),
+  createNumberValueSchema('quantity', true),
+  createNumberValueSchema('tonnes', true)
 ];

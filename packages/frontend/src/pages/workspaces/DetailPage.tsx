@@ -12,8 +12,8 @@ import {
   UnknownErrorCard
 } from '../../components/CustomCards';
 import { PageHeaderCard } from '../../components/PageHeaderCard';
-import WorkspaceCalculationsPage from './WorkspaceCalculationsPage';
-import WorkspaceEditorPage from './WorkspaceEditorPage';
+import { WorkspaceCalculationsPage } from './CalculationsPage';
+import { WorkspaceEditorPage } from './EditorPage';
 
 const WORKSPACE = gql`
   query dataset($id: String!) {

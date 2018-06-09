@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Dataset } from '@masterthesis/shared';
+import { GQLDataset } from '@masterthesis/shared';
 import { Button, Tabs } from 'antd';
 import gql from 'graphql-tag';
 import { History } from 'history';
@@ -14,11 +14,11 @@ import {
   UnknownErrorCard
 } from '../../components/CustomCards';
 import { PageHeaderCard } from '../../components/PageHeaderCard';
-import { DatasetActions } from './ActionsPage';
-import { DataEntries } from './EntriesPage';
+import { DataActionsPage } from './ActionsPage';
+import { DataEntriesPage } from './EntriesPage';
 import { DataSchemas } from './SchemasPage';
 
-export interface IDataDetailPageProps
+export interface DataDetailPageProps
   extends RouteComponentProps<{ id: string }, {}> {}
 
 const NoDatasetExceptionActions: SFC<{ history: History }> = ({ history }) => (
@@ -48,7 +48,7 @@ const DATASET = gql`
   }
 `;
 
-export default class DataDetailPage extends Component<IDataDetailPageProps> {
+export default class DataDetailPage extends Component<DataDetailPageProps> {
   public render() {
     const {
       history,
@@ -78,7 +78,7 @@ export default class DataDetailPage extends Component<IDataDetailPageProps> {
             );
           }
 
-          const dataset: Dataset = data.dataset;
+          const dataset: GQLDataset = data.dataset;
 
           return (
             <>
@@ -98,10 +98,10 @@ export default class DataDetailPage extends Component<IDataDetailPageProps> {
                   tab={`${dataset.entriesCount} Entries`}
                   key="entries"
                 >
-                  <DataEntries dataset={dataset} refetch={refetch} />
+                  <DataEntriesPage dataset={dataset} refetch={refetch} />
                 </Tabs.TabPane>
                 <Tabs.TabPane tab="Actions" key="actions">
-                  <DatasetActions dataset={dataset} refetch={refetch} />
+                  <DataActionsPage dataset={dataset} refetch={refetch} />
                 </Tabs.TabPane>
               </Tabs>
             </>

@@ -1,12 +1,13 @@
 import * as React from 'react';
 
-import { Card, Col, Row } from 'antd';
+import { GQLVisualization } from '@masterthesis/shared';
+import { Card, Col } from 'antd';
 import gql from 'graphql-tag';
 import { Mutation, Query } from 'react-apollo';
 
 import { CardItem } from '../components/CardItem';
+import { cardItemProps, CardsLayout } from '../components/CardsLayout';
 import { LoadingCard } from '../components/CustomCards';
-import { NumberInfo } from '../components/NumberInfo';
 import { PageHeaderCard } from '../components/PageHeaderCard';
 import { tryOperation } from '../utils/form';
 import { CreateVisForm } from './forms/CreateVisForm';
@@ -48,18 +49,14 @@ export default class VisPage extends React.Component<{}, {}> {
             );
           }
 
+          const visualizations: Array<GQLVisualization> = data.visualizations;
+
           return (
             <>
               <PageHeaderCard title="Visualizations" />
-              <Row gutter={12} style={{ marginBottom: 12 }}>
-                {data.visualizations.map(vs => (
-                  <Col
-                    key={`card-${vs.id}`}
-                    sm={{ span: 24 }}
-                    md={{ span: 12 }}
-                    xl={{ span: 6 }}
-                    style={{ marginBottom: 12 }}
-                  >
+              <CardsLayout>
+                {visualizations.map(vs => (
+                  <Col {...cardItemProps} key={vs.id}>
                     <Mutation mutation={DELETE_VIS}>
                       {deleteVis => (
                         <CardItem
@@ -87,11 +84,7 @@ export default class VisPage extends React.Component<{}, {}> {
                               }" deletion failed.`
                             });
                           }}
-                        >
-                          <Col xs={{ span: 24 }} md={{ span: 12 }}>
-                            <NumberInfo total={0} title="Entries" />
-                          </Col>
-                        </CardItem>
+                        />
                       )}
                     </Mutation>
                   </Col>
@@ -126,7 +119,7 @@ export default class VisPage extends React.Component<{}, {}> {
                     </Mutation>
                   </Card>
                 </Col>
-              </Row>
+              </CardsLayout>
             </>
           );
         }}

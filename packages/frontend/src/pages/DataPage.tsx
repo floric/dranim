@@ -1,12 +1,13 @@
 import * as React from 'react';
 
-import { Dataset } from '@masterthesis/shared';
-import { Card, Col, Row } from 'antd';
+import { GQLDataset } from '@masterthesis/shared';
+import { Card, Col } from 'antd';
 import gql from 'graphql-tag';
 import { Mutation, Query } from 'react-apollo';
 
 import { ALL_DATASETS } from '../App';
 import { CardItem } from '../components/CardItem';
+import { cardItemProps, CardsLayout } from '../components/CardsLayout';
 import { LoadingCard, UnknownErrorCard } from '../components/CustomCards';
 import { NumberInfo } from '../components/NumberInfo';
 import { PageHeaderCard } from '../components/PageHeaderCard';
@@ -42,16 +43,12 @@ export default class DataPage extends React.Component<{}, {}> {
               return <UnknownErrorCard error={error} />;
             }
 
+            const datasets: Array<GQLDataset> = data.datasets;
+
             return (
-              <Row gutter={12} style={{ marginBottom: 12 }}>
-                {data.datasets.map((ds: Dataset) => (
-                  <Col
-                    key={`card-${ds.id}`}
-                    sm={{ span: 24 }}
-                    md={{ span: 12 }}
-                    xl={{ span: 6 }}
-                    style={{ marginBottom: 12 }}
-                  >
+              <CardsLayout>
+                {datasets.map(ds => (
+                  <Col {...cardItemProps} key={ds.id}>
                     <Mutation mutation={DELETE_DATASET}>
                       {deleteDataset => (
                         <CardItem
@@ -125,7 +122,7 @@ export default class DataPage extends React.Component<{}, {}> {
                     </Mutation>
                   </Card>
                 </Col>
-              </Row>
+              </CardsLayout>
             );
           }}
         </Query>

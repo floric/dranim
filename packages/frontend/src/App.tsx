@@ -11,11 +11,11 @@ import { Route, Switch } from 'react-router-dom';
 
 import { AppMenu } from './components/AppMenu';
 import DataPage from './pages/DataPage';
-import DataDetailPage from './pages/dataset/DataDetailPage';
+import DetailPage from './pages/dataset/DetailPage';
 import StartPage from './pages/StartPage';
 import VisPage from './pages/VisPage';
 import VisDetailPage from './pages/visualizations/VisDetailPage';
-import WorkspaceDetailPage from './pages/workspaces/WorkspaceDetailPage';
+import WorkspaceDetailPage from './pages/workspaces/DetailPage';
 import WorkspacesPage from './pages/WorkspacesPage';
 
 const { Content, Footer, Sider } = Layout;
@@ -95,7 +95,7 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
             <Switch>
               <Route exact path="/" component={StartPage} />
               <Route exact path="/data" component={DataPage} />
-              <Route path="/data/:id" component={DataDetailPage} />
+              <Route path="/data/:id" component={DetailPage} />
               <Route exact path="/workspaces" component={WorkspacesPage} />
               <Route path="/workspaces/:id" component={WorkspaceDetailPage} />
               <Route exact path="/visualizations" component={VisPage} />

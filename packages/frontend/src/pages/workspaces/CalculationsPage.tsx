@@ -24,11 +24,11 @@ const CALCULATIONS = gql`
   }
 `;
 
-export interface IWorkspaceCalculationsPageProps
+export interface WorkspaceCalculationsPageProps
   extends RouteComponentProps<{ id: string }> {}
 
-export default class WorkspaceCalculationsPage extends Component<
-  IWorkspaceCalculationsPageProps
+export class WorkspaceCalculationsPage extends Component<
+  WorkspaceCalculationsPageProps
 > {
   public render() {
     const {

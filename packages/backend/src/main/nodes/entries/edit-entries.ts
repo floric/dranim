@@ -108,7 +108,6 @@ const copyEditedToOtherDataset = async (
   onContextFnExecution: (inputs: Values) => Promise<NodeExecutionResult<any>>
 ) => {
   const oldCollection = getEntryCollection(db, oldDsId);
-
   return new Promise((resolve, reject) => {
     const col = oldCollection.find();
     col.on('data', async (entry: Entry) => {

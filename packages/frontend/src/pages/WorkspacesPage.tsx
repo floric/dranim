@@ -1,14 +1,15 @@
 import * as React from 'react';
 
 import { Workspace } from '@masterthesis/shared';
-import { Card, Col, Row, Tooltip } from 'antd';
-import { distanceInWordsToNow } from 'date-fns';
+import { Card, Col } from 'antd';
 import gql from 'graphql-tag';
 import { Mutation, Query } from 'react-apollo';
 import { RouteComponentProps } from 'react-router';
 
 import { CardItem } from '../components/CardItem';
+import { cardItemProps, CardsLayout } from '../components/CardsLayout';
 import { PageHeaderCard } from '../components/PageHeaderCard';
+import { TimeInfo } from '../components/TimeInfo';
 import { LoadingCard, UnknownErrorCard } from './../components/CustomCards';
 import { tryOperation } from './../utils/form';
 import { CreateWorkspaceForm } from './forms/CreateWorkspaceForm';
@@ -58,16 +59,12 @@ export default class WorkspacesOverviewPage extends React.Component<
               return <UnknownErrorCard error={error} />;
             }
 
+            const workspaces: Array<Workspace> = data.workspaces;
+
             return (
-              <Row gutter={12} style={{ marginBottom: 12 }}>
-                {data.workspaces.map((ws: Workspace) => (
-                  <Col
-                    key={`card-${ws.id}`}
-                    xs={{ span: 24 }}
-                    md={{ span: 12 }}
-                    xl={{ span: 8 }}
-                    style={{ marginBottom: 12 }}
-                  >
+              <CardsLayout>
+                {workspaces.map(ws => (
+                  <Col {...cardItemProps} key={ws.id}>
                     <Mutation mutation={DELETE_WORKSPACE}>
                       {deleteWorkspace => (
                         <CardItem
@@ -95,28 +92,8 @@ export default class WorkspacesOverviewPage extends React.Component<
                             })
                           }
                         >
-                          <Row>
-                            <Col xs={6}>Created:</Col>
-                            <Col xs={18}>
-                              <Tooltip title={ws.created}>
-                                {distanceInWordsToNow(ws.created, {
-                                  includeSeconds: true,
-                                  addSuffix: true
-                                })}
-                              </Tooltip>
-                            </Col>
-                          </Row>
-                          <Row>
-                            <Col xs={6}>Last change:</Col>
-                            <Col xs={18}>
-                              <Tooltip title={ws.lastChange}>
-                                {distanceInWordsToNow(ws.lastChange, {
-                                  includeSeconds: true,
-                                  addSuffix: true
-                                })}
-                              </Tooltip>
-                            </Col>
-                          </Row>
+                          <TimeInfo text="Created" time={ws.created} />
+                          <TimeInfo text="Last change" time={ws.lastChange} />
                         </CardItem>
                       )}
                     </Mutation>
@@ -154,7 +131,7 @@ export default class WorkspacesOverviewPage extends React.Component<
                     </Mutation>
                   </Card>
                 </Col>
-              </Row>
+              </CardsLayout>
             );
           }}
         </Query>

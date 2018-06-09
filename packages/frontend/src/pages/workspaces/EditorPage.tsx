@@ -147,8 +147,11 @@ const START_CALCULATION = gql`
   }
 `;
 
-export default class WorkspaceEditorPage extends React.Component<
-  RouteComponentProps<{ id: string }>
+export interface WorkspaceEditorPageProps
+  extends RouteComponentProps<{ id: string }> {}
+
+export class WorkspaceEditorPage extends React.Component<
+  WorkspaceEditorPageProps
 > {
   public render() {
     const {
