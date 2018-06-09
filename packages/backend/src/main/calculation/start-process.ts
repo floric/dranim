@@ -5,7 +5,7 @@ import {
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
-import { executeServerNode } from '../calculation/server-execution';
+import { executeServerNode } from '../calculation/execution';
 import { serverNodeTypes } from '../nodes/all-nodes';
 import { getAllNodes } from '../workspace/nodes';
 

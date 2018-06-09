@@ -3,7 +3,7 @@ import {
   ConditionalMetaTypes,
   ContextNodeType,
   DatasetMeta,
-  NodeInstance,
+  GQLNodeInstance,
   NodeState,
   parseNodeForm,
   SocketDef,
@@ -40,7 +40,7 @@ export const isEntryMeta = (
 };
 
 export const renderContextNode = (
-  n: NodeInstance,
+  n: GQLNodeInstance,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   changeState: (newState: Partial<ExplorerEditorState>) => void,
@@ -91,7 +91,7 @@ export const renderContextNode = (
 };
 
 export const renderNode = (
-  n: NodeInstance,
+  n: GQLNodeInstance,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   changeState: (newState: Partial<ExplorerEditorState>) => void,

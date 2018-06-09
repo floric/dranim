@@ -22,10 +22,7 @@ export const executeServerNode = async (
   nodeId: string,
   contextInputs?: IOValues<any>
 ): Promise<NodeExecutionResult<{}, {}>> => {
-  const node = await getNode(db, nodeId);
-  if (!node) {
-    throw new Error('Node not found');
-  }
+  const node = await getCheckedNode(nodeId, db);
 
   if (node.type === ContextNodeType.INPUT) {
     if (!contextInputs) {
@@ -58,7 +55,15 @@ export const executeServerNode = async (
     return await calculateContext(node, type, nodeForm, nodeInputs, db);
   }
 
-  return await type.onNodeExecution(nodeForm, nodeInputs, db);
+  return await type.onNodeExecution(nodeForm, nodeInputs, { db, node });
+};
+
+const getCheckedNode = async (nodeId: string, db: Db) => {
+  const node = await getNode(db, nodeId);
+  if (!node) {
+    throw new Error('Node not found');
+  }
+  return node;
 };
 
 const calculateContext = async (
@@ -85,7 +90,9 @@ const calculateContext = async (
     throw Error('Missing input node');
   }
 
-  return await type.onNodeExecution(nodeForm, nodeInputs, db, {
+  return await type.onNodeExecution(nodeForm, nodeInputs, {
+    db,
+    node,
     onContextFnExecution: inputs =>
       executeServerNode(db, outputNode._id.toHexString(), inputs)
   });

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Dataset, ProcessState, UploadProcess } from '@masterthesis/shared';
+import { GQLDataset, ProcessState, UploadProcess } from '@masterthesis/shared';
 import { Button, Card, Col, Form, Icon, Row, Table, Upload } from 'antd';
 import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
@@ -47,8 +47,8 @@ export const ALL_UPLOADS = gql`
   }
 `;
 
-export interface DataActionsProps {
-  dataset: Dataset;
+export interface DataActionsPageProps {
+  dataset: GQLDataset;
   refetch: () => Promise<ApolloQueryResult<any>>;
 }
 
@@ -57,9 +57,9 @@ export interface DataActionsState {
   uploading: boolean;
 }
 
-export const DatasetActions = withApollo<DataActionsProps>(
+export const DataActionsPage = withApollo<DataActionsPageProps>(
   class DatasetActionsImpl extends React.Component<
-    DataActionsProps & WithApolloClient<{}>,
+    DataActionsPageProps & WithApolloClient<{}>,
     DataActionsState
   > {
     public componentWillMount() {
@@ -256,7 +256,7 @@ export const DatasetActions = withApollo<DataActionsProps>(
                                   <AsyncButton
                                     type="primary"
                                     disabled
-                                    onClick={async () => console.log('TODO')}
+                                    onClick={async () => 0}
                                   >
                                     as CSV
                                   </AsyncButton>
@@ -265,7 +265,7 @@ export const DatasetActions = withApollo<DataActionsProps>(
                                   <AsyncButton
                                     type="primary"
                                     disabled
-                                    onClick={async () => console.log('TODO')}
+                                    onClick={async () => 0}
                                   >
                                     as ZIP
                                   </AsyncButton>

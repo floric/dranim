@@ -1,9 +1,11 @@
 import {
   CalculationProcess,
   ConnectionInstance,
+  Dataset,
   Entry,
   NodeInstance,
   UploadProcess,
+  Visualization,
   Workspace
 } from '@masterthesis/shared';
 
@@ -11,13 +13,16 @@ import { createBirthdaysDemoData } from '../../examples/birthdays';
 import { createSTRDemoData } from '../../examples/str';
 import { startCalculation } from '../../main/calculation/start-process';
 import {
+  createVisualization,
+  deleteVisualization
+} from '../../main/visualizations/visualizations';
+import {
   createConnection,
   deleteConnection
 } from '../../main/workspace/connections';
 import {
   addValueSchema,
   createDataset,
-  Dataset,
   deleteDataset
 } from '../../main/workspace/dataset';
 import { createEntryFromJSON, deleteEntry } from '../../main/workspace/entry';
@@ -87,5 +92,12 @@ export const Mutation = {
   deleteWorkspace: (_, { id }, { db }): Promise<boolean> =>
     deleteWorkspace(db, id),
   startCalculation: (_, { workspaceId }, { db }): Promise<CalculationProcess> =>
-    startCalculation(db, workspaceId)
+    startCalculation(db, workspaceId),
+  createVisualization: (
+    _,
+    { name, datasetId },
+    { db }
+  ): Promise<Visualization> => createVisualization(db, name, datasetId),
+  deleteVisualization: (_, { id }, { db }): Promise<boolean> =>
+    deleteVisualization(db, id)
 };

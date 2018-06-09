@@ -12,7 +12,7 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { executeServerNode } from '../../../src/main/calculation/server-execution';
+import { executeServerNode } from '../../../src/main/calculation/execution';
 import { createConnection } from '../../../src/main/workspace/connections';
 import {
   addValueSchema,
@@ -93,7 +93,7 @@ describe('Server Execution', () => {
     expect(outputs).toBeDefined();
     expect(results).toBeDefined();
     expect(Object.keys(outputs).length).toBe(0);
-    expect(Object.keys(results).length).toBe(1);
+    expect(Object.keys(results!).length).toBe(1);
   });
 
   test('should fail for invalid form', async () => {
@@ -120,24 +120,11 @@ describe('Server Execution', () => {
 
   test('should fail for invalid input', async () => {
     const ws = await createWorkspace(db, 'test', '');
-    const nodeA = await createNode(
-      db,
-      StringInputNodeDef.name,
-      ws.id,
-      [],
-      0,
-      0
-    );
-    const nodeB = await createNode(
-      db,
-      NumberOutputNodeDef.name,
-      ws.id,
-      [],
-      0,
-      0
-    );
+    const [nodeA, nodeB] = await Promise.all([
+      createNode(db, StringInputNodeDef.name, ws.id, [], 0, 0),
+      createNode(db, NumberOutputNodeDef.name, ws.id, [], 0, 0)
+    ]);
     await addOrUpdateFormValue(db, nodeA.id, 'value', 'NaN');
-
     await createConnection(
       db,
       { name: 'value', nodeId: nodeA.id },
@@ -154,22 +141,10 @@ describe('Server Execution', () => {
 
   test('should wait for inputs and combine them as sum', async () => {
     const ws = await createWorkspace(db, 'test', '');
-    const nodeA = await createNode(
-      db,
-      NumberInputNodeDef.name,
-      ws.id,
-      [],
-      0,
-      0
-    );
-    const nodeB = await createNode(
-      db,
-      NumberInputNodeDef.name,
-      ws.id,
-      [],
-      0,
-      0
-    );
+    const [nodeA, nodeB] = await Promise.all([
+      createNode(db, NumberInputNodeDef.name, ws.id, [], 0, 0),
+      createNode(db, NumberInputNodeDef.name, ws.id, [], 0, 0)
+    ]);
     const sumNode = await createNode(db, SumNodeDef.name, ws.id, [], 0, 0);
     const outputNode = await createNode(
       db,

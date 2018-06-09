@@ -1,15 +1,17 @@
 import {
   CalculationProcess,
+  Dataset,
   UploadProcess,
+  Visualization,
   Workspace
 } from '@masterthesis/shared';
 
 import { getAllCalculations } from '../../main/calculation/start-process';
 import {
-  Dataset,
-  getAllDatasets,
-  getDataset
-} from '../../main/workspace/dataset';
+  getAllVisualizations,
+  getVisualization
+} from '../../main/visualizations/visualizations';
+import { getAllDatasets, getDataset } from '../../main/workspace/dataset';
 import { getAllUploads } from '../../main/workspace/upload';
 import { getAllWorkspaces, getWorkspace } from '../../main/workspace/workspace';
 
@@ -27,5 +29,9 @@ export const Query = {
     _,
     { workspaceId },
     { db }
-  ): Promise<Array<CalculationProcess>> => getAllCalculations(db, workspaceId)
+  ): Promise<Array<CalculationProcess>> => getAllCalculations(db, workspaceId),
+  visualizations: (_, __, { db }): Promise<Array<Visualization>> =>
+    getAllVisualizations(db),
+  visualization: (_, { id }, { db }): Promise<Visualization | null> =>
+    getVisualization(db, id)
 };

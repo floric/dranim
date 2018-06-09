@@ -11,14 +11,12 @@ const createNodeWithForm = (form: Array<FormValue>): NodeInstance => ({
   id: '1',
   inputs: [],
   outputs: [],
-  state: NodeState.VALID,
   type: 'Node',
   contextIds: [],
   workspaceId: '2',
   x: 0,
   y: 0,
-  form,
-  meta: {}
+  form
 });
 
 describe('Utils', () => {

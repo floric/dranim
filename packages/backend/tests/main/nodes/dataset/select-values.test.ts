@@ -11,7 +11,7 @@ import {
   createEntry,
   getAllEntries
 } from '../../../../src/main/workspace/entry';
-import { getTestMongoDb, NeverGoHereError } from '../../../test-utils';
+import { getTestMongoDb, NeverGoHereError, NODE } from '../../../test-utils';
 
 let conn;
 let db: Db;
@@ -85,7 +85,7 @@ describe('SelectValuesNode', () => {
     const res = await SelectValuesNode.onNodeExecution(
       { values: ['test'] },
       { dataset: { datasetId: ds.id } },
-      db
+      { db, node: NODE }
     );
     expect(res.outputs.dataset.datasetId).toBeDefined();
 
@@ -111,7 +111,7 @@ describe('SelectValuesNode', () => {
       await SelectValuesNode.onNodeExecution(
         { values: ['bla', 'test'] },
         { dataset: { datasetId: ds.id } },
-        db
+        { db, node: NODE }
       );
       throw NeverGoHereError;
     } catch (err) {
@@ -124,7 +124,7 @@ describe('SelectValuesNode', () => {
       await SelectValuesNode.onNodeExecution(
         { values: ['test'] },
         { dataset: { datasetId: 'ds.id' } },
-        db
+        { db, node: NODE }
       );
       throw NeverGoHereError;
     } catch (err) {
@@ -184,7 +184,7 @@ describe('SelectValuesNode', () => {
     const res = await SelectValuesNode.onNodeExecution(
       { values: ['test', 'abc'] },
       { dataset: { datasetId: ds.id } },
-      db
+      { db, node: NODE }
     );
     expect(res.outputs.dataset.datasetId).toBeDefined();
 

@@ -11,7 +11,7 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { getCreatedDatasetName } from '../../calculation/utils';
+import { createDynamicDatasetName } from '../../calculation/utils';
 import {
   addValueSchema,
   createDataset,
@@ -65,10 +65,10 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
 
     return inputs;
   },
-  onNodeExecution: async (form, inputs, db, context) => {
+  onNodeExecution: async (form, inputs, { db, onContextFnExecution, node }) => {
     const newDs = await createDataset(
       db,
-      getCreatedDatasetName(EditEntriesNodeDef.name)
+      createDynamicDatasetName(EditEntriesNodeDef.name, node.id)
     );
     const oldDs = await getDataset(db, inputs.dataset.datasetId);
     if (!oldDs) {
@@ -77,15 +77,15 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
 
     await copySchemas(oldDs.valueschemas, newDs.id, db);
 
-    if (context) {
+    if (onContextFnExecution) {
       await copyEditedToOtherDataset(
         db,
         inputs.dataset.datasetId,
         newDs.id,
-        context.onContextFnExecution
+        onContextFnExecution
       );
     } else {
-      throw new Error('Missing context');
+      throw new Error('Missing context function');
     }
 
     return {
@@ -108,7 +108,6 @@ const copyEditedToOtherDataset = async (
   onContextFnExecution: (inputs: Values) => Promise<NodeExecutionResult<any>>
 ) => {
   const oldCollection = getEntryCollection(db, oldDsId);
-
   return new Promise((resolve, reject) => {
     const col = oldCollection.find();
     col.on('data', async (entry: Entry) => {

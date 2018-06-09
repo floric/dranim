@@ -1,4 +1,4 @@
-import { DataType } from '@masterthesis/shared';
+import { Dataset, DataType } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { getEntryCollection } from './entry';
@@ -11,14 +11,9 @@ export interface Valueschema {
   unique: boolean;
 }
 
-export interface Dataset {
-  _id: ObjectID;
-  id: string;
-  name: string;
-  valueschemas: Array<Valueschema>;
-}
-
-export const getDatasetsCollection = (db: Db): Collection<Dataset> => {
+export const getDatasetsCollection = (
+  db: Db
+): Collection<Dataset & { _id: ObjectID }> => {
   return db.collection('Datasets');
 };
 
@@ -42,10 +37,10 @@ export const createDataset = async (db: Db, name: string): Promise<Dataset> => {
     throw new Error('Writing dataset failed');
   }
 
-  const newItem = res.ops[0];
+  const { _id, ...obj } = res.ops[0];
   return {
-    id: newItem._id.toHexString(),
-    ...newItem
+    id: _id.toHexString(),
+    ...obj
   };
 };
 
@@ -68,10 +63,13 @@ export const deleteDataset = async (db: Db, id: string) => {
 export const getAllDatasets = async (db: Db): Promise<Array<Dataset>> => {
   const collection = getDatasetsCollection(db);
   const allDatasets = await collection.find().toArray();
-  return allDatasets.map(ds => ({
-    id: ds._id.toHexString(),
-    ...ds
-  }));
+  return allDatasets.map(ds => {
+    const { _id, ...obj } = ds;
+    return {
+      id: _id.toHexString(),
+      ...obj
+    };
+  });
 };
 
 export const getDataset = async (
@@ -83,13 +81,15 @@ export const getDataset = async (
   }
 
   const collection = getDatasetsCollection(db);
-  const obj = await collection.findOne({ _id: new ObjectID(id) });
-  if (!obj) {
+  const res = await collection.findOne({ _id: new ObjectID(id) });
+  if (!res) {
     return null;
   }
 
+  const { _id, ...obj } = res;
+
   return {
-    id: obj._id.toHexString(),
+    id: _id.toHexString(),
     ...obj
   };
 };

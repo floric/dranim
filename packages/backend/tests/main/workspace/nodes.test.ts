@@ -156,17 +156,11 @@ describe('Nodes', () => {
       form: [],
       inputs: [],
       outputs: [],
-      state: NodeState.VALID,
       contextIds: [],
       type: 'unknown',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0,
-      metaInputs: JSON.stringify({}),
-      metaOutputs: JSON.stringify({}),
-      hasContextFn: false,
-      contextInputDefs: '',
-      contextOutputDefs: ''
+      y: 0
     });
 
     expect(state).toBe(NodeState.ERROR);
@@ -567,16 +561,10 @@ describe('Nodes', () => {
       await getContextInputDefs(
         {
           type: ContextNodeType.INPUT,
-          state: NodeState.VALID,
           contextIds: [VALID_OBJECT_ID],
           inputs: [],
           outputs: [],
           form: [],
-          metaInputs: '',
-          metaOutputs: '',
-          hasContextFn: false,
-          contextInputDefs: '',
-          contextOutputDefs: '',
           x: 0,
           y: 0,
           workspaceId: ws.id,
@@ -596,16 +584,10 @@ describe('Nodes', () => {
       await getContextOutputDefs(
         {
           type: ContextNodeType.INPUT,
-          state: NodeState.VALID,
           contextIds: [VALID_OBJECT_ID],
           inputs: [],
           outputs: [],
           form: [],
-          metaInputs: '',
-          metaOutputs: '',
-          hasContextFn: false,
-          contextInputDefs: '',
-          contextOutputDefs: '',
           x: 0,
           y: 0,
           workspaceId: ws.id,

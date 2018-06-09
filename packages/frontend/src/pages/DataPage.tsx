@@ -1,13 +1,13 @@
 import * as React from 'react';
 
-import { Dataset } from '@masterthesis/shared';
-import { Card, Col, Row } from 'antd';
+import { GQLDataset } from '@masterthesis/shared';
+import { Card, Col } from 'antd';
 import gql from 'graphql-tag';
 import { Mutation, Query } from 'react-apollo';
-import { Link } from 'react-router-dom';
 
 import { ALL_DATASETS } from '../App';
-import { AsyncButton } from '../components/AsyncButton';
+import { CardItem } from '../components/CardItem';
+import { cardItemProps, CardsLayout } from '../components/CardsLayout';
 import { LoadingCard, UnknownErrorCard } from '../components/CustomCards';
 import { NumberInfo } from '../components/NumberInfo';
 import { PageHeaderCard } from '../components/PageHeaderCard';
@@ -28,11 +28,7 @@ const DELETE_DATASET = gql`
   }
 `;
 
-export default class DataPage extends React.Component<{}, { saving: boolean }> {
-  public componentWillMount() {
-    this.setState({ saving: false });
-  }
-
+export default class DataPage extends React.Component<{}, {}> {
   public render() {
     return (
       <>
@@ -47,75 +43,53 @@ export default class DataPage extends React.Component<{}, { saving: boolean }> {
               return <UnknownErrorCard error={error} />;
             }
 
+            const datasets: Array<GQLDataset> = data.datasets;
+
             return (
-              <Row gutter={12} style={{ marginBottom: 12 }}>
-                {data.datasets.map((ds: Dataset) => (
-                  <Col
-                    key={`card-${ds.id}`}
-                    sm={{ span: 24 }}
-                    md={{ span: 12 }}
-                    xl={{ span: 6 }}
-                    style={{ marginBottom: 12 }}
-                  >
-                    <Card
-                      title={<Link to={`/data/${ds.id}`}>{ds.name}</Link>}
-                      bordered={false}
-                    >
-                      <Row>
-                        <Col xs={{ span: 24 }} md={{ span: 12 }}>
-                          <NumberInfo
-                            total={ds.valueschemas.length}
-                            title="Schemas"
-                          />
-                        </Col>
-                        <Col xs={{ span: 24 }} md={{ span: 12 }}>
-                          <NumberInfo total={ds.entriesCount} title="Entries" />
-                        </Col>
-                      </Row>
-                      <Row
-                        type="flex"
-                        justify="end"
-                        style={{ marginTop: 12 }}
-                        gutter={12}
-                      >
-                        <Col>
-                          <Mutation mutation={DELETE_DATASET}>
-                            {deleteDataset => (
-                              <AsyncButton
-                                confirmClick
-                                confirmMessage="Delete Dataset?"
-                                icon="delete"
-                                loading={this.state.saving}
-                                onClick={async () => {
-                                  this.setState({ saving: true });
-                                  await tryOperation({
-                                    op: () =>
-                                      deleteDataset({
-                                        variables: {
-                                          id: ds.id
-                                        }
-                                      }),
-                                    refetch,
-                                    successTitle: () => 'Dataset deleted',
-                                    successMessage: () =>
-                                      `Dataset "${
-                                        ds.name
-                                      }" deleted successfully.`,
-                                    failedTitle: 'Dataset not deleted.',
-                                    failedMessage: `Dataset "${
-                                      ds.name
-                                    }" deletion failed.`
-                                  });
-                                  this.setState({ saving: false });
-                                }}
-                              >
-                                Delete
-                              </AsyncButton>
-                            )}
-                          </Mutation>
-                        </Col>
-                      </Row>
-                    </Card>
+              <CardsLayout>
+                {datasets.map(ds => (
+                  <Col {...cardItemProps} key={ds.id}>
+                    <Mutation mutation={DELETE_DATASET}>
+                      {deleteDataset => (
+                        <CardItem
+                          id={ds.id}
+                          name={ds.name}
+                          path="/data"
+                          confirmDeleteMessage="Delete Dataset?"
+                          handleDelete={() =>
+                            tryOperation({
+                              op: () =>
+                                deleteDataset({
+                                  variables: {
+                                    id: ds.id
+                                  }
+                                }),
+                              refetch,
+                              successTitle: () => 'Dataset deleted',
+                              successMessage: () =>
+                                `Dataset "${ds.name}" deleted successfully.`,
+                              failedTitle: 'Dataset not deleted.',
+                              failedMessage: `Dataset "${
+                                ds.name
+                              }" deletion failed.`
+                            })
+                          }
+                        >
+                          <Col xs={{ span: 24 }} md={{ span: 12 }}>
+                            <NumberInfo
+                              total={ds.valueschemas.length}
+                              title="Schemas"
+                            />
+                          </Col>
+                          <Col xs={{ span: 24 }} md={{ span: 12 }}>
+                            <NumberInfo
+                              total={ds.entriesCount}
+                              title="Entries"
+                            />
+                          </Col>
+                        </CardItem>
+                      )}
+                    </Mutation>
                   </Col>
                 ))}
                 <Col
@@ -139,7 +113,7 @@ export default class DataPage extends React.Component<{}, { saving: boolean }> {
                               successTitle: () => 'Dataset created',
                               successMessage: () =>
                                 `Dataset "${name}" created successfully.`,
-                              failedTitle: 'Dataset not deleted.',
+                              failedTitle: 'Dataset not created.',
                               failedMessage: `Dataset  "${name}" creation failed.`
                             })
                           }
@@ -148,7 +122,7 @@ export default class DataPage extends React.Component<{}, { saving: boolean }> {
                     </Mutation>
                   </Card>
                 </Col>
-              </Row>
+              </CardsLayout>
             );
           }}
         </Query>

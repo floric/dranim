@@ -2,6 +2,7 @@ import {
   DatasetSocket,
   DataType,
   EditEntriesNodeDef,
+  NodeInstance,
   sleep,
   StringInputNodeDef,
   ValueSchema
@@ -24,6 +25,7 @@ import { createWorkspace } from '../../../../src/main/workspace/workspace';
 import {
   getTestMongoDb,
   NeverGoHereError,
+  NODE,
   VALID_OBJECT_ID
 } from '../../../test-utils';
 
@@ -65,8 +67,9 @@ describe('EditEntriesNode', () => {
     const res = await EditEntriesNode.onNodeExecution(
       {},
       { dataset: { datasetId: ds.id } },
-      db,
       {
+        db,
+        node: NODE,
         onContextFnExecution: () => Promise.resolve({ outputs: {} })
       }
     );
@@ -214,8 +217,9 @@ describe('EditEntriesNode', () => {
     const res = await EditEntriesNode.onNodeExecution(
       {},
       { dataset: { datasetId: ds.id } },
-      db,
       {
+        db,
+        node: NODE,
         onContextFnExecution: input =>
           Promise.resolve({ outputs: { val: ':)' } })
       }
@@ -239,11 +243,11 @@ describe('EditEntriesNode', () => {
       await EditEntriesNode.onNodeExecution(
         {},
         { dataset: { datasetId: ds.id } },
-        db
+        { db, node: NODE }
       );
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Missing context');
+      expect(err.message).toBe('Missing context function');
     }
   });
 
@@ -252,7 +256,7 @@ describe('EditEntriesNode', () => {
       await EditEntriesNode.onNodeExecution(
         {},
         { dataset: { datasetId: VALID_OBJECT_ID } },
-        db
+        { db, node: NODE }
       );
       throw NeverGoHereError;
     } catch (err) {

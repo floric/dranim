@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Dataset } from '@masterthesis/shared';
+import { GQLDataset } from '@masterthesis/shared';
 import { Button, Tabs } from 'antd';
 import gql from 'graphql-tag';
 import { History } from 'history';
@@ -12,13 +12,13 @@ import {
   CustomErrorCard,
   LoadingCard,
   UnknownErrorCard
-} from '../components/CustomCards';
-import { PageHeaderCard } from '../components/PageHeaderCard';
-import { DatasetActions } from './dataset-details/ActionsPage';
-import { DataEntries } from './dataset-details/EntriesPage';
-import { DataSchemas } from './dataset-details/SchemasPage';
+} from '../../components/CustomCards';
+import { PageHeaderCard } from '../../components/PageHeaderCard';
+import { DataActionsPage } from './ActionsPage';
+import { DataEntriesPage } from './EntriesPage';
+import { DataSchemas } from './SchemasPage';
 
-export interface IDataDetailPageProps
+export interface DataDetailPageProps
   extends RouteComponentProps<{ id: string }, {}> {}
 
 const NoDatasetExceptionActions: SFC<{ history: History }> = ({ history }) => (
@@ -48,7 +48,7 @@ const DATASET = gql`
   }
 `;
 
-export default class DataDetailPage extends Component<IDataDetailPageProps> {
+export default class DataDetailPage extends Component<DataDetailPageProps> {
   public render() {
     const {
       history,
@@ -58,31 +58,31 @@ export default class DataDetailPage extends Component<IDataDetailPageProps> {
     } = this.props;
 
     return (
-      <>
-        <PageHeaderCard title="Dataset" />
-        <Query query={DATASET} variables={{ id }}>
-          {({ loading, error, data, refetch }) => {
-            if (loading) {
-              return <LoadingCard />;
-            }
+      <Query query={DATASET} variables={{ id }}>
+        {({ loading, error, data, refetch }) => {
+          if (loading) {
+            return <LoadingCard />;
+          }
 
-            if (error) {
-              return <UnknownErrorCard error={error} />;
-            }
+          if (error) {
+            return <UnknownErrorCard error={error} />;
+          }
 
-            if (!data.dataset) {
-              return (
-                <CustomErrorCard
-                  title="Unknown dataset"
-                  description="Dataset doesn't exist."
-                  actions={<NoDatasetExceptionActions history={history} />}
-                />
-              );
-            }
-
-            const dataset: Dataset = data.dataset;
-
+          if (!data.dataset) {
             return (
+              <CustomErrorCard
+                title="Unknown dataset"
+                description="Dataset doesn't exist."
+                actions={<NoDatasetExceptionActions history={history} />}
+              />
+            );
+          }
+
+          const dataset: GQLDataset = data.dataset;
+
+          return (
+            <>
+              <PageHeaderCard title={dataset.name} typeTitle="Dataset" />
               <Tabs
                 type="card"
                 animated={{ inkBar: true, tabPane: false }}
@@ -98,16 +98,16 @@ export default class DataDetailPage extends Component<IDataDetailPageProps> {
                   tab={`${dataset.entriesCount} Entries`}
                   key="entries"
                 >
-                  <DataEntries dataset={dataset} refetch={refetch} />
+                  <DataEntriesPage dataset={dataset} refetch={refetch} />
                 </Tabs.TabPane>
                 <Tabs.TabPane tab="Actions" key="actions">
-                  <DatasetActions dataset={dataset} refetch={refetch} />
+                  <DataActionsPage dataset={dataset} refetch={refetch} />
                 </Tabs.TabPane>
               </Tabs>
-            );
-          }}
-        </Query>
-      </>
+            </>
+          );
+        }}
+      </Query>
     );
   }
 }

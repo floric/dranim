@@ -1,4 +1,5 @@
 import {
+  Dataset,
   Entry,
   FormValues,
   JoinDatasetsNodeDef,
@@ -11,11 +12,10 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { getCreatedDatasetName } from '../../calculation/utils';
+import { createDynamicDatasetName } from '../../calculation/utils';
 import {
   addValueSchema,
   createDataset,
-  Dataset,
   getDataset
 } from '../../workspace/dataset';
 import { createEntry, getEntryCollection } from '../../workspace/entry';
@@ -69,7 +69,7 @@ export const JoinDatasetsNode: ServerNodeDef<
       }
     };
   },
-  onNodeExecution: async (form, inputs, db) => {
+  onNodeExecution: async (form, inputs, { db, node }) => {
     const [dsA, dsB] = await Promise.all([
       getDataset(db, inputs.datasetA.datasetId),
       getDataset(db, inputs.datasetB.datasetId)
@@ -79,7 +79,7 @@ export const JoinDatasetsNode: ServerNodeDef<
 
     const newDs = await createDataset(
       db,
-      getCreatedDatasetName(JoinDatasetsNodeDef.name)
+      createDynamicDatasetName(JoinDatasetsNodeDef.name, node.id)
     );
     await addSchemasFromBothDatasets(
       db,

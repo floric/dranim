@@ -19,6 +19,7 @@ import { MutationDef } from './schemas/mutations';
 import { QueryDef } from './schemas/query';
 import UploadProcessDef from './schemas/upload';
 import ValueschemaDef from './schemas/valueschema';
+import VisualizationDef from './schemas/visualizations';
 import WorkspaceDef from './schemas/workspace';
 
 export interface ApolloContext {
@@ -84,7 +85,8 @@ const typeDefs = [
   WorkspaceDef,
   DatasetDef,
   ValueschemaDef,
-  CalculationProcessDef
+  CalculationProcessDef,
+  VisualizationDef
 ];
 
 export default makeExecutableSchema<ApolloContext>({

@@ -7,7 +7,7 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { executeServerNode } from '../../../src/main/calculation/server-execution';
+import { executeServerNode } from '../../../src/main/calculation/execution';
 import {
   getAllCalculations,
   startCalculation
@@ -20,7 +20,7 @@ let conn;
 let db: Db;
 let server;
 
-jest.mock('../../../src/main/calculation/server-execution');
+jest.mock('../../../src/main/calculation/execution');
 
 describe('Start Process', () => {
   beforeAll(async () => {

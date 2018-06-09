@@ -1,7 +1,7 @@
 import {
   FormValues,
+  GQLNodeInstance,
   NodeDef,
-  NodeInstance,
   NodesMap,
   SocketMetas
 } from '@masterthesis/shared';
@@ -22,7 +22,7 @@ export interface EditorProps {
 
 export interface EditorContext {
   state: ExplorerEditorProps;
-  node: NodeInstance;
+  node: GQLNodeInstance;
 }
 
 export interface RenderFormItemsProps<NodeInputs, NodeForm>

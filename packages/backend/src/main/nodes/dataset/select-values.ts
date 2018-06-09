@@ -1,4 +1,5 @@
 import {
+  Dataset,
   SelectValuesNodeDef,
   SelectValuesNodeForm,
   SelectValuesNodeInputs,
@@ -10,10 +11,9 @@ import { Db } from 'mongodb';
 import {
   addValueSchema,
   createDataset,
-  Dataset,
   getDataset
 } from '../../../main/workspace/dataset';
-import { getCreatedDatasetName } from '../../calculation/utils';
+import { createDynamicDatasetName } from '../../calculation/utils';
 import { copyTransformedToOtherDataset } from '../../workspace/entry';
 import { validateDataset, validateDatasetId } from './utils';
 
@@ -45,7 +45,7 @@ export const SelectValuesNode: ServerNodeDef<
       }
     };
   },
-  onNodeExecution: async (form, inputs, db) => {
+  onNodeExecution: async (form, inputs, { db, node }) => {
     await validateDataset(inputs.dataset.datasetId, db);
 
     const existingDs = await getDataset(db, inputs.dataset.datasetId);
@@ -58,7 +58,7 @@ export const SelectValuesNode: ServerNodeDef<
     const usedValues = new Set(form.values!);
     const newDs = await createDataset(
       db,
-      getCreatedDatasetName(SelectValuesNodeDef.name)
+      createDynamicDatasetName(SelectValuesNodeDef.name, node.id)
     );
 
     await filterSchema(existingDs!, newDs, usedValues, db);

@@ -60,6 +60,13 @@ export const MutationDef = `
       nodes: [NodeInput!]!
       connections: [ConnectionInput!]!
     ): Boolean!
+    createVisualization (
+      name: String!
+      datasetId: String!
+    ): Visualization!
+    deleteVisualization (
+      id: String!
+    ): Boolean!
     createSTRDemoData: Boolean!
     createBirthdaysDemoData: Boolean!
     uploadEntriesCsv (files: [Upload!]!, datasetId: String!): UploadProcess!

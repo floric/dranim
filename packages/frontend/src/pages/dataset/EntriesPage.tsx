@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Dataset, Values } from '@masterthesis/shared';
+import { GQLDataset, Values } from '@masterthesis/shared';
 import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
 import { Mutation } from 'react-apollo';
@@ -10,8 +10,8 @@ import { AsyncButton } from '../../components/AsyncButton';
 import { tryOperation } from '../../utils/form';
 import { CreateEntryForm } from '../forms/CreateEntryForm';
 
-export interface DataEntriesProps {
-  dataset: Dataset;
+export interface DataEntriesPageProps {
+  dataset: GQLDataset;
   refetch: () => Promise<ApolloQueryResult<any>>;
 }
 
@@ -53,8 +53,8 @@ const expandedRowRender = (e: { values: Values; key: string }) => {
   );
 };
 
-export class DataEntries extends React.Component<
-  DataEntriesProps,
+export class DataEntriesPage extends React.Component<
+  DataEntriesPageProps,
   { saving: boolean }
 > {
   public componentWillMount() {

@@ -1,4 +1,3 @@
-export const getCreatedDatasetName = (nodeName: string) => {
-  const randomVal = Math.floor(Math.random() * 100000);
-  return `${nodeName}-${randomVal}`;
+export const createDynamicDatasetName = (nodeName: string, nodeId: string) => {
+  return `${nodeName}-${nodeId}`;
 };

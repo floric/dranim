@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Colors, Dataset } from '@masterthesis/shared';
+import { Colors, GQLDataset } from '@masterthesis/shared';
 import { Card, Col, Row, Table, Tag } from 'antd';
 import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
@@ -30,7 +30,7 @@ const ADD_VALUE_SCHEMA = gql`
 `;
 
 export interface DataSchemasProps {
-  dataset: Dataset;
+  dataset: GQLDataset;
   refetch: () => Promise<ApolloQueryResult<any>>;
 }
 
