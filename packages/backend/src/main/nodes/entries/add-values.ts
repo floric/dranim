@@ -1,11 +1,13 @@
 import {
   AddValuesNodeDef,
+  AddValuesNodeForm,
   Entry,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
   NodeExecutionResult,
   ServerNodeDefWithContextFn,
   sleep,
+  SocketDef,
   Values
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
@@ -13,11 +15,12 @@ import { Db } from 'mongodb';
 import { createDynamicDatasetName } from '../../calculation/utils';
 import { createDataset, getDataset } from '../../workspace/dataset';
 import { createEntry, getEntryCollection } from '../../workspace/entry';
-import { copySchemas, getDynamicEntryContextInputs } from './util';
+import { copySchemas, getDynamicEntryContextInputs } from './utils';
 
 export const AddValuesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
-  ForEachEntryNodeOutputs
+  ForEachEntryNodeOutputs,
+  AddValuesNodeForm
 > = {
   name: AddValuesNodeDef.name,
   transformContextInputDefsToContextOutputDefs: async (
@@ -31,11 +34,27 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
       return {};
     }
 
-    return { ...contextInputDefs };
+    if (!form.values) {
+      return contextInputDefs;
+    }
+
+    const dynOutputs: { [name: string]: SocketDef } = {};
+    form.values.forEach(f => {
+      dynOutputs[f.displayName] = f;
+    });
+
+    return { ...contextInputDefs, ...dynOutputs };
   },
   transformInputDefsToContextInputDefs: getDynamicEntryContextInputs,
   isInputValid: async inputs => {
     if (!inputs.dataset || !inputs.dataset.datasetId) {
+      return false;
+    }
+
+    return true;
+  },
+  isFormValid: async form => {
+    if (!form.values || form.values.length === 0) {
       return false;
     }
 

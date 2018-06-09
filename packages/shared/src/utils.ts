@@ -1,15 +1,15 @@
 const sleepPromise = require('sleep-promise');
 
 import {
+  FormValue,
   FormValues,
-  NodeInstance,
   ServerNodeDef,
   ServerNodeDefWithContextFn
 } from './nodes';
 
-export const parseNodeForm = (node: NodeInstance): FormValues<any> => {
+export const parseNodeForm = (form: Array<FormValue>): FormValues<any> => {
   const fullForm = {};
-  Array.from(Object.values(node.form)).forEach(e => {
+  Array.from(Object.values(form)).forEach(e => {
     if (fullForm[e.name] !== undefined) {
       throw new Error(`Duplicate form value names: ${e.name}`);
     }

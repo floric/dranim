@@ -89,7 +89,7 @@ export const getContextOutputDefs = async (
     parentInputs,
     contextInputDefs,
     contextInputs,
-    node.form,
+    parseNodeForm(parent.form),
     db
   );
 };
@@ -120,7 +120,11 @@ export const getMetaOutputs = async (
 
   const allInputs = await getMetaInputs(db, nodeId, node.inputs);
 
-  return await nodeType.onMetaExecution(parseNodeForm(node), allInputs, db);
+  return await nodeType.onMetaExecution(
+    parseNodeForm(node.form),
+    allInputs,
+    db
+  );
 };
 
 export const getMetaInputs = async (
@@ -360,7 +364,7 @@ export const getNodeState = async (node: NodeInstance) => {
   }
 
   const isValid = t.isFormValid
-    ? await t.isFormValid(parseNodeForm(node))
+    ? await t.isFormValid(parseNodeForm(node.form))
     : true;
   if (!isValid) {
     return NodeState.INVALID;

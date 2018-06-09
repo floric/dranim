@@ -1,4 +1,4 @@
-import { SocketDefs, ValueSchema } from '@masterthesis/shared';
+import { ValueSchema } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import { addValueSchema } from '../../workspace/dataset';

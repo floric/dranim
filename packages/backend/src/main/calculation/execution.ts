@@ -47,7 +47,7 @@ export const executeServerNode = async (
   }
 
   const nodeInputs = inputValuesToObject(inputValues);
-  const nodeForm = parseNodeForm(node);
+  const nodeForm = parseNodeForm(node.form);
 
   await checkValidInputAndForm(type, nodeInputs, nodeForm);
 

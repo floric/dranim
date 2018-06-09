@@ -23,7 +23,7 @@ describe('Utils', () => {
   it('should parse empty node form', () => {
     const node = createNodeWithForm([]);
 
-    const res = parseNodeForm(node);
+    const res = parseNodeForm(node.form);
 
     expect(Object.keys(res).length).toBe(0);
   });
@@ -34,7 +34,7 @@ describe('Utils', () => {
       { name: 'car', value: JSON.stringify('test') }
     ]);
 
-    const res = parseNodeForm(node);
+    const res = parseNodeForm(node.form);
 
     expect(res.test).toBe(123);
     expect(res.car).toBe('test');
@@ -47,11 +47,11 @@ describe('Utils', () => {
     ]);
 
     expect(() => {
-      parseNodeForm(node);
+      parseNodeForm(node.form);
     }).toThrow(Error);
 
     expect(() => {
-      parseNodeForm(node);
+      parseNodeForm(node.form);
     }).toThrow('Duplicate form value names: test');
   });
 
@@ -61,7 +61,7 @@ describe('Utils', () => {
       { name: 'car', value: 'invalid-str' }
     ]);
 
-    const res = parseNodeForm(node);
+    const res = parseNodeForm(node.form);
 
     expect(res.test).toBe(123);
     expect(res.car).toBe(null);

@@ -13,7 +13,7 @@ import { Db } from 'mongodb';
 import { createDynamicDatasetName } from '../../calculation/utils';
 import { createDataset, getDataset } from '../../workspace/dataset';
 import { createEntry, getEntryCollection } from '../../workspace/entry';
-import { copySchemas, getDynamicEntryContextInputs } from './util';
+import { copySchemas, getDynamicEntryContextInputs } from './utils';
 
 export const EditEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
