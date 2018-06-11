@@ -369,6 +369,7 @@ describe('AddValuesNode', () => {
       unique: true,
       required: true
     });
+
     await createEntry(db, ds.id, { test: JSON.stringify(1) });
 
     try {

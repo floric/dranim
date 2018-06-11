@@ -1,7 +1,8 @@
-import { ValueSchema } from '@masterthesis/shared';
+import { ValueSchema, Entry } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import { addValueSchema } from '../../workspace/dataset';
+import { getEntryCollection } from '../../workspace/entry';
 
 export const copySchemas = (
   schemas: Array<ValueSchema>,
@@ -28,4 +29,21 @@ export const getDynamicEntryContextInputs = async (
   });
 
   return dynInputDefs;
+};
+
+export const processEntries = async (
+  db: Db,
+  dsId: string,
+  processFn: (entry: Entry) => Promise<void>
+) => {
+  const coll = getEntryCollection(db, dsId);
+  const cursor = coll
+    .find()
+    .maxAwaitTimeMS(200)
+    .maxTimeMS(200);
+  while (await cursor.hasNext()) {
+    const doc = await cursor.next();
+    await processFn(doc);
+  }
+  await cursor.close();
 };

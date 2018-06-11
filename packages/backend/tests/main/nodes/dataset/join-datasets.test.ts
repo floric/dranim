@@ -286,9 +286,9 @@ describe('JoinDatasetsNode', () => {
     );
     expect(newDs).not.toBe(null);
     expect(newColASchema).toBeDefined();
-    expect(newColASchema.unique).toBe(true);
+    expect(newColASchema.unique).toBe(false);
     expect(newColBSchema).toBeDefined();
-    expect(newColBSchema.unique).toBe(true);
+    expect(newColBSchema.unique).toBe(false);
     expect(newDs.valueschemas.length).toBe(3);
   });
 

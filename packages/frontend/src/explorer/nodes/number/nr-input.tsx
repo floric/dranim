@@ -16,6 +16,10 @@ export const NumberInputNode: ClientNodeDef<
   NumberInputNodeForm
 > = {
   name: NumberInputNodeDef.name,
+  renderName: (context, nodeForm) =>
+    nodeForm.value == null
+      ? NumberInputNodeDef.name
+      : nodeForm.value.toString(),
   renderFormItems: ({ form: { getFieldDecorator }, nodeForm }) => (
     <Form.Item label="Value">
       {getFieldDecorator('value', {

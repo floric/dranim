@@ -1,6 +1,5 @@
 import {
   Dataset,
-  Entry,
   FormValues,
   JoinDatasetsNodeDef,
   JoinDatasetsNodeForm,
@@ -8,9 +7,10 @@ import {
   JoinDatasetsNodeOutputs,
   ServerNodeDef,
   Values,
-  ValueSchema
+  ValueSchema,
+  Entry
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
+import { Db, Collection } from 'mongodb';
 
 import { createDynamicDatasetName } from '../../calculation/utils';
 import {
@@ -21,6 +21,7 @@ import {
 import { createEntry, getEntryCollection } from '../../workspace/entry';
 import { validateNonEmptyString } from '../string/utils';
 import { validateDatasetId } from './utils';
+import { processEntries } from '../entries/utils';
 
 export const JoinDatasetsNode: ServerNodeDef<
   JoinDatasetsNodeInputs,
@@ -89,52 +90,38 @@ export const JoinDatasetsNode: ServerNodeDef<
       form.valueA!,
       form.valueB!
     );
-    await joinEntries(db, form.valueA!, form.valueB!, newDs, dsA!, dsB!);
+
+    await processEntries(db, dsA!.id, async entry => {
+      const bColl = getEntryCollection(db, dsB!.id);
+      await getMatchesAndCreateEntries(
+        db,
+        entry,
+        form.valueA!,
+        form.valueB!,
+        newDs.id,
+        bColl
+      );
+    });
 
     return { outputs: { joined: { datasetId: newDs.id } } };
   }
 };
 
-const joinEntries = async (
+const getMatchesAndCreateEntries = async (
   db: Db,
+  docA: Entry,
   valNameA: string,
   valNameB: string,
-  newDs: Dataset,
-  dsA: Dataset,
-  dsB: Dataset
+  newDsId: string,
+  bColl: Collection<Entry>
 ) => {
-  const aColl = getEntryCollection(db, dsA.id);
-  const bColl = getEntryCollection(db, dsB.id);
-
-  return new Promise((resolveA, rejectA) => {
-    const aCursor = aColl.find();
-    aCursor.on('data', async (chunkA: Entry) => {
-      const valFromA = chunkA.values[valNameA];
-
-      await new Promise((resolveB, rejectB) => {
-        const bCursor = bColl.find({ [`values.${valNameB}`]: valFromA });
-        bCursor.on('data', async (chunkB: Entry) => {
-          createEntry(
-            db,
-            newDs.id,
-            await joinEntry(chunkA.values, chunkB.values)
-          );
-        });
-        bCursor.on('error', () => {
-          rejectB();
-        });
-        bCursor.on('end', () => {
-          resolveB();
-        });
-      });
-    });
-    aCursor.on('end', () => {
-      resolveA();
-    });
-    aCursor.on('error', () => {
-      rejectA();
-    });
-  });
+  const valFromA = docA.values[valNameA];
+  const bCursor = bColl.find({ [`values.${valNameB}`]: valFromA });
+  while (await bCursor.hasNext()) {
+    const docB = await bCursor.next();
+    await createEntry(db, newDsId, await joinEntry(docA.values, docB.values));
+  }
+  await bCursor.close();
 };
 
 const joinEntry = async (valuesA: Values, valuesB: Values) => {
@@ -164,12 +151,20 @@ const addSchemasFromBothDatasets = async (
 ) => {
   await Promise.all(
     Object.entries(dsA.valueschemas).map(val =>
-      addValueSchema(db, newDs.id, { ...val[1], name: `A_${val[1].name}` })
+      addValueSchema(db, newDs.id, {
+        ...val[1],
+        unique: false,
+        name: `A_${val[1].name}`
+      })
     )
   );
   await Promise.all(
     Object.entries(dsB.valueschemas).map(val =>
-      addValueSchema(db, newDs.id, { ...val[1], name: `B_${val[1].name}` })
+      addValueSchema(db, newDs.id, {
+        ...val[1],
+        unique: false,
+        name: `B_${val[1].name}`
+      })
     )
   );
 };

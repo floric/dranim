@@ -39,7 +39,7 @@ const expandedRowRender = (e: { values: Values; key: string }) => {
     Object.entries(e.values).map(v => ({
       key: `${e.key}-${v[0]}`,
       name: v[0],
-      value: v[1]
+      value: JSON.stringify(v[1])
     }))
   );
 

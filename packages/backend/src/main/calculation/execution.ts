@@ -20,11 +20,9 @@ import { getContextNode } from '../workspace/nodes-detail';
 
 export const executeNode = async (
   db: Db,
-  nodeId: string,
+  node: NodeInstance,
   contextInputs?: IOValues<any>
-): Promise<NodeExecutionResult<{}, {}>> => {
-  const node = await tryGetNode(nodeId, db);
-
+): Promise<NodeExecutionResult<{}>> => {
   if (node.type === ContextNodeType.INPUT) {
     if (!contextInputs) {
       throw new Error('Context needs context inputs');
@@ -75,19 +73,19 @@ const calculateContext = async (
   db: Db
 ) => {
   const outputNode = await getContextNode(node, ContextNodeType.OUTPUT, db);
-  if (outputNode === null) {
+  if (!outputNode) {
     throw Error('Missing output node');
   }
 
   const inputNode = await getContextNode(node, ContextNodeType.INPUT, db);
-  if (inputNode === null) {
+  if (!inputNode) {
     throw Error('Missing input node');
   }
 
   return await type.onNodeExecution(nodeForm, nodeInputs, {
     db,
     node,
-    onContextFnExecution: inputs => executeNode(db, outputNode.id, inputs)
+    onContextFnExecution: inputs => executeNode(db, outputNode, inputs)
   });
 };
 
@@ -116,7 +114,8 @@ const getConnectionResult = async (
     throw new Error('Invalid connection');
   }
 
-  const nodeRes = await executeNode(db, c.from.nodeId, contextInputs);
+  const inputNode = await tryGetNode(c.from.nodeId, db);
+  const nodeRes = await executeNode(db, inputNode, contextInputs);
 
   return { socketName: i.name, value: nodeRes.outputs[c.from.name] };
 };

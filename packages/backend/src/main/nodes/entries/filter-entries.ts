@@ -1,13 +1,9 @@
 import {
   DataType,
-  Entry,
   FilterEntriesNodeDef,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
-  NodeExecutionResult,
   ServerNodeDefWithContextFn,
-  sleep,
-  Values,
   ValueSchema
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
@@ -18,7 +14,8 @@ import {
   createDataset,
   getDataset
 } from '../../workspace/dataset';
-import { createEntry, getEntryCollection } from '../../workspace/entry';
+import { createEntry } from '../../workspace/entry';
+import { processEntries } from './utils';
 
 export const FilterEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
@@ -72,12 +69,12 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
     await copySchemas(oldDs.valueschemas, newDs.id, db);
 
     if (onContextFnExecution) {
-      await copyFilteredToOtherDataset(
-        db,
-        inputs.dataset.datasetId,
-        newDs.id,
-        onContextFnExecution
-      );
+      await processEntries(db, inputs.dataset.datasetId, async entry => {
+        const result = await onContextFnExecution(entry.values);
+        if (result.outputs.keepEntry) {
+          await createEntry(db, newDs.id, entry.values);
+        }
+      });
     } else {
       throw new Error('Missing context function');
     }
@@ -94,29 +91,3 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
 
 const copySchemas = (schemas: Array<ValueSchema>, newDsId: string, db: Db) =>
   Promise.all(schemas.map(s => addValueSchema(db, newDsId, s)));
-
-const copyFilteredToOtherDataset = async (
-  db: Db,
-  oldDsId: string,
-  newDsId: string,
-  onContextFnExecution: (inputs: Values) => Promise<NodeExecutionResult<any>>
-) => {
-  const oldCollection = getEntryCollection(db, oldDsId);
-
-  return new Promise((resolve, reject) => {
-    const col = oldCollection.find();
-    col.on('data', async (entry: Entry) => {
-      const result = await onContextFnExecution(entry.values);
-      if (result.outputs.keepEntry) {
-        createEntry(db, newDsId, entry.values);
-      }
-    });
-    col.on('end', async () => {
-      await sleep(500);
-      resolve();
-    });
-    col.on('error', () => {
-      reject();
-    });
-  });
-};

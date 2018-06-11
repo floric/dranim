@@ -130,6 +130,7 @@ const commoditiesSchemas: Array<Valueschema> = [
   createStringValueSchema('destination_latitude', true),
   createStringValueSchema('destination_longitude', true),
   createNumberValueSchema('destination_decLatitude', true),
+  createNumberValueSchema('destination_decLongitude', true),
   createNumberValueSchema('measure', true),
   createStringValueSchema('commodity', true),
   createNumberValueSchema('quantity', true),
