@@ -5,7 +5,7 @@
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "clean": "rm -rf dist node_modules .cache",
+    "clean": "rm -rf dist node_modules",
     "lint": "tslint -p . --fix",
     "start": "concurrently \"tsc -w\" \"cross-env NODE_ENV=development nodemon dist/main.js\"",
     "test": "jest --coverage --maxWorkers=1",
