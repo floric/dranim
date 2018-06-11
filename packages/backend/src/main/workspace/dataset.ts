@@ -1,7 +1,7 @@
 import { Dataset, DataType } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
-import { getEntryCollection } from './entry';
+import { clearEntries, getEntryCollection } from './entry';
 
 export interface Valueschema {
   name: string;
@@ -17,20 +17,25 @@ export const getDatasetsCollection = (
   return db.collection('Datasets');
 };
 
-export const createDataset = async (db: Db, name: string): Promise<Dataset> => {
+export const createDataset = async (
+  db: Db,
+  name: string,
+  workspaceId: string | null = null
+): Promise<Dataset> => {
   const collection = getDatasetsCollection(db);
   if (name.length === 0) {
-    throw new Error('Name must not be empty.');
+    throw new Error('Name must not be empty');
   }
 
   const existingDatasetsWithSameName = await collection.findOne({ name });
   if (existingDatasetsWithSameName) {
-    throw new Error('Names must be unique.');
+    throw new Error('Names must be unique');
   }
 
   const res = await collection.insertOne({
     name,
-    valueschemas: []
+    valueschemas: [],
+    workspaceId
   });
 
   if (res.result.ok !== 1 || res.ops.length !== 1) {
@@ -45,16 +50,11 @@ export const createDataset = async (db: Db, name: string): Promise<Dataset> => {
 };
 
 export const deleteDataset = async (db: Db, id: string) => {
-  const entryCollection = getEntryCollection(db, id);
-  const containedEntries = await entryCollection.count({});
-  if (containedEntries > 0) {
-    await entryCollection.drop();
-  }
-
+  await clearEntries(db, id);
   const collection = getDatasetsCollection(db);
   const res = await collection.deleteOne({ _id: new ObjectID(id) });
   if (res.result.ok !== 1 || res.deletedCount !== 1) {
-    throw new Error('Deletion of Dataset failed.');
+    throw new Error('Deletion of Dataset failed');
   }
 
   return true;
@@ -102,15 +102,15 @@ export const addValueSchema = async (
   const collection = getDatasetsCollection(db);
   const ds = await getDataset(db, datasetId);
   if (!ds) {
-    throw new Error('Dataset not found.');
+    throw new Error('Dataset not found');
   }
 
   if (schema.name.length === 0) {
-    throw new Error('Name must not be empty.');
+    throw new Error('Name must not be empty');
   }
 
   if (ds.valueschemas.find(s => s.name === schema.name)) {
-    throw new Error('Schema already exists.');
+    throw new Error('Schema already exists');
   }
 
   const res = await collection.updateOne(
@@ -132,4 +132,9 @@ export const addValueSchema = async (
   }
 
   return res.modifiedCount === 1;
+};
+
+export const clearGeneratedDatasets = async (db: Db, wsId: string) => {
+  const coll = getDatasetsCollection(db);
+  await coll.deleteMany({ workspaceId: wsId });
 };

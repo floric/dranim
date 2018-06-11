@@ -16,7 +16,7 @@ export const FormatNumberNode: ServerNodeDef<
 > = {
   name: FormatNumberNodeDef.name,
   isInputValid: async input => {
-    if (Number.isNaN(input.number)) {
+    if (input.number == null || Number.isNaN(input.number)) {
       return false;
     }
 

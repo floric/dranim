@@ -3,7 +3,6 @@ import { SFC } from 'react';
 
 import { Button, Card, Col, Icon, List, Row, Spin } from 'antd';
 import { SpinProps } from 'antd/lib/spin';
-import { css } from 'glamor';
 import { History } from 'history';
 import { withRouter } from 'react-router';
 
@@ -24,7 +23,7 @@ const DefaultErrorActions = withRouter(DefaultErrorActionsImpl);
 export const LoadingCard: SFC<SpinProps> = props => (
   <Row>
     <Col>
-      <Card bordered={false} {...css({ textAlign: 'center' })}>
+      <Card bordered={false} style={{ textAlign: 'center' }}>
         <Spin indicator={LoadingIcon} {...props} />
       </Card>
     </Col>

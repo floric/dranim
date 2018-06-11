@@ -82,7 +82,16 @@ describe('Dataset', () => {
       await addValueSchema(db, VALID_OBJECT_ID, SCHEMA);
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Dataset not found.');
+      expect(err.message).toBe('Dataset not found');
+    }
+  });
+
+  test('should throw error for empty dataset name', async () => {
+    try {
+      await createDataset(db, '');
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Name must not be empty');
     }
   });
 
@@ -99,7 +108,7 @@ describe('Dataset', () => {
       });
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Name must not be empty.');
+      expect(err.message).toBe('Name must not be empty');
     }
   });
 
@@ -111,7 +120,7 @@ describe('Dataset', () => {
       await addValueSchema(db, newDs.id, SCHEMA);
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Schema already exists.');
+      expect(err.message).toBe('Schema already exists');
     }
   });
 
@@ -122,7 +131,7 @@ describe('Dataset', () => {
       await createDataset(db, 'test');
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Names must be unique.');
+      expect(err.message).toBe('Names must be unique');
     }
   });
 

@@ -8,19 +8,20 @@ import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { tryOperation } from '../../utils/form';
 import { EditorContext, RenderFormItemsProps } from '../nodes/all-nodes';
 
-export interface IPropertiesFormProps {
+export interface PropertiesFormProps {
   handleSubmit: (form: WrappedFormUtils, nodeId: string) => Promise<any>;
   renderFormItems: (props: RenderFormItemsProps<any, any>) => JSX.Element;
   context: EditorContext;
 }
 
 class PropertiesFormImpl extends React.Component<
-  IPropertiesFormProps & FormComponentProps,
-  { saving: boolean; temp: any }
+  PropertiesFormProps & FormComponentProps,
+  { saving: boolean; isTouched: boolean; temp: any }
 > {
   public componentWillMount() {
     this.setState({
       saving: false,
+      isTouched: false,
       temp: {}
     });
   }
@@ -54,7 +55,8 @@ class PropertiesFormImpl extends React.Component<
         failedMessage: `Saving properties has failed.`
       });
       await this.setState({
-        saving: false
+        saving: false,
+        isTouched: false
       });
       this.props.form.resetFields();
     });
@@ -71,9 +73,9 @@ class PropertiesFormImpl extends React.Component<
       context: { state, node }
     } = this.props;
     const { saving } = this.state;
-    const unsavedChanges = form.isFieldsTouched();
+    const unsavedChanges = form.isFieldsTouched() || this.state.isTouched;
     const inputs = node ? JSON.parse(node.metaInputs as any) : {};
-    const nodeForm = node ? parseNodeForm(node) : {};
+    const nodeForm = node ? parseNodeForm(node.form) : {};
 
     return (
       <Form layout="inline" hideRequiredMark onSubmit={this.handleSubmit}>
@@ -83,6 +85,7 @@ class PropertiesFormImpl extends React.Component<
           state,
           node,
           nodeForm,
+          touchForm: () => this.setState({ isTouched: true }),
           getTempState: () => this.state.temp,
           setTempState: s =>
             this.setState({ temp: { ...this.state.temp, ...s } })

@@ -1,5 +1,6 @@
 import { NodeDef } from '../nodes';
 import { DatasetSocket } from '../sockets';
+import { ValueSchema } from '../workspace';
 import { DatasetRef } from './dataset';
 
 export interface EntryRef {
@@ -41,5 +42,51 @@ export const FilterEntriesNodeDef: NodeDef<
     dataset: DatasetSocket('Dataset')
   },
   path: ['Entry'],
+  keywords: []
+};
+
+export interface AddValuesNodeForm {
+  values: Array<ValueSchema>;
+}
+
+export const AddValuesNodeDef: NodeDef<
+  ForEachEntryNodeInputs,
+  ForEachEntryNodeOutputs
+> = {
+  name: 'Add Values',
+  inputs: {
+    dataset: DatasetSocket('Dataset')
+  },
+  outputs: {
+    dataset: DatasetSocket('Dataset')
+  },
+  path: ['Entry'],
+  keywords: []
+};
+
+export interface RemoveValuesNodeInputs {
+  dataset: DatasetRef;
+}
+
+export interface RemoveValuesNodeOutputs {
+  dataset: DatasetRef;
+}
+
+export interface RemoveValuesNodeForm {
+  values: Array<string>;
+}
+
+export const RemoveValuesNodeDef: NodeDef<
+  RemoveValuesNodeInputs,
+  RemoveValuesNodeOutputs
+> = {
+  name: 'Remove Values',
+  inputs: {
+    dataset: DatasetSocket('Dataset')
+  },
+  outputs: {
+    dataset: DatasetSocket('Dataset')
+  },
+  path: ['Dataset', 'Operators'],
   keywords: []
 };

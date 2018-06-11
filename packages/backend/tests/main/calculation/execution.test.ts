@@ -12,7 +12,7 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { executeServerNode } from '../../../src/main/calculation/execution';
+import { executeNode } from '../../../src/main/calculation/execution';
 import { createConnection } from '../../../src/main/workspace/connections';
 import {
   addValueSchema,
@@ -20,10 +20,13 @@ import {
 } from '../../../src/main/workspace/dataset';
 import { createEntry, getAllEntries } from '../../../src/main/workspace/entry';
 import {
-  addOrUpdateFormValue,
   createNode,
   getNodesCollection
 } from '../../../src/main/workspace/nodes';
+import {
+  addOrUpdateFormValue,
+  getContextNode
+} from '../../../src/main/workspace/nodes-detail';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
 import {
   getTestMongoDb,
@@ -57,7 +60,7 @@ describe('Server Execution', () => {
     const ws = await createWorkspace(db, 'test', '');
     const node = await createNode(db, StringInputNodeDef.name, ws.id, [], 0, 0);
 
-    const { outputs, results } = await executeServerNode(db, node.id);
+    const { outputs, results } = await executeNode(db, node.id);
 
     expect(outputs).toBeDefined();
     expect(results).toBeUndefined();
@@ -88,7 +91,7 @@ describe('Server Execution', () => {
       { name: 'value', nodeId: nodeB.id }
     );
 
-    const { outputs, results } = await executeServerNode(db, nodeB.id);
+    const { outputs, results } = await executeNode(db, nodeB.id);
 
     expect(outputs).toBeDefined();
     expect(results).toBeDefined();
@@ -102,7 +105,7 @@ describe('Server Execution', () => {
     await addOrUpdateFormValue(db, node.id, 'value', '{NaN');
 
     try {
-      await executeServerNode(db, node.id);
+      await executeNode(db, node.id);
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Invalid form');
@@ -111,7 +114,7 @@ describe('Server Execution', () => {
 
   test('should fail for invalid node', async () => {
     try {
-      await executeServerNode(db, VALID_OBJECT_ID);
+      await executeNode(db, VALID_OBJECT_ID);
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Node not found');
@@ -132,7 +135,7 @@ describe('Server Execution', () => {
     );
 
     try {
-      await executeServerNode(db, nodeB.id);
+      await executeNode(db, nodeB.id);
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Invalid input');
@@ -174,7 +177,7 @@ describe('Server Execution', () => {
       { name: 'value', nodeId: outputNode.id }
     );
 
-    const { outputs, results } = await executeServerNode(db, outputNode.id);
+    const { outputs, results } = await executeNode(db, outputNode.id);
 
     expect(outputs).toBeDefined();
     expect(results).toBeDefined();
@@ -193,36 +196,20 @@ describe('Server Execution', () => {
     });
     await createEntry(db, ds.id, { val: JSON.stringify('test') });
 
-    const editEntriesNode = await createNode(
-      db,
-      EditEntriesNodeDef.name,
-      ws.id,
-      [],
-      0,
-      0
-    );
-    const inputNode = await createNode(
-      db,
-      DatasetInputNodeDef.name,
-      ws.id,
-      [],
-      0,
-      0
-    );
-    const outputNode = await createNode(
-      db,
-      DatasetOutputNodeDef.name,
-      ws.id,
-      [],
-      0,
-      0
+    const [editEntriesNode, inputNode, outputNode] = await Promise.all(
+      [
+        EditEntriesNodeDef.name,
+        DatasetInputNodeDef.name,
+        DatasetOutputNodeDef.name
+      ].map(type => createNode(db, type, ws.id, [], 0, 0))
     );
 
     const nodesColl = await getNodesCollection(db);
-    const contextOutputNode = await nodesColl.findOne({
-      contextIds: [editEntriesNode.id],
-      type: ContextNodeType.OUTPUT
-    });
+    const contextOutputNode = await getContextNode(
+      editEntriesNode,
+      ContextNodeType.OUTPUT,
+      db
+    );
     expect(contextOutputNode).toBeDefined();
     const stringInputNode = await createNode(
       db,
@@ -235,7 +222,7 @@ describe('Server Execution', () => {
     await createConnection(
       db,
       { name: 'value', nodeId: stringInputNode.id },
-      { name: 'val', nodeId: contextOutputNode!._id.toHexString() }
+      { name: 'val', nodeId: contextOutputNode!.id }
     );
 
     await addOrUpdateFormValue(
@@ -245,18 +232,20 @@ describe('Server Execution', () => {
       JSON.stringify(ds.id)
     );
 
-    await createConnection(
-      db,
-      { name: 'dataset', nodeId: inputNode.id },
-      { name: 'dataset', nodeId: editEntriesNode.id }
-    );
-    await createConnection(
-      db,
-      { name: 'dataset', nodeId: editEntriesNode.id },
-      { name: 'dataset', nodeId: outputNode.id }
+    await Promise.all(
+      [
+        { from: inputNode.id, to: editEntriesNode.id },
+        { from: editEntriesNode.id, to: outputNode.id }
+      ].map(pair =>
+        createConnection(
+          db,
+          { name: 'dataset', nodeId: pair.from },
+          { name: 'dataset', nodeId: pair.to }
+        )
+      )
     );
 
-    const { outputs, results } = await executeServerNode(db, outputNode.id);
+    const { outputs, results } = await executeNode(db, outputNode.id);
 
     expect(outputs).toBeDefined();
     expect(results).toBeDefined();
@@ -265,5 +254,32 @@ describe('Server Execution', () => {
     const newDsId = (results as any).dataset.datasetId;
     const allEntries = await getAllEntries(db, newDsId);
     expect(allEntries.length).toBe(1);
+  });
+
+  test('should throw error', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const ds = await createDataset(db, 'test');
+
+    const editEntriesNode = await createNode(
+      db,
+      EditEntriesNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+
+    const nodesColl = await getNodesCollection(db);
+    const inputNode = await getContextNode(
+      editEntriesNode,
+      ContextNodeType.INPUT,
+      db
+    );
+
+    try {
+      const { outputs, results } = await executeNode(db, inputNode.id);
+    } catch (err) {
+      expect(err.message).toBe('Context needs context inputs');
+    }
   });
 });

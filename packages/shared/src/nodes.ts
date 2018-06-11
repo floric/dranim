@@ -84,6 +84,7 @@ export interface ServerNodeDefWithContextFn<
     inputs: SocketMetas<NodeInputs>,
     contextInputDefs: SocketDefs<{}>,
     contextInputs: SocketMetas<{}>,
+    form: FormValues<NodeForm>,
     db: Db
   ) => Promise<SocketDefs<{}>>;
 }

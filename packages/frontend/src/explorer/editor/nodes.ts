@@ -122,7 +122,9 @@ export const renderNode = (
   const bgRect = getBackgroundRect(height);
   const nodeTitle = getHeaderText(
     isSelected,
-    renderName ? renderName({ node: n, state: server }, parseNodeForm(n)) : name
+    renderName
+      ? renderName({ node: n, state: server }, parseNodeForm(n.form))
+      : name
   );
   const inputsGroup = renderSockets(
     inputs,

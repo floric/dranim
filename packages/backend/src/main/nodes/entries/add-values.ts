@@ -1,39 +1,69 @@
 import {
-  EditEntriesNodeDef,
+  AddValuesNodeDef,
+  AddValuesNodeForm,
   Entry,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
   NodeExecutionResult,
   ServerNodeDefWithContextFn,
   sleep,
-  Values
+  SocketDef,
+  Values,
+  ValueSchema
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import { createDynamicDatasetName } from '../../calculation/utils';
-import { createDataset, getDataset } from '../../workspace/dataset';
+import {
+  addValueSchema,
+  createDataset,
+  getDataset
+} from '../../workspace/dataset';
 import { createEntry, getEntryCollection } from '../../workspace/entry';
 import { copySchemas, getDynamicEntryContextInputs } from './utils';
 
-export const EditEntriesNode: ServerNodeDefWithContextFn<
+export const AddValuesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
-  ForEachEntryNodeOutputs
+  ForEachEntryNodeOutputs,
+  AddValuesNodeForm
 > = {
-  name: EditEntriesNodeDef.name,
+  name: AddValuesNodeDef.name,
   transformContextInputDefsToContextOutputDefs: async (
     inputDefs,
     inputs,
-    contextInputDefs
+    contextInputDefs,
+    contextInputs,
+    form
   ) => {
     if (!inputs.dataset || !inputs.dataset.isPresent) {
       return {};
     }
 
-    return contextInputDefs;
+    if (!form.values) {
+      return contextInputDefs;
+    }
+
+    const dynOutputs: { [name: string]: SocketDef } = {};
+    form.values.forEach(f => {
+      dynOutputs[f.name] = {
+        dataType: f.type,
+        displayName: f.name,
+        isDynamic: true
+      };
+    });
+
+    return { ...contextInputDefs, ...dynOutputs };
   },
   transformInputDefsToContextInputDefs: getDynamicEntryContextInputs,
   isInputValid: async inputs => {
     if (!inputs.dataset || !inputs.dataset.datasetId) {
+      return false;
+    }
+
+    return true;
+  },
+  isFormValid: async form => {
+    if (!form.values || form.values.length === 0) {
       return false;
     }
 
@@ -44,19 +74,28 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
       return { dataset: { content: { schema: [] }, isPresent: false } };
     }
 
-    return inputs;
+    return {
+      dataset: {
+        content: {
+          schema: [...inputs.dataset.content.schema, ...(form.values || [])]
+        },
+        isPresent: true
+      }
+    };
   },
   onNodeExecution: async (form, inputs, { db, onContextFnExecution, node }) => {
-    const newDs = await createDataset(
-      db,
-      createDynamicDatasetName(EditEntriesNodeDef.name, node.id)
-    );
     const oldDs = await getDataset(db, inputs.dataset.datasetId);
     if (!oldDs) {
       throw new Error('Unknown dataset source');
     }
 
+    const newDs = await createDataset(
+      db,
+      createDynamicDatasetName(AddValuesNodeDef.name, node.id)
+    );
+
     await copySchemas(oldDs.valueschemas, newDs.id, db);
+    await addDynamicSchemas(newDs.id, form.values || [], db);
 
     if (onContextFnExecution) {
       await copyEditedToOtherDataset(
@@ -77,6 +116,14 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
       }
     };
   }
+};
+
+const addDynamicSchemas = async (
+  dsId: string,
+  formValues: Array<ValueSchema>,
+  db: Db
+) => {
+  await Promise.all(formValues.map(f => addValueSchema(db, dsId, f)));
 };
 
 const copyEditedToOtherDataset = async (

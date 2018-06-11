@@ -4,7 +4,8 @@ import {
   SocketInstance
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
-import { getNode, getNodesCollection } from './nodes';
+import { getNode } from './nodes';
+import { addConnection, removeConnection } from './nodes-detail';
 
 export const getConnectionsCollection = (
   db: Db
@@ -32,32 +33,13 @@ export const createConnection = async (
     throw new Error('Only one input allowed');
   }
 
-  const nodesCollection = getNodesCollection(db);
-  const outputNode = await nodesCollection.findOne<NodeInstance>({
-    _id: new ObjectID(from.nodeId)
-  });
-  const inputNode = await nodesCollection.findOne<NodeInstance>({
-    _id: new ObjectID(to.nodeId)
-  });
-
-  if (!outputNode || !inputNode) {
-    throw new Error('Unknown node!');
-  }
-
-  if (inputNode.workspaceId !== outputNode.workspaceId) {
-    throw new Error('Nodes live in different workspaces!');
-  }
-
-  if (
-    inputNode.contextIds[inputNode.contextIds.length - 1] !==
-    outputNode.contextIds[outputNode.contextIds.length - 1]
-  ) {
-    throw new Error('Nodes live in different contexts!');
-  }
+  const outputNode = await getNode(db, from.nodeId);
+  const inputNode = await getNode(db, to.nodeId);
+  await checkNodes(db, inputNode, outputNode);
 
   const hasFoundCycles = await containsCycles(db, inputNode!, from, to);
   if (hasFoundCycles) {
-    throw new Error('Cyclic dependencies not allowed!');
+    throw new Error('Cyclic dependencies not allowed');
   }
 
   const insertRes = await collection.insertOne({
@@ -75,20 +57,35 @@ export const createConnection = async (
   const connId = newItem._id.toHexString();
 
   await Promise.all([
-    nodesCollection.updateOne(
-      { _id: new ObjectID(from.nodeId) },
-      { $push: { outputs: { name: from.name, connectionId: connId } } }
-    ),
-    nodesCollection.updateOne(
-      { _id: new ObjectID(to.nodeId) },
-      { $push: { inputs: { name: to.name, connectionId: connId } } }
-    )
+    addConnection(db, from, 'output', connId),
+    addConnection(db, to, 'input', connId)
   ]);
 
   return {
     id: newItem._id.toHexString(),
     ...newItem
   };
+};
+
+const checkNodes = async (
+  db: Db,
+  inputNode: NodeInstance | null,
+  outputNode: NodeInstance | null
+) => {
+  if (!outputNode || !inputNode) {
+    throw new Error('Unknown node');
+  }
+
+  if (inputNode.workspaceId !== outputNode.workspaceId) {
+    throw new Error('Nodes live in different workspaces');
+  }
+
+  if (
+    inputNode.contextIds[inputNode.contextIds.length - 1] !==
+    outputNode.contextIds[outputNode.contextIds.length - 1]
+  ) {
+    throw new Error('Nodes live in different contexts');
+  }
 };
 
 const containsCycles = async (
@@ -125,11 +122,8 @@ const containsCycles = async (
 export const deleteConnection = async (db: Db, id: string) => {
   const connection = await getConnection(db, id);
   if (!connection) {
-    throw new Error('Connection not known.');
+    throw new Error('Connection not known');
   }
-
-  const connCollection = getConnectionsCollection(db);
-  const nodesCollection = getNodesCollection(db);
 
   const outputNode = await getNode(db, connection.from.nodeId);
   const inputNode = await getNode(db, connection.to.nodeId);
@@ -138,29 +132,12 @@ export const deleteConnection = async (db: Db, id: string) => {
     throw new Error('Unknown nodes as input or output!');
   }
 
-  await nodesCollection.updateMany(
-    { _id: new ObjectID(connection.from.nodeId) },
-    {
-      $pull: {
-        outputs: {
-          name: connection.from.name,
-          connectionId: connection.id
-        }
-      }
-    }
-  );
-  await nodesCollection.updateOne(
-    { _id: new ObjectID(connection.to.nodeId) },
-    {
-      $pull: {
-        inputs: {
-          name: connection.to.name,
-          connectionId: connection.id
-        }
-      }
-    }
-  );
+  await Promise.all([
+    removeConnection(db, connection.from, 'output', connection.id),
+    removeConnection(db, connection.to, 'input', connection.id)
+  ]);
 
+  const connCollection = getConnectionsCollection(db);
   const res = await connCollection.deleteOne({ _id: new ObjectID(id) });
   if (res.deletedCount !== 1) {
     throw new Error('Deleting connection failed');

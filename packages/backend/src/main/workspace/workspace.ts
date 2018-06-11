@@ -102,13 +102,17 @@ export const updateWorkspace = async (
     )
   );
 
-  const wsCollection = getWorkspacesCollection(db);
-  await wsCollection.findOneAndUpdate(
-    { _id: new ObjectID(id) },
-    { $set: { lastChange: new Date() } }
-  );
+  await updateLastChange(db, id);
 
   return true;
+};
+
+export const updateLastChange = async (db: Db, wsId: string) => {
+  const wsCollection = getWorkspacesCollection(db);
+  await wsCollection.findOneAndUpdate(
+    { _id: new ObjectID(wsId) },
+    { $set: { lastChange: new Date() } }
+  );
 };
 
 export const getAllWorkspaces = async (db: Db): Promise<Array<Workspace>> => {

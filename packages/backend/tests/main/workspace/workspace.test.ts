@@ -17,7 +17,8 @@ import {
   getAllWorkspaces,
   getWorkspace,
   initWorkspaceDb,
-  updateWorkspace
+  updateWorkspace,
+  updateLastChange
 } from '../../../src/main/workspace/workspace';
 import { getTestMongoDb, NeverGoHereError } from '../../test-utils';
 
@@ -158,5 +159,17 @@ describe('Workspaces', () => {
   test('should return true after initializing workspaces', async () => {
     const res = await initWorkspaceDb(db);
     expect(res).toBe(true);
+  });
+
+  test('should update last change of workspace', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+
+    await sleep(100);
+    await updateLastChange(db, ws.id);
+
+    const newWs = await getWorkspace(db, ws.id);
+    expect(new Date(newWs.lastChange).getTime()).toBeGreaterThan(
+      new Date(ws.lastChange).getTime()
+    );
   });
 });

@@ -295,4 +295,20 @@ describe('Entry', () => {
       expect(err.message).toBe('Key already used');
     }
   });
+
+  test('should throw error for invalid id formats', async () => {
+    try {
+      await deleteEntry(db, 'test', VALID_OBJECT_ID);
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Invalid ID');
+    }
+
+    try {
+      await deleteEntry(db, VALID_OBJECT_ID, 'test');
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Invalid ID');
+    }
+  });
 });

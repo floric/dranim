@@ -210,6 +210,7 @@ describe('FilterEntriesNode', () => {
       { dataset: validDs },
       inputRes,
       {},
+      [],
       db
     );
 

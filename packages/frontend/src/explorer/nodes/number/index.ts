@@ -1,2 +1,2 @@
 export * from './format-number';
-export * from './input';
+export * from './nr-input';

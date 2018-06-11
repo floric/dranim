@@ -1,7 +1,7 @@
-import { DataType, SelectValuesNodeDef } from '@masterthesis/shared';
+import { DataType, RemoveValuesNodeDef } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { SelectValuesNode } from '../../../../src/main/nodes/dataset/select-values';
+import { RemoveValuesNode } from '../../../../src/main/nodes/entries/remove-values';
 import {
   addValueSchema,
   createDataset,
@@ -17,7 +17,7 @@ let conn;
 let db: Db;
 let server;
 
-describe('SelectValuesNode', () => {
+describe('RemoveValuesNode', () => {
   beforeAll(async () => {
     const { connection, database, mongodbServer } = await getTestMongoDb();
     conn = connection;
@@ -36,32 +36,32 @@ describe('SelectValuesNode', () => {
   });
 
   test('should have correct properties', () => {
-    expect(SelectValuesNode.name).toBe(SelectValuesNodeDef.name);
-    expect(SelectValuesNode.isFormValid).toBeDefined();
-    expect(SelectValuesNode.isInputValid).toBeDefined();
+    expect(RemoveValuesNode.name).toBe(RemoveValuesNodeDef.name);
+    expect(RemoveValuesNode.isFormValid).toBeDefined();
+    expect(RemoveValuesNode.isInputValid).toBeDefined();
   });
 
   test('should have valid inputs and invalid inputs', async () => {
-    let res = await SelectValuesNode.isInputValid({
+    let res = await RemoveValuesNode.isInputValid({
       dataset: { datasetId: 'test' }
     });
     expect(res).toBe(true);
 
-    res = await SelectValuesNode.isInputValid({ dataset: { datasetId: null } });
+    res = await RemoveValuesNode.isInputValid({ dataset: { datasetId: null } });
     expect(res).toBe(false);
 
-    res = await SelectValuesNode.isInputValid({ dataset: null });
+    res = await RemoveValuesNode.isInputValid({ dataset: null });
     expect(res).toBe(false);
   });
 
   test('should validate form', async () => {
-    let res = await SelectValuesNode.isFormValid({ values: [] });
+    let res = await RemoveValuesNode.isFormValid({ values: [] });
     expect(res).toBe(false);
 
-    res = await SelectValuesNode.isFormValid({ values: null });
+    res = await RemoveValuesNode.isFormValid({ values: null });
     expect(res).toBe(false);
 
-    res = await SelectValuesNode.isFormValid({ values: ['test'] });
+    res = await RemoveValuesNode.isFormValid({ values: ['test'] });
     expect(res).toBe(true);
   });
 
@@ -82,7 +82,7 @@ describe('SelectValuesNode', () => {
       unique: false
     });
 
-    const res = await SelectValuesNode.onNodeExecution(
+    const res = await RemoveValuesNode.onNodeExecution(
       { values: ['test'] },
       { dataset: { datasetId: ds.id } },
       { db, node: NODE }
@@ -108,7 +108,7 @@ describe('SelectValuesNode', () => {
     });
 
     try {
-      await SelectValuesNode.onNodeExecution(
+      await RemoveValuesNode.onNodeExecution(
         { values: ['bla', 'test'] },
         { dataset: { datasetId: ds.id } },
         { db, node: NODE }
@@ -121,7 +121,7 @@ describe('SelectValuesNode', () => {
 
   test('should validate dataset', async () => {
     try {
-      await SelectValuesNode.onNodeExecution(
+      await RemoveValuesNode.onNodeExecution(
         { values: ['test'] },
         { dataset: { datasetId: 'ds.id' } },
         { db, node: NODE }
@@ -181,7 +181,7 @@ describe('SelectValuesNode', () => {
       ].map(n => createEntry(db, ds.id, n))
     );
 
-    const res = await SelectValuesNode.onNodeExecution(
+    const res = await RemoveValuesNode.onNodeExecution(
       { values: ['test', 'abc'] },
       { dataset: { datasetId: ds.id } },
       { db, node: NODE }
@@ -209,7 +209,7 @@ describe('SelectValuesNode', () => {
   });
 
   test('should return absent meta if dataset is missing', async () => {
-    let res = await SelectValuesNode.onMetaExecution(
+    let res = await RemoveValuesNode.onMetaExecution(
       { values: ['test', 'abc'] },
       { dataset: null },
       db
@@ -218,7 +218,7 @@ describe('SelectValuesNode', () => {
       dataset: { isPresent: false, content: { schema: [] } }
     });
 
-    res = await SelectValuesNode.onMetaExecution(
+    res = await RemoveValuesNode.onMetaExecution(
       { values: ['test', 'abc'] },
       { dataset: undefined },
       db
@@ -227,7 +227,7 @@ describe('SelectValuesNode', () => {
       dataset: { isPresent: false, content: { schema: [] } }
     });
 
-    res = await SelectValuesNode.onMetaExecution(
+    res = await RemoveValuesNode.onMetaExecution(
       { values: ['test', 'abc'] },
       { dataset: { content: { schema: [] }, isPresent: false } },
       db
@@ -238,7 +238,7 @@ describe('SelectValuesNode', () => {
   });
 
   test('should return absent meta if values are empty', async () => {
-    const res = await SelectValuesNode.onMetaExecution(
+    const res = await RemoveValuesNode.onMetaExecution(
       { values: [] },
       { dataset: { content: { schema: [] }, isPresent: true } },
       db
@@ -249,7 +249,7 @@ describe('SelectValuesNode', () => {
   });
 
   test('should return filtered meta data', async () => {
-    const res = await SelectValuesNode.onMetaExecution(
+    const res = await RemoveValuesNode.onMetaExecution(
       { values: ['a', 'b'] },
       {
         dataset: {
