@@ -5,14 +5,17 @@ import {
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
-import { executeServerNode } from '../calculation/execution';
+import { executeNode } from '../calculation/execution';
 import { serverNodeTypes } from '../nodes/all-nodes';
+import { clearGeneratedDatasets } from '../workspace/dataset';
 import { getAllNodes } from '../workspace/nodes';
 
 const startProcess = async (db: Db, processId: string, workspaceId: string) => {
   const processCollection = getCalculationsCollection(db);
 
   try {
+    await clearGeneratedDatasets(db, workspaceId);
+
     const nodes = await getAllNodes(db, workspaceId);
     const outputNodesInstances = nodes.filter(
       n =>
@@ -53,7 +56,7 @@ const executeOutputNode = async (
   const processCollection = getCalculationsCollection(db);
 
   // TODO Display results somewhere
-  await executeServerNode(db, o.id);
+  await executeNode(db, o.id);
   await processCollection.updateOne(
     { _id: new ObjectID(processId) },
     {

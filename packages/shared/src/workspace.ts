@@ -24,6 +24,7 @@ export interface Dataset {
   entriesCount: number;
   valueschemas: Array<ValueSchema>;
   latestEntries: Array<Entry>;
+  workspaceId: string | null;
 }
 
 export interface GQLDataset {

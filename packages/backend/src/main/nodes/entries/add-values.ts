@@ -8,12 +8,17 @@ import {
   ServerNodeDefWithContextFn,
   sleep,
   SocketDef,
-  Values
+  Values,
+  ValueSchema
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import { createDynamicDatasetName } from '../../calculation/utils';
-import { createDataset, getDataset } from '../../workspace/dataset';
+import {
+  addValueSchema,
+  createDataset,
+  getDataset
+} from '../../workspace/dataset';
 import { createEntry, getEntryCollection } from '../../workspace/entry';
 import { copySchemas, getDynamicEntryContextInputs } from './utils';
 
@@ -40,7 +45,11 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
 
     const dynOutputs: { [name: string]: SocketDef } = {};
     form.values.forEach(f => {
-      dynOutputs[f.displayName] = f;
+      dynOutputs[f.name] = {
+        dataType: f.type,
+        displayName: f.name,
+        isDynamic: true
+      };
     });
 
     return { ...contextInputDefs, ...dynOutputs };
@@ -65,21 +74,28 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
       return { dataset: { content: { schema: [] }, isPresent: false } };
     }
 
-    return inputs;
+    return {
+      dataset: {
+        content: {
+          schema: [...inputs.dataset.content.schema, ...(form.values || [])]
+        },
+        isPresent: true
+      }
+    };
   },
   onNodeExecution: async (form, inputs, { db, onContextFnExecution, node }) => {
-    const newDs = await createDataset(
-      db,
-      createDynamicDatasetName(AddValuesNodeDef.name, node.id)
-    );
     const oldDs = await getDataset(db, inputs.dataset.datasetId);
     if (!oldDs) {
       throw new Error('Unknown dataset source');
     }
 
-    await copySchemas(oldDs.valueschemas, newDs.id, db);
+    const newDs = await createDataset(
+      db,
+      createDynamicDatasetName(AddValuesNodeDef.name, node.id)
+    );
 
-    // TODO add new schemas
+    await copySchemas(oldDs.valueschemas, newDs.id, db);
+    await addDynamicSchemas(newDs.id, form.values || [], db);
 
     if (onContextFnExecution) {
       await copyEditedToOtherDataset(
@@ -100,6 +116,14 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
       }
     };
   }
+};
+
+const addDynamicSchemas = async (
+  dsId: string,
+  formValues: Array<ValueSchema>,
+  db: Db
+) => {
+  await Promise.all(formValues.map(f => addValueSchema(db, dsId, f)));
 };
 
 const copyEditedToOtherDataset = async (

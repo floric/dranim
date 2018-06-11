@@ -49,6 +49,14 @@ export const getEntriesCount = async (
   return await collection.count({});
 };
 
+export const clearEntries = async (db, datasetId: string) => {
+  const count = await getEntriesCount(db, datasetId);
+  if (count > 0) {
+    const entryCollection = getEntryCollection(db, datasetId);
+    await entryCollection.drop();
+  }
+};
+
 export const getLatestEntries = async (
   db: Db,
   datasetId: string

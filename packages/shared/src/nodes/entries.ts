@@ -1,5 +1,6 @@
 import { NodeDef } from '../nodes';
-import { DatasetSocket, SocketDef } from '../sockets';
+import { DatasetSocket } from '../sockets';
+import { ValueSchema } from '../workspace';
 import { DatasetRef } from './dataset';
 
 export interface EntryRef {
@@ -45,7 +46,7 @@ export const FilterEntriesNodeDef: NodeDef<
 };
 
 export interface AddValuesNodeForm {
-  values: Array<SocketDef>;
+  values: Array<ValueSchema>;
 }
 
 export const AddValuesNodeDef: NodeDef<

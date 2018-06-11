@@ -62,7 +62,13 @@ describe('AddValuesNode', () => {
   test('should have valid form', async () => {
     const res = await AddValuesNode.isFormValid({
       values: [
-        { dataType: DataType.STRING, displayName: 'test', isDynamic: true }
+        {
+          type: DataType.STRING,
+          name: 'test',
+          required: true,
+          unique: false,
+          fallback: ''
+        }
       ]
     });
     expect(res).toBe(true);
@@ -229,7 +235,13 @@ describe('AddValuesNode', () => {
       {},
       {
         values: [
-          { displayName: 'test2', isDynamic: true, dataType: DataType.STRING }
+          {
+            name: 'test2',
+            fallback: '',
+            required: true,
+            type: DataType.STRING,
+            unique: false
+          }
         ]
       },
       null

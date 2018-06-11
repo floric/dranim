@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import {
   FormatNumberNodeDef,
   FormatNumberNodeForm,
@@ -5,7 +7,6 @@ import {
   FormatNumberNodeOutputs
 } from '@masterthesis/shared';
 import { Checkbox, Form, InputNumber, Select } from 'antd';
-import * as React from 'react';
 
 import { ClientNodeDef } from '../all-nodes';
 import { getValueOrDefault } from '../utils';

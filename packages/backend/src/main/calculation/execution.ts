@@ -15,9 +15,10 @@ import { Db } from 'mongodb';
 
 import { serverNodeTypes } from '../nodes/all-nodes';
 import { getConnection } from '../workspace/connections';
-import { getNode, getNodesCollection } from '../workspace/nodes';
+import { getNode } from '../workspace/nodes';
+import { getContextNode } from '../workspace/nodes-detail';
 
-export const executeServerNode = async (
+export const executeNode = async (
   db: Db,
   nodeId: string,
   contextInputs?: IOValues<any>
@@ -73,19 +74,12 @@ const calculateContext = async (
   nodeInputs: IOValues<any>,
   db: Db
 ) => {
-  const nodesColl = getNodesCollection(db);
-  const outputNode = await nodesColl.findOne({
-    contextIds: [...node.contextIds, node.id],
-    type: ContextNodeType.OUTPUT
-  });
+  const outputNode = await getContextNode(node, ContextNodeType.OUTPUT, db);
   if (outputNode === null) {
     throw Error('Missing output node');
   }
 
-  const inputNode = await nodesColl.findOne({
-    contextIds: [...node.contextIds, node.id],
-    type: ContextNodeType.INPUT
-  });
+  const inputNode = await getContextNode(node, ContextNodeType.INPUT, db);
   if (inputNode === null) {
     throw Error('Missing input node');
   }
@@ -93,8 +87,7 @@ const calculateContext = async (
   return await type.onNodeExecution(nodeForm, nodeInputs, {
     db,
     node,
-    onContextFnExecution: inputs =>
-      executeServerNode(db, outputNode._id.toHexString(), inputs)
+    onContextFnExecution: inputs => executeNode(db, outputNode.id, inputs)
   });
 };
 
@@ -123,7 +116,7 @@ const getConnectionResult = async (
     throw new Error('Invalid connection');
   }
 
-  const nodeRes = await executeServerNode(db, c.from.nodeId, contextInputs);
+  const nodeRes = await executeNode(db, c.from.nodeId, contextInputs);
 
   return { socketName: i.name, value: nodeRes.outputs[c.from.name] };
 };

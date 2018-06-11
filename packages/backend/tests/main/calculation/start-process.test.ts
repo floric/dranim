@@ -7,7 +7,7 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { executeServerNode } from '../../../src/main/calculation/execution';
+import { executeNode } from '../../../src/main/calculation/execution';
 import {
   getAllCalculations,
   startCalculation
@@ -49,7 +49,7 @@ describe('Start Process', () => {
   });
 
   test('should start new calculation process without any nodes', async () => {
-    (executeServerNode as jest.Mock).mockImplementation(n =>
+    (executeNode as jest.Mock).mockImplementation(n =>
       Promise.resolve<IOValues<{}>>({ outputs: {}, results: {} })
     );
 
@@ -72,11 +72,11 @@ describe('Start Process', () => {
     expect(finishedProcess.totalOutputs).toBe(0);
     expect(finishedProcess.start).toBeDefined();
 
-    expect((executeServerNode as jest.Mock).mock.calls.length).toBe(0);
+    expect((executeNode as jest.Mock).mock.calls.length).toBe(0);
   });
 
   test('should start new calculation process with one node', async done => {
-    (executeServerNode as jest.Mock).mockImplementation(n =>
+    (executeNode as jest.Mock).mockImplementation(n =>
       Promise.resolve<IOValues<{}>>({ outputs: {}, results: {} })
     );
 
@@ -122,13 +122,13 @@ describe('Start Process', () => {
     expect(finishedProcess.totalOutputs).toBe(2);
     expect(finishedProcess.start).toBeDefined();
 
-    expect((executeServerNode as jest.Mock).mock.calls.length).toBe(2);
+    expect((executeNode as jest.Mock).mock.calls.length).toBe(2);
 
     done();
   });
 
   test('should catch error for failed node execution', async () => {
-    (executeServerNode as jest.Mock).mockImplementation(n => {
+    (executeNode as jest.Mock).mockImplementation(n => {
       throw new Error('Something went wrong during node execution.');
     });
 
@@ -162,6 +162,6 @@ describe('Start Process', () => {
     expect(finishedProcess.totalOutputs).toBe(1);
     expect(finishedProcess.start).toBeDefined();
 
-    expect((executeServerNode as jest.Mock).mock.calls.length).toBe(1);
+    expect((executeNode as jest.Mock).mock.calls.length).toBe(1);
   });
 });

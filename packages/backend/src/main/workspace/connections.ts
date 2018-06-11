@@ -33,12 +33,8 @@ export const createConnection = async (
   }
 
   const nodesCollection = getNodesCollection(db);
-  const outputNode = await nodesCollection.findOne<NodeInstance>({
-    _id: new ObjectID(from.nodeId)
-  });
-  const inputNode = await nodesCollection.findOne<NodeInstance>({
-    _id: new ObjectID(to.nodeId)
-  });
+  const outputNode = await getNode(db, from.nodeId);
+  const inputNode = await getNode(db, to.nodeId);
 
   if (!outputNode || !inputNode) {
     throw new Error('Unknown node!');

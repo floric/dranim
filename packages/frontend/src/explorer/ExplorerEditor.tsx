@@ -192,18 +192,17 @@ export class ExplorerEditor extends React.Component<
             >
               <Row gutter={12}>
                 <Col xs={24} md={16} xl={20}>
-                  {node && (
-                    <>
-                      <h4>Properties</h4>
-                      {renderFormItems ? (
+                  {node &&
+                    renderFormItems && (
+                      <>
+                        <h4>Properties</h4>
                         <PropertiesForm
                           renderFormItems={renderFormItems}
                           handleSubmit={this.handleSave}
                           context={{ state: this.props, node }}
                         />
-                      ) : null}
-                    </>
-                  )}
+                      </>
+                    )}
                 </Col>
                 <Col xs={24} md={8} xl={4}>
                   <h4>Actions</h4>

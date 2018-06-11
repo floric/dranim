@@ -1,10 +1,11 @@
+import * as React from 'react';
+
 import {
   NumberInputNodeDef,
   NumberInputNodeForm,
   NumberInputNodeOutputs
 } from '@masterthesis/shared';
 import { Form, InputNumber } from 'antd';
-import * as React from 'react';
 
 import { ClientNodeDef } from '../all-nodes';
 import { getValueOrDefault } from '../utils';
