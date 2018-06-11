@@ -7,6 +7,7 @@ import {
   parseNodeForm,
   SocketDef,
   SocketDefs,
+  SocketInstance,
   SocketMetaDef,
   SocketMetas
 } from '@masterthesis/shared';
@@ -219,4 +220,44 @@ export const addOrUpdateFormValue = async (
   }
 
   return true;
+};
+
+export const addConnection = async (
+  db: Db,
+  from: SocketInstance,
+  type: 'output' | 'input',
+  connId: string
+) => {
+  const nodesCollection = getNodesCollection(db);
+  await nodesCollection.updateOne(
+    { _id: new ObjectID(from.nodeId) },
+    {
+      $push: {
+        [type === 'input' ? 'inputs' : 'outputs']: {
+          name: from.name,
+          connectionId: connId
+        }
+      }
+    }
+  );
+};
+
+export const removeConnection = async (
+  db: Db,
+  from: SocketInstance,
+  type: 'output' | 'input',
+  connId: string
+) => {
+  const nodesCollection = getNodesCollection(db);
+  await nodesCollection.updateOne(
+    { _id: new ObjectID(from.nodeId) },
+    {
+      $pull: {
+        [type === 'input' ? 'inputs' : 'outputs']: {
+          name: from.name,
+          connectionId: connId
+        }
+      }
+    }
+  );
 };

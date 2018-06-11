@@ -26,12 +26,8 @@ import {
   deleteDataset
 } from '../../main/workspace/dataset';
 import { createEntryFromJSON, deleteEntry } from '../../main/workspace/entry';
-import {
-  addOrUpdateFormValue,
-  createNode,
-  deleteNode,
-  updateNode
-} from '../../main/workspace/nodes';
+import { createNode, deleteNode, updateNode } from '../../main/workspace/nodes';
+import { addOrUpdateFormValue } from '../../main/workspace/nodes-detail';
 import { uploadEntriesCsv } from '../../main/workspace/upload';
 import {
   createWorkspace,

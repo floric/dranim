@@ -23,7 +23,10 @@ import {
   createNode,
   getNodesCollection
 } from '../../../src/main/workspace/nodes';
-import { addOrUpdateFormValue } from '../../../src/main/workspace/nodes-detail';
+import {
+  addOrUpdateFormValue,
+  getContextNode
+} from '../../../src/main/workspace/nodes-detail';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
 import {
   getTestMongoDb,
@@ -193,36 +196,20 @@ describe('Server Execution', () => {
     });
     await createEntry(db, ds.id, { val: JSON.stringify('test') });
 
-    const editEntriesNode = await createNode(
-      db,
-      EditEntriesNodeDef.name,
-      ws.id,
-      [],
-      0,
-      0
-    );
-    const inputNode = await createNode(
-      db,
-      DatasetInputNodeDef.name,
-      ws.id,
-      [],
-      0,
-      0
-    );
-    const outputNode = await createNode(
-      db,
-      DatasetOutputNodeDef.name,
-      ws.id,
-      [],
-      0,
-      0
+    const [editEntriesNode, inputNode, outputNode] = await Promise.all(
+      [
+        EditEntriesNodeDef.name,
+        DatasetInputNodeDef.name,
+        DatasetOutputNodeDef.name
+      ].map(type => createNode(db, type, ws.id, [], 0, 0))
     );
 
     const nodesColl = await getNodesCollection(db);
-    const contextOutputNode = await nodesColl.findOne({
-      contextIds: [editEntriesNode.id],
-      type: ContextNodeType.OUTPUT
-    });
+    const contextOutputNode = await getContextNode(
+      editEntriesNode,
+      ContextNodeType.OUTPUT,
+      db
+    );
     expect(contextOutputNode).toBeDefined();
     const stringInputNode = await createNode(
       db,
@@ -235,7 +222,7 @@ describe('Server Execution', () => {
     await createConnection(
       db,
       { name: 'value', nodeId: stringInputNode.id },
-      { name: 'val', nodeId: contextOutputNode!._id.toHexString() }
+      { name: 'val', nodeId: contextOutputNode!.id }
     );
 
     await addOrUpdateFormValue(
@@ -245,15 +232,17 @@ describe('Server Execution', () => {
       JSON.stringify(ds.id)
     );
 
-    await createConnection(
-      db,
-      { name: 'dataset', nodeId: inputNode.id },
-      { name: 'dataset', nodeId: editEntriesNode.id }
-    );
-    await createConnection(
-      db,
-      { name: 'dataset', nodeId: editEntriesNode.id },
-      { name: 'dataset', nodeId: outputNode.id }
+    await Promise.all(
+      [
+        { from: inputNode.id, to: editEntriesNode.id },
+        { from: editEntriesNode.id, to: outputNode.id }
+      ].map(pair =>
+        createConnection(
+          db,
+          { name: 'dataset', nodeId: pair.from },
+          { name: 'dataset', nodeId: pair.to }
+        )
+      )
     );
 
     const { outputs, results } = await executeNode(db, outputNode.id);
@@ -265,5 +254,32 @@ describe('Server Execution', () => {
     const newDsId = (results as any).dataset.datasetId;
     const allEntries = await getAllEntries(db, newDsId);
     expect(allEntries.length).toBe(1);
+  });
+
+  test('should throw error', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const ds = await createDataset(db, 'test');
+
+    const editEntriesNode = await createNode(
+      db,
+      EditEntriesNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+
+    const nodesColl = await getNodesCollection(db);
+    const inputNode = await getContextNode(
+      editEntriesNode,
+      ContextNodeType.INPUT,
+      db
+    );
+
+    try {
+      const { outputs, results } = await executeNode(db, inputNode.id);
+    } catch (err) {
+      expect(err.message).toBe('Context needs context inputs');
+    }
   });
 });

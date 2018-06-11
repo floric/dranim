@@ -9,7 +9,6 @@ import {
   NodeState,
   NumberInputNodeDef,
   NumberOutputNodeDef,
-  SelectValuesNodeDef,
   StringInputNodeDef,
   StringOutputNodeDef,
   SumNodeDef
@@ -197,6 +196,34 @@ describe('Nodes', () => {
     } catch (err) {
       expect(err.message).toBe('Parent node missing');
     }
+  });
+
+  test('should return null for non context node as parent (should never happen)', async () => {
+    const ws = await createWorkspace(db, 'Ws', '');
+    const wrongParentNode = await createNode(
+      db,
+      StringInputNodeDef.name,
+      ws.id,
+      [],
+      0,
+      0
+    );
+    const res = await getContextInputDefs(
+      {
+        type: ContextNodeType.INPUT,
+        contextIds: [wrongParentNode.id],
+        inputs: [],
+        outputs: [],
+        form: [],
+        x: 0,
+        y: 0,
+        workspaceId: ws.id,
+        id: VALID_OBJECT_ID
+      },
+      db
+    );
+
+    expect(res).toBe(null);
   });
 
   test('should throw error for missing parent node', async () => {

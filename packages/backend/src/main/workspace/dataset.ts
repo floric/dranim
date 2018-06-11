@@ -24,12 +24,12 @@ export const createDataset = async (
 ): Promise<Dataset> => {
   const collection = getDatasetsCollection(db);
   if (name.length === 0) {
-    throw new Error('Name must not be empty.');
+    throw new Error('Name must not be empty');
   }
 
   const existingDatasetsWithSameName = await collection.findOne({ name });
   if (existingDatasetsWithSameName) {
-    throw new Error('Names must be unique.');
+    throw new Error('Names must be unique');
   }
 
   const res = await collection.insertOne({
@@ -54,7 +54,7 @@ export const deleteDataset = async (db: Db, id: string) => {
   const collection = getDatasetsCollection(db);
   const res = await collection.deleteOne({ _id: new ObjectID(id) });
   if (res.result.ok !== 1 || res.deletedCount !== 1) {
-    throw new Error('Deletion of Dataset failed.');
+    throw new Error('Deletion of Dataset failed');
   }
 
   return true;
@@ -102,15 +102,15 @@ export const addValueSchema = async (
   const collection = getDatasetsCollection(db);
   const ds = await getDataset(db, datasetId);
   if (!ds) {
-    throw new Error('Dataset not found.');
+    throw new Error('Dataset not found');
   }
 
   if (schema.name.length === 0) {
-    throw new Error('Name must not be empty.');
+    throw new Error('Name must not be empty');
   }
 
   if (ds.valueschemas.find(s => s.name === schema.name)) {
-    throw new Error('Schema already exists.');
+    throw new Error('Schema already exists');
   }
 
   const res = await collection.updateOne(

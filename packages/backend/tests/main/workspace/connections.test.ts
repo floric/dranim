@@ -79,6 +79,11 @@ describe('Connections', () => {
     expect(unknownConn).toBe(null);
   });
 
+  test('should return null for invalid id', async () => {
+    const res = await getConnection(db, 'test');
+    expect(res).toBe(null);
+  });
+
   test('should create connection in context', async () => {
     const ws = await createWorkspace(db, 'test', '');
 
@@ -149,7 +154,7 @@ describe('Connections', () => {
       await createConnection(db, toSocket, fromSocket);
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Cyclic dependencies not allowed!');
+      expect(err.message).toBe('Cyclic dependencies not allowed');
     }
   });
 
@@ -175,7 +180,7 @@ describe('Connections', () => {
       await createConnection(db, toSocket, fromSocket);
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Unknown node!');
+      expect(err.message).toBe('Unknown node');
     }
   });
 
@@ -210,7 +215,7 @@ describe('Connections', () => {
       await createConnection(db, toSocket, fromSocket);
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Nodes live in different workspaces!');
+      expect(err.message).toBe('Nodes live in different workspaces');
     }
   });
 
@@ -252,7 +257,7 @@ describe('Connections', () => {
       await createConnection(db, toSocket, fromSocket);
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Nodes live in different contexts!');
+      expect(err.message).toBe('Nodes live in different contexts');
     }
   });
 });

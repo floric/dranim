@@ -10,6 +10,17 @@ import { Db } from 'mongodb';
 
 import { AddValuesNode } from '../../../../src/main/nodes/entries/add-values';
 import {
+  addValueSchema,
+  createDataset
+} from '../../../../src/main/workspace/dataset';
+import {
+  createEntry,
+  getAllEntries
+} from '../../../../src/main/workspace/entry';
+import { createNode } from '../../../../src/main/workspace/nodes';
+import { addOrUpdateFormValue } from '../../../../src/main/workspace/nodes-detail';
+import { createWorkspace } from '../../../../src/main/workspace/workspace';
+import {
   getTestMongoDb,
   NeverGoHereError,
   NODE,
@@ -258,5 +269,153 @@ describe('AddValuesNode', () => {
         displayName: 'test2'
       }
     });
+  });
+
+  test('should return empty object for missing dataset input for context', async () => {
+    const res = await AddValuesNode.transformContextInputDefsToContextOutputDefs(
+      {
+        dataset: {
+          dataType: DataType.DATASET,
+          isDynamic: false,
+          displayName: 'Dataset'
+        }
+      },
+      { dataset: { isPresent: false, content: { schema: [] } } },
+      {
+        test: {
+          dataType: DataType.NUMBER,
+          isDynamic: true,
+          displayName: 'Test'
+        }
+      },
+      {},
+      {
+        values: [
+          {
+            name: 'test2',
+            fallback: '',
+            required: true,
+            type: DataType.STRING,
+            unique: false
+          }
+        ]
+      },
+      null
+    );
+    expect(res).toEqual({});
+  });
+
+  test('should add new value to dataset from StringInputNode', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const ds = await createDataset(db, 'test-ds');
+
+    await addValueSchema(db, ds.id, {
+      name: 'test',
+      type: DataType.NUMBER,
+      fallback: '0',
+      unique: true,
+      required: true
+    });
+    await createEntry(db, ds.id, { test: JSON.stringify(1) });
+
+    const res = await AddValuesNode.onNodeExecution(
+      {
+        values: [
+          {
+            name: 'new',
+            required: true,
+            unique: true,
+            fallback: '',
+            type: DataType.STRING
+          }
+        ]
+      },
+      { dataset: { datasetId: ds.id } },
+      {
+        db,
+        node: {
+          id: VALID_OBJECT_ID,
+          contextIds: [],
+          inputs: [],
+          outputs: [],
+          type: AddValuesNode.name,
+          workspaceId: ws.id,
+          form: [],
+          x: 0,
+          y: 0
+        },
+        onContextFnExecution: async inputs => ({
+          outputs: { ...inputs, new: 'super' }
+        })
+      }
+    );
+
+    expect(res.outputs.dataset.datasetId).toBeDefined();
+
+    const all = await getAllEntries(db, res.outputs.dataset.datasetId);
+
+    expect(all.length).toBe(1);
+    expect(all[0].values).toEqual({ test: '1', new: 'super' });
+  });
+
+  test('should throw error for missing context function', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const ds = await createDataset(db, 'test-ds');
+
+    await addValueSchema(db, ds.id, {
+      name: 'test',
+      type: DataType.NUMBER,
+      fallback: '0',
+      unique: true,
+      required: true
+    });
+    await createEntry(db, ds.id, { test: JSON.stringify(1) });
+
+    try {
+      await AddValuesNode.onNodeExecution(
+        {
+          values: [
+            {
+              name: 'new',
+              required: true,
+              unique: true,
+              fallback: '',
+              type: DataType.STRING
+            }
+          ]
+        },
+        { dataset: { datasetId: ds.id } },
+        {
+          db,
+          node: {
+            id: VALID_OBJECT_ID,
+            contextIds: [],
+            inputs: [],
+            outputs: [],
+            type: AddValuesNode.name,
+            workspaceId: ws.id,
+            form: [],
+            x: 0,
+            y: 0
+          }
+        }
+      );
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Missing context function');
+    }
+  });
+
+  test('should throw error for invalid dataset input', async () => {
+    try {
+      await AddValuesNode.onNodeExecution(
+        { values: [] },
+        { dataset: { datasetId: VALID_OBJECT_ID } },
+        { db, node: NODE }
+      );
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Unknown dataset source');
+    }
   });
 });

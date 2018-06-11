@@ -80,4 +80,23 @@ describe('FormatNumberNode', () => {
     );
     expect(res).toEqual({ formatted: { content: {}, isPresent: true } });
   });
+
+  test('should have invalid input', async () => {
+    let res = await FormatNumberNode.isInputValid({ number: null });
+    expect(res).toBe(false);
+
+    res = await FormatNumberNode.isInputValid({ number: undefined });
+    expect(res).toBe(false);
+
+    res = await FormatNumberNode.isInputValid({ number: NaN });
+    expect(res).toBe(false);
+  });
+
+  test('should have valid input', async () => {
+    let res = await FormatNumberNode.isInputValid({ number: 0 });
+    expect(res).toBe(true);
+
+    res = await FormatNumberNode.isInputValid({ number: -1 });
+    expect(res).toBe(true);
+  });
 });

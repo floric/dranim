@@ -1,4 +1,4 @@
-import { Entry, sleep, Values } from '@masterthesis/shared';
+import { Dataset, Entry, sleep, Values } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { getDataset } from '../../main/workspace/dataset';
@@ -15,16 +15,17 @@ export const getEntry = async (
   db: Db,
   datasetId: string,
   id: string
-): Promise<Entry & { _id: ObjectID } | null> => {
+): Promise<Entry | null> => {
   const collection = getEntryCollection(db, datasetId);
   const obj = await collection.findOne({ _id: new ObjectID(id) });
   if (!obj) {
     return null;
   }
 
+  const { _id, ...res } = obj;
   return {
-    id: obj._id.toHexString(),
-    ...obj
+    id: _id.toHexString(),
+    ...res
   };
 };
 
@@ -95,31 +96,11 @@ export const createEntry = async (
     throw new Error('Invalid dataset');
   }
 
-  // check required schemas which are not set
-  const missedSchemas = ds.valueschemas
-    .filter(s => s.required)
-    .filter(s => !valuesArr.map(v => v[0]).includes(s.name));
-  if (missedSchemas.length > 0) {
-    throw new UploadEntryError(
-      'Values from Schema not set',
-      'schema-not-fulfilled'
-    );
-  }
+  await checkForMissingValues(ds, valuesArr.map(v => v[0]));
+  await checkForUnsupportedValues(ds, valuesArr.map(v => v[0]));
 
-  // check values which are not specified in the schema
-  const allValueNames = ds.valueschemas.map(v => v.name);
-  const unsupportedValues = valuesArr.filter(
-    v => !allValueNames.includes(v[0])
-  );
-  if (unsupportedValues.length > 0) {
-    throw new UploadEntryError(
-      'Unsupported values provided',
-      'unsupported-values'
-    );
-  }
-
-  const collection = getEntryCollection(db, datasetId);
   try {
+    const collection = getEntryCollection(db, datasetId);
     const res = await collection.insertOne({
       values
     });
@@ -128,10 +109,11 @@ export const createEntry = async (
       throw new Error('Writing dataset failed');
     }
 
-    const newItem = res.ops[0];
+    const obj = res.ops[0];
+    const { _id, ...other } = obj;
     return {
-      id: newItem._id.toHexString(),
-      ...newItem
+      id: _id.toHexString(),
+      ...other
     };
   } catch (err) {
     if (err.code === 11000) {
@@ -142,6 +124,35 @@ export const createEntry = async (
         'internal-write-error'
       );
     }
+  }
+};
+
+const checkForMissingValues = async (
+  ds: Dataset,
+  valueNames: Array<string>
+) => {
+  const missedSchemas = ds.valueschemas
+    .filter(s => s.required)
+    .filter(s => !valueNames.includes(s.name));
+  if (missedSchemas.length > 0) {
+    throw new UploadEntryError(
+      'Values from Schema not set',
+      'schema-not-fulfilled'
+    );
+  }
+};
+
+const checkForUnsupportedValues = async (
+  ds: Dataset,
+  valueNames: Array<string>
+) => {
+  const allValueNames = ds.valueschemas.map(v => v.name);
+  const unsupportedValues = valueNames.filter(v => !allValueNames.includes(v));
+  if (unsupportedValues.length > 0) {
+    throw new UploadEntryError(
+      'Unsupported values provided',
+      'unsupported-values'
+    );
   }
 };
 

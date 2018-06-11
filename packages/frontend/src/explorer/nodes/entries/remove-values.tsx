@@ -1,22 +1,22 @@
 import * as React from 'react';
 
 import {
-  SelectValuesNodeDef,
-  SelectValuesNodeForm,
-  SelectValuesNodeInputs,
-  SelectValuesNodeOutputs
+  RemoveValuesNodeDef,
+  RemoveValuesNodeForm,
+  RemoveValuesNodeInputs,
+  RemoveValuesNodeOutputs
 } from '@masterthesis/shared';
 import { Form, Select } from 'antd';
 
 import { ClientNodeDef } from '../all-nodes';
 import { getValueOrDefault } from '../utils';
 
-export const SelectValuesNode: ClientNodeDef<
-  SelectValuesNodeInputs,
-  SelectValuesNodeOutputs,
-  SelectValuesNodeForm
+export const RemoveValuesNode: ClientNodeDef<
+  RemoveValuesNodeInputs,
+  RemoveValuesNodeOutputs,
+  RemoveValuesNodeForm
 > = {
-  name: SelectValuesNodeDef.name,
+  name: RemoveValuesNodeDef.name,
   renderFormItems: ({
     form,
     form: { getFieldDecorator },

@@ -58,10 +58,12 @@ export const createNode = async (
     db
   );
 
+  const { _id, ...other } = res.ops[0];
+
   return {
     id: newNodeId,
     form: [],
-    ...res.ops[0]
+    ...other
   };
 };
 
@@ -112,11 +114,7 @@ const checkNoOutputNodeInContexts = async (
   }
 
   const nodeType = serverNodeTypes.get(type);
-  if (!nodeType) {
-    return;
-  }
-
-  if (nodeType.isOutputNode === true) {
+  if (nodeType!.isOutputNode === true) {
     throw new Error('Output nodes only on root level allowed');
   }
 };
@@ -198,9 +196,10 @@ export const getAllNodes = async (
   const all = await collection.find({ workspaceId }).toArray();
   return all.map(n => {
     const valueNames = n.form ? Object.keys(n.form) : [];
+    const { _id, ...other } = n;
     return {
-      ...n,
-      id: n._id.toHexString(),
+      ...other,
+      id: _id.toHexString(),
       form: valueNames.map(name => ({ name, value: n.form[name] }))
     };
   });
@@ -209,22 +208,23 @@ export const getAllNodes = async (
 export const getNode = async (
   db: Db,
   id: string
-): Promise<NodeInstance & { _id: ObjectID } | null> => {
+): Promise<NodeInstance | null> => {
   if (!ObjectID.isValid(id)) {
     return null;
   }
 
   const collection = getNodesCollection(db);
-  const node = await collection.findOne({ _id: new ObjectID(id) });
-  if (!node) {
+  const obj = await collection.findOne({ _id: new ObjectID(id) });
+  if (!obj) {
     return null;
   }
 
-  const valueNames = node.form ? Object.keys(node.form) : [];
+  const valueNames = obj.form ? Object.keys(obj.form) : [];
+  const { _id, ...res } = obj;
 
   return {
-    ...node,
-    id: node._id.toHexString(),
-    form: valueNames.map(name => ({ name, value: node.form[name] }))
+    ...res,
+    id: _id.toHexString(),
+    form: valueNames.map(name => ({ name, value: obj.form[name] }))
   };
 };

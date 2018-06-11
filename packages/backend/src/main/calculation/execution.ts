@@ -23,7 +23,7 @@ export const executeNode = async (
   nodeId: string,
   contextInputs?: IOValues<any>
 ): Promise<NodeExecutionResult<{}, {}>> => {
-  const node = await getCheckedNode(nodeId, db);
+  const node = await tryGetNode(nodeId, db);
 
   if (node.type === ContextNodeType.INPUT) {
     if (!contextInputs) {
@@ -59,7 +59,7 @@ export const executeNode = async (
   return await type.onNodeExecution(nodeForm, nodeInputs, { db, node });
 };
 
-const getCheckedNode = async (nodeId: string, db: Db) => {
+const tryGetNode = async (nodeId: string, db: Db) => {
   const node = await getNode(db, nodeId);
   if (!node) {
     throw new Error('Node not found');

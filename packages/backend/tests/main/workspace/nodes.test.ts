@@ -9,7 +9,7 @@ import {
   NodeState,
   NumberInputNodeDef,
   NumberOutputNodeDef,
-  SelectValuesNodeDef,
+  RemoveValuesNodeDef,
   StringInputNodeDef,
   StringOutputNodeDef,
   SumNodeDef
@@ -337,7 +337,7 @@ describe('Nodes', () => {
     const ws = await createWorkspace(db, 'test', '');
     const [inputNode, selectNode, outputNode] = await Promise.all([
       createNode(db, DatasetInputNodeDef.name, ws.id, [], 0, 0),
-      createNode(db, SelectValuesNodeDef.name, ws.id, [], 0, 0),
+      createNode(db, RemoveValuesNodeDef.name, ws.id, [], 0, 0),
       createNode(db, DatasetOutputNodeDef.name, ws.id, [], 0, 0)
     ]);
 

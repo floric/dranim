@@ -51,33 +51,6 @@ export const JoinDatasetsNodeDef: NodeDef<
   keywords: []
 };
 
-export interface SelectValuesNodeInputs {
-  dataset: DatasetRef;
-}
-
-export interface SelectValuesNodeOutputs {
-  dataset: DatasetRef;
-}
-
-export interface SelectValuesNodeForm {
-  values: Array<string>;
-}
-
-export const SelectValuesNodeDef: NodeDef<
-  SelectValuesNodeInputs,
-  SelectValuesNodeOutputs
-> = {
-  name: 'Select Values',
-  inputs: {
-    dataset: DatasetSocket('Dataset')
-  },
-  outputs: {
-    dataset: DatasetSocket('Dataset')
-  },
-  path: ['Dataset', 'Operators'],
-  keywords: []
-};
-
 export interface DatasetOutputNodeInputs {
   dataset: DatasetRef;
 }

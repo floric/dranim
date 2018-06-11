@@ -16,7 +16,7 @@ import {
   getMetaInputs,
   getMetaOutputs,
   getNodeState
-} from '../../main/workspace/nodes';
+} from '../../main/workspace/nodes-detail';
 import { getWorkspace } from '../../main/workspace/workspace';
 
 export const Node = {
