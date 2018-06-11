@@ -43,7 +43,8 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
   } catch (err) {
     await updateFinishedProcess(db, processId, ProcessState.ERROR);
     if (process.env.NODE_ENV !== 'test') {
-      console.error('Finished calculation with errors.', err);
+      console.log(err);
+      console.error('Finished calculation with errors: ' + err.message);
     }
   }
 };
@@ -56,7 +57,7 @@ const executeOutputNode = async (
   const processCollection = getCalculationsCollection(db);
 
   // TODO Display results somewhere
-  await executeNode(db, o.id);
+  await executeNode(db, o);
   await processCollection.updateOne(
     { _id: new ObjectID(processId) },
     {

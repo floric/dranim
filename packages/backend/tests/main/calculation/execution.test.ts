@@ -21,7 +21,8 @@ import {
 import { createEntry, getAllEntries } from '../../../src/main/workspace/entry';
 import {
   createNode,
-  getNodesCollection
+  getNodesCollection,
+  getNode
 } from '../../../src/main/workspace/nodes';
 import {
   addOrUpdateFormValue,
@@ -60,7 +61,7 @@ describe('Server Execution', () => {
     const ws = await createWorkspace(db, 'test', '');
     const node = await createNode(db, StringInputNodeDef.name, ws.id, [], 0, 0);
 
-    const { outputs, results } = await executeNode(db, node.id);
+    const { outputs, results } = await executeNode(db, node);
 
     expect(outputs).toBeDefined();
     expect(results).toBeUndefined();
@@ -91,7 +92,7 @@ describe('Server Execution', () => {
       { name: 'value', nodeId: nodeB.id }
     );
 
-    const { outputs, results } = await executeNode(db, nodeB.id);
+    const { outputs, results } = await executeNode(db, nodeB);
 
     expect(outputs).toBeDefined();
     expect(results).toBeDefined();
@@ -105,19 +106,10 @@ describe('Server Execution', () => {
     await addOrUpdateFormValue(db, node.id, 'value', '{NaN');
 
     try {
-      await executeNode(db, node.id);
+      await executeNode(db, node);
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Invalid form');
-    }
-  });
-
-  test('should fail for invalid node', async () => {
-    try {
-      await executeNode(db, VALID_OBJECT_ID);
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Node not found');
     }
   });
 
@@ -135,7 +127,7 @@ describe('Server Execution', () => {
     );
 
     try {
-      await executeNode(db, nodeB.id);
+      await executeNode(db, nodeB);
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Invalid input');
@@ -177,7 +169,8 @@ describe('Server Execution', () => {
       { name: 'value', nodeId: outputNode.id }
     );
 
-    const { outputs, results } = await executeNode(db, outputNode.id);
+    const updatedNode = await getNode(db, outputNode.id);
+    const { outputs, results } = await executeNode(db, updatedNode);
 
     expect(outputs).toBeDefined();
     expect(results).toBeDefined();
@@ -245,7 +238,8 @@ describe('Server Execution', () => {
       )
     );
 
-    const { outputs, results } = await executeNode(db, outputNode.id);
+    const updatedNode = await getNode(db, outputNode.id);
+    const { outputs, results } = await executeNode(db, updatedNode);
 
     expect(outputs).toBeDefined();
     expect(results).toBeDefined();
@@ -277,7 +271,7 @@ describe('Server Execution', () => {
     );
 
     try {
-      const { outputs, results } = await executeNode(db, inputNode.id);
+      const { outputs, results } = await executeNode(db, inputNode);
     } catch (err) {
       expect(err.message).toBe('Context needs context inputs');
     }

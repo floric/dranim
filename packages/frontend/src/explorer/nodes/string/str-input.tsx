@@ -16,6 +16,8 @@ export const StringInputNode: ClientNodeDef<
   StringInputNodeForm
 > = {
   name: StringInputNodeDef.name,
+  renderName: (context, nodeForm) =>
+    nodeForm.value == null ? StringInputNodeDef.name : nodeForm.value,
   renderFormItems: ({ form: { getFieldDecorator }, nodeForm }) => (
     <Form.Item label="Value">
       {getFieldDecorator('value', {

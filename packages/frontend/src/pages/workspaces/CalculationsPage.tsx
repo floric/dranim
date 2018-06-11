@@ -58,7 +58,7 @@ export class WorkspaceCalculationsPage extends Component<
               ) : e.state === ProcessState.PROCESSING ? (
                 <Icon type="clock-circle" />
               ) : (
-                <Icon type="warning-circle" />
+                <Icon type="exclamation-circle" />
               ),
             results: {
               processed: e.processedOutputs.toLocaleString(),

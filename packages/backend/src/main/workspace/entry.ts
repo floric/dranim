@@ -1,8 +1,8 @@
-import { Dataset, Entry, sleep, Values } from '@masterthesis/shared';
+import { Dataset, Entry, Values } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
-import { getDataset } from '../../main/workspace/dataset';
 import { UploadEntryError } from './upload';
+import { getDataset } from './dataset';
 
 export const getEntryCollection = (
   db: Db,
@@ -100,7 +100,7 @@ export const createEntry = async (
   await checkForUnsupportedValues(ds, valuesArr.map(v => v[0]));
 
   try {
-    const collection = getEntryCollection(db, datasetId);
+    const collection = getEntryCollection(db, ds.id);
     const res = await collection.insertOne({
       values
     });
@@ -162,22 +162,18 @@ export const copyTransformedToOtherDataset = async (
   newDsId: string,
   transformFn: (obj: Entry) => Values
 ) => {
-  const oldCollection = getEntryCollection(db, oldDsId);
+  const newDs = await getDataset(db, newDsId);
+  if (!newDs) {
+    throw new Error('Invalid dataset');
+  }
 
-  return new Promise((resolve, reject) => {
-    const col = oldCollection.find();
-    col.on('data', async (chunk: Entry) => {
-      const newValues = transformFn(chunk);
-      await createEntry(db, newDsId, newValues);
-    });
-    col.on('end', async () => {
-      await sleep(500);
-      resolve();
-    });
-    col.on('error', () => {
-      reject();
-    });
-  });
+  const oldCollection = getEntryCollection(db, oldDsId);
+  const cursor = oldCollection.find();
+  while (await cursor.hasNext()) {
+    const doc = await cursor.next();
+    const newValues = transformFn(doc);
+    await createEntry(db, newDs.id, newValues);
+  }
 };
 
 export const createEntryFromJSON = async (
@@ -186,7 +182,12 @@ export const createEntryFromJSON = async (
   values: string
 ): Promise<Entry> => {
   const parsedValues: Values = JSON.parse(values);
-  return await createEntry(db, datasetId, parsedValues);
+  const ds = await getDataset(db, datasetId);
+  if (!ds) {
+    throw new Error('Invalid dataset');
+  }
+
+  return await createEntry(db, ds.id, parsedValues);
 };
 
 export const deleteEntry = async (

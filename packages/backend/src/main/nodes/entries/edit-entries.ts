@@ -1,19 +1,18 @@
 import {
   EditEntriesNodeDef,
-  Entry,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
-  NodeExecutionResult,
-  ServerNodeDefWithContextFn,
-  sleep,
-  Values
+  ServerNodeDefWithContextFn
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { createDynamicDatasetName } from '../../calculation/utils';
 import { createDataset, getDataset } from '../../workspace/dataset';
-import { createEntry, getEntryCollection } from '../../workspace/entry';
-import { copySchemas, getDynamicEntryContextInputs } from './utils';
+import { createEntry } from '../../workspace/entry';
+import {
+  copySchemas,
+  getDynamicEntryContextInputs,
+  processEntries
+} from './utils';
 
 export const EditEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
@@ -59,12 +58,10 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
     await copySchemas(oldDs.valueschemas, newDs.id, db);
 
     if (onContextFnExecution) {
-      await copyEditedToOtherDataset(
-        db,
-        inputs.dataset.datasetId,
-        newDs.id,
-        onContextFnExecution
-      );
+      await processEntries(db, inputs.dataset.datasetId, async entry => {
+        const result = await onContextFnExecution(entry.values);
+        await createEntry(db, newDs.id, result.outputs);
+      });
     } else {
       throw new Error('Missing context function');
     }
@@ -77,27 +74,4 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
       }
     };
   }
-};
-
-const copyEditedToOtherDataset = async (
-  db: Db,
-  oldDsId: string,
-  newDsId: string,
-  onContextFnExecution: (inputs: Values) => Promise<NodeExecutionResult<any>>
-) => {
-  const oldCollection = getEntryCollection(db, oldDsId);
-  return new Promise((resolve, reject) => {
-    const col = oldCollection.find();
-    col.on('data', async (entry: Entry) => {
-      const result = await onContextFnExecution(entry.values);
-      createEntry(db, newDsId, result.outputs);
-    });
-    col.on('end', async () => {
-      await sleep(500);
-      resolve();
-    });
-    col.on('error', () => {
-      reject();
-    });
-  });
 };
