@@ -4,7 +4,7 @@ import { NumberInputNode } from '../../../../src/main/nodes/number/input';
 
 describe('NumberInputNode', () => {
   test('should have correct properties', () => {
-    expect(NumberInputNode.name).toBe(NumberInputNodeDef.name);
+    expect(NumberInputNode.type).toBe(NumberInputNodeDef.type);
     expect(NumberInputNode.isFormValid).toBeDefined();
     expect(NumberInputNode.isInputValid).toBeUndefined();
   });

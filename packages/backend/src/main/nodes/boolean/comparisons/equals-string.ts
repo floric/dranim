@@ -9,7 +9,7 @@ export const EqualsStringNode: ServerNodeDef<
   EqualsStringNodeInputs,
   EqualsStringNodeOutputs
 > = {
-  name: EqualsStringNodeDef.name,
+  type: EqualsStringNodeDef.type,
   isInputValid: async inputs => {
     if (inputs.valueA == null || inputs.valueB == null) {
       return false;

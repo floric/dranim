@@ -21,7 +21,7 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs
 > = {
-  name: FilterEntriesNodeDef.name,
+  type: FilterEntriesNodeDef.type,
   transformInputDefsToContextInputDefs: async (inputDefs, inputs) => {
     if (!inputs.dataset || !inputs.dataset.isPresent) {
       return {};
@@ -59,7 +59,7 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
   onNodeExecution: async (form, inputs, { db, onContextFnExecution, node }) => {
     const newDs = await createDataset(
       db,
-      createDynamicDatasetName(FilterEntriesNodeDef.name, node.id)
+      createDynamicDatasetName(FilterEntriesNodeDef.type, node.id)
     );
     const oldDs = await getDataset(db, inputs.dataset.datasetId);
     if (!oldDs) {

@@ -4,7 +4,7 @@ import { AndNode } from '../../../../../src/main/nodes/boolean/operators/and';
 
 describe('AndNode', () => {
   test('should have correct properties', () => {
-    expect(AndNode.name).toBe(AndNodeDef.name);
+    expect(AndNode.type).toBe(AndNodeDef.type);
     expect(AndNode.isFormValid).toBeUndefined();
     expect(AndNode.isInputValid).toBeDefined();
   });

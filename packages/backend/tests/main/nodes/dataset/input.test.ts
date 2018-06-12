@@ -33,7 +33,7 @@ describe('DatasetInputNode', () => {
   });
 
   test('should have correct properties', () => {
-    expect(DatasetInputNode.name).toBe(DatasetInputNodeDef.name);
+    expect(DatasetInputNode.type).toBe(DatasetInputNodeDef.type);
     expect(DatasetInputNode.isFormValid).toBeDefined();
     expect(DatasetInputNode.isInputValid).toBeUndefined();
   });

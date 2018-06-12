@@ -67,7 +67,7 @@ describe('Nodes', () => {
 
   test('should get valid node state', async () => {
     const ws = await createWorkspace(db, 'test', '');
-    const node = await createNode(db, NumberInputNodeDef.name, ws.id, [], 0, 0);
+    const node = await createNode(db, NumberInputNodeDef.type, ws.id, [], 0, 0);
     await addOrUpdateFormValue(db, node.id, 'value', '1');
     const updatedNode = await getNode(db, node.id);
 
@@ -78,7 +78,7 @@ describe('Nodes', () => {
 
   test('should get invalid node state', async () => {
     const ws = await createWorkspace(db, 'test', '');
-    const node = await createNode(db, NumberInputNodeDef.name, ws.id, [], 0, 0);
+    const node = await createNode(db, NumberInputNodeDef.type, ws.id, [], 0, 0);
 
     const state = await getNodeState(node);
 
@@ -122,7 +122,7 @@ describe('Nodes', () => {
     const ws = await createWorkspace(db, 'test', '');
     const dsInputNode = await createNode(
       db,
-      DatasetInputNodeDef.name,
+      DatasetInputNodeDef.type,
       ws.id,
       [],
       0,
@@ -131,7 +131,7 @@ describe('Nodes', () => {
 
     const dsOutputNode = await createNode(
       db,
-      DatasetOutputNodeDef.name,
+      DatasetOutputNodeDef.type,
       ws.id,
       [],
       0,
@@ -162,7 +162,7 @@ describe('Nodes', () => {
     const ws = await createWorkspace(db, 'Ws', '');
     const dsInput = await createNode(
       db,
-      DatasetInputNodeDef.name,
+      DatasetInputNodeDef.type,
       ws.id,
       [],
       0,
@@ -202,7 +202,7 @@ describe('Nodes', () => {
     const ws = await createWorkspace(db, 'Ws', '');
     const wrongParentNode = await createNode(
       db,
-      StringInputNodeDef.name,
+      StringInputNodeDef.type,
       ws.id,
       [],
       0,
@@ -253,7 +253,7 @@ describe('Nodes', () => {
     const ws = await createWorkspace(db, 'Ws', '');
     const dsInput = await createNode(
       db,
-      DatasetInputNodeDef.name,
+      DatasetInputNodeDef.type,
       ws.id,
       [],
       0,
@@ -261,7 +261,7 @@ describe('Nodes', () => {
     );
     const editEntriesNode = await createNode(
       db,
-      EditEntriesNodeDef.name,
+      EditEntriesNodeDef.type,
       ws.id,
       [],
       0,
@@ -286,7 +286,7 @@ describe('Nodes', () => {
 
   test('should throw error for empty value names', async () => {
     const ws = await createWorkspace(db, 'test', '');
-    const node = await createNode(db, StringInputNodeDef.name, ws.id, [], 0, 0);
+    const node = await createNode(db, StringInputNodeDef.type, ws.id, [], 0, 0);
     try {
       await addOrUpdateFormValue(db, node.id, '', 'test');
       throw NeverGoHereError;
@@ -328,8 +328,8 @@ describe('Nodes', () => {
     ]);
 
     const [dsInput, filterEntries] = await Promise.all([
-      createNode(db, DatasetInputNodeDef.name, ws.id, [], 0, 0),
-      createNode(db, FilterEntriesNodeDef.name, ws.id, [], 0, 0)
+      createNode(db, DatasetInputNodeDef.type, ws.id, [], 0, 0),
+      createNode(db, FilterEntriesNodeDef.type, ws.id, [], 0, 0)
     ]);
 
     await addOrUpdateFormValue(

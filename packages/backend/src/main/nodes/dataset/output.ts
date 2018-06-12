@@ -13,7 +13,7 @@ export const DatasetOutputNode: ServerNodeDef<
   {},
   DatasetOutputNodeResults
 > = {
-  name: DatasetOutputNodeDef.name,
+  type: DatasetOutputNodeDef.type,
   isInputValid: inputs => validateDatasetInput(inputs),
   onMetaExecution: async (form, inputs) => {
     if (!inputs.dataset || !inputs.dataset.isPresent) {

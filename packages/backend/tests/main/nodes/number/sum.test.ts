@@ -4,7 +4,7 @@ import { SumNode } from '../../../../src/main/nodes/number/sum';
 
 describe('SumNode', () => {
   test('should have correct properties', () => {
-    expect(SumNodeDef.name).toBe(SumNodeDef.name);
+    expect(SumNodeDef.type).toBe(SumNodeDef.type);
     expect(SumNode.isFormValid).toBeUndefined();
     expect(SumNode.isInputValid).toBeDefined();
   });

@@ -4,7 +4,7 @@ import { EqualsStringNode } from '../../../../../src/main/nodes/boolean/comparis
 
 describe('EqualsStringNode', () => {
   test('should have correct properties', () => {
-    expect(EqualsStringNode.name).toBe(EqualsStringNodeDef.name);
+    expect(EqualsStringNode.type).toBe(EqualsStringNodeDef.type);
     expect(EqualsStringNode.isFormValid).toBeUndefined();
     expect(EqualsStringNode.isInputValid).toBeDefined();
   });

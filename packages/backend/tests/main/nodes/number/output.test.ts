@@ -4,7 +4,7 @@ import { NumberOutputNode } from '../../../../src/main/nodes/number/output';
 
 describe('NumberOutputNode', () => {
   test('should have correct properties', () => {
-    expect(NumberOutputNode.name).toBe(NumberOutputNodeDef.name);
+    expect(NumberOutputNode.type).toBe(NumberOutputNodeDef.type);
     expect(NumberOutputNode.isFormValid).toBeUndefined();
     expect(NumberOutputNode.isInputValid).toBeDefined();
     expect(NumberOutputNodeDef.isOutputNode).toBe(true);

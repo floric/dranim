@@ -10,7 +10,7 @@ export const StringInputNode: ServerNodeDef<
   StringInputNodeOutputs,
   StringInputNodeForm
 > = {
-  name: StringInputNodeDef.name,
+  type: StringInputNodeDef.type,
   onMetaExecution: async form => {
     if (form.value == null) {
       return {

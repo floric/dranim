@@ -16,7 +16,7 @@ export const JoinDatasetsNode: ClientNodeDef<
   JoinDatasetsNodeOutputs,
   JoinDatasetsNodeForm
 > = {
-  name: JoinDatasetsNodeDef.name,
+  type: JoinDatasetsNodeDef.type,
   renderFormItems: ({ inputs, nodeForm, form: { getFieldDecorator } }) => {
     const dsA = inputs.datasetA;
     const dsB = inputs.datasetB;

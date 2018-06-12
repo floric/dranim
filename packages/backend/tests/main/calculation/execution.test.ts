@@ -59,7 +59,7 @@ describe('Server Execution', () => {
 
   test('should execute simple node', async () => {
     const ws = await createWorkspace(db, 'test', '');
-    const node = await createNode(db, StringInputNodeDef.name, ws.id, [], 0, 0);
+    const node = await createNode(db, StringInputNodeDef.type, ws.id, [], 0, 0);
 
     const { outputs, results } = await executeNode(db, node);
 
@@ -72,7 +72,7 @@ describe('Server Execution', () => {
     const ws = await createWorkspace(db, 'test', '');
     const nodeA = await createNode(
       db,
-      StringInputNodeDef.name,
+      StringInputNodeDef.type,
       ws.id,
       [],
       0,
@@ -80,7 +80,7 @@ describe('Server Execution', () => {
     );
     const nodeB = await createNode(
       db,
-      StringOutputNodeDef.name,
+      StringOutputNodeDef.type,
       ws.id,
       [],
       0,
@@ -102,7 +102,7 @@ describe('Server Execution', () => {
 
   test('should fail for invalid form', async () => {
     const ws = await createWorkspace(db, 'test', '');
-    const node = await createNode(db, NumberInputNodeDef.name, ws.id, [], 0, 0);
+    const node = await createNode(db, NumberInputNodeDef.type, ws.id, [], 0, 0);
     await addOrUpdateFormValue(db, node.id, 'value', '{NaN');
 
     try {
@@ -116,8 +116,8 @@ describe('Server Execution', () => {
   test('should fail for invalid input', async () => {
     const ws = await createWorkspace(db, 'test', '');
     const [nodeA, nodeB] = await Promise.all([
-      createNode(db, StringInputNodeDef.name, ws.id, [], 0, 0),
-      createNode(db, NumberOutputNodeDef.name, ws.id, [], 0, 0)
+      createNode(db, StringInputNodeDef.type, ws.id, [], 0, 0),
+      createNode(db, NumberOutputNodeDef.type, ws.id, [], 0, 0)
     ]);
     await addOrUpdateFormValue(db, nodeA.id, 'value', 'NaN');
     await createConnection(
@@ -137,13 +137,13 @@ describe('Server Execution', () => {
   test('should wait for inputs and combine them as sum', async () => {
     const ws = await createWorkspace(db, 'test', '');
     const [nodeA, nodeB] = await Promise.all([
-      createNode(db, NumberInputNodeDef.name, ws.id, [], 0, 0),
-      createNode(db, NumberInputNodeDef.name, ws.id, [], 0, 0)
+      createNode(db, NumberInputNodeDef.type, ws.id, [], 0, 0),
+      createNode(db, NumberInputNodeDef.type, ws.id, [], 0, 0)
     ]);
-    const sumNode = await createNode(db, SumNodeDef.name, ws.id, [], 0, 0);
+    const sumNode = await createNode(db, SumNodeDef.type, ws.id, [], 0, 0);
     const outputNode = await createNode(
       db,
-      NumberOutputNodeDef.name,
+      NumberOutputNodeDef.type,
       ws.id,
       [],
       0,
@@ -191,9 +191,9 @@ describe('Server Execution', () => {
 
     const [editEntriesNode, inputNode, outputNode] = await Promise.all(
       [
-        EditEntriesNodeDef.name,
-        DatasetInputNodeDef.name,
-        DatasetOutputNodeDef.name
+        EditEntriesNodeDef.type,
+        DatasetInputNodeDef.type,
+        DatasetOutputNodeDef.type
       ].map(type => createNode(db, type, ws.id, [], 0, 0))
     );
 
@@ -206,7 +206,7 @@ describe('Server Execution', () => {
     expect(contextOutputNode).toBeDefined();
     const stringInputNode = await createNode(
       db,
-      StringInputNodeDef.name,
+      StringInputNodeDef.type,
       ws.id,
       [editEntriesNode.id],
       0,
@@ -256,7 +256,7 @@ describe('Server Execution', () => {
 
     const editEntriesNode = await createNode(
       db,
-      EditEntriesNodeDef.name,
+      EditEntriesNodeDef.type,
       ws.id,
       [],
       0,

@@ -9,7 +9,7 @@ export const AndNode: ServerNodeDef<
   BooleanOperatorInputs,
   BooleanOperatorOutputs
 > = {
-  name: AndNodeDef.name,
+  type: AndNodeDef.type,
   isInputValid: async inputs => {
     if (inputs.valueA == null || inputs.valueB == null) {
       return false;

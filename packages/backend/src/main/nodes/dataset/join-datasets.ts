@@ -28,7 +28,7 @@ export const JoinDatasetsNode: ServerNodeDef<
   JoinDatasetsNodeOutputs,
   JoinDatasetsNodeForm
 > = {
-  name: JoinDatasetsNodeDef.name,
+  type: JoinDatasetsNodeDef.type,
   isInputValid: inputs =>
     Promise.resolve(
       validateDatasetId(inputs.datasetA) && validateDatasetId(inputs.datasetB)
@@ -80,7 +80,7 @@ export const JoinDatasetsNode: ServerNodeDef<
 
     const newDs = await createDataset(
       db,
-      createDynamicDatasetName(JoinDatasetsNodeDef.name, node.id)
+      createDynamicDatasetName(JoinDatasetsNodeDef.type, node.id)
     );
     await addSchemasFromBothDatasets(
       db,

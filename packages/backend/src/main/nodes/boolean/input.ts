@@ -10,7 +10,7 @@ export const BooleanInputNode: ServerNodeDef<
   BooleanInputNodeOutputs,
   BooleanInputNodeForm
 > = {
-  name: BooleanInputNodeDef.name,
+  type: BooleanInputNodeDef.type,
   onMetaExecution: async form => {
     if (form.value == null) {
       return {

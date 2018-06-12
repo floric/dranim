@@ -28,7 +28,7 @@ describe('DatasetOutputNode', () => {
   });
 
   test('should have correct properties', () => {
-    expect(DatasetOutputNode.name).toBe(DatasetOutputNodeDef.name);
+    expect(DatasetOutputNode.type).toBe(DatasetOutputNodeDef.type);
     expect(DatasetOutputNode.isInputValid).toBeDefined();
     expect(DatasetOutputNode.isFormValid).toBeUndefined();
     expect(DatasetOutputNodeDef.isOutputNode).toBe(true);

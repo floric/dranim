@@ -52,7 +52,7 @@ describe('EditEntriesNode', () => {
   });
 
   test('should have correct properties', () => {
-    expect(EditEntriesNode.name).toBe(EditEntriesNodeDef.name);
+    expect(EditEntriesNode.type).toBe(EditEntriesNodeDef.type);
     expect(EditEntriesNode.isFormValid).toBeUndefined();
     expect(EditEntriesNode.isInputValid).toBeDefined();
     expect(

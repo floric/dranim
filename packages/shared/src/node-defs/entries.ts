@@ -19,14 +19,15 @@ export const EditEntriesNodeDef: NodeDef<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs
 > = {
-  name: 'Edit Entries',
+  name: 'Edit',
+  type: 'EditEntries',
   inputs: {
     dataset: DatasetSocket('Dataset')
   },
   outputs: {
     dataset: DatasetSocket('Dataset')
   },
-  path: ['Entry'],
+  path: ['Entries'],
   keywords: []
 };
 
@@ -34,14 +35,15 @@ export const FilterEntriesNodeDef: NodeDef<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs
 > = {
-  name: 'Filter Entries',
+  name: 'Filter',
+  type: 'FilterEntries',
   inputs: {
     dataset: DatasetSocket('Dataset')
   },
   outputs: {
     dataset: DatasetSocket('Dataset')
   },
-  path: ['Entry'],
+  path: ['Entries'],
   keywords: []
 };
 
@@ -54,13 +56,14 @@ export const AddValuesNodeDef: NodeDef<
   ForEachEntryNodeOutputs
 > = {
   name: 'Add Values',
+  type: 'AddValuesEntries',
   inputs: {
     dataset: DatasetSocket('Dataset')
   },
   outputs: {
     dataset: DatasetSocket('Dataset')
   },
-  path: ['Entry'],
+  path: ['Entries'],
   keywords: []
 };
 
@@ -80,7 +83,8 @@ export const RemoveValuesNodeDef: NodeDef<
   RemoveValuesNodeInputs,
   RemoveValuesNodeOutputs
 > = {
-  name: 'Remove Values',
+  name: 'Select Values',
+  type: 'SelectValueEntries',
   inputs: {
     dataset: DatasetSocket('Dataset')
   },

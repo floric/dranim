@@ -100,7 +100,7 @@ class CreateEntryFormImpl extends React.Component<
                   initialValue: '',
                   rules
                 })(<Input placeholder="Fallback" />)}
-              {valueType === DataType.DATE &&
+              {valueType === DataType.DATETIME &&
                 getFieldDecorator(s.name, {
                   initialValue: moment(),
                   rules

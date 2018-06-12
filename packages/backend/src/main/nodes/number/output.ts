@@ -13,7 +13,7 @@ export const NumberOutputNode: ServerNodeDef<
   {},
   NumberOutputNodeResults
 > = {
-  name: NumberOutputNodeDef.name,
+  type: NumberOutputNodeDef.type,
   isInputValid: input => Promise.resolve(validateNumber(input.value)),
   onMetaExecution: () => Promise.resolve({}),
   onNodeExecution: (form, inputs) =>

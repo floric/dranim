@@ -9,7 +9,7 @@ export const OrNode: ServerNodeDef<
   BooleanOperatorInputs,
   BooleanOperatorOutputs
 > = {
-  name: OrNodeDef.name,
+  type: OrNodeDef.type,
   isInputValid: async inputs => {
     if (inputs.valueA == null || inputs.valueB == null) {
       return false;

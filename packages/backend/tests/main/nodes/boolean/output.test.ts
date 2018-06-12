@@ -4,7 +4,7 @@ import { BooleanOutputNode } from '../../../../src/main/nodes/boolean/output';
 
 describe('BooleanOutputNode', () => {
   test('should have correct properties', () => {
-    expect(BooleanOutputNode.name).toBe(BooleanOutputNodeDef.name);
+    expect(BooleanOutputNode.type).toBe(BooleanOutputNodeDef.type);
     expect(BooleanOutputNode.isFormValid).toBeUndefined();
     expect(BooleanOutputNode.isInputValid).toBeDefined();
     expect(BooleanOutputNodeDef.isOutputNode).toBe(true);

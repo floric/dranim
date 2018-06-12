@@ -22,7 +22,7 @@ export const RemoveValuesNode: ServerNodeDef<
   RemoveValuesNodeOutputs,
   RemoveValuesNodeForm
 > = {
-  name: RemoveValuesNodeDef.name,
+  type: RemoveValuesNodeDef.type,
   isInputValid: async inputs => validateDatasetId(inputs.dataset),
   isFormValid: form => Promise.resolve(!!form.values && form.values.length > 0),
   onMetaExecution: async (form, inputs, db) => {
@@ -58,7 +58,7 @@ export const RemoveValuesNode: ServerNodeDef<
     const usedValues = new Set(form.values!);
     const newDs = await createDataset(
       db,
-      createDynamicDatasetName(RemoveValuesNodeDef.name, node.id)
+      createDynamicDatasetName(RemoveValuesNodeDef.type, node.id)
     );
 
     await filterSchema(existingDs!, newDs, usedValues, db);

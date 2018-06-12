@@ -1,18 +1,18 @@
 import {
-  NumberInputNodeDef,
-  NumberInputNodeForm,
-  NumberInputNodeOutputs,
+  TimeInputNodeDef,
+  TimeInputNodeForm,
+  TimeInputNodeOutputs,
   ServerNodeDef
 } from '@masterthesis/shared';
 
-import { validateNumber } from './utils';
+import { validateNumber } from '../number/utils';
 
-export const NumberInputNode: ServerNodeDef<
+export const TimeInputNode: ServerNodeDef<
   {},
-  NumberInputNodeOutputs,
-  NumberInputNodeForm
+  TimeInputNodeOutputs,
+  TimeInputNodeForm
 > = {
-  type: NumberInputNodeDef.type,
+  type: TimeInputNodeDef.type,
   isFormValid: form => Promise.resolve(validateNumber(form.value)),
   onMetaExecution: async form => {
     if (form.value == null) {

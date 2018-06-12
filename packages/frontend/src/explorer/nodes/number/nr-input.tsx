@@ -15,7 +15,7 @@ export const NumberInputNode: ClientNodeDef<
   NumberInputNodeOutputs,
   NumberInputNodeForm
 > = {
-  name: NumberInputNodeDef.name,
+  type: NumberInputNodeDef.type,
   renderName: (context, nodeForm) =>
     nodeForm.value == null
       ? NumberInputNodeDef.name

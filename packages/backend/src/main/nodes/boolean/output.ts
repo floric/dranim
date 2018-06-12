@@ -11,7 +11,7 @@ export const BooleanOutputNode: ServerNodeDef<
   {},
   BooleanOutputNodeResults
 > = {
-  name: BooleanOutputNodeDef.name,
+  type: BooleanOutputNodeDef.type,
   isInputValid: async inputs => {
     if (inputs.value == null) {
       return false;

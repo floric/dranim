@@ -129,8 +129,8 @@ describe('Workspaces', () => {
 
     const ws = await createWorkspace(db, name, description);
     const [nodeA, nodeB] = await Promise.all([
-      createNode(db, NumberInputNodeDef.name, ws.id, [], 0, 0),
-      createNode(db, NumberOutputNodeDef.name, ws.id, [], 0, 0)
+      createNode(db, NumberInputNodeDef.type, ws.id, [], 0, 0),
+      createNode(db, NumberOutputNodeDef.type, ws.id, [], 0, 0)
     ]);
     const nodeConn = await createConnection(
       db,

@@ -46,7 +46,7 @@ describe('Connections', () => {
 
     const nodeA = await createNode(
       db,
-      NumberInputNodeDef.name,
+      NumberInputNodeDef.type,
       ws.id,
       [],
       0,
@@ -54,7 +54,7 @@ describe('Connections', () => {
     );
     const nodeB = await createNode(
       db,
-      NumberOutputNodeDef.name,
+      NumberOutputNodeDef.type,
       ws.id,
       [],
       0,
@@ -89,7 +89,7 @@ describe('Connections', () => {
 
     const contextNode = await createNode(
       db,
-      NumberInputNodeDef.name,
+      NumberInputNodeDef.type,
       ws.id,
       [],
       0,
@@ -97,7 +97,7 @@ describe('Connections', () => {
     );
     const nodeA = await createNode(
       db,
-      NumberInputNodeDef.name,
+      NumberInputNodeDef.type,
       ws.id,
       [contextNode.id],
       0,
@@ -105,7 +105,7 @@ describe('Connections', () => {
     );
     const nodeB = await createNode(
       db,
-      SumNodeDef.name,
+      SumNodeDef.type,
       ws.id,
       [contextNode.id],
       0,
@@ -129,7 +129,7 @@ describe('Connections', () => {
 
     const nodeA = await createNode(
       db,
-      NumberInputNodeDef.name,
+      NumberInputNodeDef.type,
       ws.id,
       [],
       0,
@@ -137,7 +137,7 @@ describe('Connections', () => {
     );
     const nodeB = await createNode(
       db,
-      NumberOutputNodeDef.name,
+      NumberOutputNodeDef.type,
       ws.id,
       [],
       0,
@@ -163,7 +163,7 @@ describe('Connections', () => {
 
     const nodeA = await createNode(
       db,
-      NumberInputNodeDef.name,
+      NumberInputNodeDef.type,
       ws.id,
       [],
       0,
@@ -190,7 +190,7 @@ describe('Connections', () => {
 
     const nodeA = await createNode(
       db,
-      NumberInputNodeDef.name,
+      NumberInputNodeDef.type,
       wsA.id,
       [],
       0,
@@ -198,7 +198,7 @@ describe('Connections', () => {
     );
     const nodeB = await createNode(
       db,
-      NumberInputNodeDef.name,
+      NumberInputNodeDef.type,
       wsB.id,
       [],
       0,
@@ -223,7 +223,7 @@ describe('Connections', () => {
     const ws = await createWorkspace(db, 'test', '');
     const contextNode = await createNode(
       db,
-      NumberInputNodeDef.name,
+      NumberInputNodeDef.type,
       ws.id,
       [],
       0,
@@ -232,7 +232,7 @@ describe('Connections', () => {
 
     const nodeA = await createNode(
       db,
-      NumberInputNodeDef.name,
+      NumberInputNodeDef.type,
       ws.id,
       [],
       0,
@@ -240,7 +240,7 @@ describe('Connections', () => {
     );
     const nodeB = await createNode(
       db,
-      NumberInputNodeDef.name,
+      NumberInputNodeDef.type,
       ws.id,
       [contextNode.id],
       0,

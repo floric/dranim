@@ -27,7 +27,7 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeOutputs,
   AddValuesNodeForm
 > = {
-  name: AddValuesNodeDef.name,
+  type: AddValuesNodeDef.type,
   transformContextInputDefsToContextOutputDefs: async (
     inputDefs,
     inputs,
@@ -91,7 +91,7 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
 
     const newDs = await createDataset(
       db,
-      createDynamicDatasetName(AddValuesNodeDef.name, node.id)
+      createDynamicDatasetName(AddValuesNodeDef.type, node.id)
     );
 
     await copySchemas(oldDs.valueschemas, newDs.id, db);

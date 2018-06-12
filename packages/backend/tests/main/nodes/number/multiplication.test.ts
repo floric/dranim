@@ -4,7 +4,7 @@ import { MultiplicationNode } from '../../../../src/main/nodes/number/multiplica
 
 describe('MultiplicationNode', () => {
   test('should have correct properties', () => {
-    expect(MultiplicationNode.name).toBe(MultiplicationNodeDef.name);
+    expect(MultiplicationNode.type).toBe(MultiplicationNodeDef.type);
     expect(MultiplicationNode.isFormValid).toBeUndefined();
     expect(MultiplicationNode.isInputValid).toBeDefined();
   });

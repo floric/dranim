@@ -8,7 +8,7 @@ import {
 import { validateNumber } from './utils';
 
 export const SumNode: ServerNodeDef<SumNodeNodeInputs, SumNodeNodeOutputs> = {
-  name: SumNodeDef.name,
+  type: SumNodeDef.type,
   isInputValid: values =>
     Promise.resolve(validateNumber(values.a) && validateNumber(values.b)),
   onMetaExecution: async (form, inputs) => {

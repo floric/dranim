@@ -50,7 +50,7 @@ describe('AddValuesNode', () => {
   });
 
   test('should have correct properties', () => {
-    expect(AddValuesNode.name).toBe(AddValuesNodeDef.name);
+    expect(AddValuesNode.type).toBe(AddValuesNodeDef.type);
     expect(AddValuesNode.isFormValid).toBeDefined();
     expect(AddValuesNode.isInputValid).toBeDefined();
     expect(
@@ -338,7 +338,7 @@ describe('AddValuesNode', () => {
           contextIds: [],
           inputs: [],
           outputs: [],
-          type: AddValuesNode.name,
+          type: AddValuesNode.type,
           workspaceId: ws.id,
           form: [],
           x: 0,
@@ -393,7 +393,7 @@ describe('AddValuesNode', () => {
             contextIds: [],
             inputs: [],
             outputs: [],
-            type: AddValuesNode.name,
+            type: AddValuesNode.type,
             workspaceId: ws.id,
             form: [],
             x: 0,

@@ -4,7 +4,7 @@ import { FormatNumberNode } from '../../../../src/main/nodes/number/format-numbe
 
 describe('FormatNumberNode', () => {
   test('should have correct properties', () => {
-    expect(FormatNumberNode.name).toBe(FormatNumberNodeDef.name);
+    expect(FormatNumberNode.type).toBe(FormatNumberNodeDef.type);
     expect(FormatNumberNode.isFormValid).toBeUndefined();
     expect(FormatNumberNode.isInputValid).toBeDefined();
   });

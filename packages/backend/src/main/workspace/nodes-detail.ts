@@ -161,8 +161,7 @@ export const getMetaInputs = async (
 
   await Promise.all(
     inputConns.map(async c => {
-      const connId = c.connectionId;
-      const conn = await getConnection(db, connId);
+      const conn = await getConnection(db, c.connectionId);
       if (!conn) {
         throw new Error('Invalid connection');
       }

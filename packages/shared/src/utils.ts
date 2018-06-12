@@ -31,9 +31,6 @@ export const sleep = (ms: number): Promise<void> => sleepPromise(ms);
 
 export const hasContextFn = (
   nodeDef: ServerNodeDef | ServerNodeDefWithContextFn
-): nodeDef is ServerNodeDefWithContextFn => {
-  return (
-    (nodeDef as ServerNodeDefWithContextFn)
-      .transformInputDefsToContextInputDefs !== undefined
-  );
-};
+): nodeDef is ServerNodeDefWithContextFn =>
+  (nodeDef as ServerNodeDefWithContextFn)
+    .transformInputDefsToContextInputDefs !== undefined;

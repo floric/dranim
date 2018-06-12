@@ -14,7 +14,7 @@ export const FormatNumberNode: ServerNodeDef<
     'average-total'?: number;
   }
 > = {
-  name: FormatNumberNodeDef.name,
+  type: FormatNumberNodeDef.type,
   isInputValid: async input => {
     if (input.number == null || Number.isNaN(input.number)) {
       return false;

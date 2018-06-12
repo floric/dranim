@@ -15,7 +15,7 @@ export const StringInputNode: ClientNodeDef<
   StringInputNodeOutputs,
   StringInputNodeForm
 > = {
-  name: StringInputNodeDef.name,
+  type: StringInputNodeDef.type,
   renderName: (context, nodeForm) =>
     nodeForm.value == null ? StringInputNodeDef.name : nodeForm.value,
   renderFormItems: ({ form: { getFieldDecorator }, nodeForm }) => (

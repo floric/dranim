@@ -18,7 +18,7 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs
 > = {
-  name: EditEntriesNodeDef.name,
+  type: EditEntriesNodeDef.type,
   transformContextInputDefsToContextOutputDefs: async (
     inputDefs,
     inputs,
@@ -48,7 +48,7 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
   onNodeExecution: async (form, inputs, { db, onContextFnExecution, node }) => {
     const newDs = await createDataset(
       db,
-      createDynamicDatasetName(EditEntriesNodeDef.name, node.id)
+      createDynamicDatasetName(EditEntriesNodeDef.type, node.id)
     );
     const oldDs = await getDataset(db, inputs.dataset.datasetId);
     if (!oldDs) {

@@ -4,7 +4,7 @@ import { OrNode } from '../../../../../src/main/nodes/boolean/operators/or';
 
 describe('OrNode', () => {
   test('should have correct properties', () => {
-    expect(OrNode.name).toBe(OrNodeDef.name);
+    expect(OrNode.type).toBe(OrNodeDef.type);
     expect(OrNode.isFormValid).toBeUndefined();
     expect(OrNode.isInputValid).toBeDefined();
   });

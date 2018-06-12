@@ -4,7 +4,7 @@ import { StringInputNode } from '../../../../src/main/nodes/string/input';
 
 describe('StringInputNode', () => {
   test('should have correct properties', () => {
-    expect(StringInputNode.name).toBe(StringInputNodeDef.name);
+    expect(StringInputNode.type).toBe(StringInputNodeDef.type);
     expect(StringInputNode.isFormValid).toBeUndefined();
     expect(StringInputNode.isInputValid).toBeUndefined();
   });

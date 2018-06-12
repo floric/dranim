@@ -13,7 +13,7 @@ export const DatasetInputNode: ServerNodeDef<
   DatasetInputNodeOutputs,
   DatasetInputNodeForm
 > = {
-  name: DatasetInputNodeDef.name,
+  type: DatasetInputNodeDef.type,
   isFormValid: form => Promise.resolve(!!form.dataset),
   onMetaExecution: async (form, inputs, db) => {
     if (!form.dataset) {

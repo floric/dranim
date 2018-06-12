@@ -36,7 +36,7 @@ describe('RemoveValuesNode', () => {
   });
 
   test('should have correct properties', () => {
-    expect(RemoveValuesNode.name).toBe(RemoveValuesNodeDef.name);
+    expect(RemoveValuesNode.type).toBe(RemoveValuesNodeDef.type);
     expect(RemoveValuesNode.isFormValid).toBeDefined();
     expect(RemoveValuesNode.isInputValid).toBeDefined();
   });

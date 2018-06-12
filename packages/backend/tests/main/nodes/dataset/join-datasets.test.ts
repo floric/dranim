@@ -46,7 +46,7 @@ describe('JoinDatasetsNode', () => {
   });
 
   test('should have correct properties', () => {
-    expect(JoinDatasetsNode.name).toBe(JoinDatasetsNodeDef.name);
+    expect(JoinDatasetsNode.type).toBe(JoinDatasetsNodeDef.type);
     expect(JoinDatasetsNode.isFormValid).toBeDefined();
     expect(JoinDatasetsNode.isInputValid).toBeDefined();
   });

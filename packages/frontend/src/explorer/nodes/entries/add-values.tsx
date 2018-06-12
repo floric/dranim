@@ -22,7 +22,7 @@ export const AddValuesNode: ClientNodeDef<
   ForEachEntryNodeOutputs,
   AddValuesNodeForm
 > = {
-  name: AddValuesNodeDef.name,
+  type: AddValuesNodeDef.type,
   renderFormItems: ({
     form,
     form: { getFieldDecorator, setFieldsValue, getFieldValue },
@@ -56,7 +56,8 @@ export const AddValuesNode: ClientNodeDef<
                   DataType.STRING,
                   DataType.NUMBER,
                   DataType.BOOLEAN,
-                  DataType.DATE
+                  DataType.DATETIME,
+                  DataType.TIME
                 ].map(type => (
                   <Select.Option value={type} key={`option-${type}`}>
                     {type}

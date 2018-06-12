@@ -16,7 +16,7 @@ export const RemoveValuesNode: ClientNodeDef<
   RemoveValuesNodeOutputs,
   RemoveValuesNodeForm
 > = {
-  name: RemoveValuesNodeDef.name,
+  type: RemoveValuesNodeDef.type,
   renderFormItems: ({
     form,
     form: { getFieldDecorator },

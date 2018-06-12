@@ -16,7 +16,7 @@ export const FormatNumberNode: ClientNodeDef<
   FormatNumberNodeOutputs,
   FormatNumberNodeForm
 > = {
-  name: FormatNumberNodeDef.name,
+  type: FormatNumberNodeDef.type,
   renderFormItems: ({ form: { getFieldDecorator }, nodeForm }) => {
     const thousandsSeparated = getValueOrDefault(
       nodeForm,

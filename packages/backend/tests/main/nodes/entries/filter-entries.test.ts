@@ -48,7 +48,7 @@ describe('FilterEntriesNode', () => {
   });
 
   test('should have correct properties', () => {
-    expect(FilterEntriesNode.name).toBe(FilterEntriesNodeDef.name);
+    expect(FilterEntriesNode.type).toBe(FilterEntriesNodeDef.type);
     expect(FilterEntriesNode.isFormValid).toBeUndefined();
     expect(FilterEntriesNode.isInputValid).toBeDefined();
     expect(

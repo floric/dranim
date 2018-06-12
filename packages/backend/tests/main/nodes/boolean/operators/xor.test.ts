@@ -4,7 +4,7 @@ import { XorNode } from '../../../../../src/main/nodes/boolean/operators/xor';
 
 describe('XorNode', () => {
   test('should have correct properties', () => {
-    expect(XorNode.name).toBe(XorNodeDef.name);
+    expect(XorNode.type).toBe(XorNodeDef.type);
     expect(XorNode.isFormValid).toBeUndefined();
     expect(XorNode.isInputValid).toBeDefined();
   });

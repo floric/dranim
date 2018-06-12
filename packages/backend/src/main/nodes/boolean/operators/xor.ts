@@ -9,7 +9,7 @@ export const XorNode: ServerNodeDef<
   BooleanOperatorInputs,
   BooleanOperatorOutputs
 > = {
-  name: XorNodeDef.name,
+  type: XorNodeDef.type,
   isInputValid: async inputs => {
     if (inputs.valueA == null || inputs.valueB == null) {
       return false;
