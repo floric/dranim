@@ -175,7 +175,7 @@ export const getMetaInputs = async (
   return inputs;
 };
 
-export const getNodeState = async (node: NodeInstance) => {
+export const getNodeState = async (node: NodeInstance, db: Db) => {
   const t = serverNodeTypes.get(node.type);
   if (!t) {
     return NodeState.ERROR;

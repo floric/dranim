@@ -5,15 +5,13 @@ import {
   ServerNodeDef
 } from '@masterthesis/shared';
 
-import { validateNumber } from '../number/utils';
-
 export const DatetimeInputNode: ServerNodeDef<
   {},
   DatetimeInputNodeOutputs,
   DatetimeInputNodeForm
 > = {
   type: DatetimeInputNodeDef.type,
-  isFormValid: form => Promise.resolve(validateNumber(form.value)),
+  isFormValid: form => Promise.resolve(form.value != null),
   onMetaExecution: async form => {
     if (form.value == null) {
       return {

@@ -10,12 +10,37 @@ export const DatetimeConstructNode: ServerNodeDef<
   DatetimeInputNodeOutputs
 > = {
   type: DatetimeConstructNodeDef.type,
+  isInputValid: async inputs => {
+    if (
+      inputs.day == null ||
+      inputs.month == null ||
+      inputs.year == null ||
+      inputs.time == null
+    ) {
+      return false;
+    }
+
+    if (
+      !Number.isInteger(inputs.day) ||
+      !Number.isInteger(inputs.month) ||
+      !Number.isInteger(inputs.year)
+    ) {
+      return false;
+    }
+
+    // TODO Validate valid date
+    return true;
+  },
   onMetaExecution: async (form, inputs) => {
     if (
       inputs.day == null ||
       inputs.month == null ||
       inputs.time == null ||
-      inputs.year == null
+      inputs.year == null ||
+      !inputs.day.isPresent ||
+      !inputs.month.isPresent ||
+      !inputs.year.isPresent ||
+      !inputs.time.isPresent
     ) {
       return {
         value: { content: {}, isPresent: false }
@@ -33,9 +58,9 @@ export const DatetimeConstructNode: ServerNodeDef<
           values.year,
           values.month,
           values.day,
-          values.time.getUTCHours(),
-          values.time.getUTCMinutes(),
-          values.time.getUTCSeconds()
+          values.time.getHours(),
+          values.time.getMinutes(),
+          values.time.getSeconds()
         )
       }
     })

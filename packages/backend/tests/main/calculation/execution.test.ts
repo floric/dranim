@@ -100,6 +100,45 @@ describe('Server Execution', () => {
     expect(Object.keys(results!).length).toBe(1);
   });
 
+  test('should return outputs from context for context input nodes', async () => {
+    const contextInputs = { test: 123 };
+    const res = await executeNode(
+      db,
+      {
+        type: ContextNodeType.INPUT,
+        x: 0,
+        y: 0,
+        workspaceId: VALID_OBJECT_ID,
+        id: VALID_OBJECT_ID,
+        outputs: [],
+        inputs: [],
+        form: [],
+        contextIds: [VALID_OBJECT_ID]
+      },
+      contextInputs
+    );
+    expect(res).toEqual({ outputs: contextInputs });
+  });
+
+  test('should throw error for unknown node type', async () => {
+    try {
+      await executeNode(db, {
+        type: 'UnknownNodeType',
+        x: 0,
+        y: 0,
+        workspaceId: VALID_OBJECT_ID,
+        id: VALID_OBJECT_ID,
+        outputs: [],
+        inputs: [],
+        form: [],
+        contextIds: [VALID_OBJECT_ID]
+      });
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Unknown node type');
+    }
+  });
+
   test('should fail for invalid form', async () => {
     const ws = await createWorkspace(db, 'test', '');
     const node = await createNode(db, NumberInputNodeDef.type, ws.id, [], 0, 0);

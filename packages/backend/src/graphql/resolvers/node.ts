@@ -20,7 +20,8 @@ import {
 import { getWorkspace } from '../../main/workspace/workspace';
 
 export const Node = {
-  state: (node: NodeInstance): Promise<NodeState> => getNodeState(node),
+  state: (node: NodeInstance, _, { db }): Promise<NodeState> =>
+    getNodeState(node, db),
   workspace: ({ workspaceId }, __, { db }): Promise<Workspace | null> =>
     getWorkspace(db, workspaceId),
   metaOutputs: (
