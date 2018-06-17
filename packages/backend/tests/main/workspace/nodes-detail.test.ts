@@ -71,7 +71,7 @@ describe('Nodes', () => {
     await addOrUpdateFormValue(db, node.id, 'value', '1');
     const updatedNode = await getNode(db, node.id);
 
-    const state = await getNodeState(updatedNode);
+    const state = await getNodeState(updatedNode, db);
 
     expect(state).toBe(NodeState.VALID);
   });
@@ -80,39 +80,45 @@ describe('Nodes', () => {
     const ws = await createWorkspace(db, 'test', '');
     const node = await createNode(db, NumberInputNodeDef.type, ws.id, [], 0, 0);
 
-    const state = await getNodeState(node);
+    const state = await getNodeState(node, db);
 
     expect(state).toBe(NodeState.INVALID);
   });
 
   test('should get error node state', async () => {
-    const state = await getNodeState({
-      id: VALID_OBJECT_ID,
-      form: [],
-      inputs: [],
-      outputs: [],
-      contextIds: [],
-      type: 'unknown',
-      workspaceId: VALID_OBJECT_ID,
-      x: 0,
-      y: 0
-    });
+    const state = await getNodeState(
+      {
+        id: VALID_OBJECT_ID,
+        form: [],
+        inputs: [],
+        outputs: [],
+        contextIds: [],
+        type: 'unknown',
+        workspaceId: VALID_OBJECT_ID,
+        x: 0,
+        y: 0
+      },
+      db
+    );
 
     expect(state).toBe(NodeState.ERROR);
   });
 
   test('should get error node state', async () => {
-    const state = await getNodeState({
-      id: VALID_OBJECT_ID,
-      form: [],
-      inputs: [],
-      outputs: [],
-      contextIds: [],
-      type: 'unknown',
-      workspaceId: VALID_OBJECT_ID,
-      x: 0,
-      y: 0
-    });
+    const state = await getNodeState(
+      {
+        id: VALID_OBJECT_ID,
+        form: [],
+        inputs: [],
+        outputs: [],
+        contextIds: [],
+        type: 'unknown',
+        workspaceId: VALID_OBJECT_ID,
+        x: 0,
+        y: 0
+      },
+      db
+    );
 
     expect(state).toBe(NodeState.ERROR);
   });

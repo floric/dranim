@@ -120,6 +120,4 @@ const addDynamicSchemas = async (
   dsId: string,
   formValues: Array<ValueSchema>,
   db: Db
-) => {
-  await Promise.all(formValues.map(f => addValueSchema(db, dsId, f)));
-};
+) => Promise.all(formValues.map(f => addValueSchema(db, dsId, f)));

@@ -48,7 +48,7 @@ export const executeNode = async (
   const nodeInputs = inputValuesToObject(inputValues);
   const nodeForm = parseNodeForm(node.form);
 
-  await checkValidInputAndForm(type, nodeInputs, nodeForm);
+  await checkValidInputAndForm(node, type, nodeInputs, nodeForm, db);
 
   if (hasContextFn(type)) {
     return await calculateContext(node, type, nodeForm, nodeInputs, db);
@@ -131,9 +131,11 @@ const inputValuesToObject = (
 };
 
 const checkValidInputAndForm = async (
+  node: NodeInstance,
   type: NodeDef & ServerNodeDef,
   inputs: IOValues<{}>,
-  form: FormValues<{}>
+  form: FormValues<{}>,
+  db: Db
 ) => {
   const isValidForm = type.isFormValid ? await type.isFormValid(form) : true;
   const isValidInput = type.isInputValid

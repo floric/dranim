@@ -27,7 +27,6 @@ export interface NodeDef<NodeInputs = {}, NodeOutputs = {}> {
   inputs: SocketDefs<NodeInputs>;
   outputs: SocketDefs<NodeOutputs>;
   isOutputNode?: boolean;
-  supportsDynamicSockets?: boolean;
   path: Array<string>;
   keywords: Array<string>;
 }

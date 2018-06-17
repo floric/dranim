@@ -5,7 +5,7 @@ import {
   ServerNodeDef
 } from '@masterthesis/shared';
 
-import { validateDataset, validateDatasetInput } from './utils';
+import { validateDataset } from './utils';
 
 export const DatasetOutputNode: ServerNodeDef<
   DatasetOutputNodeInputs,
@@ -14,7 +14,6 @@ export const DatasetOutputNode: ServerNodeDef<
   DatasetOutputNodeResults
 > = {
   type: DatasetOutputNodeDef.type,
-  isInputValid: inputs => validateDatasetInput(inputs),
   onMetaExecution: async (form, inputs) => {
     if (!inputs.dataset || !inputs.dataset.isPresent) {
       return {

@@ -15,7 +15,7 @@ import {
 } from '../../../main/workspace/dataset';
 import { createDynamicDatasetName } from '../../calculation/utils';
 import { copyTransformedToOtherDataset } from '../../workspace/entry';
-import { validateDataset, validateDatasetId } from '../dataset/utils';
+import { validateDataset } from '../dataset/utils';
 
 export const RemoveValuesNode: ServerNodeDef<
   RemoveValuesNodeInputs,
@@ -23,7 +23,6 @@ export const RemoveValuesNode: ServerNodeDef<
   RemoveValuesNodeForm
 > = {
   type: RemoveValuesNodeDef.type,
-  isInputValid: async inputs => validateDatasetId(inputs.dataset),
   isFormValid: form => Promise.resolve(!!form.values && form.values.length > 0),
   onMetaExecution: async (form, inputs, db) => {
     if (!form.values || form.values.length === 0) {

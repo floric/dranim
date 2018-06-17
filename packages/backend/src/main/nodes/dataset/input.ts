@@ -6,7 +6,6 @@ import {
 } from '@masterthesis/shared';
 
 import { getDataset } from '../../workspace/dataset';
-import { validateDataset } from './utils';
 
 export const DatasetInputNode: ServerNodeDef<
   {},
@@ -39,8 +38,6 @@ export const DatasetInputNode: ServerNodeDef<
     };
   },
   onNodeExecution: async (form, inputs, { db }) => {
-    await validateDataset(form.dataset!, db);
-
     return {
       outputs: {
         dataset: {

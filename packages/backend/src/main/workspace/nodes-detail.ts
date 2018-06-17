@@ -1,5 +1,4 @@
 import {
-  ConnectionDescription,
   ContextNodeType,
   hasContextFn,
   NodeInstance,
@@ -123,7 +122,7 @@ export const getMetaOutputs = async (
 ): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> => {
   const node = await getNode(db, nodeId);
   if (!node) {
-    return {};
+    throw new Error('Unknown node');
   }
 
   const nodeType = serverNodeTypes.get(node.type);
@@ -131,7 +130,7 @@ export const getMetaOutputs = async (
     return {};
   }
 
-  const allInputs = await getMetaInputs(db, nodeId, node.inputs);
+  const allInputs = await getMetaInputs(db, nodeId);
 
   return await nodeType.onMetaExecution(
     parseNodeForm(node.form),
@@ -142,22 +141,16 @@ export const getMetaOutputs = async (
 
 export const getMetaInputs = async (
   db: Db,
-  nodeId: string,
-  inputConnections?: Array<ConnectionDescription>
+  nodeId: string
 ): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> => {
   const inputs = {};
 
-  let inputConns;
-  if (!inputConnections) {
-    const node = await getNode(db, nodeId);
-    if (!node) {
-      throw new Error('Metas: Node not found');
-    }
-
-    inputConns = node.inputs;
-  } else {
-    inputConns = inputConnections;
+  const node = await getNode(db, nodeId);
+  if (!node) {
+    throw new Error('Metas: Node not found');
   }
+
+  const inputConns = node.inputs;
 
   await Promise.all(
     inputConns.map(async c => {
@@ -175,16 +168,61 @@ export const getMetaInputs = async (
   return inputs;
 };
 
+export const getAllMetaInputs = async (
+  inputDefs: SocketDefs<any>,
+  node: NodeInstance,
+  db: Db
+) => {
+  let inputs: { [name: string]: SocketMetaDef } = {};
+
+  await Promise.all(
+    Object.entries(inputDefs).map(async c => {
+      const connection = node.inputs.find(i => i.name === c[0]) || null;
+      if (!connection) {
+        inputs[c[0]] = {
+          isPresent: false,
+          content: {}
+        };
+        return;
+      }
+
+      const conn = await getConnection(db, connection.connectionId);
+      if (!conn) {
+        throw new Error('Invalid connection');
+      }
+
+      inputs[connection.name] = (await getMetaOutputs(db, conn.from.nodeId))[
+        conn.from.name
+      ];
+    })
+  );
+
+  return inputs;
+};
+
 export const getNodeState = async (node: NodeInstance, db: Db) => {
   const t = serverNodeTypes.get(node.type);
   if (!t) {
     return NodeState.ERROR;
   }
 
+  let inputDefs = {};
+  if (node.type === ContextNodeType.INPUT) {
+    inputDefs = (await getContextInputDefs(node, db)) || {};
+  } else if (node.type === ContextNodeType.OUTPUT) {
+    inputDefs = (await getContextOutputDefs(node, db)) || {};
+  } else {
+    inputDefs = serverNodeTypes.get(node.type)!.inputs;
+  }
+  const metaInputs = await getAllMetaInputs(inputDefs, node, db);
+  const allInputsPresent = Object.values(metaInputs)
+    .map(i => i.isPresent)
+    .reduce((a, b) => a && b, true);
+
   const isValid = t.isFormValid
     ? await t.isFormValid(parseNodeForm(node.form))
     : true;
-  if (!isValid) {
+  if (!isValid || !allInputsPresent) {
     return NodeState.INVALID;
   }
 

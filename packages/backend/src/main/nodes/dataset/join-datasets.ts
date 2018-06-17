@@ -20,7 +20,6 @@ import {
 } from '../../workspace/dataset';
 import { createEntry, getEntryCollection } from '../../workspace/entry';
 import { validateNonEmptyString } from '../string/utils';
-import { validateDatasetId } from './utils';
 import { processEntries } from '../entries/utils';
 
 export const JoinDatasetsNode: ServerNodeDef<
@@ -29,10 +28,6 @@ export const JoinDatasetsNode: ServerNodeDef<
   JoinDatasetsNodeForm
 > = {
   type: JoinDatasetsNodeDef.type,
-  isInputValid: inputs =>
-    Promise.resolve(
-      validateDatasetId(inputs.datasetA) && validateDatasetId(inputs.datasetB)
-    ),
   isFormValid: form =>
     Promise.resolve(
       validateNonEmptyString(form.valueA) && validateNonEmptyString(form.valueB)

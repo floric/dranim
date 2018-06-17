@@ -35,7 +35,7 @@ export const Node = {
     _,
     { db }
   ): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> =>
-    getMetaInputs(db, id, inputs),
+    getMetaInputs(db, id),
   contextInputDefs: (
     node,
     _,

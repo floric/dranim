@@ -2,13 +2,11 @@ import {
   Colors,
   ConditionalMetaTypes,
   ContextNodeType,
-  DatasetMeta,
   GQLNodeInstance,
   NodeState,
   parseNodeForm,
   SocketDef,
   SocketDefs,
-  SocketMetaDef,
   SocketType
 } from '@masterthesis/shared';
 import * as Konva from 'konva';
@@ -25,19 +23,6 @@ import {
 export const NODE_WIDTH = 180;
 const TEXT_HEIGHT = 20;
 const STATE_LINE_HEIGHT = 1;
-
-export const isEntryMeta = (
-  n:
-    | { [x: string]: SocketMetaDef<{}> }
-    | { [x: string]: SocketMetaDef<DatasetMeta> }
-): n is { [x: string]: SocketMetaDef<DatasetMeta> } => {
-  const keys = Object.keys(n as { [x: string]: SocketMetaDef<DatasetMeta> });
-  return (
-    keys.length >= 1 &&
-    (n as { [x: string]: SocketMetaDef<DatasetMeta> })[keys[0]].content
-      .schema !== undefined
-  );
-};
 
 export const renderContextNode = (
   n: GQLNodeInstance,
@@ -61,23 +46,11 @@ export const renderContextNode = (
 
   const bgRect = getBackgroundRect(height);
   const nodeTitle = getHeaderText(false, n.type);
-  const inputsGroup = renderSockets(
-    inputs,
-    n.id,
-    server,
-    state,
-    SocketType.INPUT,
-    socketsMap,
-    changeState
-  );
-  const outputsGroup = renderSockets(
-    outputs,
-    n.id,
-    server,
-    state,
-    SocketType.OUTPUT,
-    socketsMap,
-    changeState
+  const [inputsGroup, outputsGroup] = [
+    { defs: inputs, type: SocketType.INPUT },
+    { defs: outputs, type: SocketType.OUTPUT }
+  ].map(p =>
+    renderSockets(p.defs, n.id, server, state, p.type, socketsMap, changeState)
   );
   const stateRect = getStateRect(height, n.state);
 
@@ -126,25 +99,14 @@ export const renderNode = (
       ? renderName({ node: n, state: server }, parseNodeForm(n.form))
       : name
   );
-  const inputsGroup = renderSockets(
-    inputs,
-    n.id,
-    server,
-    state,
-    SocketType.INPUT,
-    socketsMap,
-    changeState
-  );
-  const outputsGroup = renderSockets(
-    outputs,
-    n.id,
-    server,
-    state,
-    SocketType.OUTPUT,
-    socketsMap,
-    changeState
+  const [inputsGroup, outputsGroup] = [
+    { defs: inputs, type: SocketType.INPUT },
+    { defs: outputs, type: SocketType.OUTPUT }
+  ].map(p =>
+    renderSockets(p.defs, n.id, server, state, p.type, socketsMap, changeState)
   );
   const stateRect = getStateRect(height, n.state);
+
   nodeGroup.add(bgRect);
   nodeGroup.add(nodeTitle);
 

@@ -14,6 +14,8 @@ import * as DatasetNodes from './dataset';
 import * as EntriesNodes from './entries';
 import * as NumberNodes from './number';
 import * as StringNodes from './string';
+import * as TimeNodes from './time';
+import * as DatetimeNodes from './datetime';
 
 export interface EditorProps {
   x?: number;
@@ -56,7 +58,9 @@ const allNodes = [
   NumberNodes,
   StringNodes,
   BooleanNodes,
-  EntriesNodes
+  EntriesNodes,
+  TimeNodes,
+  DatetimeNodes
 ];
 
 const buildTree = (
