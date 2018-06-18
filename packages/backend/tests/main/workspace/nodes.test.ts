@@ -31,7 +31,8 @@ import {
   getAllNodes,
   getNode,
   getNodesCollection,
-  updateNode
+  updateNode,
+  tryGetNode
 } from '../../../src/main/workspace/nodes';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
 import {
@@ -122,6 +123,15 @@ describe('Nodes', () => {
     const unknownNode = await getNode(db, '123');
 
     expect(unknownNode).toBe(null);
+  });
+
+  test('should throw error for unknown node', async () => {
+    try {
+      await tryGetNode(VALID_OBJECT_ID, db);
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Node not found');
+    }
   });
 
   test('should not create node for unknown workspace', async () => {
@@ -276,7 +286,7 @@ describe('Nodes', () => {
       await createNode(db, 'unknown', ws.id, [], 0, 0);
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Invalid node type');
+      expect(err.message).toBe('Unknown node type');
     }
   });
 

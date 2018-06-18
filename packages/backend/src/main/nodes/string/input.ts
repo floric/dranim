@@ -11,6 +11,13 @@ export const StringInputNode: ServerNodeDef<
   StringInputNodeForm
 > = {
   type: StringInputNodeDef.type,
+  isFormValid: async form => {
+    if (form.value == null) {
+      return false;
+    }
+
+    return true;
+  },
   onMetaExecution: async form => {
     if (form.value == null) {
       return {
@@ -25,7 +32,7 @@ export const StringInputNode: ServerNodeDef<
   onNodeExecution: form =>
     Promise.resolve({
       outputs: {
-        value: form.value || ''
+        value: form.value!
       }
     })
 };

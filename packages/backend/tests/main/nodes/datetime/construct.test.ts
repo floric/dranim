@@ -11,38 +11,6 @@ describe(DatetimeConstructNode.type, () => {
 
   test('should have invalid inputs', async () => {
     let res = await DatetimeConstructNode.isInputValid({
-      day: null,
-      month: 0,
-      year: 0,
-      time: new Date()
-    });
-    expect(res).toBe(false);
-
-    res = await DatetimeConstructNode.isInputValid({
-      day: 1,
-      month: null,
-      year: 0,
-      time: new Date()
-    });
-    expect(res).toBe(false);
-
-    res = await DatetimeConstructNode.isInputValid({
-      day: 1,
-      month: 1,
-      year: null,
-      time: new Date()
-    });
-    expect(res).toBe(false);
-
-    res = await DatetimeConstructNode.isInputValid({
-      day: 1,
-      month: 1,
-      year: 1,
-      time: null
-    });
-    expect(res).toBe(false);
-
-    res = await DatetimeConstructNode.isInputValid({
       day: 1.5,
       month: 1,
       year: 1,

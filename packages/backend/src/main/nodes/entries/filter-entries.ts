@@ -42,13 +42,6 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
     Promise.resolve({
       keepEntry: { dataType: DataType.BOOLEAN, displayName: 'Keep entry' }
     }),
-  isInputValid: async inputs => {
-    if (!inputs.dataset || !inputs.dataset.datasetId) {
-      return false;
-    }
-
-    return true;
-  },
   onMetaExecution: async (form, inputs) => {
     if (!inputs.dataset || !inputs.dataset.isPresent) {
       return { dataset: { content: { schema: [] }, isPresent: false } };

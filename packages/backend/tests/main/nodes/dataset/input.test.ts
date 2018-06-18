@@ -49,19 +49,6 @@ describe('DatasetInputNode', () => {
     expect(res.outputs.dataset).toEqual({ datasetId: newDs.id });
   });
 
-  test('should get output value from form', async () => {
-    try {
-      await DatasetInputNode.onNodeExecution(
-        { dataset: VALID_OBJECT_ID },
-        {},
-        { db, node: NODE }
-      );
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Unknown dataset');
-    }
-  });
-
   test('should accept form', async () => {
     const res = await DatasetInputNode.isFormValid({ dataset: 'test' });
 

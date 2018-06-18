@@ -20,7 +20,11 @@ import {
   updateWorkspace,
   updateLastChange
 } from '../../../src/main/workspace/workspace';
-import { getTestMongoDb, NeverGoHereError } from '../../test-utils';
+import {
+  getTestMongoDb,
+  NeverGoHereError,
+  VALID_OBJECT_ID
+} from '../../test-utils';
 
 let conn;
 let db: Db;
@@ -121,6 +125,15 @@ describe('Workspaces', () => {
     expect(new Date(ws.lastChange).getTime()).toBeLessThan(
       new Date(newWs.lastChange).getTime()
     );
+  });
+
+  test('should throw error when updating workspaces with invalid id', async () => {
+    try {
+      await updateWorkspace(db, 'test', [], []);
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Invalid ID');
+    }
   });
 
   test('should move nodes with update workspace', async () => {

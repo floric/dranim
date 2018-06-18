@@ -50,7 +50,7 @@ describe('FilterEntriesNode', () => {
   test('should have correct properties', () => {
     expect(FilterEntriesNode.type).toBe(FilterEntriesNodeDef.type);
     expect(FilterEntriesNode.isFormValid).toBeUndefined();
-    expect(FilterEntriesNode.isInputValid).toBeDefined();
+    expect(FilterEntriesNode.isInputValid).toBeUndefined();
     expect(
       FilterEntriesNode.transformContextInputDefsToContextOutputDefs
     ).toBeDefined();
@@ -117,23 +117,6 @@ describe('FilterEntriesNode', () => {
     );
     expect(res.dataset.isPresent).toBe(false);
     expect(res.dataset.content.schema).toEqual([]);
-  });
-
-  test('should have valid input', async () => {
-    const res = await FilterEntriesNode.isInputValid({
-      dataset: { datasetId: VALID_OBJECT_ID }
-    });
-    expect(res).toBe(true);
-  });
-
-  test('should have invalid input', async () => {
-    let res = await FilterEntriesNode.isInputValid({ dataset: undefined });
-    expect(res).toBe(false);
-
-    res = await FilterEntriesNode.isInputValid({
-      dataset: { datasetId: null }
-    });
-    expect(res).toBe(false);
   });
 
   test('should use dataset schemas as dynamic inputs of context fn', async () => {

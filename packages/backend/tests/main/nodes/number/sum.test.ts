@@ -6,18 +6,7 @@ describe('SumNode', () => {
   test('should have correct properties', () => {
     expect(SumNodeDef.type).toBe(SumNodeDef.type);
     expect(SumNode.isFormValid).toBeUndefined();
-    expect(SumNode.isInputValid).toBeDefined();
-  });
-
-  test('should validate input', async () => {
-    let res = await SumNode.isInputValid({ a: 3, b: 2 });
-    expect(res).toBe(true);
-
-    res = await SumNode.isInputValid({ a: -3, b: 2 });
-    expect(res).toBe(true);
-
-    res = await SumNode.isInputValid({ a: null, b: 2 });
-    expect(res).toBe(false);
+    expect(SumNode.isInputValid).toBeUndefined();
   });
 
   test('should sum two numbers', async () => {

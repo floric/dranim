@@ -12,10 +12,19 @@ import {
 import { Db } from 'mongodb';
 
 import { tryGetNodeType } from '../nodes/all-nodes';
-import { getConnection } from '../workspace/connections';
+import { tryGetConnection } from '../workspace/connections';
 import { tryGetNode } from '../workspace/nodes';
 import { getContextNode } from '../workspace/nodes-detail';
-import { isNodeInMetaValid, isNodeInExecutionValid } from './validation';
+import { isNodeInMetaValid, areNodeInputsValid } from './validation';
+
+export const executeNodeWithId = async (
+  db: Db,
+  nodeId: string,
+  contextInputs?: IOValues<any>
+) => {
+  const node = await tryGetNode(nodeId, db);
+  return await executeNode(db, node, contextInputs);
+};
 
 export const executeNode = async (
   db: Db,
@@ -44,7 +53,7 @@ export const executeNode = async (
 
   await validateMetaAndExecution(node, nodeInputs, db);
 
-  const type = tryGetNodeType(node);
+  const type = tryGetNodeType(node.type);
   if (hasContextFn(type)) {
     return await calculateContext(node, type, nodeForm, nodeInputs, db);
   }
@@ -59,10 +68,10 @@ const validateMetaAndExecution = async (
 ) => {
   const [metaValid, execValid] = await Promise.all([
     isNodeInMetaValid(node, db),
-    isNodeInExecutionValid(node, nodeInputs, db)
+    areNodeInputsValid(node, nodeInputs, db)
   ]);
   if (!metaValid) {
-    throw new Error('Form or inputs are not used correctly');
+    throw new Error('Form values or inputs are missing');
   }
   if (!execValid) {
     throw new Error('Execution inputs are not valid');
@@ -76,12 +85,13 @@ const calculateContext = async (
   nodeInputs: IOValues<any>,
   db: Db
 ) => {
-  const outputNode = await getContextNode(node, ContextNodeType.OUTPUT, db);
+  const [outputNode, inputNode] = await Promise.all([
+    getContextNode(node, ContextNodeType.OUTPUT, db),
+    getContextNode(node, ContextNodeType.INPUT, db)
+  ]);
   if (!outputNode) {
     throw Error('Missing output node');
   }
-
-  const inputNode = await getContextNode(node, ContextNodeType.INPUT, db);
   if (!inputNode) {
     throw Error('Missing input node');
   }
@@ -113,15 +123,11 @@ const getConnectionResult = async (
   db: Db,
   contextInputs?: IOValues<any>
 ) => {
-  const c = await getConnection(db, i.connectionId);
-  if (!c) {
-    throw new Error('Invalid connection');
-  }
-
-  const inputNode = await tryGetNode(c.from.nodeId, db);
+  const conn = await tryGetConnection(i.connectionId, db);
+  const inputNode = await tryGetNode(conn.from.nodeId, db);
   const nodeRes = await executeNode(db, inputNode, contextInputs);
 
-  return { socketName: i.name, value: nodeRes.outputs[c.from.name] };
+  return { socketName: i.name, value: nodeRes.outputs[conn.from.name] };
 };
 
 const inputValuesToObject = (

@@ -38,20 +38,7 @@ describe('RemoveValuesNode', () => {
   test('should have correct properties', () => {
     expect(RemoveValuesNode.type).toBe(RemoveValuesNodeDef.type);
     expect(RemoveValuesNode.isFormValid).toBeDefined();
-    expect(RemoveValuesNode.isInputValid).toBeDefined();
-  });
-
-  test('should have valid inputs and invalid inputs', async () => {
-    let res = await RemoveValuesNode.isInputValid({
-      dataset: { datasetId: 'test' }
-    });
-    expect(res).toBe(true);
-
-    res = await RemoveValuesNode.isInputValid({ dataset: { datasetId: null } });
-    expect(res).toBe(false);
-
-    res = await RemoveValuesNode.isInputValid({ dataset: null });
-    expect(res).toBe(false);
+    expect(RemoveValuesNode.isInputValid).toBeUndefined();
   });
 
   test('should validate form', async () => {

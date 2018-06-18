@@ -18,9 +18,6 @@ describe('NumberInputNode', () => {
 
     res = await NumberInputNode.isFormValid({ value: null });
     expect(res).toBe(false);
-
-    res = await NumberInputNode.isFormValid({ value: 'test' as any });
-    expect(res).toBe(false);
   });
 
   test('should get output value from form', async () => {

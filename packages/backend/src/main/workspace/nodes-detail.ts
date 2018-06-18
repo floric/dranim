@@ -13,7 +13,7 @@ import {
 import { Db, ObjectID } from 'mongodb';
 
 import { serverNodeTypes, tryGetNodeType } from '../nodes/all-nodes';
-import { getConnection } from './connections';
+import { tryGetConnection } from './connections';
 import { getNode, getNodesCollection, tryGetNode } from './nodes';
 import { isNodeInMetaValid } from '../calculation/validation';
 
@@ -83,19 +83,16 @@ export const getContextOutputDefs = async (
     db
   );
 
-  const nodesColl = getNodesCollection(db);
-  const contextInputNode = await nodesColl.findOne({
-    contextIds: node.contextIds,
-    type: ContextNodeType.INPUT
-  });
+  const contextInputNode = await getContextNode(
+    parent,
+    ContextNodeType.INPUT,
+    db
+  );
   if (!contextInputNode) {
     throw new Error('Context input node unknown');
   }
 
-  const contextInputs = await getMetaInputs(
-    db,
-    contextInputNode._id.toHexString()
-  );
+  const contextInputs = await getMetaInputs(db, contextInputNode.id);
 
   return await parentType.transformContextInputDefsToContextOutputDefs(
     parentType.inputs,
@@ -117,6 +114,7 @@ const getParentNode = async (node: NodeInstance, db: Db) => {
   return parent;
 };
 
+// TODO Test
 export const getMetaOutputs = async (
   db: Db,
   nodeId: string
@@ -136,26 +134,19 @@ export const getMetaOutputs = async (
   );
 };
 
+// TODO Test
 export const getMetaInputs = async (
   db: Db,
   nodeId: string
 ): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> => {
   const inputs = {};
 
-  const node = await getNode(db, nodeId);
-  if (!node) {
-    throw new Error('Metas: Node not found');
-  }
-
+  const node = await tryGetNode(nodeId, db);
   const inputConns = node.inputs;
 
   await Promise.all(
     inputConns.map(async c => {
-      const conn = await getConnection(db, c.connectionId);
-      if (!conn) {
-        throw new Error('Invalid connection');
-      }
-
+      const conn = await tryGetConnection(c.connectionId, db);
       inputs[c.name] = (await getMetaOutputs(db, conn.from.nodeId))[
         conn.from.name
       ];
@@ -165,19 +156,33 @@ export const getMetaInputs = async (
   return inputs;
 };
 
-export const getAllMetaInputs = async (node: NodeInstance, db: Db) => {
+export const getInputDefs = async (
+  node: NodeInstance,
+  db: Db
+): Promise<SocketDefs<any>> => {
   let inputDefs: SocketDefs<any> = {};
   if (node.type === ContextNodeType.INPUT) {
     const parent = await getParentNode(node, db);
-    const parentType = tryGetNodeType(parent);
-    inputDefs = parentType.inputs;
+    const parentType = tryGetNodeType(parent.type);
+    if (hasContextFn(parentType)) {
+      return parentType.transformInputDefsToContextInputDefs(
+        parentType.inputs,
+        await getMetaInputs(db, parent.id),
+        db
+      );
+    }
   } else if (node.type === ContextNodeType.OUTPUT) {
     inputDefs = (await getContextOutputDefs(node, db)) || {};
   } else {
-    const type = tryGetNodeType(node);
+    const type = tryGetNodeType(node.type);
     inputDefs = type.inputs;
   }
 
+  return inputDefs;
+};
+
+export const getAllMetaInputs = async (node: NodeInstance, db: Db) => {
+  const inputDefs = await getInputDefs(node, db);
   let inputs: { [name: string]: SocketMetaDef } = {};
 
   await Promise.all(
@@ -191,11 +196,7 @@ export const getAllMetaInputs = async (node: NodeInstance, db: Db) => {
         return;
       }
 
-      const conn = await getConnection(db, connection.connectionId);
-      if (!conn) {
-        throw new Error('Invalid connection');
-      }
-
+      const conn = await tryGetConnection(connection.connectionId, db);
       inputs[connection.name] = (await getMetaOutputs(db, conn.from.nodeId))[
         conn.from.name
       ];

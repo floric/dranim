@@ -34,12 +34,7 @@ export const getAllEntries = async (
   datasetId: string
 ): Promise<Array<Entry>> => {
   const collection = getEntryCollection(db, datasetId);
-  const obj = await collection.find().toArray();
-  if (!obj) {
-    return [];
-  }
-
-  return obj;
+  return await collection.find().toArray();
 };
 
 export const getEntriesCount = async (

@@ -1,9 +1,4 @@
-import {
-  NodeDef,
-  NodesMap,
-  ServerNodeDef,
-  NodeInstance
-} from '@masterthesis/shared';
+import { NodeDef, NodesMap, ServerNodeDef } from '@masterthesis/shared';
 
 import * as BooleanNodes from './boolean';
 import * as DatasetNodes from './dataset';
@@ -35,10 +30,10 @@ export const serverNodeTypes: Map<string, ServerNodeDef & NodeDef> = new Map(
     ])
 );
 
-export const tryGetNodeType = (node: NodeInstance): NodeDef & ServerNodeDef => {
-  if (!serverNodeTypes.has(node.type)) {
-    throw new Error('Invalid node type');
+export const tryGetNodeType = (type: string): NodeDef & ServerNodeDef => {
+  if (!serverNodeTypes.has(type)) {
+    throw new Error('Unknown node type');
   }
 
-  return serverNodeTypes.get(node.type)!;
+  return serverNodeTypes.get(type)!;
 };

@@ -11,27 +11,6 @@ describe(TimeConstructNode.type, () => {
 
   test('should have invalid inputs', async () => {
     let res = await TimeConstructNode.isInputValid({
-      hours: null,
-      minutes: 0,
-      seconds: 0
-    });
-    expect(res).toBe(false);
-
-    res = await TimeConstructNode.isInputValid({
-      hours: 0,
-      minutes: null,
-      seconds: 0
-    });
-    expect(res).toBe(false);
-
-    res = await TimeConstructNode.isInputValid({
-      hours: 0,
-      minutes: 0,
-      seconds: null
-    });
-    expect(res).toBe(false);
-
-    res = await TimeConstructNode.isInputValid({
       hours: 25,
       minutes: 0,
       seconds: 0

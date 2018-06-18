@@ -4,7 +4,7 @@ import {
   SocketInstance
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
-import { getNode } from './nodes';
+import { getNode, tryGetNode } from './nodes';
 import { addConnection, removeConnection } from './nodes-detail';
 
 export const getConnectionsCollection = (
@@ -120,17 +120,9 @@ const containsCycles = async (
 };
 
 export const deleteConnection = async (db: Db, id: string) => {
-  const connection = await getConnection(db, id);
-  if (!connection) {
-    throw new Error('Connection not known');
-  }
-
-  const outputNode = await getNode(db, connection.from.nodeId);
-  const inputNode = await getNode(db, connection.to.nodeId);
-
-  if (!outputNode || !inputNode) {
-    throw new Error('Unknown nodes as input or output!');
-  }
+  const connection = await tryGetConnection(id, db);
+  await tryGetNode(connection.from.nodeId, db);
+  await tryGetNode(connection.to.nodeId, db);
 
   await Promise.all([
     removeConnection(db, connection.from, 'output', connection.id),
@@ -146,9 +138,18 @@ export const deleteConnection = async (db: Db, id: string) => {
   return true;
 };
 
+export const tryGetConnection = async (id: string, db: Db) => {
+  const conn = await getConnection(id, db);
+  if (!conn) {
+    throw new Error('Invalid connection');
+  }
+
+  return conn;
+};
+
 export const getConnection = async (
-  db: Db,
-  id: string
+  id: string,
+  db: Db
 ): Promise<ConnectionInstance & { _id: ObjectID } | null> => {
   if (!ObjectID.isValid(id)) {
     return null;

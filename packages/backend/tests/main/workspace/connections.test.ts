@@ -9,7 +9,8 @@ import { Db } from 'mongodb';
 import {
   createConnection,
   deleteConnection,
-  getConnection
+  getConnection,
+  tryGetConnection
 } from '../../../src/main/workspace/connections';
 import { createNode } from '../../../src/main/workspace/nodes';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
@@ -75,13 +76,22 @@ describe('Connections', () => {
     const res = await deleteConnection(db, newConn.id);
     expect(res).toBe(true);
 
-    const unknownConn = await getConnection(db, newConn.id);
+    const unknownConn = await getConnection(newConn.id, db);
     expect(unknownConn).toBe(null);
   });
 
   test('should return null for invalid id', async () => {
-    const res = await getConnection(db, 'test');
+    const res = await getConnection('test', db);
     expect(res).toBe(null);
+  });
+
+  test('should throw error for unknown connection', async () => {
+    try {
+      await tryGetConnection(VALID_OBJECT_ID, db);
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Invalid connection');
+    }
   });
 
   test('should create connection in context', async () => {
@@ -122,6 +132,15 @@ describe('Connections', () => {
     expect(newConn.to).toEqual(toSocket);
     expect(newConn.workspaceId).toBe(ws.id);
     expect(newConn.contextIds).toEqual([contextNode.id]);
+  });
+
+  test('should error when trying to create invalid connection', async () => {
+    try {
+      await createConnection(db, null, null);
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Invalid connection');
+    }
   });
 
   test('should find cycle and prevent connection creation', async () => {

@@ -13,7 +13,8 @@ import {
   getAllEntries,
   getEntriesCount,
   getEntry,
-  getLatestEntries
+  getLatestEntries,
+  clearEntries
 } from '../../../src/main/workspace/entry';
 import {
   getTestMongoDb,
@@ -72,6 +73,12 @@ describe('Entry', () => {
     expect(unknownEntry).toBe(null);
   });
 
+  test('should return null for missing entry', async () => {
+    const ds = await createDataset(db, 'test');
+    const res = await getEntry(db, ds.id, VALID_OBJECT_ID);
+    expect(res).toBe(null);
+  });
+
   test('should create entry from JSON payload', async () => {
     const schemaA = {
       name: 'test',
@@ -105,6 +112,19 @@ describe('Entry', () => {
     expect(entryFromServer.values).toEqual(payload);
   });
 
+  test('should throw error when creating entry with invalid ds id', async () => {
+    try {
+      await createEntryFromJSON(
+        db,
+        VALID_OBJECT_ID,
+        JSON.stringify({ test: 9 })
+      );
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Invalid dataset');
+    }
+  });
+
   test('should copy entries from one dataset to another and transform them', async () => {
     const schema = {
       name: 'test',
@@ -131,6 +151,20 @@ describe('Entry', () => {
     expect(all.map(e => e.values.test).sort()).toEqual(
       values.map(v => v * 100).sort()
     );
+  });
+
+  test('should throw error for copying from unknown ds', async () => {
+    try {
+      await copyTransformedToOtherDataset(
+        db,
+        VALID_OBJECT_ID,
+        VALID_OBJECT_ID,
+        () => ({})
+      );
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Invalid dataset');
+    }
   });
 
   test('should get entries count', async () => {
@@ -310,5 +344,50 @@ describe('Entry', () => {
     } catch (err) {
       expect(err.message).toBe('Invalid ID');
     }
+  });
+
+  test('should delete entries', async () => {
+    const ds = await createDataset(db, 'test');
+    await addValueSchema(db, ds.id, {
+      name: 'value',
+      type: DataType.STRING,
+      unique: false,
+      fallback: '',
+      required: true
+    });
+
+    const [e1, e2, e3] = await Promise.all(
+      [1, 2, 3].map(n => createEntry(db, ds.id, { value: n }))
+    );
+
+    await Promise.all([
+      deleteEntry(db, ds.id, e1.id),
+      deleteEntry(db, ds.id, e2.id)
+    ]);
+
+    const entriesCount = await getEntriesCount(db, ds.id);
+    expect(entriesCount).toBe(1);
+  });
+
+  test('should clear entries', async () => {
+    const ds = await createDataset(db, 'test');
+    await addValueSchema(db, ds.id, {
+      name: 'value',
+      type: DataType.STRING,
+      unique: false,
+      fallback: '',
+      required: true
+    });
+
+    await Promise.all(
+      [1, 2, 3, 4, 5].map(n => createEntry(db, ds.id, { value: n }))
+    );
+    let entriesCount = await getEntriesCount(db, ds.id);
+    expect(entriesCount).toBe(5);
+
+    await clearEntries(db, ds.id);
+
+    entriesCount = await getEntriesCount(db, ds.id);
+    expect(entriesCount).toBe(0);
   });
 });

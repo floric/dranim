@@ -34,7 +34,9 @@ import {
   getContextInputDefs,
   getContextOutputDefs,
   getMetaInputs,
-  getNodeState
+  getNodeState,
+  getInputDefs,
+  getContextNode
 } from '../../../src/main/workspace/nodes-detail';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
 import {
@@ -381,5 +383,139 @@ describe('Nodes', () => {
         displayName: 'Keep entry'
       }
     });
+  });
+
+  test('should get input defs from EditEntriesNode', async () => {
+    const inputDefs = await getInputDefs(
+      {
+        type: EditEntriesNodeDef.type,
+        inputs: [],
+        outputs: [],
+        form: [],
+        x: 0,
+        y: 0,
+        contextIds: [],
+        workspaceId: VALID_OBJECT_ID,
+        id: VALID_OBJECT_ID
+      },
+      db
+    );
+    expect(inputDefs).toEqual({
+      dataset: { dataType: DataType.DATASET, displayName: 'Dataset' }
+    });
+  });
+
+  test('should get input defs from ContextInputNode', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const dsNode = await createNode(
+      db,
+      DatasetInputNodeDef.type,
+      ws.id,
+      [],
+      0,
+      0
+    );
+    const eeNode = await createNode(
+      db,
+      EditEntriesNodeDef.type,
+      ws.id,
+      [],
+      0,
+      0
+    );
+    const conn = await createConnection(
+      db,
+      { name: 'dataset', nodeId: dsNode.id },
+      { name: 'dataset', nodeId: eeNode.id }
+    );
+
+    const ds = await createDataset(db, 'test');
+    await addOrUpdateFormValue(db, dsNode.id, 'dataset', JSON.stringify(ds.id));
+    await addValueSchema(db, ds.id, {
+      name: 'dataset',
+      type: DataType.STRING,
+      unique: false,
+      required: true,
+      fallback: ''
+    });
+
+    const contextInputNode = await getContextNode(
+      eeNode,
+      ContextNodeType.INPUT,
+      db
+    );
+    let inputDefs = await getInputDefs(contextInputNode, db);
+    expect(inputDefs).toEqual({
+      dataset: {
+        dataType: DataType.STRING,
+        displayName: 'dataset',
+        isDynamic: true
+      }
+    });
+
+    const contextOutputNode = await getContextNode(
+      eeNode,
+      ContextNodeType.OUTPUT,
+      db
+    );
+    inputDefs = await getInputDefs(contextOutputNode, db);
+    expect(inputDefs).toEqual({
+      dataset: {
+        dataType: DataType.STRING,
+        displayName: 'dataset',
+        isDynamic: true
+      }
+    });
+  });
+
+  test('should get context nodes', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const dsNode = await createNode(
+      db,
+      DatasetInputNodeDef.type,
+      ws.id,
+      [],
+      0,
+      0
+    );
+    const eeNode = await createNode(
+      db,
+      EditEntriesNodeDef.type,
+      ws.id,
+      [],
+      0,
+      0
+    );
+
+    const contextInputNode = await getContextNode(
+      eeNode,
+      ContextNodeType.INPUT,
+      db
+    );
+    expect(contextInputNode.type).toBe(ContextNodeType.INPUT);
+    expect(contextInputNode.contextIds).toEqual([eeNode.id]);
+
+    const contextOutputNode = await getContextNode(
+      eeNode,
+      ContextNodeType.OUTPUT,
+      db
+    );
+    expect(contextOutputNode.type).toBe(ContextNodeType.OUTPUT);
+    expect(contextOutputNode.contextIds).toEqual([eeNode.id]);
+  });
+
+  test('should return for node without context', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const strInputNode = await createNode(
+      db,
+      StringInputNodeDef.type,
+      ws.id,
+      [],
+      0,
+      0
+    );
+
+    const res = await getContextNode(strInputNode, ContextNodeType.INPUT, db);
+    expect(res).toBe(null);
   });
 });

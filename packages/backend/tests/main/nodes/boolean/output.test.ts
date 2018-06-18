@@ -6,24 +6,8 @@ describe('BooleanOutputNode', () => {
   test('should have correct properties', () => {
     expect(BooleanOutputNode.type).toBe(BooleanOutputNodeDef.type);
     expect(BooleanOutputNode.isFormValid).toBeUndefined();
-    expect(BooleanOutputNode.isInputValid).toBeDefined();
+    expect(BooleanOutputNode.isInputValid).toBeUndefined();
     expect(BooleanOutputNodeDef.isOutputNode).toBe(true);
-  });
-
-  test('should check valid inputs', async () => {
-    let res = await BooleanOutputNode.isInputValid({ value: true });
-    expect(res).toBe(true);
-
-    res = await BooleanOutputNode.isInputValid({ value: false });
-    expect(res).toBe(true);
-  });
-
-  test('should check invalid inputs', async () => {
-    let res = await BooleanOutputNode.isInputValid({ value: null });
-    expect(res).toBe(false);
-
-    res = await BooleanOutputNode.isInputValid({ value: undefined });
-    expect(res).toBe(false);
   });
 
   test('should get output false value from input', async () => {

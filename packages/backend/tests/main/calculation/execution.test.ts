@@ -12,7 +12,10 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { executeNode } from '../../../src/main/calculation/execution';
+import {
+  executeNode,
+  executeNodeWithId
+} from '../../../src/main/calculation/execution';
 import { createConnection } from '../../../src/main/workspace/connections';
 import {
   addValueSchema,
@@ -39,7 +42,7 @@ let conn;
 let db: Db;
 let server;
 
-describe('Server Execution', () => {
+describe('Execution', () => {
   beforeAll(async () => {
     const { connection, database, mongodbServer } = await getTestMongoDb();
     conn = connection;
@@ -61,7 +64,9 @@ describe('Server Execution', () => {
     const ws = await createWorkspace(db, 'test', '');
     const node = await createNode(db, StringInputNodeDef.type, ws.id, [], 0, 0);
 
-    const { outputs, results } = await executeNode(db, node);
+    await addOrUpdateFormValue(db, node.id, 'value', JSON.stringify('test'));
+
+    const { outputs, results } = await executeNodeWithId(db, node.id);
 
     expect(outputs).toBeDefined();
     expect(results).toBeUndefined();
@@ -91,8 +96,9 @@ describe('Server Execution', () => {
       { name: 'value', nodeId: nodeA.id },
       { name: 'value', nodeId: nodeB.id }
     );
+    await addOrUpdateFormValue(db, nodeA.id, 'value', JSON.stringify('test'));
 
-    const { outputs, results } = await executeNode(db, nodeB);
+    const { outputs, results } = await executeNodeWithId(db, nodeB.id);
 
     expect(outputs).toBeDefined();
     expect(results).toBeDefined();
@@ -148,7 +154,7 @@ describe('Server Execution', () => {
       await executeNode(db, node);
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Invalid form');
+      expect(err.message).toBe('Form values or inputs are missing');
     }
   });
 
@@ -169,7 +175,7 @@ describe('Server Execution', () => {
       await executeNode(db, nodeB);
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Invalid input');
+      expect(err.message).toBe('Form values or inputs are missing');
     }
   });
 
@@ -262,6 +268,12 @@ describe('Server Execution', () => {
       inputNode.id,
       'dataset',
       JSON.stringify(ds.id)
+    );
+    await addOrUpdateFormValue(
+      db,
+      stringInputNode.id,
+      'value',
+      JSON.stringify('test')
     );
 
     await Promise.all(

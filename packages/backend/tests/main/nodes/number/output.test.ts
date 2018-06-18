@@ -6,23 +6,8 @@ describe('NumberOutputNode', () => {
   test('should have correct properties', () => {
     expect(NumberOutputNode.type).toBe(NumberOutputNodeDef.type);
     expect(NumberOutputNode.isFormValid).toBeUndefined();
-    expect(NumberOutputNode.isInputValid).toBeDefined();
+    expect(NumberOutputNode.isInputValid).toBeUndefined();
     expect(NumberOutputNodeDef.isOutputNode).toBe(true);
-  });
-
-  test('should check valid int number', async () => {
-    const res = await NumberOutputNode.isInputValid({ value: 1 });
-    expect(res).toBe(true);
-  });
-
-  test('should check valid float number', async () => {
-    const res = await NumberOutputNode.isInputValid({ value: -1.23 });
-    expect(res).toBe(true);
-  });
-
-  test('should check invalid number', async () => {
-    const res = await NumberOutputNode.isInputValid({ value: NaN });
-    expect(res).toBe(false);
   });
 
   test('should get output int value from input', async () => {

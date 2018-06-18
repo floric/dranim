@@ -29,29 +29,9 @@ describe('DatasetOutputNode', () => {
 
   test('should have correct properties', () => {
     expect(DatasetOutputNode.type).toBe(DatasetOutputNodeDef.type);
-    expect(DatasetOutputNode.isInputValid).toBeDefined();
+    expect(DatasetOutputNode.isInputValid).toBeUndefined();
     expect(DatasetOutputNode.isFormValid).toBeUndefined();
     expect(DatasetOutputNodeDef.isOutputNode).toBe(true);
-  });
-
-  test('should have valid input', async () => {
-    const validInput = await DatasetOutputNode.isInputValid({
-      dataset: { datasetId: 'test' }
-    });
-
-    expect(validInput).toBe(true);
-  });
-
-  test('should have invalid inputs', async () => {
-    let isValid = await DatasetOutputNode.isInputValid({
-      dataset: { datasetId: null }
-    });
-
-    expect(isValid).toBe(false);
-
-    isValid = await DatasetOutputNode.isInputValid({ dataset: null });
-
-    expect(isValid).toBe(false);
   });
 
   test('should have invalid dataset', async () => {

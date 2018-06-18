@@ -5,8 +5,6 @@ import {
   ServerNodeDef
 } from '@masterthesis/shared';
 
-import { validateNumber } from './utils';
-
 export const MultiplicationNode: ServerNodeDef<
   MultiplicationNodeInputs,
   MultiplicationNodeOutputs
