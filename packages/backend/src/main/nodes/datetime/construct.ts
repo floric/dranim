@@ -11,23 +11,6 @@ export const DatetimeConstructNode: ServerNodeDef<
 > = {
   type: DatetimeConstructNodeDef.type,
   isInputValid: async inputs => {
-    if (
-      inputs.day == null ||
-      inputs.month == null ||
-      inputs.year == null ||
-      inputs.time == null
-    ) {
-      return false;
-    }
-
-    if (
-      !Number.isInteger(inputs.day) ||
-      !Number.isInteger(inputs.month) ||
-      !Number.isInteger(inputs.year)
-    ) {
-      return false;
-    }
-
     // TODO Validate valid date
     return true;
   },

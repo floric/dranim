@@ -31,13 +31,6 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
     return contextInputDefs;
   },
   transformInputDefsToContextInputDefs: getDynamicEntryContextInputs,
-  isInputValid: async inputs => {
-    if (!inputs.dataset || !inputs.dataset.datasetId) {
-      return false;
-    }
-
-    return true;
-  },
   onMetaExecution: async (form, inputs, db) => {
     if (!inputs.dataset || !inputs.dataset.isPresent) {
       return { dataset: { content: { schema: [] }, isPresent: false } };

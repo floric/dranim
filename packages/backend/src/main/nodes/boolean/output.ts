@@ -12,13 +12,6 @@ export const BooleanOutputNode: ServerNodeDef<
   BooleanOutputNodeResults
 > = {
   type: BooleanOutputNodeDef.type,
-  isInputValid: async inputs => {
-    if (inputs.value == null) {
-      return false;
-    }
-
-    return true;
-  },
   onMetaExecution: () => Promise.resolve({}),
   onNodeExecution: (form, inputs) =>
     Promise.resolve({

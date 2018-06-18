@@ -12,9 +12,10 @@ import {
 } from '@masterthesis/shared';
 import { Db, ObjectID } from 'mongodb';
 
-import { serverNodeTypes } from '../nodes/all-nodes';
+import { serverNodeTypes, tryGetNodeType } from '../nodes/all-nodes';
 import { getConnection } from './connections';
-import { getNode, getNodesCollection } from './nodes';
+import { getNode, getNodesCollection, tryGetNode } from './nodes';
+import { isNodeInMetaValid } from '../calculation/validation';
 
 export const getContextInputDefs = async (
   node: NodeInstance,
@@ -120,11 +121,7 @@ export const getMetaOutputs = async (
   db: Db,
   nodeId: string
 ): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> => {
-  const node = await getNode(db, nodeId);
-  if (!node) {
-    throw new Error('Unknown node');
-  }
-
+  const node = await tryGetNode(nodeId, db);
   const nodeType = serverNodeTypes.get(node.type);
   if (!nodeType) {
     return {};
@@ -168,11 +165,19 @@ export const getMetaInputs = async (
   return inputs;
 };
 
-export const getAllMetaInputs = async (
-  inputDefs: SocketDefs<any>,
-  node: NodeInstance,
-  db: Db
-) => {
+export const getAllMetaInputs = async (node: NodeInstance, db: Db) => {
+  let inputDefs: SocketDefs<any> = {};
+  if (node.type === ContextNodeType.INPUT) {
+    const parent = await getParentNode(node, db);
+    const parentType = tryGetNodeType(parent);
+    inputDefs = parentType.inputs;
+  } else if (node.type === ContextNodeType.OUTPUT) {
+    inputDefs = (await getContextOutputDefs(node, db)) || {};
+  } else {
+    const type = tryGetNodeType(node);
+    inputDefs = type.inputs;
+  }
+
   let inputs: { [name: string]: SocketMetaDef } = {};
 
   await Promise.all(
@@ -206,23 +211,8 @@ export const getNodeState = async (node: NodeInstance, db: Db) => {
     return NodeState.ERROR;
   }
 
-  let inputDefs = {};
-  if (node.type === ContextNodeType.INPUT) {
-    inputDefs = (await getContextInputDefs(node, db)) || {};
-  } else if (node.type === ContextNodeType.OUTPUT) {
-    inputDefs = (await getContextOutputDefs(node, db)) || {};
-  } else {
-    inputDefs = serverNodeTypes.get(node.type)!.inputs;
-  }
-  const metaInputs = await getAllMetaInputs(inputDefs, node, db);
-  const allInputsPresent = Object.values(metaInputs)
-    .map(i => i.isPresent)
-    .reduce((a, b) => a && b, true);
-
-  const isValid = t.isFormValid
-    ? await t.isFormValid(parseNodeForm(node.form))
-    : true;
-  if (!isValid || !allInputsPresent) {
+  const isValid = await isNodeInMetaValid(node, db);
+  if (!isValid) {
     return NodeState.INVALID;
   }
 

@@ -5,12 +5,8 @@ import {
   SumNodeNodeOutputs
 } from '@masterthesis/shared';
 
-import { validateNumber } from './utils';
-
 export const SumNode: ServerNodeDef<SumNodeNodeInputs, SumNodeNodeOutputs> = {
   type: SumNodeDef.type,
-  isInputValid: values =>
-    Promise.resolve(validateNumber(values.a) && validateNumber(values.b)),
   onMetaExecution: async (form, inputs) => {
     if (
       inputs.a == null ||

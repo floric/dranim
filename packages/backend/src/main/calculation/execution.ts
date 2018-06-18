@@ -4,19 +4,18 @@ import {
   FormValues,
   hasContextFn,
   IOValues,
-  NodeDef,
   NodeExecutionResult,
   NodeInstance,
   parseNodeForm,
-  ServerNodeDef,
   ServerNodeDefWithContextFn
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { serverNodeTypes } from '../nodes/all-nodes';
+import { tryGetNodeType } from '../nodes/all-nodes';
 import { getConnection } from '../workspace/connections';
-import { getNode } from '../workspace/nodes';
+import { tryGetNode } from '../workspace/nodes';
 import { getContextNode } from '../workspace/nodes-detail';
+import { isNodeInMetaValid, isNodeInExecutionValid } from './validation';
 
 export const executeNode = async (
   db: Db,
@@ -40,16 +39,12 @@ export const executeNode = async (
     return getContextNodeOutputs(inputValues);
   }
 
-  const type = serverNodeTypes.get(node.type);
-  if (!type) {
-    throw new Error('Unknown node type');
-  }
-
   const nodeInputs = inputValuesToObject(inputValues);
   const nodeForm = parseNodeForm(node.form);
 
-  await checkValidInputAndForm(node, type, nodeInputs, nodeForm, db);
+  await validateMetaAndExecution(node, nodeInputs, db);
 
+  const type = tryGetNodeType(node);
   if (hasContextFn(type)) {
     return await calculateContext(node, type, nodeForm, nodeInputs, db);
   }
@@ -57,12 +52,21 @@ export const executeNode = async (
   return await type.onNodeExecution(nodeForm, nodeInputs, { db, node });
 };
 
-const tryGetNode = async (nodeId: string, db: Db) => {
-  const node = await getNode(db, nodeId);
-  if (!node) {
-    throw new Error('Node not found');
+const validateMetaAndExecution = async (
+  node: NodeInstance,
+  nodeInputs: IOValues<{}>,
+  db: Db
+) => {
+  const [metaValid, execValid] = await Promise.all([
+    isNodeInMetaValid(node, db),
+    isNodeInExecutionValid(node, nodeInputs, db)
+  ]);
+  if (!metaValid) {
+    throw new Error('Form or inputs are not used correctly');
   }
-  return node;
+  if (!execValid) {
+    throw new Error('Execution inputs are not valid');
+  }
 };
 
 const calculateContext = async (
@@ -122,31 +126,10 @@ const getConnectionResult = async (
 
 const inputValuesToObject = (
   inputValues: Array<{ socketName: string; value: string }>
-) => {
+): IOValues<{}> => {
   const inputs = {};
   inputValues.forEach(i => {
     inputs[i.socketName] = i.value;
   });
   return inputs;
-};
-
-const checkValidInputAndForm = async (
-  node: NodeInstance,
-  type: NodeDef & ServerNodeDef,
-  inputs: IOValues<{}>,
-  form: FormValues<{}>,
-  db: Db
-) => {
-  const isValidForm = type.isFormValid ? await type.isFormValid(form) : true;
-  const isValidInput = type.isInputValid
-    ? await type.isInputValid(inputs)
-    : true;
-
-  if (!isValidForm) {
-    throw new Error('Invalid form');
-  }
-
-  if (!isValidInput) {
-    throw new Error('Invalid input');
-  }
 };

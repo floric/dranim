@@ -12,8 +12,6 @@ export const MultiplicationNode: ServerNodeDef<
   MultiplicationNodeOutputs
 > = {
   type: MultiplicationNodeDef.type,
-  isInputValid: values =>
-    Promise.resolve(validateNumber(values.a) && validateNumber(values.b)),
   onMetaExecution: async (form, inputs) => {
     if (
       inputs.a == null ||

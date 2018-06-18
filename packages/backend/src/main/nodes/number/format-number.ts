@@ -15,13 +15,6 @@ export const FormatNumberNode: ServerNodeDef<
   }
 > = {
   type: FormatNumberNodeDef.type,
-  isInputValid: async input => {
-    if (input.number == null || Number.isNaN(input.number)) {
-      return false;
-    }
-
-    return true;
-  },
   onMetaExecution: async (form, inputs) => {
     if (inputs.number == null || !inputs.number.isPresent) {
       return {

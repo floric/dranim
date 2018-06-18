@@ -11,14 +11,6 @@ export const TimeConstructNode: ServerNodeDef<
 > = {
   type: TimeConstructNodeDef.type,
   isInputValid: async inputs => {
-    if (
-      inputs.seconds == null ||
-      inputs.minutes == null ||
-      inputs.hours == null
-    ) {
-      return false;
-    }
-
     if (inputs.seconds < 0 || inputs.seconds > 59) {
       return false;
     }

@@ -94,7 +94,7 @@ describe('Utils', () => {
 
   it('should return true for node with context function', () => {
     const res = hasContextFn({
-      name: 'test',
+      type: 'test',
       isFormValid: () => Promise.resolve(true),
       isInputValid: () => Promise.resolve(true),
       onMetaExecution: () => Promise.resolve({}),
@@ -107,7 +107,7 @@ describe('Utils', () => {
 
   it('should return false for node without context function', () => {
     const res = hasContextFn({
-      name: 'test',
+      type: 'test',
       isFormValid: () => Promise.resolve(true),
       isInputValid: () => Promise.resolve(true),
       onMetaExecution: () => Promise.resolve({}),

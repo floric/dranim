@@ -55,13 +55,6 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
     return { ...contextInputDefs, ...dynOutputs };
   },
   transformInputDefsToContextInputDefs: getDynamicEntryContextInputs,
-  isInputValid: async inputs => {
-    if (!inputs.dataset || !inputs.dataset.datasetId) {
-      return false;
-    }
-
-    return true;
-  },
   isFormValid: async form => {
     if (!form.values || form.values.length === 0) {
       return false;

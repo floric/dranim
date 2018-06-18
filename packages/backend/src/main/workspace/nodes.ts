@@ -228,3 +228,11 @@ export const getNode = async (
     form: valueNames.map(name => ({ name, value: obj.form[name] }))
   };
 };
+
+export const tryGetNode = async (nodeId: string, db: Db) => {
+  const node = await getNode(db, nodeId);
+  if (!node) {
+    throw new Error('Node not found');
+  }
+  return node;
+};
