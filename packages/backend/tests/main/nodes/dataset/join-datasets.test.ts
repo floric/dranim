@@ -81,7 +81,10 @@ describe('JoinDatasetsNode', () => {
           datasetA: { datasetId: dsA.id },
           datasetB: { datasetId: VALID_OBJECT_ID }
         },
-        { db, node: NODE }
+        {
+          db,
+          node: NODE
+        }
       );
       throw NeverGoHereError;
     } catch (err) {
@@ -99,7 +102,10 @@ describe('JoinDatasetsNode', () => {
       await JoinDatasetsNode.onNodeExecution(
         { valueA: 'TEST', valueB: 'else' },
         { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
-        { db, node: NODE }
+        {
+          db,
+          node: NODE
+        }
       );
       throw NeverGoHereError;
     } catch (err) {
@@ -136,7 +142,10 @@ describe('JoinDatasetsNode', () => {
       await JoinDatasetsNode.onNodeExecution(
         { valueA: schemaA.name, valueB: schemaB.name },
         { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
-        { db, node: NODE }
+        {
+          db,
+          node: NODE
+        }
       );
       throw NeverGoHereError;
     } catch (err) {
@@ -196,7 +205,10 @@ describe('JoinDatasetsNode', () => {
     const res = await JoinDatasetsNode.onNodeExecution(
       { valueA: schemaA.name, valueB: schemaB.name },
       { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
-      { db, node: NODE }
+      {
+        db,
+        node: NODE
+      }
     );
 
     const newDs = await getDataset(db, res.outputs.joined.datasetId);
@@ -253,7 +265,10 @@ describe('JoinDatasetsNode', () => {
     const res = await JoinDatasetsNode.onNodeExecution(
       { valueA: schemaA.name, valueB: schemaB.name },
       { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
-      { db, node: NODE }
+      {
+        db,
+        node: NODE
+      }
     );
 
     const newDs = await getDataset(db, res.outputs.joined.datasetId);
@@ -354,7 +369,10 @@ describe('JoinDatasetsNode', () => {
     const res = await JoinDatasetsNode.onNodeExecution(
       { valueA: schemaA.name, valueB: schemaB.name },
       { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
-      { db, node: NODE }
+      {
+        db,
+        node: NODE
+      }
     );
 
     const newDs = await getDataset(db, res.outputs.joined.datasetId);

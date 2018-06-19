@@ -70,7 +70,10 @@ describe('EditEntriesNode', () => {
       {
         db,
         node: NODE,
-        contextFnExecution: () => Promise.resolve({ outputs: {} })
+        contextFnExecution: () => Promise.resolve({ outputs: {} }),
+        updateProgress: () => {
+          //
+        }
       }
     );
     expect(res.outputs.dataset.datasetId).toBeDefined();
@@ -206,7 +209,11 @@ describe('EditEntriesNode', () => {
       {
         db,
         node: NODE,
-        contextFnExecution: input => Promise.resolve({ outputs: { val: ':)' } })
+        contextFnExecution: input =>
+          Promise.resolve({ outputs: { val: ':)' } }),
+        updateProgress: () => {
+          //
+        }
       }
     );
     expect(res.outputs.dataset).toBeDefined();
@@ -228,7 +235,13 @@ describe('EditEntriesNode', () => {
       await EditEntriesNode.onNodeExecution(
         {},
         { dataset: { datasetId: ds.id } },
-        { db, node: NODE }
+        {
+          db,
+          node: NODE,
+          updateProgress: () => {
+            //
+          }
+        }
       );
       throw NeverGoHereError;
     } catch (err) {
@@ -241,7 +254,13 @@ describe('EditEntriesNode', () => {
       await EditEntriesNode.onNodeExecution(
         {},
         { dataset: { datasetId: VALID_OBJECT_ID } },
-        { db, node: NODE }
+        {
+          db,
+          node: NODE,
+          updateProgress: () => {
+            //
+          }
+        }
       );
       throw NeverGoHereError;
     } catch (err) {

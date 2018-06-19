@@ -48,7 +48,10 @@ export interface ServerNodeDef<
   onNodeExecution: (
     form: FormValues<NodeForm>,
     inputs: IOValues<NodeInputs>,
-    context: { db: Db; node: NodeInstance }
+    context: {
+      db: Db;
+      node: NodeInstance;
+    }
   ) => Promise<NodeExecutionResult<NodeOutputs, NodeResults>>;
   onMetaExecution: (
     form: FormValues<NodeForm>,
@@ -69,6 +72,7 @@ export interface ServerNodeDefWithContextFn<
     context: {
       node: NodeInstance;
       db: Db;
+      updateProgress?: (percentage: number) => void;
       contextFnExecution?: (
         input: IOValues<any>
       ) => Promise<NodeExecutionResult<any>>;

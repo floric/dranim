@@ -1,7 +1,6 @@
 import {
   DatasetMeta,
   Entry,
-  sleep,
   SocketDef,
   SocketDefs,
   SocketMetaDef,

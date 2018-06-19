@@ -40,7 +40,10 @@ describe('DatasetOutputNode', () => {
     const res = await DatasetOutputNode.onNodeExecution(
       {},
       { dataset: { datasetId: ds.id } },
-      { db, node: NODE }
+      {
+        db,
+        node: NODE
+      }
     );
 
     expect(res.outputs).toBeDefined();

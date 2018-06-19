@@ -58,7 +58,14 @@ export const executeNode = async (
     return await calculateContext(node, type, nodeForm, nodeInputs, db);
   }
 
-  return await type.onNodeExecution(nodeForm, nodeInputs, { db, node });
+  return await type.onNodeExecution(nodeForm, nodeInputs, {
+    db,
+    node
+  });
+};
+
+const updateProgress = (percentage: number) => {
+  // TODO
 };
 
 const validateMetaAndExecution = async (
@@ -93,7 +100,8 @@ const calculateContext = async (
   return await type.onNodeExecution(nodeForm, nodeInputs, {
     db,
     node,
-    contextFnExecution: inputs => executeNode(db, outputNode, inputs)
+    contextFnExecution: inputs => executeNode(db, outputNode, inputs),
+    updateProgress
   });
 };
 

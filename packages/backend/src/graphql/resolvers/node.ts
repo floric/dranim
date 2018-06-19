@@ -13,9 +13,9 @@ import { serverNodeTypes } from '../../main/nodes/all-nodes';
 import {
   getContextInputDefs,
   getContextOutputDefs,
+  getMetaInputs,
   getMetaOutputs,
-  getNodeState,
-  getMetaInputs
+  getNodeState
 } from '../../main/workspace/nodes-detail';
 import { getWorkspace } from '../../main/workspace/workspace';
 

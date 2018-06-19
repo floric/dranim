@@ -44,7 +44,10 @@ describe('DatasetInputNode', () => {
     const res = await DatasetInputNode.onNodeExecution(
       { dataset: newDs.id },
       {},
-      { db, node: NODE }
+      {
+        db,
+        node: NODE
+      }
     );
     expect(res.outputs.dataset).toEqual({ datasetId: newDs.id });
   });

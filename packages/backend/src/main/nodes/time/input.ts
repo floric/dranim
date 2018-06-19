@@ -1,8 +1,8 @@
 import {
+  ServerNodeDef,
   TimeInputNodeDef,
   TimeInputNodeForm,
-  TimeInputNodeOutputs,
-  ServerNodeDef
+  TimeInputNodeOutputs
 } from '@masterthesis/shared';
 
 export const TimeInputNode: ServerNodeDef<

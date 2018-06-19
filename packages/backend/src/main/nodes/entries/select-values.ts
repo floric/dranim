@@ -1,9 +1,9 @@
 import {
   Dataset,
-  RemoveValuesNodeDef,
-  RemoveValuesNodeForm,
-  RemoveValuesNodeInputs,
-  RemoveValuesNodeOutputs,
+  SelectValuesNodeDef,
+  SelectValuesNodeForm,
+  SelectValuesNodeInputs,
+  SelectValuesNodeOutputs,
   ServerNodeDef
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
@@ -16,12 +16,12 @@ import {
 import { createDynamicDatasetName } from '../../calculation/utils';
 import { copyTransformedToOtherDataset } from '../../workspace/entry';
 
-export const RemoveValuesNode: ServerNodeDef<
-  RemoveValuesNodeInputs,
-  RemoveValuesNodeOutputs,
-  RemoveValuesNodeForm
+export const SelectValuesNode: ServerNodeDef<
+  SelectValuesNodeInputs,
+  SelectValuesNodeOutputs,
+  SelectValuesNodeForm
 > = {
-  type: RemoveValuesNodeDef.type,
+  type: SelectValuesNodeDef.type,
   isFormValid: form => Promise.resolve(!!form.values && form.values.length > 0),
   onMetaExecution: async (form, inputs, db) => {
     if (!form.values || form.values.length === 0) {
@@ -54,7 +54,7 @@ export const RemoveValuesNode: ServerNodeDef<
     const usedValues = new Set(form.values!);
     const newDs = await createDataset(
       db,
-      createDynamicDatasetName(RemoveValuesNodeDef.type, node.id),
+      createDynamicDatasetName(SelectValuesNodeDef.type, node.id),
       node.workspaceId
     );
 

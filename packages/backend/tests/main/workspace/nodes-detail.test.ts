@@ -5,21 +5,13 @@ import {
   DataType,
   EditEntriesNodeDef,
   FilterEntriesNodeDef,
-  JoinDatasetsNodeDef,
   NodeState,
   NumberInputNodeDef,
-  NumberOutputNodeDef,
-  StringInputNodeDef,
-  StringOutputNodeDef,
-  SumNodeDef
+  StringInputNodeDef
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { DatasetOutputNode } from '../../../src/main/nodes/dataset';
-import {
-  createConnection,
-  getAllConnections
-} from '../../../src/main/workspace/connections';
+import { createConnection } from '../../../src/main/workspace/connections';
 import {
   addValueSchema,
   createDataset
@@ -32,12 +24,12 @@ import {
 import {
   addOrUpdateFormValue,
   getContextInputDefs,
-  getContextOutputDefs,
-  getMetaInputs,
-  getNodeState,
-  getInputDefs,
   getContextNode,
-  getMetaOutputs
+  getContextOutputDefs,
+  getInputDefs,
+  getMetaInputs,
+  getMetaOutputs,
+  getNodeState
 } from '../../../src/main/workspace/nodes-detail';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
 import {
@@ -425,7 +417,7 @@ describe('Nodes', () => {
       0,
       0
     );
-    const conn = await createConnection(
+    await createConnection(
       db,
       { name: 'dataset', nodeId: dsNode.id },
       { name: 'dataset', nodeId: eeNode.id }

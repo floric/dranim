@@ -322,7 +322,10 @@ describe('AddValuesNode', () => {
         },
         contextFnExecution: async inputs => ({
           outputs: { ...inputs, new: 'super' }
-        })
+        }),
+        updateProgress: () => {
+          //
+        }
       }
     );
 
@@ -374,6 +377,9 @@ describe('AddValuesNode', () => {
             form: [],
             x: 0,
             y: 0
+          },
+          updateProgress: () => {
+            //
           }
         }
       );
@@ -388,7 +394,13 @@ describe('AddValuesNode', () => {
       await AddValuesNode.onNodeExecution(
         { values: [] },
         { dataset: { datasetId: VALID_OBJECT_ID } },
-        { db, node: NODE }
+        {
+          db,
+          node: NODE,
+          updateProgress: () => {
+            //
+          }
+        }
       );
       throw NeverGoHereError;
     } catch (err) {

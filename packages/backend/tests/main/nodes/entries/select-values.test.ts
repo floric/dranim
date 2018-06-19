@@ -1,7 +1,7 @@
-import { DataType, RemoveValuesNodeDef } from '@masterthesis/shared';
+import { DataType, SelectValuesNodeDef } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { RemoveValuesNode } from '../../../../src/main/nodes/entries/remove-values';
+import { SelectValuesNode } from '../../../../src/main/nodes/entries/select-values';
 import {
   addValueSchema,
   createDataset,
@@ -17,7 +17,7 @@ let conn;
 let db: Db;
 let server;
 
-describe('RemoveValuesNode', () => {
+describe('SelectValuesNode', () => {
   beforeAll(async () => {
     const { connection, database, mongodbServer } = await getTestMongoDb();
     conn = connection;
@@ -36,19 +36,19 @@ describe('RemoveValuesNode', () => {
   });
 
   test('should have correct properties', () => {
-    expect(RemoveValuesNode.type).toBe(RemoveValuesNodeDef.type);
-    expect(RemoveValuesNode.isFormValid).toBeDefined();
-    expect(RemoveValuesNode.isInputValid).toBeUndefined();
+    expect(SelectValuesNode.type).toBe(SelectValuesNodeDef.type);
+    expect(SelectValuesNode.isFormValid).toBeDefined();
+    expect(SelectValuesNode.isInputValid).toBeUndefined();
   });
 
   test('should validate form', async () => {
-    let res = await RemoveValuesNode.isFormValid({ values: [] });
+    let res = await SelectValuesNode.isFormValid({ values: [] });
     expect(res).toBe(false);
 
-    res = await RemoveValuesNode.isFormValid({ values: null });
+    res = await SelectValuesNode.isFormValid({ values: null });
     expect(res).toBe(false);
 
-    res = await RemoveValuesNode.isFormValid({ values: ['test'] });
+    res = await SelectValuesNode.isFormValid({ values: ['test'] });
     expect(res).toBe(true);
   });
 
@@ -69,10 +69,13 @@ describe('RemoveValuesNode', () => {
       unique: false
     });
 
-    const res = await RemoveValuesNode.onNodeExecution(
+    const res = await SelectValuesNode.onNodeExecution(
       { values: ['test'] },
       { dataset: { datasetId: ds.id } },
-      { db, node: NODE }
+      {
+        db,
+        node: NODE
+      }
     );
     expect(res.outputs.dataset.datasetId).toBeDefined();
 
@@ -95,10 +98,13 @@ describe('RemoveValuesNode', () => {
     });
 
     try {
-      await RemoveValuesNode.onNodeExecution(
+      await SelectValuesNode.onNodeExecution(
         { values: ['bla', 'test'] },
         { dataset: { datasetId: ds.id } },
-        { db, node: NODE }
+        {
+          db,
+          node: NODE
+        }
       );
       throw NeverGoHereError;
     } catch (err) {
@@ -155,10 +161,13 @@ describe('RemoveValuesNode', () => {
       ].map(n => createEntry(db, ds.id, n))
     );
 
-    const res = await RemoveValuesNode.onNodeExecution(
+    const res = await SelectValuesNode.onNodeExecution(
       { values: ['test', 'abc'] },
       { dataset: { datasetId: ds.id } },
-      { db, node: NODE }
+      {
+        db,
+        node: NODE
+      }
     );
     expect(res.outputs.dataset.datasetId).toBeDefined();
 
@@ -183,7 +192,7 @@ describe('RemoveValuesNode', () => {
   });
 
   test('should return absent meta if dataset is missing', async () => {
-    let res = await RemoveValuesNode.onMetaExecution(
+    let res = await SelectValuesNode.onMetaExecution(
       { values: ['test', 'abc'] },
       { dataset: null },
       db
@@ -192,7 +201,7 @@ describe('RemoveValuesNode', () => {
       dataset: { isPresent: false, content: { schema: [] } }
     });
 
-    res = await RemoveValuesNode.onMetaExecution(
+    res = await SelectValuesNode.onMetaExecution(
       { values: ['test', 'abc'] },
       { dataset: undefined },
       db
@@ -201,7 +210,7 @@ describe('RemoveValuesNode', () => {
       dataset: { isPresent: false, content: { schema: [] } }
     });
 
-    res = await RemoveValuesNode.onMetaExecution(
+    res = await SelectValuesNode.onMetaExecution(
       { values: ['test', 'abc'] },
       { dataset: { content: { schema: [] }, isPresent: false } },
       db
@@ -212,7 +221,7 @@ describe('RemoveValuesNode', () => {
   });
 
   test('should return absent meta if values are empty', async () => {
-    const res = await RemoveValuesNode.onMetaExecution(
+    const res = await SelectValuesNode.onMetaExecution(
       { values: [] },
       { dataset: { content: { schema: [] }, isPresent: true } },
       db
@@ -223,7 +232,7 @@ describe('RemoveValuesNode', () => {
   });
 
   test('should return filtered meta data', async () => {
-    const res = await RemoveValuesNode.onMetaExecution(
+    const res = await SelectValuesNode.onMetaExecution(
       { values: ['a', 'b'] },
       {
         dataset: {
