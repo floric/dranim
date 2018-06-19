@@ -21,6 +21,7 @@ import {
 import { createEntry, getEntryCollection } from '../../workspace/entry';
 import { validateNonEmptyString } from '../string/utils';
 import { processEntries } from '../entries/utils';
+import { allAreDefinedAndPresent } from '../../calculation/validation';
 
 export const JoinDatasetsNode: ServerNodeDef<
   JoinDatasetsNodeInputs,
@@ -36,12 +37,7 @@ export const JoinDatasetsNode: ServerNodeDef<
     if (!form.valueA || !form.valueB) {
       return { joined: { isPresent: false, content: { schema: [] } } };
     }
-    if (
-      !inputs.datasetA ||
-      !inputs.datasetB ||
-      !inputs.datasetA.isPresent ||
-      !inputs.datasetB.isPresent
-    ) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return {
         joined: { isPresent: false, content: { schema: [] } }
       };

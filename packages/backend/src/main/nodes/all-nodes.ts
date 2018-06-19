@@ -8,20 +8,25 @@ import * as StringNodes from './string';
 import * as TimeNodes from './time';
 import * as DatetimeNodes from './datetime';
 
-const allNodes = [
-  DatasetNodes,
-  NumberNodes,
-  StringNodes,
-  EntryNodes,
-  BooleanNodes,
-  TimeNodes,
-  DatetimeNodes
-];
-
 export const serverNodeTypes: Map<string, ServerNodeDef & NodeDef> = new Map(
-  allNodes
+  [
+    DatasetNodes,
+    NumberNodes,
+    StringNodes,
+    EntryNodes,
+    BooleanNodes,
+    TimeNodes,
+    DatetimeNodes
+  ]
     .map<Array<[string, ServerNodeDef]>>(nodes =>
-      Object.values(nodes).map<[string, ServerNodeDef]>(n => [n.type, n])
+      Object.values(nodes).map<[string, ServerNodeDef]>(n => {
+        if (!n) {
+          throw new Error(
+            'Something wrong: ' + JSON.stringify(Object.values(nodes))
+          );
+        }
+        return [n.type, n];
+      })
     )
     .reduce<Array<[string, ServerNodeDef]>>((a, b) => [...a, ...b], [])
     .map<[string, (ServerNodeDef & NodeDef)]>(n => [

@@ -3,13 +3,14 @@ import {
   NodeInstance,
   ContextNodeType,
   parseNodeForm,
-  DataType
+  DataType,
+  SocketMetaDef
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import { getDataset } from '../workspace/dataset';
 import { tryGetNodeType } from '../nodes/all-nodes';
-import { getAllMetaInputs, getInputDefs } from '../workspace/nodes-detail';
+import { getMetaInputs, getInputDefs } from '../workspace/nodes-detail';
 
 export const isNodeInMetaValid = async (node: NodeInstance, db: Db) => {
   let isValidForm = true;
@@ -24,7 +25,7 @@ export const isNodeInMetaValid = async (node: NodeInstance, db: Db) => {
     isValidForm = type.isFormValid ? await type.isFormValid(form) : true;
   }
 
-  const metaDefs = await getAllMetaInputs(node, db);
+  const metaDefs = await getMetaInputs(node, db);
   const allInputsPresent = Object.values(metaDefs)
     .map(a => a.isPresent)
     .reduce((a, b) => a && b, true);
@@ -46,29 +47,6 @@ export const areNodeInputsValid = async (
   return res.reduce((a, b) => a && b, true);
 };
 
-export const isInputValid = async (input: any, dataType: DataType, db: Db) => {
-  if (input == null) {
-    return false;
-  }
-
-  if (dataType === DataType.DATASET) {
-    return await validateDataset(input, db);
-  } else if (dataType === DataType.NUMBER) {
-    return validateNumber(input);
-  } else if (dataType === DataType.STRING) {
-    return validateString(input);
-  } else if (dataType === DataType.BOOLEAN) {
-    return validateBoolean(input);
-  } else if (dataType === DataType.DATETIME) {
-    return validateDatatime(input);
-  } else if (dataType === DataType.TIME) {
-    return validateTime(input);
-  }
-
-  console.warn('Unsupported data type: ' + dataType);
-  return true;
-};
-
 const validateDataset = async (datasetRef: any, db: Db): Promise<boolean> => {
   const ds = await getDataset(db, datasetRef.datasetId);
   if (!ds) {
@@ -79,21 +57,53 @@ const validateDataset = async (datasetRef: any, db: Db): Promise<boolean> => {
 };
 
 const validateNumber = (value: any) => {
-  return typeof value === 'number' && !Number.isNaN(value);
+  return Promise.resolve(typeof value === 'number' && !Number.isNaN(value));
 };
 
 const validateString = (value: any) => {
-  return typeof value === 'string';
+  return Promise.resolve(typeof value === 'string');
 };
 
 const validateBoolean = (value: any) => {
-  return typeof value === 'boolean';
+  return Promise.resolve(typeof value === 'boolean');
 };
 
 const validateDatatime = (value: any) => {
-  return value instanceof Date;
+  return Promise.resolve(value instanceof Date);
 };
 
 const validateTime = (value: any) => {
-  return value instanceof Date;
+  return Promise.resolve(value instanceof Date);
 };
+
+const validationMethods: Map<
+  string,
+  (input: any, db: Db) => Promise<boolean>
+> = new Map([
+  [DataType.DATASET, validateDataset],
+  [DataType.STRING, validateString],
+  [DataType.NUMBER, validateNumber],
+  [DataType.BOOLEAN, validateBoolean],
+  [DataType.TIME, validateTime],
+  [DataType.DATETIME, validateDatatime]
+]);
+
+export const isInputValid = async (input: any, dataType: DataType, db: Db) => {
+  if (input == null) {
+    return false;
+  }
+
+  if (!validationMethods.has(dataType)) {
+    console.warn('Unsupported data type: ' + dataType);
+    return true;
+  }
+
+  return await validationMethods.get(dataType)!(input, db);
+};
+
+export const allAreDefinedAndPresent = (inputs: {
+  [name: string]: SocketMetaDef<any>;
+}) =>
+  Object.values(inputs)
+    .map(i => i != null && i.isPresent === true)
+    .reduce((a, b) => a && b, true);

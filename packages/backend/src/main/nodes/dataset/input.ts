@@ -15,7 +15,7 @@ export const DatasetInputNode: ServerNodeDef<
   type: DatasetInputNodeDef.type,
   isFormValid: form => Promise.resolve(form.dataset != null),
   onMetaExecution: async (form, inputs, db) => {
-    if (!form.dataset) {
+    if (form.dataset == null) {
       return {
         dataset: { isPresent: false, content: { schema: [] } }
       };

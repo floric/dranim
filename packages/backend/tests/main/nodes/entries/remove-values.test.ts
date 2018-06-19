@@ -106,19 +106,6 @@ describe('RemoveValuesNode', () => {
     }
   });
 
-  test('should validate dataset', async () => {
-    try {
-      await RemoveValuesNode.onNodeExecution(
-        { values: ['test'] },
-        { dataset: { datasetId: 'ds.id' } },
-        { db, node: NODE }
-      );
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Unknown dataset');
-    }
-  });
-
   test('should copy all entries but only with selected values', async () => {
     const ds = await createDataset(db, 'test');
     await Promise.all(

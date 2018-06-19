@@ -16,6 +16,7 @@ import {
 } from '../../workspace/dataset';
 import { createEntry } from '../../workspace/entry';
 import { processEntries } from './utils';
+import { allAreDefinedAndPresent } from '../../calculation/validation';
 
 export const FilterEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
@@ -23,7 +24,7 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
 > = {
   type: FilterEntriesNodeDef.type,
   transformInputDefsToContextInputDefs: async (inputDefs, inputs) => {
-    if (!inputs.dataset || !inputs.dataset.isPresent) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return {};
     }
 
@@ -43,7 +44,7 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
       keepEntry: { dataType: DataType.BOOLEAN, displayName: 'Keep entry' }
     }),
   onMetaExecution: async (form, inputs) => {
-    if (!inputs.dataset || !inputs.dataset.isPresent) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return { dataset: { content: { schema: [] }, isPresent: false } };
     }
 

@@ -5,18 +5,15 @@ import {
   ServerNodeDef
 } from '@masterthesis/shared';
 
+import { allAreDefinedAndPresent } from '../../../calculation/validation';
+
 export const OrNode: ServerNodeDef<
   BooleanOperatorInputs,
   BooleanOperatorOutputs
 > = {
   type: OrNodeDef.type,
   onMetaExecution: async (form, inputs, db) => {
-    if (
-      !inputs.valueA ||
-      !inputs.valueB ||
-      !inputs.valueA.isPresent ||
-      !inputs.valueB.isPresent
-    ) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return {
         value: {
           content: {},

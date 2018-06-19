@@ -1,6 +1,8 @@
 const numbro = require('numbro');
 import { FormatNumberNodeDef, ServerNodeDef } from '@masterthesis/shared';
 
+import { allAreDefinedAndPresent } from '../../calculation/validation';
+
 export const FormatNumberNode: ServerNodeDef<
   { number: number },
   { formatted: string },
@@ -16,7 +18,7 @@ export const FormatNumberNode: ServerNodeDef<
 > = {
   type: FormatNumberNodeDef.type,
   onMetaExecution: async (form, inputs) => {
-    if (inputs.number == null || !inputs.number.isPresent) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return {
         formatted: { content: {}, isPresent: false }
       };

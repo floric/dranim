@@ -31,7 +31,7 @@ export const getContextInputDefs = async (
     return null;
   }
 
-  const parentInputs = await getMetaInputs(db, parent.id);
+  const parentInputs = await getMetaInputs(parent, db);
   return await parentType.transformInputDefsToContextInputDefs(
     parentType.inputs,
     parentInputs,
@@ -76,7 +76,7 @@ export const getContextOutputDefs = async (
     return null;
   }
 
-  const parentInputs = await getMetaInputs(db, parent.id);
+  const parentInputs = await getMetaInputs(parent, db);
   const contextInputDefs = await parentType.transformInputDefsToContextInputDefs(
     parentType.inputs,
     parentInputs,
@@ -92,7 +92,7 @@ export const getContextOutputDefs = async (
     throw new Error('Context input node unknown');
   }
 
-  const contextInputs = await getMetaInputs(db, contextInputNode.id);
+  const contextInputs = await getMetaInputs(contextInputNode, db);
 
   return await parentType.transformContextInputDefsToContextOutputDefs(
     parentType.inputs,
@@ -114,7 +114,6 @@ const getParentNode = async (node: NodeInstance, db: Db) => {
   return parent;
 };
 
-// TODO Test
 export const getMetaOutputs = async (
   db: Db,
   nodeId: string
@@ -125,35 +124,12 @@ export const getMetaOutputs = async (
     return {};
   }
 
-  const allInputs = await getMetaInputs(db, nodeId);
-
+  const allInputs = await getMetaInputs(node, db);
   return await nodeType.onMetaExecution(
     parseNodeForm(node.form),
     allInputs,
     db
   );
-};
-
-// TODO Test
-export const getMetaInputs = async (
-  db: Db,
-  nodeId: string
-): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> => {
-  const inputs = {};
-
-  const node = await tryGetNode(nodeId, db);
-  const inputConns = node.inputs;
-
-  await Promise.all(
-    inputConns.map(async c => {
-      const conn = await tryGetConnection(c.connectionId, db);
-      inputs[c.name] = (await getMetaOutputs(db, conn.from.nodeId))[
-        conn.from.name
-      ];
-    })
-  );
-
-  return inputs;
 };
 
 export const getInputDefs = async (
@@ -167,7 +143,7 @@ export const getInputDefs = async (
     if (hasContextFn(parentType)) {
       return parentType.transformInputDefsToContextInputDefs(
         parentType.inputs,
-        await getMetaInputs(db, parent.id),
+        await getMetaInputs(parent, db),
         db
       );
     }
@@ -181,9 +157,9 @@ export const getInputDefs = async (
   return inputDefs;
 };
 
-export const getAllMetaInputs = async (node: NodeInstance, db: Db) => {
+export const getMetaInputs = async (node: NodeInstance, db: Db) => {
   const inputDefs = await getInputDefs(node, db);
-  let inputs: { [name: string]: SocketMetaDef } = {};
+  let inputs: { [name: string]: SocketMetaDef<any> } = {};
 
   await Promise.all(
     Object.entries(inputDefs).map(async c => {

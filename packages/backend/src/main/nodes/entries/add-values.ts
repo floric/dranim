@@ -21,6 +21,7 @@ import {
   getDynamicEntryContextInputs,
   processEntries
 } from './utils';
+import { allAreDefinedAndPresent } from '../../calculation/validation';
 
 export const AddValuesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
@@ -35,7 +36,7 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
     contextInputs,
     form
   ) => {
-    if (!inputs.dataset || !inputs.dataset.isPresent) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return {};
     }
 
@@ -63,7 +64,7 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
     return true;
   },
   onMetaExecution: async (form, inputs, db) => {
-    if (!inputs.dataset || !inputs.dataset.isPresent) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return { dataset: { content: { schema: [] }, isPresent: false } };
     }
 

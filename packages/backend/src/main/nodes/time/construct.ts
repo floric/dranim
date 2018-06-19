@@ -5,6 +5,8 @@ import {
   ServerNodeDef
 } from '@masterthesis/shared';
 
+import { allAreDefinedAndPresent } from '../../calculation/validation';
+
 export const TimeConstructNode: ServerNodeDef<
   TimeConstructNodeInputs,
   TimeInputNodeOutputs
@@ -31,14 +33,7 @@ export const TimeConstructNode: ServerNodeDef<
     return true;
   },
   onMetaExecution: async (form, inputs) => {
-    if (
-      inputs.hours === null ||
-      inputs.minutes == null ||
-      inputs.seconds == null ||
-      !inputs.hours.isPresent ||
-      !inputs.minutes.isPresent ||
-      !inputs.seconds.isPresent
-    ) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return {
         value: { content: {}, isPresent: false }
       };

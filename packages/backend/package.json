@@ -8,7 +8,7 @@
     "clean": "rm -rf dist node_modules",
     "lint": "tslint -p . --fix",
     "start": "concurrently \"tsc -w\" \"cross-env NODE_ENV=development nodemon dist/main.js\"",
-    "test": "jest --coverage --maxWorkers=1",
+    "test": "jest --coverage --maxWorkers=4",
     "test:watch": "jest --watch"
   },
   "dependencies": {
@@ -42,7 +42,7 @@
     "@types/cors": "^2.8.4",
     "@types/express-graphql": "^0.6.1",
     "@types/graphql": "^0.13.1",
-    "@types/jest": "^22.2.3",
+    "@types/jest": "^23.1.0",
     "@types/mongodb": "^3.0.18",
     "@types/node": "^10.1.2",
     "@types/promise-retry": "^1.1.1",

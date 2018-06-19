@@ -15,7 +15,6 @@ import {
 } from '../../../main/workspace/dataset';
 import { createDynamicDatasetName } from '../../calculation/utils';
 import { copyTransformedToOtherDataset } from '../../workspace/entry';
-import { validateDataset } from '../dataset/utils';
 
 export const RemoveValuesNode: ServerNodeDef<
   RemoveValuesNodeInputs,
@@ -45,8 +44,6 @@ export const RemoveValuesNode: ServerNodeDef<
     };
   },
   onNodeExecution: async (form, inputs, { db, node }) => {
-    await validateDataset(inputs.dataset.datasetId, db);
-
     const existingDs = await getDataset(db, inputs.dataset.datasetId);
     const schemasOnDs = existingDs!.valueschemas.map(n => n.name);
     const unknownValues = form.values!.filter(n => !schemasOnDs.includes(n));

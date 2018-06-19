@@ -17,7 +17,8 @@ import { Db } from 'mongodb';
 import {
   isNodeInMetaValid,
   areNodeInputsValid,
-  isInputValid
+  isInputValid,
+  allAreDefinedAndPresent
 } from '../../../src/main/calculation/validation';
 import { createConnection } from '../../../src/main/workspace/connections';
 import {
@@ -350,5 +351,26 @@ describe('Validation', () => {
   test('should return true for validation of unknown datatypes', async () => {
     const res = await isInputValid({}, 'test' as any, db);
     expect(res).toBe(true);
+  });
+
+  test('should have valid inputs', async () => {
+    let res = await allAreDefinedAndPresent({
+      val: { isPresent: true, content: {} }
+    });
+    expect(res).toBe(true);
+
+    res = await allAreDefinedAndPresent({
+      valA: { isPresent: true, content: {} },
+      valB: { isPresent: true, content: {} }
+    });
+    expect(res).toBe(true);
+  });
+
+  test('should have invalid inputs', async () => {
+    const res = await allAreDefinedAndPresent({
+      valA: { isPresent: true, content: {} },
+      valB: { isPresent: false, content: {} }
+    });
+    expect(res).toBe(false);
   });
 });

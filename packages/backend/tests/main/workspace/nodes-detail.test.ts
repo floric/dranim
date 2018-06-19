@@ -36,7 +36,8 @@ import {
   getMetaInputs,
   getNodeState,
   getInputDefs,
-  getContextNode
+  getContextNode,
+  getMetaOutputs
 } from '../../../src/main/workspace/nodes-detail';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
 import {
@@ -159,7 +160,8 @@ describe('Nodes', () => {
       { name: 'dataset', nodeId: dsOutputNode.id }
     );
 
-    const res = await getMetaInputs(db, dsOutputNode.id);
+    const node = await getNode(db, dsOutputNode.id);
+    const res = await getMetaInputs(node, db);
 
     expect(res.dataset).toBeDefined();
     expect(res.dataset.isPresent).toBe(true);
@@ -517,5 +519,19 @@ describe('Nodes', () => {
 
     const res = await getContextNode(strInputNode, ContextNodeType.INPUT, db);
     expect(res).toBe(null);
+  });
+
+  test('should get empty meta inputs for context', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const node = await createNode(db, StringInputNodeDef.type, ws.id, [], 0, 0);
+    const res = await getMetaInputs(node, db);
+    expect(res).toEqual({});
+  });
+
+  test('should get empty meta outputs for context', async () => {
+    const ws = await createWorkspace(db, 'test', '');
+    const node = await createNode(db, StringInputNodeDef.type, ws.id, [], 0, 0);
+    const res = await getMetaOutputs(db, node.id);
+    expect(res).toEqual({ value: { content: {}, isPresent: false } });
   });
 });

@@ -5,18 +5,15 @@ import {
   XorNodeDef
 } from '@masterthesis/shared';
 
+import { allAreDefinedAndPresent } from '../../../calculation/validation';
+
 export const XorNode: ServerNodeDef<
   BooleanOperatorInputs,
   BooleanOperatorOutputs
 > = {
   type: XorNodeDef.type,
   onMetaExecution: async (form, inputs, db) => {
-    if (
-      !inputs.valueA ||
-      !inputs.valueB ||
-      !inputs.valueA.isPresent ||
-      !inputs.valueB.isPresent
-    ) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return {
         value: {
           content: {},

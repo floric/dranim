@@ -4,6 +4,7 @@ import {
   DatetimeConstructNodeInputs,
   ServerNodeDef
 } from '@masterthesis/shared';
+import { allAreDefinedAndPresent } from '../../calculation/validation';
 
 export const DatetimeConstructNode: ServerNodeDef<
   DatetimeConstructNodeInputs,
@@ -22,16 +23,7 @@ export const DatetimeConstructNode: ServerNodeDef<
     return true;
   },
   onMetaExecution: async (form, inputs) => {
-    if (
-      inputs.day == null ||
-      inputs.month == null ||
-      inputs.time == null ||
-      inputs.year == null ||
-      !inputs.day.isPresent ||
-      !inputs.month.isPresent ||
-      !inputs.year.isPresent ||
-      !inputs.time.isPresent
-    ) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return {
         value: { content: {}, isPresent: false }
       };

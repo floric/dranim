@@ -5,15 +5,12 @@ import {
   SumNodeNodeOutputs
 } from '@masterthesis/shared';
 
+import { allAreDefinedAndPresent } from '../../calculation/validation';
+
 export const SumNode: ServerNodeDef<SumNodeNodeInputs, SumNodeNodeOutputs> = {
   type: SumNodeDef.type,
   onMetaExecution: async (form, inputs) => {
-    if (
-      inputs.a == null ||
-      inputs.b == null ||
-      !inputs.a.isPresent ||
-      !inputs.b.isPresent
-    ) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return {
         sum: { content: {}, isPresent: false }
       };
