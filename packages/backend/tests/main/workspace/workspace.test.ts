@@ -20,7 +20,11 @@ import {
   updateWorkspace,
   updateLastChange
 } from '../../../src/main/workspace/workspace';
-import { getTestMongoDb, NeverGoHereError } from '../../test-utils';
+import {
+  getTestMongoDb,
+  NeverGoHereError,
+  VALID_OBJECT_ID
+} from '../../test-utils';
 
 let conn;
 let db: Db;
@@ -123,14 +127,23 @@ describe('Workspaces', () => {
     );
   });
 
+  test('should throw error when updating workspaces with invalid id', async () => {
+    try {
+      await updateWorkspace(db, 'test', [], []);
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Invalid ID');
+    }
+  });
+
   test('should move nodes with update workspace', async () => {
     const description = 'desc';
     const name = 'wsname';
 
     const ws = await createWorkspace(db, name, description);
     const [nodeA, nodeB] = await Promise.all([
-      createNode(db, NumberInputNodeDef.name, ws.id, [], 0, 0),
-      createNode(db, NumberOutputNodeDef.name, ws.id, [], 0, 0)
+      createNode(db, NumberInputNodeDef.type, ws.id, [], 0, 0),
+      createNode(db, NumberOutputNodeDef.type, ws.id, [], 0, 0)
     ]);
     const nodeConn = await createConnection(
       db,

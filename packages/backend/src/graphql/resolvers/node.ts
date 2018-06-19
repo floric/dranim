@@ -13,14 +13,15 @@ import { serverNodeTypes } from '../../main/nodes/all-nodes';
 import {
   getContextInputDefs,
   getContextOutputDefs,
-  getMetaInputs,
   getMetaOutputs,
-  getNodeState
+  getNodeState,
+  getMetaInputs
 } from '../../main/workspace/nodes-detail';
 import { getWorkspace } from '../../main/workspace/workspace';
 
 export const Node = {
-  state: (node: NodeInstance): Promise<NodeState> => getNodeState(node),
+  state: (node: NodeInstance, _, { db }): Promise<NodeState> =>
+    getNodeState(node, db),
   workspace: ({ workspaceId }, __, { db }): Promise<Workspace | null> =>
     getWorkspace(db, workspaceId),
   metaOutputs: (
@@ -30,11 +31,11 @@ export const Node = {
   ): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> =>
     getMetaOutputs(db, id),
   metaInputs: (
-    { id, inputs },
+    node,
     _,
     { db }
   ): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> =>
-    getMetaInputs(db, id, inputs),
+    getMetaInputs(node, db),
   contextInputDefs: (
     node,
     _,

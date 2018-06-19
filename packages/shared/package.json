@@ -5,8 +5,8 @@
   "main": "lib/index.js",
   "dependencies": {
     "date-fns": "^1.29.0",
-    "moment": "^2.22.1",
-    "sleep-promise": "^6.0.0",
+    "moment": "^2.22.2",
+    "sleep-promise": "^8.0.1",
     "uuid": "^3.2.1"
   },
   "typings": "lib/index.d.ts",
@@ -21,13 +21,13 @@
     "test": "jest --coverage --detectLeaks"
   },
   "devDependencies": {
-    "@types/jest": "^22.2.3",
+    "@types/jest": "^23.1.1",
     "@types/uuid": "^3.4.3",
     "jest": "^23.0.0",
     "ts-jest": "^22.4.6",
     "tslint": "^5.2.0",
     "tslint-config-prettier": "^1.13.0",
-    "typescript": "^2.8.3",
+    "typescript": "^2.9.2",
     "weak": "^1.0.1"
   },
   "jest": {

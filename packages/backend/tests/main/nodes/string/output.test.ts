@@ -4,7 +4,7 @@ import { StringOutputNode } from '../../../../src/main/nodes/string/output';
 
 describe('StringOutputNode', () => {
   test('should have correct properties', () => {
-    expect(StringOutputNode.name).toBe(StringOutputNodeDef.name);
+    expect(StringOutputNode.type).toBe(StringOutputNodeDef.type);
     expect(StringOutputNode.isFormValid).toBeUndefined();
     expect(StringOutputNode.isInputValid).toBeUndefined();
     expect(StringOutputNodeDef.isOutputNode).toBe(true);

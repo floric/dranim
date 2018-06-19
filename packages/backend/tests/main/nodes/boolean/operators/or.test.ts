@@ -4,9 +4,9 @@ import { OrNode } from '../../../../../src/main/nodes/boolean/operators/or';
 
 describe('OrNode', () => {
   test('should have correct properties', () => {
-    expect(OrNode.name).toBe(OrNodeDef.name);
+    expect(OrNode.type).toBe(OrNodeDef.type);
     expect(OrNode.isFormValid).toBeUndefined();
-    expect(OrNode.isInputValid).toBeDefined();
+    expect(OrNode.isInputValid).toBeUndefined();
   });
 
   test('should return empty object for onMetaExecution', async () => {
@@ -59,34 +59,6 @@ describe('OrNode', () => {
       null
     );
     expect(res).toEqual({ value: { content: {}, isPresent: false } });
-  });
-
-  test('should have valid inputs', async () => {
-    let res = await OrNode.isInputValid({
-      valueA: true,
-      valueB: true
-    });
-    expect(res).toBe(true);
-
-    res = await OrNode.isInputValid({
-      valueA: true,
-      valueB: false
-    });
-    expect(res).toBe(true);
-  });
-
-  test('should have invalid inputs', async () => {
-    let res = await OrNode.isInputValid({
-      valueA: null,
-      valueB: true
-    });
-    expect(res).toBe(false);
-
-    res = await OrNode.isInputValid({
-      valueA: true,
-      valueB: undefined
-    });
-    expect(res).toBe(false);
   });
 
   test('should valid empty object for onMetaExecution', async () => {

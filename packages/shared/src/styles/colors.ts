@@ -1,10 +1,11 @@
 // tslint:disable:variable-name
-export const Dataset = '#0099ff';
+export const Dataset = '#a0de09';
 export const Entry = '#deff07';
 export const Number = '#ff9900';
 export const String = '#ff0099';
 export const Boolean = '#ff3800';
-export const Date = '#7627e8';
+export const Datetime = '#2227e8';
+export const Time = '#0099ff';
 
 export const GrayDark = '#666';
 export const GrayMedium = '#999';

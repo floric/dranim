@@ -50,9 +50,9 @@ describe('AddValuesNode', () => {
   });
 
   test('should have correct properties', () => {
-    expect(AddValuesNode.name).toBe(AddValuesNodeDef.name);
+    expect(AddValuesNode.type).toBe(AddValuesNodeDef.type);
     expect(AddValuesNode.isFormValid).toBeDefined();
-    expect(AddValuesNode.isInputValid).toBeDefined();
+    expect(AddValuesNode.isInputValid).toBeUndefined();
     expect(
       AddValuesNode.transformContextInputDefsToContextOutputDefs
     ).toBeDefined();
@@ -81,30 +81,6 @@ describe('AddValuesNode', () => {
           fallback: ''
         }
       ]
-    });
-    expect(res).toBe(true);
-  });
-
-  test('should have invalid input', async () => {
-    let res = await AddValuesNode.isInputValid({
-      dataset: undefined
-    });
-    expect(res).toBe(false);
-
-    res = await AddValuesNode.isInputValid({
-      dataset: null
-    });
-    expect(res).toBe(false);
-
-    res = await AddValuesNode.isInputValid({
-      dataset: { datasetId: '' }
-    });
-    expect(res).toBe(false);
-  });
-
-  test('should have valid input', async () => {
-    const res = await AddValuesNode.isInputValid({
-      dataset: { datasetId: VALID_OBJECT_ID }
     });
     expect(res).toBe(true);
   });
@@ -338,7 +314,7 @@ describe('AddValuesNode', () => {
           contextIds: [],
           inputs: [],
           outputs: [],
-          type: AddValuesNode.name,
+          type: AddValuesNode.type,
           workspaceId: ws.id,
           form: [],
           x: 0,
@@ -393,7 +369,7 @@ describe('AddValuesNode', () => {
             contextIds: [],
             inputs: [],
             outputs: [],
-            type: AddValuesNode.name,
+            type: AddValuesNode.type,
             workspaceId: ws.id,
             form: [],
             x: 0,

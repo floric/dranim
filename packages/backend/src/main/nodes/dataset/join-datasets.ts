@@ -1,5 +1,7 @@
 import {
+  allAreDefinedAndPresent,
   Dataset,
+  Entry,
   FormValues,
   JoinDatasetsNodeDef,
   JoinDatasetsNodeForm,
@@ -7,10 +9,9 @@ import {
   JoinDatasetsNodeOutputs,
   ServerNodeDef,
   Values,
-  ValueSchema,
-  Entry
+  ValueSchema
 } from '@masterthesis/shared';
-import { Db, Collection } from 'mongodb';
+import { Collection, Db } from 'mongodb';
 
 import { createDynamicDatasetName } from '../../calculation/utils';
 import {
@@ -19,20 +20,15 @@ import {
   getDataset
 } from '../../workspace/dataset';
 import { createEntry, getEntryCollection } from '../../workspace/entry';
-import { validateNonEmptyString } from '../string/utils';
-import { validateDatasetId } from './utils';
 import { processEntries } from '../entries/utils';
+import { validateNonEmptyString } from '../string/utils';
 
 export const JoinDatasetsNode: ServerNodeDef<
   JoinDatasetsNodeInputs,
   JoinDatasetsNodeOutputs,
   JoinDatasetsNodeForm
 > = {
-  name: JoinDatasetsNodeDef.name,
-  isInputValid: inputs =>
-    Promise.resolve(
-      validateDatasetId(inputs.datasetA) && validateDatasetId(inputs.datasetB)
-    ),
+  type: JoinDatasetsNodeDef.type,
   isFormValid: form =>
     Promise.resolve(
       validateNonEmptyString(form.valueA) && validateNonEmptyString(form.valueB)
@@ -41,12 +37,7 @@ export const JoinDatasetsNode: ServerNodeDef<
     if (!form.valueA || !form.valueB) {
       return { joined: { isPresent: false, content: { schema: [] } } };
     }
-    if (
-      !inputs.datasetA ||
-      !inputs.datasetB ||
-      !inputs.datasetA.isPresent ||
-      !inputs.datasetB.isPresent
-    ) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return {
         joined: { isPresent: false, content: { schema: [] } }
       };
@@ -80,7 +71,7 @@ export const JoinDatasetsNode: ServerNodeDef<
 
     const newDs = await createDataset(
       db,
-      createDynamicDatasetName(JoinDatasetsNodeDef.name, node.id)
+      createDynamicDatasetName(JoinDatasetsNodeDef.type, node.id)
     );
     await addSchemasFromBothDatasets(
       db,

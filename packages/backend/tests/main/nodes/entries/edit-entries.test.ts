@@ -52,9 +52,9 @@ describe('EditEntriesNode', () => {
   });
 
   test('should have correct properties', () => {
-    expect(EditEntriesNode.name).toBe(EditEntriesNodeDef.name);
+    expect(EditEntriesNode.type).toBe(EditEntriesNodeDef.type);
     expect(EditEntriesNode.isFormValid).toBeUndefined();
-    expect(EditEntriesNode.isInputValid).toBeDefined();
+    expect(EditEntriesNode.isInputValid).toBeUndefined();
     expect(
       EditEntriesNode.transformContextInputDefsToContextOutputDefs
     ).toBeDefined();
@@ -110,21 +110,6 @@ describe('EditEntriesNode', () => {
     res = await EditEntriesNode.onMetaExecution({}, { dataset: undefined }, db);
     expect(res.dataset.isPresent).toBe(false);
     expect(res.dataset.content.schema).toEqual([]);
-  });
-
-  test('should have valid input', async () => {
-    const res = await EditEntriesNode.isInputValid({
-      dataset: { datasetId: VALID_OBJECT_ID }
-    });
-    expect(res).toBe(true);
-  });
-
-  test('should have invalid input', async () => {
-    let res = await EditEntriesNode.isInputValid({ dataset: undefined });
-    expect(res).toBe(false);
-
-    res = await EditEntriesNode.isInputValid({ dataset: { datasetId: null } });
-    expect(res).toBe(false);
   });
 
   test('should use dataset schemas as dynamic inputs of context fn', async () => {

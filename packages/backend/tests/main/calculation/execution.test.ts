@@ -12,7 +12,10 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { executeNode } from '../../../src/main/calculation/execution';
+import {
+  executeNode,
+  executeNodeWithId
+} from '../../../src/main/calculation/execution';
 import { createConnection } from '../../../src/main/workspace/connections';
 import {
   addValueSchema,
@@ -39,7 +42,7 @@ let conn;
 let db: Db;
 let server;
 
-describe('Server Execution', () => {
+describe('Execution', () => {
   beforeAll(async () => {
     const { connection, database, mongodbServer } = await getTestMongoDb();
     conn = connection;
@@ -59,9 +62,11 @@ describe('Server Execution', () => {
 
   test('should execute simple node', async () => {
     const ws = await createWorkspace(db, 'test', '');
-    const node = await createNode(db, StringInputNodeDef.name, ws.id, [], 0, 0);
+    const node = await createNode(db, StringInputNodeDef.type, ws.id, [], 0, 0);
 
-    const { outputs, results } = await executeNode(db, node);
+    await addOrUpdateFormValue(db, node.id, 'value', JSON.stringify('test'));
+
+    const { outputs, results } = await executeNodeWithId(db, node.id);
 
     expect(outputs).toBeDefined();
     expect(results).toBeUndefined();
@@ -72,7 +77,7 @@ describe('Server Execution', () => {
     const ws = await createWorkspace(db, 'test', '');
     const nodeA = await createNode(
       db,
-      StringInputNodeDef.name,
+      StringInputNodeDef.type,
       ws.id,
       [],
       0,
@@ -80,7 +85,7 @@ describe('Server Execution', () => {
     );
     const nodeB = await createNode(
       db,
-      StringOutputNodeDef.name,
+      StringOutputNodeDef.type,
       ws.id,
       [],
       0,
@@ -91,8 +96,9 @@ describe('Server Execution', () => {
       { name: 'value', nodeId: nodeA.id },
       { name: 'value', nodeId: nodeB.id }
     );
+    await addOrUpdateFormValue(db, nodeA.id, 'value', JSON.stringify('test'));
 
-    const { outputs, results } = await executeNode(db, nodeB);
+    const { outputs, results } = await executeNodeWithId(db, nodeB.id);
 
     expect(outputs).toBeDefined();
     expect(results).toBeDefined();
@@ -100,24 +106,63 @@ describe('Server Execution', () => {
     expect(Object.keys(results!).length).toBe(1);
   });
 
+  test('should return outputs from context for context input nodes', async () => {
+    const contextInputs = { test: 123 };
+    const res = await executeNode(
+      db,
+      {
+        type: ContextNodeType.INPUT,
+        x: 0,
+        y: 0,
+        workspaceId: VALID_OBJECT_ID,
+        id: VALID_OBJECT_ID,
+        outputs: [],
+        inputs: [],
+        form: [],
+        contextIds: [VALID_OBJECT_ID]
+      },
+      contextInputs
+    );
+    expect(res).toEqual({ outputs: contextInputs });
+  });
+
+  test('should throw error for unknown node type', async () => {
+    try {
+      await executeNode(db, {
+        type: 'UnknownNodeType',
+        x: 0,
+        y: 0,
+        workspaceId: VALID_OBJECT_ID,
+        id: VALID_OBJECT_ID,
+        outputs: [],
+        inputs: [],
+        form: [],
+        contextIds: [VALID_OBJECT_ID]
+      });
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Unknown node type');
+    }
+  });
+
   test('should fail for invalid form', async () => {
     const ws = await createWorkspace(db, 'test', '');
-    const node = await createNode(db, NumberInputNodeDef.name, ws.id, [], 0, 0);
+    const node = await createNode(db, NumberInputNodeDef.type, ws.id, [], 0, 0);
     await addOrUpdateFormValue(db, node.id, 'value', '{NaN');
 
     try {
       await executeNode(db, node);
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Invalid form');
+      expect(err.message).toBe('Form values or inputs are missing');
     }
   });
 
   test('should fail for invalid input', async () => {
     const ws = await createWorkspace(db, 'test', '');
     const [nodeA, nodeB] = await Promise.all([
-      createNode(db, StringInputNodeDef.name, ws.id, [], 0, 0),
-      createNode(db, NumberOutputNodeDef.name, ws.id, [], 0, 0)
+      createNode(db, StringInputNodeDef.type, ws.id, [], 0, 0),
+      createNode(db, NumberOutputNodeDef.type, ws.id, [], 0, 0)
     ]);
     await addOrUpdateFormValue(db, nodeA.id, 'value', 'NaN');
     await createConnection(
@@ -130,20 +175,20 @@ describe('Server Execution', () => {
       await executeNode(db, nodeB);
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Invalid input');
+      expect(err.message).toBe('Form values or inputs are missing');
     }
   });
 
   test('should wait for inputs and combine them as sum', async () => {
     const ws = await createWorkspace(db, 'test', '');
     const [nodeA, nodeB] = await Promise.all([
-      createNode(db, NumberInputNodeDef.name, ws.id, [], 0, 0),
-      createNode(db, NumberInputNodeDef.name, ws.id, [], 0, 0)
+      createNode(db, NumberInputNodeDef.type, ws.id, [], 0, 0),
+      createNode(db, NumberInputNodeDef.type, ws.id, [], 0, 0)
     ]);
-    const sumNode = await createNode(db, SumNodeDef.name, ws.id, [], 0, 0);
+    const sumNode = await createNode(db, SumNodeDef.type, ws.id, [], 0, 0);
     const outputNode = await createNode(
       db,
-      NumberOutputNodeDef.name,
+      NumberOutputNodeDef.type,
       ws.id,
       [],
       0,
@@ -191,9 +236,9 @@ describe('Server Execution', () => {
 
     const [editEntriesNode, inputNode, outputNode] = await Promise.all(
       [
-        EditEntriesNodeDef.name,
-        DatasetInputNodeDef.name,
-        DatasetOutputNodeDef.name
+        EditEntriesNodeDef.type,
+        DatasetInputNodeDef.type,
+        DatasetOutputNodeDef.type
       ].map(type => createNode(db, type, ws.id, [], 0, 0))
     );
 
@@ -206,7 +251,7 @@ describe('Server Execution', () => {
     expect(contextOutputNode).toBeDefined();
     const stringInputNode = await createNode(
       db,
-      StringInputNodeDef.name,
+      StringInputNodeDef.type,
       ws.id,
       [editEntriesNode.id],
       0,
@@ -223,6 +268,12 @@ describe('Server Execution', () => {
       inputNode.id,
       'dataset',
       JSON.stringify(ds.id)
+    );
+    await addOrUpdateFormValue(
+      db,
+      stringInputNode.id,
+      'value',
+      JSON.stringify('test')
     );
 
     await Promise.all(
@@ -256,7 +307,7 @@ describe('Server Execution', () => {
 
     const editEntriesNode = await createNode(
       db,
-      EditEntriesNodeDef.name,
+      EditEntriesNodeDef.type,
       ws.id,
       [],
       0,

@@ -23,10 +23,10 @@ export type IOValues<T> = { [Name in keyof T]: T[Name] };
 
 export interface NodeDef<NodeInputs = {}, NodeOutputs = {}> {
   name: string;
+  type: string;
   inputs: SocketDefs<NodeInputs>;
   outputs: SocketDefs<NodeOutputs>;
   isOutputNode?: boolean;
-  supportsDynamicSockets?: boolean;
   path: Array<string>;
   keywords: Array<string>;
 }
@@ -42,7 +42,7 @@ export interface ServerNodeDef<
   NodeForm = {},
   NodeResults = {}
 > {
-  name: string;
+  type: string;
   isFormValid?: (form: FormValues<NodeForm>) => Promise<boolean>;
   isInputValid?: (inputs: IOValues<NodeInputs>) => Promise<boolean>;
   onNodeExecution: (

@@ -49,7 +49,7 @@ const birthdaysSchema: Array<Valueschema> = [
   },
   {
     name: 'birthday',
-    type: DataType.DATE,
+    type: DataType.DATETIME,
     required: true,
     fallback: '',
     unique: false

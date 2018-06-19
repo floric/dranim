@@ -42,10 +42,7 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
     console.log('Finished calcuation successfully.');
   } catch (err) {
     await updateFinishedProcess(db, processId, ProcessState.ERROR);
-    if (process.env.NODE_ENV !== 'test') {
-      console.log(err);
-      console.error('Finished calculation with errors: ' + err.message);
-    }
+    console.error('Finished calculation with errors: ' + err.message);
   }
 };
 

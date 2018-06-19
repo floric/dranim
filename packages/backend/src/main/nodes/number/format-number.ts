@@ -1,5 +1,9 @@
 const numbro = require('numbro');
-import { FormatNumberNodeDef, ServerNodeDef } from '@masterthesis/shared';
+import {
+  allAreDefinedAndPresent,
+  FormatNumberNodeDef,
+  ServerNodeDef
+} from '@masterthesis/shared';
 
 export const FormatNumberNode: ServerNodeDef<
   { number: number },
@@ -14,16 +18,9 @@ export const FormatNumberNode: ServerNodeDef<
     'average-total'?: number;
   }
 > = {
-  name: FormatNumberNodeDef.name,
-  isInputValid: async input => {
-    if (input.number == null || Number.isNaN(input.number)) {
-      return false;
-    }
-
-    return true;
-  },
+  type: FormatNumberNodeDef.type,
   onMetaExecution: async (form, inputs) => {
-    if (inputs.number == null || !inputs.number.isPresent) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return {
         formatted: { content: {}, isPresent: false }
       };

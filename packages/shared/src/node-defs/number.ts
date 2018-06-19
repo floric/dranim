@@ -21,7 +21,8 @@ export const FormatNumberNodeDef: NodeDef<
   FormatNumberNodeInputs,
   FormatNumberNodeOutputs
 > = {
-  name: 'Format Number',
+  name: 'Format',
+  type: 'FormatNumber',
   inputs: {
     number: NumberSocket('Number')
   },
@@ -29,7 +30,7 @@ export const FormatNumberNodeDef: NodeDef<
     formatted: StringSocket('Formatted')
   },
   path: ['Numbers', 'Converters'],
-  keywords: []
+  keywords: ['to string']
 };
 
 export interface NumberInputNodeOutputs {
@@ -41,7 +42,8 @@ export interface NumberInputNodeForm {
 }
 
 export const NumberInputNodeDef: NodeDef<{}, NumberInputNodeOutputs> = {
-  name: 'Number Input',
+  name: 'Input',
+  type: 'NumberInput',
   inputs: {},
   outputs: {
     value: NumberSocket('Number')
@@ -64,6 +66,7 @@ export const MultiplicationNodeDef: NodeDef<
   MultiplicationNodeOutputs
 > = {
   name: 'Multiplication',
+  type: 'Multiplication',
   inputs: {
     a: NumberSocket('A'),
     b: NumberSocket('B')
@@ -93,7 +96,8 @@ export interface SumNodeNodeOutputs {
 }
 
 export const NumberOutputNodeDef: NodeDef<NumberOutputNodeInputs, {}> = {
-  name: 'Number Output',
+  name: 'Output',
+  type: 'NumberOutput',
   inputs: {
     value: NumberSocket('Number')
   },
@@ -105,6 +109,7 @@ export const NumberOutputNodeDef: NodeDef<NumberOutputNodeInputs, {}> = {
 
 export const SumNodeDef: NodeDef<SumNodeNodeInputs, SumNodeNodeOutputs> = {
   name: 'Sum',
+  type: 'Sum',
   inputs: {
     a: NumberSocket('A'),
     b: NumberSocket('B')

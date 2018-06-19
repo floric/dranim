@@ -4,9 +4,9 @@ import { EqualsStringNode } from '../../../../../src/main/nodes/boolean/comparis
 
 describe('EqualsStringNode', () => {
   test('should have correct properties', () => {
-    expect(EqualsStringNode.name).toBe(EqualsStringNodeDef.name);
+    expect(EqualsStringNode.type).toBe(EqualsStringNodeDef.type);
     expect(EqualsStringNode.isFormValid).toBeUndefined();
-    expect(EqualsStringNode.isInputValid).toBeDefined();
+    expect(EqualsStringNode.isInputValid).toBeUndefined();
   });
 
   test('should return empty object for onMetaExecution', async () => {
@@ -59,34 +59,6 @@ describe('EqualsStringNode', () => {
       null
     );
     expect(res).toEqual({ equals: { content: {}, isPresent: false } });
-  });
-
-  test('should have valid inputs', async () => {
-    let res = await EqualsStringNode.isInputValid({
-      valueA: 'true',
-      valueB: 'true'
-    });
-    expect(res).toBe(true);
-
-    res = await EqualsStringNode.isInputValid({
-      valueA: 'true',
-      valueB: 'false'
-    });
-    expect(res).toBe(true);
-  });
-
-  test('should have invalid inputs', async () => {
-    let res = await EqualsStringNode.isInputValid({
-      valueA: null,
-      valueB: 'true'
-    });
-    expect(res).toBe(false);
-
-    res = await EqualsStringNode.isInputValid({
-      valueA: 'true',
-      valueB: undefined
-    });
-    expect(res).toBe(false);
   });
 
   test('should valid empty object for onMetaExecution', async () => {

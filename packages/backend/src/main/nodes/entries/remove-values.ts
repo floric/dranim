@@ -15,15 +15,13 @@ import {
 } from '../../../main/workspace/dataset';
 import { createDynamicDatasetName } from '../../calculation/utils';
 import { copyTransformedToOtherDataset } from '../../workspace/entry';
-import { validateDataset, validateDatasetId } from '../dataset/utils';
 
 export const RemoveValuesNode: ServerNodeDef<
   RemoveValuesNodeInputs,
   RemoveValuesNodeOutputs,
   RemoveValuesNodeForm
 > = {
-  name: RemoveValuesNodeDef.name,
-  isInputValid: async inputs => validateDatasetId(inputs.dataset),
+  type: RemoveValuesNodeDef.type,
   isFormValid: form => Promise.resolve(!!form.values && form.values.length > 0),
   onMetaExecution: async (form, inputs, db) => {
     if (!form.values || form.values.length === 0) {
@@ -46,8 +44,6 @@ export const RemoveValuesNode: ServerNodeDef<
     };
   },
   onNodeExecution: async (form, inputs, { db, node }) => {
-    await validateDataset(inputs.dataset.datasetId, db);
-
     const existingDs = await getDataset(db, inputs.dataset.datasetId);
     const schemasOnDs = existingDs!.valueschemas.map(n => n.name);
     const unknownValues = form.values!.filter(n => !schemasOnDs.includes(n));
@@ -58,7 +54,7 @@ export const RemoveValuesNode: ServerNodeDef<
     const usedValues = new Set(form.values!);
     const newDs = await createDataset(
       db,
-      createDynamicDatasetName(RemoveValuesNodeDef.name, node.id)
+      createDynamicDatasetName(RemoveValuesNodeDef.type, node.id)
     );
 
     await filterSchema(existingDs!, newDs, usedValues, db);

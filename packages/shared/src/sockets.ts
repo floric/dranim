@@ -1,5 +1,5 @@
-import { DatasetRef } from './nodes/dataset';
-import { EntryRef } from './nodes/entries';
+import { DatasetRef } from './node-defs/dataset';
+import { EntryRef } from './node-defs/entries';
 import { ValueSchema } from './workspace';
 
 export enum SocketType {
@@ -11,7 +11,8 @@ export enum DataType {
   DATASET = 'Dataset',
   NUMBER = 'Number',
   BOOLEAN = 'Boolean',
-  DATE = 'Date',
+  DATETIME = 'Datetime',
+  TIME = 'Time',
   STRING = 'String'
 }
 
@@ -64,7 +65,12 @@ export const BooleanSocket = (name: string): SocketDef => ({
   displayName: name
 });
 
-export const DateSocket = (name: string): SocketDef => ({
-  dataType: DataType.DATE,
+export const DatetimeSocket = (name: string): SocketDef => ({
+  dataType: DataType.DATETIME,
+  displayName: name
+});
+
+export const TimeSocket = (name: string): SocketDef => ({
+  dataType: DataType.TIME,
   displayName: name
 });

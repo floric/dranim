@@ -14,6 +14,8 @@ import * as DatasetNodes from './dataset';
 import * as EntriesNodes from './entries';
 import * as NumberNodes from './number';
 import * as StringNodes from './string';
+import * as TimeNodes from './time';
+import * as DatetimeNodes from './datetime';
 
 export interface EditorProps {
   x?: number;
@@ -41,7 +43,7 @@ export interface ClientNodeDef<
   NodeOutputs = {},
   NodeForm = {}
 > {
-  name: string;
+  type: string;
   renderName?: (
     context: EditorContext,
     nodeForm: FormValues<NodeForm>
@@ -56,7 +58,9 @@ const allNodes = [
   NumberNodes,
   StringNodes,
   BooleanNodes,
-  EntriesNodes
+  EntriesNodes,
+  TimeNodes,
+  DatetimeNodes
 ];
 
 const buildTree = (
@@ -87,8 +91,8 @@ const buildTree = (
         .filter(elem => JSON.stringify(elem.path) === JSON.stringify(e))
         .map(elem => ({
           label: elem.name,
-          value: elem.name,
-          key: elem.name,
+          value: elem.type,
+          key: elem.type,
           index: `${elem.name}, ${elem.path.join(' ')}, ${elem.keywords.join(
             ' '
           )}`.toLocaleLowerCase(),
@@ -102,7 +106,7 @@ const buildTree = (
 const clientNodeMap: Map<string, ClientNodeDef> = new Map(
   allNodes
     .map<Array<[string, ClientNodeDef]>>(nodes =>
-      Object.values(nodes).map<[string, ClientNodeDef]>(n => [n.name, n])
+      Object.values(nodes).map<[string, ClientNodeDef]>(n => [n.type, n])
     )
     .reduce<Array<[string, ClientNodeDef]>>((a, b) => [...a, ...b], [])
 );

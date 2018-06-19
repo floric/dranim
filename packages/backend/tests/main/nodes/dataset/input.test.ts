@@ -33,7 +33,7 @@ describe('DatasetInputNode', () => {
   });
 
   test('should have correct properties', () => {
-    expect(DatasetInputNode.name).toBe(DatasetInputNodeDef.name);
+    expect(DatasetInputNode.type).toBe(DatasetInputNodeDef.type);
     expect(DatasetInputNode.isFormValid).toBeDefined();
     expect(DatasetInputNode.isInputValid).toBeUndefined();
   });
@@ -47,19 +47,6 @@ describe('DatasetInputNode', () => {
       { db, node: NODE }
     );
     expect(res.outputs.dataset).toEqual({ datasetId: newDs.id });
-  });
-
-  test('should get output value from form', async () => {
-    try {
-      await DatasetInputNode.onNodeExecution(
-        { dataset: VALID_OBJECT_ID },
-        {},
-        { db, node: NODE }
-      );
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Unknown dataset');
-    }
   });
 
   test('should accept form', async () => {

@@ -1,4 +1,5 @@
 import {
+  allAreDefinedAndPresent,
   BooleanOperatorInputs,
   BooleanOperatorOutputs,
   ServerNodeDef,
@@ -9,21 +10,9 @@ export const XorNode: ServerNodeDef<
   BooleanOperatorInputs,
   BooleanOperatorOutputs
 > = {
-  name: XorNodeDef.name,
-  isInputValid: async inputs => {
-    if (inputs.valueA == null || inputs.valueB == null) {
-      return false;
-    }
-
-    return true;
-  },
+  type: XorNodeDef.type,
   onMetaExecution: async (form, inputs, db) => {
-    if (
-      !inputs.valueA ||
-      !inputs.valueB ||
-      !inputs.valueA.isPresent ||
-      !inputs.valueB.isPresent
-    ) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return {
         value: {
           content: {},

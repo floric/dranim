@@ -4,9 +4,9 @@ import { AndNode } from '../../../../../src/main/nodes/boolean/operators/and';
 
 describe('AndNode', () => {
   test('should have correct properties', () => {
-    expect(AndNode.name).toBe(AndNodeDef.name);
+    expect(AndNode.type).toBe(AndNodeDef.type);
     expect(AndNode.isFormValid).toBeUndefined();
-    expect(AndNode.isInputValid).toBeDefined();
+    expect(AndNode.isInputValid).toBeUndefined();
   });
 
   test('should return empty object for onMetaExecution', async () => {
@@ -59,34 +59,6 @@ describe('AndNode', () => {
       null
     );
     expect(res).toEqual({ value: { content: {}, isPresent: false } });
-  });
-
-  test('should have valid inputs', async () => {
-    let res = await AndNode.isInputValid({
-      valueA: true,
-      valueB: true
-    });
-    expect(res).toBe(true);
-
-    res = await AndNode.isInputValid({
-      valueA: true,
-      valueB: false
-    });
-    expect(res).toBe(true);
-  });
-
-  test('should have invalid inputs', async () => {
-    let res = await AndNode.isInputValid({
-      valueA: null,
-      valueB: true
-    });
-    expect(res).toBe(false);
-
-    res = await AndNode.isInputValid({
-      valueA: true,
-      valueB: undefined
-    });
-    expect(res).toBe(false);
   });
 
   test('should valid empty object for onMetaExecution', async () => {

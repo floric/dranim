@@ -4,7 +4,7 @@ import { BooleanInputNode } from '../../../../src/main/nodes/boolean/input';
 
 describe('BooleanInputNode', () => {
   test('should have correct properties', () => {
-    expect(BooleanInputNode.name).toBe(BooleanInputNodeDef.name);
+    expect(BooleanInputNode.type).toBe(BooleanInputNodeDef.type);
     expect(BooleanInputNode.isFormValid).toBeUndefined();
     expect(BooleanInputNode.isInputValid).toBeUndefined();
   });

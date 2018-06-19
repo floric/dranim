@@ -1,4 +1,5 @@
 import {
+  allAreDefinedAndPresent,
   BooleanOperatorInputs,
   BooleanOperatorOutputs,
   OrNodeDef,
@@ -9,21 +10,9 @@ export const OrNode: ServerNodeDef<
   BooleanOperatorInputs,
   BooleanOperatorOutputs
 > = {
-  name: OrNodeDef.name,
-  isInputValid: async inputs => {
-    if (inputs.valueA == null || inputs.valueB == null) {
-      return false;
-    }
-
-    return true;
-  },
+  type: OrNodeDef.type,
   onMetaExecution: async (form, inputs, db) => {
-    if (
-      !inputs.valueA ||
-      !inputs.valueB ||
-      !inputs.valueA.isPresent ||
-      !inputs.valueB.isPresent
-    ) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return {
         value: {
           content: {},

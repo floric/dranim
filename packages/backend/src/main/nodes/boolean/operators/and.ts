@@ -1,4 +1,5 @@
 import {
+  allAreDefinedAndPresent,
   AndNodeDef,
   BooleanOperatorInputs,
   BooleanOperatorOutputs,
@@ -9,21 +10,9 @@ export const AndNode: ServerNodeDef<
   BooleanOperatorInputs,
   BooleanOperatorOutputs
 > = {
-  name: AndNodeDef.name,
-  isInputValid: async inputs => {
-    if (inputs.valueA == null || inputs.valueB == null) {
-      return false;
-    }
-
-    return true;
-  },
+  type: AndNodeDef.type,
   onMetaExecution: async (form, inputs, db) => {
-    if (
-      !inputs.valueA ||
-      !inputs.valueB ||
-      !inputs.valueA.isPresent ||
-      !inputs.valueB.isPresent
-    ) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return {
         value: {
           content: {},

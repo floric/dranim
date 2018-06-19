@@ -1,4 +1,4 @@
-import { Dataset, UploadProcess } from '@masterthesis/shared';
+import { Dataset, DataType, UploadProcess } from '@masterthesis/shared';
 import * as fastCsv from 'fast-csv';
 import { Collection, Db, ObjectID } from 'mongodb';
 import * as promisesAll from 'promises-all';
@@ -47,14 +47,14 @@ const validateEntry = (parsedObj: any, schema: Array<Valueschema>) => {
       return false;
     }
 
-    if (s.type === 'Number' && Number.isNaN(correspondingVal)) {
+    if (s.type === DataType.NUMBER && Number.isNaN(correspondingVal)) {
       return false;
     } else if (
-      s.type === 'Boolean' &&
+      s.type === DataType.BOOLEAN &&
       (correspondingVal !== 'true' || correspondingVal !== 'false')
     ) {
       return false;
-    } else if (s.type === 'Date') {
+    } else if (s.type === DataType.DATETIME) {
       // TODO validate date
     }
 

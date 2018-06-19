@@ -5,15 +5,13 @@ import {
   ServerNodeDef
 } from '@masterthesis/shared';
 
-import { validateNumber } from './utils';
-
 export const NumberInputNode: ServerNodeDef<
   {},
   NumberInputNodeOutputs,
   NumberInputNodeForm
 > = {
-  name: NumberInputNodeDef.name,
-  isFormValid: form => Promise.resolve(validateNumber(form.value)),
+  type: NumberInputNodeDef.type,
+  isFormValid: form => Promise.resolve(form.value != null),
   onMetaExecution: async form => {
     if (form.value == null) {
       return {

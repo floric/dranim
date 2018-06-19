@@ -46,29 +46,9 @@ describe('JoinDatasetsNode', () => {
   });
 
   test('should have correct properties', () => {
-    expect(JoinDatasetsNode.name).toBe(JoinDatasetsNodeDef.name);
+    expect(JoinDatasetsNode.type).toBe(JoinDatasetsNodeDef.type);
     expect(JoinDatasetsNode.isFormValid).toBeDefined();
-    expect(JoinDatasetsNode.isInputValid).toBeDefined();
-  });
-
-  test('should have valid inputs and invalid inputs', async () => {
-    let res = await JoinDatasetsNode.isInputValid({
-      datasetA: { datasetId: 'a' },
-      datasetB: { datasetId: 'b' }
-    });
-    expect(res).toBe(true);
-
-    res = await JoinDatasetsNode.isInputValid({
-      datasetA: { datasetId: null },
-      datasetB: { datasetId: 'a' }
-    });
-    expect(res).toBe(false);
-
-    res = await JoinDatasetsNode.isInputValid({
-      datasetA: null,
-      datasetB: { datasetId: 't' }
-    });
-    expect(res).toBe(false);
+    expect(JoinDatasetsNode.isInputValid).toBeUndefined();
   });
 
   test('should validate form', async () => {

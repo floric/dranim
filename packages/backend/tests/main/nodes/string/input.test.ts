@@ -4,9 +4,22 @@ import { StringInputNode } from '../../../../src/main/nodes/string/input';
 
 describe('StringInputNode', () => {
   test('should have correct properties', () => {
-    expect(StringInputNode.name).toBe(StringInputNodeDef.name);
-    expect(StringInputNode.isFormValid).toBeUndefined();
+    expect(StringInputNode.type).toBe(StringInputNodeDef.type);
+    expect(StringInputNode.isFormValid).toBeDefined();
     expect(StringInputNode.isInputValid).toBeUndefined();
+  });
+
+  test('should have invalid form', async () => {
+    const res = await StringInputNode.isFormValid({ value: null });
+    expect(res).toBe(false);
+  });
+
+  test('should have valid form', async () => {
+    let res = await StringInputNode.isFormValid({ value: '' });
+    expect(res).toBe(true);
+
+    res = await StringInputNode.isFormValid({ value: 'test' });
+    expect(res).toBe(true);
   });
 
   test('should get output value from form', async () => {

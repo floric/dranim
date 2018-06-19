@@ -4,7 +4,7 @@ import { NumberInputNode } from '../../../../src/main/nodes/number/input';
 
 describe('NumberInputNode', () => {
   test('should have correct properties', () => {
-    expect(NumberInputNode.name).toBe(NumberInputNodeDef.name);
+    expect(NumberInputNode.type).toBe(NumberInputNodeDef.type);
     expect(NumberInputNode.isFormValid).toBeDefined();
     expect(NumberInputNode.isInputValid).toBeUndefined();
   });
@@ -17,9 +17,6 @@ describe('NumberInputNode', () => {
     expect(res).toBe(true);
 
     res = await NumberInputNode.isFormValid({ value: null });
-    expect(res).toBe(false);
-
-    res = await NumberInputNode.isFormValid({ value: 'test' as any });
     expect(res).toBe(false);
   });
 

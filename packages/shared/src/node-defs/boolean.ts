@@ -10,7 +10,8 @@ export interface BooleanInputNodeForm {
 }
 
 export const BooleanInputNodeDef: NodeDef<{}, BooleanInputNodeOutputs> = {
-  name: 'Boolean Input',
+  name: 'Input',
+  type: 'BooleanInput',
   inputs: {},
   outputs: {
     value: BooleanSocket('Boolean')
@@ -28,7 +29,8 @@ export interface BooleanOutputNodeResults {
 }
 
 export const BooleanOutputNodeDef: NodeDef<BooleanOutputNodeInputs, {}> = {
-  name: 'Boolean Output',
+  name: 'Output',
+  type: 'BooleanOutput',
   inputs: {
     value: BooleanSocket('Boolean')
   },
@@ -52,6 +54,7 @@ export const EqualsStringNodeDef: NodeDef<
   EqualsStringNodeOutputs
 > = {
   name: 'Equals String',
+  type: 'EqualsString',
   inputs: {
     valueA: StringSocket('Value A'),
     valueB: StringSocket('Value B')
@@ -77,6 +80,7 @@ export const AndNodeDef: NodeDef<
   BooleanOperatorOutputs
 > = {
   name: 'And',
+  type: 'And',
   inputs: {
     valueA: BooleanSocket('Value A'),
     valueB: BooleanSocket('Value B')
@@ -93,6 +97,7 @@ export const OrNodeDef: NodeDef<
   BooleanOperatorOutputs
 > = {
   name: 'Or',
+  type: 'Or',
   inputs: {
     valueA: BooleanSocket('Value A'),
     valueB: BooleanSocket('Value B')
@@ -109,6 +114,7 @@ export const XorNodeDef: NodeDef<
   BooleanOperatorOutputs
 > = {
   name: 'Xor',
+  type: 'Xor',
   inputs: {
     valueA: BooleanSocket('Value A'),
     valueB: BooleanSocket('Value B')

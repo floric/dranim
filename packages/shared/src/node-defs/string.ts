@@ -10,7 +10,8 @@ export interface StringInputNodeForm {
 }
 
 export const StringInputNodeDef: NodeDef<{}, StringInputNodeOutputs> = {
-  name: 'String Input',
+  name: 'Input',
+  type: 'StringInput',
   inputs: {},
   outputs: {
     value: StringSocket('String')
@@ -28,7 +29,8 @@ export interface StringOutputNodeResults {
 }
 
 export const StringOutputNodeDef: NodeDef<StringOutputNodeInputs, {}> = {
-  name: 'String Output',
+  name: 'Output',
+  type: 'StringOutput',
   inputs: {
     value: StringSocket('String')
   },

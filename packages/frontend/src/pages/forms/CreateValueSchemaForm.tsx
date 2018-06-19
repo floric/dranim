@@ -51,8 +51,8 @@ class CreateValueSchemaFormImpl extends React.Component<
         case DataType.BOOLEAN:
           fallback = form.getFieldValue('fallbackBoolean');
           break;
-        case DataType.DATE:
-          fallback = form.getFieldValue('fallbackDate');
+        case DataType.DATETIME:
+          fallback = form.getFieldValue('fallbackDatetime');
           break;
         case DataType.NUMBER:
           fallback = form.getFieldValue('fallbackNumber');
@@ -125,7 +125,7 @@ class CreateValueSchemaFormImpl extends React.Component<
                   DataType.STRING,
                   DataType.NUMBER,
                   DataType.BOOLEAN,
-                  DataType.DATE
+                  DataType.DATETIME
                 ].map(type => (
                   <Select.Option value={type} key={`option-${type}`}>
                     {type}
@@ -149,9 +149,9 @@ class CreateValueSchemaFormImpl extends React.Component<
             })(<Input placeholder="Fallback" />)}
           </Form.Item>
         )}
-        {valueType === DataType.DATE && (
+        {valueType === DataType.DATETIME && (
           <Form.Item label="Fallback">
-            {getFieldDecorator('fallbackDate', {
+            {getFieldDecorator('fallbackDatetime', {
               initialValue: moment(),
               rules: [{ required: true, message: 'Please specify a value.' }]
             })(

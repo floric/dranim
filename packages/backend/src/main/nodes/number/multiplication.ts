@@ -1,26 +1,18 @@
 import {
+  allAreDefinedAndPresent,
   MultiplicationNodeDef,
   MultiplicationNodeInputs,
   MultiplicationNodeOutputs,
   ServerNodeDef
 } from '@masterthesis/shared';
 
-import { validateNumber } from './utils';
-
 export const MultiplicationNode: ServerNodeDef<
   MultiplicationNodeInputs,
   MultiplicationNodeOutputs
 > = {
-  name: MultiplicationNodeDef.name,
-  isInputValid: values =>
-    Promise.resolve(validateNumber(values.a) && validateNumber(values.b)),
+  type: MultiplicationNodeDef.type,
   onMetaExecution: async (form, inputs) => {
-    if (
-      inputs.a == null ||
-      inputs.b == null ||
-      !inputs.a.isPresent ||
-      !inputs.b.isPresent
-    ) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return {
         product: { content: {}, isPresent: false }
       };

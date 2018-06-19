@@ -84,19 +84,19 @@ describe('Start Process', () => {
     await Promise.all(
       [
         {
-          type: NumberOutputNodeDef.name,
+          type: NumberOutputNodeDef.type,
           workspaceId: ws.id,
           x: 0,
           y: 0
         },
         {
-          type: DatasetOutputNodeDef.name,
+          type: DatasetOutputNodeDef.type,
           workspaceId: ws.id,
           x: 0,
           y: 0
         },
         {
-          type: NumberInputNodeDef.name,
+          type: NumberInputNodeDef.type,
           workspaceId: ws.id,
           x: 0,
           y: 0
@@ -136,7 +136,7 @@ describe('Start Process', () => {
     await Promise.all(
       [
         {
-          type: NumberOutputNodeDef.name,
+          type: NumberOutputNodeDef.type,
           workspaceId: ws.id,
           x: 0,
           y: 0

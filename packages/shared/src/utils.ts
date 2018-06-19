@@ -6,6 +6,7 @@ import {
   ServerNodeDef,
   ServerNodeDefWithContextFn
 } from './nodes';
+import { SocketMetaDef } from './sockets';
 
 export const parseNodeForm = (form: Array<FormValue>): FormValues<any> => {
   const fullForm = {};
@@ -31,9 +32,13 @@ export const sleep = (ms: number): Promise<void> => sleepPromise(ms);
 
 export const hasContextFn = (
   nodeDef: ServerNodeDef | ServerNodeDefWithContextFn
-): nodeDef is ServerNodeDefWithContextFn => {
-  return (
-    (nodeDef as ServerNodeDefWithContextFn)
-      .transformInputDefsToContextInputDefs !== undefined
-  );
-};
+): nodeDef is ServerNodeDefWithContextFn =>
+  (nodeDef as ServerNodeDefWithContextFn)
+    .transformInputDefsToContextInputDefs !== undefined;
+
+export const allAreDefinedAndPresent = (inputs: {
+  [name: string]: SocketMetaDef<any>;
+}) =>
+  Object.values(inputs)
+    .map(i => i != null && i.isPresent === true)
+    .reduce((a, b) => a && b, true);

@@ -6,17 +6,16 @@ import {
 } from '@masterthesis/shared';
 
 import { getDataset } from '../../workspace/dataset';
-import { validateDataset } from './utils';
 
 export const DatasetInputNode: ServerNodeDef<
   {},
   DatasetInputNodeOutputs,
   DatasetInputNodeForm
 > = {
-  name: DatasetInputNodeDef.name,
-  isFormValid: form => Promise.resolve(!!form.dataset),
+  type: DatasetInputNodeDef.type,
+  isFormValid: form => Promise.resolve(form.dataset != null),
   onMetaExecution: async (form, inputs, db) => {
-    if (!form.dataset) {
+    if (form.dataset == null) {
       return {
         dataset: { isPresent: false, content: { schema: [] } }
       };
@@ -39,8 +38,6 @@ export const DatasetInputNode: ServerNodeDef<
     };
   },
   onNodeExecution: async (form, inputs, { db }) => {
-    await validateDataset(form.dataset!, db);
-
     return {
       outputs: {
         dataset: {

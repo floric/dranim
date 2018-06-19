@@ -1,4 +1,5 @@
 import {
+  allAreDefinedAndPresent,
   EditEntriesNodeDef,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
@@ -18,28 +19,21 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs
 > = {
-  name: EditEntriesNodeDef.name,
+  type: EditEntriesNodeDef.type,
   transformContextInputDefsToContextOutputDefs: async (
     inputDefs,
     inputs,
     contextInputDefs
   ) => {
-    if (!inputs.dataset || !inputs.dataset.isPresent) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return {};
     }
 
     return contextInputDefs;
   },
   transformInputDefsToContextInputDefs: getDynamicEntryContextInputs,
-  isInputValid: async inputs => {
-    if (!inputs.dataset || !inputs.dataset.datasetId) {
-      return false;
-    }
-
-    return true;
-  },
   onMetaExecution: async (form, inputs, db) => {
-    if (!inputs.dataset || !inputs.dataset.isPresent) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return { dataset: { content: { schema: [] }, isPresent: false } };
     }
 
@@ -48,7 +42,7 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
   onNodeExecution: async (form, inputs, { db, onContextFnExecution, node }) => {
     const newDs = await createDataset(
       db,
-      createDynamicDatasetName(EditEntriesNodeDef.name, node.id)
+      createDynamicDatasetName(EditEntriesNodeDef.type, node.id)
     );
     const oldDs = await getDataset(db, inputs.dataset.datasetId);
     if (!oldDs) {

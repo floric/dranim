@@ -4,19 +4,27 @@ import {
   FormValues,
   hasContextFn,
   IOValues,
-  NodeDef,
   NodeExecutionResult,
   NodeInstance,
   parseNodeForm,
-  ServerNodeDef,
   ServerNodeDefWithContextFn
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { serverNodeTypes } from '../nodes/all-nodes';
-import { getConnection } from '../workspace/connections';
-import { getNode } from '../workspace/nodes';
+import { tryGetNodeType } from '../nodes/all-nodes';
+import { tryGetConnection } from '../workspace/connections';
+import { tryGetNode } from '../workspace/nodes';
 import { getContextNode } from '../workspace/nodes-detail';
+import { areNodeInputsValid, isNodeInMetaValid } from './validation';
+
+export const executeNodeWithId = async (
+  db: Db,
+  nodeId: string,
+  contextInputs?: IOValues<any>
+) => {
+  const node = await tryGetNode(nodeId, db);
+  return await executeNode(db, node, contextInputs);
+};
 
 export const executeNode = async (
   db: Db,
@@ -40,16 +48,12 @@ export const executeNode = async (
     return getContextNodeOutputs(inputValues);
   }
 
-  const type = serverNodeTypes.get(node.type);
-  if (!type) {
-    throw new Error('Unknown node type');
-  }
-
   const nodeInputs = inputValuesToObject(inputValues);
   const nodeForm = parseNodeForm(node.form);
 
-  await checkValidInputAndForm(type, nodeInputs, nodeForm);
+  await validateMetaAndExecution(node, nodeInputs, db);
 
+  const type = tryGetNodeType(node.type);
   if (hasContextFn(type)) {
     return await calculateContext(node, type, nodeForm, nodeInputs, db);
   }
@@ -57,12 +61,21 @@ export const executeNode = async (
   return await type.onNodeExecution(nodeForm, nodeInputs, { db, node });
 };
 
-const tryGetNode = async (nodeId: string, db: Db) => {
-  const node = await getNode(db, nodeId);
-  if (!node) {
-    throw new Error('Node not found');
+const validateMetaAndExecution = async (
+  node: NodeInstance,
+  nodeInputs: IOValues<{}>,
+  db: Db
+) => {
+  const [metaValid, execValid] = await Promise.all([
+    isNodeInMetaValid(node, db),
+    areNodeInputsValid(node, nodeInputs, db)
+  ]);
+  if (!metaValid) {
+    throw new Error('Form values or inputs are missing');
   }
-  return node;
+  if (!execValid) {
+    throw new Error('Execution inputs are not valid');
+  }
 };
 
 const calculateContext = async (
@@ -72,12 +85,13 @@ const calculateContext = async (
   nodeInputs: IOValues<any>,
   db: Db
 ) => {
-  const outputNode = await getContextNode(node, ContextNodeType.OUTPUT, db);
+  const [outputNode, inputNode] = await Promise.all([
+    getContextNode(node, ContextNodeType.OUTPUT, db),
+    getContextNode(node, ContextNodeType.INPUT, db)
+  ]);
   if (!outputNode) {
     throw Error('Missing output node');
   }
-
-  const inputNode = await getContextNode(node, ContextNodeType.INPUT, db);
   if (!inputNode) {
     throw Error('Missing input node');
   }
@@ -109,42 +123,19 @@ const getConnectionResult = async (
   db: Db,
   contextInputs?: IOValues<any>
 ) => {
-  const c = await getConnection(db, i.connectionId);
-  if (!c) {
-    throw new Error('Invalid connection');
-  }
-
-  const inputNode = await tryGetNode(c.from.nodeId, db);
+  const conn = await tryGetConnection(i.connectionId, db);
+  const inputNode = await tryGetNode(conn.from.nodeId, db);
   const nodeRes = await executeNode(db, inputNode, contextInputs);
 
-  return { socketName: i.name, value: nodeRes.outputs[c.from.name] };
+  return { socketName: i.name, value: nodeRes.outputs[conn.from.name] };
 };
 
 const inputValuesToObject = (
   inputValues: Array<{ socketName: string; value: string }>
-) => {
+): IOValues<{}> => {
   const inputs = {};
   inputValues.forEach(i => {
     inputs[i.socketName] = i.value;
   });
   return inputs;
-};
-
-const checkValidInputAndForm = async (
-  type: NodeDef & ServerNodeDef,
-  inputs: IOValues<{}>,
-  form: FormValues<{}>
-) => {
-  const isValidForm = type.isFormValid ? await type.isFormValid(form) : true;
-  const isValidInput = type.isInputValid
-    ? await type.isInputValid(inputs)
-    : true;
-
-  if (!isValidForm) {
-    throw new Error('Invalid form');
-  }
-
-  if (!isValidInput) {
-    throw new Error('Invalid input');
-  }
 };

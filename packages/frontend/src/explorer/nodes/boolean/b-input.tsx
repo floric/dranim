@@ -15,7 +15,7 @@ export const BooleanInputNode: ClientNodeDef<
   BooleanInputNodeOutputs,
   BooleanInputNodeForm
 > = {
-  name: BooleanInputNodeDef.name,
+  type: BooleanInputNodeDef.type,
   renderFormItems: ({ form: { getFieldDecorator }, nodeForm }) => {
     const value = getValueOrDefault(nodeForm, 'value', true);
     return (

@@ -1,6 +1,7 @@
 import {
   AddValuesNodeDef,
   AddValuesNodeForm,
+  allAreDefinedAndPresent,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
   ServerNodeDefWithContextFn,
@@ -27,7 +28,7 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeOutputs,
   AddValuesNodeForm
 > = {
-  name: AddValuesNodeDef.name,
+  type: AddValuesNodeDef.type,
   transformContextInputDefsToContextOutputDefs: async (
     inputDefs,
     inputs,
@@ -35,7 +36,7 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
     contextInputs,
     form
   ) => {
-    if (!inputs.dataset || !inputs.dataset.isPresent) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return {};
     }
 
@@ -55,13 +56,6 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
     return { ...contextInputDefs, ...dynOutputs };
   },
   transformInputDefsToContextInputDefs: getDynamicEntryContextInputs,
-  isInputValid: async inputs => {
-    if (!inputs.dataset || !inputs.dataset.datasetId) {
-      return false;
-    }
-
-    return true;
-  },
   isFormValid: async form => {
     if (!form.values || form.values.length === 0) {
       return false;
@@ -70,7 +64,7 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
     return true;
   },
   onMetaExecution: async (form, inputs, db) => {
-    if (!inputs.dataset || !inputs.dataset.isPresent) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return { dataset: { content: { schema: [] }, isPresent: false } };
     }
 
@@ -91,7 +85,7 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
 
     const newDs = await createDataset(
       db,
-      createDynamicDatasetName(AddValuesNodeDef.name, node.id)
+      createDynamicDatasetName(AddValuesNodeDef.type, node.id)
     );
 
     await copySchemas(oldDs.valueschemas, newDs.id, db);
@@ -120,6 +114,4 @@ const addDynamicSchemas = async (
   dsId: string,
   formValues: Array<ValueSchema>,
   db: Db
-) => {
-  await Promise.all(formValues.map(f => addValueSchema(db, dsId, f)));
-};
+) => Promise.all(formValues.map(f => addValueSchema(db, dsId, f)));

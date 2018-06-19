@@ -4,9 +4,9 @@ import { XorNode } from '../../../../../src/main/nodes/boolean/operators/xor';
 
 describe('XorNode', () => {
   test('should have correct properties', () => {
-    expect(XorNode.name).toBe(XorNodeDef.name);
+    expect(XorNode.type).toBe(XorNodeDef.type);
     expect(XorNode.isFormValid).toBeUndefined();
-    expect(XorNode.isInputValid).toBeDefined();
+    expect(XorNode.isInputValid).toBeUndefined();
   });
 
   test('should return empty object for onMetaExecution', async () => {
@@ -59,34 +59,6 @@ describe('XorNode', () => {
       null
     );
     expect(res).toEqual({ value: { content: {}, isPresent: false } });
-  });
-
-  test('should have valid inputs', async () => {
-    let res = await XorNode.isInputValid({
-      valueA: true,
-      valueB: true
-    });
-    expect(res).toBe(true);
-
-    res = await XorNode.isInputValid({
-      valueA: true,
-      valueB: false
-    });
-    expect(res).toBe(true);
-  });
-
-  test('should have invalid inputs', async () => {
-    let res = await XorNode.isInputValid({
-      valueA: null,
-      valueB: true
-    });
-    expect(res).toBe(false);
-
-    res = await XorNode.isInputValid({
-      valueA: true,
-      valueB: undefined
-    });
-    expect(res).toBe(false);
   });
 
   test('should valid empty object for onMetaExecution', async () => {

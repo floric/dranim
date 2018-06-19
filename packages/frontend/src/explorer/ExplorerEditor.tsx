@@ -166,6 +166,7 @@ export class ExplorerEditor extends React.Component<
     const node = selectedNodeId
       ? nodes.find(n => n.id === selectedNodeId)
       : null;
+    const nodeType = node ? nodeTypes.get(node.type) || null : null;
 
     const renderFormItems = node
       ? nodeTypes.get(node.type)!.renderFormItems || null
@@ -187,7 +188,7 @@ export class ExplorerEditor extends React.Component<
           <Col xs={24} md={16} lg={18} xxl={20}>
             <Card
               bordered={false}
-              title={node ? node.type : 'Nothing selected'}
+              title={nodeType ? nodeType.name : 'Nothing selected'}
               style={{ marginBottom: 12 }}
             >
               <Row gutter={12}>

@@ -11,7 +11,7 @@ export const StringOutputNode: ServerNodeDef<
   {},
   StringOutputNodeResults
 > = {
-  name: StringOutputNodeDef.name,
+  type: StringOutputNodeDef.type,
   onMetaExecution: () => Promise.resolve({}),
   onNodeExecution: (form, inputs) =>
     Promise.resolve({

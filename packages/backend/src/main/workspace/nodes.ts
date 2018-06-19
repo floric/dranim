@@ -6,7 +6,7 @@ import {
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
-import { serverNodeTypes } from '../nodes/all-nodes';
+import { serverNodeTypes, tryGetNodeType } from '../nodes/all-nodes';
 import { deleteConnection, getConnectionsCollection } from './connections';
 import { getWorkspace, updateLastChange } from './workspace';
 
@@ -24,10 +24,7 @@ export const createNode = async (
   x: number,
   y: number
 ): Promise<NodeInstance> => {
-  const nodeType = serverNodeTypes.get(type);
-  if (!nodeType) {
-    throw new Error('Invalid node type');
-  }
+  const nodeType = tryGetNodeType(type);
 
   await checkNoOutputNodeInContexts(type, contextNodeIds);
   await checkValidContextNode(contextNodeIds, db);
@@ -227,4 +224,12 @@ export const getNode = async (
     id: _id.toHexString(),
     form: valueNames.map(name => ({ name, value: obj.form[name] }))
   };
+};
+
+export const tryGetNode = async (nodeId: string, db: Db) => {
+  const node = await getNode(db, nodeId);
+  if (!node) {
+    throw new Error('Node not found');
+  }
+  return node;
 };

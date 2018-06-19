@@ -1,11 +1,10 @@
 import {
+  allAreDefinedAndPresent,
   DatasetOutputNodeDef,
   DatasetOutputNodeInputs,
   DatasetOutputNodeResults,
   ServerNodeDef
 } from '@masterthesis/shared';
-
-import { validateDataset, validateDatasetInput } from './utils';
 
 export const DatasetOutputNode: ServerNodeDef<
   DatasetOutputNodeInputs,
@@ -13,10 +12,9 @@ export const DatasetOutputNode: ServerNodeDef<
   {},
   DatasetOutputNodeResults
 > = {
-  name: DatasetOutputNodeDef.name,
-  isInputValid: inputs => validateDatasetInput(inputs),
+  type: DatasetOutputNodeDef.type,
   onMetaExecution: async (form, inputs) => {
-    if (!inputs.dataset || !inputs.dataset.isPresent) {
+    if (!allAreDefinedAndPresent(inputs)) {
       return {
         dataset: { content: { schema: [] }, isPresent: false }
       };
@@ -24,12 +22,8 @@ export const DatasetOutputNode: ServerNodeDef<
 
     return inputs;
   },
-  onNodeExecution: async (form, inputs, { db }) => {
-    await validateDataset(inputs.dataset.datasetId, db);
-
-    return {
-      outputs: {},
-      results: { dataset: inputs.dataset }
-    };
-  }
+  onNodeExecution: async (form, inputs, { db }) => ({
+    outputs: {},
+    results: { dataset: inputs.dataset }
+  })
 };
