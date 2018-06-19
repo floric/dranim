@@ -1,11 +1,10 @@
 import {
+  allAreDefinedAndPresent,
   DatasetOutputNodeDef,
   DatasetOutputNodeInputs,
   DatasetOutputNodeResults,
   ServerNodeDef
 } from '@masterthesis/shared';
-
-import { allAreDefinedAndPresent } from '../../calculation/validation';
 
 export const DatasetOutputNode: ServerNodeDef<
   DatasetOutputNodeInputs,

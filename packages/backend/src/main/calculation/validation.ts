@@ -1,20 +1,19 @@
 import {
+  ContextNodeType,
+  DataType,
   IOValues,
   NodeInstance,
-  ContextNodeType,
-  parseNodeForm,
-  DataType,
-  SocketMetaDef
+  parseNodeForm
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { getDataset } from '../workspace/dataset';
 import { tryGetNodeType } from '../nodes/all-nodes';
-import { getMetaInputs, getInputDefs } from '../workspace/nodes-detail';
+import { getDataset } from '../workspace/dataset';
+import { getInputDefs, getMetaInputs } from '../workspace/nodes-detail';
 
 export const isNodeInMetaValid = async (node: NodeInstance, db: Db) => {
   let isValidForm = true;
-  let isValidInput = true;
+  const isValidInput = true;
   if (
     node.type !== ContextNodeType.INPUT &&
     node.type !== ContextNodeType.OUTPUT
@@ -100,10 +99,3 @@ export const isInputValid = async (input: any, dataType: DataType, db: Db) => {
 
   return await validationMethods.get(dataType)!(input, db);
 };
-
-export const allAreDefinedAndPresent = (inputs: {
-  [name: string]: SocketMetaDef<any>;
-}) =>
-  Object.values(inputs)
-    .map(i => i != null && i.isPresent === true)
-    .reduce((a, b) => a && b, true);

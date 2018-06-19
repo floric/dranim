@@ -1,8 +1,8 @@
 import { Dataset, Entry, Values } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
-import { UploadEntryError } from './upload';
 import { getDataset } from './dataset';
+import { UploadEntryError } from './upload';
 
 export const getEntryCollection = (
   db: Db,

@@ -1,4 +1,5 @@
 import {
+  allAreDefinedAndPresent,
   EditEntriesNodeDef,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
@@ -13,7 +14,6 @@ import {
   getDynamicEntryContextInputs,
   processEntries
 } from './utils';
-import { allAreDefinedAndPresent } from '../../calculation/validation';
 
 export const EditEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,

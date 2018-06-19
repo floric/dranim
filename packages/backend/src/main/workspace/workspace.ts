@@ -4,6 +4,7 @@ import {
   Workspace
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
+
 import { getConnectionsCollection } from './connections';
 import { getNodesCollection } from './nodes';
 

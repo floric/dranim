@@ -1,4 +1,4 @@
-import { Dataset, UploadProcess, DataType } from '@masterthesis/shared';
+import { Dataset, DataType, UploadProcess } from '@masterthesis/shared';
 import * as fastCsv from 'fast-csv';
 import { Collection, Db, ObjectID } from 'mongodb';
 import * as promisesAll from 'promises-all';

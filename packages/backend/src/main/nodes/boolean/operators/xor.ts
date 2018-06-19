@@ -1,11 +1,10 @@
 import {
+  allAreDefinedAndPresent,
   BooleanOperatorInputs,
   BooleanOperatorOutputs,
   ServerNodeDef,
   XorNodeDef
 } from '@masterthesis/shared';
-
-import { allAreDefinedAndPresent } from '../../../calculation/validation';
 
 export const XorNode: ServerNodeDef<
   BooleanOperatorInputs,

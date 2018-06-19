@@ -1,11 +1,10 @@
 import {
+  allAreDefinedAndPresent,
   BooleanOperatorInputs,
   BooleanOperatorOutputs,
   OrNodeDef,
   ServerNodeDef
 } from '@masterthesis/shared';
-
-import { allAreDefinedAndPresent } from '../../../calculation/validation';
 
 export const OrNode: ServerNodeDef<
   BooleanOperatorInputs,

@@ -1,7 +1,9 @@
 const numbro = require('numbro');
-import { FormatNumberNodeDef, ServerNodeDef } from '@masterthesis/shared';
-
-import { allAreDefinedAndPresent } from '../../calculation/validation';
+import {
+  allAreDefinedAndPresent,
+  FormatNumberNodeDef,
+  ServerNodeDef
+} from '@masterthesis/shared';
 
 export const FormatNumberNode: ServerNodeDef<
   { number: number },

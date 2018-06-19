@@ -1,25 +1,25 @@
 import {
+  BooleanOutputNodeDef,
   ContextNodeType,
   DatasetInputNodeDef,
   DatasetOutputNodeDef,
   DataType,
   EditEntriesNodeDef,
+  JoinDatasetsNodeDef,
   NumberInputNodeDef,
   NumberOutputNodeDef,
   StringInputNodeDef,
   StringOutputNodeDef,
-  SumNodeDef,
-  BooleanOutputNodeDef,
-  JoinDatasetsNodeDef
+  SumNodeDef
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import {
-  isNodeInMetaValid,
   areNodeInputsValid,
   isInputValid,
-  allAreDefinedAndPresent
+  isNodeInMetaValid
 } from '../../../src/main/calculation/validation';
+import { StringOutputNode } from '../../../src/main/nodes/string';
 import { createConnection } from '../../../src/main/workspace/connections';
 import {
   addValueSchema,
@@ -28,8 +28,8 @@ import {
 import { createEntry, getAllEntries } from '../../../src/main/workspace/entry';
 import {
   createNode,
-  getNodesCollection,
-  getNode
+  getNode,
+  getNodesCollection
 } from '../../../src/main/workspace/nodes';
 import {
   addOrUpdateFormValue,
@@ -44,7 +44,6 @@ import {
   NeverGoHereError,
   VALID_OBJECT_ID
 } from '../../test-utils';
-import { StringOutputNode } from '../../../src/main/nodes/string';
 
 let conn;
 let db: Db;
@@ -351,26 +350,5 @@ describe('Validation', () => {
   test('should return true for validation of unknown datatypes', async () => {
     const res = await isInputValid({}, 'test' as any, db);
     expect(res).toBe(true);
-  });
-
-  test('should have valid inputs', async () => {
-    let res = await allAreDefinedAndPresent({
-      val: { isPresent: true, content: {} }
-    });
-    expect(res).toBe(true);
-
-    res = await allAreDefinedAndPresent({
-      valA: { isPresent: true, content: {} },
-      valB: { isPresent: true, content: {} }
-    });
-    expect(res).toBe(true);
-  });
-
-  test('should have invalid inputs', async () => {
-    const res = await allAreDefinedAndPresent({
-      valA: { isPresent: true, content: {} },
-      valB: { isPresent: false, content: {} }
-    });
-    expect(res).toBe(false);
   });
 });

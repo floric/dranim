@@ -1,11 +1,10 @@
 import {
+  allAreDefinedAndPresent,
   EqualsStringNodeDef,
   EqualsStringNodeInputs,
   EqualsStringNodeOutputs,
   ServerNodeDef
 } from '@masterthesis/shared';
-
-import { allAreDefinedAndPresent } from '../../../calculation/validation';
 
 export const EqualsStringNode: ServerNodeDef<
   EqualsStringNodeInputs,

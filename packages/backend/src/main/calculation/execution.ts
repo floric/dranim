@@ -15,7 +15,7 @@ import { tryGetNodeType } from '../nodes/all-nodes';
 import { tryGetConnection } from '../workspace/connections';
 import { tryGetNode } from '../workspace/nodes';
 import { getContextNode } from '../workspace/nodes-detail';
-import { isNodeInMetaValid, areNodeInputsValid } from './validation';
+import { areNodeInputsValid, isNodeInMetaValid } from './validation';
 
 export const executeNodeWithId = async (
   db: Db,

@@ -1,11 +1,10 @@
 import {
+  allAreDefinedAndPresent,
   ServerNodeDef,
   SumNodeDef,
   SumNodeNodeInputs,
   SumNodeNodeOutputs
 } from '@masterthesis/shared';
-
-import { allAreDefinedAndPresent } from '../../calculation/validation';
 
 export const SumNode: ServerNodeDef<SumNodeNodeInputs, SumNodeNodeOutputs> = {
   type: SumNodeDef.type,

@@ -1,4 +1,5 @@
 import {
+  allAreDefinedAndPresent,
   DataType,
   FilterEntriesNodeDef,
   ForEachEntryNodeInputs,
@@ -16,7 +17,6 @@ import {
 } from '../../workspace/dataset';
 import { createEntry } from '../../workspace/entry';
 import { processEntries } from './utils';
-import { allAreDefinedAndPresent } from '../../calculation/validation';
 
 export const FilterEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,

@@ -1,11 +1,10 @@
 import {
-  TimeInputNodeOutputs,
+  allAreDefinedAndPresent,
+  ServerNodeDef,
   TimeConstructNodeDef,
   TimeConstructNodeInputs,
-  ServerNodeDef
+  TimeInputNodeOutputs
 } from '@masterthesis/shared';
-
-import { allAreDefinedAndPresent } from '../../calculation/validation';
 
 export const TimeConstructNode: ServerNodeDef<
   TimeConstructNodeInputs,

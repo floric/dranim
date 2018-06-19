@@ -1,5 +1,6 @@
 import { Visualization } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
+
 import { getDataset } from '../workspace/dataset';
 
 export const getVisCollection = (

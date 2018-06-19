@@ -1,10 +1,10 @@
 import {
-  ValueSchema,
+  DatasetMeta,
   Entry,
   SocketDef,
+  SocketDefs,
   SocketMetaDef,
-  DatasetMeta,
-  SocketDefs
+  ValueSchema
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 

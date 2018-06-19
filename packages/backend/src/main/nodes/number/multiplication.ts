@@ -1,11 +1,10 @@
 import {
+  allAreDefinedAndPresent,
   MultiplicationNodeDef,
   MultiplicationNodeInputs,
   MultiplicationNodeOutputs,
   ServerNodeDef
 } from '@masterthesis/shared';
-
-import { allAreDefinedAndPresent } from '../../calculation/validation';
 
 export const MultiplicationNode: ServerNodeDef<
   MultiplicationNodeInputs,

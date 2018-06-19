@@ -34,19 +34,6 @@ describe('DatasetOutputNode', () => {
     expect(DatasetOutputNodeDef.isOutputNode).toBe(true);
   });
 
-  test('should have invalid dataset', async () => {
-    try {
-      await DatasetOutputNode.onNodeExecution(
-        {},
-        { dataset: { datasetId: 'test' } },
-        { db, node: NODE }
-      );
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Unknown dataset');
-    }
-  });
-
   test('should have valid dataset', async () => {
     const ds = await createDataset(db, 'test');
 

@@ -5,7 +5,13 @@ import {
   NodeState,
   NumberInputNodeDef
 } from '../src';
-import { hasContextFn, isNumeric, parseNodeForm, sleep } from '../src/utils';
+import {
+  allAreDefinedAndPresent,
+  hasContextFn,
+  isNumeric,
+  parseNodeForm,
+  sleep
+} from '../src/utils';
 
 const createNodeWithForm = (form: Array<FormValue>): NodeInstance => ({
   id: '1',
@@ -20,7 +26,7 @@ const createNodeWithForm = (form: Array<FormValue>): NodeInstance => ({
 });
 
 describe('Utils', () => {
-  it('should parse empty node form', () => {
+  test('should parse empty node form', () => {
     const node = createNodeWithForm([]);
 
     const res = parseNodeForm(node.form);
@@ -28,7 +34,7 @@ describe('Utils', () => {
     expect(Object.keys(res).length).toBe(0);
   });
 
-  it('should parse valid node form', () => {
+  test('should parse valid node form', () => {
     const node = createNodeWithForm([
       { name: 'test', value: JSON.stringify(123) },
       { name: 'car', value: JSON.stringify('test') }
@@ -40,7 +46,7 @@ describe('Utils', () => {
     expect(res.car).toBe('test');
   });
 
-  it('should not parse node form with values with duplicated names', () => {
+  test('should not parse node form with values with duplicated names', () => {
     const node = createNodeWithForm([
       { name: 'test', value: JSON.stringify(123) },
       { name: 'test', value: JSON.stringify('test') }
@@ -55,7 +61,7 @@ describe('Utils', () => {
     }).toThrow('Duplicate form value names: test');
   });
 
-  it('should not parse node form and throw error for invalid values', () => {
+  test('should not parse node form and throw error for invalid values', () => {
     const node = createNodeWithForm([
       { name: 'test', value: JSON.stringify(123) },
       { name: 'car', value: 'invalid-str' }
@@ -67,7 +73,7 @@ describe('Utils', () => {
     expect(res.car).toBe(null);
   });
 
-  it('should be numeric', () => {
+  test('should be numeric', () => {
     expect(isNumeric(3)).toBe(true);
     expect(isNumeric(-3)).toBe(true);
     expect(isNumeric(3.14)).toBe(true);
@@ -76,7 +82,7 @@ describe('Utils', () => {
     expect(isNumeric('-3.14')).toBe(true);
   });
 
-  it('should not be numeric', () => {
+  test('should not be numeric', () => {
     expect(isNumeric('')).toBe(false);
     expect(isNumeric('a')).toBe(false);
     expect(isNumeric(null)).toBe(false);
@@ -84,7 +90,7 @@ describe('Utils', () => {
     expect(isNumeric(NaN)).toBe(false);
   });
 
-  it('should sleep', async () => {
+  test('should sleep', async () => {
     const now = new Date().getTime();
     await sleep(500);
     const later = new Date().getTime();
@@ -92,7 +98,7 @@ describe('Utils', () => {
     expect(later - now).toBeGreaterThan(499);
   });
 
-  it('should return true for node with context function', () => {
+  test('should return true for node with context function', () => {
     const res = hasContextFn({
       type: 'test',
       isFormValid: () => Promise.resolve(true),
@@ -105,13 +111,34 @@ describe('Utils', () => {
     expect(res).toBe(true);
   });
 
-  it('should return false for node without context function', () => {
+  test('should return false for node without context function', () => {
     const res = hasContextFn({
       type: 'test',
       isFormValid: () => Promise.resolve(true),
       isInputValid: () => Promise.resolve(true),
       onMetaExecution: () => Promise.resolve({}),
       onNodeExecution: () => Promise.resolve({ outputs: {} })
+    });
+    expect(res).toBe(false);
+  });
+
+  test('should have valid inputs', async () => {
+    let res = await allAreDefinedAndPresent({
+      val: { isPresent: true, content: {} }
+    });
+    expect(res).toBe(true);
+
+    res = await allAreDefinedAndPresent({
+      valA: { isPresent: true, content: {} },
+      valB: { isPresent: true, content: {} }
+    });
+    expect(res).toBe(true);
+  });
+
+  test('should have invalid inputs', async () => {
+    const res = await allAreDefinedAndPresent({
+      valA: { isPresent: true, content: {} },
+      valB: { isPresent: false, content: {} }
     });
     expect(res).toBe(false);
   });
