@@ -32,28 +32,29 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
     return contextInputDefs;
   },
   transformInputDefsToContextInputDefs: getDynamicEntryContextInputs,
-  onMetaExecution: async (form, inputs, db) => {
+  onMetaExecution: async (form, inputs) => {
     if (!allAreDefinedAndPresent(inputs)) {
       return { dataset: { content: { schema: [] }, isPresent: false } };
     }
 
     return inputs;
   },
-  onNodeExecution: async (form, inputs, { db, onContextFnExecution, node }) => {
-    const newDs = await createDataset(
-      db,
-      createDynamicDatasetName(EditEntriesNodeDef.type, node.id)
-    );
+  onNodeExecution: async (form, inputs, { db, contextFnExecution, node }) => {
     const oldDs = await getDataset(db, inputs.dataset.datasetId);
     if (!oldDs) {
       throw new Error('Unknown dataset source');
     }
 
+    const newDs = await createDataset(
+      db,
+      createDynamicDatasetName(EditEntriesNodeDef.type, node.id),
+      node.workspaceId
+    );
     await copySchemas(oldDs.valueschemas, newDs.id, db);
 
-    if (onContextFnExecution) {
+    if (contextFnExecution) {
       await processEntries(db, inputs.dataset.datasetId, async entry => {
-        const result = await onContextFnExecution(entry.values);
+        const result = await contextFnExecution(entry.values);
         await createEntry(db, newDs.id, result.outputs);
       });
     } else {

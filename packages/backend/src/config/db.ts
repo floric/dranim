@@ -12,7 +12,7 @@ export const mongoDbClient = async (): Promise<MongoClient> => {
   return promiseRetry(async (retry, i) => {
     console.log(`Retry ${i} connect to MongoDB`);
     try {
-      return await tryConnectoDb();
+      return await tryConnectToDb();
     } catch (err) {
       retry();
       return null;
@@ -20,7 +20,7 @@ export const mongoDbClient = async (): Promise<MongoClient> => {
   });
 };
 
-export const tryConnectoDb = async () => {
+const tryConnectToDb = async () => {
   const client = await MongoClient.connect(config.db);
   console.log('Connected to MongoDB');
   return client;

@@ -77,7 +77,7 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
       }
     };
   },
-  onNodeExecution: async (form, inputs, { db, onContextFnExecution, node }) => {
+  onNodeExecution: async (form, inputs, { db, contextFnExecution, node }) => {
     const oldDs = await getDataset(db, inputs.dataset.datasetId);
     if (!oldDs) {
       throw new Error('Unknown dataset source');
@@ -85,15 +85,16 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
 
     const newDs = await createDataset(
       db,
-      createDynamicDatasetName(AddValuesNodeDef.type, node.id)
+      createDynamicDatasetName(AddValuesNodeDef.type, node.id),
+      node.workspaceId
     );
 
     await copySchemas(oldDs.valueschemas, newDs.id, db);
     await addDynamicSchemas(newDs.id, form.values || [], db);
 
-    if (onContextFnExecution) {
+    if (contextFnExecution) {
       await processEntries(db, inputs.dataset.datasetId, async entry => {
-        const result = await onContextFnExecution(entry.values);
+        const result = await contextFnExecution(entry.values);
         await createEntry(db, newDs.id, result.outputs);
       });
     } else {

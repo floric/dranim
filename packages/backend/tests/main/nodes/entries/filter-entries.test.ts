@@ -68,7 +68,7 @@ describe('FilterEntriesNode', () => {
       {
         db,
         node: NODE,
-        onContextFnExecution: input =>
+        contextFnExecution: input =>
           Promise.resolve({ outputs: { keepEntry: true } })
       }
     );
@@ -228,7 +228,7 @@ describe('FilterEntriesNode', () => {
       {
         db,
         node: NODE,
-        onContextFnExecution: input =>
+        contextFnExecution: input =>
           Promise.resolve({
             outputs: { keepEntry: input.val < 10 }
           })

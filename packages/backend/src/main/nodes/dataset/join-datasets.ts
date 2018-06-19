@@ -71,7 +71,8 @@ export const JoinDatasetsNode: ServerNodeDef<
 
     const newDs = await createDataset(
       db,
-      createDynamicDatasetName(JoinDatasetsNodeDef.type, node.id)
+      createDynamicDatasetName(JoinDatasetsNodeDef.type, node.id),
+      node.workspaceId
     );
     await addSchemasFromBothDatasets(
       db,

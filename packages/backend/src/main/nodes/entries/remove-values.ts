@@ -54,7 +54,8 @@ export const RemoveValuesNode: ServerNodeDef<
     const usedValues = new Set(form.values!);
     const newDs = await createDataset(
       db,
-      createDynamicDatasetName(RemoveValuesNodeDef.type, node.id)
+      createDynamicDatasetName(RemoveValuesNodeDef.type, node.id),
+      node.workspaceId
     );
 
     await filterSchema(existingDs!, newDs, usedValues, db);

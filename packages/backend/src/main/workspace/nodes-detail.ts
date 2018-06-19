@@ -12,10 +12,10 @@ import {
 } from '@masterthesis/shared';
 import { Db, ObjectID } from 'mongodb';
 
+import { isNodeInMetaValid } from '../calculation/validation';
 import { serverNodeTypes, tryGetNodeType } from '../nodes/all-nodes';
 import { tryGetConnection } from './connections';
 import { getNode, getNodesCollection, tryGetNode } from './nodes';
-import { isNodeInMetaValid } from '../calculation/validation';
 
 export const getContextInputDefs = async (
   node: NodeInstance,
@@ -159,7 +159,7 @@ export const getInputDefs = async (
 
 export const getMetaInputs = async (node: NodeInstance, db: Db) => {
   const inputDefs = await getInputDefs(node, db);
-  let inputs: { [name: string]: SocketMetaDef<any> } = {};
+  const inputs: { [name: string]: SocketMetaDef<any> } = {};
 
   await Promise.all(
     Object.entries(inputDefs).map(async c => {

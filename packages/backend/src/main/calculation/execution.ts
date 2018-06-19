@@ -85,21 +85,15 @@ const calculateContext = async (
   nodeInputs: IOValues<any>,
   db: Db
 ) => {
-  const [outputNode, inputNode] = await Promise.all([
-    getContextNode(node, ContextNodeType.OUTPUT, db),
-    getContextNode(node, ContextNodeType.INPUT, db)
-  ]);
+  const outputNode = await getContextNode(node, ContextNodeType.OUTPUT, db);
   if (!outputNode) {
     throw Error('Missing output node');
-  }
-  if (!inputNode) {
-    throw Error('Missing input node');
   }
 
   return await type.onNodeExecution(nodeForm, nodeInputs, {
     db,
     node,
-    onContextFnExecution: inputs => executeNode(db, outputNode, inputs)
+    contextFnExecution: inputs => executeNode(db, outputNode, inputs)
   });
 };
 

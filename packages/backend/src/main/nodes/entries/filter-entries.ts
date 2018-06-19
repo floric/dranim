@@ -50,10 +50,11 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
 
     return inputs;
   },
-  onNodeExecution: async (form, inputs, { db, onContextFnExecution, node }) => {
+  onNodeExecution: async (form, inputs, { db, contextFnExecution, node }) => {
     const newDs = await createDataset(
       db,
-      createDynamicDatasetName(FilterEntriesNodeDef.type, node.id)
+      createDynamicDatasetName(FilterEntriesNodeDef.type, node.id),
+      node.workspaceId
     );
     const oldDs = await getDataset(db, inputs.dataset.datasetId);
     if (!oldDs) {
@@ -62,9 +63,9 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
 
     await copySchemas(oldDs.valueschemas, newDs.id, db);
 
-    if (onContextFnExecution) {
+    if (contextFnExecution) {
       await processEntries(db, inputs.dataset.datasetId, async entry => {
-        const result = await onContextFnExecution(entry.values);
+        const result = await contextFnExecution(entry.values);
         if (result.outputs.keepEntry) {
           await createEntry(db, newDs.id, entry.values);
         }

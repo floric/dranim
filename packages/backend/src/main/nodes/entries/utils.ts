@@ -1,6 +1,7 @@
 import {
   DatasetMeta,
   Entry,
+  sleep,
   SocketDef,
   SocketDefs,
   SocketMetaDef,
@@ -44,13 +45,12 @@ export const processEntries = async (
   processFn: (entry: Entry) => Promise<void>
 ) => {
   const coll = getEntryCollection(db, dsId);
-  const cursor = coll
-    .find()
-    .maxAwaitTimeMS(200)
-    .maxTimeMS(200);
+  const cursor = coll.find();
+
   while (await cursor.hasNext()) {
     const doc = await cursor.next();
     await processFn(doc);
   }
+
   await cursor.close();
 };

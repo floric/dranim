@@ -320,7 +320,7 @@ describe('AddValuesNode', () => {
           x: 0,
           y: 0
         },
-        onContextFnExecution: async inputs => ({
+        contextFnExecution: async inputs => ({
           outputs: { ...inputs, new: 'super' }
         })
       }

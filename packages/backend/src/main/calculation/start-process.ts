@@ -15,7 +15,6 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
 
   try {
     await clearGeneratedDatasets(db, workspaceId);
-
     const nodes = await getAllNodes(db, workspaceId);
     const outputNodesInstances = nodes.filter(
       n =>
@@ -34,6 +33,8 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
       }
     );
 
+    console.log('Started calculation.');
+
     await Promise.all(
       outputNodesInstances.map(o => executeOutputNode(db, o, processId))
     );
@@ -42,7 +43,7 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
     console.log('Finished calcuation successfully.');
   } catch (err) {
     await updateFinishedProcess(db, processId, ProcessState.ERROR);
-    console.error('Finished calculation with errors: ' + err.message);
+    console.error('Finished calculation with errors', err);
   }
 };
 

@@ -70,7 +70,7 @@ describe('EditEntriesNode', () => {
       {
         db,
         node: NODE,
-        onContextFnExecution: () => Promise.resolve({ outputs: {} })
+        contextFnExecution: () => Promise.resolve({ outputs: {} })
       }
     );
     expect(res.outputs.dataset.datasetId).toBeDefined();
@@ -206,8 +206,7 @@ describe('EditEntriesNode', () => {
       {
         db,
         node: NODE,
-        onContextFnExecution: input =>
-          Promise.resolve({ outputs: { val: ':)' } })
+        contextFnExecution: input => Promise.resolve({ outputs: { val: ':)' } })
       }
     );
     expect(res.outputs.dataset).toBeDefined();

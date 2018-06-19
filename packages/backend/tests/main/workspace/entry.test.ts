@@ -6,6 +6,7 @@ import {
   createDataset
 } from '../../../src/main/workspace/dataset';
 import {
+  clearEntries,
   copyTransformedToOtherDataset,
   createEntry,
   createEntryFromJSON,
@@ -13,8 +14,7 @@ import {
   getAllEntries,
   getEntriesCount,
   getEntry,
-  getLatestEntries,
-  clearEntries
+  getLatestEntries
 } from '../../../src/main/workspace/entry';
 import {
   getTestMongoDb,
