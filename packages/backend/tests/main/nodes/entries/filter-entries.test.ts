@@ -69,10 +69,7 @@ describe('FilterEntriesNode', () => {
         db,
         node: NODE,
         contextFnExecution: input =>
-          Promise.resolve({ outputs: { keepEntry: true } }),
-        updateProgress: () => {
-          //
-        }
+          Promise.resolve({ outputs: { keepEntry: true } })
       }
     );
     expect(res.outputs.dataset.datasetId).toBeDefined();
@@ -234,10 +231,7 @@ describe('FilterEntriesNode', () => {
         contextFnExecution: input =>
           Promise.resolve({
             outputs: { keepEntry: input.val < 10 }
-          }),
-        updateProgress: () => {
-          //
-        }
+          })
       }
     );
     expect(res.outputs.dataset).toBeDefined();
@@ -259,10 +253,7 @@ describe('FilterEntriesNode', () => {
         { dataset: { datasetId: ds.id } },
         {
           db,
-          node: NODE,
-          updateProgress: () => {
-            //
-          }
+          node: NODE
         }
       );
       throw NeverGoHereError;
@@ -278,10 +269,7 @@ describe('FilterEntriesNode', () => {
         { dataset: { datasetId: VALID_OBJECT_ID } },
         {
           db,
-          node: NODE,
-          updateProgress: () => {
-            //
-          }
+          node: NODE
         }
       );
       throw NeverGoHereError;

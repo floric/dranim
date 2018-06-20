@@ -233,3 +233,8 @@ export const tryGetNode = async (nodeId: string, db: Db) => {
   }
   return node;
 };
+
+export const resetProgress = async (workspaceId: string, db: Db) => {
+  const coll = getNodesCollection(db);
+  await coll.updateMany({ workspaceId }, { $set: { progress: null } });
+};

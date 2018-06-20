@@ -265,3 +265,21 @@ export const removeConnection = async (
     }
   );
 };
+
+export const setProgress = async (
+  nodeId: string,
+  value: number | null,
+  db: Db
+) => {
+  if (value !== null && (value < 0 || value > 1)) {
+    throw new Error('Invalid progress value');
+  }
+
+  const nodesCollection = getNodesCollection(db);
+  await nodesCollection.updateOne(
+    { _id: new ObjectID(nodeId) },
+    {
+      $set: { progress: value }
+    }
+  );
+};

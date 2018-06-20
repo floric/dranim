@@ -8,7 +8,7 @@ import { Collection, Db, ObjectID } from 'mongodb';
 import { executeNode } from '../calculation/execution';
 import { serverNodeTypes } from '../nodes/all-nodes';
 import { clearGeneratedDatasets } from '../workspace/dataset';
-import { getAllNodes } from '../workspace/nodes';
+import { getAllNodes, resetProgress } from '../workspace/nodes';
 
 const startProcess = async (db: Db, processId: string, workspaceId: string) => {
   const processCollection = getCalculationsCollection(db);
@@ -39,10 +39,15 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
       outputNodesInstances.map(o => executeOutputNode(db, o, processId))
     );
 
-    await updateFinishedProcess(db, processId, ProcessState.SUCCESSFUL);
+    await updateFinishedProcess(
+      db,
+      processId,
+      workspaceId,
+      ProcessState.SUCCESSFUL
+    );
     console.log('Finished calcuation successfully.');
   } catch (err) {
-    await updateFinishedProcess(db, processId, ProcessState.ERROR);
+    await updateFinishedProcess(db, processId, workspaceId, ProcessState.ERROR);
     console.error('Finished calculation with errors', err);
   }
 };
@@ -69,6 +74,7 @@ const executeOutputNode = async (
 const updateFinishedProcess = async (
   db: Db,
   processId: string,
+  workspaceId: string,
   state: ProcessState
 ) => {
   const processCollection = getCalculationsCollection(db);
@@ -81,6 +87,7 @@ const updateFinishedProcess = async (
       }
     }
   );
+  await resetProgress(workspaceId, db);
 };
 
 const getCalculationsCollection = (

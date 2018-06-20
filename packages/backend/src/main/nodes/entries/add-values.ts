@@ -93,10 +93,15 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
     await addDynamicSchemas(newDs.id, form.values || [], db);
 
     if (contextFnExecution) {
-      await processEntries(db, inputs.dataset.datasetId, async entry => {
-        const result = await contextFnExecution(entry.values);
-        await createEntry(db, newDs.id, result.outputs);
-      });
+      await processEntries(
+        db,
+        inputs.dataset.datasetId,
+        node.id,
+        async entry => {
+          const result = await contextFnExecution(entry.values);
+          await createEntry(db, newDs.id, result.outputs);
+        }
+      );
     } else {
       throw new Error('Missing context function');
     }

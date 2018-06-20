@@ -322,10 +322,7 @@ describe('AddValuesNode', () => {
         },
         contextFnExecution: async inputs => ({
           outputs: { ...inputs, new: 'super' }
-        }),
-        updateProgress: () => {
-          //
-        }
+        })
       }
     );
 
@@ -377,9 +374,6 @@ describe('AddValuesNode', () => {
             form: [],
             x: 0,
             y: 0
-          },
-          updateProgress: () => {
-            //
           }
         }
       );
@@ -396,10 +390,7 @@ describe('AddValuesNode', () => {
         { dataset: { datasetId: VALID_OBJECT_ID } },
         {
           db,
-          node: NODE,
-          updateProgress: () => {
-            //
-          }
+          node: NODE
         }
       );
       throw NeverGoHereError;

@@ -72,7 +72,6 @@ export interface ServerNodeDefWithContextFn<
     context: {
       node: NodeInstance;
       db: Db;
-      updateProgress?: (percentage: number) => void;
       contextFnExecution?: (
         input: IOValues<any>
       ) => Promise<NodeExecutionResult<any>>;
@@ -117,6 +116,7 @@ export interface GQLNodeInstance extends NodeInstance {
   hasContextFn: boolean;
   contextInputDefs: string | null;
   contextOutputDefs: string | null;
+  progress: number | null;
 }
 
 export interface SocketInstance {

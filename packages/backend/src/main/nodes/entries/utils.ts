@@ -9,7 +9,8 @@ import {
 import { Db } from 'mongodb';
 
 import { addValueSchema } from '../../workspace/dataset';
-import { getEntryCollection } from '../../workspace/entry';
+import { getEntriesCount, getEntryCollection } from '../../workspace/entry';
+import { setProgress } from '../../workspace/nodes-detail';
 
 export const copySchemas = (
   schemas: Array<ValueSchema>,
@@ -41,14 +42,23 @@ export const getDynamicEntryContextInputs = async (
 export const processEntries = async (
   db: Db,
   dsId: string,
+  nodeId: string,
   processFn: (entry: Entry) => Promise<void>
 ) => {
   const coll = getEntryCollection(db, dsId);
   const cursor = coll.find();
+  const entriesCount = await getEntriesCount(db, dsId);
+  let i = 0;
 
   while (await cursor.hasNext()) {
     const doc = await cursor.next();
     await processFn(doc);
+
+    if (i % 100 === 0) {
+      await setProgress(nodeId, i / entriesCount, db);
+    }
+
+    i += 1;
   }
 
   await cursor.close();

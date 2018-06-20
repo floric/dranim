@@ -64,10 +64,6 @@ export const executeNode = async (
   });
 };
 
-const updateProgress = (percentage: number) => {
-  // TODO
-};
-
 const validateMetaAndExecution = async (
   node: NodeInstance,
   nodeInputs: IOValues<{}>,
@@ -100,8 +96,7 @@ const calculateContext = async (
   return await type.onNodeExecution(nodeForm, nodeInputs, {
     db,
     node,
-    contextFnExecution: inputs => executeNode(db, outputNode, inputs),
-    updateProgress
+    contextFnExecution: inputs => executeNode(db, outputNode, inputs)
   });
 };
 

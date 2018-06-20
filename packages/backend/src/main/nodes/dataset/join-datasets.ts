@@ -83,7 +83,7 @@ export const JoinDatasetsNode: ServerNodeDef<
       form.valueB!
     );
 
-    await processEntries(db, dsA!.id, async entry => {
+    await processEntries(db, dsA!.id, node.id, async entry => {
       const bColl = getEntryCollection(db, dsB!.id);
       await getMatchesAndCreateEntries(
         db,
