@@ -1,11 +1,4 @@
-import {
-  AddValuesNodeDef,
-  DatasetSocket,
-  DataType,
-  NodeInstance,
-  sleep,
-  ValueSchema
-} from '@masterthesis/shared';
+import { AddValuesNodeDef, DataType } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import { AddValuesNode } from '../../../../src/main/nodes/entries/add-values';
@@ -17,8 +10,6 @@ import {
   createEntry,
   getAllEntries
 } from '../../../../src/main/workspace/entry';
-import { createNode } from '../../../../src/main/workspace/nodes';
-import { addOrUpdateFormValue } from '../../../../src/main/workspace/nodes-detail';
 import { createWorkspace } from '../../../../src/main/workspace/workspace';
 import {
   getTestMongoDb,

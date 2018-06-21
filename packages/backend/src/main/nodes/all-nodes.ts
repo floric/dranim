@@ -3,7 +3,7 @@ import { NodeDef, NodesMap, ServerNodeDef } from '@masterthesis/shared';
 import * as BooleanNodes from './boolean';
 import * as DatasetNodes from './dataset';
 import * as DatetimeNodes from './datetime';
-import * as EntryNodes from './entries';
+import * as EntriesNodes from './entries';
 import * as NumberNodes from './number';
 import * as StringNodes from './string';
 import * as TimeNodes from './time';
@@ -13,7 +13,7 @@ export const serverNodeTypes: Map<string, ServerNodeDef & NodeDef> = new Map(
     DatasetNodes,
     NumberNodes,
     StringNodes,
-    EntryNodes,
+    EntriesNodes,
     BooleanNodes,
     TimeNodes,
     DatetimeNodes

@@ -1,16 +1,11 @@
 import {
   DatasetSocket,
   DataType,
-  EditEntriesNodeDef,
-  NodeInstance,
-  sleep,
-  StringInputNodeDef,
-  ValueSchema
+  EditEntriesNodeDef
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import { EditEntriesNode } from '../../../../src/main/nodes/entries/edit-entries';
-import { StringInputNode } from '../../../../src/main/nodes/string';
 import {
   addValueSchema,
   createDataset,
@@ -20,7 +15,6 @@ import {
   createEntry,
   getAllEntries
 } from '../../../../src/main/workspace/entry';
-import { createNode } from '../../../../src/main/workspace/nodes';
 import { createWorkspace } from '../../../../src/main/workspace/workspace';
 import {
   getTestMongoDb,

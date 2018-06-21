@@ -1,9 +1,7 @@
 import {
   DatasetSocket,
   DataType,
-  FilterEntriesNodeDef,
-  NodeInstance,
-  ValueSchema
+  FilterEntriesNodeDef
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
