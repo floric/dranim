@@ -27,7 +27,8 @@
 
 #### Production
 
-- run `./scripts/build` to build one Docker image composed of images for frontend, backend and MonogDB
+1.  run `./scripts/build` to build projects
+2.  run `./scripts/assemble` to build one Docker image composed of images for frontend, backend and MonogDB
 
 ### Start
 
