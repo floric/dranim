@@ -17,7 +17,7 @@ import { createDynamicDatasetName } from '../../calculation/utils';
 import {
   addValueSchema,
   createDataset,
-  getDataset
+  tryGetDataset
 } from '../../workspace/dataset';
 import { createEntry, getEntryCollection } from '../../workspace/entry';
 import { processEntries } from '../entries/utils';
@@ -63,8 +63,8 @@ export const JoinDatasetsNode: ServerNodeDef<
   },
   onNodeExecution: async (form, inputs, { db, node }) => {
     const [dsA, dsB] = await Promise.all([
-      getDataset(db, inputs.datasetA.datasetId),
-      getDataset(db, inputs.datasetB.datasetId)
+      tryGetDataset(inputs.datasetA.datasetId, db),
+      tryGetDataset(inputs.datasetB.datasetId, db)
     ]);
 
     await validateSchemas(form, dsA!, dsB!);
@@ -74,14 +74,7 @@ export const JoinDatasetsNode: ServerNodeDef<
       createDynamicDatasetName(JoinDatasetsNodeDef.type, node.id),
       node.workspaceId
     );
-    await addSchemasFromBothDatasets(
-      db,
-      newDs,
-      dsA!,
-      dsB!,
-      form.valueA!,
-      form.valueB!
-    );
+    await addSchemasFromBothDatasets(db, newDs, dsA!, dsB!);
 
     await processEntries(db, dsA!.id, node.id, async entry => {
       const bColl = getEntryCollection(db, dsB!.id);
@@ -137,9 +130,7 @@ const addSchemasFromBothDatasets = async (
   db: Db,
   newDs: Dataset,
   dsA: Dataset,
-  dsB: Dataset,
-  valueAName: string,
-  valueBName: string
+  dsB: Dataset
 ) => {
   await Promise.all(
     Object.entries(dsA.valueschemas).map(val =>
@@ -166,10 +157,6 @@ const validateSchemas = async (
   dsA: Dataset,
   dsB: Dataset
 ) => {
-  if (!dsA || !dsB) {
-    throw new Error('Unknown dataset');
-  }
-
   const schemaA = getMatchSchema(form.valueA!, dsA.valueschemas);
   const schemaB = getMatchSchema(form.valueB!, dsB.valueschemas);
 

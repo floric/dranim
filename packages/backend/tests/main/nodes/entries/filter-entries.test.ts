@@ -1,21 +1,19 @@
 import {
+  allAreDefinedAndPresent,
+  Dataset,
   DatasetSocket,
   DataType,
   FilterEntriesNodeDef
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
+import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
 import { FilterEntriesNode } from '../../../../src/main/nodes/entries/filter-entries';
+import { processEntries } from '../../../../src/main/nodes/entries/utils';
 import {
-  addValueSchema,
   createDataset,
   getDataset
 } from '../../../../src/main/workspace/dataset';
-import {
-  createEntry,
-  getAllEntries
-} from '../../../../src/main/workspace/entry';
-import { createWorkspace } from '../../../../src/main/workspace/workspace';
 import {
   getTestMongoDb,
   NeverGoHereError,
@@ -26,6 +24,11 @@ import {
 let conn;
 let db: Db;
 let server;
+
+jest.mock('@masterthesis/shared');
+jest.mock('../../../../src/main/nodes/entries/utils');
+jest.mock('../../../../src/main/workspace/dataset');
+jest.mock('../../../../src/main/calculation/utils');
 
 describe('FilterEntriesNode', () => {
   beforeAll(async () => {
@@ -58,24 +61,44 @@ describe('FilterEntriesNode', () => {
   });
 
   test('should create new DS and do changes on this one', async () => {
-    const ds = await createDataset(db, 'newds');
+    const oldDs: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'Old DS',
+      workspaceId: 'CDE'
+    };
+    const newDs: Dataset = {
+      id: 'ABC',
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'New DS',
+      workspaceId: 'CDE'
+    };
+    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
+    (processEntries as jest.Mock).mockImplementation(() => Promise.resolve());
+    (getDataset as jest.Mock).mockResolvedValue(oldDs);
+    (createDataset as jest.Mock).mockResolvedValue(newDs);
 
     const res = await FilterEntriesNode.onNodeExecution(
       {},
-      { dataset: { datasetId: ds.id } },
+      { dataset: { datasetId: oldDs.id } },
       {
         db,
         node: NODE,
-        contextFnExecution: input =>
+        contextFnExecution: () =>
           Promise.resolve({ outputs: { keepEntry: true } })
       }
     );
-    expect(res.outputs.dataset.datasetId).toBeDefined();
-    expect(res.outputs.dataset.datasetId).not.toBe(ds.id);
+    expect(res.outputs.dataset.datasetId).toBe(newDs.id);
     expect(res.results).toBeUndefined();
   });
 
   test('should passthrough defs on onMetaExecution', async () => {
+    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(true);
+
     const validDs = {
       content: {
         schema: [
@@ -118,6 +141,8 @@ describe('FilterEntriesNode', () => {
   });
 
   test('should use dataset schemas as dynamic inputs of context fn', async () => {
+    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(true);
+
     const validDs = {
       content: {
         schema: [
@@ -204,25 +229,30 @@ describe('FilterEntriesNode', () => {
   });
 
   test('should edit entries', async () => {
-    const ws = await createWorkspace(db, 'test', '');
-    const ds = await createDataset(db, 'ds 1');
-    await addValueSchema(db, ds.id, {
-      name: 'val',
-      fallback: '0',
-      required: true,
-      type: DataType.NUMBER,
-      unique: false
-    });
-
-    await Promise.all(
-      Array(20)
-        .fill(0)
-        .map((e, i) => createEntry(db, ds.id, { val: JSON.stringify(i) }))
-    );
+    const oldDs: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'Old DS',
+      workspaceId: 'CDE'
+    };
+    const newDs: Dataset = {
+      id: 'ABC',
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'New DS',
+      workspaceId: 'CDE'
+    };
+    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
+    (processEntries as jest.Mock).mockImplementation(() => Promise.resolve());
+    (getDataset as jest.Mock).mockResolvedValue(oldDs);
+    (createDataset as jest.Mock).mockResolvedValue(newDs);
 
     const res = await FilterEntriesNode.onNodeExecution(
       {},
-      { dataset: { datasetId: ds.id } },
+      { dataset: { datasetId: oldDs.id } },
       {
         db,
         node: NODE,
@@ -233,22 +263,34 @@ describe('FilterEntriesNode', () => {
       }
     );
     expect(res.outputs.dataset).toBeDefined();
-
-    const newDs = await getDataset(db, res.outputs.dataset.datasetId);
-    const oldDs = await getDataset(db, ds.id);
-    expect(newDs.valueschemas).toEqual(oldDs.valueschemas);
-
-    const allEntries = await getAllEntries(db, newDs.id);
-    expect(allEntries.length).toBe(10);
   });
 
   test('should throw errors for missing context', async () => {
-    const ds = await createDataset(db, 'ds 1');
+    const oldDs: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'Old DS',
+      workspaceId: 'CDE'
+    };
+    const newDs: Dataset = {
+      id: 'ABC',
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'New DS',
+      workspaceId: 'CDE'
+    };
+    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
+    (processEntries as jest.Mock).mockImplementation(() => Promise.resolve());
+    (getDataset as jest.Mock).mockResolvedValue(oldDs);
+    (createDataset as jest.Mock).mockResolvedValue(newDs);
 
     try {
       await FilterEntriesNode.onNodeExecution(
         {},
-        { dataset: { datasetId: ds.id } },
+        { dataset: { datasetId: oldDs.id } },
         {
           db,
           node: NODE

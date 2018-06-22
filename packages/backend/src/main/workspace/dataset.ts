@@ -94,6 +94,15 @@ export const getDataset = async (
   };
 };
 
+export const tryGetDataset = async (id: string, db: Db) => {
+  const ds = await getDataset(db, id);
+  if (!ds) {
+    throw new Error('Unknown dataset');
+  }
+
+  return ds;
+};
+
 export const addValueSchema = async (
   db: Db,
   datasetId: string,

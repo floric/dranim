@@ -1,21 +1,29 @@
-import { DataType, SelectValuesNodeDef } from '@masterthesis/shared';
+import { Dataset, DataType, SelectValuesNodeDef } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
+import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
 import { SelectValuesNode } from '../../../../src/main/nodes/entries/select-values';
+import { processEntries } from '../../../../src/main/nodes/entries/utils';
 import {
   addValueSchema,
   createDataset,
   getDataset
 } from '../../../../src/main/workspace/dataset';
 import {
-  createEntry,
-  getAllEntries
-} from '../../../../src/main/workspace/entry';
-import { getTestMongoDb, NeverGoHereError, NODE } from '../../../test-utils';
+  getTestMongoDb,
+  NeverGoHereError,
+  NODE,
+  VALID_OBJECT_ID
+} from '../../../test-utils';
 
 let conn;
 let db: Db;
 let server;
+
+jest.mock('@masterthesis/shared');
+jest.mock('../../../../src/main/nodes/entries/utils');
+jest.mock('../../../../src/main/workspace/dataset');
+jest.mock('../../../../src/main/calculation/utils');
 
 describe('SelectValuesNode', () => {
   beforeAll(async () => {
@@ -53,54 +61,70 @@ describe('SelectValuesNode', () => {
   });
 
   test('should select values from dataset and create new', async () => {
-    const ds = await createDataset(db, 'test');
-    await addValueSchema(db, ds.id, {
-      name: 'test',
-      required: true,
-      type: DataType.STRING,
-      fallback: '',
-      unique: false
-    });
-    await addValueSchema(db, ds.id, {
-      name: 'abc',
-      required: false,
-      type: DataType.STRING,
-      fallback: '',
-      unique: false
-    });
+    const oldDs: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: ['name', 'test', 'abc'].map(n => ({
+        type: DataType.STRING,
+        name: n,
+        required: true,
+        fallback: '',
+        unique: false
+      })),
+      name: 'Old DS',
+      workspaceId: 'CDE'
+    };
+    const newDs: Dataset = {
+      id: 'ABC',
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'New DS',
+      workspaceId: 'CDE'
+    };
+    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
+    (processEntries as jest.Mock).mockImplementation(n => Promise.resolve());
+    (getDataset as jest.Mock).mockResolvedValue(oldDs);
+    (createDataset as jest.Mock).mockResolvedValue(newDs);
 
     const res = await SelectValuesNode.onNodeExecution(
       { values: ['test'] },
-      { dataset: { datasetId: ds.id } },
+      { dataset: { datasetId: oldDs.id } },
       {
         db,
         node: NODE
       }
     );
     expect(res.outputs.dataset.datasetId).toBeDefined();
-
-    const newDsId = res.outputs.dataset.datasetId;
-    const newDs = await getDataset(db, newDsId);
-
-    expect(newDs).not.toBe(null);
-    expect(newDs.valueschemas.length).toBe(1);
-    expect(newDs.valueschemas[0].name).toBe('test');
   });
 
-  test('should select values from dataset and create new', async () => {
-    const ds = await createDataset(db, 'test');
-    await addValueSchema(db, ds.id, {
-      name: 'test',
-      required: true,
-      type: DataType.STRING,
-      fallback: '',
-      unique: false
-    });
+  test('should throw error for unknown specified value names', async () => {
+    const oldDs: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'Old DS',
+      workspaceId: 'CDE'
+    };
+    const newDs: Dataset = {
+      id: 'ABC',
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'New DS',
+      workspaceId: 'CDE'
+    };
+    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
+    (processEntries as jest.Mock).mockImplementation(n => Promise.resolve());
+    (getDataset as jest.Mock).mockResolvedValue(oldDs);
+    (createDataset as jest.Mock).mockResolvedValue(newDs);
 
     try {
       await SelectValuesNode.onNodeExecution(
         { values: ['bla', 'test'] },
-        { dataset: { datasetId: ds.id } },
+        { dataset: { datasetId: oldDs.id } },
         {
           db,
           node: NODE
@@ -113,82 +137,42 @@ describe('SelectValuesNode', () => {
   });
 
   test('should copy all entries but only with selected values', async () => {
-    const ds = await createDataset(db, 'test');
-    await Promise.all(
-      [
-        {
-          name: 'test',
-          required: true,
-          type: DataType.STRING,
-          fallback: '',
-          unique: false
-        },
-        {
-          name: 'abc',
-          required: false,
-          type: DataType.STRING,
-          fallback: '',
-          unique: false
-        },
-        {
-          name: 'other',
-          required: false,
-          type: DataType.STRING,
-          fallback: '',
-          unique: false
-        }
-      ].map(n => addValueSchema(db, ds.id, n))
-    );
-
-    await Promise.all(
-      [
-        { test: 'a', abc: 'b', other: 'b' },
-        {
-          test: 'sg',
-          abc: 'dsgb',
-          other: 'sb'
-        },
-        {
-          test: 'asga',
-          abc: 'dfhgb',
-          other: 'dfhb'
-        },
-        {
-          test: 'aas',
-          abc: 'bdfh',
-          other: 'bsg'
-        }
-      ].map(n => createEntry(db, ds.id, n))
-    );
+    const oldDs: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: ['name', 'test', 'abc'].map(n => ({
+        type: DataType.STRING,
+        name: n,
+        required: true,
+        fallback: '',
+        unique: false
+      })),
+      name: 'Old DS',
+      workspaceId: 'CDE'
+    };
+    const newDs: Dataset = {
+      id: 'ABC',
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'New DS',
+      workspaceId: 'CDE'
+    };
+    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
+    (processEntries as jest.Mock).mockImplementation(n => Promise.resolve());
+    (getDataset as jest.Mock).mockResolvedValue(oldDs);
+    (createDataset as jest.Mock).mockResolvedValue(newDs);
 
     const res = await SelectValuesNode.onNodeExecution(
       { values: ['test', 'abc'] },
-      { dataset: { datasetId: ds.id } },
+      { dataset: { datasetId: oldDs.id } },
       {
         db,
         node: NODE
       }
     );
     expect(res.outputs.dataset.datasetId).toBeDefined();
-
-    const newDsId = res.outputs.dataset.datasetId;
-    const newDs = await getDataset(db, newDsId);
-
-    expect(newDs).not.toBe(null);
-    expect(newDs.valueschemas.length).toBe(2);
-    expect(newDs.valueschemas.filter(n => n.name === 'test')).toBeDefined();
-    expect(newDs.valueschemas.filter(n => n.name === 'abc')).toBeDefined();
-
-    const allEntries = await getAllEntries(db, newDs.id);
-    expect(allEntries.length).toBe(4);
-
-    const correctEntries = allEntries.filter(
-      n =>
-        Object.keys(n.values).includes('test') &&
-        Object.keys(n.values).includes('abc') &&
-        !Object.keys(n.values).includes('other')
-    );
-    expect(correctEntries.length).toBe(4);
   });
 
   test('should return absent meta if dataset is missing', async () => {
