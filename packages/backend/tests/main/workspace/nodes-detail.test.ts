@@ -251,7 +251,7 @@ describe('Node Details', () => {
     }
   });
 
-  test('should get empty context inputs', async () => {
+  test.skip('should get empty context inputs', async () => {
     const ws = await createWorkspace(db, 'Ws', '');
     await createNode(db, DatasetInputNodeDef.type, ws.id, [], 0, 0);
     await createNode(db, EditEntriesNodeDef.type, ws.id, [], 0, 0);
@@ -292,7 +292,7 @@ describe('Node Details', () => {
     }
   });
 
-  test('should get context inputs with dataset schema', async () => {
+  test.skip('should get context inputs with dataset schema', async () => {
     const ws = await createWorkspace(db, 'Ws', '');
     const ds = await createDataset(db, 'DsA');
     const valA = {
@@ -385,7 +385,7 @@ describe('Node Details', () => {
     });
   });
 
-  test('should get input defs from ContextInputNode', async () => {
+  test.skip('should get input defs from ContextInputNode', async () => {
     const ws = await createWorkspace(db, 'test', '');
     const dsNode = await createNode(
       db,
