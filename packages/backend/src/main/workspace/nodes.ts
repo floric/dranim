@@ -6,7 +6,7 @@ import {
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
-import { serverNodeTypes, tryGetNodeType } from '../nodes/all-nodes';
+import { getNodeType, tryGetNodeType } from '../nodes/all-nodes';
 import { deleteConnection, getConnectionsCollection } from './connections';
 import { getWorkspace, updateLastChange } from './workspace';
 
@@ -110,7 +110,7 @@ const checkNoOutputNodeInContexts = async (
     return;
   }
 
-  const nodeType = serverNodeTypes.get(type);
+  const nodeType = getNodeType(type);
   if (nodeType!.isOutputNode === true) {
     throw new Error('Output nodes only on root level allowed');
   }

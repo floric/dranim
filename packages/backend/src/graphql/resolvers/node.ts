@@ -9,7 +9,7 @@ import {
   Workspace
 } from '@masterthesis/shared';
 
-import { serverNodeTypes } from '../../main/nodes/all-nodes';
+import { getNodeType, hasNodeType } from '../../main/nodes/all-nodes';
 import {
   getContextInputDefs,
   getContextOutputDefs,
@@ -49,5 +49,5 @@ export const Node = {
   ): Promise<(SocketDefs<{}> & { [name: string]: SocketDef }) | null> =>
     getContextOutputDefs(node, db),
   hasContextFn: ({ type }): boolean =>
-    serverNodeTypes.has(type) ? hasContextFn(serverNodeTypes.get(type)!) : false
+    hasNodeType(type) ? hasContextFn(getNodeType(type)!) : false
 };

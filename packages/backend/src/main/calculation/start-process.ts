@@ -6,7 +6,7 @@ import {
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { executeNode } from '../calculation/execution';
-import { serverNodeTypes } from '../nodes/all-nodes';
+import { getNodeType, hasNodeType } from '../nodes/all-nodes';
 import { clearGeneratedDatasets } from '../workspace/dataset';
 import { getAllNodes, resetProgress } from '../workspace/nodes';
 
@@ -18,9 +18,7 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
     const nodes = await getAllNodes(db, workspaceId);
     const outputNodesInstances = nodes.filter(
       n =>
-        serverNodeTypes.has(n.type)
-          ? serverNodeTypes.get(n.type)!.isOutputNode === true
-          : false
+        hasNodeType(n.type) ? getNodeType(n.type)!.isOutputNode === true : false
     );
 
     await processCollection.updateOne(

@@ -36,7 +36,7 @@ export const createConnection = async (
 
   const outputNode = await getNode(db, from.nodeId);
   const inputNode = await getNode(db, to.nodeId);
-  await checkNodes(db, inputNode, outputNode);
+  checkNodes(inputNode, outputNode);
 
   const hasFoundCycles = await containsCycles(db, inputNode!, from, to);
   if (hasFoundCycles) {
@@ -68,8 +68,7 @@ export const createConnection = async (
   };
 };
 
-const checkNodes = async (
-  db: Db,
+const checkNodes = (
   inputNode: NodeInstance | null,
   outputNode: NodeInstance | null
 ) => {

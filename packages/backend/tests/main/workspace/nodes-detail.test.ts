@@ -42,7 +42,7 @@ let conn;
 let db: Db;
 let server;
 
-describe('Nodes', () => {
+describe('Node Details', () => {
   beforeAll(async () => {
     const { connection, database, mongodbServer } = await getTestMongoDb();
     conn = connection;
@@ -253,22 +253,8 @@ describe('Nodes', () => {
 
   test('should get empty context inputs', async () => {
     const ws = await createWorkspace(db, 'Ws', '');
-    const dsInput = await createNode(
-      db,
-      DatasetInputNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0
-    );
-    const editEntriesNode = await createNode(
-      db,
-      EditEntriesNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0
-    );
+    await createNode(db, DatasetInputNodeDef.type, ws.id, [], 0, 0);
+    await createNode(db, EditEntriesNodeDef.type, ws.id, [], 0, 0);
 
     const allNodes = await getAllNodes(db, ws.id);
     const contextInputNode = allNodes.find(
@@ -302,7 +288,7 @@ describe('Nodes', () => {
       await addOrUpdateFormValue(db, VALID_OBJECT_ID, 'test', 'test');
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Node does not exist');
+      expect(err.message).toBe('Node not found');
     }
   });
 

@@ -13,7 +13,7 @@ import {
 import { Db, ObjectID } from 'mongodb';
 
 import { isNodeInMetaValid } from '../calculation/validation';
-import { serverNodeTypes, tryGetNodeType } from '../nodes/all-nodes';
+import { getNodeType, hasNodeType, tryGetNodeType } from '../nodes/all-nodes';
 import { tryGetConnection } from './connections';
 import { getNode, getNodesCollection, tryGetNode } from './nodes';
 
@@ -21,12 +21,12 @@ export const getContextInputDefs = async (
   node: NodeInstance,
   db: Db
 ): Promise<SocketDefs<any> | null> => {
-  if (serverNodeTypes.has(node.type)) {
+  if (hasNodeType(node.type)) {
     return null;
   }
 
   const parent = await getParentNode(node, db);
-  const parentType = serverNodeTypes.get(parent.type)!;
+  const parentType = getNodeType(parent.type)!;
   if (!hasContextFn(parentType)) {
     return null;
   }
@@ -66,12 +66,12 @@ export const getContextOutputDefs = async (
   node: NodeInstance,
   db: Db
 ): Promise<(SocketDefs<any> & { [name: string]: SocketDef }) | null> => {
-  if (serverNodeTypes.has(node.type)) {
+  if (hasNodeType(node.type)) {
     return null;
   }
 
   const parent = await getParentNode(node, db);
-  const parentType = serverNodeTypes.get(parent.type)!;
+  const parentType = getNodeType(node.type)!;
   if (!hasContextFn(parentType)) {
     return null;
   }
@@ -119,7 +119,7 @@ export const getMetaOutputs = async (
   nodeId: string
 ): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> => {
   const node = await tryGetNode(nodeId, db);
-  const nodeType = serverNodeTypes.get(node.type);
+  const nodeType = getNodeType(node.type);
   if (!nodeType) {
     return {};
   }
@@ -183,17 +183,17 @@ export const getMetaInputs = async (node: NodeInstance, db: Db) => {
 };
 
 export const getNodeState = async (node: NodeInstance, db: Db) => {
-  const t = serverNodeTypes.get(node.type);
-  if (!t) {
+  try {
+    const t = tryGetNodeType(node.type);
+    const isValid = await isNodeInMetaValid(node, db);
+    if (!isValid) {
+      return NodeState.INVALID;
+    }
+
+    return NodeState.VALID;
+  } catch (err) {
     return NodeState.ERROR;
   }
-
-  const isValid = await isNodeInMetaValid(node, db);
-  if (!isValid) {
-    return NodeState.INVALID;
-  }
-
-  return NodeState.VALID;
 };
 
 export const addOrUpdateFormValue = async (
@@ -206,11 +206,7 @@ export const addOrUpdateFormValue = async (
     throw new Error('No form value name specified');
   }
 
-  const node = await getNode(db, nodeId);
-  if (!node) {
-    throw new Error('Node does not exist');
-  }
-
+  const node = await tryGetNode(nodeId, db);
   const nodeObjId = new ObjectID(nodeId);
 
   const collection = getNodesCollection(db);

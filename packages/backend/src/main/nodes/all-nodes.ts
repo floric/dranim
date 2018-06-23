@@ -8,7 +8,7 @@ import * as NumberNodes from './number';
 import * as StringNodes from './string';
 import * as TimeNodes from './time';
 
-export const serverNodeTypes: Map<string, ServerNodeDef & NodeDef> = new Map(
+const serverNodeTypes: Map<string, ServerNodeDef & NodeDef> = new Map(
   [
     DatasetNodes,
     NumberNodes,
@@ -27,6 +27,11 @@ export const serverNodeTypes: Map<string, ServerNodeDef & NodeDef> = new Map(
       { ...NodesMap.get(n[0])!, ...n[1] }
     ])
 );
+
+export const getNodeType = (type: string): (NodeDef & ServerNodeDef) | null =>
+  serverNodeTypes.get(type) || null;
+
+export const hasNodeType = (type: string): boolean => serverNodeTypes.has(type);
 
 export const tryGetNodeType = (type: string): NodeDef & ServerNodeDef => {
   if (!serverNodeTypes.has(type)) {
