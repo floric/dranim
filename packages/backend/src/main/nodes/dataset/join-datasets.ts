@@ -11,7 +11,7 @@ import {
   Values,
   ValueSchema
 } from '@masterthesis/shared';
-import { Collection, Db } from 'mongodb';
+import { Db } from 'mongodb';
 
 import { createDynamicDatasetName } from '../../calculation/utils';
 import {

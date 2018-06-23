@@ -487,9 +487,7 @@ describe('JoinDatasetsNode', () => {
       }
     });
     (processEntries as jest.Mock).mockImplementation(
-      async (a, b, c, processFn) => {
-        await processFn(entryA);
-      }
+      async (a, b, c, processFn) => processFn(entryA)
     );
 
     const res = await JoinDatasetsNode.onNodeExecution(

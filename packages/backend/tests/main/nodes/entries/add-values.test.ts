@@ -2,7 +2,9 @@ import {
   AddValuesNodeDef,
   allAreDefinedAndPresent,
   Dataset,
-  DataType
+  DataType,
+  Entry,
+  ValueSchema
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
@@ -13,6 +15,7 @@ import {
   createDataset,
   getDataset
 } from '../../../../src/main/workspace/dataset';
+import { createEntry } from '../../../../src/main/workspace/entry';
 import {
   getTestMongoDb,
   NeverGoHereError,
@@ -27,6 +30,7 @@ let server;
 jest.mock('@masterthesis/shared');
 jest.mock('../../../../src/main/nodes/entries/utils');
 jest.mock('../../../../src/main/workspace/dataset');
+jest.mock('../../../../src/main/workspace/entry');
 jest.mock('../../../../src/main/calculation/utils');
 
 describe('AddValuesNode', () => {
@@ -164,9 +168,10 @@ describe('AddValuesNode', () => {
         }
       },
       {},
-      { values: [] },
+      { values: undefined },
       null
     );
+
     expect(res).toEqual({
       test: {
         dataType: DataType.NUMBER,
@@ -257,12 +262,19 @@ describe('AddValuesNode', () => {
     expect(res).toEqual({});
   });
 
-  test('should add new value to dataset from StringInputNode', async () => {
+  test('should add new value to dataset', async () => {
+    const oldVS: ValueSchema = {
+      name: 'test',
+      type: DataType.STRING,
+      fallback: '',
+      unique: false,
+      required: true
+    };
     const oldDs: Dataset = {
       id: VALID_OBJECT_ID,
       entriesCount: 0,
       latestEntries: [],
-      valueschemas: [],
+      valueschemas: [oldVS],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
@@ -274,10 +286,17 @@ describe('AddValuesNode', () => {
       name: 'New DS',
       workspaceId: 'CDE'
     };
-    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
-    (processEntries as jest.Mock).mockImplementation(() => Promise.resolve());
+    const entryA: Entry = {
+      id: 'eA',
+      values: { [oldVS.name]: 'foo' }
+    };
+    (createDynamicDatasetName as jest.Mock).mockReturnValue('AddEntries');
+    (processEntries as jest.Mock).mockImplementation(
+      async (a, b, c, processFn) => processFn(entryA)
+    );
     (getDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
+    (createEntry as jest.Mock).mockResolvedValue({});
 
     const res = await AddValuesNode.onNodeExecution(
       {
@@ -312,6 +331,11 @@ describe('AddValuesNode', () => {
     );
 
     expect(res.outputs.dataset.datasetId).toBe(newDs.id);
+    expect(createEntry as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(createEntry as jest.Mock).toHaveBeenCalledWith(db, newDs.id, {
+      [oldVS.name]: 'foo',
+      new: 'super'
+    });
   });
 
   test('should throw error for missing context function', async () => {
@@ -331,7 +355,7 @@ describe('AddValuesNode', () => {
       name: 'New DS',
       workspaceId: 'CDE'
     };
-    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
+    (createDynamicDatasetName as jest.Mock).mockReturnValue('AddEntries-123');
     (processEntries as jest.Mock).mockImplementation(() => Promise.resolve());
     (getDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
