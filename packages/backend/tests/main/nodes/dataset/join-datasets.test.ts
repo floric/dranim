@@ -16,7 +16,10 @@ import {
   createDataset,
   tryGetDataset
 } from '../../../../src/main/workspace/dataset';
-import { createEntry } from '../../../../src/main/workspace/entry';
+import {
+  createEntry,
+  getEntryCollection
+} from '../../../../src/main/workspace/entry';
 import {
   getTestMongoDb,
   NeverGoHereError,
@@ -440,20 +443,76 @@ describe('JoinDatasetsNode', () => {
       name: 'New DS',
       workspaceId: 'CDE'
     };
-    const entryA: Entry = { id: 'ABC', values: [] };
+    const entryA: Entry = {
+      id: 'eA',
+      values: { [schemaA.name]: 'test', [schemaOnlyA.name]: true }
+    };
+    const entryB1: Entry = {
+      id: 'eB1',
+      values: { [schemaB.name]: 'test', [schemaOnlyB.name]: 9 }
+    };
+    const entryB2: Entry = {
+      id: 'eB2',
+      values: { [schemaB.name]: 'test', [schemaOnlyB.name]: 8 }
+    };
 
+    const coll = db.collection(`Entries_${newDs.id}`);
+    await coll.insertOne({
+      values: [{ [schemaB.name]: 'test', [schemaOnlyB.name]: 9 }]
+    });
     (tryGetDataset as jest.Mock)
       .mockResolvedValueOnce(dsA)
       .mockResolvedValueOnce(dsB);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
+    (addValueSchema as jest.Mock).mockResolvedValue(true);
     (createDynamicDatasetName as jest.Mock).mockReturnValue(
       'FilterEntries-123'
     );
-    (processEntries as jest.Mock).mockImplementation((a, b, c, proccessFn) =>
-      proccessFn(entryA)
+    (createEntry as jest.Mock).mockResolvedValue({});
+    (getEntryCollection as jest.Mock).mockReturnValue({
+      find: () => {
+        let hasNextCalls = 0;
+        return {
+          close: async () => true,
+          next: async () => (hasNextCalls === 1 ? entryB1 : entryB2),
+          hasNext: async () => {
+            hasNextCalls += 1;
+
+            if (hasNextCalls < 3) {
+              return true;
+            }
+            return false;
+          }
+        };
+      }
+    });
+    (processEntries as jest.Mock).mockImplementation(
+      async (a, b, c, processFn) => {
+        await processFn(entryA);
+      }
     );
 
-    expect(createEntry as jest.Mock).toHaveBeenCalledTimes(111);
+    const res = await JoinDatasetsNode.onNodeExecution(
+      { valueA: schemaA.name, valueB: schemaB.name },
+      { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
+      { db, node: NODE }
+    );
+
+    expect(res.results).toBeUndefined();
+    expect(res.outputs.joined.datasetId).toBe(newDs.id);
+    expect(createEntry as jest.Mock).toHaveBeenCalledTimes(2);
+    expect(createEntry as jest.Mock).toHaveBeenCalledWith(db, newDs.id, {
+      [`A_${schemaA.name}`]: 'test',
+      [`B_${schemaB.name}`]: 'test',
+      [`A_${schemaOnlyA.name}`]: true,
+      [`B_${schemaOnlyB.name}`]: 8
+    });
+    expect(createEntry as jest.Mock).toHaveBeenCalledWith(db, newDs.id, {
+      [`A_${schemaA.name}`]: 'test',
+      [`B_${schemaB.name}`]: 'test',
+      [`A_${schemaOnlyA.name}`]: true,
+      [`B_${schemaOnlyB.name}`]: 9
+    });
   });
 
   test('should have absent metas', async () => {

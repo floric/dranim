@@ -24,8 +24,8 @@ import {
 import { createEntry, getAllEntries } from '../../../src/main/workspace/entry';
 import {
   createNode,
-  getNodesCollection,
-  getNode
+  getNode,
+  getNodesCollection
 } from '../../../src/main/workspace/nodes';
 import {
   addOrUpdateFormValue,

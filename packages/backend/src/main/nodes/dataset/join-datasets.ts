@@ -67,26 +67,24 @@ export const JoinDatasetsNode: ServerNodeDef<
       tryGetDataset(inputs.datasetB.datasetId, db)
     ]);
 
-    await validateSchemas(form, dsA!, dsB!);
+    validateSchemas(form, dsA, dsB);
 
     const newDs = await createDataset(
       db,
       createDynamicDatasetName(JoinDatasetsNodeDef.type, node.id),
       node.workspaceId
     );
-    await addSchemasFromBothDatasets(db, newDs, dsA!, dsB!);
-
-    await processEntries(db, dsA!.id, node.id, async entry => {
-      const bColl = getEntryCollection(db, dsB!.id);
-      await getMatchesAndCreateEntries(
+    await addSchemasFromBothDatasets(db, newDs, dsA, dsB);
+    await processEntries(db, dsA!.id, node.id, entry =>
+      getMatchesAndCreateEntries(
         db,
         entry,
         form.valueA!,
         form.valueB!,
         newDs.id,
-        bColl
-      );
-    });
+        dsB.id
+      )
+    );
 
     return { outputs: { joined: { datasetId: newDs.id } } };
   }
@@ -98,30 +96,27 @@ const getMatchesAndCreateEntries = async (
   valNameA: string,
   valNameB: string,
   newDsId: string,
-  bColl: Collection<Entry>
+  dsBid: string
 ) => {
+  const col = getEntryCollection(db, dsBid);
   const valFromA = docA.values[valNameA];
-  const bCursor = bColl.find({ [`values.${valNameB}`]: valFromA });
-  while (await bCursor.hasNext()) {
-    const docB = await bCursor.next();
-    await createEntry(db, newDsId, await joinEntry(docA.values, docB.values));
+  const cursor = col.find({ [`values.${valNameB}`]: valFromA });
+  while (await cursor.hasNext()) {
+    const docB = await cursor.next();
+    await createEntry(db, newDsId, joinEntry(docA.values, docB.values));
   }
-  await bCursor.close();
+  await cursor.close();
 };
 
-const joinEntry = async (valuesA: Values, valuesB: Values) => {
+const joinEntry = (valuesA: Values, valuesB: Values) => {
   const res = {};
 
-  await Promise.all(
-    Object.entries(valuesA).map(val => {
-      res[`A_${val[0]}`] = val[1];
-    })
-  );
-  await Promise.all(
-    Object.entries(valuesB).map(val => {
-      res[`B_${val[0]}`] = val[1];
-    })
-  );
+  Object.entries(valuesA).map(val => {
+    res[`A_${val[0]}`] = val[1];
+  });
+  Object.entries(valuesB).map(val => {
+    res[`B_${val[0]}`] = val[1];
+  });
 
   return res;
 };
@@ -152,7 +147,7 @@ const addSchemasFromBothDatasets = async (
   );
 };
 
-const validateSchemas = async (
+const validateSchemas = (
   form: FormValues<JoinDatasetsNodeForm>,
   dsA: Dataset,
   dsB: Dataset
