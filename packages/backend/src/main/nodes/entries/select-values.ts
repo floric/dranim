@@ -1,20 +1,23 @@
 import {
   Dataset,
+  Entry,
   SelectValuesNodeDef,
   SelectValuesNodeForm,
   SelectValuesNodeInputs,
   SelectValuesNodeOutputs,
-  ServerNodeDef
+  ServerNodeDef,
+  Values
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import {
   addValueSchema,
   createDataset,
-  getDataset
+  tryGetDataset
 } from '../../../main/workspace/dataset';
 import { createDynamicDatasetName } from '../../calculation/utils';
-import { copyTransformedToOtherDataset } from '../../workspace/entry';
+import { createEntry } from '../../workspace/entry';
+import { processEntries } from './utils';
 
 export const SelectValuesNode: ServerNodeDef<
   SelectValuesNodeInputs,
@@ -23,7 +26,7 @@ export const SelectValuesNode: ServerNodeDef<
 > = {
   type: SelectValuesNodeDef.type,
   isFormValid: form => Promise.resolve(!!form.values && form.values.length > 0),
-  onMetaExecution: async (form, inputs, db) => {
+  onMetaExecution: async (form, inputs) => {
     if (!form.values || form.values.length === 0) {
       return { dataset: { isPresent: false, content: { schema: [] } } };
     }
@@ -44,7 +47,7 @@ export const SelectValuesNode: ServerNodeDef<
     };
   },
   onNodeExecution: async (form, inputs, { db, node }) => {
-    const existingDs = await getDataset(db, inputs.dataset.datasetId);
+    const existingDs = await tryGetDataset(inputs.dataset.datasetId, db);
     const schemasOnDs = existingDs!.valueschemas.map(n => n.name);
     const unknownValues = form.values!.filter(n => !schemasOnDs.includes(n));
     if (unknownValues.length > 0) {
@@ -58,8 +61,21 @@ export const SelectValuesNode: ServerNodeDef<
       node.workspaceId
     );
 
-    await filterSchema(existingDs!, newDs, usedValues, db);
-    await copyEntries(existingDs!, newDs, usedValues, db);
+    await filterSchema(existingDs, newDs, usedValues, db);
+    await copyTransformedToOtherDataset(
+      db,
+      existingDs.id,
+      newDs.id,
+      node.id,
+      entry => {
+        const newValues = {};
+        usedValues.forEach(u => {
+          newValues[u] = entry.values[u];
+        });
+
+        return newValues;
+      }
+    );
 
     return {
       outputs: {
@@ -71,30 +87,27 @@ export const SelectValuesNode: ServerNodeDef<
   }
 };
 
-const filterSchema = async (
-  existingDs: Dataset,
-  newDs: Dataset,
-  usedValues: Set<string>,
-  db: Db
-) => {
-  await Promise.all(
-    existingDs!.valueschemas
-      .filter(s => usedValues.has(s.name))
-      .map(s => addValueSchema(db, newDs.id, s))
-  );
-};
-
-const copyEntries = (
+const filterSchema = (
   existingDs: Dataset,
   newDs: Dataset,
   usedValues: Set<string>,
   db: Db
 ) =>
-  copyTransformedToOtherDataset(db, existingDs.id, newDs.id, e => {
-    const newValues = {};
-    usedValues.forEach(u => {
-      newValues[u] = e.values[u];
-    });
+  Promise.all(
+    existingDs!.valueschemas
+      .filter(s => usedValues.has(s.name))
+      .map(s => addValueSchema(db, newDs.id, s))
+  );
 
-    return newValues;
+const copyTransformedToOtherDataset = async (
+  db: Db,
+  oldDsId: string,
+  newDsId: string,
+  nodeId: string,
+  transformFn: (obj: Entry) => Values
+) => {
+  processEntries(db, oldDsId, nodeId, async doc => {
+    const newValues = transformFn(doc);
+    await createEntry(db, newDsId, newValues);
   });
+};

@@ -3,7 +3,9 @@ import {
   Dataset,
   DatasetSocket,
   DataType,
-  FilterEntriesNodeDef
+  Entry,
+  FilterEntriesNodeDef,
+  ValueSchema
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
@@ -14,6 +16,7 @@ import {
   createDataset,
   getDataset
 } from '../../../../src/main/workspace/dataset';
+import { createEntry } from '../../../../src/main/workspace/entry';
 import {
   getTestMongoDb,
   NeverGoHereError,
@@ -28,6 +31,7 @@ let server;
 jest.mock('@masterthesis/shared');
 jest.mock('../../../../src/main/nodes/entries/utils');
 jest.mock('../../../../src/main/workspace/dataset');
+jest.mock('../../../../src/main/workspace/entry');
 jest.mock('../../../../src/main/calculation/utils');
 
 describe('FilterEntriesNode', () => {
@@ -228,12 +232,19 @@ describe('FilterEntriesNode', () => {
     });
   });
 
-  test('should edit entries', async () => {
+  test('should filter entries', async () => {
+    const vs: ValueSchema = {
+      name: 'val',
+      type: DataType.NUMBER,
+      fallback: '',
+      unique: false,
+      required: true
+    };
     const oldDs: Dataset = {
       id: VALID_OBJECT_ID,
       entriesCount: 0,
       latestEntries: [],
-      valueschemas: [],
+      valueschemas: [vs],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
@@ -245,10 +256,28 @@ describe('FilterEntriesNode', () => {
       name: 'New DS',
       workspaceId: 'CDE'
     };
+    const entryA: Entry = {
+      id: 'eA',
+      values: { [vs.name]: 1 }
+    };
+    const entryB: Entry = {
+      id: 'eB',
+      values: { [vs.name]: 15 }
+    };
+    const entryC: Entry = {
+      id: 'eC',
+      values: { [vs.name]: 2 }
+    };
     (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
-    (processEntries as jest.Mock).mockImplementation(() => Promise.resolve());
     (getDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
+    (processEntries as jest.Mock).mockImplementation(
+      async (a, b, c, processFn) => {
+        await processFn(entryA);
+        await processFn(entryB);
+        await processFn(entryC);
+      }
+    );
 
     const res = await FilterEntriesNode.onNodeExecution(
       {},
@@ -262,7 +291,14 @@ describe('FilterEntriesNode', () => {
           })
       }
     );
-    expect(res.outputs.dataset).toBeDefined();
+    expect(res.outputs.dataset.datasetId).toBe(newDs.id);
+    expect(createEntry as jest.Mock).toHaveBeenCalledTimes(2);
+    expect(createEntry as jest.Mock).toHaveBeenCalledWith(db, newDs.id, {
+      [vs.name]: 1
+    });
+    expect(createEntry as jest.Mock).toHaveBeenCalledWith(db, newDs.id, {
+      [vs.name]: 2
+    });
   });
 
   test('should throw errors for missing context', async () => {

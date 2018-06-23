@@ -1,14 +1,19 @@
-import { Dataset, DataType, SelectValuesNodeDef } from '@masterthesis/shared';
+import {
+  Dataset,
+  DataType,
+  Entry,
+  SelectValuesNodeDef
+} from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
 import { SelectValuesNode } from '../../../../src/main/nodes/entries/select-values';
 import { processEntries } from '../../../../src/main/nodes/entries/utils';
 import {
-  addValueSchema,
   createDataset,
-  getDataset
+  tryGetDataset
 } from '../../../../src/main/workspace/dataset';
+import { createEntry } from '../../../../src/main/workspace/entry';
 import {
   getTestMongoDb,
   NeverGoHereError,
@@ -23,6 +28,7 @@ let server;
 jest.mock('@masterthesis/shared');
 jest.mock('../../../../src/main/nodes/entries/utils');
 jest.mock('../../../../src/main/workspace/dataset');
+jest.mock('../../../../src/main/workspace/entry');
 jest.mock('../../../../src/main/calculation/utils');
 
 describe('SelectValuesNode', () => {
@@ -85,7 +91,7 @@ describe('SelectValuesNode', () => {
     };
     (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
     (processEntries as jest.Mock).mockImplementation(n => Promise.resolve());
-    (getDataset as jest.Mock).mockResolvedValue(oldDs);
+    (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
 
     const res = await SelectValuesNode.onNodeExecution(
@@ -118,7 +124,7 @@ describe('SelectValuesNode', () => {
     };
     (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
     (processEntries as jest.Mock).mockImplementation(n => Promise.resolve());
-    (getDataset as jest.Mock).mockResolvedValue(oldDs);
+    (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
 
     try {
@@ -159,9 +165,15 @@ describe('SelectValuesNode', () => {
       name: 'New DS',
       workspaceId: 'CDE'
     };
+    const entryA: Entry = {
+      id: 'eA',
+      values: { name: 'foo', test: 'bar', abc: '123' }
+    };
     (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
-    (processEntries as jest.Mock).mockImplementation(n => Promise.resolve());
-    (getDataset as jest.Mock).mockResolvedValue(oldDs);
+    (processEntries as jest.Mock).mockImplementation(
+      async (a, b, c, processFn) => processFn(entryA)
+    );
+    (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
 
     const res = await SelectValuesNode.onNodeExecution(
@@ -173,6 +185,11 @@ describe('SelectValuesNode', () => {
       }
     );
     expect(res.outputs.dataset.datasetId).toBeDefined();
+    expect(createEntry as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(createEntry as jest.Mock).toHaveBeenCalledWith(db, newDs.id, {
+      test: 'bar',
+      abc: '123'
+    });
   });
 
   test('should return absent meta if dataset is missing', async () => {
