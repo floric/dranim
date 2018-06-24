@@ -229,7 +229,7 @@ describe('Validation', () => {
     expect(tryGetNodeType as jest.Mock).toHaveBeenCalledTimes(0);
   });
 
-  test.skip('should validate context output nodes', async () => {
+  test('should validate context output nodes', async () => {
     const type: ServerNodeDef & NodeDef = {
       type: ContextNodeType.OUTPUT,
       name: ContextNodeType.OUTPUT,

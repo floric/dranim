@@ -1,4 +1,4 @@
-import { DataType, Entry } from '@masterthesis/shared';
+import { DataType } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import {
@@ -10,7 +10,6 @@ import {
   createEntry,
   createEntryFromJSON,
   deleteEntry,
-  getAllEntries,
   getEntriesCount,
   getEntry,
   getLatestEntries

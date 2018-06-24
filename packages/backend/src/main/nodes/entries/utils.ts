@@ -23,7 +23,11 @@ export const getDynamicEntryContextInputs = async (
   inputs: { dataset: SocketMetaDef<DatasetMeta> },
   db: Db
 ): Promise<{ [name: string]: SocketDef }> => {
-  if (!inputs.dataset || !inputs.dataset.isPresent) {
+  if (
+    !inputs.dataset ||
+    !inputs.dataset.isPresent ||
+    !inputs.dataset.content.schema
+  ) {
     return {};
   }
 
@@ -44,7 +48,7 @@ export const processEntries = async (
   dsId: string,
   nodeId: string,
   processFn: (entry: Entry) => Promise<void>
-) => {
+): Promise<void> => {
   const coll = getEntryCollection(db, dsId);
   const cursor = coll.find();
   const entriesCount = await getEntriesCount(db, dsId);

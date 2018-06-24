@@ -15,7 +15,12 @@ import { Db, ObjectID } from 'mongodb';
 import { isNodeInMetaValid } from '../calculation/validation';
 import { getNodeType, hasNodeType, tryGetNodeType } from '../nodes/all-nodes';
 import { tryGetConnection } from './connections';
-import { getNode, getNodesCollection, tryGetNode } from './nodes';
+import {
+  getContextNode,
+  getNode,
+  getNodesCollection,
+  tryGetNode
+} from './nodes';
 
 export const getContextInputDefs = async (
   node: NodeInstance,
@@ -37,29 +42,6 @@ export const getContextInputDefs = async (
     parentInputs,
     db
   );
-};
-
-export const getContextNode = async (
-  node: NodeInstance,
-  type: ContextNodeType,
-  db: Db
-): Promise<NodeInstance | null> => {
-  const nodesColl = getNodesCollection(db);
-  const n = await nodesColl.findOne({
-    contextIds: [...node.contextIds, node.id],
-    type
-  });
-
-  if (!n) {
-    return null;
-  }
-
-  const { _id, ...res } = n;
-
-  return {
-    id: _id.toHexString(),
-    ...res
-  };
 };
 
 export const getContextOutputDefs = async (

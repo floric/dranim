@@ -172,6 +172,42 @@ describe('EditEntriesNode', () => {
     });
   });
 
+  test('should return empty object for missing inputs', async () => {
+    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(false);
+
+    const validDs = {
+      content: {
+        schema: [
+          {
+            type: DataType.BOOLEAN,
+            name: 'super',
+            required: false,
+            unique: false,
+            fallback: ''
+          }
+        ]
+      },
+      isPresent: true
+    };
+
+    const res = await EditEntriesNode.transformContextInputDefsToContextOutputDefs(
+      { dataset: DatasetSocket('Ds') },
+      { dataset: validDs },
+      {
+        super: {
+          dataType: DataType.BOOLEAN,
+          displayName: 'super',
+          isDynamic: true
+        }
+      },
+      {},
+      [],
+      db
+    );
+
+    expect(res).toEqual({});
+  });
+
   test('should passthrough dynamic inputs of context input node', async () => {
     (allAreDefinedAndPresent as jest.Mock).mockReturnValue(true);
 

@@ -238,3 +238,26 @@ export const resetProgress = async (workspaceId: string, db: Db) => {
   const coll = getNodesCollection(db);
   await coll.updateMany({ workspaceId }, { $set: { progress: null } });
 };
+
+export const getContextNode = async (
+  node: NodeInstance,
+  type: ContextNodeType,
+  db: Db
+): Promise<NodeInstance | null> => {
+  const nodesColl = getNodesCollection(db);
+  const n = await nodesColl.findOne({
+    contextIds: [...node.contextIds, node.id],
+    type
+  });
+
+  if (!n) {
+    return null;
+  }
+
+  const { _id, ...res } = n;
+
+  return {
+    id: _id.toHexString(),
+    ...res
+  };
+};

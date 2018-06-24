@@ -13,8 +13,7 @@ import { Db } from 'mongodb';
 
 import { tryGetNodeType } from '../nodes/all-nodes';
 import { tryGetConnection } from '../workspace/connections';
-import { tryGetNode } from '../workspace/nodes';
-import { getContextNode } from '../workspace/nodes-detail';
+import { getContextNode, tryGetNode } from '../workspace/nodes';
 import { areNodeInputsValid, isNodeInMetaValid } from './validation';
 
 export const executeNodeWithId = async (
