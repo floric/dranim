@@ -184,7 +184,6 @@ export const getMetaInputs = async (node: NodeInstance, db: Db) => {
 
 export const getNodeState = async (node: NodeInstance, db: Db) => {
   try {
-    const t = tryGetNodeType(node.type);
     const isValid = await isNodeInMetaValid(node, db);
     if (!isValid) {
       return NodeState.INVALID;
@@ -206,7 +205,7 @@ export const addOrUpdateFormValue = async (
     throw new Error('No form value name specified');
   }
 
-  const node = await tryGetNode(nodeId, db);
+  await tryGetNode(nodeId, db);
   const nodeObjId = new ObjectID(nodeId);
 
   const collection = getNodesCollection(db);

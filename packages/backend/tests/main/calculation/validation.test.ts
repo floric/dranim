@@ -1,16 +1,10 @@
 import {
-  BooleanOutputNodeDef,
   ContextNodeType,
-  DatasetInputNodeDef,
-  DatasetOutputNodeDef,
   DataType,
-  EditEntriesNodeDef,
-  JoinDatasetsNodeDef,
-  NumberInputNodeDef,
-  NumberOutputNodeDef,
-  StringInputNodeDef,
-  StringOutputNodeDef,
-  SumNodeDef
+  NodeDef,
+  NodeInstance,
+  parseNodeForm,
+  ServerNodeDef
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
@@ -19,35 +13,21 @@ import {
   isInputValid,
   isNodeInMetaValid
 } from '../../../src/main/calculation/validation';
-import { StringOutputNode } from '../../../src/main/nodes/string';
-import { createConnection } from '../../../src/main/workspace/connections';
+import { tryGetNodeType } from '../../../src/main/nodes/all-nodes';
+import { createDataset } from '../../../src/main/workspace/dataset';
 import {
-  addValueSchema,
-  createDataset
-} from '../../../src/main/workspace/dataset';
-import { createEntry, getAllEntries } from '../../../src/main/workspace/entry';
-import {
-  createNode,
-  getNode,
-  getNodesCollection
-} from '../../../src/main/workspace/nodes';
-import {
-  addOrUpdateFormValue,
-  getContextNode
+  getInputDefs,
+  getMetaInputs
 } from '../../../src/main/workspace/nodes-detail';
-import {
-  createWorkspace,
-  getWorkspace
-} from '../../../src/main/workspace/workspace';
-import {
-  getTestMongoDb,
-  NeverGoHereError,
-  VALID_OBJECT_ID
-} from '../../test-utils';
+import { getTestMongoDb, VALID_OBJECT_ID } from '../../test-utils';
 
 let conn;
 let db: Db;
 let server;
+
+jest.mock('@masterthesis/shared');
+jest.mock('../../../src/main/nodes/all-nodes');
+jest.mock('../../../src/main/workspace/nodes-detail');
 
 describe('Validation', () => {
   beforeAll(async () => {
@@ -67,102 +47,236 @@ describe('Validation', () => {
     jest.resetAllMocks();
   });
 
-  test('should validate simple nodes', async () => {
-    const ws = await createWorkspace(db, 'test', '');
-    const [inputNode, outputNode] = await Promise.all([
-      createNode(db, StringInputNodeDef.type, ws.id, [], 0, 0),
-      createNode(db, StringOutputNode.type, ws.id, [], 0, 0)
-    ]);
+  test('should validate simple nodes 1', async () => {
+    const typeName = 'notype';
+    const type: ServerNodeDef & NodeDef = {
+      type: typeName,
+      name: typeName,
+      inputs: {
+        value: {
+          dataType: DataType.STRING,
+          displayName: 'value',
+          isDynamic: false
+        }
+      },
+      outputs: {},
+      keywords: [],
+      path: [],
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: {} })
+    };
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: typeName,
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
 
-    await addOrUpdateFormValue(
-      db,
-      inputNode.id,
-      'value',
-      JSON.stringify('test')
-    );
-    await createConnection(
-      db,
-      { nodeId: inputNode.id, name: 'value' },
-      { nodeId: outputNode.id, name: 'value' }
-    );
+    (getMetaInputs as jest.Mock).mockResolvedValue({
+      value: {
+        isPresent: true,
+        content: {}
+      }
+    });
+    (tryGetNodeType as jest.Mock).mockReturnValue(type);
 
-    const node = await getNode(db, outputNode.id);
-    let res = await isNodeInMetaValid(node, db);
+    const res = await isNodeInMetaValid(node, db);
     expect(res).toBe(true);
+  });
 
-    res = await areNodeInputsValid(node, { value: 'test' }, db);
+  test('should validate simple nodes 2', async () => {
+    const typeName = 'notype';
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: typeName,
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+
+    (getInputDefs as jest.Mock).mockResolvedValue({});
+
+    const res = await areNodeInputsValid(node, { value: 'test' }, db);
     expect(res).toBe(true);
   });
 
   test('should validate nodes without connection as invalid', async () => {
-    const ws = await createWorkspace(db, 'test', '');
-    const [inputNode, outputNode] = await Promise.all([
-      createNode(db, StringInputNodeDef.type, ws.id, [], 0, 0),
-      createNode(db, StringOutputNode.type, ws.id, [], 0, 0)
-    ]);
+    const typeName = 'notype';
+    const type: ServerNodeDef & NodeDef = {
+      type: typeName,
+      name: typeName,
+      inputs: {
+        value: {
+          dataType: DataType.STRING,
+          displayName: 'value',
+          isDynamic: false
+        }
+      },
+      outputs: {},
+      keywords: [],
+      path: [],
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: {} })
+    };
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: typeName,
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
 
-    await addOrUpdateFormValue(
-      db,
-      inputNode.id,
-      'value',
-      JSON.stringify('test')
-    );
+    (getMetaInputs as jest.Mock).mockResolvedValue({
+      value: {
+        isPresent: false,
+        content: {}
+      }
+    });
+    (tryGetNodeType as jest.Mock).mockReturnValue(type);
 
-    const node = await getNode(db, outputNode.id);
-    let res = await isNodeInMetaValid(node, db);
+    const res = await isNodeInMetaValid(node, db);
     expect(res).toBe(false);
-
-    res = await areNodeInputsValid(node, { value: 'test' }, db);
-    expect(res).toBe(true);
   });
 
   test('should validate nodes without form input as invalid', async () => {
-    const ws = await createWorkspace(db, 'test', '');
-    const inputNode = await createNode(
-      db,
-      StringInputNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0
-    );
+    const typeName = 'notype';
+    const type: ServerNodeDef & NodeDef = {
+      type: typeName,
+      name: typeName,
+      inputs: {
+        value: {
+          dataType: DataType.STRING,
+          displayName: 'value',
+          isDynamic: false
+        }
+      },
+      outputs: {},
+      keywords: [],
+      path: [],
+      isFormValid: async () => false,
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: {} })
+    };
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: typeName,
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
 
-    const node = await getNode(db, inputNode.id);
+    (getMetaInputs as jest.Mock).mockResolvedValue({});
+    (tryGetNodeType as jest.Mock).mockReturnValue(type);
+
     const res = await isNodeInMetaValid(node, db);
     expect(res).toBe(false);
   });
 
   test('should validate context input nodes', async () => {
-    const ws = await createWorkspace(db, 'test', '');
-    const eeNode = await createNode(
-      db,
-      EditEntriesNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0
-    );
-    const inputNode = await getContextNode(eeNode, ContextNodeType.INPUT, db);
-    const res = await isNodeInMetaValid(inputNode, db);
+    const type: ServerNodeDef & NodeDef = {
+      type: ContextNodeType.INPUT,
+      name: ContextNodeType.INPUT,
+      inputs: {
+        value: {
+          dataType: DataType.STRING,
+          displayName: 'value',
+          isDynamic: false
+        }
+      },
+      outputs: {},
+      keywords: [],
+      path: [],
+      isFormValid: async () => false,
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: {} })
+    };
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: ContextNodeType.INPUT,
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+
+    (getMetaInputs as jest.Mock).mockResolvedValue({});
+    (tryGetNodeType as jest.Mock).mockReturnValue(type);
+
+    const res = await isNodeInMetaValid(node, db);
     expect(res).toBe(true);
+
+    expect(parseNodeForm as jest.Mock).toHaveBeenCalledTimes(0);
+    expect(tryGetNodeType as jest.Mock).toHaveBeenCalledTimes(0);
   });
 
   test.skip('should validate context output nodes', async () => {
-    const ws = await createWorkspace(db, 'test', '');
-    const eeNode = await createNode(
-      db,
-      EditEntriesNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0
-    );
-    const outputNode = await getContextNode(eeNode, ContextNodeType.OUTPUT, db);
-    const res = await isNodeInMetaValid(outputNode, db);
+    const type: ServerNodeDef & NodeDef = {
+      type: ContextNodeType.OUTPUT,
+      name: ContextNodeType.OUTPUT,
+      inputs: {
+        value: {
+          dataType: DataType.STRING,
+          displayName: 'value',
+          isDynamic: false
+        }
+      },
+      outputs: {},
+      keywords: [],
+      path: [],
+      isFormValid: async () => false,
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: {} })
+    };
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: ContextNodeType.OUTPUT,
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+
+    (getMetaInputs as jest.Mock).mockResolvedValue({});
+    (tryGetNodeType as jest.Mock).mockReturnValue(type);
+
+    const res = await isNodeInMetaValid(node, db);
     expect(res).toBe(true);
+
+    expect(parseNodeForm as jest.Mock).toHaveBeenCalledTimes(0);
+    expect(tryGetNodeType as jest.Mock).toHaveBeenCalledTimes(0);
   });
 
   test('should have invalid dataset input', async () => {
+    (getInputDefs as jest.Mock).mockResolvedValue({
+      dataset: {
+        dataType: DataType.DATASET,
+        displayName: 'dataset'
+      }
+    });
+
     const res = await areNodeInputsValid(
       {
         id: VALID_OBJECT_ID,
@@ -170,7 +284,7 @@ describe('Validation', () => {
         form: [],
         inputs: [],
         outputs: [],
-        type: DatasetOutputNodeDef.type,
+        type: 'type',
         workspaceId: VALID_OBJECT_ID,
         x: 0,
         y: 0
@@ -182,6 +296,13 @@ describe('Validation', () => {
   });
 
   test('should have dataset input with invalid id', async () => {
+    (getInputDefs as jest.Mock).mockResolvedValue({
+      dataset: {
+        dataType: DataType.DATASET,
+        displayName: 'dataset'
+      }
+    });
+
     const res = await areNodeInputsValid(
       {
         id: VALID_OBJECT_ID,
@@ -189,7 +310,7 @@ describe('Validation', () => {
         form: [],
         inputs: [],
         outputs: [],
-        type: DatasetOutputNodeDef.type,
+        type: 'type',
         workspaceId: VALID_OBJECT_ID,
         x: 0,
         y: 0
@@ -200,7 +321,14 @@ describe('Validation', () => {
     expect(res).toBe(false);
   });
 
-  test('should have dataset input', async () => {
+  test('should have valid dataset input', async () => {
+    (getInputDefs as jest.Mock).mockResolvedValue({
+      dataset: {
+        dataType: DataType.DATASET,
+        displayName: 'dataset'
+      }
+    });
+
     const ds = await createDataset(db, 'test');
     const res = await areNodeInputsValid(
       {
@@ -209,7 +337,7 @@ describe('Validation', () => {
         form: [],
         inputs: [],
         outputs: [],
-        type: DatasetOutputNodeDef.type,
+        type: 'type',
         workspaceId: VALID_OBJECT_ID,
         x: 0,
         y: 0
@@ -221,6 +349,13 @@ describe('Validation', () => {
   });
 
   test('should have invalid input with different name', async () => {
+    (getInputDefs as jest.Mock).mockResolvedValue({
+      else: {
+        dataType: DataType.NUMBER,
+        displayName: 'else'
+      }
+    });
+
     const res = await areNodeInputsValid(
       {
         id: VALID_OBJECT_ID,
@@ -228,7 +363,7 @@ describe('Validation', () => {
         form: [],
         inputs: [],
         outputs: [],
-        type: NumberOutputNodeDef.type,
+        type: 'type',
         workspaceId: VALID_OBJECT_ID,
         x: 0,
         y: 0
@@ -240,6 +375,17 @@ describe('Validation', () => {
   });
 
   test('should have valid and invalid input', async () => {
+    (getInputDefs as jest.Mock).mockResolvedValue({
+      datasetA: {
+        dataType: DataType.DATASET,
+        displayName: 'dsA'
+      },
+      datasetB: {
+        dataType: DataType.DATASET,
+        displayName: 'dsB'
+      }
+    });
+
     const ds = await createDataset(db, 'test');
     const res = await areNodeInputsValid(
       {
@@ -248,7 +394,7 @@ describe('Validation', () => {
         form: [],
         inputs: [],
         outputs: [],
-        type: JoinDatasetsNodeDef.type,
+        type: 'type',
         workspaceId: VALID_OBJECT_ID,
         x: 0,
         y: 0
