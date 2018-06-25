@@ -16,11 +16,7 @@ import {
   updateLastChange,
   updateWorkspace
 } from '../../../src/main/workspace/workspace';
-import {
-  getTestMongoDb,
-  NeverGoHereError,
-  VALID_OBJECT_ID
-} from '../../test-utils';
+import { getTestMongoDb, NeverGoHereError } from '../../test-utils';
 
 let conn;
 let db: Db;

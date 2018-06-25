@@ -266,10 +266,10 @@ describe('Nodes', () => {
     const ws = await createWorkspace(db, 'test', '');
 
     try {
-      await createNode(db, 'unknown', ws.id, [], 0, 0);
+      await createNode(db, 'UnknownNodeType', ws.id, [], 0, 0);
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Unknown node type');
+      expect(err.message).toBe('Unknown node type: UnknownNodeType');
     }
   });
 

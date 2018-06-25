@@ -8,6 +8,7 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
+import { getMetaInputs } from '../../../src/main/calculation/meta-execution';
 import {
   areNodeInputsValid,
   isInputValid,
@@ -15,10 +16,7 @@ import {
 } from '../../../src/main/calculation/validation';
 import { tryGetNodeType } from '../../../src/main/nodes/all-nodes';
 import { createDataset } from '../../../src/main/workspace/dataset';
-import {
-  getInputDefs,
-  getMetaInputs
-} from '../../../src/main/workspace/nodes-detail';
+import { getInputDefs } from '../../../src/main/workspace/nodes-detail';
 import { getTestMongoDb, VALID_OBJECT_ID } from '../../test-utils';
 
 let conn;
@@ -28,6 +26,7 @@ let server;
 jest.mock('@masterthesis/shared');
 jest.mock('../../../src/main/nodes/all-nodes');
 jest.mock('../../../src/main/workspace/nodes-detail');
+jest.mock('../../../src/main/calculation/meta-execution');
 
 describe('Validation', () => {
   beforeAll(async () => {

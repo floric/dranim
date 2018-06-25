@@ -7,9 +7,10 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
+import { getMetaInputs } from '../calculation/meta-execution';
 import { tryGetNodeType } from '../nodes/all-nodes';
 import { getDataset } from '../workspace/dataset';
-import { getInputDefs, getMetaInputs } from '../workspace/nodes-detail';
+import { getInputDefs } from '../workspace/nodes-detail';
 
 export const isNodeInMetaValid = async (node: NodeInstance, db: Db) => {
   let isValidForm = true;

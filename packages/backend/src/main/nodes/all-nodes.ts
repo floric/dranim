@@ -35,7 +35,7 @@ export const hasNodeType = (type: string): boolean => serverNodeTypes.has(type);
 
 export const tryGetNodeType = (type: string): NodeDef & ServerNodeDef => {
   if (!serverNodeTypes.has(type)) {
-    throw new Error('Unknown node type');
+    throw new Error('Unknown node type: ' + type);
   }
 
   return serverNodeTypes.get(type)!;

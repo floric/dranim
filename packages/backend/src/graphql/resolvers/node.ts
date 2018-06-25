@@ -9,12 +9,14 @@ import {
   Workspace
 } from '@masterthesis/shared';
 
+import {
+  getMetaInputs,
+  getMetaOutputs
+} from '../../main/calculation/meta-execution';
 import { getNodeType, hasNodeType } from '../../main/nodes/all-nodes';
 import {
   getContextInputDefs,
   getContextOutputDefs,
-  getMetaInputs,
-  getMetaOutputs,
   getNodeState
 } from '../../main/workspace/nodes-detail';
 import { getWorkspace } from '../../main/workspace/workspace';
@@ -25,11 +27,11 @@ export const Node = {
   workspace: ({ workspaceId }, __, { db }): Promise<Workspace | null> =>
     getWorkspace(db, workspaceId),
   metaOutputs: (
-    { id },
+    node,
     _,
     { db }
   ): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> =>
-    getMetaOutputs(db, id),
+    getMetaOutputs(node, db),
   metaInputs: (
     node,
     _,

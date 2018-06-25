@@ -9,6 +9,7 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
+import { getMetaInputs } from '../../../src/main/calculation/meta-execution';
 import { isNodeInMetaValid } from '../../../src/main/calculation/validation';
 import {
   getNodeType,
@@ -24,6 +25,7 @@ import {
   addOrUpdateFormValue,
   getContextInputDefs,
   getContextOutputDefs,
+  getInputDefs,
   getNodeState
 } from '../../../src/main/workspace/nodes-detail';
 import {
@@ -41,6 +43,7 @@ jest.mock('../../../src/main/workspace/nodes');
 jest.mock('../../../src/main/nodes/all-nodes');
 jest.mock('../../../src/main/calculation/validation');
 jest.mock('../../../src/main/workspace/connections');
+jest.mock('../../../src/main/calculation/meta-execution');
 
 describe('Node Details', () => {
   beforeAll(async () => {
@@ -70,6 +73,72 @@ describe('Node Details', () => {
         outputs: [],
         contextIds: [],
         type: 'type',
+        workspaceId: VALID_OBJECT_ID,
+        x: 0,
+        y: 0
+      },
+      db
+    );
+
+    expect(state).toBe(NodeState.VALID);
+  });
+
+  test('should get valid node state for ContextInputNode', async () => {
+    const parentNode: NodeInstance = {
+      id: 'testnode',
+      contextIds: [],
+      form: [],
+      inputs: [{ name: 'dataset', connectionId: '123' }],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    (isNodeInMetaValid as jest.Mock).mockReturnValue(true);
+    (getNode as jest.Mock).mockReturnValue(parentNode);
+
+    const state = await getNodeState(
+      {
+        id: VALID_OBJECT_ID,
+        form: [],
+        inputs: [],
+        outputs: [],
+        contextIds: [parentNode.id],
+        type: ContextNodeType.INPUT,
+        workspaceId: VALID_OBJECT_ID,
+        x: 0,
+        y: 0
+      },
+      db
+    );
+
+    expect(state).toBe(NodeState.VALID);
+  });
+
+  test('should get valid node state for ContextOutputNode', async () => {
+    const parentNode: NodeInstance = {
+      id: 'testnode',
+      contextIds: [],
+      form: [],
+      inputs: [{ name: 'dataset', connectionId: '123' }],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    (isNodeInMetaValid as jest.Mock).mockReturnValue(true);
+    (getNode as jest.Mock).mockReturnValue(parentNode);
+
+    const state = await getNodeState(
+      {
+        id: VALID_OBJECT_ID,
+        form: [],
+        inputs: [],
+        outputs: [],
+        contextIds: [parentNode.id],
+        type: ContextNodeType.OUTPUT,
         workspaceId: VALID_OBJECT_ID,
         x: 0,
         y: 0
@@ -146,7 +215,7 @@ describe('Node Details', () => {
   test('should throw error for missing parent node', async () => {
     const node: NodeInstance = {
       id: 'testnode',
-      contextIds: [],
+      contextIds: ['unknown id'],
       form: [],
       inputs: [{ name: 'dataset', connectionId: '123' }],
       outputs: [],
@@ -231,7 +300,7 @@ describe('Node Details', () => {
     };
     const inputNode: NodeInstance = {
       id: 'abc',
-      contextIds: [],
+      contextIds: [parentNode.id],
       form: [],
       inputs: [],
       outputs: [],
@@ -283,7 +352,7 @@ describe('Node Details', () => {
     };
     const inputNode: NodeInstance = {
       id: 'abc',
-      contextIds: [],
+      contextIds: [parentNode.id],
       form: [],
       inputs: [],
       outputs: [],
@@ -322,5 +391,140 @@ describe('Node Details', () => {
     } catch (err) {
       expect(err.message).toBe('Node not found');
     }
+  });
+
+  test('should get input defs for ContextOutputNode from context output defs from parent node', async () => {
+    const parentTypeName = 'parentnode';
+    const parentNode: NodeInstance = {
+      id: parentTypeName,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    const parentType: ServerNodeDefWithContextFn & NodeDef = {
+      type: parentTypeName,
+      name: parentTypeName,
+      inputs: {},
+      outputs: {},
+      keywords: [],
+      path: [],
+      isFormValid: async () => false,
+      onMetaExecution: async () => ({ test: { content: {}, isPresent: true } }),
+      onNodeExecution: async () => ({ outputs: {} }),
+      transformContextInputDefsToContextOutputDefs: async inputs => ({
+        test: {
+          dataType: DataType.DATETIME,
+          displayName: 'date',
+          isDynamic: true
+        }
+      }),
+      transformInputDefsToContextInputDefs: async () => ({})
+    };
+    const contextInputNode: NodeInstance = {
+      id: 'abc',
+      type: ContextNodeType.INPUT,
+      contextIds: [parentNode.id],
+      form: [],
+      inputs: [],
+      outputs: [],
+      workspaceId: 'abc',
+      x: 0,
+      y: 0
+    };
+    (getNode as jest.Mock).mockResolvedValueOnce(parentNode);
+    (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
+    (hasNodeType as jest.Mock).mockReturnValueOnce(false);
+    (hasContextFn as jest.Mock).mockReturnValue(true);
+    (getContextNode as jest.Mock).mockReturnValue(contextInputNode);
+
+    const res = await getInputDefs(
+      {
+        id: 'abc',
+        type: ContextNodeType.OUTPUT,
+        contextIds: [parentNode.id],
+        form: [],
+        inputs: [],
+        outputs: [],
+        workspaceId: 'abc',
+        x: 0,
+        y: 0
+      },
+      null
+    );
+    expect(hasContextFn).toHaveBeenCalledTimes(1);
+    expect(res).toEqual({
+      test: {
+        dataType: DataType.DATETIME,
+        displayName: 'date',
+        isDynamic: true
+      }
+    });
+  });
+
+  test('should get input defs for ContextInputNode from context input defs from parent node', async () => {
+    const parentTypeName = 'parentnode';
+    const parentNode: NodeInstance = {
+      id: parentTypeName,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    const parentType: ServerNodeDefWithContextFn & NodeDef = {
+      type: parentTypeName,
+      name: parentTypeName,
+      inputs: {},
+      outputs: {},
+      keywords: [],
+      path: [],
+      isFormValid: async () => false,
+      onMetaExecution: async () => ({ test: { content: {}, isPresent: true } }),
+      onNodeExecution: async () => ({ outputs: {} }),
+      transformContextInputDefsToContextOutputDefs: async inputs => inputs,
+      transformInputDefsToContextInputDefs: async () => ({
+        test: {
+          dataType: DataType.DATETIME,
+          displayName: 'date',
+          isDynamic: true
+        }
+      })
+    };
+    (getNode as jest.Mock).mockResolvedValueOnce(parentNode);
+    (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
+    (hasNodeType as jest.Mock).mockReturnValueOnce(true);
+    (hasContextFn as jest.Mock).mockReturnValue(true);
+
+    const res = await getInputDefs(
+      {
+        id: 'abc',
+        type: ContextNodeType.INPUT,
+        contextIds: [parentNode.id],
+        form: [],
+        inputs: [{ connectionId: 'abc', name: 'test' }],
+        outputs: [],
+        workspaceId: 'abc',
+        x: 0,
+        y: 0
+      },
+      null
+    );
+    expect(hasContextFn).toHaveBeenCalledTimes(1);
+    expect(getMetaInputs).toHaveBeenCalledTimes(1);
+    expect(res).toEqual({
+      test: {
+        dataType: DataType.DATETIME,
+        displayName: 'date',
+        isDynamic: true
+      }
+    });
   });
 });

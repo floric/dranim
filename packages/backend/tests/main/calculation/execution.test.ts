@@ -139,7 +139,7 @@ describe('Execution', () => {
       });
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Unknown node type');
+      expect(err.message).toBe('Unknown node type: UnknownNodeType');
     }
   });
 
