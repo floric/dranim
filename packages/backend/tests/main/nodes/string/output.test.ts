@@ -5,14 +5,14 @@ import { StringOutputNode } from '../../../../src/main/nodes/string/output';
 describe('StringOutputNode', () => {
   test('should have correct properties', () => {
     expect(StringOutputNode.type).toBe(StringOutputNodeDef.type);
-    expect(StringOutputNode.isFormValid).toBeUndefined();
+    expect(StringOutputNode.isFormValid).toBeDefined();
     expect(StringOutputNode.isInputValid).toBeUndefined();
     expect(StringOutputNodeDef.isOutputNode).toBe(true);
   });
 
   test('should get output value from input', async () => {
     const inputValue = 'a huge text';
-    const form = { value: inputValue };
+    const form = { name: 'test', description: '' };
 
     const res = await StringOutputNode.onNodeExecution(
       form,
@@ -28,7 +28,7 @@ describe('StringOutputNode', () => {
 
   test('should return nothing onMetaExecution', async () => {
     const res = await StringOutputNode.onMetaExecution(
-      {},
+      { name: 'test', description: '' },
       { value: { content: {}, isPresent: true } },
       null
     );

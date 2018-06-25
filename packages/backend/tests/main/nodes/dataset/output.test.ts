@@ -47,7 +47,7 @@ describe('DatasetOutputNode', () => {
     );
 
     expect(res.outputs).toBeDefined();
-    expect(res.results.dataset.datasetId).toBe(ds.id);
+    expect(res.results.value.datasetId).toBe(ds.id);
   });
 
   test('should return absent meta for missing dataset', async () => {
