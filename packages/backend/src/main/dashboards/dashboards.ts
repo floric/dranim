@@ -8,8 +8,8 @@ export const getDashboardCollection = (
 };
 
 export const createDashboard = async (
-  db: Db,
-  name: string
+  name: string,
+  db: Db
 ): Promise<Dashboard> => {
   const collection = getDashboardCollection(db);
   if (name.length === 0) {
@@ -36,7 +36,7 @@ export const createDashboard = async (
   };
 };
 
-export const deleteDashboard = async (db: Db, id: string) => {
+export const deleteDashboard = async (id: string, db: Db) => {
   const coll = getDashboardCollection(db);
   const res = await coll.deleteOne({ _id: new ObjectID(id) });
   if (res.result.ok !== 1 || res.deletedCount !== 1) {
@@ -56,8 +56,8 @@ export const getAllDashboards = async (db: Db): Promise<Array<Dashboard>> => {
 };
 
 export const getDashboard = async (
-  db: Db,
-  id: string
+  id: string,
+  db: Db
 ): Promise<(Dashboard & { _id: ObjectID }) | null> => {
   if (!ObjectID.isValid(id)) {
     return null;
@@ -73,4 +73,16 @@ export const getDashboard = async (
     id: obj._id.toHexString(),
     ...obj
   };
+};
+
+export const tryGetDashboard = async (
+  id: string,
+  db: Db
+): Promise<Dashboard> => {
+  const dashboard = await getDashboard(id, db);
+  if (!dashboard) {
+    throw new Error('Unknown dashboard');
+  }
+
+  return dashboard;
 };

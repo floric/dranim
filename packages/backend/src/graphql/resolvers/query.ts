@@ -33,5 +33,5 @@ export const Query = {
   dashboards: (_, __, { db }): Promise<Array<Dashboard>> =>
     getAllDashboards(db),
   dashboard: (_, { id }, { db }): Promise<Dashboard | null> =>
-    getDashboard(db, id)
+    getDashboard(id, db)
 };

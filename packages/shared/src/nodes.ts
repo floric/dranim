@@ -34,6 +34,10 @@ export interface OutputResult<T = any> {
   dashboardId: string;
 }
 
+export interface GQLOutputResult extends OutputResult<any> {
+  id: string;
+}
+
 export interface NodeDef<NodeInputs = {}, NodeOutputs = {}> {
   name: string;
   type: string;
