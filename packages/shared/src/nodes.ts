@@ -24,11 +24,14 @@ export type IOValues<T> = { [Name in keyof T]: T[Name] };
 export interface OutputNodeForm {
   name: string;
   description: string;
+  dashboardId: string;
 }
 
-export interface OutputResult<T> {
+export interface OutputResult<T = any> {
   value: T;
   type: DataType;
+  name: string;
+  dashboardId: string;
 }
 
 export interface NodeDef<NodeInputs = {}, NodeOutputs = {}> {

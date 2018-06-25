@@ -1,10 +1,10 @@
 import {
+  DatasetOutputNodeDef,
   FormValues,
   GQLNodeInstance,
   NodeDef,
   NodesMap,
-  SocketMetas,
-  DatasetOutputNodeDef
+  SocketMetas
 } from '@masterthesis/shared';
 import { FormComponentProps } from 'antd/lib/form';
 import { TreeData } from 'antd/lib/tree-select';

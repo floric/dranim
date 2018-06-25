@@ -24,8 +24,13 @@ export const DatasetOutputNode: ServerNodeDef<
 
     return inputs;
   },
-  onNodeExecution: async (form, inputs, { db }) => ({
+  onNodeExecution: async (form, inputs) => ({
     outputs: {},
-    results: { value: inputs.dataset, type: DataType.DATASET }
+    results: {
+      name: '',
+      value: inputs.dataset,
+      type: DataType.DATASET,
+      dashboardId: ''
+    }
   })
 };

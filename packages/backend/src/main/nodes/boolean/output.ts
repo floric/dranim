@@ -22,8 +22,10 @@ export const BooleanOutputNode: ServerNodeDef<
     Promise.resolve({
       outputs: {},
       results: {
+        name: form.name!,
         value: inputs.value,
-        type: DataType.BOOLEAN
+        type: DataType.BOOLEAN,
+        dashboardId: form.dashboardId!
       }
     })
 };

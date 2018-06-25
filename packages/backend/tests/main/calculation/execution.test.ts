@@ -96,7 +96,12 @@ describe('Execution', () => {
     );
     await addOrUpdateFormValue(db, nodeA.id, 'value', JSON.stringify('test'));
     await addOrUpdateFormValue(db, nodeB.id, 'name', JSON.stringify('test'));
-
+    await addOrUpdateFormValue(
+      db,
+      nodeB.id,
+      'dashboardId',
+      JSON.stringify('dsid')
+    );
     const { outputs, results } = await executeNodeWithId(db, nodeB.id);
 
     expect(outputs).toBeDefined();
@@ -201,6 +206,12 @@ describe('Execution', () => {
       outputNode.id,
       'name',
       JSON.stringify('test')
+    );
+    await addOrUpdateFormValue(
+      db,
+      outputNode.id,
+      'dashboardId',
+      JSON.stringify('dsid')
     );
 
     await createConnection(

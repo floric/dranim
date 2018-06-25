@@ -22,8 +22,10 @@ export const NumberOutputNode: ServerNodeDef<
     Promise.resolve({
       outputs: {},
       results: {
+        name: form.name!,
         value: inputs.value,
-        type: DataType.NUMBER
+        type: DataType.NUMBER,
+        dashboardId: form.dashboardId!
       }
     })
 };

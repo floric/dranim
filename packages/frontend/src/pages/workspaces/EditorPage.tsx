@@ -24,6 +24,10 @@ const WORKSPACE_NODE_SELECTION = gql`
         type
       }
     }
+    dashboards {
+      id
+      name
+    }
     workspace(id: $workspaceId) {
       id
       name
@@ -196,6 +200,7 @@ export class WorkspaceEditorPage extends React.Component<
                                     <Mutation mutation={UPDATE_NODE}>
                                       {updateNode => (
                                         <ExplorerEditor
+                                          dashboards={data.dashboards}
                                           datasets={data.datasets}
                                           connections={deepCopyResponse(
                                             data.workspace.connections

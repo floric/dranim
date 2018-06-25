@@ -22,8 +22,7 @@ export const createDashboard = async (
   }
 
   const res = await collection.insertOne({
-    name,
-    type: null
+    name
   });
 
   if (res.result.ok !== 1 || res.ops.length !== 1) {

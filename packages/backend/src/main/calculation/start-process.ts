@@ -1,11 +1,13 @@
 import {
   CalculationProcess,
   NodeInstance,
+  OutputResult,
   ProcessState
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { executeNode } from '../calculation/execution';
+import { addOrUpdateResult } from '../dashboards/results';
 import { getNodeType, hasNodeType } from '../nodes/all-nodes';
 import { clearGeneratedDatasets } from '../workspace/dataset';
 import { getAllNodes, resetProgress } from '../workspace/nodes';
@@ -33,11 +35,10 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
 
     console.log('Started calculation.');
 
-    const res = await Promise.all(
+    const results = await Promise.all(
       outputNodesInstances.map(o => executeOutputNode(db, o, processId))
     );
-    console.log(res);
-
+    await saveResults(results as Array<OutputResult>, db);
     await updateFinishedProcess(
       db,
       processId,
@@ -50,6 +51,13 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
     console.error('Finished calculation with errors', err);
   }
 };
+
+const saveResults = async (results: Array<OutputResult | undefined>, db: Db) =>
+  Promise.all(
+    results
+      .filter(r => r != null && Object.keys(r).length > 0)
+      .map(r => addOrUpdateResult(r!, db))
+  );
 
 const executeOutputNode = async (
   db: Db,
