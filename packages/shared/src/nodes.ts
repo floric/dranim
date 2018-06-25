@@ -48,7 +48,10 @@ export interface ServerNodeDef<
   onNodeExecution: (
     form: FormValues<NodeForm>,
     inputs: IOValues<NodeInputs>,
-    context: { db: Db; node: NodeInstance }
+    context: {
+      db: Db;
+      node: NodeInstance;
+    }
   ) => Promise<NodeExecutionResult<NodeOutputs, NodeResults>>;
   onMetaExecution: (
     form: FormValues<NodeForm>,
@@ -69,7 +72,7 @@ export interface ServerNodeDefWithContextFn<
     context: {
       node: NodeInstance;
       db: Db;
-      onContextFnExecution?: (
+      contextFnExecution?: (
         input: IOValues<any>
       ) => Promise<NodeExecutionResult<any>>;
     }
@@ -113,6 +116,7 @@ export interface GQLNodeInstance extends NodeInstance {
   hasContextFn: boolean;
   contextInputDefs: string | null;
   contextOutputDefs: string | null;
+  progress: number | null;
 }
 
 export interface SocketInstance {

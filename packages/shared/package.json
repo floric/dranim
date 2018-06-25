@@ -6,12 +6,12 @@
   "dependencies": {
     "date-fns": "^1.29.0",
     "moment": "^2.22.2",
+    "mongodb": "^3.0.10",
     "sleep-promise": "^8.0.1",
     "uuid": "^3.2.1"
   },
   "typings": "lib/index.d.ts",
   "author": {
-    "email": "floririchte@gmail.com",
     "name": "Florian Richter"
   },
   "scripts": {
@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@types/jest": "^23.1.1",
+    "@types/mongodb": "^3.0.21",
     "@types/uuid": "^3.4.3",
     "jest": "^23.0.0",
     "ts-jest": "^22.4.6",

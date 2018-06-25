@@ -52,7 +52,7 @@ export const renderContextNode = (
   ].map(p =>
     renderSockets(p.defs, n.id, server, state, p.type, socketsMap, changeState)
   );
-  const stateRect = getStateRect(height, n.state);
+  const stateRect = getStateRect(height, n.progress, n.state);
 
   nodeGroup.add(bgRect);
   nodeGroup.add(nodeTitle);
@@ -105,7 +105,7 @@ export const renderNode = (
   ].map(p =>
     renderSockets(p.defs, n.id, server, state, p.type, socketsMap, changeState)
   );
-  const stateRect = getStateRect(height, n.state);
+  const stateRect = getStateRect(height, n.progress, n.state);
 
   nodeGroup.add(bgRect);
   nodeGroup.add(nodeTitle);
@@ -132,9 +132,13 @@ const getContextFunctionNote = () =>
     x: NODE_WIDTH / 2 - 5
   });
 
-const getStateRect = (height: number, state: NodeState) =>
+const getStateRect = (
+  height: number,
+  progress: number | null,
+  state: NodeState
+) =>
   new Konva.Rect({
-    width: NODE_WIDTH,
+    width: progress !== null ? progress * NODE_WIDTH : NODE_WIDTH,
     height: STATE_LINE_HEIGHT,
     x: 0,
     y: height - STATE_LINE_HEIGHT,

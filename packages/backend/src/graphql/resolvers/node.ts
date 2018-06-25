@@ -9,13 +9,15 @@ import {
   Workspace
 } from '@masterthesis/shared';
 
-import { serverNodeTypes } from '../../main/nodes/all-nodes';
+import {
+  getMetaInputs,
+  getMetaOutputs
+} from '../../main/calculation/meta-execution';
+import { getNodeType, hasNodeType } from '../../main/nodes/all-nodes';
 import {
   getContextInputDefs,
   getContextOutputDefs,
-  getMetaOutputs,
-  getNodeState,
-  getMetaInputs
+  getNodeState
 } from '../../main/workspace/nodes-detail';
 import { getWorkspace } from '../../main/workspace/workspace';
 
@@ -25,11 +27,11 @@ export const Node = {
   workspace: ({ workspaceId }, __, { db }): Promise<Workspace | null> =>
     getWorkspace(db, workspaceId),
   metaOutputs: (
-    { id },
+    node,
     _,
     { db }
   ): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> =>
-    getMetaOutputs(db, id),
+    getMetaOutputs(node, db),
   metaInputs: (
     node,
     _,
@@ -49,5 +51,5 @@ export const Node = {
   ): Promise<(SocketDefs<{}> & { [name: string]: SocketDef }) | null> =>
     getContextOutputDefs(node, db),
   hasContextFn: ({ type }): boolean =>
-    serverNodeTypes.has(type) ? hasContextFn(serverNodeTypes.get(type)!) : false
+    hasNodeType(type) ? hasContextFn(getNodeType(type)!) : false
 };

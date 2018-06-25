@@ -1,7 +1,7 @@
 FROM node:slim
 
 WORKDIR /
-ADD dist .
+COPY dist .
 ENV NODE_ENV="production"
 ENV PORT=3000
 EXPOSE ${PORT}

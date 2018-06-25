@@ -1,27 +1,22 @@
 import {
+  allAreDefinedAndPresent,
+  Dataset,
   DatasetSocket,
   DataType,
-  EditEntriesNodeDef,
-  NodeInstance,
-  sleep,
-  StringInputNodeDef,
-  ValueSchema
+  EditEntriesNodeDef
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
+import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
 import { EditEntriesNode } from '../../../../src/main/nodes/entries/edit-entries';
-import { StringInputNode } from '../../../../src/main/nodes/string';
 import {
-  addValueSchema,
+  getDynamicEntryContextInputs,
+  processEntries
+} from '../../../../src/main/nodes/entries/utils';
+import {
   createDataset,
   getDataset
 } from '../../../../src/main/workspace/dataset';
-import {
-  createEntry,
-  getAllEntries
-} from '../../../../src/main/workspace/entry';
-import { createNode } from '../../../../src/main/workspace/nodes';
-import { createWorkspace } from '../../../../src/main/workspace/workspace';
 import {
   getTestMongoDb,
   NeverGoHereError,
@@ -32,6 +27,11 @@ import {
 let conn;
 let db: Db;
 let server;
+
+jest.mock('@masterthesis/shared');
+jest.mock('../../../../src/main/nodes/entries/utils');
+jest.mock('../../../../src/main/workspace/dataset');
+jest.mock('../../../../src/main/calculation/utils');
 
 describe('EditEntriesNode', () => {
   beforeAll(async () => {
@@ -62,23 +62,43 @@ describe('EditEntriesNode', () => {
   });
 
   test('should create new DS and do changes on this one', async () => {
-    const ds = await createDataset(db, 'newds');
+    const oldDs: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'Old DS',
+      workspaceId: 'CDE'
+    };
+    const newDs: Dataset = {
+      id: 'ABC',
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'New DS',
+      workspaceId: 'CDE'
+    };
+    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
+    (processEntries as jest.Mock).mockImplementation(n => Promise.resolve());
+    (getDataset as jest.Mock).mockResolvedValue(oldDs);
+    (createDataset as jest.Mock).mockResolvedValue(newDs);
 
     const res = await EditEntriesNode.onNodeExecution(
       {},
-      { dataset: { datasetId: ds.id } },
+      { dataset: { datasetId: oldDs.id } },
       {
         db,
         node: NODE,
-        onContextFnExecution: () => Promise.resolve({ outputs: {} })
+        contextFnExecution: () => Promise.resolve({ outputs: {} })
       }
     );
-    expect(res.outputs.dataset.datasetId).toBeDefined();
-    expect(res.outputs.dataset.datasetId).not.toBe(ds.id);
+
+    expect(res.outputs.dataset.datasetId).toBe(newDs.id);
     expect(res.results).toBeUndefined();
   });
 
   test('should passthrough defs on onMetaExecution', async () => {
+    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(true);
     const validDs = {
       content: {
         schema: [
@@ -103,6 +123,8 @@ describe('EditEntriesNode', () => {
   });
 
   test('should return empty object on onMetaExecution', async () => {
+    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(false);
+
     let res = await EditEntriesNode.onMetaExecution({}, { dataset: null }, db);
     expect(res.dataset.isPresent).toBe(false);
     expect(res.dataset.content.schema).toEqual([]);
@@ -113,6 +135,13 @@ describe('EditEntriesNode', () => {
   });
 
   test('should use dataset schemas as dynamic inputs of context fn', async () => {
+    (getDynamicEntryContextInputs as jest.Mock).mockReturnValue({
+      super: {
+        dataType: DataType.BOOLEAN,
+        displayName: 'super',
+        isDynamic: true
+      }
+    });
     const validDs = {
       content: {
         schema: [
@@ -143,7 +172,9 @@ describe('EditEntriesNode', () => {
     });
   });
 
-  test('should passthrough dynamic inputs of context input node', async () => {
+  test('should return empty object for missing inputs', async () => {
+    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(false);
+
     const validDs = {
       content: {
         schema: [
@@ -159,16 +190,52 @@ describe('EditEntriesNode', () => {
       isPresent: true
     };
 
-    const inputRes = await EditEntriesNode.transformInputDefsToContextInputDefs(
+    const res = await EditEntriesNode.transformContextInputDefsToContextOutputDefs(
       { dataset: DatasetSocket('Ds') },
       { dataset: validDs },
+      {
+        super: {
+          dataType: DataType.BOOLEAN,
+          displayName: 'super',
+          isDynamic: true
+        }
+      },
+      {},
+      [],
       db
     );
+
+    expect(res).toEqual({});
+  });
+
+  test('should passthrough dynamic inputs of context input node', async () => {
+    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(true);
+
+    const validDs = {
+      content: {
+        schema: [
+          {
+            type: DataType.BOOLEAN,
+            name: 'super',
+            required: false,
+            unique: false,
+            fallback: ''
+          }
+        ]
+      },
+      isPresent: true
+    };
 
     const res = await EditEntriesNode.transformContextInputDefsToContextOutputDefs(
       { dataset: DatasetSocket('Ds') },
       { dataset: validDs },
-      inputRes,
+      {
+        super: {
+          dataType: DataType.BOOLEAN,
+          displayName: 'super',
+          isDynamic: true
+        }
+      },
       {},
       [],
       db
@@ -184,52 +251,70 @@ describe('EditEntriesNode', () => {
   });
 
   test('should edit entries', async () => {
-    const ws = await createWorkspace(db, 'test', '');
-    const ds = await createDataset(db, 'ds 1');
-    await addValueSchema(db, ds.id, {
-      name: 'val',
-      fallback: '',
-      required: true,
-      type: DataType.STRING,
-      unique: false
-    });
-
-    await Promise.all(
-      Array(20)
-        .fill(0)
-        .map((e, i) => createEntry(db, ds.id, { val: JSON.stringify(i) }))
-    );
+    const oldDs: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'Old DS',
+      workspaceId: 'CDE'
+    };
+    const newDs: Dataset = {
+      id: 'ABC',
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'New DS',
+      workspaceId: 'CDE'
+    };
+    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
+    (processEntries as jest.Mock).mockImplementation(n => Promise.resolve());
+    (getDataset as jest.Mock).mockResolvedValue(oldDs);
+    (createDataset as jest.Mock).mockResolvedValue(newDs);
 
     const res = await EditEntriesNode.onNodeExecution(
       {},
-      { dataset: { datasetId: ds.id } },
+      { dataset: { datasetId: oldDs.id } },
       {
         db,
         node: NODE,
-        onContextFnExecution: input =>
-          Promise.resolve({ outputs: { val: ':)' } })
+        contextFnExecution: input => Promise.resolve({ outputs: { val: ':)' } })
       }
     );
     expect(res.outputs.dataset).toBeDefined();
-
-    const newDs = await getDataset(db, res.outputs.dataset.datasetId);
-    const oldDs = await getDataset(db, ds.id);
     expect(newDs.valueschemas).toEqual(oldDs.valueschemas);
-
-    const allEntries = await getAllEntries(db, newDs.id);
-    expect(allEntries.length).toBe(20);
-
-    expect(allEntries[0].values.val).toBe(':)');
   });
 
   test('should throw errors for missing context', async () => {
-    const ds = await createDataset(db, 'ds 1');
+    const oldDs: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'Old DS',
+      workspaceId: 'CDE'
+    };
+    const newDs: Dataset = {
+      id: 'ABC',
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'New DS',
+      workspaceId: 'CDE'
+    };
+    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
+    (processEntries as jest.Mock).mockImplementation(n => Promise.resolve());
+    (getDataset as jest.Mock).mockResolvedValue(oldDs);
+    (createDataset as jest.Mock).mockResolvedValue(newDs);
 
     try {
       await EditEntriesNode.onNodeExecution(
         {},
-        { dataset: { datasetId: ds.id } },
-        { db, node: NODE }
+        { dataset: { datasetId: oldDs.id } },
+        {
+          db,
+          node: NODE
+        }
       );
       throw NeverGoHereError;
     } catch (err) {
@@ -242,7 +327,10 @@ describe('EditEntriesNode', () => {
       await EditEntriesNode.onNodeExecution(
         {},
         { dataset: { datasetId: VALID_OBJECT_ID } },
-        { db, node: NODE }
+        {
+          db,
+          node: NODE
+        }
       );
       throw NeverGoHereError;
     } catch (err) {

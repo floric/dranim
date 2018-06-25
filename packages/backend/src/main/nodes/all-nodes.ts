@@ -3,17 +3,17 @@ import { NodeDef, NodesMap, ServerNodeDef } from '@masterthesis/shared';
 import * as BooleanNodes from './boolean';
 import * as DatasetNodes from './dataset';
 import * as DatetimeNodes from './datetime';
-import * as EntryNodes from './entries';
+import * as EntriesNodes from './entries';
 import * as NumberNodes from './number';
 import * as StringNodes from './string';
 import * as TimeNodes from './time';
 
-export const serverNodeTypes: Map<string, ServerNodeDef & NodeDef> = new Map(
+const serverNodeTypes: Map<string, ServerNodeDef & NodeDef> = new Map(
   [
     DatasetNodes,
     NumberNodes,
     StringNodes,
-    EntryNodes,
+    EntriesNodes,
     BooleanNodes,
     TimeNodes,
     DatetimeNodes
@@ -28,9 +28,14 @@ export const serverNodeTypes: Map<string, ServerNodeDef & NodeDef> = new Map(
     ])
 );
 
+export const getNodeType = (type: string): (NodeDef & ServerNodeDef) | null =>
+  serverNodeTypes.get(type) || null;
+
+export const hasNodeType = (type: string): boolean => serverNodeTypes.has(type);
+
 export const tryGetNodeType = (type: string): NodeDef & ServerNodeDef => {
   if (!serverNodeTypes.has(type)) {
-    throw new Error('Unknown node type');
+    throw new Error('Unknown node type: ' + type);
   }
 
   return serverNodeTypes.get(type)!;

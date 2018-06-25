@@ -1,7 +1,7 @@
 import { Dataset, Entry, Values } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
-import { getDataset } from './dataset';
+import { tryGetDataset } from './dataset';
 import { UploadEntryError } from './upload';
 
 export const getEntryCollection = (
@@ -86,11 +86,7 @@ export const createEntry = async (
     }
   });
 
-  const ds = await getDataset(db, datasetId);
-  if (!ds) {
-    throw new Error('Invalid dataset');
-  }
-
+  const ds = await tryGetDataset(datasetId, db);
   await checkForMissingValues(ds, valuesArr.map(v => v[0]));
   await checkForUnsupportedValues(ds, valuesArr.map(v => v[0]));
 
@@ -151,38 +147,13 @@ const checkForUnsupportedValues = async (
   }
 };
 
-export const copyTransformedToOtherDataset = async (
-  db: Db,
-  oldDsId: string,
-  newDsId: string,
-  transformFn: (obj: Entry) => Values
-) => {
-  const newDs = await getDataset(db, newDsId);
-  if (!newDs) {
-    throw new Error('Invalid dataset');
-  }
-
-  const oldCollection = getEntryCollection(db, oldDsId);
-  const cursor = oldCollection.find();
-  while (await cursor.hasNext()) {
-    const doc = await cursor.next();
-    const newValues = transformFn(doc);
-    await createEntry(db, newDs.id, newValues);
-  }
-};
-
 export const createEntryFromJSON = async (
   db: Db,
   datasetId: string,
   values: string
 ): Promise<Entry> => {
   const parsedValues: Values = JSON.parse(values);
-  const ds = await getDataset(db, datasetId);
-  if (!ds) {
-    throw new Error('Invalid dataset');
-  }
-
-  return await createEntry(db, ds.id, parsedValues);
+  return await createEntry(db, datasetId, parsedValues);
 };
 
 export const deleteEntry = async (

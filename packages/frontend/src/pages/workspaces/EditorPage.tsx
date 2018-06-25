@@ -50,6 +50,7 @@ const WORKSPACE_NODE_SELECTION = gql`
         hasContextFn
         contextInputDefs
         contextOutputDefs
+        progress
       }
       connections {
         id

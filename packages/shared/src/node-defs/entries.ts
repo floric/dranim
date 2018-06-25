@@ -67,21 +67,21 @@ export const AddValuesNodeDef: NodeDef<
   keywords: []
 };
 
-export interface RemoveValuesNodeInputs {
+export interface SelectValuesNodeInputs {
   dataset: DatasetRef;
 }
 
-export interface RemoveValuesNodeOutputs {
+export interface SelectValuesNodeOutputs {
   dataset: DatasetRef;
 }
 
-export interface RemoveValuesNodeForm {
+export interface SelectValuesNodeForm {
   values: Array<string>;
 }
 
-export const RemoveValuesNodeDef: NodeDef<
-  RemoveValuesNodeInputs,
-  RemoveValuesNodeOutputs
+export const SelectValuesNodeDef: NodeDef<
+  SelectValuesNodeInputs,
+  SelectValuesNodeOutputs
 > = {
   name: 'Select Values',
   type: 'SelectValueEntries',

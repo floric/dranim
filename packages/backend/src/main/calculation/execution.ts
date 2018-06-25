@@ -13,8 +13,7 @@ import { Db } from 'mongodb';
 
 import { tryGetNodeType } from '../nodes/all-nodes';
 import { tryGetConnection } from '../workspace/connections';
-import { tryGetNode } from '../workspace/nodes';
-import { getContextNode } from '../workspace/nodes-detail';
+import { getContextNode, tryGetNode } from '../workspace/nodes';
 import { areNodeInputsValid, isNodeInMetaValid } from './validation';
 
 export const executeNodeWithId = async (
@@ -58,7 +57,10 @@ export const executeNode = async (
     return await calculateContext(node, type, nodeForm, nodeInputs, db);
   }
 
-  return await type.onNodeExecution(nodeForm, nodeInputs, { db, node });
+  return await type.onNodeExecution(nodeForm, nodeInputs, {
+    db,
+    node
+  });
 };
 
 const validateMetaAndExecution = async (
@@ -85,21 +87,15 @@ const calculateContext = async (
   nodeInputs: IOValues<any>,
   db: Db
 ) => {
-  const [outputNode, inputNode] = await Promise.all([
-    getContextNode(node, ContextNodeType.OUTPUT, db),
-    getContextNode(node, ContextNodeType.INPUT, db)
-  ]);
+  const outputNode = await getContextNode(node, ContextNodeType.OUTPUT, db);
   if (!outputNode) {
     throw Error('Missing output node');
-  }
-  if (!inputNode) {
-    throw Error('Missing input node');
   }
 
   return await type.onNodeExecution(nodeForm, nodeInputs, {
     db,
     node,
-    onContextFnExecution: inputs => executeNode(db, outputNode, inputs)
+    contextFnExecution: inputs => executeNode(db, outputNode, inputs)
   });
 };
 

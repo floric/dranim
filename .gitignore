@@ -10,3 +10,4 @@ lib/
 .idea/
 .cache/
 data/
+tmp/

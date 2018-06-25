@@ -1,4 +1,4 @@
-import { DataType, Entry } from '@masterthesis/shared';
+import { DataType } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import {
@@ -6,15 +6,13 @@ import {
   createDataset
 } from '../../../src/main/workspace/dataset';
 import {
-  copyTransformedToOtherDataset,
+  clearEntries,
   createEntry,
   createEntryFromJSON,
   deleteEntry,
-  getAllEntries,
   getEntriesCount,
   getEntry,
-  getLatestEntries,
-  clearEntries
+  getLatestEntries
 } from '../../../src/main/workspace/entry';
 import {
   getTestMongoDb,
@@ -121,49 +119,7 @@ describe('Entry', () => {
       );
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Invalid dataset');
-    }
-  });
-
-  test('should copy entries from one dataset to another and transform them', async () => {
-    const schema = {
-      name: 'test',
-      type: DataType.NUMBER,
-      required: true,
-      unique: true,
-      fallback: '1'
-    };
-
-    const dsA = await createDataset(db, 'dsA');
-    const dsB = await createDataset(db, 'dsB');
-
-    await addValueSchema(db, dsA.id, schema);
-    await addValueSchema(db, dsB.id, schema);
-
-    const values = [1, 2, 3, 4, 5];
-    await Promise.all(values.map(v => createEntry(db, dsA.id, { test: v })));
-
-    await copyTransformedToOtherDataset(db, dsA.id, dsB.id, (e: Entry) => ({
-      test: e.values.test * 100
-    }));
-
-    const all = await getAllEntries(db, dsB.id);
-    expect(all.map(e => e.values.test).sort()).toEqual(
-      values.map(v => v * 100).sort()
-    );
-  });
-
-  test('should throw error for copying from unknown ds', async () => {
-    try {
-      await copyTransformedToOtherDataset(
-        db,
-        VALID_OBJECT_ID,
-        VALID_OBJECT_ID,
-        () => ({})
-      );
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Invalid dataset');
+      expect(err.message).toBe('Unknown dataset');
     }
   });
 
@@ -253,7 +209,7 @@ describe('Entry', () => {
       await createEntry(db, VALID_OBJECT_ID, { test: 9 });
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Invalid dataset');
+      expect(err.message).toBe('Unknown dataset');
     }
   });
 

@@ -6,27 +6,31 @@ import {
   parseNodeForm,
   SocketDef,
   SocketDefs,
-  SocketInstance,
-  SocketMetaDef,
-  SocketMetas
+  SocketInstance
 } from '@masterthesis/shared';
 import { Db, ObjectID } from 'mongodb';
 
-import { serverNodeTypes, tryGetNodeType } from '../nodes/all-nodes';
-import { tryGetConnection } from './connections';
-import { getNode, getNodesCollection, tryGetNode } from './nodes';
+import { getMetaInputs } from '../calculation/meta-execution';
 import { isNodeInMetaValid } from '../calculation/validation';
+import { hasNodeType, tryGetNodeType } from '../nodes/all-nodes';
+import {
+  getContextNode,
+  getNode,
+  getNodesCollection,
+  tryGetNode
+} from './nodes';
 
 export const getContextInputDefs = async (
   node: NodeInstance,
   db: Db
 ): Promise<SocketDefs<any> | null> => {
-  if (serverNodeTypes.has(node.type)) {
+  if (hasNodeType(node.type)) {
     return null;
   }
 
-  const parent = await getParentNode(node, db);
-  const parentType = serverNodeTypes.get(parent.type)!;
+  // will only be accessed by context io nodes
+  const parent = await tryGetParentNode(node, db);
+  const parentType = tryGetNodeType(parent.type);
   if (!hasContextFn(parentType)) {
     return null;
   }
@@ -39,39 +43,17 @@ export const getContextInputDefs = async (
   );
 };
 
-export const getContextNode = async (
-  node: NodeInstance,
-  type: ContextNodeType,
-  db: Db
-): Promise<NodeInstance | null> => {
-  const nodesColl = getNodesCollection(db);
-  const n = await nodesColl.findOne({
-    contextIds: [...node.contextIds, node.id],
-    type
-  });
-
-  if (!n) {
-    return null;
-  }
-
-  const { _id, ...res } = n;
-
-  return {
-    id: _id.toHexString(),
-    ...res
-  };
-};
-
 export const getContextOutputDefs = async (
   node: NodeInstance,
   db: Db
 ): Promise<(SocketDefs<any> & { [name: string]: SocketDef }) | null> => {
-  if (serverNodeTypes.has(node.type)) {
+  if (hasNodeType(node.type)) {
     return null;
   }
 
-  const parent = await getParentNode(node, db);
-  const parentType = serverNodeTypes.get(parent.type)!;
+  // will only be accessed by context io nodes
+  const parent = await tryGetParentNode(node, db);
+  const parentType = tryGetNodeType(parent.type);
   if (!hasContextFn(parentType)) {
     return null;
   }
@@ -104,7 +86,11 @@ export const getContextOutputDefs = async (
   );
 };
 
-const getParentNode = async (node: NodeInstance, db: Db) => {
+const tryGetParentNode = async (node: NodeInstance, db: Db) => {
+  if (node.contextIds.length === 0) {
+    throw new Error('Node doesnt have context');
+  }
+
   const parentNodeId = node.contextIds[node.contextIds.length - 1];
   const parent = await getNode(db, parentNodeId);
   if (parent === null) {
@@ -114,31 +100,13 @@ const getParentNode = async (node: NodeInstance, db: Db) => {
   return parent;
 };
 
-export const getMetaOutputs = async (
-  db: Db,
-  nodeId: string
-): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> => {
-  const node = await tryGetNode(nodeId, db);
-  const nodeType = serverNodeTypes.get(node.type);
-  if (!nodeType) {
-    return {};
-  }
-
-  const allInputs = await getMetaInputs(node, db);
-  return await nodeType.onMetaExecution(
-    parseNodeForm(node.form),
-    allInputs,
-    db
-  );
-};
-
 export const getInputDefs = async (
   node: NodeInstance,
   db: Db
 ): Promise<SocketDefs<any>> => {
   let inputDefs: SocketDefs<any> = {};
   if (node.type === ContextNodeType.INPUT) {
-    const parent = await getParentNode(node, db);
+    const parent = await tryGetParentNode(node, db);
     const parentType = tryGetNodeType(parent.type);
     if (hasContextFn(parentType)) {
       return parentType.transformInputDefsToContextInputDefs(
@@ -157,43 +125,24 @@ export const getInputDefs = async (
   return inputDefs;
 };
 
-export const getMetaInputs = async (node: NodeInstance, db: Db) => {
-  const inputDefs = await getInputDefs(node, db);
-  let inputs: { [name: string]: SocketMetaDef<any> } = {};
-
-  await Promise.all(
-    Object.entries(inputDefs).map(async c => {
-      const connection = node.inputs.find(i => i.name === c[0]) || null;
-      if (!connection) {
-        inputs[c[0]] = {
-          isPresent: false,
-          content: {}
-        };
-        return;
-      }
-
-      const conn = await tryGetConnection(connection.connectionId, db);
-      inputs[connection.name] = (await getMetaOutputs(db, conn.from.nodeId))[
-        conn.from.name
-      ];
-    })
-  );
-
-  return inputs;
-};
-
 export const getNodeState = async (node: NodeInstance, db: Db) => {
-  const t = serverNodeTypes.get(node.type);
-  if (!t) {
+  if (
+    node.type === ContextNodeType.INPUT ||
+    node.type === ContextNodeType.OUTPUT
+  ) {
+    return await getNodeState(await tryGetParentNode(node, db), db);
+  }
+
+  try {
+    const isValid = await isNodeInMetaValid(node, db);
+    if (!isValid) {
+      return NodeState.INVALID;
+    }
+
+    return NodeState.VALID;
+  } catch (err) {
     return NodeState.ERROR;
   }
-
-  const isValid = await isNodeInMetaValid(node, db);
-  if (!isValid) {
-    return NodeState.INVALID;
-  }
-
-  return NodeState.VALID;
 };
 
 export const addOrUpdateFormValue = async (
@@ -206,11 +155,7 @@ export const addOrUpdateFormValue = async (
     throw new Error('No form value name specified');
   }
 
-  const node = await getNode(db, nodeId);
-  if (!node) {
-    throw new Error('Node does not exist');
-  }
-
+  await tryGetNode(nodeId, db);
   const nodeObjId = new ObjectID(nodeId);
 
   const collection = getNodesCollection(db);
@@ -262,6 +207,24 @@ export const removeConnection = async (
           connectionId: connId
         }
       }
+    }
+  );
+};
+
+export const setProgress = async (
+  nodeId: string,
+  value: number | null,
+  db: Db
+) => {
+  if (value !== null && (value < 0 || value > 1)) {
+    throw new Error('Invalid progress value');
+  }
+
+  const nodesCollection = getNodesCollection(db);
+  await nodesCollection.updateOne(
+    { _id: new ObjectID(nodeId) },
+    {
+      $set: { progress: value }
     }
   );
 };

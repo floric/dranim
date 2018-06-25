@@ -16,12 +16,13 @@
     "mongodb": "sudo docker run -p 127.0.0.1:27017:27017 mongo:latest"
   },
   "author": {
-    "name": "Florian Richter",
-    "email": "floririchte@gmail.com"
+    "name": "Florian Richter"
   },
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
   "prettier": {
     "singleQuote": true
   },

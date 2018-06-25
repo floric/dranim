@@ -11,11 +11,11 @@ import { TreeData } from 'antd/lib/tree-select';
 import { ExplorerEditorProps } from '../ExplorerEditor';
 import * as BooleanNodes from './boolean';
 import * as DatasetNodes from './dataset';
+import * as DatetimeNodes from './datetime';
 import * as EntriesNodes from './entries';
 import * as NumberNodes from './number';
 import * as StringNodes from './string';
 import * as TimeNodes from './time';
-import * as DatetimeNodes from './datetime';
 
 export interface EditorProps {
   x?: number;

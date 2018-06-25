@@ -24,13 +24,11 @@ import {
 import { createEntry, getAllEntries } from '../../../src/main/workspace/entry';
 import {
   createNode,
-  getNodesCollection,
-  getNode
+  getContextNode,
+  getNode,
+  getNodesCollection
 } from '../../../src/main/workspace/nodes';
-import {
-  addOrUpdateFormValue,
-  getContextNode
-} from '../../../src/main/workspace/nodes-detail';
+import { addOrUpdateFormValue } from '../../../src/main/workspace/nodes-detail';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
 import {
   getTestMongoDb,
@@ -141,7 +139,7 @@ describe('Execution', () => {
       });
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Unknown node type');
+      expect(err.message).toBe('Unknown node type: UnknownNodeType');
     }
   });
 

@@ -6,25 +6,17 @@ import {
 import { Db } from 'mongodb';
 
 import { createConnection } from '../../../src/main/workspace/connections';
-import {
-  createNode,
-  getAllNodes,
-  getNode
-} from '../../../src/main/workspace/nodes';
+import { createNode, getNode } from '../../../src/main/workspace/nodes';
 import {
   createWorkspace,
   deleteWorkspace,
   getAllWorkspaces,
   getWorkspace,
   initWorkspaceDb,
-  updateWorkspace,
-  updateLastChange
+  updateLastChange,
+  updateWorkspace
 } from '../../../src/main/workspace/workspace';
-import {
-  getTestMongoDb,
-  NeverGoHereError,
-  VALID_OBJECT_ID
-} from '../../test-utils';
+import { getTestMongoDb, NeverGoHereError } from '../../test-utils';
 
 let conn;
 let db: Db;

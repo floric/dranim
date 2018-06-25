@@ -3,12 +3,15 @@ env:
   global:
     - CC_TEST_REPORTER_ID=fc64d003bdf120b91db2a980408cf2073efe351171845840b1fa6a0d87b658ea
 node_js:
-  - "9"
+  - "10"
 cache:
   yarn: true
   directories:
     - $HOME/.mongodb-binaries
-before_install: yarn global add greenkeeper-lockfile@1
+before_install:
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH="$HOME/.yarn/bin:$PATH"
+  - yarn global add greenkeeper-lockfile@1
 before_script:
   - greenkeeper-lockfile-update
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter

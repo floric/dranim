@@ -1,6 +1,7 @@
 {
   "name": "@masterthesis/backend",
   "version": "1.0.0",
+  "private": true,
   "license": "MIT",
   "main": "dist/main.js",
   "scripts": {
@@ -72,6 +73,11 @@
       "jsx",
       "json",
       "node"
+    ]
+  },
+  "workspaces": {
+    "nohoist": [
+      "**"
     ]
   }
 }

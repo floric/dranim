@@ -1,25 +1,21 @@
 import {
   AddValuesNodeDef,
-  DatasetSocket,
+  allAreDefinedAndPresent,
+  Dataset,
   DataType,
-  NodeInstance,
-  sleep,
+  Entry,
   ValueSchema
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
+import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
 import { AddValuesNode } from '../../../../src/main/nodes/entries/add-values';
+import { processEntries } from '../../../../src/main/nodes/entries/utils';
 import {
-  addValueSchema,
-  createDataset
+  createDataset,
+  getDataset
 } from '../../../../src/main/workspace/dataset';
-import {
-  createEntry,
-  getAllEntries
-} from '../../../../src/main/workspace/entry';
-import { createNode } from '../../../../src/main/workspace/nodes';
-import { addOrUpdateFormValue } from '../../../../src/main/workspace/nodes-detail';
-import { createWorkspace } from '../../../../src/main/workspace/workspace';
+import { createEntry } from '../../../../src/main/workspace/entry';
 import {
   getTestMongoDb,
   NeverGoHereError,
@@ -30,6 +26,12 @@ import {
 let conn;
 let db: Db;
 let server;
+
+jest.mock('@masterthesis/shared');
+jest.mock('../../../../src/main/nodes/entries/utils');
+jest.mock('../../../../src/main/workspace/dataset');
+jest.mock('../../../../src/main/workspace/entry');
+jest.mock('../../../../src/main/calculation/utils');
 
 describe('AddValuesNode', () => {
   beforeAll(async () => {
@@ -106,6 +108,8 @@ describe('AddValuesNode', () => {
   });
 
   test('should have present meta', async () => {
+    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(true);
+
     const res = await AddValuesNode.onMetaExecution(
       { values: [] },
       {
@@ -145,7 +149,9 @@ describe('AddValuesNode', () => {
   });
 
   test('should add dynamic context outputs from context inputs without form', async () => {
-    let res = await AddValuesNode.transformContextInputDefsToContextOutputDefs(
+    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(true);
+
+    const res = await AddValuesNode.transformContextInputDefsToContextOutputDefs(
       {
         dataset: {
           dataType: DataType.DATASET,
@@ -165,34 +171,7 @@ describe('AddValuesNode', () => {
       { values: undefined },
       null
     );
-    expect(res).toEqual({
-      test: {
-        dataType: DataType.NUMBER,
-        isDynamic: true,
-        displayName: 'Test'
-      }
-    });
 
-    res = await AddValuesNode.transformContextInputDefsToContextOutputDefs(
-      {
-        dataset: {
-          dataType: DataType.DATASET,
-          isDynamic: false,
-          displayName: 'Dataset'
-        }
-      },
-      { dataset: { isPresent: true, content: { schema: [] } } },
-      {
-        test: {
-          dataType: DataType.NUMBER,
-          isDynamic: true,
-          displayName: 'Test'
-        }
-      },
-      {},
-      { values: [] },
-      null
-    );
     expect(res).toEqual({
       test: {
         dataType: DataType.NUMBER,
@@ -203,6 +182,8 @@ describe('AddValuesNode', () => {
   });
 
   test('should add dynamic context outputs from context inputs as well as from form', async () => {
+    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(true);
+
     const res = await AddValuesNode.transformContextInputDefsToContextOutputDefs(
       {
         dataset: {
@@ -281,18 +262,41 @@ describe('AddValuesNode', () => {
     expect(res).toEqual({});
   });
 
-  test('should add new value to dataset from StringInputNode', async () => {
-    const ws = await createWorkspace(db, 'test', '');
-    const ds = await createDataset(db, 'test-ds');
-
-    await addValueSchema(db, ds.id, {
+  test('should add new value to dataset', async () => {
+    const oldVS: ValueSchema = {
       name: 'test',
-      type: DataType.NUMBER,
-      fallback: '0',
-      unique: true,
+      type: DataType.STRING,
+      fallback: '',
+      unique: false,
       required: true
-    });
-    await createEntry(db, ds.id, { test: JSON.stringify(1) });
+    };
+    const oldDs: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [oldVS],
+      name: 'Old DS',
+      workspaceId: 'CDE'
+    };
+    const newDs: Dataset = {
+      id: 'ABC',
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'New DS',
+      workspaceId: 'CDE'
+    };
+    const entryA: Entry = {
+      id: 'eA',
+      values: { [oldVS.name]: 'foo' }
+    };
+    (createDynamicDatasetName as jest.Mock).mockReturnValue('AddEntries');
+    (processEntries as jest.Mock).mockImplementation(
+      async (a, b, c, processFn) => processFn(entryA)
+    );
+    (getDataset as jest.Mock).mockResolvedValue(oldDs);
+    (createDataset as jest.Mock).mockResolvedValue(newDs);
+    (createEntry as jest.Mock).mockResolvedValue({});
 
     const res = await AddValuesNode.onNodeExecution(
       {
@@ -306,7 +310,7 @@ describe('AddValuesNode', () => {
           }
         ]
       },
-      { dataset: { datasetId: ds.id } },
+      { dataset: { datasetId: oldDs.id } },
       {
         db,
         node: {
@@ -315,38 +319,46 @@ describe('AddValuesNode', () => {
           inputs: [],
           outputs: [],
           type: AddValuesNode.type,
-          workspaceId: ws.id,
+          workspaceId: VALID_OBJECT_ID,
           form: [],
           x: 0,
           y: 0
         },
-        onContextFnExecution: async inputs => ({
+        contextFnExecution: async inputs => ({
           outputs: { ...inputs, new: 'super' }
         })
       }
     );
 
-    expect(res.outputs.dataset.datasetId).toBeDefined();
-
-    const all = await getAllEntries(db, res.outputs.dataset.datasetId);
-
-    expect(all.length).toBe(1);
-    expect(all[0].values).toEqual({ test: '1', new: 'super' });
+    expect(res.outputs.dataset.datasetId).toBe(newDs.id);
+    expect(createEntry as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(createEntry as jest.Mock).toHaveBeenCalledWith(db, newDs.id, {
+      [oldVS.name]: 'foo',
+      new: 'super'
+    });
   });
 
   test('should throw error for missing context function', async () => {
-    const ws = await createWorkspace(db, 'test', '');
-    const ds = await createDataset(db, 'test-ds');
-
-    await addValueSchema(db, ds.id, {
-      name: 'test',
-      type: DataType.NUMBER,
-      fallback: '0',
-      unique: true,
-      required: true
-    });
-
-    await createEntry(db, ds.id, { test: JSON.stringify(1) });
+    const oldDs: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'Old DS',
+      workspaceId: 'CDE'
+    };
+    const newDs: Dataset = {
+      id: 'ABC',
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [],
+      name: 'New DS',
+      workspaceId: 'CDE'
+    };
+    (createDynamicDatasetName as jest.Mock).mockReturnValue('AddEntries-123');
+    (processEntries as jest.Mock).mockImplementation(() => Promise.resolve());
+    (getDataset as jest.Mock).mockResolvedValue(oldDs);
+    (createDataset as jest.Mock).mockResolvedValue(newDs);
 
     try {
       await AddValuesNode.onNodeExecution(
@@ -361,7 +373,7 @@ describe('AddValuesNode', () => {
             }
           ]
         },
-        { dataset: { datasetId: ds.id } },
+        { dataset: { datasetId: oldDs.id } },
         {
           db,
           node: {
@@ -370,7 +382,7 @@ describe('AddValuesNode', () => {
             inputs: [],
             outputs: [],
             type: AddValuesNode.type,
-            workspaceId: ws.id,
+            workspaceId: VALID_OBJECT_ID,
             form: [],
             x: 0,
             y: 0
@@ -388,7 +400,10 @@ describe('AddValuesNode', () => {
       await AddValuesNode.onNodeExecution(
         { values: [] },
         { dataset: { datasetId: VALID_OBJECT_ID } },
-        { db, node: NODE }
+        {
+          db,
+          node: NODE
+        }
       );
       throw NeverGoHereError;
     } catch (err) {

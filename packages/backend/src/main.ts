@@ -6,8 +6,8 @@ import * as morgan from 'morgan';
 
 import { graphqlExpress } from 'apollo-server-express';
 import { apolloUploadExpress } from 'apollo-upload-server';
-
 import { Db } from 'mongodb';
+
 import { mongoDbClient } from './config/db';
 import Schema from './graphql/schema';
 import { initWorkspaceDb } from './main/workspace/workspace';

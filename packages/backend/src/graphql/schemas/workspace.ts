@@ -29,6 +29,7 @@ const NodeDef = `
     hasContextFn: Boolean!
     contextInputDefs: SocketDefs
     contextOutputDefs: SocketDefs
+    progress: Float
   }
 `;
 

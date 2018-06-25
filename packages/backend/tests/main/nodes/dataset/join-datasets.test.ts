@@ -1,20 +1,24 @@
 import {
+  allAreDefinedAndPresent,
+  Dataset,
   DataType,
+  Entry,
   JoinDatasetsNodeDef,
-  sleep,
   ValueSchema
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
+import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
 import { JoinDatasetsNode } from '../../../../src/main/nodes/dataset/join-datasets';
+import { processEntries } from '../../../../src/main/nodes/entries/utils';
 import {
   addValueSchema,
   createDataset,
-  getDataset
+  tryGetDataset
 } from '../../../../src/main/workspace/dataset';
 import {
   createEntry,
-  getAllEntries
+  getEntryCollection
 } from '../../../../src/main/workspace/entry';
 import {
   getTestMongoDb,
@@ -26,6 +30,12 @@ import {
 let conn;
 let db: Db;
 let server;
+
+jest.mock('@masterthesis/shared');
+jest.mock('../../../../src/main/nodes/entries/utils');
+jest.mock('../../../../src/main/workspace/dataset');
+jest.mock('../../../../src/main/workspace/entry');
+jest.mock('../../../../src/main/calculation/utils');
 
 describe('JoinDatasetsNode', () => {
   beforeAll(async () => {
@@ -71,35 +81,47 @@ describe('JoinDatasetsNode', () => {
     expect(res).toBe(true);
   });
 
-  test('should stop for not found datasets', async () => {
-    const dsA = await createDataset(db, 'a');
-
-    try {
-      await JoinDatasetsNode.onNodeExecution(
-        { valueA: 'TEST', valueB: 'else' },
-        {
-          datasetA: { datasetId: dsA.id },
-          datasetB: { datasetId: VALID_OBJECT_ID }
-        },
-        { db, node: NODE }
-      );
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Unknown dataset');
-    }
-  });
-
   test('should stop for not found schemas', async () => {
-    const [dsA, dsB] = await Promise.all([
-      createDataset(db, 'a'),
-      createDataset(db, 'b')
-    ]);
+    const dsA: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: ['name', 'test', 'abc'].map(n => ({
+        type: DataType.STRING,
+        name: n,
+        required: true,
+        fallback: '',
+        unique: false
+      })),
+      name: 'Old DS',
+      workspaceId: 'CDE'
+    };
+    const dsB: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: ['name', 'test', 'abc'].map(n => ({
+        type: DataType.STRING,
+        name: n,
+        required: true,
+        fallback: '',
+        unique: false
+      })),
+      name: 'Old DS',
+      workspaceId: 'CDE'
+    };
+    (tryGetDataset as jest.Mock)
+      .mockResolvedValueOnce(dsA)
+      .mockResolvedValueOnce(dsB);
 
     try {
       await JoinDatasetsNode.onNodeExecution(
         { valueA: 'TEST', valueB: 'else' },
         { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
-        { db, node: NODE }
+        {
+          db,
+          node: NODE
+        }
       );
       throw NeverGoHereError;
     } catch (err) {
@@ -108,35 +130,50 @@ describe('JoinDatasetsNode', () => {
   });
 
   test('should throw error for unequal datatypes of values', async () => {
-    const [dsA, dsB] = await Promise.all([
-      createDataset(db, 'a'),
-      createDataset(db, 'b')
-    ]);
-    const schemaA: ValueSchema = {
-      name: 'colA',
-      unique: true,
-      fallback: '',
-      type: DataType.STRING,
-      required: true
+    const dsA: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [
+        {
+          name: 'colA',
+          unique: true,
+          fallback: '',
+          type: DataType.STRING,
+          required: true
+        }
+      ],
+      name: 'Old DS',
+      workspaceId: 'CDE'
     };
-    const schemaB: ValueSchema = {
-      name: 'colB',
-      unique: true,
-      fallback: '',
-      type: DataType.NUMBER,
-      required: true
+    const dsB: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [
+        {
+          name: 'colB',
+          unique: true,
+          fallback: '',
+          type: DataType.NUMBER,
+          required: true
+        }
+      ],
+      name: 'Old DS',
+      workspaceId: 'CDE'
     };
-
-    await Promise.all([
-      addValueSchema(db, dsA.id, schemaA),
-      addValueSchema(db, dsB.id, schemaB)
-    ]);
+    (tryGetDataset as jest.Mock)
+      .mockResolvedValueOnce(dsA)
+      .mockResolvedValueOnce(dsB);
 
     try {
       await JoinDatasetsNode.onNodeExecution(
-        { valueA: schemaA.name, valueB: schemaB.name },
+        { valueA: dsA.valueschemas[0].name, valueB: dsB.valueschemas[0].name },
         { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
-        { db, node: NODE }
+        {
+          db,
+          node: NODE
+        }
       );
       throw NeverGoHereError;
     } catch (err) {
@@ -145,10 +182,6 @@ describe('JoinDatasetsNode', () => {
   });
 
   test('should validate datasets and join valueschemas', async () => {
-    const [dsA, dsB] = await Promise.all([
-      createDataset(db, 'a'),
-      createDataset(db, 'b')
-    ]);
     const schemaA: ValueSchema = {
       name: 'colA',
       unique: true,
@@ -185,41 +218,85 @@ describe('JoinDatasetsNode', () => {
       required: true
     };
 
-    await Promise.all([
-      addValueSchema(db, dsA.id, schemaA),
-      addValueSchema(db, dsB.id, schemaB),
-      addValueSchema(db, dsA.id, schemaOnlyA),
-      addValueSchema(db, dsB.id, schemaOnlyB),
-      addValueSchema(db, dsB.id, otherColAinB)
-    ]);
+    const dsA: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [schemaA, schemaOnlyA],
+      name: 'DS B',
+      workspaceId: 'CDE'
+    };
+    const dsB: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [schemaB, schemaOnlyB, otherColAinB],
+      name: 'DS A',
+      workspaceId: 'CDE'
+    };
+    const newDs: Dataset = {
+      id: 'newid',
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [schemaB, schemaOnlyB],
+      name: 'New DS',
+      workspaceId: 'CDE'
+    };
+
+    (tryGetDataset as jest.Mock)
+      .mockResolvedValueOnce(dsA)
+      .mockResolvedValueOnce(dsB);
+    (createDataset as jest.Mock).mockResolvedValue(newDs);
+    (createDynamicDatasetName as jest.Mock).mockReturnValue(
+      'FilterEntries-123'
+    );
+    (processEntries as jest.Mock).mockImplementation(() => ({}));
 
     const res = await JoinDatasetsNode.onNodeExecution(
       { valueA: schemaA.name, valueB: schemaB.name },
       { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
-      { db, node: NODE }
+      {
+        db,
+        node: NODE
+      }
     );
 
-    const newDs = await getDataset(db, res.outputs.joined.datasetId);
-    const newColASchema = newDs.valueschemas.find(
-      n => n.name === `A_${schemaOnlyA.name}`
+    expect(res.results).toBeUndefined();
+    expect(res.outputs.joined.datasetId).toBe(newDs.id);
+    expect(createDataset as jest.Mock).toBeCalledWith(
+      db,
+      'FilterEntries-123',
+      NODE.workspaceId
     );
-    const newColBSchema = newDs.valueschemas.find(
-      n => n.name === `B_${schemaOnlyB.name}`
-    );
-
-    expect(newDs).not.toBe(null);
-    expect(newColASchema).toBeDefined();
-    expect(newColBSchema).toBeDefined();
-    expect(newColASchema.unique).toBe(false);
-    expect(newColBSchema.unique).toBe(false);
-    expect(newDs.valueschemas.length).toBe(5);
+    expect(addValueSchema as jest.Mock).toHaveBeenCalledTimes(5);
+    expect(addValueSchema as jest.Mock).toBeCalledWith(db, newDs.id, {
+      ...schemaA,
+      unique: false,
+      name: `A_${schemaA.name}`
+    });
+    expect(addValueSchema as jest.Mock).toBeCalledWith(db, newDs.id, {
+      ...schemaOnlyA,
+      unique: false,
+      name: `A_${schemaOnlyA.name}`
+    });
+    expect(addValueSchema as jest.Mock).toBeCalledWith(db, newDs.id, {
+      ...schemaB,
+      unique: false,
+      name: `B_${schemaB.name}`
+    });
+    expect(addValueSchema as jest.Mock).toBeCalledWith(db, newDs.id, {
+      ...schemaOnlyB,
+      unique: false,
+      name: `B_${schemaOnlyB.name}`
+    });
+    expect(addValueSchema as jest.Mock).toBeCalledWith(db, newDs.id, {
+      ...otherColAinB,
+      unique: false,
+      name: `B_${otherColAinB.name}`
+    });
   });
 
   test('should support same column names', async () => {
-    const [dsA, dsB] = await Promise.all([
-      createDataset(db, 'a'),
-      createDataset(db, 'b')
-    ]);
     const sharedName = 'colx';
 
     const schemaA: ValueSchema = {
@@ -244,39 +321,75 @@ describe('JoinDatasetsNode', () => {
       required: false
     };
 
-    await Promise.all([
-      addValueSchema(db, dsA.id, schemaA),
-      addValueSchema(db, dsB.id, schemaB),
-      addValueSchema(db, dsB.id, schemaOnlyB)
-    ]);
+    const dsA: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [schemaA],
+      name: 'Old DS',
+      workspaceId: 'CDE'
+    };
+    const dsB: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [schemaB, schemaOnlyB],
+      name: 'Old DS',
+      workspaceId: 'CDE'
+    };
+    const newDs: Dataset = {
+      id: 'newid',
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [schemaB, schemaOnlyB],
+      name: 'New DS',
+      workspaceId: 'CDE'
+    };
+
+    (tryGetDataset as jest.Mock)
+      .mockResolvedValueOnce(dsA)
+      .mockResolvedValueOnce(dsB);
+    (createDataset as jest.Mock).mockResolvedValue(newDs);
+    (createDynamicDatasetName as jest.Mock).mockReturnValue(
+      'FilterEntries-123'
+    );
+    (processEntries as jest.Mock).mockImplementation(() => ({}));
 
     const res = await JoinDatasetsNode.onNodeExecution(
       { valueA: schemaA.name, valueB: schemaB.name },
       { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
-      { db, node: NODE }
+      {
+        db,
+        node: NODE
+      }
     );
 
-    const newDs = await getDataset(db, res.outputs.joined.datasetId);
-
-    const newColASchema = newDs.valueschemas.find(
-      n => n.name === `A_${sharedName}`
+    expect(res.results).toBeUndefined();
+    expect(res.outputs.joined.datasetId).toBe(newDs.id);
+    expect(createDataset as jest.Mock).toBeCalledWith(
+      db,
+      'FilterEntries-123',
+      NODE.workspaceId
     );
-    const newColBSchema = newDs.valueschemas.find(
-      n => n.name === `B_${sharedName}`
-    );
-    expect(newDs).not.toBe(null);
-    expect(newColASchema).toBeDefined();
-    expect(newColASchema.unique).toBe(false);
-    expect(newColBSchema).toBeDefined();
-    expect(newColBSchema.unique).toBe(false);
-    expect(newDs.valueschemas.length).toBe(3);
+    expect(addValueSchema as jest.Mock).toHaveBeenCalledTimes(3);
+    expect(addValueSchema as jest.Mock).toBeCalledWith(db, newDs.id, {
+      ...schemaA,
+      unique: false,
+      name: `A_${schemaA.name}`
+    });
+    expect(addValueSchema as jest.Mock).toBeCalledWith(db, newDs.id, {
+      ...schemaB,
+      unique: false,
+      name: `B_${schemaB.name}`
+    });
+    expect(addValueSchema as jest.Mock).toBeCalledWith(db, newDs.id, {
+      ...schemaOnlyB,
+      unique: false,
+      name: `B_${schemaOnlyB.name}`
+    });
   });
 
   test('should add joined entries', async () => {
-    const [dsA, dsB] = await Promise.all([
-      createDataset(db, 'a'),
-      createDataset(db, 'b')
-    ]);
     const schemaA: ValueSchema = {
       name: 'colA',
       unique: false,
@@ -306,49 +419,75 @@ describe('JoinDatasetsNode', () => {
       required: false
     };
 
-    await Promise.all([
-      addValueSchema(db, dsA.id, schemaA),
-      addValueSchema(db, dsB.id, schemaB),
-      addValueSchema(db, dsA.id, schemaOnlyA),
-      addValueSchema(db, dsB.id, schemaOnlyB)
-    ]);
+    const dsA: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [schemaA, schemaOnlyA],
+      name: 'Old DS',
+      workspaceId: 'CDE'
+    };
+    const dsB: Dataset = {
+      id: VALID_OBJECT_ID,
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [schemaB, schemaOnlyB],
+      name: 'Old DS',
+      workspaceId: 'CDE'
+    };
+    const newDs: Dataset = {
+      id: 'newid',
+      entriesCount: 0,
+      latestEntries: [],
+      valueschemas: [schemaB, schemaOnlyB],
+      name: 'New DS',
+      workspaceId: 'CDE'
+    };
+    const entryA: Entry = {
+      id: 'eA',
+      values: { [schemaA.name]: 'test', [schemaOnlyA.name]: true }
+    };
+    const entryB1: Entry = {
+      id: 'eB1',
+      values: { [schemaB.name]: 'test', [schemaOnlyB.name]: 9 }
+    };
+    const entryB2: Entry = {
+      id: 'eB2',
+      values: { [schemaB.name]: 'test', [schemaOnlyB.name]: 8 }
+    };
 
-    await Promise.all(
-      [
-        {
-          [schemaA.name]: 'test',
-          [schemaOnlyA.name]: 'true'
-        },
-        {
-          [schemaA.name]: 'test2',
-          [schemaOnlyA.name]: 'false'
-        },
-        {
-          [schemaA.name]: 'otherA',
-          [schemaOnlyA.name]: 'false'
-        }
-      ].map(n => createEntry(db, dsA.id, n))
+    const coll = db.collection(`Entries_${newDs.id}`);
+    await coll.insertOne({
+      values: [{ [schemaB.name]: 'test', [schemaOnlyB.name]: 9 }]
+    });
+    (tryGetDataset as jest.Mock)
+      .mockResolvedValueOnce(dsA)
+      .mockResolvedValueOnce(dsB);
+    (createDataset as jest.Mock).mockResolvedValue(newDs);
+    (addValueSchema as jest.Mock).mockResolvedValue(true);
+    (createDynamicDatasetName as jest.Mock).mockReturnValue(
+      'FilterEntries-123'
     );
+    (createEntry as jest.Mock).mockResolvedValue({});
+    (getEntryCollection as jest.Mock).mockReturnValue({
+      find: () => {
+        let hasNextCalls = 0;
+        return {
+          close: async () => true,
+          next: async () => (hasNextCalls === 1 ? entryB1 : entryB2),
+          hasNext: async () => {
+            hasNextCalls += 1;
 
-    await Promise.all(
-      [
-        {
-          [schemaB.name]: 'test',
-          [schemaOnlyB.name]: 'true'
-        },
-        {
-          [schemaB.name]: 'test',
-          [schemaOnlyB.name]: '1'
-        },
-        {
-          [schemaB.name]: 'test2',
-          [schemaOnlyB.name]: '2'
-        },
-        {
-          [schemaB.name]: 'otherB',
-          [schemaOnlyB.name]: '3'
-        }
-      ].map(n => createEntry(db, dsB.id, n))
+            if (hasNextCalls < 3) {
+              return true;
+            }
+            return false;
+          }
+        };
+      }
+    });
+    (processEntries as jest.Mock).mockImplementation(
+      async (a, b, c, processFn) => processFn(entryA)
     );
 
     const res = await JoinDatasetsNode.onNodeExecution(
@@ -357,20 +496,26 @@ describe('JoinDatasetsNode', () => {
       { db, node: NODE }
     );
 
-    const newDs = await getDataset(db, res.outputs.joined.datasetId);
-    expect(newDs).not.toBe(null);
-
-    await sleep(100);
-
-    const allEntries = await getAllEntries(db, newDs.id);
-    expect(allEntries.length).toBe(3);
-    expect(allEntries[0].values.A_colA).toBeDefined();
-    expect(allEntries[0].values.A_colOnlyA).toBeDefined();
-    expect(allEntries[0].values.B_colB).toBeDefined();
-    expect(allEntries[0].values.B_colOnlyB).toBeDefined();
+    expect(res.results).toBeUndefined();
+    expect(res.outputs.joined.datasetId).toBe(newDs.id);
+    expect(createEntry as jest.Mock).toHaveBeenCalledTimes(2);
+    expect(createEntry as jest.Mock).toHaveBeenCalledWith(db, newDs.id, {
+      [`A_${schemaA.name}`]: 'test',
+      [`B_${schemaB.name}`]: 'test',
+      [`A_${schemaOnlyA.name}`]: true,
+      [`B_${schemaOnlyB.name}`]: 8
+    });
+    expect(createEntry as jest.Mock).toHaveBeenCalledWith(db, newDs.id, {
+      [`A_${schemaA.name}`]: 'test',
+      [`B_${schemaB.name}`]: 'test',
+      [`A_${schemaOnlyA.name}`]: true,
+      [`B_${schemaOnlyB.name}`]: 9
+    });
   });
 
   test('should have absent metas', async () => {
+    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(false);
+
     let res = await JoinDatasetsNode.onMetaExecution(
       { valueA: null, valueB: 'test' },
       {
@@ -433,6 +578,8 @@ describe('JoinDatasetsNode', () => {
   });
 
   test('should have valid metas with joined keys', async () => {
+    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(true);
+
     const res = await JoinDatasetsNode.onMetaExecution(
       { valueA: 'testA', valueB: 'testB' },
       {

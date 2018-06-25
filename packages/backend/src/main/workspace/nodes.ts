@@ -6,7 +6,7 @@ import {
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
-import { serverNodeTypes, tryGetNodeType } from '../nodes/all-nodes';
+import { getNodeType, tryGetNodeType } from '../nodes/all-nodes';
 import { deleteConnection, getConnectionsCollection } from './connections';
 import { getWorkspace, updateLastChange } from './workspace';
 
@@ -110,7 +110,7 @@ const checkNoOutputNodeInContexts = async (
     return;
   }
 
-  const nodeType = serverNodeTypes.get(type);
+  const nodeType = getNodeType(type);
   if (nodeType!.isOutputNode === true) {
     throw new Error('Output nodes only on root level allowed');
   }
@@ -232,4 +232,32 @@ export const tryGetNode = async (nodeId: string, db: Db) => {
     throw new Error('Node not found');
   }
   return node;
+};
+
+export const resetProgress = async (workspaceId: string, db: Db) => {
+  const coll = getNodesCollection(db);
+  await coll.updateMany({ workspaceId }, { $set: { progress: null } });
+};
+
+export const getContextNode = async (
+  node: NodeInstance,
+  type: ContextNodeType,
+  db: Db
+): Promise<NodeInstance | null> => {
+  const nodesColl = getNodesCollection(db);
+  const n = await nodesColl.findOne({
+    contextIds: [...node.contextIds, node.id],
+    type
+  });
+
+  if (!n) {
+    return null;
+  }
+
+  const { _id, ...res } = n;
+
+  return {
+    id: _id.toHexString(),
+    ...res
+  };
 };

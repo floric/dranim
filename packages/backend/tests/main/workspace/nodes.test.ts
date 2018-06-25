@@ -2,37 +2,28 @@ import {
   ContextNodeType,
   DatasetInputNodeDef,
   DatasetOutputNodeDef,
-  DataType,
   EditEntriesNodeDef,
-  FilterEntriesNodeDef,
   JoinDatasetsNodeDef,
-  NodeState,
   NumberInputNodeDef,
-  NumberOutputNodeDef,
-  RemoveValuesNodeDef,
+  SelectValuesNodeDef,
   StringInputNodeDef,
   StringOutputNodeDef,
   SumNodeDef
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { DatasetOutputNode } from '../../../src/main/nodes/dataset';
 import {
   createConnection,
   getAllConnections
 } from '../../../src/main/workspace/connections';
-import {
-  addValueSchema,
-  createDataset
-} from '../../../src/main/workspace/dataset';
 import {
   createNode,
   deleteNode,
   getAllNodes,
   getNode,
   getNodesCollection,
-  updateNode,
-  tryGetNode
+  tryGetNode,
+  updateNode
 } from '../../../src/main/workspace/nodes';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
 import {
@@ -118,8 +109,6 @@ describe('Nodes', () => {
   });
 
   test('should not get invalid node', async () => {
-    const ws = await createWorkspace(db, 'test', '');
-
     const unknownNode = await getNode(db, '123');
 
     expect(unknownNode).toBe(null);
@@ -198,15 +187,9 @@ describe('Nodes', () => {
 
   test('should throw error when deleting context type node', async () => {
     const ws = await createWorkspace(db, 'test', '');
-    const newRootNode = await createNode(
-      db,
-      EditEntriesNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0
-    );
+    await createNode(db, EditEntriesNodeDef.type, ws.id, [], 0, 0);
     const allNodes = await getAllNodes(db, ws.id);
+    expect(allNodes.length).toBe(3);
 
     const contextNodes = allNodes.filter(
       n => n.type !== EditEntriesNodeDef.type
@@ -283,10 +266,10 @@ describe('Nodes', () => {
     const ws = await createWorkspace(db, 'test', '');
 
     try {
-      await createNode(db, 'unknown', ws.id, [], 0, 0);
+      await createNode(db, 'UnknownNodeType', ws.id, [], 0, 0);
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Unknown node type');
+      expect(err.message).toBe('Unknown node type: UnknownNodeType');
     }
   });
 
@@ -318,14 +301,7 @@ describe('Nodes', () => {
 
   test('should create node and nested context nodes', async () => {
     const ws = await createWorkspace(db, 'test', '');
-    const contextNode = await createNode(
-      db,
-      EditEntriesNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0
-    );
+    await createNode(db, EditEntriesNodeDef.type, ws.id, [], 0, 0);
 
     const allNodes = await getAllNodes(db, ws.id);
     expect(allNodes.length).toBe(3);
@@ -347,7 +323,7 @@ describe('Nodes', () => {
     const ws = await createWorkspace(db, 'test', '');
     const [inputNode, selectNode, outputNode] = await Promise.all([
       createNode(db, DatasetInputNodeDef.type, ws.id, [], 0, 0),
-      createNode(db, RemoveValuesNodeDef.type, ws.id, [], 0, 0),
+      createNode(db, SelectValuesNodeDef.type, ws.id, [], 0, 0),
       createNode(db, DatasetOutputNodeDef.type, ws.id, [], 0, 0)
     ]);
 
