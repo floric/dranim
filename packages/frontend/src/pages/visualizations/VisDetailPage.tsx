@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { GQLVisualization } from '@masterthesis/shared';
+import { GQLDashboard } from '@masterthesis/shared';
 import { Card } from 'antd';
 import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
@@ -13,9 +13,9 @@ import {
 } from '../../components/CustomCards';
 import { PageHeaderCard } from '../../components/PageHeaderCard';
 
-const VISUALIZATION = gql`
-  query visualization($id: String!) {
-    visualization(id: $id) {
+const DASHBOARD = gql`
+  query dashboard($id: String!) {
+    dashboard(id: $id) {
       id
       name
     }
@@ -28,10 +28,7 @@ export interface VisDetailPageProps
 export default class VisDetailPage extends React.Component<VisDetailPageProps> {
   public render() {
     return (
-      <Query
-        query={VISUALIZATION}
-        variables={{ id: this.props.match.params.id }}
-      >
+      <Query query={DASHBOARD} variables={{ id: this.props.match.params.id }}>
         {({ loading, error, data, refetch }) => {
           if (loading) {
             return <LoadingCard />;
@@ -41,24 +38,21 @@ export default class VisDetailPage extends React.Component<VisDetailPageProps> {
             return <UnknownErrorCard error={error} />;
           }
 
-          if (!data.visualization) {
+          if (!data.dashboard) {
             return (
               <CustomErrorCard
-                title="Unknown visualization"
-                description="Visualization doesn't exist."
+                title="Unknown Dashboard"
+                description="Dashboard doesn't exist."
               />
             );
           }
 
-          const visualization: GQLVisualization = data.visualization;
+          const dashboard: GQLDashboard = data.dashboard;
 
           return (
             <>
-              <PageHeaderCard
-                title={visualization.name}
-                typeTitle="Visualization"
-              />
-              <Card bordered={false}>Suggest visualizations here</Card>
+              <PageHeaderCard title={dashboard.name} typeTitle="Dashboard" />
+              <Card bordered={false}>Show dashboard content here</Card>
             </>
           );
         }}

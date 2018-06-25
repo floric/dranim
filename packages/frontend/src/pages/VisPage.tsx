@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { GQLVisualization } from '@masterthesis/shared';
+import { GQLDashboard } from '@masterthesis/shared';
 import { Card, Col } from 'antd';
 import gql from 'graphql-tag';
 import { Mutation, Query } from 'react-apollo';
@@ -12,23 +12,23 @@ import { PageHeaderCard } from '../components/PageHeaderCard';
 import { tryOperation } from '../utils/form';
 import { CreateVisForm } from './forms/CreateVisForm';
 
-const CREATE_VIS = gql`
-  mutation createVisualization($name: String!, $datasetId: String!) {
-    createVisualization(name: $name, datasetId: $datasetId) {
+const CREATE_DASHBOARD = gql`
+  mutation createDashboard($name: String!) {
+    createDashboard(name: $name) {
       id
     }
   }
 `;
 
-export const DELETE_VIS = gql`
-  mutation deleteVisualization($id: String!) {
-    deleteVisualization(id: $id)
+export const DELETE_DASHBOARD = gql`
+  mutation deleteDashboard($id: String!) {
+    deleteDashboard(id: $id)
   }
 `;
 
-export const ALL_VIS = gql`
+export const ALL_DASHBOARDS = gql`
   {
-    visualizations {
+    dashboards {
       id
       name
     }
@@ -38,48 +38,46 @@ export const ALL_VIS = gql`
 export default class VisPage extends React.Component<{}, {}> {
   public render() {
     return (
-      <Query query={ALL_VIS}>
+      <Query query={ALL_DASHBOARDS}>
         {({ loading, error, data, refetch }) => {
           if (loading || error) {
             return (
               <>
-                <PageHeaderCard title="Visualizations" />
+                <PageHeaderCard title="Dashboards" />
                 <LoadingCard />
               </>
             );
           }
 
-          const visualizations: Array<GQLVisualization> = data.visualizations;
+          const dashboards: Array<GQLDashboard> = data.dashboards;
 
           return (
             <>
-              <PageHeaderCard title="Visualizations" />
+              <PageHeaderCard title="Dashboards" />
               <CardsLayout>
-                {visualizations.map(vs => (
+                {dashboards.map(vs => (
                   <Col {...cardItemProps} key={vs.id}>
-                    <Mutation mutation={DELETE_VIS}>
-                      {deleteVis => (
+                    <Mutation mutation={DELETE_DASHBOARD}>
+                      {deleteDashboard => (
                         <CardItem
-                          confirmDeleteMessage="Delete Visualization?"
+                          confirmDeleteMessage="Delete Dashboard?"
                           id={vs.id}
                           name={vs.name}
-                          path="/visualizations"
+                          path="/dashboards"
                           handleDelete={async () => {
                             await tryOperation({
                               op: () =>
-                                deleteVis({
+                                deleteDashboard({
                                   variables: {
                                     id: vs.id
                                   }
                                 }),
                               refetch,
-                              successTitle: () => 'Visualization deleted',
+                              successTitle: () => 'Dashboard deleted',
                               successMessage: () =>
-                                `Visualization "${
-                                  vs.name
-                                }" deleted successfully.`,
-                              failedTitle: 'Visualization not deleted.',
-                              failedMessage: `Visualization "${
+                                `Dashboard "${vs.name}" deleted successfully.`,
+                              failedTitle: 'Dashboard not deleted.',
+                              failedMessage: `Dashboard "${
                                 vs.name
                               }" deletion failed.`
                             });
@@ -95,23 +93,23 @@ export default class VisPage extends React.Component<{}, {}> {
                   style={{ marginBottom: 12 }}
                 >
                   <Card bordered={false}>
-                    <Mutation mutation={CREATE_VIS}>
-                      {createVis => (
+                    <Mutation mutation={CREATE_DASHBOARD}>
+                      {createDashboard => (
                         <CreateVisForm
-                          handleCreate={(name, datasetId) =>
+                          handleCreate={name =>
                             tryOperation({
                               op: async () => {
-                                await createVis({
-                                  variables: { name, datasetId }
+                                await createDashboard({
+                                  variables: { name }
                                 });
                                 return true;
                               },
                               refetch,
-                              successTitle: () => 'Visualization created',
+                              successTitle: () => 'Dashboard created',
                               successMessage: () =>
-                                `Visualization "${name}" created successfully.`,
-                              failedTitle: 'Visualization not created.',
-                              failedMessage: `Visualization  "${name}" creation failed.`
+                                `Dashboard "${name}" created successfully.`,
+                              failedTitle: 'Dashboard not created.',
+                              failedMessage: `Dashboard  "${name}" creation failed.`
                             })
                           }
                         />

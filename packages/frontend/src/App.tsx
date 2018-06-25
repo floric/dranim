@@ -36,7 +36,7 @@ export const ALL_DATASETS = gql`
       id
       name
     }
-    visualizations {
+    dashboards {
       id
       name
     }
@@ -81,7 +81,7 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
 
               return (
                 <AppMenu
-                  visualizations={res.data!.visualizations}
+                  dashboards={res.data!.dashboards}
                   datasets={res.data!.datasets}
                   workspaces={res.data!.workspaces}
                   collapsed={collapsed}
@@ -98,12 +98,8 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
               <Route path="/data/:id" component={DetailPage} />
               <Route exact path="/workspaces" component={WorkspacesPage} />
               <Route path="/workspaces/:id" component={WorkspaceDetailPage} />
-              <Route exact path="/visualizations" component={VisPage} />
-              <Route
-                exact
-                path="/visualizations/:id"
-                component={VisDetailPage}
-              />
+              <Route exact path="/dashboards" component={VisPage} />
+              <Route exact path="/dashboards/:id" component={VisDetailPage} />
             </Switch>
           </Content>
           <Footer style={{ textAlign: 'center' }}>Florian Richter</Footer>

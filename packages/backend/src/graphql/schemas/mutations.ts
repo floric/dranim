@@ -60,11 +60,10 @@ export const MutationDef = `
       nodes: [NodeInput!]!
       connections: [ConnectionInput!]!
     ): Boolean!
-    createVisualization (
+    createDashboard (
       name: String!
-      datasetId: String!
-    ): Visualization!
-    deleteVisualization (
+    ): Dashboard!
+    deleteDashboard (
       id: String!
     ): Boolean!
     createSTRDemoData: Boolean!
