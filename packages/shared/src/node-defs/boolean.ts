@@ -24,10 +24,6 @@ export interface BooleanOutputNodeInputs {
   value: boolean;
 }
 
-export interface BooleanOutputNodeResults {
-  value: boolean;
-}
-
 export const BooleanOutputNodeDef: NodeDef<BooleanOutputNodeInputs, {}> = {
   name: 'Output',
   type: 'BooleanOutput',

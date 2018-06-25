@@ -2,7 +2,9 @@ import {
   allAreDefinedAndPresent,
   DatasetOutputNodeDef,
   DatasetOutputNodeInputs,
-  DatasetOutputNodeResults,
+  DatasetRef,
+  DataType,
+  OutputResult,
   ServerNodeDef
 } from '@masterthesis/shared';
 
@@ -10,7 +12,7 @@ export const DatasetOutputNode: ServerNodeDef<
   DatasetOutputNodeInputs,
   {},
   {},
-  DatasetOutputNodeResults
+  OutputResult<DatasetRef>
 > = {
   type: DatasetOutputNodeDef.type,
   onMetaExecution: async (form, inputs) => {
@@ -24,6 +26,6 @@ export const DatasetOutputNode: ServerNodeDef<
   },
   onNodeExecution: async (form, inputs, { db }) => ({
     outputs: {},
-    results: { dataset: inputs.dataset }
+    results: { value: inputs.dataset, type: DataType.DATASET }
   })
 };

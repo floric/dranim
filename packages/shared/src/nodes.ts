@@ -1,6 +1,6 @@
 import { Db } from 'mongodb';
 
-import { SocketDefs, SocketMetas } from './sockets';
+import { DataType, SocketDefs, SocketMetas } from './sockets';
 
 export enum NodeState {
   VALID = 'VALID',
@@ -21,6 +21,16 @@ export interface FormValue {
 export type FormValues<T> = { [Name in keyof T]: T[Name] | null };
 export type IOValues<T> = { [Name in keyof T]: T[Name] };
 
+export interface OutputNodeForm {
+  name: string;
+  description: string;
+}
+
+export interface OutputResult<T> {
+  value: T;
+  type: DataType;
+}
+
 export interface NodeDef<NodeInputs = {}, NodeOutputs = {}> {
   name: string;
   type: string;
@@ -33,7 +43,7 @@ export interface NodeDef<NodeInputs = {}, NodeOutputs = {}> {
 
 export interface NodeExecutionResult<NodeOutputs, NodeResults = {}> {
   outputs: IOValues<NodeOutputs>;
-  results?: IOValues<NodeResults>;
+  results?: NodeResults;
 }
 
 export interface ServerNodeDef<

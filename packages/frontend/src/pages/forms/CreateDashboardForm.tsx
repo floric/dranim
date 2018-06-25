@@ -5,12 +5,12 @@ import { FormComponentProps } from 'antd/lib/form';
 
 import { hasErrors } from '../../utils/form';
 
-export interface CreateVisFormProps extends FormComponentProps {
+export interface CreateDashboardFormProps extends FormComponentProps {
   handleCreate: (name: string) => Promise<boolean | null>;
 }
 
-class CreateVisFormImpl extends React.Component<
-  CreateVisFormProps,
+class CreateDashboardFormImpl extends React.Component<
+  CreateDashboardFormProps,
   { saving: boolean }
 > {
   public componentWillMount() {
@@ -81,4 +81,4 @@ class CreateVisFormImpl extends React.Component<
   }
 }
 
-export const CreateVisForm = Form.create()(CreateVisFormImpl);
+export const CreateDashboardForm = Form.create()(CreateDashboardFormImpl);

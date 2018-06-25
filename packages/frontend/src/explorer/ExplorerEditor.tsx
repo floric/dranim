@@ -196,7 +196,6 @@ export class ExplorerEditor extends React.Component<
                   {node &&
                     renderFormItems && (
                       <>
-                        <h4>Properties</h4>
                         <PropertiesForm
                           renderFormItems={renderFormItems}
                           handleSubmit={this.handleSave}

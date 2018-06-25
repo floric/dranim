@@ -33,9 +33,10 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
 
     console.log('Started calculation.');
 
-    await Promise.all(
+    const res = await Promise.all(
       outputNodesInstances.map(o => executeOutputNode(db, o, processId))
     );
+    console.log(res);
 
     await updateFinishedProcess(
       db,
@@ -57,8 +58,7 @@ const executeOutputNode = async (
 ) => {
   const processCollection = getCalculationsCollection(db);
 
-  // TODO Display results somewhere
-  await executeNode(db, o);
+  const res = await executeNode(db, o);
   await processCollection.updateOne(
     { _id: new ObjectID(processId) },
     {
@@ -67,6 +67,8 @@ const executeOutputNode = async (
       }
     }
   );
+
+  return res.results;
 };
 
 const updateFinishedProcess = async (

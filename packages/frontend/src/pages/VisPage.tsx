@@ -10,7 +10,7 @@ import { cardItemProps, CardsLayout } from '../components/CardsLayout';
 import { LoadingCard } from '../components/CustomCards';
 import { PageHeaderCard } from '../components/PageHeaderCard';
 import { tryOperation } from '../utils/form';
-import { CreateVisForm } from './forms/CreateVisForm';
+import { CreateDashboardForm } from './forms/CreateDashboardForm';
 
 const CREATE_DASHBOARD = gql`
   mutation createDashboard($name: String!) {
@@ -53,7 +53,19 @@ export default class VisPage extends React.Component<{}, {}> {
 
           return (
             <>
-              <PageHeaderCard title="Dashboards" />
+              <PageHeaderCard
+                title="Dashboards"
+                helpContent={
+                  <>
+                    <p>
+                      Visualizations are organized in Dashboards. Dashboards are
+                      used to display information retrieved from the datasets.
+                      They can contain any data from output nodes except
+                      Datasets.
+                    </p>
+                  </>
+                }
+              />
               <CardsLayout>
                 {dashboards.map(vs => (
                   <Col {...cardItemProps} key={vs.id}>
@@ -93,9 +105,10 @@ export default class VisPage extends React.Component<{}, {}> {
                   style={{ marginBottom: 12 }}
                 >
                   <Card bordered={false}>
+                    <h2>New Dashboard</h2>
                     <Mutation mutation={CREATE_DASHBOARD}>
                       {createDashboard => (
-                        <CreateVisForm
+                        <CreateDashboardForm
                           handleCreate={name =>
                             tryOperation({
                               op: async () => {

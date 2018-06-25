@@ -1,23 +1,29 @@
 import {
   BooleanOutputNodeDef,
   BooleanOutputNodeInputs,
-  BooleanOutputNodeResults,
+  DataType,
+  OutputNodeForm,
+  OutputResult,
   ServerNodeDef
 } from '@masterthesis/shared';
+
+import { isOutputFormValid } from '../../calculation/utils';
 
 export const BooleanOutputNode: ServerNodeDef<
   BooleanOutputNodeInputs,
   {},
-  {},
-  BooleanOutputNodeResults
+  OutputNodeForm,
+  OutputResult<boolean>
 > = {
   type: BooleanOutputNodeDef.type,
+  isFormValid: isOutputFormValid,
   onMetaExecution: () => Promise.resolve({}),
   onNodeExecution: (form, inputs) =>
     Promise.resolve({
       outputs: {},
       results: {
-        value: inputs.value
+        value: inputs.value,
+        type: DataType.BOOLEAN
       }
     })
 };
