@@ -205,8 +205,7 @@ export const uploadEntriesCsv = async (
     };
     const processId = new ObjectID(process.id);
 
-    // don't await for entry processing
-    doUploadAsync(db, ds, processId, files);
+    await doUploadAsync(db, ds, processId, files);
 
     return process;
   } catch (err) {
