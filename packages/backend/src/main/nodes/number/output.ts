@@ -25,7 +25,8 @@ export const NumberOutputNode: ServerNodeDef<
         name: form.name!,
         value: inputs.value,
         type: DataType.NUMBER,
-        dashboardId: form.dashboardId!
+        dashboardId: form.dashboardId!,
+        description: form.description || ''
       }
     })
 };

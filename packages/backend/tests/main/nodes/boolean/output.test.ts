@@ -11,8 +11,8 @@ describe('BooleanOutputNode', () => {
   });
 
   test('should get output false value from input', async () => {
-    const res = await BooleanOutputNode.onNodeExecution(
-      { name: 'test', description: '', dashboardId: 'abc' },
+    let res = await BooleanOutputNode.onNodeExecution(
+      { name: 'test', description: 'desc', dashboardId: 'abc' },
       {
         value: true
       },
@@ -23,7 +23,18 @@ describe('BooleanOutputNode', () => {
     expect(res.results.type).toBe(DataType.BOOLEAN);
     expect(res.results.name).toBe('test');
     expect(res.results.dashboardId).toBe('abc');
+    expect(res.results.description).toBe('desc');
     expect(Object.keys(res.outputs).length).toBe(0);
+
+    res = await BooleanOutputNode.onNodeExecution(
+      { name: 'test', description: null, dashboardId: 'abc' },
+      {
+        value: true
+      },
+      null
+    );
+
+    expect(res.results.description).toBe('');
   });
 
   test('should get output true value from input', async () => {

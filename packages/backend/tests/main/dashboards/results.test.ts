@@ -6,6 +6,7 @@ import {
   addOrUpdateResult,
   deleteResultById,
   deleteResultByName,
+  deleteResultsByDashboard,
   getResult,
   getResultsForDashboard
 } from '../../../src/main/dashboards/results';
@@ -42,6 +43,7 @@ describe('Dashboard Results', () => {
   test('should create result', async () => {
     const value: OutputResult<string> = {
       dashboardId: 'abc',
+      description: 'desc',
       name: 'test',
       type: DataType.STRING,
       value: 'val'
@@ -61,7 +63,13 @@ describe('Dashboard Results', () => {
   test('should throw error for empty names', async () => {
     try {
       await addOrUpdateResult(
-        { name: '', value: '', dashboardId: 'test', type: DataType.STRING },
+        {
+          name: '',
+          description: 'desc',
+          value: '',
+          dashboardId: 'test',
+          type: DataType.STRING
+        },
         db
       );
       throw NeverGoHereError;
@@ -76,7 +84,13 @@ describe('Dashboard Results', () => {
     });
     try {
       await addOrUpdateResult(
-        { name: 'test', value: '', dashboardId: 'test', type: DataType.STRING },
+        {
+          name: 'test',
+          description: 'desc',
+          value: '',
+          dashboardId: 'test',
+          type: DataType.STRING
+        },
         db
       );
       throw NeverGoHereError;
@@ -88,12 +102,14 @@ describe('Dashboard Results', () => {
   test('should update result', async () => {
     const oldValue: OutputResult<string> = {
       dashboardId: 'abc',
+      description: 'desc',
       name: 'test',
       type: DataType.STRING,
       value: 'val'
     };
     const newValue: OutputResult<number> = {
       dashboardId: 'abc',
+      description: 'new desc',
       name: 'test',
       type: DataType.NUMBER,
       value: 123
@@ -116,6 +132,7 @@ describe('Dashboard Results', () => {
   test('should get result', async () => {
     const value: OutputResult<string> = {
       dashboardId: 'abc',
+      description: 'desc',
       name: 'test',
       type: DataType.STRING,
       value: 'val'
@@ -132,6 +149,7 @@ describe('Dashboard Results', () => {
   test('should delete result by id', async () => {
     const value: OutputResult<string> = {
       dashboardId: 'abc',
+      description: 'desc',
       name: 'test',
       type: DataType.STRING,
       value: 'val'
@@ -141,6 +159,25 @@ describe('Dashboard Results', () => {
     expect(savedRes.id).toBeDefined();
 
     const res = await deleteResultById(savedRes.id, db);
+    expect(res).toEqual(true);
+
+    const newRes = await getResult(savedRes.id, db);
+    expect(newRes).toBe(null);
+  });
+
+  test('should delete result by dashboard id', async () => {
+    const value: OutputResult<string> = {
+      dashboardId: 'abc',
+      description: 'desc',
+      name: 'test',
+      type: DataType.STRING,
+      value: 'val'
+    };
+
+    const savedRes = await addOrUpdateResult(value, db);
+    expect(savedRes.id).toBeDefined();
+
+    const res = await deleteResultsByDashboard('abc', db);
     expect(res).toEqual(true);
 
     const newRes = await getResult(savedRes.id, db);
@@ -158,6 +195,7 @@ describe('Dashboard Results', () => {
   test('should delete result by name', async () => {
     const value: OutputResult<string> = {
       dashboardId: 'abc',
+      description: 'desc',
       name: 'test',
       type: DataType.STRING,
       value: 'val'
@@ -198,12 +236,14 @@ describe('Dashboard Results', () => {
   test('should get only results for correct dashboard', async () => {
     const value: OutputResult<string> = {
       dashboardId: 'abc',
+      description: 'desc',
       name: 'test',
       type: DataType.STRING,
       value: 'val'
     };
     const otherValue: OutputResult<string> = {
       dashboardId: 'otherDb',
+      description: 'desc 2',
       name: 'test',
       type: DataType.STRING,
       value: 'val'

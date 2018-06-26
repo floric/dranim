@@ -30,7 +30,8 @@ export const DatasetOutputNode: ServerNodeDef<
       name: '',
       value: inputs.dataset,
       type: DataType.DATASET,
-      dashboardId: ''
+      dashboardId: '',
+      description: ''
     }
   })
 };

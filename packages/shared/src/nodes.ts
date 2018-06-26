@@ -31,6 +31,7 @@ export interface OutputResult<T = any> {
   value: T;
   type: DataType;
   name: string;
+  description: string;
   dashboardId: string;
 }
 

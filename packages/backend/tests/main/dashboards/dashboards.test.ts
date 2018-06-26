@@ -7,6 +7,7 @@ import {
   getDashboard,
   tryGetDashboard
 } from '../../../src/main/dashboards/dashboards';
+import { deleteResultsByDashboard } from '../../../src/main/dashboards/results';
 import {
   getTestMongoDb,
   NeverGoHereError,
@@ -16,6 +17,8 @@ import {
 let conn;
 let db: Db;
 let server;
+
+jest.mock('../../../src/main/dashboards/results');
 
 describe('Dashboard', () => {
   beforeAll(async () => {
@@ -71,6 +74,11 @@ describe('Dashboard', () => {
 
     const res = await deleteDashboard(createdDb.id, db);
     expect(res).toBe(true);
+
+    expect(deleteResultsByDashboard as jest.Mock).toHaveBeenCalledWith(
+      createdDb.id,
+      db
+    );
   });
 
   test('should return null for unknown dashboard', async () => {

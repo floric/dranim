@@ -1,5 +1,6 @@
 import { Dashboard } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
+import { deleteResultsByDashboard } from './results';
 
 export const getDashboardCollection = (
   db: Db
@@ -42,6 +43,8 @@ export const deleteDashboard = async (id: string, db: Db) => {
   if (res.result.ok !== 1 || res.deletedCount !== 1) {
     throw new Error('Deletion of Dashboard failed.');
   }
+
+  await deleteResultsByDashboard(id, db);
 
   return true;
 };

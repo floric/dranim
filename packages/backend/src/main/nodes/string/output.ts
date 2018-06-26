@@ -25,7 +25,8 @@ export const StringOutputNode: ServerNodeDef<
         name: form.name!,
         value: inputs.value,
         type: DataType.STRING,
-        dashboardId: form.dashboardId!
+        dashboardId: form.dashboardId!,
+        description: form.description || ''
       }
     })
 };

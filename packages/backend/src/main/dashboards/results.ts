@@ -31,11 +31,12 @@ export const addOrUpdateResult = async (
 };
 
 const createResult = async (result: OutputResult, db: Db) => {
-  const { name, type, value, dashboardId } = result;
+  const { name, type, value, dashboardId, description } = result;
   const coll = getResultsCollection(db);
   const res = await coll.insertOne({
     name,
     type,
+    description,
     value: JSON.stringify(value),
     dashboardId
   });
@@ -48,13 +49,14 @@ const createResult = async (result: OutputResult, db: Db) => {
 };
 
 const updateResult = async (result: OutputResult, db: Db) => {
-  const { name, type, value, dashboardId } = result;
+  const { name, type, value, dashboardId, description } = result;
   const coll = getResultsCollection(db);
   const res = await coll.findOneAndUpdate(
     { name, dashboardId },
     {
       name,
       type,
+      description,
       value: JSON.stringify(value),
       dashboardId
     }
@@ -93,6 +95,16 @@ export const deleteResultByName = async (
   const coll = getResultsCollection(db);
   const res = await coll.deleteOne({ name, dashboardId });
   if (res.result.ok !== 1 || res.deletedCount !== 1) {
+    throw new Error('Deletion of Result failed');
+  }
+
+  return true;
+};
+
+export const deleteResultsByDashboard = async (dashboardId: string, db: Db) => {
+  const coll = getResultsCollection(db);
+  const res = await coll.deleteMany({ dashboardId });
+  if (res.result.ok !== 1) {
     throw new Error('Deletion of Result failed');
   }
 

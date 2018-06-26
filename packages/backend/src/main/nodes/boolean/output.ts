@@ -25,7 +25,8 @@ export const BooleanOutputNode: ServerNodeDef<
         name: form.name!,
         value: inputs.value,
         type: DataType.BOOLEAN,
-        dashboardId: form.dashboardId!
+        dashboardId: form.dashboardId!,
+        description: form.description || ''
       }
     })
 };
