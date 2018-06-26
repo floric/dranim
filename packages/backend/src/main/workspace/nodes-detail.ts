@@ -216,7 +216,7 @@ export const setProgress = async (
   value: number | null,
   db: Db
 ) => {
-  if (value !== null && (value < 0 || value > 1)) {
+  if (value != null && (value < 0 || value > 1)) {
     throw new Error('Invalid progress value');
   }
 
@@ -227,4 +227,6 @@ export const setProgress = async (
       $set: { progress: value }
     }
   );
+
+  return true;
 };
