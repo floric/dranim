@@ -173,17 +173,17 @@ export const addOrUpdateFormValue = async (
 
 export const addConnection = async (
   db: Db,
-  from: SocketInstance,
+  socket: SocketInstance,
   type: 'output' | 'input',
   connId: string
 ) => {
   const nodesCollection = getNodesCollection(db);
   await nodesCollection.updateOne(
-    { _id: new ObjectID(from.nodeId) },
+    { _id: new ObjectID(socket.nodeId) },
     {
       $push: {
         [type === 'input' ? 'inputs' : 'outputs']: {
-          name: from.name,
+          name: socket.name,
           connectionId: connId
         }
       }
@@ -193,17 +193,17 @@ export const addConnection = async (
 
 export const removeConnection = async (
   db: Db,
-  from: SocketInstance,
+  socket: SocketInstance,
   type: 'output' | 'input',
   connId: string
 ) => {
   const nodesCollection = getNodesCollection(db);
   await nodesCollection.updateOne(
-    { _id: new ObjectID(from.nodeId) },
+    { _id: new ObjectID(socket.nodeId) },
     {
       $pull: {
         [type === 'input' ? 'inputs' : 'outputs']: {
-          name: from.name,
+          name: socket.name,
           connectionId: connId
         }
       }

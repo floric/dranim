@@ -7,7 +7,7 @@ import {
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { getNodeType, tryGetNodeType } from '../nodes/all-nodes';
-import { deleteConnection, getConnectionsCollection } from './connections';
+import { deleteConnection, deleteConnectionsInContext } from './connections';
 import { getWorkspace, updateLastChange } from './workspace';
 
 export const getNodesCollection = (
@@ -124,14 +124,7 @@ const checkValidWorkspace = async (workspaceId: string, db: Db) => {
 };
 
 export const deleteNode = async (db: Db, id: string) => {
-  if (!ObjectID.isValid(id)) {
-    throw new Error('Invalid ID');
-  }
-
-  const nodeToDelete = await getNode(db, id);
-  if (!nodeToDelete) {
-    throw new Error('Node does not exist');
-  }
+  const nodeToDelete = await tryGetNode(id, db);
 
   if (
     nodeToDelete.type === ContextNodeType.INPUT ||
@@ -146,10 +139,7 @@ export const deleteNode = async (db: Db, id: string) => {
     )
   );
 
-  const connectionsCollection = getConnectionsCollection(db);
-  await connectionsCollection.deleteMany({
-    contextIds: { $elemMatch: { $eq: id } }
-  });
+  await deleteConnectionsInContext(id, db);
 
   const nodesCollection = getNodesCollection(db);
   const res = await nodesCollection.deleteMany({

@@ -178,3 +178,10 @@ export const getAllConnections = async (
     ...ds
   }));
 };
+
+export const deleteConnectionsInContext = async (contextId: string, db: Db) => {
+  const connectionsCollection = getConnectionsCollection(db);
+  await connectionsCollection.deleteMany({
+    contextIds: { $elemMatch: { $eq: contextId } }
+  });
+};

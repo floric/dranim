@@ -19,15 +19,17 @@ import {
 import {
   getContextNode,
   getNode,
-  tryGetNode,
-  getNodesCollection
+  getNodesCollection,
+  tryGetNode
 } from '../../../src/main/workspace/nodes';
 import {
+  addConnection,
   addOrUpdateFormValue,
   getContextInputDefs,
   getContextOutputDefs,
   getInputDefs,
   getNodeState,
+  removeConnection,
   setProgress
 } from '../../../src/main/workspace/nodes-detail';
 import {
@@ -314,7 +316,7 @@ describe('Node Details', () => {
     (getNode as jest.Mock).mockResolvedValue(parentNode);
     (getNodeType as jest.Mock).mockReturnValue(parentType);
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
-    (hasContextFn as jest.Mock).mockReturnValue(true);
+    (hasContextFn as any).mockReturnValue(true);
 
     const inputRes = await getContextInputDefs(inputNode, db);
     expect(inputRes).toEqual({});
@@ -367,7 +369,7 @@ describe('Node Details', () => {
     (getNodeType as jest.Mock).mockReturnValue(parentType);
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
     (getContextNode as jest.Mock).mockResolvedValue(inputNode);
-    (hasContextFn as jest.Mock).mockReturnValue(true);
+    (hasContextFn as any).mockReturnValue(true);
 
     const outputRes = await getContextOutputDefs(inputNode, db);
     expect(outputRes).toEqual({});
@@ -420,7 +422,7 @@ describe('Node Details', () => {
     (getNodeType as jest.Mock).mockReturnValue(parentType);
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
     (getContextNode as jest.Mock).mockResolvedValue(null);
-    (hasContextFn as jest.Mock).mockReturnValue(true);
+    (hasContextFn as any).mockReturnValue(true);
 
     try {
       await getContextOutputDefs(inputNode, db);
@@ -519,7 +521,7 @@ describe('Node Details', () => {
     (getNode as jest.Mock).mockResolvedValueOnce(parentNode);
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
     (hasNodeType as jest.Mock).mockReturnValueOnce(false);
-    (hasContextFn as jest.Mock).mockReturnValue(true);
+    (hasContextFn as any).mockReturnValue(true);
     (getContextNode as jest.Mock).mockReturnValue(contextInputNode);
 
     const res = await getInputDefs(
@@ -581,7 +583,7 @@ describe('Node Details', () => {
     (getNode as jest.Mock).mockResolvedValueOnce(parentNode);
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
     (hasNodeType as jest.Mock).mockReturnValueOnce(true);
-    (hasContextFn as jest.Mock).mockReturnValue(true);
+    (hasContextFn as any).mockReturnValue(true);
 
     const res = await getInputDefs(
       {
@@ -610,7 +612,7 @@ describe('Node Details', () => {
 
   test('should set progress', async () => {
     (getNodesCollection as jest.Mock).mockReturnValue({
-      updateOne: () => Promise.resolve(true)
+      updateOne: jest.fn()
     });
 
     let res = await setProgress(VALID_OBJECT_ID, 0.5, db);
@@ -624,11 +626,13 @@ describe('Node Details', () => {
 
     res = await setProgress(null, 1, db);
     expect(res).toBe(true);
+
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(4);
   });
 
   test('should throw for invalid progress value', async () => {
     (getNodesCollection as jest.Mock).mockReturnValue({
-      updateOne: () => Promise.resolve(true)
+      updateOne: jest.fn()
     });
 
     try {
@@ -644,5 +648,35 @@ describe('Node Details', () => {
     } catch (err) {
       expect(err.message).toBe('Invalid progress value');
     }
+
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(0);
+  });
+
+  test('should add and remove connection from  node', async () => {
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateOne: jest.fn()
+    });
+
+    const nodeId = VALID_OBJECT_ID;
+    await addConnection(db, { name: 'test', nodeId }, 'input', VALID_OBJECT_ID);
+    await addConnection(
+      db,
+      { name: 'test', nodeId },
+      'output',
+      VALID_OBJECT_ID
+    );
+    await removeConnection(
+      db,
+      { name: 'test', nodeId },
+      'input',
+      VALID_OBJECT_ID
+    );
+    await removeConnection(
+      db,
+      { name: 'test', nodeId },
+      'output',
+      VALID_OBJECT_ID
+    );
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(4);
   });
 });

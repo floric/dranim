@@ -4,7 +4,9 @@ import { Db } from 'mongodb';
 import {
   createConnection,
   deleteConnection,
+  deleteConnectionsInContext,
   getConnection,
+  getConnectionsCollection,
   tryGetConnection
 } from '../../../src/main/workspace/connections';
 import { getNode } from '../../../src/main/workspace/nodes';
@@ -363,5 +365,23 @@ describe('Connections', () => {
     } catch (err) {
       expect(err.message).toBe('Nodes live in different contexts');
     }
+  });
+
+  test('should delete connections with context id', async () => {
+    const connectionsCollection = getConnectionsCollection(db);
+    await connectionsCollection.insertOne({
+      contextIds: ['randomid']
+    });
+    await connectionsCollection.insertOne({
+      contextIds: ['randomid', 'test']
+    });
+    await connectionsCollection.insertOne({
+      contextIds: ['abc', 'randomid', 'test']
+    });
+
+    await deleteConnectionsInContext('randomid', db);
+
+    const count = await connectionsCollection.count({});
+    expect(count).toBe(0);
   });
 });
