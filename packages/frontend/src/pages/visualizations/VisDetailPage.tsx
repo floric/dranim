@@ -1,26 +1,38 @@
 import * as React from 'react';
 
-import { GQLVisualization } from '@masterthesis/shared';
-import { Card } from 'antd';
+import { DataType, GQLDashboard, GQLOutputResult } from '@masterthesis/shared';
+import { Card, Col, Row } from 'antd';
 import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
 import { RouteComponentProps } from 'react-router';
 
+import { BooleanInfo } from '../../components/BooleanInfo';
 import {
   CustomErrorCard,
   LoadingCard,
   UnknownErrorCard
 } from '../../components/CustomCards';
+import { NumberInfo } from '../../components/NumberInfo';
 import { PageHeaderCard } from '../../components/PageHeaderCard';
+import { StringInfo } from '../../components/StringInfo';
 
-const VISUALIZATION = gql`
-  query visualization($id: String!) {
-    visualization(id: $id) {
+const DASHBOARD = gql`
+  query dashboard($id: String!) {
+    dashboard(id: $id) {
       id
       name
+      results {
+        id
+        name
+        value
+        type
+        description
+      }
     }
   }
 `;
+
+const resultCardSize = { xs: 24, md: 12, lg: 8, xl: 6 };
 
 export interface VisDetailPageProps
   extends RouteComponentProps<{ id: string }> {}
@@ -28,10 +40,7 @@ export interface VisDetailPageProps
 export default class VisDetailPage extends React.Component<VisDetailPageProps> {
   public render() {
     return (
-      <Query
-        query={VISUALIZATION}
-        variables={{ id: this.props.match.params.id }}
-      >
+      <Query query={DASHBOARD} variables={{ id: this.props.match.params.id }}>
         {({ loading, error, data, refetch }) => {
           if (loading) {
             return <LoadingCard />;
@@ -41,24 +50,27 @@ export default class VisDetailPage extends React.Component<VisDetailPageProps> {
             return <UnknownErrorCard error={error} />;
           }
 
-          if (!data.visualization) {
+          if (!data.dashboard) {
             return (
               <CustomErrorCard
-                title="Unknown visualization"
-                description="Visualization doesn't exist."
+                title="Unknown Dashboard"
+                description="Dashboard doesn't exist."
               />
             );
           }
 
-          const visualization: GQLVisualization = data.visualization;
+          const dashboard: GQLDashboard = data.dashboard;
 
           return (
             <>
-              <PageHeaderCard
-                title={visualization.name}
-                typeTitle="Visualization"
-              />
-              <Card bordered={false}>Suggest visualizations here</Card>
+              <PageHeaderCard title={dashboard.name} typeTitle="Dashboard" />
+              <Row gutter={8}>
+                {dashboard.results.map(r => (
+                  <Col {...resultCardSize} key={r.id}>
+                    <Card bordered={false}>{renderResult(r)}</Card>
+                  </Col>
+                ))}
+              </Row>
             </>
           );
         }}
@@ -66,3 +78,15 @@ export default class VisDetailPage extends React.Component<VisDetailPageProps> {
     );
   }
 }
+
+const renderResult = (result: GQLOutputResult): JSX.Element => {
+  if (result.type === DataType.NUMBER) {
+    return <NumberInfo title={result.name} total={result.value} />;
+  } else if (result.type === DataType.STRING) {
+    return <StringInfo title={result.name} value={result.value} />;
+  } else if (result.type === DataType.BOOLEAN) {
+    return <BooleanInfo title={result.name} value={result.value} />;
+  }
+
+  return <p>Not yet supported Datatype</p>;
+};

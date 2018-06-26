@@ -24,10 +24,6 @@ export interface StringOutputNodeInputs {
   value: string;
 }
 
-export interface StringOutputNodeResults {
-  value: string;
-}
-
 export const StringOutputNodeDef: NodeDef<StringOutputNodeInputs, {}> = {
   name: 'Output',
   type: 'StringOutput',

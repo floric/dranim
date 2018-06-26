@@ -1,15 +1,12 @@
-import { GQLDataset } from './workspace';
+import { GQLOutputResult } from './nodes';
 
-export interface Visualization {
+export interface Dashboard {
   id: string;
   name: string;
-  type: string | null;
-  datasetId: string;
 }
 
-export interface GQLVisualization {
+export interface GQLDashboard {
   id: string;
   name: string;
-  type: string | null;
-  dataset: GQLDataset;
+  results: Array<GQLOutputResult>;
 }

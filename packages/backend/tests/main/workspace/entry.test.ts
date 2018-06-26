@@ -1,10 +1,7 @@
-import { DataType } from '@masterthesis/shared';
+import { Dataset, DataType, ValueSchema } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import {
-  addValueSchema,
-  createDataset
-} from '../../../src/main/workspace/dataset';
+import { getDataset, tryGetDataset } from '../../../src/main/workspace/dataset';
 import {
   clearEntries,
   createEntry,
@@ -12,6 +9,7 @@ import {
   deleteEntry,
   getEntriesCount,
   getEntry,
+  getEntryCollection,
   getLatestEntries
 } from '../../../src/main/workspace/entry';
 import {
@@ -23,6 +21,8 @@ import {
 let conn;
 let db: Db;
 let server;
+
+jest.mock('../../../src/main/workspace/dataset');
 
 describe('Entry', () => {
   beforeAll(async () => {
@@ -43,19 +43,26 @@ describe('Entry', () => {
   });
 
   test('should create, get and delete entry', async () => {
-    const schema = {
+    const schema: ValueSchema = {
       name: 'test',
       type: DataType.STRING,
       required: true,
       unique: false,
       fallback: ''
     };
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      workspaceId: 'ws',
+      valueschemas: [schema],
+      latestEntries: [],
+      entriesCount: 0
+    };
+
+    (getDataset as jest.Mock).mockResolvedValue(ds);
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
+
     const schemaValue = 'test';
-
-    const ds = await createDataset(db, 'ds1');
-    let res = await addValueSchema(db, ds.id, schema);
-    expect(res).toBe(true);
-
     const entry = await createEntry(db, ds.id, { [schema.name]: schemaValue });
 
     expect(entry.id).toBeDefined();
@@ -64,7 +71,7 @@ describe('Entry', () => {
     const retrievedEntry = await getEntry(db, ds.id, entry.id);
     expect(retrievedEntry).toEqual(entry);
 
-    res = await deleteEntry(db, ds.id, entry.id);
+    const res = await deleteEntry(db, ds.id, entry.id);
     expect(res).toBe(true);
 
     const unknownEntry = await getEntry(db, ds.id, entry.id);
@@ -72,20 +79,31 @@ describe('Entry', () => {
   });
 
   test('should return null for missing entry', async () => {
-    const ds = await createDataset(db, 'test');
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      workspaceId: 'ws',
+      valueschemas: [],
+      latestEntries: [],
+      entriesCount: 0
+    };
+
+    (getDataset as jest.Mock).mockResolvedValue(ds);
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
+
     const res = await getEntry(db, ds.id, VALID_OBJECT_ID);
     expect(res).toBe(null);
   });
 
   test('should create entry from JSON payload', async () => {
-    const schemaA = {
+    const schemaA: ValueSchema = {
       name: 'test',
       type: DataType.STRING,
       required: true,
       unique: true,
       fallback: ''
     };
-    const schemaB = {
+    const schemaB: ValueSchema = {
       name: 'abc',
       type: DataType.NUMBER,
       required: true,
@@ -93,9 +111,17 @@ describe('Entry', () => {
       fallback: '3'
     };
 
-    const ds = await createDataset(db, 'ds1');
-    await addValueSchema(db, ds.id, schemaA);
-    await addValueSchema(db, ds.id, schemaB);
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      workspaceId: 'ws',
+      valueschemas: [schemaA, schemaB],
+      latestEntries: [],
+      entriesCount: 0
+    };
+
+    (getDataset as jest.Mock).mockResolvedValue(ds);
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     const payload = {
       test: 'a',
@@ -111,6 +137,10 @@ describe('Entry', () => {
   });
 
   test('should throw error when creating entry with invalid ds id', async () => {
+    (tryGetDataset as jest.Mock).mockImplementation(() => {
+      throw new Error('Unknown dataset');
+    });
+
     try {
       await createEntryFromJSON(
         db,
@@ -124,7 +154,7 @@ describe('Entry', () => {
   });
 
   test('should get entries count', async () => {
-    const schema = {
+    const schema: ValueSchema = {
       name: 'test',
       type: DataType.STRING,
       required: true,
@@ -132,8 +162,17 @@ describe('Entry', () => {
       fallback: ''
     };
 
-    const ds = await createDataset(db, 'ds1');
-    await addValueSchema(db, ds.id, schema);
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      workspaceId: 'ws',
+      valueschemas: [schema],
+      latestEntries: [],
+      entriesCount: 0
+    };
+
+    (getDataset as jest.Mock).mockResolvedValue(ds);
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     const values = ['a', 'b', 'c', 'd', 'e'];
     await Promise.all(values.map(v => createEntry(db, ds.id, { test: v })));
@@ -143,7 +182,7 @@ describe('Entry', () => {
   });
 
   test('should get latest entries', async () => {
-    const schema = {
+    const schema: ValueSchema = {
       name: 'test',
       type: DataType.STRING,
       required: true,
@@ -151,8 +190,17 @@ describe('Entry', () => {
       fallback: ''
     };
 
-    const ds = await createDataset(db, 'ds1');
-    await addValueSchema(db, ds.id, schema);
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      workspaceId: 'ws',
+      valueschemas: [schema],
+      latestEntries: [],
+      entriesCount: 0
+    };
+
+    (getDataset as jest.Mock).mockResolvedValue(ds);
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     const values = ['a', 'b', 'c', 'd', 'e'];
     await Promise.all(values.map(v => createEntry(db, ds.id, { test: v })));
@@ -165,7 +213,17 @@ describe('Entry', () => {
   });
 
   test('should throw error for undefined values', async () => {
-    const ds = await createDataset(db, 'ds1');
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      workspaceId: 'ws',
+      valueschemas: [],
+      latestEntries: [],
+      entriesCount: 0
+    };
+
+    (getDataset as jest.Mock).mockResolvedValue(ds);
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     try {
       await createEntry(db, ds.id, { test: 'abc' });
@@ -176,7 +234,17 @@ describe('Entry', () => {
   });
 
   test('should throw error for missing values', async () => {
-    const ds = await createDataset(db, 'ds1');
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      workspaceId: 'ws',
+      valueschemas: [],
+      latestEntries: [],
+      entriesCount: 0
+    };
+
+    (getDataset as jest.Mock).mockResolvedValue(ds);
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     try {
       await createEntry(db, ds.id, {});
@@ -187,7 +255,17 @@ describe('Entry', () => {
   });
 
   test('should throw error for null keys or undefined values', async () => {
-    const ds = await createDataset(db, 'ds1');
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      workspaceId: 'ws',
+      valueschemas: [],
+      latestEntries: [],
+      entriesCount: 0
+    };
+
+    (getDataset as jest.Mock).mockResolvedValue(ds);
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     try {
       await createEntry(db, ds.id, { [null as any]: 9 });
@@ -205,6 +283,10 @@ describe('Entry', () => {
   });
 
   test('should throw error for invalid dataset id', async () => {
+    (tryGetDataset as jest.Mock).mockImplementation(() => {
+      throw new Error('Unknown dataset');
+    });
+
     try {
       await createEntry(db, VALID_OBJECT_ID, { test: 9 });
       throw NeverGoHereError;
@@ -214,24 +296,31 @@ describe('Entry', () => {
   });
 
   test('should throw error for missing required values', async () => {
-    const schemaA = {
+    const schemaA: ValueSchema = {
       name: 'test',
       type: DataType.STRING,
       required: true,
       unique: false,
       fallback: ''
     };
-    const schemaB = {
+    const schemaB: ValueSchema = {
       name: 'abc',
       type: DataType.STRING,
       required: true,
       unique: false,
       fallback: ''
     };
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      workspaceId: 'ws',
+      valueschemas: [schemaA, schemaB],
+      latestEntries: [],
+      entriesCount: 0
+    };
 
-    const ds = await createDataset(db, 'ds1');
-    await addValueSchema(db, ds.id, schemaA);
-    await addValueSchema(db, ds.id, schemaB);
+    (getDataset as jest.Mock).mockResolvedValue(ds);
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     try {
       await createEntry(db, ds.id, { [schemaA.name]: 'test' });
@@ -242,20 +331,28 @@ describe('Entry', () => {
   });
 
   test('should throw error for missing required values', async () => {
-    const schemaA = {
+    const schema: ValueSchema = {
       name: 'test',
       type: DataType.STRING,
       required: true,
-      unique: false,
+      unique: true,
       fallback: ''
     };
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      workspaceId: 'ws',
+      valueschemas: [schema],
+      latestEntries: [],
+      entriesCount: 0
+    };
 
-    const ds = await createDataset(db, 'ds1');
-    await addValueSchema(db, ds.id, schemaA);
+    (getDataset as jest.Mock).mockResolvedValue(ds);
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     try {
       await createEntry(db, ds.id, {
-        [schemaA.name]: 'test',
+        [schema.name]: 'test',
         unknown: 'test'
       });
       throw NeverGoHereError;
@@ -265,21 +362,34 @@ describe('Entry', () => {
   });
 
   test('should throw error for already used key', async () => {
-    const schemaA = {
+    const schema: ValueSchema = {
       name: 'test',
       type: DataType.STRING,
       required: true,
       unique: true,
       fallback: ''
     };
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      workspaceId: 'ws',
+      valueschemas: [schema],
+      latestEntries: [],
+      entriesCount: 0
+    };
 
-    const ds = await createDataset(db, 'ds1');
-    await addValueSchema(db, ds.id, schemaA);
+    const coll = getEntryCollection(db, ds.id);
+    await coll.createIndex(`values.${schema.name}`, {
+      unique: true
+    });
 
-    await createEntry(db, ds.id, { [schemaA.name]: 'test' });
+    (getDataset as jest.Mock).mockResolvedValue(ds);
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
+
+    await createEntry(db, ds.id, { [schema.name]: 'test' });
 
     try {
-      await createEntry(db, ds.id, { [schemaA.name]: 'test' });
+      await createEntry(db, ds.id, { [schema.name]: 'test' });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Key already used');
@@ -303,14 +413,25 @@ describe('Entry', () => {
   });
 
   test('should delete entries', async () => {
-    const ds = await createDataset(db, 'test');
-    await addValueSchema(db, ds.id, {
-      name: 'value',
-      type: DataType.STRING,
-      unique: false,
-      fallback: '',
-      required: true
-    });
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      workspaceId: 'ws',
+      valueschemas: [
+        {
+          name: 'value',
+          type: DataType.STRING,
+          unique: false,
+          fallback: '',
+          required: true
+        }
+      ],
+      latestEntries: [],
+      entriesCount: 0
+    };
+
+    (getDataset as jest.Mock).mockResolvedValue(ds);
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     const [e1, e2, e3] = await Promise.all(
       [1, 2, 3].map(n => createEntry(db, ds.id, { value: n }))
@@ -326,14 +447,25 @@ describe('Entry', () => {
   });
 
   test('should clear entries', async () => {
-    const ds = await createDataset(db, 'test');
-    await addValueSchema(db, ds.id, {
-      name: 'value',
-      type: DataType.STRING,
-      unique: false,
-      fallback: '',
-      required: true
-    });
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      workspaceId: 'ws',
+      valueschemas: [
+        {
+          name: 'value',
+          type: DataType.STRING,
+          unique: false,
+          fallback: '',
+          required: true
+        }
+      ],
+      latestEntries: [],
+      entriesCount: 0
+    };
+
+    (getDataset as jest.Mock).mockResolvedValue(ds);
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     await Promise.all(
       [1, 2, 3, 4, 5].map(n => createEntry(db, ds.id, { value: n }))

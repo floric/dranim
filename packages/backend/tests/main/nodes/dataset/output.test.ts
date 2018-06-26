@@ -3,7 +3,7 @@ import { Db } from 'mongodb';
 
 import { DatasetOutputNode } from '../../../../src/main/nodes/dataset/output';
 import { createDataset } from '../../../../src/main/workspace/dataset';
-import { getTestMongoDb, NeverGoHereError, NODE } from '../../../test-utils';
+import { getTestMongoDb, NODE } from '../../../test-utils';
 
 let conn;
 let db: Db;
@@ -47,7 +47,7 @@ describe('DatasetOutputNode', () => {
     );
 
     expect(res.outputs).toBeDefined();
-    expect(res.results.dataset.datasetId).toBe(ds.id);
+    expect(res.results.value.datasetId).toBe(ds.id);
   });
 
   test('should return absent meta for missing dataset', async () => {

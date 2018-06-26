@@ -27,6 +27,8 @@ const SCHEMA: ValueSchema = {
   unique: false
 };
 
+jest.mock('../../../src/main/workspace/entry');
+
 describe('Dataset', () => {
   beforeAll(async () => {
     const { connection, database, mongodbServer } = await getTestMongoDb();

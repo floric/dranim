@@ -23,7 +23,17 @@ export default class StartPage extends React.Component<{}> {
   public render() {
     return (
       <>
-        <PageHeaderCard title="Start" />
+        <PageHeaderCard
+          title="Start"
+          helpContent={
+            <>
+              <p>
+                This page is currently only used to create demo data fast. The
+                content of this page might change in the future.
+              </p>
+            </>
+          }
+        />
         <Row gutter={8}>
           <Col sm={24} md={12} lg={6}>
             <Card bordered={false}>

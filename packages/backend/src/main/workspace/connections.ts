@@ -15,9 +15,9 @@ export const getConnectionsCollection = (
 };
 
 export const createConnection = async (
-  db: Db,
   from: SocketInstance,
-  to: SocketInstance
+  to: SocketInstance,
+  db: Db
 ): Promise<ConnectionInstance> => {
   if (!from || !to) {
     throw new Error('Invalid connection');
@@ -177,4 +177,11 @@ export const getAllConnections = async (
     id: ds._id.toHexString(),
     ...ds
   }));
+};
+
+export const deleteConnectionsInContext = async (contextId: string, db: Db) => {
+  const connectionsCollection = getConnectionsCollection(db);
+  await connectionsCollection.deleteMany({
+    contextIds: { $elemMatch: { $eq: contextId } }
+  });
 };

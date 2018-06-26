@@ -90,18 +90,24 @@ describe('Execution', () => {
       0
     );
     await createConnection(
-      db,
       { name: 'value', nodeId: nodeA.id },
-      { name: 'value', nodeId: nodeB.id }
+      { name: 'value', nodeId: nodeB.id },
+      db
     );
     await addOrUpdateFormValue(db, nodeA.id, 'value', JSON.stringify('test'));
-
+    await addOrUpdateFormValue(db, nodeB.id, 'name', JSON.stringify('test'));
+    await addOrUpdateFormValue(
+      db,
+      nodeB.id,
+      'dashboardId',
+      JSON.stringify('dsid')
+    );
     const { outputs, results } = await executeNodeWithId(db, nodeB.id);
 
     expect(outputs).toBeDefined();
     expect(results).toBeDefined();
     expect(Object.keys(outputs).length).toBe(0);
-    expect(Object.keys(results!).length).toBe(1);
+    expect((results as any).value).toBe('test');
   });
 
   test('should return outputs from context for context input nodes', async () => {
@@ -164,9 +170,9 @@ describe('Execution', () => {
     ]);
     await addOrUpdateFormValue(db, nodeA.id, 'value', 'NaN');
     await createConnection(
-      db,
       { name: 'value', nodeId: nodeA.id },
-      { name: 'value', nodeId: nodeB.id }
+      { name: 'value', nodeId: nodeB.id },
+      db
     );
 
     try {
@@ -195,21 +201,33 @@ describe('Execution', () => {
 
     await addOrUpdateFormValue(db, nodeA.id, 'value', '18');
     await addOrUpdateFormValue(db, nodeB.id, 'value', '81');
+    await addOrUpdateFormValue(
+      db,
+      outputNode.id,
+      'name',
+      JSON.stringify('test')
+    );
+    await addOrUpdateFormValue(
+      db,
+      outputNode.id,
+      'dashboardId',
+      JSON.stringify('dsid')
+    );
 
     await createConnection(
-      db,
       { name: 'value', nodeId: nodeA.id },
-      { name: 'a', nodeId: sumNode.id }
+      { name: 'a', nodeId: sumNode.id },
+      db
     );
     await createConnection(
-      db,
       { name: 'value', nodeId: nodeB.id },
-      { name: 'b', nodeId: sumNode.id }
+      { name: 'b', nodeId: sumNode.id },
+      db
     );
     await createConnection(
-      db,
       { name: 'sum', nodeId: sumNode.id },
-      { name: 'value', nodeId: outputNode.id }
+      { name: 'value', nodeId: outputNode.id },
+      db
     );
 
     const updatedNode = await getNode(db, outputNode.id);
@@ -240,7 +258,6 @@ describe('Execution', () => {
       ].map(type => createNode(db, type, ws.id, [], 0, 0))
     );
 
-    const nodesColl = await getNodesCollection(db);
     const contextOutputNode = await getContextNode(
       editEntriesNode,
       ContextNodeType.OUTPUT,
@@ -256,9 +273,9 @@ describe('Execution', () => {
       0
     );
     await createConnection(
-      db,
       { name: 'value', nodeId: stringInputNode.id },
-      { name: 'val', nodeId: contextOutputNode!.id }
+      { name: 'val', nodeId: contextOutputNode!.id },
+      db
     );
 
     await addOrUpdateFormValue(
@@ -273,6 +290,7 @@ describe('Execution', () => {
       'value',
       JSON.stringify('test')
     );
+    await addOrUpdateFormValue(db, outputNode.id, 'name', 'test');
 
     await Promise.all(
       [
@@ -280,9 +298,9 @@ describe('Execution', () => {
         { from: editEntriesNode.id, to: outputNode.id }
       ].map(pair =>
         createConnection(
-          db,
           { name: 'dataset', nodeId: pair.from },
-          { name: 'dataset', nodeId: pair.to }
+          { name: 'dataset', nodeId: pair.to },
+          db
         )
       )
     );
@@ -292,9 +310,9 @@ describe('Execution', () => {
 
     expect(outputs).toBeDefined();
     expect(results).toBeDefined();
-    expect((results as any).dataset).toBeDefined();
+    expect((results as any).value).toBeDefined();
 
-    const newDsId = (results as any).dataset.datasetId;
+    const newDsId = (results as any).value.datasetId;
     const allEntries = await getAllEntries(db, newDsId);
     expect(allEntries.length).toBe(1);
   });

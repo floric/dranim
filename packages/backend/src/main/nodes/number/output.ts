@@ -1,23 +1,32 @@
 import {
+  DataType,
   NumberOutputNodeDef,
   NumberOutputNodeInputs,
-  NumberOutputNodeResults,
+  OutputNodeForm,
+  OutputResult,
   ServerNodeDef
 } from '@masterthesis/shared';
+
+import { isOutputFormValid } from '../../calculation/utils';
 
 export const NumberOutputNode: ServerNodeDef<
   NumberOutputNodeInputs,
   {},
-  {},
-  NumberOutputNodeResults
+  OutputNodeForm,
+  OutputResult<number>
 > = {
   type: NumberOutputNodeDef.type,
+  isFormValid: isOutputFormValid,
   onMetaExecution: () => Promise.resolve({}),
   onNodeExecution: (form, inputs) =>
     Promise.resolve({
       outputs: {},
       results: {
-        value: inputs.value
+        name: form.name!,
+        value: inputs.value,
+        type: DataType.NUMBER,
+        dashboardId: form.dashboardId!,
+        description: form.description || ''
       }
     })
 };

@@ -32,7 +32,21 @@ export default class DataPage extends React.Component<{}, {}> {
   public render() {
     return (
       <>
-        <PageHeaderCard title="Datasets" />
+        <PageHeaderCard
+          title="Datasets"
+          helpContent={
+            <>
+              <p>
+                Structured data is represented in <strong>Datasets</strong>.
+              </p>
+              <p>
+                Datasets are comparable to Tables in SQL and can contain{' '}
+                <strong>Entries</strong> with their structure defined using{' '}
+                <strong>Valueschemas</strong>.
+              </p>
+            </>
+          }
+        />
         <Query query={ALL_DATASETS}>
           {({ loading, error, data, refetch }) => {
             if (loading) {

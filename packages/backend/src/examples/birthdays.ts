@@ -10,7 +10,7 @@ import {
 import { createEntry } from '../main/workspace/entry';
 import { createWorkspace } from '../main/workspace/workspace';
 
-const ENTRIES_COUNT = 5000;
+const ENTRIES_COUNT = 2500;
 
 export const createBirthdaysDemoData = async (db: Db) => {
   const ds = await createDataset(db, 'Birthdays');

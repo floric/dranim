@@ -48,7 +48,22 @@ export default class WorkspacesOverviewPage extends React.Component<
   public render() {
     return (
       <>
-        <PageHeaderCard title="Workspaces" />
+        <PageHeaderCard
+          title="Workspaces"
+          helpContent={
+            <>
+              <p>
+                <strong>Workspaces</strong> are used to aggregate, filter or
+                modify <strong>Datasets</strong>.
+              </p>
+              <p>
+                Create one Workspace for each scientific topic to focus on one
+                specific issue. Workspaces can have many different Datasets as
+                inputs.
+              </p>
+            </>
+          }
+        />
         <Query query={ALL_WORKSPACES}>
           {({ loading, error, data, refetch }) => {
             if (loading) {

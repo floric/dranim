@@ -1,4 +1,5 @@
 import {
+  DatasetOutputNodeDef,
   FormValues,
   GQLNodeInstance,
   NodeDef,
@@ -8,7 +9,6 @@ import {
 import { FormComponentProps } from 'antd/lib/form';
 import { TreeData } from 'antd/lib/tree-select';
 
-import { ExplorerEditorProps } from '../ExplorerEditor';
 import * as BooleanNodes from './boolean';
 import * as DatasetNodes from './dataset';
 import * as DatetimeNodes from './datetime';
@@ -16,6 +16,9 @@ import * as EntriesNodes from './entries';
 import * as NumberNodes from './number';
 import * as StringNodes from './string';
 import * as TimeNodes from './time';
+
+import { ExplorerEditorProps } from '../ExplorerEditor';
+import { renderOutputFormItems } from './output-utils';
 
 export interface EditorProps {
   x?: number;
@@ -116,7 +119,16 @@ export const nodeTypes: Map<string, ClientNodeDef & NodeDef> = new Map(
     .map<[string, NodeDef]>(n => [n[0], n[1]])
     .map<[string, ClientNodeDef & NodeDef]>(n => [
       n[0],
-      { ...(clientNodeMap.get(n[0]) || {}), ...n[1] }
+      {
+        ...(clientNodeMap.get(n[0]) || {
+          type: n[0],
+          renderFormItems:
+            n[1].isOutputNode && n[0] !== DatasetOutputNodeDef.type
+              ? (renderOutputFormItems as any)
+              : undefined
+        }),
+        ...n[1]
+      }
     ])
     .sort((a, b) => a[0].localeCompare(b[0]))
 );

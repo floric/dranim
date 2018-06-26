@@ -3,18 +3,18 @@ import { SFC } from 'react';
 
 import { Col, Row } from 'antd';
 
-export interface NumberInfoProps {
-  total: number;
+export interface StringInfoProps {
+  value: string;
   title: string;
 }
 
-export const NumberInfo: SFC<NumberInfoProps> = ({ total, title }) => (
+export const StringInfo: SFC<StringInfoProps> = ({ value, title }) => (
   <>
     <Row>
       <Col>{title}</Col>
     </Row>
     <Row>
-      <Col>{total.toLocaleString()}</Col>
+      <Col>{value}</Col>
     </Row>
   </>
 );

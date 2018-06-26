@@ -1,12 +1,8 @@
-import {
-  NumberInputNodeDef,
-  NumberOutputNodeDef,
-  sleep
-} from '@masterthesis/shared';
+import { NodeInstance, sleep } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { createConnection } from '../../../src/main/workspace/connections';
-import { createNode, getNode } from '../../../src/main/workspace/nodes';
+import { getConnectionsCollection } from '../../../src/main/workspace/connections';
+import { getNodesCollection } from '../../../src/main/workspace/nodes';
 import {
   createWorkspace,
   deleteWorkspace,
@@ -16,11 +12,18 @@ import {
   updateLastChange,
   updateWorkspace
 } from '../../../src/main/workspace/workspace';
-import { getTestMongoDb, NeverGoHereError } from '../../test-utils';
+import {
+  getTestMongoDb,
+  NeverGoHereError,
+  VALID_OBJECT_ID
+} from '../../test-utils';
 
 let conn;
 let db: Db;
 let server;
+
+jest.mock('../../../src/main/workspace/nodes');
+jest.mock('../../../src/main/workspace/connections');
 
 describe('Workspaces', () => {
   beforeAll(async () => {
@@ -41,6 +44,13 @@ describe('Workspaces', () => {
   });
 
   test('should create and delete workspace', async () => {
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      deleteMany: jest.fn()
+    });
+    (getConnectionsCollection as jest.Mock).mockReturnValue({
+      deleteMany: jest.fn()
+    });
+
     const description = 'desc';
     const name = 'wsname';
 
@@ -64,6 +74,9 @@ describe('Workspaces', () => {
     const unknownWs = await getWorkspace(db, ws.id);
 
     expect(unknownWs).toBe(null);
+
+    expect(getNodesCollection(db).deleteMany).toHaveBeenCalledTimes(1);
+    expect(getConnectionsCollection(db).deleteMany).toHaveBeenCalledTimes(1);
   });
 
   test('should not create workspace with empty name', async () => {
@@ -129,41 +142,73 @@ describe('Workspaces', () => {
   });
 
   test('should move nodes with update workspace', async () => {
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateOne: jest.fn()
+    });
+    (getConnectionsCollection as jest.Mock).mockReturnValue({
+      updateOne: jest.fn()
+    });
     const description = 'desc';
     const name = 'wsname';
 
     const ws = await createWorkspace(db, name, description);
-    const [nodeA, nodeB] = await Promise.all([
-      createNode(db, NumberInputNodeDef.type, ws.id, [], 0, 0),
-      createNode(db, NumberOutputNodeDef.type, ws.id, [], 0, 0)
-    ]);
-    const nodeConn = await createConnection(
-      db,
-      { name: 'value', nodeId: nodeA.id },
-      { name: 'value', nodeId: nodeB.id }
-    );
+
+    const nodeA: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'a',
+      x: 0,
+      y: 0,
+      workspaceId: ws.id
+    };
+    const nodeB: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'a',
+      x: 0,
+      y: 0,
+      workspaceId: ws.id
+    };
 
     const res = await updateWorkspace(
       db,
       ws.id,
       [{ ...nodeA, x: 1, y: 2 }, { ...nodeB, x: 3, y: 4 }],
-      [nodeConn]
+      [
+        {
+          workspaceId: ws.id,
+          contextIds: [],
+          from: { name: 'val', nodeId: nodeA.id },
+          to: { name: 'val', nodeId: nodeB.id },
+          id: VALID_OBJECT_ID
+        }
+      ]
     );
     expect(res).toBe(true);
 
-    const [updatedNodeA, updatedNodeB] = await Promise.all([
-      getNode(db, nodeA.id),
-      getNode(db, nodeB.id)
-    ]);
-    expect(updatedNodeA.x).toBe(1);
-    expect(updatedNodeA.y).toBe(2);
-    expect(updatedNodeB.x).toBe(3);
-    expect(updatedNodeB.y).toBe(4);
+    expect(getConnectionsCollection(db).updateOne).toHaveBeenCalledTimes(1);
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(2);
   });
 
   test('should return true after initializing workspaces', async () => {
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      createIndex: jest.fn()
+    });
+    (getConnectionsCollection as jest.Mock).mockReturnValue({
+      createIndex: jest.fn()
+    });
+
     const res = await initWorkspaceDb(db);
     expect(res).toBe(true);
+
+    expect(getConnectionsCollection(db).createIndex).toHaveBeenCalledTimes(1);
+    expect(getNodesCollection(db).createIndex).toHaveBeenCalledTimes(1);
   });
 
   test('should update last change of workspace', async () => {

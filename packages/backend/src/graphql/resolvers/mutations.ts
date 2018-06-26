@@ -1,11 +1,11 @@
 import {
   CalculationProcess,
   ConnectionInstance,
+  Dashboard,
   Dataset,
   Entry,
   NodeInstance,
   UploadProcess,
-  Visualization,
   Workspace
 } from '@masterthesis/shared';
 
@@ -13,9 +13,9 @@ import { createBirthdaysDemoData } from '../../examples/birthdays';
 import { createSTRDemoData } from '../../examples/str';
 import { startCalculation } from '../../main/calculation/start-process';
 import {
-  createVisualization,
-  deleteVisualization
-} from '../../main/visualizations/visualizations';
+  createDashboard,
+  deleteDashboard
+} from '../../main/dashboards/dashboards';
 import {
   createConnection,
   deleteConnection
@@ -78,7 +78,7 @@ export const Mutation = {
     { db }
   ): Promise<boolean> => addOrUpdateFormValue(db, nodeId, name, value),
   createConnection: (_, { input }, { db }): Promise<ConnectionInstance> =>
-    createConnection(db, input.from, input.to),
+    createConnection(input.from, input.to, db),
   deleteConnection: (_, { id }, { db }): Promise<boolean> =>
     deleteConnection(db, id),
   updateWorkspace: (_, { id, nodes, connections }, { db }): Promise<boolean> =>
@@ -89,11 +89,8 @@ export const Mutation = {
     deleteWorkspace(db, id),
   startCalculation: (_, { workspaceId }, { db }): Promise<CalculationProcess> =>
     startCalculation(db, workspaceId),
-  createVisualization: (
-    _,
-    { name, datasetId },
-    { db }
-  ): Promise<Visualization> => createVisualization(db, name, datasetId),
-  deleteVisualization: (_, { id }, { db }): Promise<boolean> =>
-    deleteVisualization(db, id)
+  createDashboard: (_, { name }, { db }): Promise<Dashboard> =>
+    createDashboard(name, db),
+  deleteDashboard: (_, { id }, { db }): Promise<boolean> =>
+    deleteDashboard(id, db)
 };

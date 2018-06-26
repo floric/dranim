@@ -82,7 +82,25 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
 
           return (
             <>
-              <PageHeaderCard title={dataset.name} typeTitle="Dataset" />
+              <PageHeaderCard
+                title={dataset.name}
+                typeTitle="Dataset"
+                helpContent={
+                  <>
+                    <p>
+                      A <strong>Dataset</strong> is defined using{' '}
+                      <strong>Valueschemas</strong>. Each Valueschema represents
+                      one column of values.
+                    </p>
+                    <p>
+                      <strong>Entries</strong> need to fit to the defined
+                      Valueschema. They can be manually defined in the Entries
+                      tab or uploaded. Currently only CSV files are supported.
+                      But more import types could be supported in the future.
+                    </p>
+                  </>
+                }
+              />
               <Tabs
                 type="card"
                 animated={{ inkBar: true, tabPane: false }}

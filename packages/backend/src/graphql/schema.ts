@@ -1,9 +1,10 @@
-import { SocketDefs, SocketMetas } from '@masterthesis/shared';
 import { GraphQLUpload } from 'apollo-upload-server';
 import { GraphQLScalarType } from 'graphql';
 import { makeExecutableSchema } from 'graphql-tools';
 import { Db } from 'mongodb';
+import { SocketDefs, SocketMetas } from '../../../shared/lib';
 
+import { Dashboard } from './resolvers/dashboards';
 import { Dataset } from './resolvers/dataset';
 import { Entry } from './resolvers/entry';
 import { Mutation } from './resolvers/mutations';
@@ -13,13 +14,13 @@ import { UploadProcess } from './resolvers/upload-process';
 import { Workspace } from './resolvers/workspace';
 
 import CalculationProcessDef from './schemas/calculation';
+import DashboardDef from './schemas/dashboards';
 import DatasetDef from './schemas/dataset';
 import EntryDef from './schemas/entry';
 import { MutationDef } from './schemas/mutations';
 import { QueryDef } from './schemas/query';
 import UploadProcessDef from './schemas/upload';
 import ValueschemaDef from './schemas/valueschema';
-import VisualizationDef from './schemas/visualizations';
 import WorkspaceDef from './schemas/workspace';
 
 export interface ApolloContext {
@@ -40,6 +41,7 @@ const resolvers: any = {
   UploadProcess,
   Node,
   Workspace,
+  Dashboard,
   Mutation,
   Upload: GraphQLUpload,
   SocketDefs: new GraphQLScalarType({
@@ -86,7 +88,7 @@ const typeDefs = [
   DatasetDef,
   ValueschemaDef,
   CalculationProcessDef,
-  VisualizationDef
+  DashboardDef
 ];
 
 export default makeExecutableSchema<ApolloContext>({

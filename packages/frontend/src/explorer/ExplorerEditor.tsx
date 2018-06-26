@@ -4,6 +4,7 @@ import {
   Colors,
   ConnectionInstance,
   Dataset,
+  GQLDashboard,
   GQLNodeInstance,
   SocketInstance
 } from '@masterthesis/shared';
@@ -29,6 +30,7 @@ export interface ExplorerEditorProps {
   connections: Array<ConnectionInstance>;
   nodes: Array<GQLNodeInstance>;
   datasets: Array<Dataset>;
+  dashboards: Array<GQLDashboard>;
   onNodeCreate: (
     type: string,
     x: number,
@@ -196,7 +198,6 @@ export class ExplorerEditor extends React.Component<
                   {node &&
                     renderFormItems && (
                       <>
-                        <h4>Properties</h4>
                         <PropertiesForm
                           renderFormItems={renderFormItems}
                           handleSubmit={this.handleSave}

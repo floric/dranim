@@ -19,14 +19,18 @@ import {
 import {
   getContextNode,
   getNode,
+  getNodesCollection,
   tryGetNode
 } from '../../../src/main/workspace/nodes';
 import {
+  addConnection,
   addOrUpdateFormValue,
   getContextInputDefs,
   getContextOutputDefs,
   getInputDefs,
-  getNodeState
+  getNodeState,
+  removeConnection,
+  setProgress
 } from '../../../src/main/workspace/nodes-detail';
 import {
   getTestMongoDb,
@@ -312,7 +316,7 @@ describe('Node Details', () => {
     (getNode as jest.Mock).mockResolvedValue(parentNode);
     (getNodeType as jest.Mock).mockReturnValue(parentType);
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
-    (hasContextFn as jest.Mock).mockReturnValue(true);
+    (hasContextFn as any).mockReturnValue(true);
 
     const inputRes = await getContextInputDefs(inputNode, db);
     expect(inputRes).toEqual({});
@@ -365,10 +369,88 @@ describe('Node Details', () => {
     (getNodeType as jest.Mock).mockReturnValue(parentType);
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
     (getContextNode as jest.Mock).mockResolvedValue(inputNode);
-    (hasContextFn as jest.Mock).mockReturnValue(true);
+    (hasContextFn as any).mockReturnValue(true);
 
     const outputRes = await getContextOutputDefs(inputNode, db);
     expect(outputRes).toEqual({});
+  });
+
+  test('should throw error for missing context node in context', async () => {
+    const parentTypeName = 'p';
+    const parentType: ServerNodeDefWithContextFn & NodeDef = {
+      type: parentTypeName,
+      name: parentTypeName,
+      inputs: {
+        value: {
+          dataType: DataType.STRING,
+          displayName: 'value',
+          isDynamic: false
+        }
+      },
+      outputs: {},
+      keywords: [],
+      path: [],
+      isFormValid: async () => false,
+      onMetaExecution: async () => ({ test: { content: {}, isPresent: true } }),
+      onNodeExecution: async () => ({ outputs: {} }),
+      transformContextInputDefsToContextOutputDefs: async () => ({}),
+      transformInputDefsToContextInputDefs: async () => ({})
+    };
+    const parentNode: NodeInstance = {
+      id: 'parentnode',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    const inputNode: NodeInstance = {
+      id: 'abc',
+      contextIds: [parentNode.id],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: ContextNodeType.INPUT,
+      workspaceId: '123',
+      x: 0,
+      y: 0
+    };
+    (getNode as jest.Mock).mockResolvedValue(parentNode);
+    (getNodeType as jest.Mock).mockReturnValue(parentType);
+    (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
+    (getContextNode as jest.Mock).mockResolvedValue(null);
+    (hasContextFn as any).mockReturnValue(true);
+
+    try {
+      await getContextOutputDefs(inputNode, db);
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Context input node unknown');
+    }
+  });
+
+  test('should throw error for node without context', async () => {
+    const node: NodeInstance = {
+      id: 'abc',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: ContextNodeType.INPUT,
+      workspaceId: '123',
+      x: 0,
+      y: 0
+    };
+
+    try {
+      await getContextOutputDefs(node, db);
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Node doesnt have context');
+    }
   });
 
   test('should throw error for empty value names', async () => {
@@ -439,7 +521,7 @@ describe('Node Details', () => {
     (getNode as jest.Mock).mockResolvedValueOnce(parentNode);
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
     (hasNodeType as jest.Mock).mockReturnValueOnce(false);
-    (hasContextFn as jest.Mock).mockReturnValue(true);
+    (hasContextFn as any).mockReturnValue(true);
     (getContextNode as jest.Mock).mockReturnValue(contextInputNode);
 
     const res = await getInputDefs(
@@ -501,7 +583,7 @@ describe('Node Details', () => {
     (getNode as jest.Mock).mockResolvedValueOnce(parentNode);
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
     (hasNodeType as jest.Mock).mockReturnValueOnce(true);
-    (hasContextFn as jest.Mock).mockReturnValue(true);
+    (hasContextFn as any).mockReturnValue(true);
 
     const res = await getInputDefs(
       {
@@ -526,5 +608,75 @@ describe('Node Details', () => {
         isDynamic: true
       }
     });
+  });
+
+  test('should set progress', async () => {
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateOne: jest.fn()
+    });
+
+    let res = await setProgress(VALID_OBJECT_ID, 0.5, db);
+    expect(res).toBe(true);
+
+    res = await setProgress(VALID_OBJECT_ID, 0, db);
+    expect(res).toBe(true);
+
+    res = await setProgress(VALID_OBJECT_ID, 1, db);
+    expect(res).toBe(true);
+
+    res = await setProgress(null, 1, db);
+    expect(res).toBe(true);
+
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(4);
+  });
+
+  test('should throw for invalid progress value', async () => {
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateOne: jest.fn()
+    });
+
+    try {
+      await setProgress(VALID_OBJECT_ID, 1.2, db);
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Invalid progress value');
+    }
+
+    try {
+      await setProgress(VALID_OBJECT_ID, -0.2, db);
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Invalid progress value');
+    }
+
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(0);
+  });
+
+  test('should add and remove connection from  node', async () => {
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateOne: jest.fn()
+    });
+
+    const nodeId = VALID_OBJECT_ID;
+    await addConnection(db, { name: 'test', nodeId }, 'input', VALID_OBJECT_ID);
+    await addConnection(
+      db,
+      { name: 'test', nodeId },
+      'output',
+      VALID_OBJECT_ID
+    );
+    await removeConnection(
+      db,
+      { name: 'test', nodeId },
+      'input',
+      VALID_OBJECT_ID
+    );
+    await removeConnection(
+      db,
+      { name: 'test', nodeId },
+      'output',
+      VALID_OBJECT_ID
+    );
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(4);
   });
 });

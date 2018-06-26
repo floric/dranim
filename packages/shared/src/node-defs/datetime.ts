@@ -1,5 +1,5 @@
 import { NodeDef } from '../nodes';
-import { TimeSocket, NumberSocket, DatetimeSocket } from '../sockets';
+import { DatetimeSocket, NumberSocket, TimeSocket } from '../sockets';
 
 export interface DatetimeInputNodeOutputs {
   value: Date;
