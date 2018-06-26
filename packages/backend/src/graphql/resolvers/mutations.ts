@@ -78,7 +78,7 @@ export const Mutation = {
     { db }
   ): Promise<boolean> => addOrUpdateFormValue(db, nodeId, name, value),
   createConnection: (_, { input }, { db }): Promise<ConnectionInstance> =>
-    createConnection(db, input.from, input.to),
+    createConnection(input.from, input.to, db),
   deleteConnection: (_, { id }, { db }): Promise<boolean> =>
     deleteConnection(db, id),
   updateWorkspace: (_, { id, nodes, connections }, { db }): Promise<boolean> =>

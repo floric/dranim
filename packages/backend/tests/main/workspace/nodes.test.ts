@@ -328,14 +328,14 @@ describe('Nodes', () => {
     ]);
 
     await createConnection(
-      db,
       { name: 'dataset', nodeId: inputNode.id },
-      { name: 'dataset', nodeId: selectNode.id }
+      { name: 'dataset', nodeId: selectNode.id },
+      db
     );
     await createConnection(
-      db,
       { name: 'dataset', nodeId: selectNode.id },
-      { name: 'dataset', nodeId: outputNode.id }
+      { name: 'dataset', nodeId: outputNode.id },
+      db
     );
 
     const res = await deleteNode(db, selectNode.id);
@@ -376,9 +376,9 @@ describe('Nodes', () => {
       0
     );
     await createConnection(
-      db,
       { name: 'value', nodeId: nodeA.id },
-      { name: 'value', nodeId: nodeB.id }
+      { name: 'value', nodeId: nodeB.id },
+      db
     );
 
     const res = await deleteNode(db, contextNode.id);
@@ -426,9 +426,9 @@ describe('Nodes', () => {
       0
     );
     await createConnection(
-      db,
       { name: 'value', nodeId: nodeA.id },
-      { name: 'value', nodeId: nodeB.id }
+      { name: 'value', nodeId: nodeB.id },
+      db
     );
 
     const res = await deleteNode(db, contextANode.id);

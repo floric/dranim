@@ -1,9 +1,4 @@
-import {
-  NumberInputNodeDef,
-  NumberOutputNodeDef,
-  SocketInstance,
-  SumNodeDef
-} from '@masterthesis/shared';
+import { NodeInstance, SocketInstance } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import {
@@ -12,8 +7,7 @@ import {
   getConnection,
   tryGetConnection
 } from '../../../src/main/workspace/connections';
-import { createNode } from '../../../src/main/workspace/nodes';
-import { createWorkspace } from '../../../src/main/workspace/workspace';
+import { getNode } from '../../../src/main/workspace/nodes';
 import {
   getTestMongoDb,
   NeverGoHereError,
@@ -23,6 +17,9 @@ import {
 let conn;
 let db: Db;
 let server;
+
+jest.mock('../../../src/main/workspace/nodes');
+jest.mock('../../../src/main/workspace/nodes-detail');
 
 describe('Connections', () => {
   beforeAll(async () => {
@@ -43,34 +40,42 @@ describe('Connections', () => {
   });
 
   test('should create and delete connection', async () => {
-    const ws = await createWorkspace(db, 'test', '');
+    const nodeA: NodeInstance = {
+      id: 'ida',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'abc',
+      workspaceId: '123',
+      x: 0,
+      y: 0
+    };
+    const nodeB: NodeInstance = {
+      id: 'idb',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'test',
+      workspaceId: '123',
+      x: 0,
+      y: 0
+    };
 
-    const nodeA = await createNode(
-      db,
-      NumberInputNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0
-    );
-    const nodeB = await createNode(
-      db,
-      NumberOutputNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0
-    );
+    (getNode as jest.Mock)
+      .mockResolvedValueOnce(nodeA)
+      .mockResolvedValueOnce(nodeB);
 
     const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
     const toSocket: SocketInstance = { name: 'val', nodeId: nodeB.id };
 
-    const newConn = await createConnection(db, fromSocket, toSocket);
+    const newConn = await createConnection(fromSocket, toSocket, db);
 
     expect(newConn.id).toBeDefined();
     expect(newConn.from).toEqual(fromSocket);
     expect(newConn.to).toEqual(toSocket);
-    expect(newConn.workspaceId).toBe(ws.id);
+    expect(newConn.workspaceId).toBe('123');
     expect(newConn.contextIds).toEqual([]);
 
     const res = await deleteConnection(db, newConn.id);
@@ -94,49 +99,109 @@ describe('Connections', () => {
     }
   });
 
+  test('should throw error for already existing connection', async () => {
+    const nodeA: NodeInstance = {
+      id: 'ida',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'abc',
+      workspaceId: '123',
+      x: 0,
+      y: 0
+    };
+    const nodeB: NodeInstance = {
+      id: 'idb',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'test',
+      workspaceId: '123',
+      x: 0,
+      y: 0
+    };
+
+    (getNode as jest.Mock)
+      .mockResolvedValueOnce(nodeA)
+      .mockResolvedValueOnce(nodeB);
+
+    await createConnection(
+      { name: 'test', nodeId: nodeA.id },
+      { name: 'test', nodeId: nodeB.id },
+      db
+    );
+
+    try {
+      await createConnection(
+        { name: 'test', nodeId: nodeA.id },
+        { name: 'test', nodeId: nodeB.id },
+        db
+      );
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Only one input allowed');
+    }
+  });
+
   test('should create connection in context', async () => {
-    const ws = await createWorkspace(db, 'test', '');
+    const node: NodeInstance = {
+      id: 'ida',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'abc',
+      workspaceId: '123',
+      x: 0,
+      y: 0
+    };
+    const nodeAinContext: NodeInstance = {
+      id: 'idb-i',
+      contextIds: [node.id],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: '123',
+      workspaceId: '123',
+      x: 0,
+      y: 0
+    };
+    const nodeBinContext: NodeInstance = {
+      id: 'idb-o',
+      contextIds: [node.id],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'abc',
+      workspaceId: '123',
+      x: 0,
+      y: 0
+    };
 
-    const contextNode = await createNode(
-      db,
-      NumberInputNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0
-    );
-    const nodeA = await createNode(
-      db,
-      NumberInputNodeDef.type,
-      ws.id,
-      [contextNode.id],
-      0,
-      0
-    );
-    const nodeB = await createNode(
-      db,
-      SumNodeDef.type,
-      ws.id,
-      [contextNode.id],
-      0,
-      0
-    );
+    (getNode as jest.Mock)
+      .mockResolvedValueOnce(nodeAinContext)
+      .mockResolvedValueOnce(nodeBinContext);
 
-    const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
-    const toSocket: SocketInstance = { name: 'val', nodeId: nodeB.id };
+    const fromSocket: SocketInstance = {
+      name: 'val',
+      nodeId: nodeAinContext.id
+    };
+    const toSocket: SocketInstance = { name: 'val', nodeId: nodeBinContext.id };
 
-    const newConn = await createConnection(db, fromSocket, toSocket);
+    const newConn = await createConnection(fromSocket, toSocket, db);
 
     expect(newConn.id).toBeDefined();
     expect(newConn.from).toEqual(fromSocket);
     expect(newConn.to).toEqual(toSocket);
-    expect(newConn.workspaceId).toBe(ws.id);
-    expect(newConn.contextIds).toEqual([contextNode.id]);
+    expect(newConn.workspaceId).toBe('123');
+    expect(newConn.contextIds).toEqual([node.id]);
   });
 
   test('should error when trying to create invalid connection', async () => {
     try {
-      await createConnection(db, null, null);
+      await createConnection(null, null, db);
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Invalid connection');
@@ -144,33 +209,43 @@ describe('Connections', () => {
   });
 
   test('should find cycle and prevent connection creation', async () => {
-    const ws = await createWorkspace(db, 'test', '');
+    const nodeA: NodeInstance = {
+      id: 'ida',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'abc',
+      workspaceId: '123',
+      x: 0,
+      y: 0
+    };
+    const nodeB: NodeInstance = {
+      id: 'idb',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'test',
+      workspaceId: '123',
+      x: 0,
+      y: 0
+    };
 
-    const nodeA = await createNode(
-      db,
-      NumberInputNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0
-    );
-    const nodeB = await createNode(
-      db,
-      NumberOutputNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0
-    );
+    (getNode as jest.Mock)
+      .mockResolvedValueOnce(nodeA)
+      .mockResolvedValueOnce(nodeB)
+      .mockResolvedValueOnce(nodeA)
+      .mockResolvedValueOnce(nodeB);
 
     const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
     const toSocket: SocketInstance = { name: 'val', nodeId: nodeB.id };
 
-    const newConn = await createConnection(db, fromSocket, toSocket);
+    const newConn = await createConnection(fromSocket, toSocket, db);
     expect(newConn).not.toBe(null);
 
     try {
-      await createConnection(db, toSocket, fromSocket);
+      await createConnection(toSocket, fromSocket, db);
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Cyclic dependencies not allowed');
@@ -178,16 +253,19 @@ describe('Connections', () => {
   });
 
   test('should not create connection for unknown nodes', async () => {
-    const ws = await createWorkspace(db, 'test', '');
+    const nodeA: NodeInstance = {
+      id: 'ida',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'abc',
+      workspaceId: '123',
+      x: 0,
+      y: 0
+    };
 
-    const nodeA = await createNode(
-      db,
-      NumberInputNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0
-    );
+    (getNode as jest.Mock).mockResolvedValueOnce(nodeA);
 
     const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
     const toSocket: SocketInstance = {
@@ -196,7 +274,7 @@ describe('Connections', () => {
     };
 
     try {
-      await createConnection(db, toSocket, fromSocket);
+      await createConnection(toSocket, fromSocket, db);
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unknown node');
@@ -204,25 +282,32 @@ describe('Connections', () => {
   });
 
   test('should not create connection for nodes in different workspaces', async () => {
-    const wsA = await createWorkspace(db, 'test', '');
-    const wsB = await createWorkspace(db, 'test', '');
+    const nodeA: NodeInstance = {
+      id: 'ida',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'abc',
+      workspaceId: '123',
+      x: 0,
+      y: 0
+    };
+    const nodeB: NodeInstance = {
+      id: 'idb',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'test',
+      workspaceId: 'otherws',
+      x: 0,
+      y: 0
+    };
 
-    const nodeA = await createNode(
-      db,
-      NumberInputNodeDef.type,
-      wsA.id,
-      [],
-      0,
-      0
-    );
-    const nodeB = await createNode(
-      db,
-      NumberInputNodeDef.type,
-      wsB.id,
-      [],
-      0,
-      0
-    );
+    (getNode as jest.Mock)
+      .mockResolvedValueOnce(nodeA)
+      .mockResolvedValueOnce(nodeB);
 
     const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
     const toSocket: SocketInstance = {
@@ -231,7 +316,7 @@ describe('Connections', () => {
     };
 
     try {
-      await createConnection(db, toSocket, fromSocket);
+      await createConnection(toSocket, fromSocket, db);
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Nodes live in different workspaces');
@@ -239,32 +324,32 @@ describe('Connections', () => {
   });
 
   test('should not create connection for nodes in different contexts', async () => {
-    const ws = await createWorkspace(db, 'test', '');
-    const contextNode = await createNode(
-      db,
-      NumberInputNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0
-    );
+    const nodeA: NodeInstance = {
+      id: 'ida',
+      contextIds: ['id'],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'abc',
+      workspaceId: '123',
+      x: 0,
+      y: 0
+    };
+    const nodeB: NodeInstance = {
+      id: 'idb',
+      contextIds: ['otherid'],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'test',
+      workspaceId: '123',
+      x: 0,
+      y: 0
+    };
 
-    const nodeA = await createNode(
-      db,
-      NumberInputNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0
-    );
-    const nodeB = await createNode(
-      db,
-      NumberInputNodeDef.type,
-      ws.id,
-      [contextNode.id],
-      0,
-      0
-    );
+    (getNode as jest.Mock)
+      .mockResolvedValueOnce(nodeA)
+      .mockResolvedValueOnce(nodeB);
 
     const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
     const toSocket: SocketInstance = {
@@ -273,7 +358,7 @@ describe('Connections', () => {
     };
 
     try {
-      await createConnection(db, toSocket, fromSocket);
+      await createConnection(toSocket, fromSocket, db);
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Nodes live in different contexts');

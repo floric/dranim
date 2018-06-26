@@ -138,9 +138,9 @@ describe('Workspaces', () => {
       createNode(db, NumberOutputNodeDef.type, ws.id, [], 0, 0)
     ]);
     const nodeConn = await createConnection(
-      db,
       { name: 'value', nodeId: nodeA.id },
-      { name: 'value', nodeId: nodeB.id }
+      { name: 'value', nodeId: nodeB.id },
+      db
     );
 
     const res = await updateWorkspace(

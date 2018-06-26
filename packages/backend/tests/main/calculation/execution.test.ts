@@ -90,9 +90,9 @@ describe('Execution', () => {
       0
     );
     await createConnection(
-      db,
       { name: 'value', nodeId: nodeA.id },
-      { name: 'value', nodeId: nodeB.id }
+      { name: 'value', nodeId: nodeB.id },
+      db
     );
     await addOrUpdateFormValue(db, nodeA.id, 'value', JSON.stringify('test'));
     await addOrUpdateFormValue(db, nodeB.id, 'name', JSON.stringify('test'));
@@ -170,9 +170,9 @@ describe('Execution', () => {
     ]);
     await addOrUpdateFormValue(db, nodeA.id, 'value', 'NaN');
     await createConnection(
-      db,
       { name: 'value', nodeId: nodeA.id },
-      { name: 'value', nodeId: nodeB.id }
+      { name: 'value', nodeId: nodeB.id },
+      db
     );
 
     try {
@@ -215,19 +215,19 @@ describe('Execution', () => {
     );
 
     await createConnection(
-      db,
       { name: 'value', nodeId: nodeA.id },
-      { name: 'a', nodeId: sumNode.id }
+      { name: 'a', nodeId: sumNode.id },
+      db
     );
     await createConnection(
-      db,
       { name: 'value', nodeId: nodeB.id },
-      { name: 'b', nodeId: sumNode.id }
+      { name: 'b', nodeId: sumNode.id },
+      db
     );
     await createConnection(
-      db,
       { name: 'sum', nodeId: sumNode.id },
-      { name: 'value', nodeId: outputNode.id }
+      { name: 'value', nodeId: outputNode.id },
+      db
     );
 
     const updatedNode = await getNode(db, outputNode.id);
@@ -273,9 +273,9 @@ describe('Execution', () => {
       0
     );
     await createConnection(
-      db,
       { name: 'value', nodeId: stringInputNode.id },
-      { name: 'val', nodeId: contextOutputNode!.id }
+      { name: 'val', nodeId: contextOutputNode!.id },
+      db
     );
 
     await addOrUpdateFormValue(
@@ -298,9 +298,9 @@ describe('Execution', () => {
         { from: editEntriesNode.id, to: outputNode.id }
       ].map(pair =>
         createConnection(
-          db,
           { name: 'dataset', nodeId: pair.from },
-          { name: 'dataset', nodeId: pair.to }
+          { name: 'dataset', nodeId: pair.to },
+          db
         )
       )
     );

@@ -147,6 +147,14 @@ describe('Dashboard Results', () => {
     expect(newRes).toBe(null);
   });
 
+  test('should return null for unknown dashboards', async () => {
+    let res = await getResult('test', db);
+    expect(res).toBe(null);
+
+    res = await getResult(VALID_OBJECT_ID, db);
+    expect(res).toBe(null);
+  });
+
   test('should delete result by name', async () => {
     const value: OutputResult<string> = {
       dashboardId: 'abc',

@@ -15,9 +15,9 @@ export const getConnectionsCollection = (
 };
 
 export const createConnection = async (
-  db: Db,
   from: SocketInstance,
-  to: SocketInstance
+  to: SocketInstance,
+  db: Db
 ): Promise<ConnectionInstance> => {
   if (!from || !to) {
     throw new Error('Invalid connection');

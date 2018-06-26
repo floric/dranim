@@ -13,12 +13,12 @@ export const createDashboard = async (
 ): Promise<Dashboard> => {
   const collection = getDashboardCollection(db);
   if (name.length === 0) {
-    throw new Error('Name must not be empty.');
+    throw new Error('Name must not be empty');
   }
 
   const existingDbWithSameName = await collection.findOne({ name });
   if (existingDbWithSameName) {
-    throw new Error('Names must be unique.');
+    throw new Error('Names must be unique');
   }
 
   const res = await collection.insertOne({
