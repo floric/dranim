@@ -1,11 +1,11 @@
 import {
   CalculationProcess,
   ConnectionInstance,
+  Dashboard,
   Dataset,
   Entry,
   NodeInstance,
   UploadProcess,
-  Dashboard,
   Workspace
 } from '@masterthesis/shared';
 
@@ -90,7 +90,7 @@ export const Mutation = {
   startCalculation: (_, { workspaceId }, { db }): Promise<CalculationProcess> =>
     startCalculation(db, workspaceId),
   createDashboard: (_, { name }, { db }): Promise<Dashboard> =>
-    createDashboard(db, name),
+    createDashboard(name, db),
   deleteDashboard: (_, { id }, { db }): Promise<boolean> =>
-    deleteDashboard(db, id)
+    deleteDashboard(id, db)
 };

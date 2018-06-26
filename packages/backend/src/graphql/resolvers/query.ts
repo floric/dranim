@@ -1,8 +1,8 @@
 import {
   CalculationProcess,
+  Dashboard,
   Dataset,
   UploadProcess,
-  Dashboard,
   Workspace
 } from '@masterthesis/shared';
 

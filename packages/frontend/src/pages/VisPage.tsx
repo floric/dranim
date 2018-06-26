@@ -58,10 +58,13 @@ export default class VisPage extends React.Component<{}, {}> {
                 helpContent={
                   <>
                     <p>
-                      Visualizations are organized in Dashboards. Dashboards are
-                      used to display information retrieved from the datasets.
-                      They can contain any data from output nodes except
-                      Datasets.
+                      Visualizations are organized in{' '}
+                      <strong>Dashboards</strong>.
+                    </p>
+                    <p>
+                      Dashboards are used to display information retrieved from
+                      the Datasets. They can contain any data from output nodes
+                      except Dataset outputs.
                     </p>
                   </>
                 }
