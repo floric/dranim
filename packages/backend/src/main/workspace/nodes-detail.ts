@@ -86,7 +86,7 @@ export const getContextOutputDefs = async (
   );
 };
 
-const tryGetParentNode = async (node: NodeInstance, db: Db) => {
+export const tryGetParentNode = async (node: NodeInstance, db: Db) => {
   if (node.contextIds.length === 0) {
     throw new Error('Node doesnt have context');
   }

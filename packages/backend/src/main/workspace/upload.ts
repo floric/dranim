@@ -1,4 +1,9 @@
-import { Dataset, DataType, UploadProcess } from '@masterthesis/shared';
+import {
+  Dataset,
+  DataType,
+  ProcessState,
+  UploadProcess
+} from '@masterthesis/shared';
 import * as fastCsv from 'fast-csv';
 import { Collection, Db, ObjectID } from 'mongodb';
 import * as promisesAll from 'promises-all';
@@ -184,7 +189,7 @@ export const uploadEntriesCsv = async (
       failedEntries: 0,
       invalidEntries: 0,
       start: new Date(),
-      state: 'STARTED',
+      state: ProcessState.STARTED,
       datasetId,
       fileNames: [],
       errors: {}
@@ -227,12 +232,12 @@ export const doUploadAsync = async (
     });
     await uploadsCollection.updateOne(
       { _id: processId },
-      { $set: { state: 'ERROR', finish: new Date() } }
+      { $set: { state: ProcessState.ERROR, finish: new Date() } }
     );
   } else {
     await uploadsCollection.updateOne(
       { _id: processId },
-      { $set: { state: 'FINISHED', finish: new Date() } }
+      { $set: { state: ProcessState.SUCCESSFUL, finish: new Date() } }
     );
   }
 };

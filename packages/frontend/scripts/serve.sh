@@ -56,7 +56,15 @@ http {
             try_files $uri /index.html;
         }
         location /api {
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Host $http_host;
+            proxy_set_header X-NginX-Proxy true;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_max_temp_file_size 0;
             proxy_pass http://backend:3000;
+            proxy_redirect off;
             proxy_read_timeout 5m;
         }
     }
@@ -64,7 +72,3 @@ http {
 EOF
 
 exec nginx -g "daemon off;"
-
-# location @rewrites {
-#            rewrite ^(.+)$ /index.html last;
-#        }
