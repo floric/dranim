@@ -1,44 +1,45 @@
 language: node_js
 env:
   global:
-    - CC_TEST_REPORTER_ID=fc64d003bdf120b91db2a980408cf2073efe351171845840b1fa6a0d87b658ea
+  - CC_TEST_REPORTER_ID=fc64d003bdf120b91db2a980408cf2073efe351171845840b1fa6a0d87b658ea
 node_js:
-  - "10"
+- '10'
 cache:
   yarn: true
   directories:
-    - $HOME/.mongodb-binaries
+  - "$HOME/.mongodb-binaries"
 before_install:
-  - curl -o- -L https://yarnpkg.com/install.sh | bash
-  - export PATH="$HOME/.yarn/bin:$PATH"
-  - yarn global add greenkeeper-lockfile@1
+- curl -o- -L https://yarnpkg.com/install.sh | bash
+- export PATH="$HOME/.yarn/bin:$PATH"
+- yarn global add greenkeeper-lockfile@1
 before_script:
-  - greenkeeper-lockfile-update
-  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-  - chmod +x ./cc-test-reporter
+- greenkeeper-lockfile-update
+- curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
+  > ./cc-test-reporter
+- chmod +x ./cc-test-reporter
 script:
-  - yarn build
-  - cd packages/shared
-  - yarn test
-  - cd ../backend
-  - yarn test
+- yarn build
+- cd packages/shared
+- yarn test
+- cd ../backend
+- yarn test
 after_script:
-  - cd packages/shared
-  - ../../cc-test-reporter format-coverage -o /tmp/codeclimate.shared.json
-  - cd ../backend
-  - ../../cc-test-reporter format-coverage -o /tmp/codeclimate.backend.json
-  - cd ../../
-  - ./cc-test-reporter sum-coverage /tmp/codeclimate.*.json -p 2 -o tmp/codeclimate.total.json
-  - ./cc-test-reporter upload-coverage -i tmp/codeclimate.total.json
-  - greenkeeper-lockfile-upload
+- cd packages/shared
+- "../../cc-test-reporter format-coverage -o /tmp/codeclimate.shared.json"
+- cd ../backend
+- "../../cc-test-reporter format-coverage -o /tmp/codeclimate.backend.json"
+- cd ../../
+- "./cc-test-reporter sum-coverage /tmp/codeclimate.*.json -p 2 -o tmp/codeclimate.total.json"
+- "./cc-test-reporter upload-coverage -i tmp/codeclimate.total.json"
+- greenkeeper-lockfile-upload
 deploy:
   provider: s3
   access_key_id:
-    secure: "pq5bexmuJAfYRQCMFOlp7iPo/utKzxhUj21HejFFfgZ9S6gavx59aOVVlJn3DAqVUNguPOtJSbq+1WgrhbmbyOJSnyHyW/ggU+ntewNtCEDImfh2cEeOJPQ+HxvxAX15ZMcd2Y6OmWUxktQf/c5/lLRlX7OwAiRNIPFtvriF2YqwNeX/d9lr88wKnZ0Snmnpy828vRTruusbresxlXFt2dQ+nQniw+2y2Egtw7+/XGWyr4qrBsNhBuVUNs92BZuI4MwtsrqPp3v9dRYKpoDz2ebvuKqmdxnDULQVOwxawJEt1JraVaAQxbLPbIj2UtEzveVONNpQzG/xEoxt/BsY0pgU2gDvFIo6oNGiBp3S22vFG2ibGU3U+zTjP0STY8IDdZcKd6V6jqKchqfw+ZlzZIhngQwVgDdKWrNxhhw55AL72X9Mo9lyYdoM+Pd4124xmIANDGHBPLNX7FEUkHkldDHcSsthgAp5UlsujVFvWr2LDaiFiBeyN/zKr4PpzoiOngCHnNxJoFv2RJuR0/TnJcr51B4woRgQtKJhlpBSB7Ie6shxgEMq59Jj3U+rDphsPZxP4q0tx9LVkU47chiY0ckoP1GmaOKGkGFguZx5SSwgpZ26BCNHlHWNNjcW5PctL0Kps7W4Ppt3VTbCYTopozrQplvBenJ1Dlic43YqNx4="
+    secure: IvD/4sL5osTkgE6bXC4t1AkHxZvx1MsnK9H4AfEq/91groNMLEDp+kXj2+H6oBIh2vdgSEHSyoVAllwP8m6GY2QIsTRg7F8KlWJjUDZXyNCCfzvM1KZa73CpCjOgt8cBVt7521QI1KqRd4Lcpd5Z4vYLpojcSBctnoanCVSHiJXgz0QQ1b5O7IDRSg2v6ozNb881sqI1se4ABPXyCUhHYGCw9EYSF/8Bq8SKpz8fJBmrbCrvTxtUOXVIn6QGusijJxtgVV9jbfDZNKAmhH7Cm4QEjF+c+aou6ebYL6CehfX7Dm3jT7fi5qHF+jly1cYN7BIR5PH0Sv8O/MKQ1No/v6eHBl2/w8DG5ESZXNvRCXo5/y6gfKBqfFDhAQmerrIVQI23QCIrdrx883ODgU6pkKZnqA9WsyRHYDM4aZVQZ0ZLOHYrZzHx3zQZ0Gv6k3IPObl1xHp2vDh60gFEp7880cn7ON7YlQwrDqY9Dv9joxn2TEQHBIsOQfjCKsBsKQcaV2yAxBf5oFhntFIB9TenCsYMKyWvlheAgHmNnO81hHTitkH8pctqzCLZhl07deSnthchck4Et+dtisAKRIxq/o4IlCcgs8MUZAzyPZBS8DCpG0/V5GlOkIj/Zro1AHg8vk61OMad+j4+y3UisAvqY9XTipVhIGcJBdUNn6LsHb8=
   secret_access_key:
-    secure: "Fk+Ldl5ijsR3musr5sn86l7bo88Y/XT5vQl4IiAcqvDuVbWoH3IihIBKxYeg0kA6bNfwQGPuwPVLy3V36mNgsjqPWtd/TsCPjOunQ8WCA4WwHeVUzsQJaGKPfRoWzlBDmhZzpm+/M8LVC/XwoOugIGl29u8u3Ho6eQEUyE8T5aualFD1QgWITPPW9IRBqce1expWi+1rKYwISe24hdeeKYmPqPK+8lvANsAJwzdw2Rahi6ILjTr7urDEfin/KM31XwYkE9A6dglrxjPYf1oYzoQeOL+Je4nvwWyLp0mlbX8DuK/G7AHsFr/EIF6+GdohxSDHB2EXF3KXaFRW8Ez2RRHzQ5YH/ikPV+BkD0AWEBptWh7n+tFPg3zdpNAEIM9QS+V+YcBLGMBznLs1UfmH1deTbmDAB8ZwPG9tIkkmYnBbTvsz6/c6PBZqcwzfILE3qvMX9X7x4WjNyZRRaVuRI3YMs/4/obOMps38FVV0hPA41RMQUeDS20uoQ6T3JW80cIZQx/SHP+v/DVICRGVcUfPLfXo9tJbs8HJN61RyC/3JRbu+6Lt1E5gP1Hbd4l8FBn1K9x1sSM7Tbg7U9hhi4i9HMldkAlK9AziCbJMKacTPPg/bmmOnNuqzNEGgHtlojpNB+KqZuP2lCoQ2/tbGkUkz49OEo8IwHSnJ1AScEhY="
-  bucket: "timeseries-explorer-frontendbucket-1jueporougkwu"
-  region: "eu-west-1"
+    secure: h6ufp4hqjwAvz6OnpeDJhDRDqnbg+QAqFhLJi3QdWEIMU7K1HsNE/pXicNZUm8cp2gIxiRciXPtYQxkgviW3aU1yxl5204xDtr2tkuRkjdtBXXNSyTMQMyBXVZ94QtHAZMs8c4oMzCde7quTDTT5XZNt20vKxHrdsS93qzMrWg+91JrKKi5l137IHa1AtLO6RNFr0/ufEYy0qZBXGW6DYV07u7XVB49oX5CveawyugUpqdvX4B3lOmksya4JjBowN9lvIKaqsmqVAX2onDSViujGmNbPXBzojkxHcgjsnwa2jS/K1Fi6Oo8QKZLvAdwXmeiLmK+Z71tUgRKzl/vJ2BpgbxsL5nF/6epj0sF49Vr3Vr2oOU4T8B+HPU7MKVl9mCnV6SrrarchyzLozagIeK/WIW9VpL1Nu9KL710cTcsVR84un6lUZafNd56QeiyN/ylHChy3mxwb2vEr2fzQ8MAV/rFXw4C5fUBInhifaxIassjD1Z2SIuYtW+CRpRokkBedPT9gMlYzaSdQ5buayiS2kPEa3GsjWk74oeAJ4BZwAtjCwdvgI/ILMBxca1F829mPZQcxRazb1JdN6OkUPryP7Oh3lOmTY+Hf15UFgLlsC0zjsVXNaHPDFwgJrkXkGy2VZCcUSqBk1HAzAApyJByk8k4njCygQQ5GkUMV6DA=
+  bucket: timeseries-explorer-frontendbucket-1jueporougkwu
+  region: eu-west-1
   skip_cleanup: true
   on:
     branch: master
