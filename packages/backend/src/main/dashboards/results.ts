@@ -114,13 +114,16 @@ export const deleteResultsByDashboard = async (dashboardId: string, db: Db) => {
 export const getResultsForDashboard = async (
   dashboardId: string,
   db: Db
-): Promise<Array<OutputResult & { id: string }>> =>
-  (await getResultsCollection(db)
+): Promise<Array<OutputResult & { id: string }>> => {
+  const all = await getResultsCollection(db)
     .find({ dashboardId })
-    .toArray()).map(n => {
+    .toArray();
+
+  return all.map(n => {
     const { _id, ...rest } = n;
     return { ...rest, id: _id.toHexString() };
   });
+};
 
 export const getResult = async (
   id: string,

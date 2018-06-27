@@ -44,26 +44,7 @@ export const getMetaOutputs = async (
   db: Db
 ): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> => {
   if (node.type === ContextNodeType.INPUT) {
-    const parent = await tryGetParentNode(node, db);
-    const parentType = await tryGetNodeType(parent.type);
-    if (!hasContextFn(parentType)) {
-      throw new Error('Should have context fn');
-    }
-
-    const dynContextDefs = await parentType.transformInputDefsToContextInputDefs(
-      await getInputDefs(parent, db),
-      await getMetaInputs(parent, db),
-      db
-    );
-
-    const res = {};
-    Object.keys(dynContextDefs).forEach(e => {
-      res[e] = {
-        content: {},
-        isPresent: true
-      };
-    });
-    return res;
+    return await getDynamitMetaOutputs(node, db);
   }
 
   const nodeType = getNodeType(node.type);
@@ -77,4 +58,27 @@ export const getMetaOutputs = async (
     allInputs,
     db
   );
+};
+
+const getDynamitMetaOutputs = async (node: NodeInstance, db: Db) => {
+  const parent = await tryGetParentNode(node, db);
+  const parentType = await tryGetNodeType(parent.type);
+  if (!hasContextFn(parentType)) {
+    throw new Error('Should have context fn');
+  }
+
+  const dynContextDefs = await parentType.transformInputDefsToContextInputDefs(
+    await getInputDefs(parent, db),
+    await getMetaInputs(parent, db),
+    db
+  );
+
+  const res = {};
+  Object.keys(dynContextDefs).forEach(e => {
+    res[e] = {
+      content: {},
+      isPresent: true
+    };
+  });
+  return res;
 };
