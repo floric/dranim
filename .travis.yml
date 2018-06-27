@@ -23,6 +23,7 @@ script:
 - yarn test
 - cd ../backend
 - yarn test
+- cd ../../
 after_script:
 - cd packages/shared
 - "../../cc-test-reporter format-coverage -o /tmp/codeclimate.shared.json"
@@ -38,5 +39,6 @@ deploy:
   secret_access_key: $AWS_SECRET_ACCESS_KEY
   bucket: timeseries-explorer-frontendbucket-1jueporougkwu
   region: eu-west-1
+  local_dir: packages/frontend/dist
   on:
     all_branches: true
