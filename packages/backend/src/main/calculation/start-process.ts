@@ -1,5 +1,6 @@
 import {
   CalculationProcess,
+  DataType,
   NodeInstance,
   OutputResult,
   ProcessState
@@ -56,6 +57,7 @@ const saveResults = async (results: Array<OutputResult | undefined>, db: Db) =>
   Promise.all(
     results
       .filter(r => r != null && Object.keys(r).length > 0)
+      .filter(r => r!.type !== DataType.DATASET)
       .map(r => addOrUpdateResult(r!, db))
   );
 

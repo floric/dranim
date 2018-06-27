@@ -8,7 +8,7 @@
     "build": "tsc -p tsconfig.json",
     "clean": "rm -rf dist node_modules",
     "lint": "tslint -p . --fix",
-    "start": "concurrently \"tsc -w\" \"cross-env NODE_ENV=development nodemon dist/main.js\"",
+    "start": "concurrently \"tsc -w\" \"cross-env NODE_ENV=development pm2 start config/pm2.dev.yml\"",
     "test": "jest --coverage --maxWorkers=4",
     "test:watch": "jest --watch"
   },

@@ -42,7 +42,7 @@ export const main = async (options: IMainOptions) => {
   }
 
   app.use(helmet());
-  app.use(morgan(options.env));
+  app.use(morgan(options.env, { buffer: true }));
   app.use(
     GRAPHQL_ROUTE,
     bodyParser.json({

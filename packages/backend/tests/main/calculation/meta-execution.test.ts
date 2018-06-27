@@ -1,20 +1,28 @@
 import {
   ConnectionInstance,
+  ContextNodeType,
   DataType,
+  hasContextFn,
   NodeDef,
   NodeInstance,
-  ServerNodeDef
+  ServerNodeDef,
+  ServerNodeDefWithContextFn
 } from '@masterthesis/shared';
 
 import {
   getMetaInputs,
   getMetaOutputs
 } from '../../../src/main/calculation/meta-execution';
-import { getNodeType } from '../../../src/main/nodes/all-nodes';
+import { getNodeType, tryGetNodeType } from '../../../src/main/nodes/all-nodes';
 import { tryGetConnection } from '../../../src/main/workspace/connections';
 import { tryGetNode } from '../../../src/main/workspace/nodes';
-import { getInputDefs } from '../../../src/main/workspace/nodes-detail';
+import {
+  getInputDefs,
+  tryGetParentNode
+} from '../../../src/main/workspace/nodes-detail';
+import { NeverGoHereError } from '../../test-utils';
 
+jest.mock('@masterthesis/shared');
 jest.mock('../../../src/main/workspace/nodes-detail');
 jest.mock('../../../src/main/workspace/connections');
 jest.mock('../../../src/main/workspace/nodes');
@@ -116,7 +124,7 @@ describe('Meta Execution', () => {
     });
   });
 
-  test('should get empty meta inputs for context nodes', async () => {
+  test('should get empty meta inputs for context output nodes', async () => {
     const res = await getMetaOutputs(
       {
         id: 'abc',
@@ -124,7 +132,7 @@ describe('Meta Execution', () => {
         form: [],
         inputs: [{ name: 'test', connectionId: 'id' }],
         outputs: [],
-        type: 'type',
+        type: ContextNodeType.OUTPUT,
         workspaceId: '',
         x: 0,
         y: 0
@@ -132,5 +140,115 @@ describe('Meta Execution', () => {
       null
     );
     expect(res).toEqual({});
+  });
+
+  test('should get dynamic, present meta inputs for context input nodes', async () => {
+    const parent: NodeInstance = {
+      id: 'parent',
+      x: 0,
+      y: 0,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'p',
+      workspaceId: ''
+    };
+    const parentType: ServerNodeDefWithContextFn & NodeDef = {
+      type: 'test',
+      inputs: {},
+      outputs: {},
+      keywords: [],
+      path: [],
+      name: 'test',
+      onMetaExecution: () => Promise.resolve({}),
+      onNodeExecution: () => Promise.resolve({ outputs: {} }),
+      transformContextInputDefsToContextOutputDefs: () => Promise.resolve({}),
+      transformInputDefsToContextInputDefs: () =>
+        Promise.resolve({
+          test: {
+            dataType: DataType.DATETIME,
+            displayName: 'date',
+            isDynamic: true
+          },
+          abc: {
+            dataType: DataType.STRING,
+            displayName: 'abc test',
+            isDynamic: true
+          }
+        })
+    };
+    (tryGetParentNode as jest.Mock).mockResolvedValue(parent);
+    (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
+    (hasContextFn as any).mockReturnValue(true);
+    (getInputDefs as jest.Mock).mockResolvedValue({});
+
+    const res = await getMetaOutputs(
+      {
+        id: 'abc',
+        contextIds: [parent.id],
+        form: [],
+        inputs: [{ name: 'test', connectionId: 'id' }],
+        outputs: [],
+        type: ContextNodeType.INPUT,
+        workspaceId: '',
+        x: 0,
+        y: 0
+      },
+      null
+    );
+    expect(res).toEqual({
+      abc: { content: {}, isPresent: true },
+      test: { content: {}, isPresent: true }
+    });
+  });
+
+  test('should throw error for parent node without context function', async () => {
+    try {
+      const parent: NodeInstance = {
+        id: 'parent',
+        x: 0,
+        y: 0,
+        contextIds: [],
+        form: [],
+        inputs: [],
+        outputs: [],
+        type: 'p',
+        workspaceId: ''
+      };
+      const parentType: ServerNodeDefWithContextFn & NodeDef = {
+        type: 'test',
+        inputs: {},
+        outputs: {},
+        keywords: [],
+        path: [],
+        name: 'test',
+        onMetaExecution: () => Promise.resolve({}),
+        onNodeExecution: () => Promise.resolve({ outputs: {} }),
+        transformContextInputDefsToContextOutputDefs: () => Promise.resolve({}),
+        transformInputDefsToContextInputDefs: () => Promise.resolve({})
+      };
+      (tryGetParentNode as jest.Mock).mockResolvedValue(parent);
+      (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
+      (hasContextFn as any).mockReturnValue(false);
+
+      await getMetaOutputs(
+        {
+          id: 'abc',
+          contextIds: [parent.id],
+          form: [],
+          inputs: [{ name: 'test', connectionId: 'id' }],
+          outputs: [],
+          type: ContextNodeType.INPUT,
+          workspaceId: '',
+          x: 0,
+          y: 0
+        },
+        null
+      );
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Should have context fn');
+    }
   });
 });

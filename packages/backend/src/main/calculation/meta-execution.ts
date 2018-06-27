@@ -1,4 +1,6 @@
 import {
+  ContextNodeType,
+  hasContextFn,
   NodeInstance,
   parseNodeForm,
   SocketMetaDef,
@@ -6,10 +8,10 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { getNodeType } from '../nodes/all-nodes';
+import { getNodeType, tryGetNodeType } from '../nodes/all-nodes';
 import { tryGetConnection } from '../workspace/connections';
 import { tryGetNode } from '../workspace/nodes';
-import { getInputDefs } from '../workspace/nodes-detail';
+import { getInputDefs, tryGetParentNode } from '../workspace/nodes-detail';
 
 export const getMetaInputs = async (node: NodeInstance, db: Db) => {
   const inputDefs = await getInputDefs(node, db);
@@ -41,6 +43,10 @@ export const getMetaOutputs = async (
   node: NodeInstance,
   db: Db
 ): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> => {
+  if (node.type === ContextNodeType.INPUT) {
+    return await getDynamitMetaOutputs(node, db);
+  }
+
   const nodeType = getNodeType(node.type);
   if (!nodeType) {
     return {};
@@ -52,4 +58,27 @@ export const getMetaOutputs = async (
     allInputs,
     db
   );
+};
+
+const getDynamitMetaOutputs = async (node: NodeInstance, db: Db) => {
+  const parent = await tryGetParentNode(node, db);
+  const parentType = await tryGetNodeType(parent.type);
+  if (!hasContextFn(parentType)) {
+    throw new Error('Should have context fn');
+  }
+
+  const dynContextDefs = await parentType.transformInputDefsToContextInputDefs(
+    await getInputDefs(parent, db),
+    await getMetaInputs(parent, db),
+    db
+  );
+
+  const res = {};
+  Object.keys(dynContextDefs).forEach(e => {
+    res[e] = {
+      content: {},
+      isPresent: true
+    };
+  });
+  return res;
 };
