@@ -34,9 +34,8 @@ after_script:
 - greenkeeper-lockfile-upload
 deploy:
   provider: s3
-  access_key_id: AKIAINP3BA5Z6LORRU2A
-  secret_access_key:
-    secure: Z7l4ekJArHPiqzce7Bl+8NZ8nwLFyiGSAZOUjOcFOdcne4bl2phZ5hlQNydH44fHgZ7x8yMbkaPzp2bZUVVjNeT4ESPfjgmQEzro3zeboj39SHZAtsghCEXAUx69pA8eGomquLyMVUmMkB6oDKJTcK2oKRV9ZnDcaIVpQKegmCJfcPqHiPsW+By42zPUpyQ32lLcUMTRlwFeNfT9+e3TPQV9zgp9/j/nHHE+//BnWVj6bU+xMrAESBQI21K7ydLnezZXf4J/y7bjcS1/05xMSGCa5Rmg6/6iWebke/75i6HChPCqnquzOFdR4K8qyS8lM5yXotUquRknzJJTARpKzZur+aQfmAZ3cAV2+QRDOq20Tcfokd+5YqbVy9ZI/+iwA7W0MQ0GO6JT4EB8jqVelnU3I3vQ/pzwlI8u/WqelByp0bV6jOTVNadkJXq3PU/p7MZBboBrruZU97puEpfM4W3nJK+FT/eNmQKsi7GK3SgyZuTrZard+qIj2MjH8am2QZwCgu/gMOxAwBm3E03BEtg2Nmqm8priUlcEX7w0teuFZvyRzY0AqCjB5qNrqoEZ69SckxnVMJ675C/D4/I4e9se+V0b2qtNveyUGGTbEvRXPDk60l0Vanm5q2hIUja+VRGE8Xd2YZVta/jz52Y3gqLdNlsTy13nPPwM+zZ5+zg=
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
   bucket: timeseries-explorer-frontendbucket-1jueporougkwu
   region: eu-west-1
   on:
