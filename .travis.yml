@@ -1,45 +1,43 @@
 language: node_js
 env:
   global:
-    - CC_TEST_REPORTER_ID=fc64d003bdf120b91db2a980408cf2073efe351171845840b1fa6a0d87b658ea
+  - CC_TEST_REPORTER_ID=fc64d003bdf120b91db2a980408cf2073efe351171845840b1fa6a0d87b658ea
 node_js:
-  - "10"
+- '10'
 cache:
   yarn: true
   directories:
-    - $HOME/.mongodb-binaries
+  - "$HOME/.mongodb-binaries"
 before_install:
-  - curl -o- -L https://yarnpkg.com/install.sh | bash
-  - export PATH="$HOME/.yarn/bin:$PATH"
-  - yarn global add greenkeeper-lockfile@1
+- curl -o- -L https://yarnpkg.com/install.sh | bash
+- export PATH="$HOME/.yarn/bin:$PATH"
+- yarn global add greenkeeper-lockfile@1
 before_script:
-  - greenkeeper-lockfile-update
-  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-  - chmod +x ./cc-test-reporter
+- greenkeeper-lockfile-update
+- curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
+  > ./cc-test-reporter
+- chmod +x ./cc-test-reporter
 script:
-  - yarn build
-  - cd packages/shared
-  - yarn test
-  - cd ../backend
-  - yarn test
+- yarn build
+- cd packages/shared
+- yarn test
+- cd ../backend
+- yarn test
+- cd ../../
 after_script:
-  - cd packages/shared
-  - ../../cc-test-reporter format-coverage -o /tmp/codeclimate.shared.json
-  - cd ../backend
-  - ../../cc-test-reporter format-coverage -o /tmp/codeclimate.backend.json
-  - cd ../../
-  - ./cc-test-reporter sum-coverage /tmp/codeclimate.*.json -p 2 -o tmp/codeclimate.total.json
-  - ./cc-test-reporter upload-coverage -i tmp/codeclimate.total.json
-  - greenkeeper-lockfile-upload
+- cd packages/shared
+- "../../cc-test-reporter format-coverage -o /tmp/codeclimate.shared.json"
+- cd ../backend
+- "../../cc-test-reporter format-coverage -o /tmp/codeclimate.backend.json"
+- cd ../../
+- "./cc-test-reporter sum-coverage /tmp/codeclimate.*.json -p 2 -o tmp/codeclimate.total.json"
+- "./cc-test-reporter upload-coverage -i tmp/codeclimate.total.json"
+- greenkeeper-lockfile-upload
 deploy:
   provider: s3
-  access_key_id:
-    secure: "NrmqlWyZ4+0ul50yjDN1C3ci2fj3ut99sax9ePvA3/vz3XoGrTQyAjGi9a5UJSdTu613DzYz+RkkKj9MxXwuAN6SRIM7GSrYu/RNBYcU29Q0JSteZzaJqJ+CQKIR3yCetQ/72EppcaWeFgaAJJlnlgMvthGHd4JpfutVPxdbNyiTry7uOEgOD6C6EdHVRMrjfoG+UC5LYSDVBXCM6noECVd5NaCmXBIB9aeutQyx5UlMOolEK/R/PFIsdw53H5g6mkzt+ziFtPplzUuaQVRFFa06kOsfsmMnRDDoAczfgDnEaDDCyfocaH5SZswdCOK4bgJyuvcDuFRnmCgCUsquvkQ0KQNGL0WeG7y8/xxyWG/HYdbDKOt4pifmRjjEE08KdvF5PJ13zNfDfae8ubNYcEw/Ey0TG5J7+Bmqb1pkW5j4O6IpfWe4/PbcCLB4Yj12RgEjivDF+biZfv6f5dGIGD0qk6zR/dQ1h3CIzQyPirVSLLQbg/2gaf9OiOFyMaXgL6X1Aofjll5fx4VlYBkv1hz3GNlS1Hi/6xw4ogvAZm41KLPJbJC8W7gSX3ffjg1QWOC19chEOxSNZEVY3IW5yjGY7JSLMpebkRyOmrG/1Vf3zWx+h+f3kRUswGrKpj2hYZ9VY6qWUcyHM1LoAta1WAPo5QaF3JlRhHFGPCRNSf4="
-  secret_access_key:
-    secure: "nAhUkPiy2dEO7yzHq2ajdb+lmqHxypwQ+fTKDrHaE5ml3OkydT361YM5focX0oNpvJ5iZEX7HcZPnyKlpvj5JYBSfpJnzg+G9WeXva1OR2MXGE/ueOhUMkXZn+CF89vJGAtfJHNFnAYnxWwbtkkRzbC4eYcUVU6PrY3yizAscMjBTQxwM/lZDLPvLYGu6KFV9oUQgfqb+68R/7uagbwv9GXWyfohkC+b385AhD9ZU+LLNx2S59JpKakB43Z2A5iKNg0z2/W8rZYtXcEZWILELHkGO2e2cjIJ+/WIzKQQmzDrr3w+EK10cvSslCAnyATAM+MPkvPVBvvuhVAT8J0FWqQAxfl9hH/p8I9fZ/aVAfEizkHku5UH90iaOkK53q6zp0tFSGxzcnTICrTM6pSfpIY9wq9Aq4hQhnUbii24q47sB8rg4X0uW7C21//7rpB/F6PrujdKEDNR6VpLVtgmWBrEyb9Bu+F01Guoi37scPmsOzwo1voJheMLGdaZzGGOaT/9fegqm2ouRfVKInzGLrQivbTndErVhTwc5J6gbRqvgUM5093tdie7tIqFvj+o4oCKlCui8gywYBROpnP+/RLaUQAmAgTj8G22xkHVWD8gd2OpoO6tYmOKfMjKR7C7AsgxT8BiwVYHahswPcAtJ50IkVNZyXjolrDJSxCs4Fk="
-  bucket: "timeseries-explorer-frontendbucket-1jueporougkwu"
-  region: "eu-west-1"
-  skip_cleanup: true
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  bucket: timeseries-explorer-frontendbucket-1jueporougkwu
+  region: eu-west-1
   local_dir: packages/frontend/dist
-  on:
-    branch: master
+  skip_cleanup: true
