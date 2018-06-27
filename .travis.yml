@@ -40,6 +40,5 @@ deploy:
   bucket: "timeseries-explorer-frontendbucket-1jueporougkwu"
   region: "eu-west-1"
   skip_cleanup: true
-  local_dir: packages/frontend/dist
   on:
     branch: master
