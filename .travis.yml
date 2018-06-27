@@ -40,5 +40,4 @@ deploy:
   bucket: timeseries-explorer-frontendbucket-1jueporougkwu
   region: eu-west-1
   local_dir: packages/frontend/dist
-  on:
-    all_branches: true
+  skip_cleanup: true
