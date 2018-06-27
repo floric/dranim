@@ -23,6 +23,7 @@ script:
 - yarn test
 - cd ../backend
 - yarn test
+- cd ../../
 after_script:
 - cd packages/shared
 - "../../cc-test-reporter format-coverage -o /tmp/codeclimate.shared.json"
@@ -34,8 +35,9 @@ after_script:
 - greenkeeper-lockfile-upload
 deploy:
   provider: s3
-  access_key_id: AKIAIBSSFFPSS7O4XW3A
-  secret_access_key:
-    secure: CnS45ya/ERf0k1/tfLD0Cnp8CnGSka8XSmYCEPrNPnUQ3jTXyeUnS6tg2j1HFydwzbi3PpJz03WvQO0J5r4JSLC5Y7maiXukjnPMaYdyB4O6mzukHh3pWbAZCWPZtQ6VDXKI3K2u/MgFeNBwOfzbdET6ZZzSuYDirJY5NWx/8cDvJr97eIrTheGMTBKQpDeKkDQNxyP/pi3Q2xmnhoaVj8WYUCLv/bGpRRcVixinKt5LRBqWi6c5HWwxTfgoijAinxYckSPk93MIAWRZLkK3lLVufkZnO44ssjAy94Z/Ftaqx9PYiNaI8hNLgsBxJGqDZgka0CCjJ6b2RMvHrvsojrWHMPZn+9jvc18gnYlEkX9T6r1YFXo4Ii7I2zJ1cKmF7rVUoknQ89qojArj/rXRn5ikPCwk3M7lpe3ztmYAnQNTai9WYHkQ1j6QqDlLCvAHxy+Of34wSKJC6uduXD+AqvWlqPIt55khUKlOT5tHePMoXGZnV/KyV1QTRPbKCdjKxzgiL4mDEGXiNGsazeJmtNQQI/BJNu5mDfeAJzAx8bOlSHOy5RC9UcBCp4pZcyeeWQivbQNBWj267eV/a9aTLHh7YEuEw7rdwehng/lMkaf693454Blh3H+YJrxIrXZw57ELvWEYTCSIl5Yy0mKz/lmsCvPbeTddrH9YPPCaYLg=
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
   bucket: timeseries-explorer-frontendbucket-1jueporougkwu
   region: eu-west-1
+  local_dir: packages/frontend/dist
+  skip_cleanup: true
