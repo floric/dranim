@@ -1,5 +1,19 @@
 Description: Timeseries Explorer
 
+Parameters: 
+  DatabaseUser: 
+    Type: String
+    Default: user
+  DatabasePW: 
+    Type: String
+    Default: pw
+  BackendUrl: 
+    Type: String
+    Default: back
+  FrontendUrl: 
+    Type: String
+    Default: front
+
 Resources:
   # Backend
   CodeArtifactBucket:
@@ -44,6 +58,18 @@ Resources:
         - Namespace: aws:elasticbeanstalk:environment
           OptionName: EnvironmentType
           Value: SingleInstance
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: DB_USER
+          Value: !Ref DatabaseUser
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: DB_PW
+          Value: !Ref DatabasePW
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: BACKEND_URL
+          Value: !Ref BackendUrl
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: FRONTEND_URL
+          Value: !Ref FrontendUrl
       SolutionStackName: 64bit Amazon Linux 2018.03 v2.11.0 running Docker 18.03.1-ce
 
   EBEnvironment:
