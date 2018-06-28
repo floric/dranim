@@ -1,6 +1,14 @@
 Description: Timeseries Explorer
 
 Resources:
+  CodeArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      LifecycleConfiguration:
+        Rules:
+          - ExpirationInDays: 30
+            Status: Enabled
+
   ProdServiceRole:
     Type: AWS::IAM::Role
     Properties:
