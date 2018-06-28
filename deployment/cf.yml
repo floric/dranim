@@ -48,7 +48,7 @@ Resources:
           Value: 80
       SolutionStackName: 64bit Amazon Linux 2018.03 v2.11.0 running Docker 18.03.1-ce
 
-  EBDockerEnvironment:
+  EBEnvironment:
     Type: AWS::ElasticBeanstalk::Environment
     Properties:
       ApplicationName: !Ref EBApplication
