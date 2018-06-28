@@ -2,5 +2,5 @@ apps:
   - script: ./dist/main.js
     name: 'backend'
     watch: true
-    instances: 3
+    instances: 0
     exec_mode: cluster

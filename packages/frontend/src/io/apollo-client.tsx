@@ -8,7 +8,7 @@ import { createUploadLink } from 'apollo-upload-client';
 const API_URL =
   process.env.NODE_ENV === 'production'
     ? '/api/graphql'
-    : 'http://localhost:3000/api/graphql';
+    : 'http://time-eben-115349qwvbsc8.vnga76de7c.eu-west-1.elasticbeanstalk.com/api/graphql';
 
 const stateCache = new InMemoryCache();
 

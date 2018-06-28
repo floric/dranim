@@ -17,6 +17,7 @@ export const GRAPHQL_ROUTE = '/api/graphql';
 export interface IMainOptions {
   env: string;
   port: number;
+  backendUrl: string;
   verbose?: boolean;
 }
 
@@ -32,14 +33,15 @@ export const main = async (options: IMainOptions) => {
   await initDb(db);
 
   const app = express();
-  if (options.env !== 'production') {
-    app.use(
-      cors({
-        maxAge: 600,
-        origin: 'http://localhost:1234'
-      })
-    );
-  }
+  app.use(
+    cors({
+      maxAge: 600,
+      origin:
+        options.env === 'production'
+          ? options.backendUrl
+          : 'http://localhost:1234'
+    })
+  );
 
   app.use(helmet());
   app.use(morgan(options.env, { buffer: true }));
@@ -81,8 +83,11 @@ export const initDb = async (db: Db) => {
 const PORT = parseInt(process.env.PORT || '80', 10);
 const NODE_ENV = process.env.NODE_ENV !== 'production' ? 'dev' : 'production';
 
+console.log('Backend URL:' + process.env.BACKEND_URL);
+
 main({
   env: NODE_ENV,
+  backendUrl: process.env.BACKEND_URL!,
   port: PORT,
   verbose: true
 });
