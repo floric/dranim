@@ -83,8 +83,8 @@ export const initDb = async (db: Db) => {
 const PORT = parseInt(process.env.PORT || '80', 10);
 const NODE_ENV = process.env.NODE_ENV !== 'production' ? 'dev' : 'production';
 const FRONTEND_URL = !!process.env.FRONTEND_URL
-  ? 'localhost:1234'
-  : process.env.FRONTEND_URL;
+  ? process.env.FRONTEND_URL
+  : 'localhost:1234';
 
 console.log('Frontend URL:' + FRONTEND_URL);
 
