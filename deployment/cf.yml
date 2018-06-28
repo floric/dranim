@@ -30,9 +30,9 @@ Resources:
   EBApplication:
     Type: AWS::ElasticBeanstalk::Application
     Properties:
-      Description: Prod App
+      Description: Backend
 
-  EBConfigurationTemplate:
+  EBBackendTemplate:
     Type: AWS::ElasticBeanstalk::ConfigurationTemplate
     Properties:
       ApplicationName: !Ref EBApplication
@@ -43,13 +43,16 @@ Resources:
         - Namespace: aws:elasticbeanstalk:environment
           OptionName: EnvironmentType
           Value: SingleInstance
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: PORT
+          Value: 3000
       SolutionStackName: 64bit Amazon Linux 2018.03 v2.11.0 running Docker 18.03.1-ce
 
-  EBProdEnvironment:
+  EBDockerEnvironment:
     Type: AWS::ElasticBeanstalk::Environment
     Properties:
       ApplicationName: !Ref EBApplication
-      TemplateName: !Ref EBConfigurationTemplate
+      TemplateName: !Ref EBBackendTemplate
       OptionSettings:
         - Namespace: aws:autoscaling:launchconfiguration
           OptionName: IamInstanceProfile
