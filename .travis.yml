@@ -34,10 +34,25 @@ after_script:
 - "./cc-test-reporter upload-coverage -i tmp/codeclimate.total.json"
 - greenkeeper-lockfile-upload
 deploy:
-  provider: s3
+- provider: s3
   access_key_id: $AWS_ACCESS_KEY_ID
   secret_access_key: $AWS_SECRET_ACCESS_KEY
   bucket: timeseries-explorer-frontendbucket-1jueporougkwu
   region: eu-west-1
+  cache_control: "public,max-age=31536000"
   local_dir: packages/frontend/dist
   skip_cleanup: true
+- provider: s3
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  bucket: $AWS_FRONTEND_BUCKET
+  region: eu-west-1
+  file: packages/frontend/dist/index.html
+  skip_cleanup: true
+- provider: elasticbeanstalk
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  region: eu-west-1
+  app: $AWS_EB_APP
+  env: $AWS_EB_APP_ENV
+  bucket_name: $AWS_APP_ARTIFACTS
