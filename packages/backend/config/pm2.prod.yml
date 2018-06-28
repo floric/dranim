@@ -1,5 +1,0 @@
-apps:
-  - script: ./main.js
-    name: 'backend'
-    instances: 0
-    exec_mode: cluster
