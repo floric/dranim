@@ -17,7 +17,7 @@ export const GRAPHQL_ROUTE = '/api/graphql';
 export interface IMainOptions {
   env: string;
   port: number;
-  backendUrl: string;
+  frontendUrl: string;
   verbose?: boolean;
 }
 
@@ -38,7 +38,7 @@ export const main = async (options: IMainOptions) => {
       maxAge: 600,
       origin:
         options.env === 'production'
-          ? options.backendUrl
+          ? options.frontendUrl
           : 'http://localhost:1234'
     })
   );
@@ -82,12 +82,15 @@ export const initDb = async (db: Db) => {
 
 const PORT = parseInt(process.env.PORT || '80', 10);
 const NODE_ENV = process.env.NODE_ENV !== 'production' ? 'dev' : 'production';
+const FRONTEND_URL = !!process.env.FRONTEND_URL
+  ? 'localhost:1234'
+  : process.env.FRONTEND_URL;
 
-console.log('Backend URL:' + process.env.BACKEND_URL);
+console.log('Frontend URL:' + FRONTEND_URL);
 
 main({
   env: NODE_ENV,
-  backendUrl: process.env.BACKEND_URL!,
+  frontendUrl: FRONTEND_URL!,
   port: PORT,
   verbose: true
 });
