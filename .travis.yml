@@ -20,13 +20,14 @@ before_script:
 script:
 - yarn build
 - cd packages/shared
-- yarn test
+# - yarn test
 - cd ../backend
-- yarn test
+# - yarn test
 - cd ../../
 - cp -Lr packages/backend/node_modules packages/backend/dist/node_modules
 - cd packages/backend
-- zip -r backend-docker.zip .
+- zip -q -r backend-docker.zip .
+- cd ../../
 after_script:
 - cd packages/shared
 - "../../cc-test-reporter format-coverage -o /tmp/codeclimate.shared.json"

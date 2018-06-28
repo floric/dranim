@@ -18,7 +18,7 @@ import VisDetailPage from './pages/visualizations/VisDetailPage';
 import WorkspaceDetailPage from './pages/workspaces/DetailPage';
 import WorkspacesPage from './pages/WorkspacesPage';
 
-const { Content, Footer, Sider } = Layout;
+const { Content, Sider } = Layout;
 
 export interface IAppProps extends RouteComponentProps<{}, {}> {}
 
