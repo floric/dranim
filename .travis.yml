@@ -21,9 +21,9 @@ before_script:
 script:
 - yarn build
 - cd packages/shared
-# - yarn test
+- yarn test
 - cd ../backend
-# - yarn test
+- yarn test
 - cd ../../
 - cp -Lr packages/backend/node_modules packages/backend/dist/node_modules
 - cd packages/backend
@@ -31,12 +31,12 @@ script:
 - cd ../../
 after_script:
 - cd packages/shared
-# - "../../cc-test-reporter format-coverage -o /tmp/codeclimate.shared.json"
+- "../../cc-test-reporter format-coverage -o /tmp/codeclimate.shared.json"
 - cd ../backend
-# - "../../cc-test-reporter format-coverage -o /tmp/codeclimate.backend.json"
+- "../../cc-test-reporter format-coverage -o /tmp/codeclimate.backend.json"
 - cd ../../
-# - "./cc-test-reporter sum-coverage /tmp/codeclimate.*.json -p 2 -o tmp/codeclimate.total.json"
-# - "./cc-test-reporter upload-coverage -i tmp/codeclimate.total.json"
+- "./cc-test-reporter sum-coverage /tmp/codeclimate.*.json -p 2 -o tmp/codeclimate.total.json"
+- "./cc-test-reporter upload-coverage -i tmp/codeclimate.total.json"
 - greenkeeper-lockfile-upload
 deploy:
 - provider: s3
@@ -47,6 +47,8 @@ deploy:
   cache_control: "public,max-age=31536000"
   local_dir: packages/frontend/dist
   skip_cleanup: true
+  on:
+    all_branches: true
 - provider: elasticbeanstalk
   access_key_id: $AWS_ACCESS_KEY_ID
   secret_access_key: $AWS_SECRET_ACCESS_KEY
