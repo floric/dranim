@@ -5,7 +5,7 @@ const config = {
   db:
     process.env.NODE_ENV === 'development'
       ? 'mongodb://127.0.0.1:27017'
-      : 'mongodb://test:user123@ds163610.mlab.com:63610/masterthesis'
+      : 'mongodb://test:user123@ds121251.mlab.com:21251/timeseries_explorer'
 };
 
 export const mongoDbClient = async (): Promise<MongoClient> => {

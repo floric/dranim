@@ -28,7 +28,7 @@ const MAX_UPLOAD_LIMIT = 100 * 1024 * 1024 * 1024;
 
 export const main = async (options: IMainOptions) => {
   const client = await mongoDbClient();
-  const db = client.db('App');
+  const db = client.db('timeseries_explorer');
   await initDb(db);
 
   const app = express();
