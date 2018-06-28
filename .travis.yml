@@ -25,6 +25,8 @@ script:
 - yarn test
 - cd ../../
 - cp -Lr packages/backend/node_modules packages/backend/dist/node_modules
+- cd packages/backend
+- zip -r backend-docker.zip .
 after_script:
 - cd packages/shared
 - "../../cc-test-reporter format-coverage -o /tmp/codeclimate.shared.json"
@@ -50,7 +52,7 @@ deploy:
   app: $AWS_EB_APP
   env: $AWS_EB_APP_ENV
   bucket_name: $AWS_APP_ARTIFACTS
-  local_dir: packages/backend/dist
+  zip_file: packages/backend/backend-docker.zip
   skip_cleanup: true
   on:
     all_branches: true

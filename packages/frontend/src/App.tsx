@@ -102,7 +102,6 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
               <Route exact path="/dashboards/:id" component={VisDetailPage} />
             </Switch>
           </Content>
-          <Footer style={{ textAlign: 'center' }}>Florian Richter</Footer>
         </Layout>
       </Layout>
     );
