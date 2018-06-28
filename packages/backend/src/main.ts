@@ -78,7 +78,7 @@ export const initDb = async (db: Db) => {
   await initWorkspaceDb(db);
 };
 
-const PORT = parseInt(process.env.PORT || '8080', 10);
+const PORT = parseInt(process.env.PORT || '80', 10);
 const NODE_ENV = process.env.NODE_ENV !== 'production' ? 'dev' : 'production';
 
 main({
