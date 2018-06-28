@@ -1,6 +1,32 @@
 Description: Timeseries Explorer
 
 Resources:
+  CloudFrontDist:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+        - DomainName:
+            Fn::GetAtt: [ FrontendBucket , "DomainName" ]
+          Id: webpage
+          S3OriginConfig:
+            OriginAccessIdentity:
+              Ref: AWS::NoValue
+        Enabled: true
+        DefaultRootObject: index.html
+        DefaultCacheBehavior:
+          TargetOriginId: webpage
+          ForwardedValues:
+            QueryString: true
+            Cookies:
+              Forward: none
+          ViewerProtocolPolicy : allow-all
+        PriceClass: PriceClass_100
+        CustomErrorResponses:
+        - ErrorCode: 404
+          ResponsePagePath: /index.html
+          ResponseCode: 200
+            
   FrontendBucket:
     Type: AWS::S3::Bucket
     Properties:
