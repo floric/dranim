@@ -15,7 +15,10 @@ Parameters:
     Type: String
   FrontendDomainName:
     Type: String
-  AcmCertificateArn:
+  EuWestCertArn:
+    Type: String
+    AllowedPattern: "arn:aws:acm:.*"
+  GlobalCertArn:
     Type: String
     AllowedPattern: "arn:aws:acm:.*"
 
@@ -71,7 +74,7 @@ Resources:
           Value: HTTP
         - Namespace: aws:elb:listener:443
           OptionName: SSLCertificateId
-          Value: !Ref AcmCertificateArn
+          Value: !Ref EuWestCertArn
         - Namespace: aws:elasticbeanstalk:application:environment
           OptionName: DB_USER
           Value: !Ref DatabaseUser
@@ -133,7 +136,8 @@ Resources:
           ResponsePagePath: /index.html
           ResponseCode: 200
         ViewerCertificate:
-          CloudFrontDefaultCertificate: true
+          AcmCertificateArn: !Ref GlobalCertArn
+          SslSupportMethod: sni-only
             
   FrontendBucket:
     Type: AWS::S3::Bucket
