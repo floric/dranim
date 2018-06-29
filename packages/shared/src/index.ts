@@ -8,3 +8,4 @@ export * from './nodes';
 export * from './sockets';
 export * from './visualizations';
 export * from './node-defs';
+export * from './users';
