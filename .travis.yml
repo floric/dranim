@@ -47,8 +47,6 @@ deploy:
   cache_control: "public,max-age=31536000"
   local_dir: packages/frontend/dist
   skip_cleanup: true
-  on:
-    all_branches: true
 - provider: elasticbeanstalk
   access_key_id: $AWS_ACCESS_KEY_ID
   secret_access_key: $AWS_SECRET_ACCESS_KEY
@@ -58,5 +56,3 @@ deploy:
   bucket_name: $AWS_APP_ARTIFACTS
   zip_file: packages/backend/backend-docker.zip
   skip_cleanup: true
-  on:
-    all_branches: true
