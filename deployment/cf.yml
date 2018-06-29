@@ -9,10 +9,15 @@ Parameters:
     Default: pw
   BackendUrl: 
     Type: String
-    Default: back
   FrontendUrl: 
     Type: String
-    Default: front
+  BackendDomainName:
+    Type: String
+  FrontendDomainName:
+    Type: String
+  AcmCertificateArn:
+    Type: String
+    AllowedPattern: "arn:aws:acm:.*"
 
 Resources:
   # Backend
@@ -55,9 +60,18 @@ Resources:
         - Namespace: aws:autoscaling:launchconfiguration
           OptionName: InstanceType
           Value: t2.micro
-        - Namespace: aws:elasticbeanstalk:environment
-          OptionName: EnvironmentType
-          Value: SingleInstance
+        - Namespace: aws:elb:listener:443
+          OptionName: ListenerProtocol
+          Value: HTTPS
+        - Namespace: aws:elb:listener:443
+          OptionName: InstancePort
+          Value: 80
+        - Namespace: aws:elb:listener:443
+          OptionName: InstanceProtocol
+          Value: HTTP
+        - Namespace: aws:elb:listener:443
+          OptionName: SSLCertificateId
+          Value: !Ref AcmCertificateArn
         - Namespace: aws:elasticbeanstalk:application:environment
           OptionName: DB_USER
           Value: !Ref DatabaseUser
@@ -93,17 +107,21 @@ Resources:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
+        Aliases:
+        - !Ref FrontendDomainName
         Origins:
-        - DomainName:
-            Fn::GetAtt: [ FrontendBucket , "DomainName" ]
-          Id: webpage
+        - Id: frontend
+          DomainName:
+            Fn::GetAtt: [ FrontendBucket , 'DomainName' ]
           S3OriginConfig:
             OriginAccessIdentity:
               Ref: AWS::NoValue
         Enabled: true
+        HttpVersion: http2
         DefaultRootObject: index.html
         DefaultCacheBehavior:
-          TargetOriginId: webpage
+          Compress: true
+          TargetOriginId: frontend
           ForwardedValues:
             QueryString: true
             Cookies:
@@ -114,6 +132,8 @@ Resources:
         - ErrorCode: 404
           ResponsePagePath: /index.html
           ResponseCode: 200
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
             
   FrontendBucket:
     Type: AWS::S3::Bucket
