@@ -3,17 +3,13 @@ Description: Timeseries Explorer
 Parameters: 
   DatabaseUser: 
     Type: String
-    Default: user
   DatabasePW: 
     Type: String
-    Default: pw
-  BackendUrl: 
+  MlabUrl:
     Type: String
-  FrontendUrl: 
+  BackendDomain:
     Type: String
-  BackendDomainName:
-    Type: String
-  FrontendDomainName:
+  FrontendDomain:
     Type: String
   EuWestCertArn:
     Type: String
@@ -82,11 +78,14 @@ Resources:
           OptionName: DB_PW
           Value: !Ref DatabasePW
         - Namespace: aws:elasticbeanstalk:application:environment
-          OptionName: BACKEND_URL
-          Value: !Ref BackendUrl
+          OptionName: DB_MLAB_URL
+          Value: !Ref MlabUrl
         - Namespace: aws:elasticbeanstalk:application:environment
-          OptionName: FRONTEND_URL
-          Value: !Ref FrontendUrl
+          OptionName: BACKEND_DOMAIN
+          Value: !Ref BackendDomain
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: FRONTEND_DOMAIN
+          Value: !Ref FrontendDomain
       SolutionStackName: 64bit Amazon Linux 2018.03 v2.11.0 running Docker 18.03.1-ce
 
   EBEnvironment:
@@ -111,7 +110,7 @@ Resources:
     Properties:
       DistributionConfig:
         Aliases:
-        - !Ref FrontendDomainName
+        - !Ref FrontendDomain
         Origins:
         - Id: frontend
           DomainName:
