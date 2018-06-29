@@ -1,6 +1,25 @@
 Description: Timeseries Explorer
 
+Parameters: 
+  DatabaseUser: 
+    Type: String
+  DatabasePW: 
+    Type: String
+  MlabUrl:
+    Type: String
+  BackendDomain:
+    Type: String
+  FrontendDomain:
+    Type: String
+  EuWestCertArn:
+    Type: String
+    AllowedPattern: "arn:aws:acm:.*"
+  GlobalCertArn:
+    Type: String
+    AllowedPattern: "arn:aws:acm:.*"
+
 Resources:
+  # Backend
   CodeArtifactBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -30,9 +49,9 @@ Resources:
   EBApplication:
     Type: AWS::ElasticBeanstalk::Application
     Properties:
-      Description: Prod App
+      Description: Backend
 
-  EBConfigurationTemplate:
+  EBBackendTemplate:
     Type: AWS::ElasticBeanstalk::ConfigurationTemplate
     Properties:
       ApplicationName: !Ref EBApplication
@@ -40,16 +59,40 @@ Resources:
         - Namespace: aws:autoscaling:launchconfiguration
           OptionName: InstanceType
           Value: t2.micro
-        - Namespace: aws:elasticbeanstalk:environment
-          OptionName: EnvironmentType
-          Value: SingleInstance
+        - Namespace: aws:elb:listener:443
+          OptionName: ListenerProtocol
+          Value: HTTPS
+        - Namespace: aws:elb:listener:443
+          OptionName: InstancePort
+          Value: 80
+        - Namespace: aws:elb:listener:443
+          OptionName: InstanceProtocol
+          Value: HTTP
+        - Namespace: aws:elb:listener:443
+          OptionName: SSLCertificateId
+          Value: !Ref EuWestCertArn
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: DB_USER
+          Value: !Ref DatabaseUser
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: DB_PW
+          Value: !Ref DatabasePW
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: DB_MLAB_URL
+          Value: !Ref MlabUrl
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: BACKEND_DOMAIN
+          Value: !Ref BackendDomain
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: FRONTEND_DOMAIN
+          Value: !Ref FrontendDomain
       SolutionStackName: 64bit Amazon Linux 2018.03 v2.11.0 running Docker 18.03.1-ce
 
-  EBProdEnvironment:
+  EBEnvironment:
     Type: AWS::ElasticBeanstalk::Environment
     Properties:
       ApplicationName: !Ref EBApplication
-      TemplateName: !Ref EBConfigurationTemplate
+      TemplateName: !Ref EBBackendTemplate
       OptionSettings:
         - Namespace: aws:autoscaling:launchconfiguration
           OptionName: IamInstanceProfile
@@ -61,21 +104,26 @@ Resources:
         Name: WebServer
         Type: Standard
 
+  # Frontend
   CloudFrontDist:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
+        Aliases:
+        - !Ref FrontendDomain
         Origins:
-        - DomainName:
-            Fn::GetAtt: [ FrontendBucket , "DomainName" ]
-          Id: webpage
+        - Id: frontend
+          DomainName:
+            Fn::GetAtt: [ FrontendBucket , 'DomainName' ]
           S3OriginConfig:
             OriginAccessIdentity:
               Ref: AWS::NoValue
         Enabled: true
+        HttpVersion: http2
         DefaultRootObject: index.html
         DefaultCacheBehavior:
-          TargetOriginId: webpage
+          Compress: true
+          TargetOriginId: frontend
           ForwardedValues:
             QueryString: true
             Cookies:
@@ -86,6 +134,9 @@ Resources:
         - ErrorCode: 404
           ResponsePagePath: /index.html
           ResponseCode: 200
+        ViewerCertificate:
+          AcmCertificateArn: !Ref GlobalCertArn
+          SslSupportMethod: sni-only
             
   FrontendBucket:
     Type: AWS::S3::Bucket
@@ -111,3 +162,4 @@ Resources:
                 - !Ref FrontendBucket
                 - /*
       Bucket: !Ref FrontendBucket
+      

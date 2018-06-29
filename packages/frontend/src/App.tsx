@@ -18,7 +18,7 @@ import VisDetailPage from './pages/visualizations/VisDetailPage';
 import WorkspaceDetailPage from './pages/workspaces/DetailPage';
 import WorkspacesPage from './pages/WorkspacesPage';
 
-const { Content, Footer, Sider } = Layout;
+const { Content, Sider } = Layout;
 
 export interface IAppProps extends RouteComponentProps<{}, {}> {}
 
@@ -102,7 +102,6 @@ class App extends React.Component<IAppProps, { collapsed: boolean }> {
               <Route exact path="/dashboards/:id" component={VisDetailPage} />
             </Switch>
           </Content>
-          <Footer style={{ textAlign: 'center' }}>Florian Richter</Footer>
         </Layout>
       </Layout>
     );

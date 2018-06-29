@@ -17,6 +17,7 @@ export const GRAPHQL_ROUTE = '/api/graphql';
 export interface IMainOptions {
   env: string;
   port: number;
+  frontendDomain: string;
   verbose?: boolean;
 }
 
@@ -28,18 +29,19 @@ const MAX_UPLOAD_LIMIT = 100 * 1024 * 1024 * 1024;
 
 export const main = async (options: IMainOptions) => {
   const client = await mongoDbClient();
-  const db = client.db('App');
+  const db = client.db('timeseries_explorer');
   await initDb(db);
 
   const app = express();
-  if (options.env !== 'production') {
-    app.use(
-      cors({
-        maxAge: 600,
-        origin: 'http://localhost:1234'
-      })
-    );
-  }
+  app.use(
+    cors({
+      maxAge: 600,
+      origin:
+        options.env === 'production'
+          ? `https://${options.frontendDomain}`
+          : 'http://localhost:1234'
+    })
+  );
 
   app.use(helmet());
   app.use(morgan(options.env, { buffer: true }));
@@ -78,11 +80,15 @@ export const initDb = async (db: Db) => {
   await initWorkspaceDb(db);
 };
 
-const PORT = parseInt(process.env.PORT || '3000', 10);
+const PORT = parseInt(process.env.PORT || '80', 10);
 const NODE_ENV = process.env.NODE_ENV !== 'production' ? 'dev' : 'production';
+const FRONTEND_DOMAIN = !!process.env.FRONTEND_DOMAIN
+  ? process.env.FRONTEND_DOMAIN
+  : 'localhost:1234';
 
 main({
   env: NODE_ENV,
+  frontendDomain: FRONTEND_DOMAIN!,
   port: PORT,
   verbose: true
 });

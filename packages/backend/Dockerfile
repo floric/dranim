@@ -2,12 +2,11 @@ FROM node:slim
 
 WORKDIR /
 COPY dist .
-COPY config config
 ENV NODE_ENV="production"
-ENV PORT=3000
-ENV PM2_PUBLIC_KEY mah2br7ohm7nevm
-ENV PM2_SECRET_KEY t5o7avdd8s47435
-EXPOSE ${PORT}
-RUN npm install pm2 -g
+ENV BACKEND_DOMAIN $BACKEND_DOMAIN
+ENV FRONTEND_DOMAIN $FRONTEND_DOMAIN
+ENV DB_USER $DB_USER
+ENV DB_PW $DB_PW
+EXPOSE 80
 
-CMD ["pm2-runtime", "config/pm2.prod.yml"]
+CMD ["node", "main.js"]
