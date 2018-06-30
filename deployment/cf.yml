@@ -86,6 +86,9 @@ Resources:
         - Namespace: aws:elasticbeanstalk:application:environment
           OptionName: FRONTEND_DOMAIN
           Value: !Ref FrontendDomain
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: BACKEND_PORT
+          Value: 80
       SolutionStackName: 64bit Amazon Linux 2018.03 v2.11.0 running Docker 18.03.1-ce
 
   EBEnvironment:
