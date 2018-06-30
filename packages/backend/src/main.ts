@@ -54,10 +54,11 @@ export const main = async (options: IMainOptions) => {
   app.use(
     session({
       secret: 'work hard',
+      sameSite: false,
       resave: true,
-      saveUninitialized: true,
+      saveUninitialized: false,
       store: new MongoStore({ db }),
-      cookie: { secure: options.env === 'production' ? true : false }
+      cookie: { secure: false }
     })
   );
   app.use(morgan('tiny'));
