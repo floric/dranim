@@ -2,47 +2,26 @@ import * as React from 'react';
 
 import { Button, Form, Icon, Input } from 'antd';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
-import { showNotificationWithIcon } from '../../utils/form';
+import { History } from 'history';
 
-class LoginFormImpl extends React.Component<{ form: WrappedFormUtils }> {
+import { login } from '../../io/auth';
+
+class LoginFormImpl extends React.Component<{
+  form: WrappedFormUtils;
+  history: History;
+}> {
   private handleSubmit = e => {
     e.preventDefault();
-    this.props.form.validateFields(async (err, values) => {
+
+    const {
+      form: { validateFields },
+      history
+    } = this.props;
+
+    validateFields(async (err, values) => {
       if (!err) {
-        try {
-          const res = await fetch('http://localhost:3000/login', {
-            body: JSON.stringify({ mail: values.mail, pw: values.pw }),
-            cache: 'no-cache',
-            credentials: 'same-origin',
-            headers: {
-              'user-agent': 'Mozilla/4.0 MDN Example',
-              'content-type': 'application/json'
-            },
-            method: 'POST',
-            mode: 'cors',
-            redirect: 'follow',
-            referrer: 'no-referrer'
-          });
-          if (res.status === 401) {
-            showNotificationWithIcon({
-              content: 'The login has failed.',
-              icon: 'error',
-              title: 'Login failed'
-            });
-            return;
-          }
-          showNotificationWithIcon({
-            content: 'You are now logged in.',
-            icon: 'success',
-            title: 'Login successful'
-          });
-        } catch (err) {
-          showNotificationWithIcon({
-            content: 'Unknown error',
-            icon: 'error',
-            title: 'Login failed because of unknown reason'
-          });
-        }
+        await login(values.mail, values.pw);
+        history.push('/');
       }
     });
   };

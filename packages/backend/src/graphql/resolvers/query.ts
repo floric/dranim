@@ -3,6 +3,7 @@ import {
   Dashboard,
   Dataset,
   UploadProcess,
+  User,
   Workspace
 } from '@masterthesis/shared';
 
@@ -11,6 +12,7 @@ import {
   getAllDashboards,
   getDashboard
 } from '../../main/dashboards/dashboards';
+import { tryGetUser } from '../../main/users/management';
 import { getAllDatasets, getDataset } from '../../main/workspace/dataset';
 import { getAllUploads } from '../../main/workspace/upload';
 import { getAllWorkspaces, getWorkspace } from '../../main/workspace/workspace';
@@ -33,5 +35,6 @@ export const Query = {
   dashboards: (_, __, { db }): Promise<Array<Dashboard>> =>
     getAllDashboards(db),
   dashboard: (_, { id }, { db }): Promise<Dashboard | null> =>
-    getDashboard(id, db)
+    getDashboard(id, db),
+  user: (_, __, { userId, db }): Promise<User> => tryGetUser(userId, db)
 };

@@ -56,10 +56,11 @@ export const main = async (options: IMainOptions) => {
       secret: 'work hard',
       resave: true,
       saveUninitialized: true,
-      store: new MongoStore({ db })
+      store: new MongoStore({ db }),
+      cookie: { secure: options.env === 'production' ? true : false }
     })
   );
-  app.use(morgan('tiny', { buffer: true }));
+  app.use(morgan('tiny'));
   app.use(
     bodyParser.json({}),
     bodyParser.urlencoded({
@@ -69,10 +70,8 @@ export const main = async (options: IMainOptions) => {
   app.use(
     GRAPHQL_ROUTE,
     (req, res, next) => {
-      console.log(req.session);
-      console.log(req.sessionID);
       if (req.session && req.session.userId) {
-        return next();
+        next();
       } else {
         res
           .status(401)
@@ -84,10 +83,10 @@ export const main = async (options: IMainOptions) => {
       maxFiles: 10,
       maxFileSize: MAX_UPLOAD_LIMIT
     }),
-    graphqlExpress({
+    graphqlExpress(req => ({
       schema: Schema,
-      context: { db }
-    })
+      context: { db, userId: req!.session!.userId || null }
+    }))
   );
 
   app.post('/logout', async (req, res, next) => {
@@ -96,7 +95,7 @@ export const main = async (options: IMainOptions) => {
         if (err) {
           return next(err);
         } else {
-          return res.redirect('/');
+          return res.status(200).send();
         }
       });
     }
@@ -110,7 +109,7 @@ export const main = async (options: IMainOptions) => {
     const pw = req.body.pw;
     const result = await login(mail, pw, db);
     if (result) {
-      (req.session as any).userId = result.mail;
+      (req.session as any).userId = result.id;
       res.status(200).send();
     } else {
       res
@@ -129,7 +128,7 @@ export const main = async (options: IMainOptions) => {
       req.body.pw,
       db
     );
-    (req.session as any).userId = result.mail;
+    (req.session as any).userId = result.id;
     res.status(200).send();
   });
   app

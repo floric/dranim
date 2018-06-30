@@ -5,7 +5,6 @@ import { Card, Col } from 'antd';
 import gql from 'graphql-tag';
 import { Mutation, Query } from 'react-apollo';
 
-import { ALL_DATASETS } from '../App';
 import { CardItem } from '../components/CardItem';
 import { cardItemProps, CardsLayout } from '../components/CardsLayout';
 import { LoadingCard, UnknownErrorCard } from '../components/CustomCards';
@@ -13,6 +12,19 @@ import { NumberInfo } from '../components/NumberInfo';
 import { PageHeaderCard } from '../components/PageHeaderCard';
 import { tryOperation } from '../utils/form';
 import { CreateDataSetForm } from './forms/CreateDatasetForm';
+
+const ALL_DATASETS = gql`
+  {
+    datasets {
+      id
+      name
+      entriesCount
+      valueschemas {
+        name
+      }
+    }
+  }
+`;
 
 const CREATE_DATASET = gql`
   mutation createDataset($name: String!) {
