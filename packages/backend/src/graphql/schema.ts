@@ -20,6 +20,7 @@ import EntryDef from './schemas/entry';
 import { MutationDef } from './schemas/mutations';
 import { QueryDef } from './schemas/query';
 import UploadProcessDef from './schemas/upload';
+import UserDef from './schemas/user';
 import ValueschemaDef from './schemas/valueschema';
 import WorkspaceDef from './schemas/workspace';
 
@@ -88,7 +89,8 @@ const typeDefs = [
   DatasetDef,
   ValueschemaDef,
   CalculationProcessDef,
-  DashboardDef
+  DashboardDef,
+  UserDef
 ];
 
 export default makeExecutableSchema<ApolloContext>({

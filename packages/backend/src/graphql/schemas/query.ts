@@ -9,5 +9,6 @@ export const QueryDef = `
     calculations(workspaceId: String!): [CalculationProcess!]!
     dashboards: [Dashboard!]!
     dashboard(id: String!): Dashboard
+    user: User!
   }
 `;
