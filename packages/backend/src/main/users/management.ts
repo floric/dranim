@@ -31,10 +31,6 @@ export const login = async (
   };
 };
 
-export const logout = async (db: Db): Promise<boolean> => {
-  return true;
-};
-
 const getFullUserByMail = async (mail: string, db: Db) => {
   const coll = getUsersCollection(db);
   return await coll.findOne({ mail });
