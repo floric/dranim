@@ -26,7 +26,8 @@ export const login = async (
   return {
     id: user._id.toHexString(),
     mail: user.mail,
-    name: user.name
+    firstName: user.firstName,
+    lastName: user.lastName
   };
 };
 
@@ -51,18 +52,29 @@ const getUser = async (id: string, db: Db): Promise<User | null> => {
     return null;
   }
 
-  return { id: res._id.toHexString(), mail: res.mail, name: res.name };
+  return {
+    id: res._id.toHexString(),
+    mail: res.mail,
+    firstName: res.firstName,
+    lastName: res.lastName
+  };
 };
 
 export const register = async (
-  name: string,
+  firstName: string,
+  lastName: string,
   mail: string,
   pw: string,
   db: Db
 ): Promise<User> => {
   const saltedPw = await hash(pw, 10);
-  const res = await getUsersCollection(db).insertOne({
-    name,
+  const coll = getUsersCollection(db);
+  await coll.createIndex('mail', {
+    unique: true
+  });
+  const res = await coll.insertOne({
+    firstName,
+    lastName,
     mail,
     pw: saltedPw
   });
@@ -75,7 +87,8 @@ export const register = async (
   return {
     id: user._id.toHexString(),
     mail: user.mail,
-    name: user.name
+    firstName: user.firstName,
+    lastName: user.lastName
   };
 };
 

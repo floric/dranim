@@ -5,10 +5,12 @@ import { setContext } from 'apollo-link-context';
 import { onError } from 'apollo-link-error';
 import { createUploadLink } from 'apollo-upload-client';
 
-const API_URL =
+import { logout } from './auth';
+
+export const API_URL =
   process.env.NODE_ENV === 'production'
-    ? `https://${process.env.BACKEND_DOMAIN}/graphql`
-    : 'http://localhost:3000/graphql';
+    ? `https://${process.env.BACKEND_DOMAIN}`
+    : 'http://localhost:3000';
 
 const stateCache = new InMemoryCache();
 
@@ -28,6 +30,15 @@ export const client = new ApolloClient({
       onError(err => {
         const { graphQLErrors, networkError } = err;
 
+        if (
+          (networkError as any).response &&
+          (networkError as any).response.status === 401
+        ) {
+          logout();
+          window.location.reload();
+          return;
+        }
+
         if (graphQLErrors) {
           graphQLErrors.map(({ message, locations, path }) =>
             console.log(
@@ -41,7 +52,7 @@ export const client = new ApolloClient({
         }
       }),
       createUploadLink({
-        uri: API_URL,
+        uri: `${API_URL}/graphql`,
         credentials: 'include'
       })
     ])

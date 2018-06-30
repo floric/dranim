@@ -7,7 +7,7 @@ import { Mutation, Query } from 'react-apollo';
 
 import { CardItem } from '../components/CardItem';
 import { cardItemProps, CardsLayout } from '../components/CardsLayout';
-import { LoadingCard } from '../components/CustomCards';
+import { LoadingCard, UnknownErrorCard } from '../components/CustomCards';
 import { PageHeaderCard } from '../components/PageHeaderCard';
 import { tryOperation } from '../utils/form';
 import { CreateDashboardForm } from './forms/CreateDashboardForm';
@@ -40,13 +40,17 @@ export default class VisPage extends React.Component<{}, {}> {
     return (
       <Query query={ALL_DASHBOARDS}>
         {({ loading, error, data, refetch }) => {
-          if (loading || error) {
+          if (loading) {
             return (
               <>
                 <PageHeaderCard title="Dashboards" />
                 <LoadingCard />
               </>
             );
+          }
+
+          if (error) {
+            return <UnknownErrorCard error={error} />;
           }
 
           const dashboards: Array<GQLDashboard> = data.dashboards;

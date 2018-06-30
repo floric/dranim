@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Colors } from '@masterthesis/shared';
 import { Card, Col, Layout, Row } from 'antd';
 import { RouteComponentProps } from 'react-router';
+import { Link } from 'react-router-dom';
 
 import { LoginForm } from './forms/LoginForm';
 
@@ -15,8 +16,12 @@ export default class LoginPage extends React.Component<LoginPageProps> {
         <Layout.Content style={{ background: Colors.Background }}>
           <Row>
             <Col span={12} offset={6}>
-              <h1>Login</h1>
               <Card bordered={false}>
+                <h1>Login</h1>
+                <p>
+                  Please login to access draniM or{' '}
+                  <Link to="/registration">create your account</Link> first.
+                </p>
                 <LoginForm history={this.props.history} />
               </Card>
             </Col>

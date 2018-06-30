@@ -5,14 +5,15 @@ import { Card, Col, Icon, Row } from 'antd';
 import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
 
-import { LoadingCard } from '../components/CustomCards';
+import { LoadingCard, UnknownErrorCard } from '../components/CustomCards';
 import { PageHeaderCard } from '../components/PageHeaderCard';
 
 export const USER = gql`
   {
     user {
       id
-      name
+      firstName
+      lastName
       mail
     }
   }
@@ -23,7 +24,7 @@ export default class UserPage extends React.Component<{}, {}> {
     return (
       <Query query={USER}>
         {({ loading, error, data }) => {
-          if (loading || error) {
+          if (loading) {
             return (
               <>
                 <PageHeaderCard title="User" />
@@ -32,15 +33,19 @@ export default class UserPage extends React.Component<{}, {}> {
             );
           }
 
+          if (error) {
+            return <UnknownErrorCard error={error} />;
+          }
+
           const user: User = data.user;
 
           return (
             <>
-              <PageHeaderCard title="User" helpContent={<></>} />
+              <PageHeaderCard title="User" />
               <Card bordered={false}>
                 <Row>
                   <Col xs={12} md={9} lg={6}>
-                    <Icon type="user" /> {user.name}
+                    <Icon type="user" /> {user.firstName} {user.lastName}
                   </Col>
                   <Col xs={12} md={9} lg={6}>
                     <Icon type="mail" /> {user.mail}

@@ -20,8 +20,10 @@ class LoginFormImpl extends React.Component<{
 
     validateFields(async (err, values) => {
       if (!err) {
-        await login(values.mail, values.pw);
-        history.push('/');
+        const res = await login(values.mail, values.pw);
+        if (res) {
+          history.push('/');
+        }
       }
     });
   };
@@ -32,11 +34,13 @@ class LoginFormImpl extends React.Component<{
       <Form onSubmit={this.handleSubmit} className="login-form">
         <Form.Item>
           {getFieldDecorator('mail', {
-            rules: [{ required: true, message: 'Please input your username!' }]
+            rules: [
+              { required: true, message: 'Please input your Email address!' }
+            ]
           })(
             <Input
-              prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
-              placeholder="Username"
+              prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />}
+              placeholder="Email"
             />
           )}
         </Form.Item>

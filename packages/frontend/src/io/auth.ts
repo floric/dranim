@@ -1,4 +1,7 @@
+import { User } from '@masterthesis/shared';
+
 import { showNotificationWithIcon } from '../utils/form';
+import { API_URL, client } from './apollo-client';
 
 const SESSION_KEY = 'SESSION_ACTIVE';
 
@@ -9,7 +12,7 @@ const setLoggedIn = (value: boolean) => {
 };
 
 export const logout = async () => {
-  await fetch('http://localhost:3000/logout', {
+  await fetch(`${API_URL}/logout`, {
     cache: 'no-cache',
     credentials: 'include',
     headers: {},
@@ -18,14 +21,21 @@ export const logout = async () => {
     redirect: 'follow',
     referrer: 'no-referrer'
   });
+  await client.cache.reset();
   setLoggedIn(false);
 };
 
-export const register = async (name: string, mail: string, pw: string) => {
+export const register = async (
+  firstName: string,
+  lastName: string,
+  mail: string,
+  pw: string
+): Promise<User | null> => {
   try {
-    await fetch('http://localhost:3000/register', {
+    const res = await fetch(`${API_URL}/registration`, {
       body: JSON.stringify({
-        name,
+        firstName,
+        lastName,
         mail,
         pw
       }),
@@ -40,26 +50,33 @@ export const register = async (name: string, mail: string, pw: string) => {
       referrer: 'no-referrer'
     });
 
+    const user: User = await res.json();
+
     setLoggedIn(true);
     showNotificationWithIcon({
-      content: 'Welcome.',
+      title: `Hello ${user.firstName}`,
       icon: 'success',
-      title: 'Registration successful.'
+      content: 'Registration successful.'
     });
+
+    return user;
   } catch (err) {
     setLoggedIn(false);
 
     showNotificationWithIcon({
-      content: 'Unknown error',
+      content:
+        'Registration has failed. Maybe the email address is already used.',
       icon: 'error',
-      title: 'Registration failed because of unknown reason'
+      title: 'Registration failed'
     });
   }
+
+  return null;
 };
 
-export const login = async (mail: string, pw: string) => {
+export const login = async (mail: string, pw: string): Promise<User | null> => {
   try {
-    const res = await fetch('http://localhost:3000/login', {
+    const res = await fetch(`${API_URL}/login`, {
       body: JSON.stringify({ mail, pw }),
       cache: 'no-cache',
       credentials: 'include',
@@ -78,15 +95,19 @@ export const login = async (mail: string, pw: string) => {
         icon: 'error',
         title: 'Login failed'
       });
-      return;
+      return null;
     }
+
+    const user: User = await res.json();
 
     setLoggedIn(true);
     showNotificationWithIcon({
-      content: 'You are now logged in.',
+      title: `Hello ${user.firstName}`,
       icon: 'success',
-      title: 'Login successful'
+      content: 'Login successful.'
     });
+
+    return user;
   } catch (err) {
     setLoggedIn(false);
     showNotificationWithIcon({
@@ -95,4 +116,6 @@ export const login = async (mail: string, pw: string) => {
       title: 'Login failed because of unknown reason'
     });
   }
+
+  return null;
 };

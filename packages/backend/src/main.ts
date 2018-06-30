@@ -110,27 +110,39 @@ export const main = async (options: IMainOptions) => {
     const result = await login(mail, pw, db);
     if (result) {
       (req.session as any).userId = result.id;
-      res.status(200).send();
+      res.status(200).send(JSON.stringify(result));
     } else {
       res
         .status(401)
         .send(generateErrorResponse('Login to access this resource'));
     }
   });
-  app.post('/register', async (req, res) => {
-    if (!req.body || !req.body.mail || !req.body.pw || !req.body.name) {
+
+  app.post('/registration', async (req, res) => {
+    if (
+      !req.body ||
+      !req.body.mail ||
+      !req.body.pw ||
+      !req.body.firstName ||
+      !req.body.lastName
+    ) {
       res.status(301).send(generateErrorResponse('Invalid request'));
     }
-
-    const result = await register(
-      req.body.name,
-      req.body.mail,
-      req.body.pw,
-      db
-    );
-    (req.session as any).userId = result.id;
-    res.status(200).send();
+    try {
+      const result = await register(
+        req.body.firstName,
+        req.body.lastName,
+        req.body.mail,
+        req.body.pw,
+        db
+      );
+      (req.session as any).userId = result.id;
+      res.status(200).send(JSON.stringify(result));
+    } catch (err) {
+      res.status(500).send();
+    }
   });
+
   app
     .listen(options.port, () => {
       if (options.verbose) {

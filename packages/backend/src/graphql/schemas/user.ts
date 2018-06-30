@@ -1,6 +1,7 @@
 const UserDef = `
   type User {
-    name: String!
+    firstName: String!
+    lastName: String!
     mail: String!
     id: String!
   }
