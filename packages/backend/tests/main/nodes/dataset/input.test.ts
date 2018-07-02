@@ -3,12 +3,7 @@ import { Db } from 'mongodb';
 
 import { DatasetInputNode } from '../../../../src/main/nodes/dataset/input';
 import { createDataset } from '../../../../src/main/workspace/dataset';
-import {
-  getTestMongoDb,
-  NeverGoHereError,
-  NODE,
-  VALID_OBJECT_ID
-} from '../../../test-utils';
+import { getTestMongoDb, NODE, VALID_OBJECT_ID } from '../../../test-utils';
 
 let conn;
 let db: Db;
@@ -39,13 +34,13 @@ describe('DatasetInputNode', () => {
   });
 
   test('should get output value from form with valid dataset', async () => {
-    const newDs = await createDataset(db, 'testA');
+    const newDs = await createDataset('testA', { db, userId: '' });
 
     const res = await DatasetInputNode.onNodeExecution(
       { dataset: newDs.id },
       {},
       {
-        db,
+        reqContext: { db, userId: '' },
         node: NODE
       }
     );
@@ -65,7 +60,11 @@ describe('DatasetInputNode', () => {
   });
 
   test('should have absent meta for missing dataset', async () => {
-    let res = await DatasetInputNode.onMetaExecution({ dataset: null }, {}, db);
+    let res = await DatasetInputNode.onMetaExecution(
+      { dataset: null },
+      {},
+      { db, userId: '' }
+    );
     expect(res).toEqual({
       dataset: { isPresent: false, content: { schema: [] } }
     });
@@ -73,13 +72,17 @@ describe('DatasetInputNode', () => {
     res = await DatasetInputNode.onMetaExecution(
       { dataset: undefined },
       {},
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({
       dataset: { isPresent: false, content: { schema: [] } }
     });
 
-    res = await DatasetInputNode.onMetaExecution({ dataset: '' }, {}, db);
+    res = await DatasetInputNode.onMetaExecution(
+      { dataset: '' },
+      {},
+      { db, userId: '' }
+    );
     expect(res).toEqual({
       dataset: { isPresent: false, content: { schema: [] } }
     });
@@ -87,7 +90,7 @@ describe('DatasetInputNode', () => {
     res = await DatasetInputNode.onMetaExecution(
       { dataset: VALID_OBJECT_ID },
       {},
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({
       dataset: { isPresent: false, content: { schema: [] } }
@@ -95,12 +98,12 @@ describe('DatasetInputNode', () => {
   });
 
   test('should have valid meta for dataset', async () => {
-    const ds = await createDataset(db, 'test');
+    const ds = await createDataset('test', { db, userId: '' });
 
     const res = await DatasetInputNode.onMetaExecution(
       { dataset: ds.id },
       {},
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({
       dataset: { isPresent: true, content: { schema: [] } }

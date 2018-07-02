@@ -93,45 +93,6 @@ describe.only('Entries Utils', () => {
       type: DataType.BOOLEAN,
       required: true
     };
-    const schemaB: ValueSchema = {
-      name: 'colB',
-      unique: false,
-      fallback: '',
-      type: DataType.STRING,
-      required: true
-    };
-    const schemaOnlyB: ValueSchema = {
-      name: 'colOnlyB',
-      unique: false,
-      fallback: '',
-      type: DataType.NUMBER,
-      required: false
-    };
-
-    const dsA: Dataset = {
-      id: VALID_OBJECT_ID,
-      entriesCount: 0,
-      latestEntries: [],
-      valueschemas: [schemaA, schemaOnlyA],
-      name: 'Old DS',
-      workspaceId: 'CDE'
-    };
-    const dsB: Dataset = {
-      id: VALID_OBJECT_ID,
-      entriesCount: 0,
-      latestEntries: [],
-      valueschemas: [schemaB, schemaOnlyB],
-      name: 'Old DS',
-      workspaceId: 'CDE'
-    };
-    const newDs: Dataset = {
-      id: 'newid',
-      entriesCount: 0,
-      latestEntries: [],
-      valueschemas: [schemaB, schemaOnlyB],
-      name: 'New DS',
-      workspaceId: 'CDE'
-    };
     const entryA: Entry = {
       id: 'eA',
       values: { [schemaA.name]: 'test', [schemaOnlyA.name]: true }
@@ -163,10 +124,10 @@ describe.only('Entries Utils', () => {
     (setProgress as jest.Mock).mockImplementation(progressFn);
 
     const res = await processEntries(
-      null,
       VALID_OBJECT_ID,
       VALID_OBJECT_ID,
-      processFn
+      processFn,
+      { db: null, userId: '' }
     );
     expect(processFn).toHaveBeenCalledTimes(250);
     expect(progressFn).toHaveBeenCalledTimes(3);

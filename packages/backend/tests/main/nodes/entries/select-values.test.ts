@@ -98,7 +98,7 @@ describe('SelectValuesNode', () => {
       { values: ['test'] },
       { dataset: { datasetId: oldDs.id } },
       {
-        db,
+        reqContext: { db, userId: '' },
         node: NODE
       }
     );
@@ -132,7 +132,7 @@ describe('SelectValuesNode', () => {
         { values: ['bla', 'test'] },
         { dataset: { datasetId: oldDs.id } },
         {
-          db,
+          reqContext: { db, userId: '' },
           node: NODE
         }
       );
@@ -170,8 +170,8 @@ describe('SelectValuesNode', () => {
       values: { name: 'foo', test: 'bar', abc: '123' }
     };
     (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
-    (processEntries as jest.Mock).mockImplementation(
-      async (a, b, c, processFn) => processFn(entryA)
+    (processEntries as jest.Mock).mockImplementation(async (a, b, processFn) =>
+      processFn(entryA)
     );
     (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
@@ -180,23 +180,27 @@ describe('SelectValuesNode', () => {
       { values: ['test', 'abc'] },
       { dataset: { datasetId: oldDs.id } },
       {
-        db,
+        reqContext: { db, userId: '' },
         node: NODE
       }
     );
     expect(res.outputs.dataset.datasetId).toBeDefined();
     expect(createEntry as jest.Mock).toHaveBeenCalledTimes(1);
-    expect(createEntry as jest.Mock).toHaveBeenCalledWith(db, newDs.id, {
-      test: 'bar',
-      abc: '123'
-    });
+    expect(createEntry as jest.Mock).toHaveBeenCalledWith(
+      newDs.id,
+      {
+        test: 'bar',
+        abc: '123'
+      },
+      { db, userId: '' }
+    );
   });
 
   test('should return absent meta if dataset is missing', async () => {
     let res = await SelectValuesNode.onMetaExecution(
       { values: ['test', 'abc'] },
       { dataset: null },
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({
       dataset: { isPresent: false, content: { schema: [] } }
@@ -205,7 +209,7 @@ describe('SelectValuesNode', () => {
     res = await SelectValuesNode.onMetaExecution(
       { values: ['test', 'abc'] },
       { dataset: undefined },
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({
       dataset: { isPresent: false, content: { schema: [] } }
@@ -214,7 +218,7 @@ describe('SelectValuesNode', () => {
     res = await SelectValuesNode.onMetaExecution(
       { values: ['test', 'abc'] },
       { dataset: { content: { schema: [] }, isPresent: false } },
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({
       dataset: { isPresent: false, content: { schema: [] } }
@@ -225,7 +229,7 @@ describe('SelectValuesNode', () => {
     const res = await SelectValuesNode.onMetaExecution(
       { values: [] },
       { dataset: { content: { schema: [] }, isPresent: true } },
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({
       dataset: { isPresent: false, content: { schema: [] } }
@@ -272,7 +276,7 @@ describe('SelectValuesNode', () => {
           isPresent: true
         }
       },
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({
       dataset: {

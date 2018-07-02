@@ -87,7 +87,7 @@ describe('EditEntriesNode', () => {
       {},
       { dataset: { datasetId: oldDs.id } },
       {
-        db,
+        reqContext: { db, userId: '' },
         node: NODE,
         contextFnExecution: () => Promise.resolve({ outputs: {} })
       }
@@ -116,7 +116,7 @@ describe('EditEntriesNode', () => {
     const res = await EditEntriesNode.onMetaExecution(
       {},
       { dataset: validDs },
-      db
+      { db, userId: '' }
     );
 
     expect(res.dataset).toEqual(validDs);
@@ -125,11 +125,19 @@ describe('EditEntriesNode', () => {
   test('should return empty object on onMetaExecution', async () => {
     (allAreDefinedAndPresent as jest.Mock).mockReturnValue(false);
 
-    let res = await EditEntriesNode.onMetaExecution({}, { dataset: null }, db);
+    let res = await EditEntriesNode.onMetaExecution(
+      {},
+      { dataset: null },
+      { db, userId: '' }
+    );
     expect(res.dataset.isPresent).toBe(false);
     expect(res.dataset.content.schema).toEqual([]);
 
-    res = await EditEntriesNode.onMetaExecution({}, { dataset: undefined }, db);
+    res = await EditEntriesNode.onMetaExecution(
+      {},
+      { dataset: undefined },
+      { db, userId: '' }
+    );
     expect(res.dataset.isPresent).toBe(false);
     expect(res.dataset.content.schema).toEqual([]);
   });
@@ -160,7 +168,7 @@ describe('EditEntriesNode', () => {
     const res = await EditEntriesNode.transformInputDefsToContextInputDefs(
       { dataset: DatasetSocket('Ds') },
       { dataset: validDs },
-      db
+      { db, userId: '' }
     );
 
     expect(res).toEqual({
@@ -202,7 +210,7 @@ describe('EditEntriesNode', () => {
       },
       {},
       [],
-      db
+      { db, userId: '' }
     );
 
     expect(res).toEqual({});
@@ -238,7 +246,7 @@ describe('EditEntriesNode', () => {
       },
       {},
       [],
-      db
+      { db, userId: '' }
     );
 
     expect(res).toEqual({
@@ -276,7 +284,7 @@ describe('EditEntriesNode', () => {
       {},
       { dataset: { datasetId: oldDs.id } },
       {
-        db,
+        reqContext: { db, userId: '' },
         node: NODE,
         contextFnExecution: input => Promise.resolve({ outputs: { val: ':)' } })
       }
@@ -312,7 +320,7 @@ describe('EditEntriesNode', () => {
         {},
         { dataset: { datasetId: oldDs.id } },
         {
-          db,
+          reqContext: { db, userId: '' },
           node: NODE
         }
       );
@@ -328,7 +336,7 @@ describe('EditEntriesNode', () => {
         {},
         { dataset: { datasetId: VALID_OBJECT_ID } },
         {
-          db,
+          reqContext: { db, userId: '' },
           node: NODE
         }
       );

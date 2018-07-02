@@ -90,7 +90,7 @@ export const Mutation = {
   updateWorkspace: (_, { id, nodes, connections }, context): Promise<boolean> =>
     updateWorkspace(id, nodes, connections, context),
   createWorkspace: (_, { name, description }, context): Promise<Workspace> =>
-    createWorkspace(name, description, context),
+    createWorkspace(name, context, description),
   deleteWorkspace: (_, { id }, context): Promise<boolean> =>
     deleteWorkspace(id, context),
   startCalculation: (

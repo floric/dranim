@@ -90,7 +90,7 @@ describe('FilterEntriesNode', () => {
       {},
       { dataset: { datasetId: oldDs.id } },
       {
-        db,
+        reqContext: { db, userId: '' },
         node: NODE,
         contextFnExecution: () =>
           Promise.resolve({ outputs: { keepEntry: true } })
@@ -120,7 +120,7 @@ describe('FilterEntriesNode', () => {
     const res = await FilterEntriesNode.onMetaExecution(
       {},
       { dataset: validDs },
-      db
+      { db, userId: '' }
     );
 
     expect(res.dataset).toEqual(validDs);
@@ -130,7 +130,7 @@ describe('FilterEntriesNode', () => {
     let res = await FilterEntriesNode.onMetaExecution(
       {},
       { dataset: null },
-      db
+      { db, userId: '' }
     );
     expect(res.dataset.isPresent).toBe(false);
     expect(res.dataset.content.schema).toEqual([]);
@@ -138,7 +138,7 @@ describe('FilterEntriesNode', () => {
     res = await FilterEntriesNode.onMetaExecution(
       {},
       { dataset: undefined },
-      db
+      { db, userId: '' }
     );
     expect(res.dataset.isPresent).toBe(false);
     expect(res.dataset.content.schema).toEqual([]);
@@ -165,7 +165,7 @@ describe('FilterEntriesNode', () => {
     const res = await FilterEntriesNode.transformInputDefsToContextInputDefs(
       { dataset: DatasetSocket('Ds') },
       { dataset: validDs },
-      db
+      { db, userId: '' }
     );
 
     expect(res).toEqual({
@@ -181,14 +181,14 @@ describe('FilterEntriesNode', () => {
     let res = await FilterEntriesNode.transformInputDefsToContextInputDefs(
       { dataset: DatasetSocket('Ds') },
       { dataset: { content: { schema: [] }, isPresent: false } },
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({});
 
     res = await FilterEntriesNode.transformInputDefsToContextInputDefs(
       { dataset: DatasetSocket('Ds') },
       { dataset: null },
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({});
   });
@@ -212,7 +212,7 @@ describe('FilterEntriesNode', () => {
     const inputRes = await FilterEntriesNode.transformInputDefsToContextInputDefs(
       { dataset: DatasetSocket('Ds') },
       { dataset: validDs },
-      db
+      { db, userId: '' }
     );
 
     const res = await FilterEntriesNode.transformContextInputDefsToContextOutputDefs(
@@ -221,7 +221,7 @@ describe('FilterEntriesNode', () => {
       inputRes,
       {},
       [],
-      db
+      { db, userId: '' }
     );
 
     expect(res).toEqual({
@@ -272,7 +272,7 @@ describe('FilterEntriesNode', () => {
     (getDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
     (processEntries as jest.Mock).mockImplementation(
-      async (a, b, c, processFn) => {
+      async (a, b, processFn) => {
         await processFn(entryA);
         await processFn(entryB);
         await processFn(entryC);
@@ -283,7 +283,7 @@ describe('FilterEntriesNode', () => {
       {},
       { dataset: { datasetId: oldDs.id } },
       {
-        db,
+        reqContext: { db, userId: '' },
         node: NODE,
         contextFnExecution: input =>
           Promise.resolve({
@@ -293,12 +293,20 @@ describe('FilterEntriesNode', () => {
     );
     expect(res.outputs.dataset.datasetId).toBe(newDs.id);
     expect(createEntry as jest.Mock).toHaveBeenCalledTimes(2);
-    expect(createEntry as jest.Mock).toHaveBeenCalledWith(db, newDs.id, {
-      [vs.name]: 1
-    });
-    expect(createEntry as jest.Mock).toHaveBeenCalledWith(db, newDs.id, {
-      [vs.name]: 2
-    });
+    expect(createEntry as jest.Mock).toHaveBeenCalledWith(
+      newDs.id,
+      {
+        [vs.name]: 1
+      },
+      { db, userId: '' }
+    );
+    expect(createEntry as jest.Mock).toHaveBeenCalledWith(
+      newDs.id,
+      {
+        [vs.name]: 2
+      },
+      { db, userId: '' }
+    );
   });
 
   test('should throw errors for missing context', async () => {
@@ -328,7 +336,7 @@ describe('FilterEntriesNode', () => {
         {},
         { dataset: { datasetId: oldDs.id } },
         {
-          db,
+          reqContext: { db, userId: '' },
           node: NODE
         }
       );
@@ -344,7 +352,7 @@ describe('FilterEntriesNode', () => {
         {},
         { dataset: { datasetId: VALID_OBJECT_ID } },
         {
-          db,
+          reqContext: { db, userId: '' },
           node: NODE
         }
       );

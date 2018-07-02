@@ -119,7 +119,7 @@ describe('JoinDatasetsNode', () => {
         { valueA: 'TEST', valueB: 'else' },
         { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
         {
-          db,
+          reqContext: { db, userId: '' },
           node: NODE
         }
       );
@@ -171,7 +171,7 @@ describe('JoinDatasetsNode', () => {
         { valueA: dsA.valueschemas[0].name, valueB: dsB.valueschemas[0].name },
         { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
         {
-          db,
+          reqContext: { db, userId: '' },
           node: NODE
         }
       );
@@ -256,7 +256,7 @@ describe('JoinDatasetsNode', () => {
       { valueA: schemaA.name, valueB: schemaB.name },
       { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
       {
-        db,
+        reqContext: { db, userId: '' },
         node: NODE
       }
     );
@@ -264,36 +264,56 @@ describe('JoinDatasetsNode', () => {
     expect(res.results).toBeUndefined();
     expect(res.outputs.joined.datasetId).toBe(newDs.id);
     expect(createDataset as jest.Mock).toBeCalledWith(
-      db,
       'FilterEntries-123',
+      { db, userId: '' },
       NODE.workspaceId
     );
     expect(addValueSchema as jest.Mock).toHaveBeenCalledTimes(5);
-    expect(addValueSchema as jest.Mock).toBeCalledWith(db, newDs.id, {
-      ...schemaA,
-      unique: false,
-      name: `A_${schemaA.name}`
-    });
-    expect(addValueSchema as jest.Mock).toBeCalledWith(db, newDs.id, {
-      ...schemaOnlyA,
-      unique: false,
-      name: `A_${schemaOnlyA.name}`
-    });
-    expect(addValueSchema as jest.Mock).toBeCalledWith(db, newDs.id, {
-      ...schemaB,
-      unique: false,
-      name: `B_${schemaB.name}`
-    });
-    expect(addValueSchema as jest.Mock).toBeCalledWith(db, newDs.id, {
-      ...schemaOnlyB,
-      unique: false,
-      name: `B_${schemaOnlyB.name}`
-    });
-    expect(addValueSchema as jest.Mock).toBeCalledWith(db, newDs.id, {
-      ...otherColAinB,
-      unique: false,
-      name: `B_${otherColAinB.name}`
-    });
+    expect(addValueSchema as jest.Mock).toBeCalledWith(
+      newDs.id,
+      {
+        ...schemaA,
+        unique: false,
+        name: `A_${schemaA.name}`
+      },
+      { db, userId: '' }
+    );
+    expect(addValueSchema as jest.Mock).toBeCalledWith(
+      newDs.id,
+      {
+        ...schemaOnlyA,
+        unique: false,
+        name: `A_${schemaOnlyA.name}`
+      },
+      { db, userId: '' }
+    );
+    expect(addValueSchema as jest.Mock).toBeCalledWith(
+      newDs.id,
+      {
+        ...schemaB,
+        unique: false,
+        name: `B_${schemaB.name}`
+      },
+      { db, userId: '' }
+    );
+    expect(addValueSchema as jest.Mock).toBeCalledWith(
+      newDs.id,
+      {
+        ...schemaOnlyB,
+        unique: false,
+        name: `B_${schemaOnlyB.name}`
+      },
+      { db, userId: '' }
+    );
+    expect(addValueSchema as jest.Mock).toBeCalledWith(
+      newDs.id,
+      {
+        ...otherColAinB,
+        unique: false,
+        name: `B_${otherColAinB.name}`
+      },
+      { db, userId: '' }
+    );
   });
 
   test('should support same column names', async () => {
@@ -359,7 +379,7 @@ describe('JoinDatasetsNode', () => {
       { valueA: schemaA.name, valueB: schemaB.name },
       { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
       {
-        db,
+        reqContext: { db, userId: '' },
         node: NODE
       }
     );
@@ -367,26 +387,38 @@ describe('JoinDatasetsNode', () => {
     expect(res.results).toBeUndefined();
     expect(res.outputs.joined.datasetId).toBe(newDs.id);
     expect(createDataset as jest.Mock).toBeCalledWith(
-      db,
       'FilterEntries-123',
+      { db, userId: '' },
       NODE.workspaceId
     );
     expect(addValueSchema as jest.Mock).toHaveBeenCalledTimes(3);
-    expect(addValueSchema as jest.Mock).toBeCalledWith(db, newDs.id, {
-      ...schemaA,
-      unique: false,
-      name: `A_${schemaA.name}`
-    });
-    expect(addValueSchema as jest.Mock).toBeCalledWith(db, newDs.id, {
-      ...schemaB,
-      unique: false,
-      name: `B_${schemaB.name}`
-    });
-    expect(addValueSchema as jest.Mock).toBeCalledWith(db, newDs.id, {
-      ...schemaOnlyB,
-      unique: false,
-      name: `B_${schemaOnlyB.name}`
-    });
+    expect(addValueSchema as jest.Mock).toBeCalledWith(
+      newDs.id,
+      {
+        ...schemaA,
+        unique: false,
+        name: `A_${schemaA.name}`
+      },
+      { db, userId: '' }
+    );
+    expect(addValueSchema as jest.Mock).toBeCalledWith(
+      newDs.id,
+      {
+        ...schemaB,
+        unique: false,
+        name: `B_${schemaB.name}`
+      },
+      { db, userId: '' }
+    );
+    expect(addValueSchema as jest.Mock).toBeCalledWith(
+      newDs.id,
+      {
+        ...schemaOnlyB,
+        unique: false,
+        name: `B_${schemaOnlyB.name}`
+      },
+      { db, userId: '' }
+    );
   });
 
   test('should add joined entries', async () => {
@@ -486,31 +518,39 @@ describe('JoinDatasetsNode', () => {
         };
       }
     });
-    (processEntries as jest.Mock).mockImplementation(
-      async (a, b, c, processFn) => processFn(entryA)
+    (processEntries as jest.Mock).mockImplementation(async (a, b, processFn) =>
+      processFn(entryA)
     );
 
     const res = await JoinDatasetsNode.onNodeExecution(
       { valueA: schemaA.name, valueB: schemaB.name },
       { datasetA: { datasetId: dsA.id }, datasetB: { datasetId: dsB.id } },
-      { db, node: NODE }
+      { reqContext: { db, userId: '' }, node: NODE }
     );
 
     expect(res.results).toBeUndefined();
     expect(res.outputs.joined.datasetId).toBe(newDs.id);
     expect(createEntry as jest.Mock).toHaveBeenCalledTimes(2);
-    expect(createEntry as jest.Mock).toHaveBeenCalledWith(db, newDs.id, {
-      [`A_${schemaA.name}`]: 'test',
-      [`B_${schemaB.name}`]: 'test',
-      [`A_${schemaOnlyA.name}`]: true,
-      [`B_${schemaOnlyB.name}`]: 8
-    });
-    expect(createEntry as jest.Mock).toHaveBeenCalledWith(db, newDs.id, {
-      [`A_${schemaA.name}`]: 'test',
-      [`B_${schemaB.name}`]: 'test',
-      [`A_${schemaOnlyA.name}`]: true,
-      [`B_${schemaOnlyB.name}`]: 9
-    });
+    expect(createEntry as jest.Mock).toHaveBeenCalledWith(
+      newDs.id,
+      {
+        [`A_${schemaA.name}`]: 'test',
+        [`B_${schemaB.name}`]: 'test',
+        [`A_${schemaOnlyA.name}`]: true,
+        [`B_${schemaOnlyB.name}`]: 8
+      },
+      { db, userId: '' }
+    );
+    expect(createEntry as jest.Mock).toHaveBeenCalledWith(
+      newDs.id,
+      {
+        [`A_${schemaA.name}`]: 'test',
+        [`B_${schemaB.name}`]: 'test',
+        [`A_${schemaOnlyA.name}`]: true,
+        [`B_${schemaOnlyB.name}`]: 9
+      },
+      { db, userId: '' }
+    );
   });
 
   test('should have absent metas', async () => {
@@ -522,7 +562,7 @@ describe('JoinDatasetsNode', () => {
         datasetA: { content: { schema: [] }, isPresent: true },
         datasetB: { content: { schema: [] }, isPresent: true }
       },
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({
       joined: { isPresent: false, content: { schema: [] } }
@@ -534,7 +574,7 @@ describe('JoinDatasetsNode', () => {
         datasetA: { content: { schema: [] }, isPresent: true },
         datasetB: { content: { schema: [] }, isPresent: true }
       },
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({
       joined: { isPresent: false, content: { schema: [] } }
@@ -546,7 +586,7 @@ describe('JoinDatasetsNode', () => {
         datasetA: { content: { schema: [] }, isPresent: true },
         datasetB: { content: { schema: [] }, isPresent: true }
       },
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({
       joined: { isPresent: false, content: { schema: [] } }
@@ -558,7 +598,7 @@ describe('JoinDatasetsNode', () => {
         datasetA: { content: { schema: [] }, isPresent: false },
         datasetB: { content: { schema: [] }, isPresent: true }
       },
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({
       joined: { isPresent: false, content: { schema: [] } }
@@ -570,7 +610,7 @@ describe('JoinDatasetsNode', () => {
         datasetA: { content: { schema: [] }, isPresent: true },
         datasetB: { content: { schema: [] }, isPresent: false }
       },
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({
       joined: { isPresent: false, content: { schema: [] } }
@@ -619,7 +659,7 @@ describe('JoinDatasetsNode', () => {
           isPresent: true
         }
       },
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({
       joined: {

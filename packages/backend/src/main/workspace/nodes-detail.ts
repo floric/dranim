@@ -9,7 +9,7 @@ import {
   SocketDefs,
   SocketInstance
 } from '@masterthesis/shared';
-import { Db, ObjectID } from 'mongodb';
+import { ObjectID } from 'mongodb';
 
 import { getMetaInputs } from '../calculation/meta-execution';
 import { isNodeInMetaValid } from '../calculation/validation';

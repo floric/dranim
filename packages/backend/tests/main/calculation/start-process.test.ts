@@ -41,9 +41,9 @@ describe('Start Process', () => {
   });
 
   test('should get empty calculations collection', async () => {
-    const ws = await createWorkspace(db, 'test', '');
+    const ws = await createWorkspace('test', { db, userId: '' }, '');
 
-    const processes = await getAllCalculations(db, ws.id);
+    const processes = await getAllCalculations(ws.id, { db, userId: '' });
 
     expect(processes.length).toBe(0);
   });
@@ -53,8 +53,8 @@ describe('Start Process', () => {
       Promise.resolve<IOValues<{}>>({ outputs: {}, results: {} })
     );
 
-    const ws = await createWorkspace(db, 'test', '');
-    const newProcess = await startCalculation(db, ws.id, true);
+    const ws = await createWorkspace('test', { db, userId: '' }, '');
+    const newProcess = await startCalculation(ws.id, { db, userId: '' }, true);
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
     expect(newProcess.finish).toBeNull();
@@ -62,7 +62,7 @@ describe('Start Process', () => {
     expect(newProcess.totalOutputs).toBe(0);
     expect(newProcess.start).toBeDefined();
 
-    const processes = await getAllCalculations(db, ws.id);
+    const processes = await getAllCalculations(ws.id, { db, userId: '' });
     expect(processes.length).toBe(1);
 
     const finishedProcess = processes[0];
@@ -80,7 +80,7 @@ describe('Start Process', () => {
       Promise.resolve<IOValues<{}>>({ outputs: {}, results: {} })
     );
 
-    const ws = await createWorkspace(db, 'test', '');
+    const ws = await createWorkspace('test', { db, userId: '' }, '');
     await Promise.all(
       [
         {
@@ -101,10 +101,12 @@ describe('Start Process', () => {
           x: 0,
           y: 0
         }
-      ].map(n => createNode(db, n.type, n.workspaceId, [], n.x, n.y))
+      ].map(n =>
+        createNode(n.type, n.workspaceId, [], n.x, n.y, { db, userId: '' })
+      )
     );
 
-    const newProcess = await startCalculation(db, ws.id, true);
+    const newProcess = await startCalculation(ws.id, { db, userId: '' }, true);
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
     expect(newProcess.finish).toBeNull();
@@ -112,7 +114,7 @@ describe('Start Process', () => {
     expect(newProcess.totalOutputs).toBe(0);
     expect(newProcess.start).toBeDefined();
 
-    const processes = await getAllCalculations(db, ws.id);
+    const processes = await getAllCalculations(ws.id, { db, userId: '' });
     expect(processes.length).toBe(1);
 
     const finishedProcess = processes[0];
@@ -132,7 +134,7 @@ describe('Start Process', () => {
       throw new Error('Something went wrong during node execution.');
     });
 
-    const ws = await createWorkspace(db, 'test', '');
+    const ws = await createWorkspace('test', { db, userId: '' }, '');
     await Promise.all(
       [
         {
@@ -141,10 +143,12 @@ describe('Start Process', () => {
           x: 0,
           y: 0
         }
-      ].map(n => createNode(db, n.type, n.workspaceId, [], n.x, n.y))
+      ].map(n =>
+        createNode(n.type, n.workspaceId, [], n.x, n.y, { db, userId: '' })
+      )
     );
 
-    const newProcess = await startCalculation(db, ws.id, true);
+    const newProcess = await startCalculation(ws.id, { db, userId: '' }, true);
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
     expect(newProcess.finish).toBeNull();
@@ -152,7 +156,7 @@ describe('Start Process', () => {
     expect(newProcess.totalOutputs).toBe(0);
     expect(newProcess.start).toBeDefined();
 
-    const processes = await getAllCalculations(db, ws.id);
+    const processes = await getAllCalculations(ws.id, { db, userId: '' });
     expect(processes.length).toBe(1);
 
     const finishedProcess = processes[0];

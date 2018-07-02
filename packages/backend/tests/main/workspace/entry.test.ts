@@ -63,18 +63,34 @@ describe('Entry', () => {
     (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     const schemaValue = 'test';
-    const entry = await createEntry(db, ds.id, { [schema.name]: schemaValue });
+    const entry = await createEntry(
+      ds.id,
+      { [schema.name]: schemaValue },
+      {
+        db,
+        userId: ''
+      }
+    );
 
     expect(entry.id).toBeDefined();
     expect(entry.values[schema.name]).toBe(schemaValue);
 
-    const retrievedEntry = await getEntry(db, ds.id, entry.id);
+    const retrievedEntry = await getEntry(ds.id, entry.id, {
+      db,
+      userId: ''
+    });
     expect(retrievedEntry).toEqual(entry);
 
-    const res = await deleteEntry(db, ds.id, entry.id);
+    const res = await deleteEntry(ds.id, entry.id, {
+      db,
+      userId: ''
+    });
     expect(res).toBe(true);
 
-    const unknownEntry = await getEntry(db, ds.id, entry.id);
+    const unknownEntry = await getEntry(ds.id, entry.id, {
+      db,
+      userId: ''
+    });
     expect(unknownEntry).toBe(null);
   });
 
@@ -91,7 +107,10 @@ describe('Entry', () => {
     (getDataset as jest.Mock).mockResolvedValue(ds);
     (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
-    const res = await getEntry(db, ds.id, VALID_OBJECT_ID);
+    const res = await getEntry(ds.id, VALID_OBJECT_ID, {
+      db,
+      userId: ''
+    });
     expect(res).toBe(null);
   });
 
@@ -128,9 +147,15 @@ describe('Entry', () => {
       abc: 17
     };
 
-    const entry = await createEntryFromJSON(db, ds.id, JSON.stringify(payload));
+    const entry = await createEntryFromJSON(ds.id, JSON.stringify(payload), {
+      db,
+      userId: ''
+    });
 
-    const entryFromServer = await getEntry(db, ds.id, entry.id);
+    const entryFromServer = await getEntry(ds.id, entry.id, {
+      db,
+      userId: ''
+    });
 
     expect(entry.values).toEqual(payload);
     expect(entryFromServer.values).toEqual(payload);
@@ -142,11 +167,10 @@ describe('Entry', () => {
     });
 
     try {
-      await createEntryFromJSON(
+      await createEntryFromJSON(VALID_OBJECT_ID, JSON.stringify({ test: 9 }), {
         db,
-        VALID_OBJECT_ID,
-        JSON.stringify({ test: 9 })
-      );
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unknown dataset');
@@ -175,9 +199,23 @@ describe('Entry', () => {
     (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     const values = ['a', 'b', 'c', 'd', 'e'];
-    await Promise.all(values.map(v => createEntry(db, ds.id, { test: v })));
+    await Promise.all(
+      values.map(v =>
+        createEntry(
+          ds.id,
+          { test: v },
+          {
+            db,
+            userId: ''
+          }
+        )
+      )
+    );
 
-    const count = await getEntriesCount(db, ds.id);
+    const count = await getEntriesCount(ds.id, {
+      db,
+      userId: ''
+    });
     expect(count).toBe(values.length);
   });
 
@@ -203,9 +241,23 @@ describe('Entry', () => {
     (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     const values = ['a', 'b', 'c', 'd', 'e'];
-    await Promise.all(values.map(v => createEntry(db, ds.id, { test: v })));
+    await Promise.all(
+      values.map(v =>
+        createEntry(
+          ds.id,
+          { test: v },
+          {
+            db,
+            userId: ''
+          }
+        )
+      )
+    );
 
-    const entries = await getLatestEntries(db, ds.id);
+    const entries = await getLatestEntries(ds.id, {
+      db,
+      userId: ''
+    });
     expect(entries.length).toBe(values.length);
     expect(
       entries.map(e => e.values).sort((a, b) => a.test.localeCompare(b.test))
@@ -226,7 +278,14 @@ describe('Entry', () => {
     (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     try {
-      await createEntry(db, ds.id, { test: 'abc' });
+      await createEntry(
+        ds.id,
+        { test: 'abc' },
+        {
+          db,
+          userId: ''
+        }
+      );
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unsupported values provided');
@@ -247,7 +306,14 @@ describe('Entry', () => {
     (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     try {
-      await createEntry(db, ds.id, {});
+      await createEntry(
+        ds.id,
+        {},
+        {
+          db,
+          userId: ''
+        }
+      );
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('No values specified for entry.');
@@ -268,14 +334,28 @@ describe('Entry', () => {
     (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     try {
-      await createEntry(db, ds.id, { [null as any]: 9 });
+      await createEntry(
+        ds.id,
+        { [null as any]: 9 },
+        {
+          db,
+          userId: ''
+        }
+      );
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unsupported values provided');
     }
 
     try {
-      await createEntry(db, ds.id, { test: undefined });
+      await createEntry(
+        ds.id,
+        { test: undefined },
+        {
+          db,
+          userId: ''
+        }
+      );
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Value malformed');
@@ -288,7 +368,14 @@ describe('Entry', () => {
     });
 
     try {
-      await createEntry(db, VALID_OBJECT_ID, { test: 9 });
+      await createEntry(
+        VALID_OBJECT_ID,
+        { test: 9 },
+        {
+          db,
+          userId: ''
+        }
+      );
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unknown dataset');
@@ -323,7 +410,14 @@ describe('Entry', () => {
     (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     try {
-      await createEntry(db, ds.id, { [schemaA.name]: 'test' });
+      await createEntry(
+        ds.id,
+        { [schemaA.name]: 'test' },
+        {
+          db,
+          userId: ''
+        }
+      );
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Values from Schema not set');
@@ -351,10 +445,17 @@ describe('Entry', () => {
     (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     try {
-      await createEntry(db, ds.id, {
-        [schema.name]: 'test',
-        unknown: 'test'
-      });
+      await createEntry(
+        ds.id,
+        {
+          [schema.name]: 'test',
+          unknown: 'test'
+        },
+        {
+          db,
+          userId: ''
+        }
+      );
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unsupported values provided');
@@ -378,7 +479,7 @@ describe('Entry', () => {
       entriesCount: 0
     };
 
-    const coll = getEntryCollection(db, ds.id);
+    const coll = getEntryCollection(ds.id, db);
     await coll.createIndex(`values.${schema.name}`, {
       unique: true
     });
@@ -386,10 +487,24 @@ describe('Entry', () => {
     (getDataset as jest.Mock).mockResolvedValue(ds);
     (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
-    await createEntry(db, ds.id, { [schema.name]: 'test' });
+    await createEntry(
+      ds.id,
+      { [schema.name]: 'test' },
+      {
+        db,
+        userId: ''
+      }
+    );
 
     try {
-      await createEntry(db, ds.id, { [schema.name]: 'test' });
+      await createEntry(
+        ds.id,
+        { [schema.name]: 'test' },
+        {
+          db,
+          userId: ''
+        }
+      );
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Key already used');
@@ -398,14 +513,20 @@ describe('Entry', () => {
 
   test('should throw error for invalid id formats', async () => {
     try {
-      await deleteEntry(db, 'test', VALID_OBJECT_ID);
+      await deleteEntry('test', VALID_OBJECT_ID, {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Invalid ID');
     }
 
     try {
-      await deleteEntry(db, VALID_OBJECT_ID, 'test');
+      await deleteEntry(VALID_OBJECT_ID, 'test', {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Invalid ID');
@@ -434,15 +555,33 @@ describe('Entry', () => {
     (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     const [e1, e2, e3] = await Promise.all(
-      [1, 2, 3].map(n => createEntry(db, ds.id, { value: n }))
+      [1, 2, 3].map(n =>
+        createEntry(
+          ds.id,
+          { value: n },
+          {
+            db,
+            userId: ''
+          }
+        )
+      )
     );
 
     await Promise.all([
-      deleteEntry(db, ds.id, e1.id),
-      deleteEntry(db, ds.id, e2.id)
+      deleteEntry(ds.id, e1.id, {
+        db,
+        userId: ''
+      }),
+      deleteEntry(ds.id, e2.id, {
+        db,
+        userId: ''
+      })
     ]);
 
-    const entriesCount = await getEntriesCount(db, ds.id);
+    const entriesCount = await getEntriesCount(ds.id, {
+      db,
+      userId: ''
+    });
     expect(entriesCount).toBe(1);
   });
 
@@ -468,14 +607,32 @@ describe('Entry', () => {
     (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
     await Promise.all(
-      [1, 2, 3, 4, 5].map(n => createEntry(db, ds.id, { value: n }))
+      [1, 2, 3, 4, 5].map(n =>
+        createEntry(
+          ds.id,
+          { value: n },
+          {
+            db,
+            userId: ''
+          }
+        )
+      )
     );
-    let entriesCount = await getEntriesCount(db, ds.id);
+    let entriesCount = await getEntriesCount(ds.id, {
+      db,
+      userId: ''
+    });
     expect(entriesCount).toBe(5);
 
-    await clearEntries(db, ds.id);
+    await clearEntries(ds.id, {
+      db,
+      userId: ''
+    });
 
-    entriesCount = await getEntriesCount(db, ds.id);
+    entriesCount = await getEntriesCount(ds.id, {
+      db,
+      userId: ''
+    });
     expect(entriesCount).toBe(0);
   });
 });
