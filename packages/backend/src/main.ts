@@ -61,7 +61,7 @@ export const main = async (options: IMainOptions) => {
       cookie: { secure: false }
     })
   );
-  app.use(morgan('tiny'));
+  app.use(morgan('combined'));
   app.use(
     bodyParser.json({}),
     bodyParser.urlencoded({
