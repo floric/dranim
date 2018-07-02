@@ -36,6 +36,10 @@ export const registerRoutes = (app: Express, db: Db) => {
     }
   });
 
+  app.get('/still-alive', (req, res) => {
+    res.sendStatus(200);
+  });
+
   app.post('/registration', async (req, res) => {
     if (
       !req.body ||
