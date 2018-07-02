@@ -1,5 +1,6 @@
 import {
   allAreDefinedAndPresent,
+  ApolloContext,
   Dataset,
   Entry,
   FormValues,
@@ -11,7 +12,6 @@ import {
   Values,
   ValueSchema
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { createDynamicDatasetName } from '../../calculation/utils';
 import {
@@ -61,29 +61,33 @@ export const JoinDatasetsNode: ServerNodeDef<
       }
     };
   },
-  onNodeExecution: async (form, inputs, { db, node }) => {
+  onNodeExecution: async (form, inputs, { node, reqContext }) => {
     const [dsA, dsB] = await Promise.all([
-      tryGetDataset(inputs.datasetA.datasetId, db),
-      tryGetDataset(inputs.datasetB.datasetId, db)
+      tryGetDataset(inputs.datasetA.datasetId, reqContext),
+      tryGetDataset(inputs.datasetB.datasetId, reqContext)
     ]);
 
     validateSchemas(form, dsA, dsB);
 
     const newDs = await createDataset(
-      db,
       createDynamicDatasetName(JoinDatasetsNodeDef.type, node.id),
+      reqContext,
       node.workspaceId
     );
-    await addSchemasFromBothDatasets(db, newDs, dsA, dsB);
-    await processEntries(db, dsA!.id, node.id, entry =>
-      getMatchesAndCreateEntries(
-        db,
-        entry,
-        form.valueA!,
-        form.valueB!,
-        newDs.id,
-        dsB.id
-      )
+    await addSchemasFromBothDatasets(newDs, dsA, dsB, reqContext);
+    await processEntries(
+      dsA!.id,
+      node.id,
+      entry =>
+        getMatchesAndCreateEntries(
+          entry,
+          form.valueA!,
+          form.valueB!,
+          newDs.id,
+          dsB.id,
+          reqContext
+        ),
+      reqContext
     );
 
     return { outputs: { joined: { datasetId: newDs.id } } };
@@ -91,19 +95,19 @@ export const JoinDatasetsNode: ServerNodeDef<
 };
 
 const getMatchesAndCreateEntries = async (
-  db: Db,
   docA: Entry,
   valNameA: string,
   valNameB: string,
   newDsId: string,
-  dsBid: string
+  dsBid: string,
+  reqContext: ApolloContext
 ) => {
-  const col = getEntryCollection(db, dsBid);
+  const col = getEntryCollection(dsBid, reqContext.db);
   const valFromA = docA.values[valNameA];
   const cursor = col.find({ [`values.${valNameB}`]: valFromA });
   while (await cursor.hasNext()) {
     const docB = await cursor.next();
-    await createEntry(db, newDsId, joinEntry(docA.values, docB.values));
+    await createEntry(newDsId, joinEntry(docA.values, docB.values), reqContext);
   }
   await cursor.close();
 };
@@ -122,27 +126,35 @@ const joinEntry = (valuesA: Values, valuesB: Values) => {
 };
 
 const addSchemasFromBothDatasets = async (
-  db: Db,
   newDs: Dataset,
   dsA: Dataset,
-  dsB: Dataset
+  dsB: Dataset,
+  reqContext: ApolloContext
 ) => {
   await Promise.all(
     Object.entries(dsA.valueschemas).map(val =>
-      addValueSchema(db, newDs.id, {
-        ...val[1],
-        unique: false,
-        name: `A_${val[1].name}`
-      })
+      addValueSchema(
+        newDs.id,
+        {
+          ...val[1],
+          unique: false,
+          name: `A_${val[1].name}`
+        },
+        reqContext
+      )
     )
   );
   await Promise.all(
     Object.entries(dsB.valueschemas).map(val =>
-      addValueSchema(db, newDs.id, {
-        ...val[1],
-        unique: false,
-        name: `B_${val[1].name}`
-      })
+      addValueSchema(
+        newDs.id,
+        {
+          ...val[1],
+          unique: false,
+          name: `B_${val[1].name}`
+        },
+        reqContext
+      )
     )
   );
 };

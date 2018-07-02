@@ -11,6 +11,8 @@ Parameters:
     Type: String
   FrontendDomain:
     Type: String
+  SessionSecret:
+    Type: String
   EuWestCertArn:
     Type: String
     AllowedPattern: "arn:aws:acm:.*"
@@ -59,6 +61,15 @@ Resources:
         - Namespace: aws:autoscaling:launchconfiguration
           OptionName: InstanceType
           Value: t2.micro
+        - Namespace: aws:elb:healthcheck
+          OptionName: HealthyThreshold
+          Value: 2
+        - Namespace: aws:elb:healthcheck
+          OptionName: Interval
+          Value: 60
+        - Namespace: aws:elasticbeanstalk:application
+          OptionName: Application Healthcheck URL
+          Value: /still-alive
         - Namespace: aws:elb:listener:443
           OptionName: ListenerProtocol
           Value: HTTPS
@@ -86,6 +97,9 @@ Resources:
         - Namespace: aws:elasticbeanstalk:application:environment
           OptionName: FRONTEND_DOMAIN
           Value: !Ref FrontendDomain
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: SESSION_SECRET
+          Value: !Ref SessionSecret
         - Namespace: aws:elasticbeanstalk:application:environment
           OptionName: BACKEND_PORT
           Value: 80

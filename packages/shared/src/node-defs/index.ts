@@ -2,11 +2,11 @@ import { NodeDef } from '../nodes';
 
 import * as BooleanNodes from './boolean';
 import * as DatasetNodes from './dataset';
+import * as DatetimeNodes from './datetime';
 import * as EntryNodes from './entries';
 import * as NumberNodes from './number';
 import * as StringNodes from './string';
 import * as TimeNodes from './time';
-import * as DatetimeNodes from './datetime';
 
 export * from './dataset';
 export * from './number';

@@ -35,13 +35,13 @@ describe('DatasetOutputNode', () => {
   });
 
   test('should have valid dataset', async () => {
-    const ds = await createDataset(db, 'test');
+    const ds = await createDataset('test', { db, userId: '' });
 
     const res = await DatasetOutputNode.onNodeExecution(
       {},
       { dataset: { datasetId: ds.id } },
       {
-        db,
+        reqContext: { db, userId: '' },
         node: NODE
       }
     );
@@ -54,7 +54,7 @@ describe('DatasetOutputNode', () => {
     let res = await DatasetOutputNode.onMetaExecution(
       {},
       { dataset: null },
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({
       dataset: { content: { schema: [] }, isPresent: false }
@@ -63,7 +63,7 @@ describe('DatasetOutputNode', () => {
     res = await DatasetOutputNode.onMetaExecution(
       {},
       { dataset: undefined },
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({
       dataset: { content: { schema: [] }, isPresent: false }
@@ -72,7 +72,7 @@ describe('DatasetOutputNode', () => {
     res = await DatasetOutputNode.onMetaExecution(
       {},
       { dataset: { content: { schema: [] }, isPresent: false } },
-      db
+      { db, userId: '' }
     );
     expect(res).toEqual({
       dataset: { content: { schema: [] }, isPresent: false }
@@ -97,7 +97,10 @@ describe('DatasetOutputNode', () => {
       }
     };
 
-    const res = await DatasetOutputNode.onMetaExecution({}, inputDef, db);
+    const res = await DatasetOutputNode.onMetaExecution({}, inputDef, {
+      db,
+      userId: ''
+    });
     expect(res).toEqual(inputDef);
   });
 });

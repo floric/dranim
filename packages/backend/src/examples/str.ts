@@ -1,5 +1,4 @@
-import { DataType } from '@masterthesis/shared';
-import { Db } from 'mongodb';
+import { ApolloContext, DataType } from '@masterthesis/shared';
 
 import {
   addValueSchema,
@@ -8,18 +7,18 @@ import {
 } from '../main/workspace/dataset';
 import { createWorkspace } from '../main/workspace/workspace';
 
-export const createSTRDemoData = async (db: Db) => {
-  let ds = await createDataset(db, 'Passages');
+export const createSTRDemoData = async (reqContext: ApolloContext) => {
+  let ds = await createDataset('Passages', reqContext);
   for (const s of passagesSchemas) {
-    await addValueSchema(db, ds.id, s);
+    await addValueSchema(ds.id, s, reqContext);
   }
-  ds = await createDataset(db, 'Commodities');
+  ds = await createDataset('Commodities', reqContext);
   for (const s of commoditiesSchemas) {
-    await addValueSchema(db, ds.id, s);
+    await addValueSchema(ds.id, s, reqContext);
   }
   await createWorkspace(
-    db,
     'Trade volumes',
+    reqContext,
     'Contains aggregation and filtering for trading development from 1600 until 1800.'
   );
   return true;

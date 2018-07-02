@@ -72,7 +72,10 @@ describe('Connections', () => {
     const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
     const toSocket: SocketInstance = { name: 'val', nodeId: nodeB.id };
 
-    const newConn = await createConnection(fromSocket, toSocket, db);
+    const newConn = await createConnection(fromSocket, toSocket, {
+      db,
+      userId: ''
+    });
 
     expect(newConn.id).toBeDefined();
     expect(newConn.from).toEqual(fromSocket);
@@ -80,21 +83,33 @@ describe('Connections', () => {
     expect(newConn.workspaceId).toBe('123');
     expect(newConn.contextIds).toEqual([]);
 
-    const res = await deleteConnection(db, newConn.id);
+    const res = await deleteConnection(newConn.id, {
+      db,
+      userId: ''
+    });
     expect(res).toBe(true);
 
-    const unknownConn = await getConnection(newConn.id, db);
+    const unknownConn = await getConnection(newConn.id, {
+      db,
+      userId: ''
+    });
     expect(unknownConn).toBe(null);
   });
 
   test('should return null for invalid id', async () => {
-    const res = await getConnection('test', db);
+    const res = await getConnection('test', {
+      db,
+      userId: ''
+    });
     expect(res).toBe(null);
   });
 
   test('should throw error for unknown connection', async () => {
     try {
-      await tryGetConnection(VALID_OBJECT_ID, db);
+      await tryGetConnection(VALID_OBJECT_ID, {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Invalid connection');
@@ -132,14 +147,20 @@ describe('Connections', () => {
     await createConnection(
       { name: 'test', nodeId: nodeA.id },
       { name: 'test', nodeId: nodeB.id },
-      db
+      {
+        db,
+        userId: ''
+      }
     );
 
     try {
       await createConnection(
         { name: 'test', nodeId: nodeA.id },
         { name: 'test', nodeId: nodeB.id },
-        db
+        {
+          db,
+          userId: ''
+        }
       );
       throw NeverGoHereError;
     } catch (err) {
@@ -192,7 +213,10 @@ describe('Connections', () => {
     };
     const toSocket: SocketInstance = { name: 'val', nodeId: nodeBinContext.id };
 
-    const newConn = await createConnection(fromSocket, toSocket, db);
+    const newConn = await createConnection(fromSocket, toSocket, {
+      db,
+      userId: ''
+    });
 
     expect(newConn.id).toBeDefined();
     expect(newConn.from).toEqual(fromSocket);
@@ -203,7 +227,10 @@ describe('Connections', () => {
 
   test('should error when trying to create invalid connection', async () => {
     try {
-      await createConnection(null, null, db);
+      await createConnection(null, null, {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Invalid connection');
@@ -243,11 +270,17 @@ describe('Connections', () => {
     const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
     const toSocket: SocketInstance = { name: 'val', nodeId: nodeB.id };
 
-    const newConn = await createConnection(fromSocket, toSocket, db);
+    const newConn = await createConnection(fromSocket, toSocket, {
+      db,
+      userId: ''
+    });
     expect(newConn).not.toBe(null);
 
     try {
-      await createConnection(toSocket, fromSocket, db);
+      await createConnection(toSocket, fromSocket, {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Cyclic dependencies not allowed');
@@ -276,7 +309,10 @@ describe('Connections', () => {
     };
 
     try {
-      await createConnection(toSocket, fromSocket, db);
+      await createConnection(toSocket, fromSocket, {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unknown node');
@@ -318,7 +354,10 @@ describe('Connections', () => {
     };
 
     try {
-      await createConnection(toSocket, fromSocket, db);
+      await createConnection(toSocket, fromSocket, {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Nodes live in different workspaces');
@@ -360,7 +399,10 @@ describe('Connections', () => {
     };
 
     try {
-      await createConnection(toSocket, fromSocket, db);
+      await createConnection(toSocket, fromSocket, {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Nodes live in different contexts');
@@ -379,7 +421,10 @@ describe('Connections', () => {
       contextIds: ['abc', 'randomid', 'test']
     });
 
-    await deleteConnectionsInContext('randomid', db);
+    await deleteConnectionsInContext('randomid', {
+      db,
+      userId: ''
+    });
 
     const count = await connectionsCollection.count({});
     expect(count).toBe(0);

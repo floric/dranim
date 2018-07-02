@@ -291,8 +291,8 @@ describe('AddValuesNode', () => {
       values: { [oldVS.name]: 'foo' }
     };
     (createDynamicDatasetName as jest.Mock).mockReturnValue('AddEntries');
-    (processEntries as jest.Mock).mockImplementation(
-      async (a, b, c, processFn) => processFn(entryA)
+    (processEntries as jest.Mock).mockImplementation(async (a, b, processFn) =>
+      processFn(entryA)
     );
     (getDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
@@ -312,7 +312,7 @@ describe('AddValuesNode', () => {
       },
       { dataset: { datasetId: oldDs.id } },
       {
-        db,
+        reqContext: { db, userId: '' },
         node: {
           id: VALID_OBJECT_ID,
           contextIds: [],
@@ -332,10 +332,14 @@ describe('AddValuesNode', () => {
 
     expect(res.outputs.dataset.datasetId).toBe(newDs.id);
     expect(createEntry as jest.Mock).toHaveBeenCalledTimes(1);
-    expect(createEntry as jest.Mock).toHaveBeenCalledWith(db, newDs.id, {
-      [oldVS.name]: 'foo',
-      new: 'super'
-    });
+    expect(createEntry as jest.Mock).toHaveBeenCalledWith(
+      newDs.id,
+      {
+        [oldVS.name]: 'foo',
+        new: 'super'
+      },
+      { db, userId: '' }
+    );
   });
 
   test('should throw error for missing context function', async () => {
@@ -375,7 +379,7 @@ describe('AddValuesNode', () => {
         },
         { dataset: { datasetId: oldDs.id } },
         {
-          db,
+          reqContext: { db, userId: '' },
           node: {
             id: VALID_OBJECT_ID,
             contextIds: [],
@@ -401,7 +405,7 @@ describe('AddValuesNode', () => {
         { values: [] },
         { dataset: { datasetId: VALID_OBJECT_ID } },
         {
-          db,
+          reqContext: { db, userId: '' },
           node: NODE
         }
       );

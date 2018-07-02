@@ -39,28 +39,32 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
 
     return inputs;
   },
-  onNodeExecution: async (form, inputs, { db, contextFnExecution, node }) => {
-    const oldDs = await getDataset(db, inputs.dataset.datasetId);
+  onNodeExecution: async (
+    form,
+    inputs,
+    { reqContext, contextFnExecution, node }
+  ) => {
+    const oldDs = await getDataset(inputs.dataset.datasetId, reqContext);
     if (!oldDs) {
       throw new Error('Unknown dataset source');
     }
 
     const newDs = await createDataset(
-      db,
       createDynamicDatasetName(EditEntriesNodeDef.type, node.id),
+      reqContext,
       node.workspaceId
     );
-    await copySchemas(oldDs.valueschemas, newDs.id, db);
+    await copySchemas(oldDs.valueschemas, newDs.id, reqContext);
 
     if (contextFnExecution) {
       await processEntries(
-        db,
         inputs.dataset.datasetId,
         node.id,
         async entry => {
           const result = await contextFnExecution(entry.values);
-          await createEntry(db, newDs.id, result.outputs);
-        }
+          await createEntry(newDs.id, result.outputs, reqContext);
+        },
+        reqContext
       );
     } else {
       throw new Error('Missing context function');

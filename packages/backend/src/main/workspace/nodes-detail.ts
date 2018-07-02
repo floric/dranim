@@ -1,4 +1,5 @@
 import {
+  ApolloContext,
   ContextNodeType,
   hasContextFn,
   NodeInstance,
@@ -8,7 +9,7 @@ import {
   SocketDefs,
   SocketInstance
 } from '@masterthesis/shared';
-import { Db, ObjectID } from 'mongodb';
+import { ObjectID } from 'mongodb';
 
 import { getMetaInputs } from '../calculation/meta-execution';
 import { isNodeInMetaValid } from '../calculation/validation';
@@ -22,59 +23,59 @@ import {
 
 export const getContextInputDefs = async (
   node: NodeInstance,
-  db: Db
+  reqContext: ApolloContext
 ): Promise<SocketDefs<any> | null> => {
   if (hasNodeType(node.type)) {
     return null;
   }
 
   // will only be accessed by context io nodes
-  const parent = await tryGetParentNode(node, db);
+  const parent = await tryGetParentNode(node, reqContext);
   const parentType = tryGetNodeType(parent.type);
   if (!hasContextFn(parentType)) {
     return null;
   }
 
-  const parentInputs = await getMetaInputs(parent, db);
+  const parentInputs = await getMetaInputs(parent, reqContext);
   return await parentType.transformInputDefsToContextInputDefs(
     parentType.inputs,
     parentInputs,
-    db
+    reqContext
   );
 };
 
 export const getContextOutputDefs = async (
   node: NodeInstance,
-  db: Db
+  reqContext: ApolloContext
 ): Promise<(SocketDefs<any> & { [name: string]: SocketDef }) | null> => {
   if (hasNodeType(node.type)) {
     return null;
   }
 
   // will only be accessed by context io nodes
-  const parent = await tryGetParentNode(node, db);
+  const parent = await tryGetParentNode(node, reqContext);
   const parentType = tryGetNodeType(parent.type);
   if (!hasContextFn(parentType)) {
     return null;
   }
 
-  const parentInputs = await getMetaInputs(parent, db);
+  const parentInputs = await getMetaInputs(parent, reqContext);
   const contextInputDefs = await parentType.transformInputDefsToContextInputDefs(
     parentType.inputs,
     parentInputs,
-    db
+    reqContext
   );
 
   const contextInputNode = await getContextNode(
     parent,
     ContextNodeType.INPUT,
-    db
+    reqContext
   );
   if (!contextInputNode) {
     throw new Error('Context input node unknown');
   }
 
-  const contextInputs = await getMetaInputs(contextInputNode, db);
+  const contextInputs = await getMetaInputs(contextInputNode, reqContext);
 
   return await parentType.transformContextInputDefsToContextOutputDefs(
     parentType.inputs,
@@ -82,17 +83,20 @@ export const getContextOutputDefs = async (
     contextInputDefs,
     contextInputs,
     parseNodeForm(parent.form),
-    db
+    reqContext
   );
 };
 
-export const tryGetParentNode = async (node: NodeInstance, db: Db) => {
+export const tryGetParentNode = async (
+  node: NodeInstance,
+  reqContext: ApolloContext
+) => {
   if (node.contextIds.length === 0) {
     throw new Error('Node doesnt have context');
   }
 
   const parentNodeId = node.contextIds[node.contextIds.length - 1];
-  const parent = await getNode(db, parentNodeId);
+  const parent = await getNode(parentNodeId, reqContext);
   if (parent === null) {
     throw new Error('Parent node missing');
   }
@@ -102,21 +106,21 @@ export const tryGetParentNode = async (node: NodeInstance, db: Db) => {
 
 export const getInputDefs = async (
   node: NodeInstance,
-  db: Db
+  reqContext: ApolloContext
 ): Promise<SocketDefs<any>> => {
   let inputDefs: SocketDefs<any> = {};
   if (node.type === ContextNodeType.INPUT) {
-    const parent = await tryGetParentNode(node, db);
+    const parent = await tryGetParentNode(node, reqContext);
     const parentType = tryGetNodeType(parent.type);
     if (hasContextFn(parentType)) {
       return parentType.transformInputDefsToContextInputDefs(
         parentType.inputs,
-        await getMetaInputs(parent, db),
-        db
+        await getMetaInputs(parent, reqContext),
+        reqContext
       );
     }
   } else if (node.type === ContextNodeType.OUTPUT) {
-    inputDefs = (await getContextOutputDefs(node, db)) || {};
+    inputDefs = (await getContextOutputDefs(node, reqContext)) || {};
   } else {
     const type = tryGetNodeType(node.type);
     inputDefs = type.inputs;
@@ -125,16 +129,22 @@ export const getInputDefs = async (
   return inputDefs;
 };
 
-export const getNodeState = async (node: NodeInstance, db: Db) => {
+export const getNodeState = async (
+  node: NodeInstance,
+  reqContext: ApolloContext
+) => {
   if (
     node.type === ContextNodeType.INPUT ||
     node.type === ContextNodeType.OUTPUT
   ) {
-    return await getNodeState(await tryGetParentNode(node, db), db);
+    return await getNodeState(
+      await tryGetParentNode(node, reqContext),
+      reqContext
+    );
   }
 
   try {
-    const isValid = await isNodeInMetaValid(node, db);
+    const isValid = await isNodeInMetaValid(node, reqContext);
     if (!isValid) {
       return NodeState.INVALID;
     }
@@ -146,19 +156,19 @@ export const getNodeState = async (node: NodeInstance, db: Db) => {
 };
 
 export const addOrUpdateFormValue = async (
-  db: Db,
   nodeId: string,
   name: string,
-  value: string
+  value: string,
+  reqContext: ApolloContext
 ) => {
   if (name.length === 0) {
     throw new Error('No form value name specified');
   }
 
-  await tryGetNode(nodeId, db);
+  await tryGetNode(nodeId, reqContext);
   const nodeObjId = new ObjectID(nodeId);
 
-  const collection = getNodesCollection(db);
+  const collection = getNodesCollection(reqContext.db);
   const res = await collection.updateOne(
     { _id: nodeObjId },
     { $set: { [`form.${name}`]: value } }
@@ -172,12 +182,12 @@ export const addOrUpdateFormValue = async (
 };
 
 export const addConnection = async (
-  db: Db,
   socket: SocketInstance,
   type: 'output' | 'input',
-  connId: string
+  connId: string,
+  reqContext: ApolloContext
 ) => {
-  const nodesCollection = getNodesCollection(db);
+  const nodesCollection = getNodesCollection(reqContext.db);
   await nodesCollection.updateOne(
     { _id: new ObjectID(socket.nodeId) },
     {
@@ -192,12 +202,12 @@ export const addConnection = async (
 };
 
 export const removeConnection = async (
-  db: Db,
   socket: SocketInstance,
   type: 'output' | 'input',
-  connId: string
+  connId: string,
+  reqContext: ApolloContext
 ) => {
-  const nodesCollection = getNodesCollection(db);
+  const nodesCollection = getNodesCollection(reqContext.db);
   await nodesCollection.updateOne(
     { _id: new ObjectID(socket.nodeId) },
     {
@@ -214,13 +224,13 @@ export const removeConnection = async (
 export const setProgress = async (
   nodeId: string,
   value: number | null,
-  db: Db
+  reqContext: ApolloContext
 ) => {
   if (value != null && (value < 0 || value > 1)) {
     throw new Error('Invalid progress value');
   }
 
-  const nodesCollection = getNodesCollection(db);
+  const nodesCollection = getNodesCollection(reqContext.db);
   await nodesCollection.updateOne(
     { _id: new ObjectID(nodeId) },
     {

@@ -22,34 +22,34 @@ import {
 import { getWorkspace } from '../../main/workspace/workspace';
 
 export const Node = {
-  state: (node: NodeInstance, _, { db }): Promise<NodeState> =>
-    getNodeState(node, db),
-  workspace: ({ workspaceId }, __, { db }): Promise<Workspace | null> =>
-    getWorkspace(db, workspaceId),
+  state: (node: NodeInstance, _, context): Promise<NodeState> =>
+    getNodeState(node, context),
+  workspace: ({ workspaceId }, __, context): Promise<Workspace | null> =>
+    getWorkspace(workspaceId, context),
   metaOutputs: (
     node,
     _,
-    { db }
+    context
   ): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> =>
-    getMetaOutputs(node, db),
+    getMetaOutputs(node, context),
   metaInputs: (
     node,
     _,
-    { db }
+    context
   ): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> =>
-    getMetaInputs(node, db),
+    getMetaInputs(node, context),
   contextInputDefs: (
     node,
     _,
-    { db }
+    context
   ): Promise<(SocketDefs<{}> & { [name: string]: SocketDef }) | null> =>
-    getContextInputDefs(node, db),
+    getContextInputDefs(node, context),
   contextOutputDefs: (
     node,
     _,
-    { db }
+    context
   ): Promise<(SocketDefs<{}> & { [name: string]: SocketDef }) | null> =>
-    getContextOutputDefs(node, db),
+    getContextOutputDefs(node, context),
   hasContextFn: ({ type }): boolean =>
     hasNodeType(type) ? hasContextFn(getNodeType(type)!) : false
 };

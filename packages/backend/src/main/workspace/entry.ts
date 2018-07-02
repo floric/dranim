@@ -1,22 +1,22 @@
-import { Dataset, Entry, Values } from '@masterthesis/shared';
+import { ApolloContext, Dataset, Entry, Values } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { tryGetDataset } from './dataset';
 import { UploadEntryError } from './upload';
 
 export const getEntryCollection = (
-  db: Db,
-  datasetId: string
+  datasetId: string,
+  db: Db
 ): Collection<Entry & { _id: ObjectID }> => {
   return db.collection(`Entries_${datasetId}`);
 };
 
 export const getEntry = async (
-  db: Db,
   datasetId: string,
-  id: string
+  id: string,
+  reqContext: ApolloContext
 ): Promise<Entry | null> => {
-  const collection = getEntryCollection(db, datasetId);
+  const collection = getEntryCollection(datasetId, reqContext.db);
   const obj = await collection.findOne({ _id: new ObjectID(id) });
   if (!obj) {
     return null;
@@ -30,34 +30,37 @@ export const getEntry = async (
 };
 
 export const getAllEntries = async (
-  db: Db,
-  datasetId: string
+  datasetId: string,
+  reqContext: ApolloContext
 ): Promise<Array<Entry>> => {
-  const collection = getEntryCollection(db, datasetId);
+  const collection = getEntryCollection(datasetId, reqContext.db);
   return await collection.find().toArray();
 };
 
 export const getEntriesCount = async (
-  db: Db,
-  datasetId: string
+  datasetId: string,
+  reqContext: ApolloContext
 ): Promise<number> => {
-  const collection = getEntryCollection(db, datasetId);
+  const collection = getEntryCollection(datasetId, reqContext.db);
   return await collection.count({});
 };
 
-export const clearEntries = async (db, datasetId: string) => {
-  const count = await getEntriesCount(db, datasetId);
+export const clearEntries = async (
+  datasetId: string,
+  reqContext: ApolloContext
+) => {
+  const count = await getEntriesCount(datasetId, reqContext);
   if (count > 0) {
-    const entryCollection = getEntryCollection(db, datasetId);
+    const entryCollection = getEntryCollection(datasetId, reqContext.db);
     await entryCollection.drop();
   }
 };
 
 export const getLatestEntries = async (
-  db: Db,
-  datasetId: string
+  datasetId: string,
+  reqContext: ApolloContext
 ): Promise<Array<Entry>> => {
-  const collection = getEntryCollection(db, datasetId);
+  const collection = getEntryCollection(datasetId, reqContext.db);
   // TODO Introduce pagination later
   const entries = await collection
     .find()
@@ -70,9 +73,9 @@ export const getLatestEntries = async (
 };
 
 export const createEntry = async (
-  db: Db,
   datasetId: string,
-  values: Values
+  values: Values,
+  reqContext: ApolloContext
 ): Promise<Entry> => {
   const valuesArr = Array.from(Object.entries(values));
 
@@ -86,12 +89,12 @@ export const createEntry = async (
     }
   });
 
-  const ds = await tryGetDataset(datasetId, db);
+  const ds = await tryGetDataset(datasetId, reqContext);
   await checkForMissingValues(ds, valuesArr.map(v => v[0]));
   await checkForUnsupportedValues(ds, valuesArr.map(v => v[0]));
 
   try {
-    const collection = getEntryCollection(db, ds.id);
+    const collection = getEntryCollection(ds.id, reqContext.db);
     const res = await collection.insertOne({
       values
     });
@@ -148,24 +151,24 @@ const checkForUnsupportedValues = async (
 };
 
 export const createEntryFromJSON = async (
-  db: Db,
   datasetId: string,
-  values: string
+  values: string,
+  reqContext: ApolloContext
 ): Promise<Entry> => {
   const parsedValues: Values = JSON.parse(values);
-  return await createEntry(db, datasetId, parsedValues);
+  return await createEntry(datasetId, parsedValues, reqContext);
 };
 
 export const deleteEntry = async (
-  db: Db,
   datasetId: string,
-  entryId: string
+  entryId: string,
+  reqContext: ApolloContext
 ) => {
   if (!ObjectID.isValid(entryId) || !ObjectID.isValid(datasetId)) {
     throw new Error('Invalid ID');
   }
 
-  const collection = getEntryCollection(db, datasetId);
+  const collection = getEntryCollection(datasetId, reqContext.db);
   const res = await collection.deleteOne({ _id: new ObjectID(entryId) });
   if (res.deletedCount !== 1) {
     throw new Error('Deleting entry failed');

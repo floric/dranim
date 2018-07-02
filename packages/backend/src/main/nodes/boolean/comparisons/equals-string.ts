@@ -11,7 +11,7 @@ export const EqualsStringNode: ServerNodeDef<
   EqualsStringNodeOutputs
 > = {
   type: EqualsStringNodeDef.type,
-  onMetaExecution: async (form, inputs, db) => {
+  onMetaExecution: async (form, inputs) => {
     if (!allAreDefinedAndPresent(inputs)) {
       return {
         equals: {

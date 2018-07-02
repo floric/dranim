@@ -25,8 +25,7 @@ import { createEntry, getAllEntries } from '../../../src/main/workspace/entry';
 import {
   createNode,
   getContextNode,
-  getNode,
-  getNodesCollection
+  getNode
 } from '../../../src/main/workspace/nodes';
 import { addOrUpdateFormValue } from '../../../src/main/workspace/nodes-detail';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
@@ -59,12 +58,21 @@ describe('Execution', () => {
   });
 
   test('should execute simple node', async () => {
-    const ws = await createWorkspace(db, 'test', '');
-    const node = await createNode(db, StringInputNodeDef.type, ws.id, [], 0, 0);
+    const ws = await createWorkspace('test', { db, userId: '' }, '');
+    const node = await createNode(StringInputNodeDef.type, ws.id, [], 0, 0, {
+      db,
+      userId: ''
+    });
 
-    await addOrUpdateFormValue(db, node.id, 'value', JSON.stringify('test'));
+    await addOrUpdateFormValue(node.id, 'value', JSON.stringify('test'), {
+      db,
+      userId: ''
+    });
 
-    const { outputs, results } = await executeNodeWithId(db, node.id);
+    const { outputs, results } = await executeNodeWithId(node.id, {
+      db,
+      userId: ''
+    });
 
     expect(outputs).toBeDefined();
     expect(results).toBeUndefined();
@@ -72,37 +80,38 @@ describe('Execution', () => {
   });
 
   test('should execute connected nodes', async () => {
-    const ws = await createWorkspace(db, 'test', '');
-    const nodeA = await createNode(
+    const ws = await createWorkspace('test', { db, userId: '' }, '');
+    const nodeA = await createNode(StringInputNodeDef.type, ws.id, [], 0, 0, {
       db,
-      StringInputNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0
-    );
-    const nodeB = await createNode(
+      userId: ''
+    });
+    const nodeB = await createNode(StringOutputNodeDef.type, ws.id, [], 0, 0, {
       db,
-      StringOutputNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0
-    );
+      userId: ''
+    });
     await createConnection(
       { name: 'value', nodeId: nodeA.id },
       { name: 'value', nodeId: nodeB.id },
-      db
+      { db, userId: '' }
     );
-    await addOrUpdateFormValue(db, nodeA.id, 'value', JSON.stringify('test'));
-    await addOrUpdateFormValue(db, nodeB.id, 'name', JSON.stringify('test'));
-    await addOrUpdateFormValue(
+    await addOrUpdateFormValue(nodeA.id, 'value', JSON.stringify('test'), {
       db,
+      userId: ''
+    });
+    await addOrUpdateFormValue(nodeB.id, 'name', JSON.stringify('test'), {
+      db,
+      userId: ''
+    });
+    await addOrUpdateFormValue(
       nodeB.id,
       'dashboardId',
-      JSON.stringify('dsid')
+      JSON.stringify('dsid'),
+      { db, userId: '' }
     );
-    const { outputs, results } = await executeNodeWithId(db, nodeB.id);
+    const { outputs, results } = await executeNodeWithId(nodeB.id, {
+      db,
+      userId: ''
+    });
 
     expect(outputs).toBeDefined();
     expect(results).toBeDefined();
@@ -113,7 +122,6 @@ describe('Execution', () => {
   test('should return outputs from context for context input nodes', async () => {
     const contextInputs = { test: 123 };
     const res = await executeNode(
-      db,
       {
         type: ContextNodeType.INPUT,
         x: 0,
@@ -125,6 +133,7 @@ describe('Execution', () => {
         form: [],
         contextIds: [VALID_OBJECT_ID]
       },
+      { db, userId: '' },
       contextInputs
     );
     expect(res).toEqual({ outputs: contextInputs });
@@ -132,17 +141,20 @@ describe('Execution', () => {
 
   test('should throw error for unknown node type', async () => {
     try {
-      await executeNode(db, {
-        type: 'UnknownNodeType',
-        x: 0,
-        y: 0,
-        workspaceId: VALID_OBJECT_ID,
-        id: VALID_OBJECT_ID,
-        outputs: [],
-        inputs: [],
-        form: [],
-        contextIds: [VALID_OBJECT_ID]
-      });
+      await executeNode(
+        {
+          type: 'UnknownNodeType',
+          x: 0,
+          y: 0,
+          workspaceId: VALID_OBJECT_ID,
+          id: VALID_OBJECT_ID,
+          outputs: [],
+          inputs: [],
+          form: [],
+          contextIds: [VALID_OBJECT_ID]
+        },
+        { db, userId: '' }
+      );
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unknown node type: UnknownNodeType');
@@ -150,12 +162,15 @@ describe('Execution', () => {
   });
 
   test('should fail for invalid form', async () => {
-    const ws = await createWorkspace(db, 'test', '');
-    const node = await createNode(db, NumberInputNodeDef.type, ws.id, [], 0, 0);
-    await addOrUpdateFormValue(db, node.id, 'value', '{NaN');
+    const ws = await createWorkspace('test', { db, userId: '' }, '');
+    const node = await createNode(NumberInputNodeDef.type, ws.id, [], 0, 0, {
+      db,
+      userId: ''
+    });
+    await addOrUpdateFormValue(node.id, 'value', '{NaN', { db, userId: '' });
 
     try {
-      await executeNode(db, node);
+      await executeNode(node, { db, userId: '' });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Form values or inputs are missing');
@@ -163,20 +178,20 @@ describe('Execution', () => {
   });
 
   test('should fail for invalid input', async () => {
-    const ws = await createWorkspace(db, 'test', '');
+    const ws = await createWorkspace('test', { db, userId: '' }, '');
     const [nodeA, nodeB] = await Promise.all([
-      createNode(db, StringInputNodeDef.type, ws.id, [], 0, 0),
-      createNode(db, NumberOutputNodeDef.type, ws.id, [], 0, 0)
+      createNode(StringInputNodeDef.type, ws.id, [], 0, 0, { db, userId: '' }),
+      createNode(NumberOutputNodeDef.type, ws.id, [], 0, 0, { db, userId: '' })
     ]);
-    await addOrUpdateFormValue(db, nodeA.id, 'value', 'NaN');
+    await addOrUpdateFormValue(nodeA.id, 'value', 'NaN', { db, userId: '' });
     await createConnection(
       { name: 'value', nodeId: nodeA.id },
       { name: 'value', nodeId: nodeB.id },
-      db
+      { db, userId: '' }
     );
 
     try {
-      await executeNode(db, nodeB);
+      await executeNode(nodeB, { db, userId: '' });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Form values or inputs are missing');
@@ -184,54 +199,58 @@ describe('Execution', () => {
   });
 
   test('should wait for inputs and combine them as sum', async () => {
-    const ws = await createWorkspace(db, 'test', '');
+    const ws = await createWorkspace('test', { db, userId: '' }, '');
     const [nodeA, nodeB] = await Promise.all([
-      createNode(db, NumberInputNodeDef.type, ws.id, [], 0, 0),
-      createNode(db, NumberInputNodeDef.type, ws.id, [], 0, 0)
+      createNode(NumberInputNodeDef.type, ws.id, [], 0, 0, { db, userId: '' }),
+      createNode(NumberInputNodeDef.type, ws.id, [], 0, 0, { db, userId: '' })
     ]);
-    const sumNode = await createNode(db, SumNodeDef.type, ws.id, [], 0, 0);
-    const outputNode = await createNode(
+    const sumNode = await createNode(SumNodeDef.type, ws.id, [], 0, 0, {
       db,
+      userId: ''
+    });
+    const outputNode = await createNode(
       NumberOutputNodeDef.type,
       ws.id,
       [],
       0,
-      0
+      0,
+      { db, userId: '' }
     );
 
-    await addOrUpdateFormValue(db, nodeA.id, 'value', '18');
-    await addOrUpdateFormValue(db, nodeB.id, 'value', '81');
-    await addOrUpdateFormValue(
+    await addOrUpdateFormValue(nodeA.id, 'value', '18', { db, userId: '' });
+    await addOrUpdateFormValue(nodeB.id, 'value', '81', { db, userId: '' });
+    await addOrUpdateFormValue(outputNode.id, 'name', JSON.stringify('test'), {
       db,
-      outputNode.id,
-      'name',
-      JSON.stringify('test')
-    );
+      userId: ''
+    });
     await addOrUpdateFormValue(
-      db,
       outputNode.id,
       'dashboardId',
-      JSON.stringify('dsid')
+      JSON.stringify('dsid'),
+      { db, userId: '' }
     );
 
     await createConnection(
       { name: 'value', nodeId: nodeA.id },
       { name: 'a', nodeId: sumNode.id },
-      db
+      { db, userId: '' }
     );
     await createConnection(
       { name: 'value', nodeId: nodeB.id },
       { name: 'b', nodeId: sumNode.id },
-      db
+      { db, userId: '' }
     );
     await createConnection(
       { name: 'sum', nodeId: sumNode.id },
       { name: 'value', nodeId: outputNode.id },
-      db
+      { db, userId: '' }
     );
 
-    const updatedNode = await getNode(db, outputNode.id);
-    const { outputs, results } = await executeNode(db, updatedNode);
+    const updatedNode = await getNode(outputNode.id, { db, userId: '' });
+    const { outputs, results } = await executeNode(updatedNode, {
+      db,
+      userId: ''
+    });
 
     expect(outputs).toBeDefined();
     expect(results).toBeDefined();
@@ -239,59 +258,68 @@ describe('Execution', () => {
   });
 
   test('should support context functions', async () => {
-    const ws = await createWorkspace(db, 'test', '');
-    const ds = await createDataset(db, 'test');
-    await addValueSchema(db, ds.id, {
-      name: 'val',
-      type: DataType.STRING,
-      unique: true,
-      required: true,
-      fallback: ''
-    });
-    await createEntry(db, ds.id, { val: JSON.stringify('test') });
+    const ws = await createWorkspace('test', { db, userId: '' }, '');
+    const ds = await createDataset('test', { db, userId: '' });
+    await addValueSchema(
+      ds.id,
+      {
+        name: 'val',
+        type: DataType.STRING,
+        unique: true,
+        required: true,
+        fallback: ''
+      },
+      { db, userId: '' }
+    );
+    await createEntry(
+      ds.id,
+      { val: JSON.stringify('test') },
+      { db, userId: '' }
+    );
 
     const [editEntriesNode, inputNode, outputNode] = await Promise.all(
       [
         EditEntriesNodeDef.type,
         DatasetInputNodeDef.type,
         DatasetOutputNodeDef.type
-      ].map(type => createNode(db, type, ws.id, [], 0, 0))
+      ].map(type => createNode(type, ws.id, [], 0, 0, { db, userId: '' }))
     );
 
     const contextOutputNode = await getContextNode(
       editEntriesNode,
       ContextNodeType.OUTPUT,
-      db
+      { db, userId: '' }
     );
+
     expect(contextOutputNode).toBeDefined();
     const stringInputNode = await createNode(
-      db,
       StringInputNodeDef.type,
       ws.id,
       [editEntriesNode.id],
       0,
-      0
+      0,
+      { db, userId: '' }
     );
+
     await createConnection(
       { name: 'value', nodeId: stringInputNode.id },
-      { name: 'val', nodeId: contextOutputNode!.id },
-      db
+      { name: 'val', nodeId: contextOutputNode.id },
+      { db, userId: '' }
     );
-
-    await addOrUpdateFormValue(
+    await addOrUpdateFormValue(inputNode.id, 'dataset', JSON.stringify(ds.id), {
       db,
-      inputNode.id,
-      'dataset',
-      JSON.stringify(ds.id)
-    );
+      userId: ''
+    });
     await addOrUpdateFormValue(
-      db,
       stringInputNode.id,
       'value',
-      JSON.stringify('test')
+      JSON.stringify('test'),
+      { db, userId: '' }
     );
-    await addOrUpdateFormValue(db, outputNode.id, 'name', 'test');
-
+    await addOrUpdateFormValue(outputNode.id, 'name', 'test', {
+      db,
+      userId: ''
+    });
     await Promise.all(
       [
         { from: inputNode.id, to: editEntriesNode.id },
@@ -300,45 +328,50 @@ describe('Execution', () => {
         createConnection(
           { name: 'dataset', nodeId: pair.from },
           { name: 'dataset', nodeId: pair.to },
-          db
+          { db, userId: '' }
         )
       )
     );
+    const updatedNode = await getNode(outputNode.id, { db, userId: '' });
 
-    const updatedNode = await getNode(db, outputNode.id);
-    const { outputs, results } = await executeNode(db, updatedNode);
-
+    const { outputs, results } = await executeNode(updatedNode, {
+      db,
+      userId: ''
+    });
     expect(outputs).toBeDefined();
     expect(results).toBeDefined();
     expect((results as any).value).toBeDefined();
 
     const newDsId = (results as any).value.datasetId;
-    const allEntries = await getAllEntries(db, newDsId);
+    const allEntries = await getAllEntries(newDsId, { db, userId: '' });
     expect(allEntries.length).toBe(1);
   });
 
   test('should throw error', async () => {
-    const ws = await createWorkspace(db, 'test', '');
-    const ds = await createDataset(db, 'test');
-
+    const ws = await createWorkspace('test', { db, userId: '' }, '');
     const editEntriesNode = await createNode(
-      db,
       EditEntriesNodeDef.type,
       ws.id,
       [],
       0,
-      0
+      0,
+      {
+        db,
+        userId: ''
+      }
     );
 
-    const nodesColl = await getNodesCollection(db);
     const inputNode = await getContextNode(
       editEntriesNode,
       ContextNodeType.INPUT,
-      db
+      { db, userId: '' }
     );
 
     try {
-      const { outputs, results } = await executeNode(db, inputNode);
+      await executeNode(inputNode, {
+        db,
+        userId: ''
+      });
     } catch (err) {
       expect(err.message).toBe('Context needs context inputs');
     }

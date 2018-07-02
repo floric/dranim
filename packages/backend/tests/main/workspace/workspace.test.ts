@@ -54,7 +54,14 @@ describe('Workspaces', () => {
     const description = 'desc';
     const name = 'wsname';
 
-    const ws = await createWorkspace(db, name, description);
+    const ws = await createWorkspace(
+      name,
+      {
+        db,
+        userId: ''
+      },
+      description
+    );
 
     expect(ws.id).toBeDefined();
     expect(ws.connections).toBeUndefined();
@@ -64,14 +71,23 @@ describe('Workspaces', () => {
     expect(ws.lastChange).toBeDefined();
     expect(ws.nodes).toBeUndefined();
 
-    const createdWs = await getWorkspace(db, ws.id);
+    const createdWs = await getWorkspace(ws.id, {
+      db,
+      userId: ''
+    });
     expect(createdWs).toEqual(ws);
 
-    const res = await deleteWorkspace(db, ws.id);
+    const res = await deleteWorkspace(ws.id, {
+      db,
+      userId: ''
+    });
 
     expect(res).toBe(true);
 
-    const unknownWs = await getWorkspace(db, ws.id);
+    const unknownWs = await getWorkspace(ws.id, {
+      db,
+      userId: ''
+    });
 
     expect(unknownWs).toBe(null);
 
@@ -84,7 +100,14 @@ describe('Workspaces', () => {
     const name = '';
 
     try {
-      await createWorkspace(db, name, description);
+      await createWorkspace(
+        name,
+        {
+          db,
+          userId: ''
+        },
+        description
+      );
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toEqual('Name of workspace must not be empty.');
@@ -93,7 +116,10 @@ describe('Workspaces', () => {
 
   test('should not delete unknown workspace', async () => {
     try {
-      await deleteWorkspace(db, 'abc');
+      await deleteWorkspace('abc', {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toEqual('Invalid ID');
@@ -102,12 +128,36 @@ describe('Workspaces', () => {
 
   test('should get all workspaces', async () => {
     await Promise.all([
-      createWorkspace(db, 'a', 'aDesc'),
-      createWorkspace(db, 'b', 'bDesc'),
-      createWorkspace(db, 'c', 'cDesc')
+      createWorkspace(
+        'a',
+        {
+          db,
+          userId: ''
+        },
+        'aDesc'
+      ),
+      createWorkspace(
+        'b',
+        {
+          db,
+          userId: ''
+        },
+        'bDesc'
+      ),
+      createWorkspace(
+        'c',
+        {
+          db,
+          userId: ''
+        },
+        'cDesc'
+      )
     ]);
 
-    const allWs = await getAllWorkspaces(db);
+    const allWs = await getAllWorkspaces({
+      db,
+      userId: ''
+    });
 
     expect(allWs.length).toBe(3);
 
@@ -119,14 +169,27 @@ describe('Workspaces', () => {
     const description = 'desc';
     const name = 'wsname';
 
-    const ws = await createWorkspace(db, name, description);
+    const ws = await createWorkspace(
+      name,
+      {
+        db,
+        userId: ''
+      },
+      description
+    );
 
     await sleep(100);
 
-    const res = await updateWorkspace(db, ws.id, [], []);
+    const res = await updateWorkspace(ws.id, [], [], {
+      db,
+      userId: ''
+    });
     expect(res).toBe(true);
 
-    const newWs = await getWorkspace(db, ws.id);
+    const newWs = await getWorkspace(ws.id, {
+      db,
+      userId: ''
+    });
     expect(new Date(ws.lastChange).getTime()).toBeLessThan(
       new Date(newWs.lastChange).getTime()
     );
@@ -134,7 +197,10 @@ describe('Workspaces', () => {
 
   test('should throw error when updating workspaces with invalid id', async () => {
     try {
-      await updateWorkspace(db, 'test', [], []);
+      await updateWorkspace('test', [], [], {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Invalid ID');
@@ -151,7 +217,14 @@ describe('Workspaces', () => {
     const description = 'desc';
     const name = 'wsname';
 
-    const ws = await createWorkspace(db, name, description);
+    const ws = await createWorkspace(
+      name,
+      {
+        db,
+        userId: ''
+      },
+      description
+    );
 
     const nodeA: NodeInstance = {
       id: VALID_OBJECT_ID,
@@ -177,7 +250,6 @@ describe('Workspaces', () => {
     };
 
     const res = await updateWorkspace(
-      db,
       ws.id,
       [{ ...nodeA, x: 1, y: 2 }, { ...nodeB, x: 3, y: 4 }],
       [
@@ -188,7 +260,11 @@ describe('Workspaces', () => {
           to: { name: 'val', nodeId: nodeB.id },
           id: VALID_OBJECT_ID
         }
-      ]
+      ],
+      {
+        db,
+        userId: ''
+      }
     );
     expect(res).toBe(true);
 
@@ -212,12 +288,25 @@ describe('Workspaces', () => {
   });
 
   test('should update last change of workspace', async () => {
-    const ws = await createWorkspace(db, 'test', '');
+    const ws = await createWorkspace(
+      'test',
+      {
+        db,
+        userId: ''
+      },
+      ''
+    );
 
     await sleep(100);
-    await updateLastChange(db, ws.id);
+    await updateLastChange(ws.id, {
+      db,
+      userId: ''
+    });
 
-    const newWs = await getWorkspace(db, ws.id);
+    const newWs = await getWorkspace(ws.id, {
+      db,
+      userId: ''
+    });
     expect(new Date(newWs.lastChange).getTime()).toBeGreaterThan(
       new Date(ws.lastChange).getTime()
     );

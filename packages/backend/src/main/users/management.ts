@@ -1,4 +1,5 @@
-import { User } from '@masterthesis/shared';
+import { ApolloContext, User } from '@masterthesis/shared';
+
 import { compare, hash } from 'bcrypt';
 import { Collection, Db, ObjectID } from 'mongodb';
 
@@ -11,9 +12,9 @@ const getUsersCollection = (
 export const login = async (
   mail: string,
   pw: string,
-  db: Db
+  reqContext: ApolloContext
 ): Promise<User | null> => {
-  const user = await getFullUserByMail(mail, db);
+  const user = await getFullUserByMail(mail, reqContext);
   if (!user) {
     return null;
   }
@@ -31,18 +32,18 @@ export const login = async (
   };
 };
 
-const getFullUserByMail = async (mail: string, db: Db) => {
-  const coll = getUsersCollection(db);
+const getFullUserByMail = async (mail: string, reqContext: ApolloContext) => {
+  const coll = getUsersCollection(reqContext.db);
   return await coll.findOne({ mail });
 };
 
-const getUser = async (id: string, db: Db): Promise<User | null> => {
-  if (!ObjectID.isValid(id)) {
+const getUser = async (reqContext: ApolloContext): Promise<User | null> => {
+  if (!ObjectID.isValid(reqContext.userId)) {
     return null;
   }
 
-  const coll = getUsersCollection(db);
-  const res = await coll.findOne({ _id: new ObjectID(id) });
+  const coll = getUsersCollection(reqContext.db);
+  const res = await coll.findOne({ _id: new ObjectID(reqContext.userId) });
 
   if (!res) {
     return null;
@@ -61,10 +62,10 @@ export const register = async (
   lastName: string,
   mail: string,
   pw: string,
-  db: Db
+  reqContext: ApolloContext
 ): Promise<User> => {
   const saltedPw = await hash(pw, 10);
-  const coll = getUsersCollection(db);
+  const coll = getUsersCollection(reqContext.db);
   await coll.createIndex('mail', {
     unique: true
   });
@@ -88,8 +89,8 @@ export const register = async (
   };
 };
 
-export const tryGetUser = async (userId: string, db: Db): Promise<User> => {
-  const user = await getUser(userId, db);
+export const tryGetUser = async (reqContext: ApolloContext): Promise<User> => {
+  const user = await getUser(reqContext);
   if (!user) {
     throw new Error('Unknown user');
   }

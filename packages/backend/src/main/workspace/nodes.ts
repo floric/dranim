@@ -1,4 +1,5 @@
 import {
+  ApolloContext,
   ContextNodeType,
   hasContextFn,
   NodeInstance,
@@ -17,20 +18,20 @@ export const getNodesCollection = (
 };
 
 export const createNode = async (
-  db: Db,
   type: string,
   workspaceId: string,
   contextNodeIds: Array<string>,
   x: number,
-  y: number
+  y: number,
+  reqContext: ApolloContext
 ): Promise<NodeInstance> => {
   const nodeType = tryGetNodeType(type);
 
   await checkNoOutputNodeInContexts(type, contextNodeIds);
-  await checkValidContextNode(contextNodeIds, db);
-  await checkValidWorkspace(workspaceId, db);
+  await checkValidContextNode(contextNodeIds, reqContext);
+  await checkValidWorkspace(workspaceId, reqContext);
 
-  const collection = getNodesCollection(db);
+  const collection = getNodesCollection(reqContext.db);
   const res = await collection.insertOne({
     x,
     y,
@@ -52,7 +53,7 @@ export const createNode = async (
     newNodeId,
     contextNodeIds,
     workspaceId,
-    db
+    reqContext
   );
 
   const { _id, ...other } = res.ops[0];
@@ -69,10 +70,10 @@ const addContextNodesIfNecessary = async (
   newNodeId: string,
   contextNodeIds: Array<string>,
   workspaceId: string,
-  db: Db
+  reqContext: ApolloContext
 ) => {
   if (hasContextFn(nodeType)) {
-    const collection = getNodesCollection(db);
+    const collection = getNodesCollection(reqContext.db);
     const nestedContextIds = [...contextNodeIds, newNodeId];
     const contextNodes = [ContextNodeType.INPUT, ContextNodeType.OUTPUT].map(
       contextType => ({
@@ -90,11 +91,14 @@ const addContextNodesIfNecessary = async (
   }
 };
 
-const checkValidContextNode = async (contextNodeIds: Array<string>, db: Db) => {
+const checkValidContextNode = async (
+  contextNodeIds: Array<string>,
+  reqContext: ApolloContext
+) => {
   if (contextNodeIds.length > 0) {
     const contextNode = await getNode(
-      db,
-      contextNodeIds[contextNodeIds.length - 1]
+      contextNodeIds[contextNodeIds.length - 1],
+      reqContext
     );
     if (!contextNode) {
       throw new Error('Unknown context node');
@@ -116,15 +120,18 @@ const checkNoOutputNodeInContexts = async (
   }
 };
 
-const checkValidWorkspace = async (workspaceId: string, db: Db) => {
-  const ws = await getWorkspace(db, workspaceId);
+const checkValidWorkspace = async (
+  workspaceId: string,
+  reqContext: ApolloContext
+) => {
+  const ws = await getWorkspace(workspaceId, reqContext);
   if (!ws) {
     throw new Error('Unknown workspace');
   }
 };
 
-export const deleteNode = async (db: Db, id: string) => {
-  const nodeToDelete = await tryGetNode(id, db);
+export const deleteNode = async (id: string, reqContext: ApolloContext) => {
+  const nodeToDelete = await tryGetNode(id, reqContext);
 
   if (
     nodeToDelete.type === ContextNodeType.INPUT ||
@@ -135,13 +142,13 @@ export const deleteNode = async (db: Db, id: string) => {
 
   await Promise.all(
     [...nodeToDelete.inputs, ...nodeToDelete.outputs].map(c =>
-      deleteConnection(db, c.connectionId)
+      deleteConnection(c.connectionId, reqContext)
     )
   );
 
-  await deleteConnectionsInContext(id, db);
+  await deleteConnectionsInContext(id, reqContext);
 
-  const nodesCollection = getNodesCollection(db);
+  const nodesCollection = getNodesCollection(reqContext.db);
   const res = await nodesCollection.deleteMany({
     $or: [
       { _id: new ObjectID(id) },
@@ -155,12 +162,17 @@ export const deleteNode = async (db: Db, id: string) => {
   return true;
 };
 
-export const updateNode = async (db: Db, id: string, x: number, y: number) => {
+export const updateNode = async (
+  id: string,
+  x: number,
+  y: number,
+  reqContext: ApolloContext
+) => {
   if (!ObjectID.isValid(id)) {
     throw new Error('Invalid ID');
   }
 
-  const collection = getNodesCollection(db);
+  const collection = getNodesCollection(reqContext.db);
   const res = await collection.findOneAndUpdate(
     { _id: new ObjectID(id) },
     { $set: { x, y } }
@@ -170,16 +182,16 @@ export const updateNode = async (db: Db, id: string, x: number, y: number) => {
     throw new Error('Updating node failed');
   }
 
-  await updateLastChange(db, res.value!.workspaceId);
+  await updateLastChange(res.value!.workspaceId, reqContext);
 
   return true;
 };
 
 export const getAllNodes = async (
-  db: Db,
-  workspaceId: string
+  workspaceId: string,
+  reqContext: ApolloContext
 ): Promise<Array<NodeInstance>> => {
-  const collection = getNodesCollection(db);
+  const collection = getNodesCollection(reqContext.db);
   const all = await collection.find({ workspaceId }).toArray();
   return all.map(n => {
     const valueNames = n.form ? Object.keys(n.form) : [];
@@ -193,14 +205,14 @@ export const getAllNodes = async (
 };
 
 export const getNode = async (
-  db: Db,
-  id: string
+  id: string,
+  reqContext: ApolloContext
 ): Promise<NodeInstance | null> => {
   if (!ObjectID.isValid(id)) {
     return null;
   }
 
-  const collection = getNodesCollection(db);
+  const collection = getNodesCollection(reqContext.db);
   const obj = await collection.findOne({ _id: new ObjectID(id) });
   if (!obj) {
     return null;
@@ -216,25 +228,28 @@ export const getNode = async (
   };
 };
 
-export const tryGetNode = async (nodeId: string, db: Db) => {
-  const node = await getNode(db, nodeId);
+export const tryGetNode = async (nodeId: string, reqContext: ApolloContext) => {
+  const node = await getNode(nodeId, reqContext);
   if (!node) {
     throw new Error('Node not found');
   }
   return node;
 };
 
-export const resetProgress = async (workspaceId: string, db: Db) => {
-  const coll = getNodesCollection(db);
+export const resetProgress = async (
+  workspaceId: string,
+  reqContext: ApolloContext
+) => {
+  const coll = getNodesCollection(reqContext.db);
   await coll.updateMany({ workspaceId }, { $set: { progress: null } });
 };
 
 export const getContextNode = async (
   node: NodeInstance,
   type: ContextNodeType,
-  db: Db
+  reqContext: ApolloContext
 ): Promise<NodeInstance | null> => {
-  const nodesColl = getNodesCollection(db);
+  const nodesColl = getNodesCollection(reqContext.db);
   const n = await nodesColl.findOne({
     contextIds: [...node.contextIds, node.id],
     type

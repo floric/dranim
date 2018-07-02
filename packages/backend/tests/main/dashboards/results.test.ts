@@ -49,10 +49,10 @@ describe('Dashboard Results', () => {
       value: 'val'
     };
 
-    const res = await addOrUpdateResult(value, db);
+    const res = await addOrUpdateResult(value, { db, userId: '' });
     expect(res).toBeDefined();
 
-    const all = await getResultsForDashboard('abc', db);
+    const all = await getResultsForDashboard('abc', { db, userId: '' });
     expect(all.length).toBe(1);
     expect(all[0].value).toEqual(JSON.stringify(value.value));
     expect(all[0].dashboardId).toEqual(value.dashboardId);
@@ -70,7 +70,7 @@ describe('Dashboard Results', () => {
           dashboardId: 'test',
           type: DataType.STRING
         },
-        db
+        { db, userId: '' }
       );
       throw NeverGoHereError;
     } catch (err) {
@@ -91,7 +91,7 @@ describe('Dashboard Results', () => {
           dashboardId: 'test',
           type: DataType.STRING
         },
-        db
+        { db, userId: '' }
       );
       throw NeverGoHereError;
     } catch (err) {
@@ -115,13 +115,13 @@ describe('Dashboard Results', () => {
       value: 123
     };
 
-    let res = await addOrUpdateResult(oldValue, db);
+    let res = await addOrUpdateResult(oldValue, { db, userId: '' });
     expect(res).toBeDefined();
 
-    res = await addOrUpdateResult(newValue, db);
+    res = await addOrUpdateResult(newValue, { db, userId: '' });
     expect(res).toBeDefined();
 
-    const all = await getResultsForDashboard('abc', db);
+    const all = await getResultsForDashboard('abc', { db, userId: '' });
     expect(all.length).toBe(1);
     expect(all[0].value).toEqual(JSON.stringify(newValue.value));
     expect(all[0].dashboardId).toEqual(newValue.dashboardId);
@@ -138,10 +138,10 @@ describe('Dashboard Results', () => {
       value: 'val'
     };
 
-    const savedRes = await addOrUpdateResult(value, db);
+    const savedRes = await addOrUpdateResult(value, { db, userId: '' });
     expect(savedRes.id).toBeDefined();
 
-    const res = await getResult(savedRes.id, db);
+    const res = await getResult(savedRes.id, { db, userId: '' });
     expect(res).toEqual(savedRes);
     expect(res.id).toBeDefined();
   });
@@ -155,13 +155,13 @@ describe('Dashboard Results', () => {
       value: 'val'
     };
 
-    const savedRes = await addOrUpdateResult(value, db);
+    const savedRes = await addOrUpdateResult(value, { db, userId: '' });
     expect(savedRes.id).toBeDefined();
 
-    const res = await deleteResultById(savedRes.id, db);
+    const res = await deleteResultById(savedRes.id, { db, userId: '' });
     expect(res).toEqual(true);
 
-    const newRes = await getResult(savedRes.id, db);
+    const newRes = await getResult(savedRes.id, { db, userId: '' });
     expect(newRes).toBe(null);
   });
 
@@ -174,21 +174,21 @@ describe('Dashboard Results', () => {
       value: 'val'
     };
 
-    const savedRes = await addOrUpdateResult(value, db);
+    const savedRes = await addOrUpdateResult(value, { db, userId: '' });
     expect(savedRes.id).toBeDefined();
 
-    const res = await deleteResultsByDashboard('abc', db);
+    const res = await deleteResultsByDashboard('abc', { db, userId: '' });
     expect(res).toEqual(true);
 
-    const newRes = await getResult(savedRes.id, db);
+    const newRes = await getResult(savedRes.id, { db, userId: '' });
     expect(newRes).toBe(null);
   });
 
   test('should return null for unknown dashboards', async () => {
-    let res = await getResult('test', db);
+    let res = await getResult('test', { db, userId: '' });
     expect(res).toBe(null);
 
-    res = await getResult(VALID_OBJECT_ID, db);
+    res = await getResult(VALID_OBJECT_ID, { db, userId: '' });
     expect(res).toBe(null);
   });
 
@@ -201,23 +201,22 @@ describe('Dashboard Results', () => {
       value: 'val'
     };
 
-    const savedRes = await addOrUpdateResult(value, db);
+    const savedRes = await addOrUpdateResult(value, { db, userId: '' });
     expect(savedRes.id).toBeDefined();
 
-    const res = await deleteResultByName(
-      savedRes.name,
-      savedRes.dashboardId,
-      db
-    );
+    const res = await deleteResultByName(savedRes.name, savedRes.dashboardId, {
+      db,
+      userId: ''
+    });
     expect(res).toEqual(true);
 
-    const newRes = await getResult(savedRes.id, db);
+    const newRes = await getResult(savedRes.id, { db, userId: '' });
     expect(newRes).toBe(null);
   });
 
   test('should throw error for unknown name', async () => {
     try {
-      await deleteResultByName('unknown', 'test', db);
+      await deleteResultByName('unknown', 'test', { db, userId: '' });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Deletion of Result failed');
@@ -226,7 +225,7 @@ describe('Dashboard Results', () => {
 
   test('should throw error for unknown id', async () => {
     try {
-      await deleteResultById(VALID_OBJECT_ID, db);
+      await deleteResultById(VALID_OBJECT_ID, { db, userId: '' });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Deletion of Result failed');
@@ -250,11 +249,14 @@ describe('Dashboard Results', () => {
     };
 
     await Promise.all([
-      addOrUpdateResult(value, db),
-      addOrUpdateResult(otherValue, db)
+      addOrUpdateResult(value, { db, userId: '' }),
+      addOrUpdateResult(otherValue, { db, userId: '' })
     ]);
 
-    const res = await getResultsForDashboard(value.dashboardId, db);
+    const res = await getResultsForDashboard(value.dashboardId, {
+      db,
+      userId: ''
+    });
     expect(res.length).toBe(1);
     expect(res[0].value).toEqual(JSON.stringify(value.value));
     expect(res[0].id).toBeDefined();

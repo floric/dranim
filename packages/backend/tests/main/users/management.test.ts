@@ -39,35 +39,47 @@ describe('Users Management', () => {
       'Richter',
       'flo@flo.de',
       '123',
-      db
+      { db, userId: '' }
     );
     expect(registerRes.firstName).toBe('Florian');
     expect(registerRes.lastName).toBe('Richter');
     expect(registerRes.mail).toBe('flo@flo.de');
     expect(registerRes.id).toBeDefined();
 
-    const loginRes = await login('flo@flo.de', '123', db);
+    const loginRes = await login('flo@flo.de', '123', { db, userId: '' });
     expect(registerRes).toEqual(loginRes);
   });
 
   test('should not login with incorrect email', async () => {
-    await register('Florian', 'Richter', 'flo@flo.de', '123', db);
+    await register('Florian', 'Richter', 'flo@flo.de', '123', {
+      db,
+      userId: ''
+    });
 
-    const loginRes = await login('abc@flo.de', '123', db);
+    const loginRes = await login('abc@flo.de', '123', { db, userId: '' });
     expect(loginRes).toBe(null);
   });
 
   test('should not login with incorrect pw', async () => {
-    await register('Florian', 'Richter', 'flo@flo.de', '123', db);
+    await register('Florian', 'Richter', 'flo@flo.de', '123', {
+      db,
+      userId: ''
+    });
 
-    const loginRes = await login('flo@flo.de', '456', db);
+    const loginRes = await login('flo@flo.de', '456', { db, userId: '' });
     expect(loginRes).toBe(null);
   });
 
   test('should not register user with same mail', async () => {
     try {
-      await register('Florian', 'Richter', 'flo@flo.de', '123', db);
-      await register('Florian', 'Richter', 'flo@flo.de', '123', db);
+      await register('Florian', 'Richter', 'flo@flo.de', '123', {
+        db,
+        userId: ''
+      });
+      await register('Florian', 'Richter', 'flo@flo.de', '123', {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.code).toBe(11000);
@@ -75,15 +87,12 @@ describe('Users Management', () => {
   });
 
   test('should get user', async () => {
-    const { id } = await register(
-      'Florian',
-      'Richter',
-      'flo@flo.de',
-      '123',
-      db
-    );
+    const { id } = await register('Florian', 'Richter', 'flo@flo.de', '123', {
+      db,
+      userId: ''
+    });
 
-    const user = await tryGetUser(id, db);
+    const user = await tryGetUser({ db, userId: id });
     expect(user.id).toBe(id);
     expect(user.firstName).toBe('Florian');
     expect(user.lastName).toBe('Richter');
@@ -92,14 +101,14 @@ describe('Users Management', () => {
 
   test('should throw error for unknown user', async () => {
     try {
-      await tryGetUser(VALID_OBJECT_ID, db);
+      await tryGetUser({ db, userId: VALID_OBJECT_ID });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unknown user');
     }
 
     try {
-      await tryGetUser('123', db);
+      await tryGetUser({ db, userId: '123' });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unknown user');

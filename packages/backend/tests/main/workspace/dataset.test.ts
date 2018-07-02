@@ -48,31 +48,52 @@ describe('Dataset', () => {
   });
 
   test('should create, get and delete dataset', async () => {
-    const newDs = await createDataset(db, 'test');
+    const newDs = await createDataset('test', {
+      db,
+      userId: ''
+    });
     expect(newDs.id).toBeDefined();
     expect(newDs.name).toBe('test');
     expect(newDs.valueschemas).toEqual([]);
 
-    const ds = await getDataset(db, newDs.id);
+    const ds = await getDataset(newDs.id, {
+      db,
+      userId: ''
+    });
     expect(ds).toEqual(newDs);
 
-    const res = await deleteDataset(db, ds.id);
+    const res = await deleteDataset(ds.id, {
+      db,
+      userId: ''
+    });
     expect(res).toBe(true);
 
-    const unknownDs = await getDataset(db, newDs.id);
+    const unknownDs = await getDataset(newDs.id, {
+      db,
+      userId: ''
+    });
     expect(unknownDs).toBe(null);
   });
 
   test('should add valueschema', async () => {
-    const newDs = await createDataset(db, 'test');
+    const newDs = await createDataset('test', {
+      db,
+      userId: ''
+    });
     expect(newDs.id).toBeDefined();
     expect(newDs.name).toBe('test');
     expect(newDs.valueschemas).toEqual([]);
 
-    const res = await addValueSchema(db, newDs.id, SCHEMA);
+    const res = await addValueSchema(newDs.id, SCHEMA, {
+      db,
+      userId: ''
+    });
     expect(res).toBe(true);
 
-    const ds = await getDataset(db, newDs.id);
+    const ds = await getDataset(newDs.id, {
+      db,
+      userId: ''
+    });
     expect(ds.valueschemas.length).toBe(1);
 
     const fetchedSchema = ds.valueschemas[0];
@@ -81,7 +102,10 @@ describe('Dataset', () => {
 
   test('should throw error for invalid dataset', async () => {
     try {
-      await addValueSchema(db, VALID_OBJECT_ID, SCHEMA);
+      await addValueSchema(VALID_OBJECT_ID, SCHEMA, {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Dataset not found');
@@ -90,23 +114,9 @@ describe('Dataset', () => {
 
   test('should throw error for empty dataset name', async () => {
     try {
-      await createDataset(db, '');
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Name must not be empty');
-    }
-  });
-
-  test('should throw error for empty schema name', async () => {
-    const newDs = await createDataset(db, 'test');
-
-    try {
-      await addValueSchema(db, newDs.id, {
-        name: '',
-        unique: false,
-        type: DataType.STRING,
-        required: true,
-        fallback: ''
+      await createDataset('', {
+        db,
+        userId: ''
       });
       throw NeverGoHereError;
     } catch (err) {
@@ -114,12 +124,48 @@ describe('Dataset', () => {
     }
   });
 
-  test('should throw error for already existing schema', async () => {
-    const newDs = await createDataset(db, 'test');
-    await addValueSchema(db, newDs.id, SCHEMA);
+  test('should throw error for empty schema name', async () => {
+    const newDs = await createDataset('test', {
+      db,
+      userId: ''
+    });
 
     try {
-      await addValueSchema(db, newDs.id, SCHEMA);
+      await addValueSchema(
+        newDs.id,
+        {
+          name: '',
+          unique: false,
+          type: DataType.STRING,
+          required: true,
+          fallback: ''
+        },
+        {
+          db,
+          userId: ''
+        }
+      );
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Name must not be empty');
+    }
+  });
+
+  test('should throw error for already existing schema', async () => {
+    const newDs = await createDataset('test', {
+      db,
+      userId: ''
+    });
+    await addValueSchema(newDs.id, SCHEMA, {
+      db,
+      userId: ''
+    });
+
+    try {
+      await addValueSchema(newDs.id, SCHEMA, {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Schema already exists');
@@ -127,10 +173,16 @@ describe('Dataset', () => {
   });
 
   test('should not create dataset with already used name', async () => {
-    await createDataset(db, 'test');
+    await createDataset('test', {
+      db,
+      userId: ''
+    });
 
     try {
-      await createDataset(db, 'test');
+      await createDataset('test', {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Names must be unique');
@@ -138,10 +190,19 @@ describe('Dataset', () => {
   });
 
   test('should return all datasets', async () => {
-    const dsA = await createDataset(db, 'test');
-    const dsB = await createDataset(db, 'test2');
+    const dsA = await createDataset('test', {
+      db,
+      userId: ''
+    });
+    const dsB = await createDataset('test2', {
+      db,
+      userId: ''
+    });
 
-    const all = await getAllDatasets(db);
+    const all = await getAllDatasets({
+      db,
+      userId: ''
+    });
 
     expect(all).toContainEqual(dsA);
     expect(all).toContainEqual(dsB);

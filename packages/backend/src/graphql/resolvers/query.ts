@@ -18,23 +18,26 @@ import { getAllUploads } from '../../main/workspace/upload';
 import { getAllWorkspaces, getWorkspace } from '../../main/workspace/workspace';
 
 export const Query = {
-  datasets: (_, __, { db }): Promise<Array<Dataset>> => getAllDatasets(db),
-  dataset: (_, { id }, { db }): Promise<Dataset | null> => getDataset(db, id),
+  datasets: (_, __, context): Promise<Array<Dataset>> =>
+    getAllDatasets(context),
+  dataset: (_, { id }, context): Promise<Dataset | null> =>
+    getDataset(id, context),
   entry: (_, {}) => null,
-  workspaces: (_, __, { db }): Promise<Array<Workspace>> =>
-    getAllWorkspaces(db),
-  workspace: (_, { id }, { db }): Promise<Workspace | null> =>
-    getWorkspace(db, id),
-  uploads: (_, { datasetId }, { db }): Promise<Array<UploadProcess>> =>
-    getAllUploads(db, datasetId),
+  workspaces: (_, __, context): Promise<Array<Workspace>> =>
+    getAllWorkspaces(context),
+  workspace: (_, { id }, context): Promise<Workspace | null> =>
+    getWorkspace(id, context),
+  uploads: (_, { datasetId }, context): Promise<Array<UploadProcess>> =>
+    getAllUploads(datasetId, context),
   calculations: (
     _,
     { workspaceId },
-    { db }
-  ): Promise<Array<CalculationProcess>> => getAllCalculations(db, workspaceId),
-  dashboards: (_, __, { db }): Promise<Array<Dashboard>> =>
-    getAllDashboards(db),
-  dashboard: (_, { id }, { db }): Promise<Dashboard | null> =>
-    getDashboard(id, db),
-  user: (_, __, { userId, db }): Promise<User> => tryGetUser(userId, db)
+    context
+  ): Promise<Array<CalculationProcess>> =>
+    getAllCalculations(workspaceId, context),
+  dashboards: (_, __, context): Promise<Array<Dashboard>> =>
+    getAllDashboards(context),
+  dashboard: (_, { id }, context): Promise<Dashboard | null> =>
+    getDashboard(id, context),
+  user: (_, __, context): Promise<User> => tryGetUser(context)
 };

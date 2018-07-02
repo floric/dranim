@@ -36,61 +36,70 @@ import {
 } from '../../main/workspace/workspace';
 
 export const Mutation = {
-  createDataset: (_, { name }, { db }): Promise<Dataset> =>
-    createDataset(db, name),
+  createDataset: (_, { name }, context): Promise<Dataset> =>
+    createDataset(name, context),
   addValueSchema: (
     _,
     { datasetId, name, type, required, fallback, unique },
-    { db }
+    context
   ): Promise<boolean> =>
-    addValueSchema(db, datasetId, {
-      name,
-      type,
-      required,
-      fallback,
-      unique
-    }),
-  addEntry: (_, { datasetId, values }, { db }): Promise<Entry> =>
-    createEntryFromJSON(db, datasetId, values),
-  deleteDataset: (_, { id }, { db }): Promise<boolean> => deleteDataset(db, id),
-  deleteEntry: (_, { entryId, datasetId }, { db }): Promise<boolean> =>
-    deleteEntry(db, datasetId, entryId),
+    addValueSchema(
+      datasetId,
+      {
+        name,
+        type,
+        required,
+        fallback,
+        unique
+      },
+      context
+    ),
+  addEntry: (_, { datasetId, values }, context): Promise<Entry> =>
+    createEntryFromJSON(datasetId, values, context),
+  deleteDataset: (_, { id }, context): Promise<boolean> =>
+    deleteDataset(id, context),
+  deleteEntry: (_, { entryId, datasetId }, context): Promise<boolean> =>
+    deleteEntry(datasetId, entryId, context),
   uploadEntriesCsv: (
     obj,
     { files, datasetId },
-    { db }
-  ): Promise<UploadProcess> => uploadEntriesCsv(db, files, datasetId),
-  createSTRDemoData: (_, {}, { db }): Promise<boolean> => createSTRDemoData(db),
-  createBirthdaysDemoData: (_, {}, { db }): Promise<boolean> =>
-    createBirthdaysDemoData(db),
+    context
+  ): Promise<UploadProcess> => uploadEntriesCsv(files, datasetId, context),
+  createSTRDemoData: (_, {}, context): Promise<boolean> =>
+    createSTRDemoData(context),
+  createBirthdaysDemoData: (_, {}, context): Promise<boolean> =>
+    createBirthdaysDemoData(context),
   createNode: (
     _,
     { type, x, y, workspaceId, contextIds },
-    { db }
+    context
   ): Promise<NodeInstance> =>
-    createNode(db, type, workspaceId, contextIds, x, y),
-  updateNode: (_, { id, x, y }, { db }): Promise<boolean> =>
-    updateNode(db, id, x, y),
-  deleteNode: (_, { id }, { db }): Promise<boolean> => deleteNode(db, id),
+    createNode(type, workspaceId, contextIds, x, y, context),
+  updateNode: (_, { id, x, y }, context): Promise<boolean> =>
+    updateNode(id, x, y, context),
+  deleteNode: (_, { id }, context): Promise<boolean> => deleteNode(id, context),
   addOrUpdateFormValue: (
     _,
     { nodeId, name, value },
-    { db }
-  ): Promise<boolean> => addOrUpdateFormValue(db, nodeId, name, value),
-  createConnection: (_, { input }, { db }): Promise<ConnectionInstance> =>
-    createConnection(input.from, input.to, db),
-  deleteConnection: (_, { id }, { db }): Promise<boolean> =>
-    deleteConnection(db, id),
-  updateWorkspace: (_, { id, nodes, connections }, { db }): Promise<boolean> =>
-    updateWorkspace(db, id, nodes, connections),
-  createWorkspace: (_, { name, description }, { db }): Promise<Workspace> =>
-    createWorkspace(db, name, description),
-  deleteWorkspace: (_, { id }, { db }): Promise<boolean> =>
-    deleteWorkspace(db, id),
-  startCalculation: (_, { workspaceId }, { db }): Promise<CalculationProcess> =>
-    startCalculation(db, workspaceId),
-  createDashboard: (_, { name }, { db }): Promise<Dashboard> =>
-    createDashboard(name, db),
-  deleteDashboard: (_, { id }, { db }): Promise<boolean> =>
-    deleteDashboard(id, db)
+    context
+  ): Promise<boolean> => addOrUpdateFormValue(nodeId, name, value, context),
+  createConnection: (_, { input }, context): Promise<ConnectionInstance> =>
+    createConnection(input.from, input.to, context),
+  deleteConnection: (_, { id }, context): Promise<boolean> =>
+    deleteConnection(id, context),
+  updateWorkspace: (_, { id, nodes, connections }, context): Promise<boolean> =>
+    updateWorkspace(id, nodes, connections, context),
+  createWorkspace: (_, { name, description }, context): Promise<Workspace> =>
+    createWorkspace(name, context, description),
+  deleteWorkspace: (_, { id }, context): Promise<boolean> =>
+    deleteWorkspace(id, context),
+  startCalculation: (
+    _,
+    { workspaceId },
+    context
+  ): Promise<CalculationProcess> => startCalculation(workspaceId, context),
+  createDashboard: (_, { name }, context): Promise<Dashboard> =>
+    createDashboard(name, context),
+  deleteDashboard: (_, { id }, context): Promise<boolean> =>
+    deleteDashboard(id, context)
 };

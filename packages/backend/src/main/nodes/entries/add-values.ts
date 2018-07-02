@@ -2,13 +2,13 @@ import {
   AddValuesNodeDef,
   AddValuesNodeForm,
   allAreDefinedAndPresent,
+  ApolloContext,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
   ServerNodeDefWithContextFn,
   SocketDef,
   ValueSchema
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { createDynamicDatasetName } from '../../calculation/utils';
 import {
@@ -77,30 +77,34 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
       }
     };
   },
-  onNodeExecution: async (form, inputs, { db, contextFnExecution, node }) => {
-    const oldDs = await getDataset(db, inputs.dataset.datasetId);
+  onNodeExecution: async (
+    form,
+    inputs,
+    { reqContext, contextFnExecution, node }
+  ) => {
+    const oldDs = await getDataset(inputs.dataset.datasetId, reqContext);
     if (!oldDs) {
       throw new Error('Unknown dataset source');
     }
 
     const newDs = await createDataset(
-      db,
       createDynamicDatasetName(AddValuesNodeDef.type, node.id),
+      reqContext,
       node.workspaceId
     );
 
-    await copySchemas(oldDs.valueschemas, newDs.id, db);
-    await addDynamicSchemas(newDs.id, form.values || [], db);
+    await copySchemas(oldDs.valueschemas, newDs.id, reqContext);
+    await addDynamicSchemas(newDs.id, form.values || [], reqContext);
 
     if (contextFnExecution) {
       await processEntries(
-        db,
         inputs.dataset.datasetId,
         node.id,
         async entry => {
           const result = await contextFnExecution(entry.values);
-          await createEntry(db, newDs.id, result.outputs);
-        }
+          await createEntry(newDs.id, result.outputs, reqContext);
+        },
+        reqContext
       );
     } else {
       throw new Error('Missing context function');
@@ -119,5 +123,5 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
 const addDynamicSchemas = async (
   dsId: string,
   formValues: Array<ValueSchema>,
-  db: Db
-) => Promise.all(formValues.map(f => addValueSchema(db, dsId, f)));
+  reqContext: ApolloContext
+) => Promise.all(formValues.map(f => addValueSchema(dsId, f, reqContext)));

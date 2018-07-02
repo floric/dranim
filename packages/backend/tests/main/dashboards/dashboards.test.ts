@@ -39,14 +39,14 @@ describe('Dashboard', () => {
   });
 
   test('should create dashboard', async () => {
-    const res = await createDashboard('test', db);
+    const res = await createDashboard('test', { db, userId: '' });
     expect(res.name).toBe('test');
     expect(res.id).toBeDefined();
   });
 
   test('should throw error for empty name', async () => {
     try {
-      await createDashboard('', db);
+      await createDashboard('', { db, userId: '' });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Name must not be empty');
@@ -54,10 +54,10 @@ describe('Dashboard', () => {
   });
 
   test('should throw error for already used name', async () => {
-    await createDashboard('test', db);
+    await createDashboard('test', { db, userId: '' });
 
     try {
-      await createDashboard('test', db);
+      await createDashboard('test', { db, userId: '' });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Names must be unique');
@@ -65,33 +65,33 @@ describe('Dashboard', () => {
   });
 
   test('should create, get and delete dashboard', async () => {
-    const createdDb = await createDashboard('test', db);
-    const getDb = await getDashboard(createdDb.id, db);
-    const tryGetDb = await tryGetDashboard(createdDb.id, db);
+    const createdDb = await createDashboard('test', { db, userId: '' });
+    const getDb = await getDashboard(createdDb.id, { db, userId: '' });
+    const tryGetDb = await tryGetDashboard(createdDb.id, { db, userId: '' });
 
     expect(createdDb).toEqual(getDb);
     expect(createdDb).toEqual(tryGetDb);
 
-    const res = await deleteDashboard(createdDb.id, db);
+    const res = await deleteDashboard(createdDb.id, { db, userId: '' });
     expect(res).toBe(true);
 
     expect(deleteResultsByDashboard as jest.Mock).toHaveBeenCalledWith(
       createdDb.id,
-      db
+      { db, userId: '' }
     );
   });
 
   test('should return null for unknown dashboard', async () => {
-    let res = await getDashboard('bla', db);
+    let res = await getDashboard('bla', { db, userId: '' });
     expect(res).toBe(null);
 
-    res = await getDashboard(VALID_OBJECT_ID, db);
+    res = await getDashboard(VALID_OBJECT_ID, { db, userId: '' });
     expect(res).toBe(null);
   });
 
   test('should throw error for unknown dashboard', async () => {
     try {
-      await tryGetDashboard('unknown', db);
+      await tryGetDashboard('unknown', { db, userId: '' });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unknown dashboard');
@@ -100,10 +100,12 @@ describe('Dashboard', () => {
 
   test('should get all dashboards', async () => {
     await Promise.all(
-      ['abc', 'test', '123'].map(name => createDashboard(name, db))
+      ['abc', 'test', '123'].map(name =>
+        createDashboard(name, { db, userId: '' })
+      )
     );
 
-    const all = await getAllDashboards(db);
+    const all = await getAllDashboards({ db, userId: '' });
     expect(all.length).toBe(3);
     expect(all.map(n => n.name)).toContain('abc');
   });

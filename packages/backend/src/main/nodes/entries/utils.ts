@@ -1,4 +1,5 @@
 import {
+  ApolloContext,
   DatasetMeta,
   Entry,
   SocketDef,
@@ -6,7 +7,6 @@ import {
   SocketMetaDef,
   ValueSchema
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { addValueSchema } from '../../workspace/dataset';
 import { getEntriesCount, getEntryCollection } from '../../workspace/entry';
@@ -15,13 +15,13 @@ import { setProgress } from '../../workspace/nodes-detail';
 export const copySchemas = (
   schemas: Array<ValueSchema>,
   newDsId: string,
-  db: Db
-) => Promise.all(schemas.map(s => addValueSchema(db, newDsId, s)));
+  reqContext: ApolloContext
+) => Promise.all(schemas.map(s => addValueSchema(newDsId, s, reqContext)));
 
 export const getDynamicEntryContextInputs = async (
   inputDefs: SocketDefs<any>,
   inputs: { dataset: SocketMetaDef<DatasetMeta> },
-  db: Db
+  reqContext: ApolloContext
 ): Promise<{ [name: string]: SocketDef }> => {
   if (
     !inputs.dataset ||
@@ -44,14 +44,14 @@ export const getDynamicEntryContextInputs = async (
 };
 
 export const processEntries = async (
-  db: Db,
   dsId: string,
   nodeId: string,
-  processFn: (entry: Entry) => Promise<void>
+  processFn: (entry: Entry) => Promise<void>,
+  reqContext: ApolloContext
 ): Promise<void> => {
-  const coll = getEntryCollection(db, dsId);
+  const coll = getEntryCollection(dsId, reqContext.db);
   const cursor = coll.find();
-  const entriesCount = await getEntriesCount(db, dsId);
+  const entriesCount = await getEntriesCount(dsId, reqContext);
   let i = 0;
 
   while (await cursor.hasNext()) {
@@ -59,7 +59,7 @@ export const processEntries = async (
     await processFn(doc);
 
     if (i % 100 === 0) {
-      await setProgress(nodeId, i / entriesCount, db);
+      await setProgress(nodeId, i / entriesCount, reqContext);
     }
 
     i += 1;

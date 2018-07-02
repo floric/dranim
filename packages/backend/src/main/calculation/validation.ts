@@ -1,18 +1,21 @@
 import {
+  ApolloContext,
   ContextNodeType,
   DataType,
   IOValues,
   NodeInstance,
   parseNodeForm
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { getMetaInputs } from '../calculation/meta-execution';
 import { tryGetNodeType } from '../nodes/all-nodes';
 import { getDataset } from '../workspace/dataset';
 import { getInputDefs } from '../workspace/nodes-detail';
 
-export const isNodeInMetaValid = async (node: NodeInstance, db: Db) => {
+export const isNodeInMetaValid = async (
+  node: NodeInstance,
+  reqContext: ApolloContext
+) => {
   let isValidForm = true;
   const isValidInput = true;
   if (
@@ -25,7 +28,7 @@ export const isNodeInMetaValid = async (node: NodeInstance, db: Db) => {
     isValidForm = type.isFormValid ? await type.isFormValid(form) : true;
   }
 
-  const metaDefs = await getMetaInputs(node, db);
+  const metaDefs = await getMetaInputs(node, reqContext);
   const allInputsPresent = Object.values(metaDefs)
     .map(a => a.isPresent)
     .reduce((a, b) => a && b, true);
@@ -36,19 +39,22 @@ export const isNodeInMetaValid = async (node: NodeInstance, db: Db) => {
 export const areNodeInputsValid = async (
   node: NodeInstance,
   inputs: IOValues<{}>,
-  db: Db
+  reqContext: ApolloContext
 ) => {
-  const inputDefs = await getInputDefs(node, db);
+  const inputDefs = await getInputDefs(node, reqContext);
   const res = await Promise.all(
     Object.entries(inputDefs).map(p =>
-      isInputValid(inputs[p[0]], p[1].dataType, db)
+      isInputValid(inputs[p[0]], p[1].dataType, reqContext)
     )
   );
   return res.reduce((a, b) => a && b, true);
 };
 
-const validateDataset = async (datasetRef: any, db: Db): Promise<boolean> => {
-  const ds = await getDataset(db, datasetRef.datasetId);
+const validateDataset = async (
+  datasetRef: any,
+  reqContext: ApolloContext
+): Promise<boolean> => {
+  const ds = await getDataset(datasetRef.datasetId, reqContext);
   if (!ds) {
     return false;
   }
@@ -78,7 +84,7 @@ const validateTime = (value: any) => {
 
 const validationMethods: Map<
   string,
-  (input: any, db: Db) => Promise<boolean>
+  (input: any, reqContext: ApolloContext) => Promise<boolean>
 > = new Map([
   [DataType.DATASET, validateDataset],
   [DataType.STRING, validateString],
@@ -88,7 +94,11 @@ const validationMethods: Map<
   [DataType.DATETIME, validateDatatime]
 ]);
 
-export const isInputValid = async (input: any, dataType: DataType, db: Db) => {
+export const isInputValid = async (
+  input: any,
+  dataType: DataType,
+  reqContext: ApolloContext
+) => {
   if (input == null) {
     return false;
   }
@@ -98,5 +108,5 @@ export const isInputValid = async (input: any, dataType: DataType, db: Db) => {
     return true;
   }
 
-  return await validationMethods.get(dataType)!(input, db);
+  return await validationMethods.get(dataType)!(input, reqContext);
 };

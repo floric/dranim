@@ -81,7 +81,10 @@ describe('Node Details', () => {
         x: 0,
         y: 0
       },
-      db
+      {
+        db,
+        userId: ''
+      }
     );
 
     expect(state).toBe(NodeState.VALID);
@@ -114,7 +117,10 @@ describe('Node Details', () => {
         x: 0,
         y: 0
       },
-      db
+      {
+        db,
+        userId: ''
+      }
     );
 
     expect(state).toBe(NodeState.VALID);
@@ -147,7 +153,10 @@ describe('Node Details', () => {
         x: 0,
         y: 0
       },
-      db
+      {
+        db,
+        userId: ''
+      }
     );
 
     expect(state).toBe(NodeState.VALID);
@@ -167,7 +176,10 @@ describe('Node Details', () => {
         x: 0,
         y: 0
       },
-      db
+      {
+        db,
+        userId: ''
+      }
     );
 
     expect(state).toBe(NodeState.INVALID);
@@ -189,7 +201,10 @@ describe('Node Details', () => {
         x: 0,
         y: 0
       },
-      db
+      {
+        db,
+        userId: ''
+      }
     );
 
     expect(state).toBe(NodeState.ERROR);
@@ -209,10 +224,16 @@ describe('Node Details', () => {
     };
     (hasNodeType as jest.Mock).mockReturnValue(true);
 
-    const inputRes = await getContextInputDefs(node, db);
+    const inputRes = await getContextInputDefs(node, {
+      db,
+      userId: ''
+    });
     expect(inputRes).toBe(null);
 
-    const outputRes = await getContextOutputDefs(node, db);
+    const outputRes = await getContextOutputDefs(node, {
+      db,
+      userId: ''
+    });
     expect(outputRes).toBe(null);
   });
 
@@ -232,7 +253,10 @@ describe('Node Details', () => {
     (hasNodeType as jest.Mock).mockReturnValue(false);
 
     try {
-      await getContextInputDefs(node, db);
+      await getContextInputDefs(node, {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Parent node missing');
@@ -265,7 +289,10 @@ describe('Node Details', () => {
     (getNode as jest.Mock).mockResolvedValue(parentNode);
     (hasNodeType as jest.Mock).mockReturnValue(false);
 
-    const res = await getContextInputDefs(node, db);
+    const res = await getContextInputDefs(node, {
+      db,
+      userId: ''
+    });
 
     expect(res).toBe(null);
   });
@@ -318,7 +345,10 @@ describe('Node Details', () => {
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
     (hasContextFn as any).mockReturnValue(true);
 
-    const inputRes = await getContextInputDefs(inputNode, db);
+    const inputRes = await getContextInputDefs(inputNode, {
+      db,
+      userId: ''
+    });
     expect(inputRes).toEqual({});
   });
 
@@ -371,7 +401,10 @@ describe('Node Details', () => {
     (getContextNode as jest.Mock).mockResolvedValue(inputNode);
     (hasContextFn as any).mockReturnValue(true);
 
-    const outputRes = await getContextOutputDefs(inputNode, db);
+    const outputRes = await getContextOutputDefs(inputNode, {
+      db,
+      userId: ''
+    });
     expect(outputRes).toEqual({});
   });
 
@@ -425,7 +458,10 @@ describe('Node Details', () => {
     (hasContextFn as any).mockReturnValue(true);
 
     try {
-      await getContextOutputDefs(inputNode, db);
+      await getContextOutputDefs(inputNode, {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Context input node unknown');
@@ -446,7 +482,10 @@ describe('Node Details', () => {
     };
 
     try {
-      await getContextOutputDefs(node, db);
+      await getContextOutputDefs(node, {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Node doesnt have context');
@@ -455,7 +494,10 @@ describe('Node Details', () => {
 
   test('should throw error for empty value names', async () => {
     try {
-      await addOrUpdateFormValue(db, VALID_OBJECT_ID, '', 'test');
+      await addOrUpdateFormValue(VALID_OBJECT_ID, '', 'test', {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('No form value name specified');
@@ -468,7 +510,10 @@ describe('Node Details', () => {
     });
 
     try {
-      await addOrUpdateFormValue(db, VALID_OBJECT_ID, 'test', 'test');
+      await addOrUpdateFormValue(VALID_OBJECT_ID, 'test', 'test', {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Node not found');
@@ -615,16 +660,28 @@ describe('Node Details', () => {
       updateOne: jest.fn()
     });
 
-    let res = await setProgress(VALID_OBJECT_ID, 0.5, db);
+    let res = await setProgress(VALID_OBJECT_ID, 0.5, {
+      db,
+      userId: ''
+    });
     expect(res).toBe(true);
 
-    res = await setProgress(VALID_OBJECT_ID, 0, db);
+    res = await setProgress(VALID_OBJECT_ID, 0, {
+      db,
+      userId: ''
+    });
     expect(res).toBe(true);
 
-    res = await setProgress(VALID_OBJECT_ID, 1, db);
+    res = await setProgress(VALID_OBJECT_ID, 1, {
+      db,
+      userId: ''
+    });
     expect(res).toBe(true);
 
-    res = await setProgress(null, 1, db);
+    res = await setProgress(null, 1, {
+      db,
+      userId: ''
+    });
     expect(res).toBe(true);
 
     expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(4);
@@ -636,14 +693,20 @@ describe('Node Details', () => {
     });
 
     try {
-      await setProgress(VALID_OBJECT_ID, 1.2, db);
+      await setProgress(VALID_OBJECT_ID, 1.2, {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Invalid progress value');
     }
 
     try {
-      await setProgress(VALID_OBJECT_ID, -0.2, db);
+      await setProgress(VALID_OBJECT_ID, -0.2, {
+        db,
+        userId: ''
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Invalid progress value');
@@ -658,24 +721,26 @@ describe('Node Details', () => {
     });
 
     const nodeId = VALID_OBJECT_ID;
-    await addConnection(db, { name: 'test', nodeId }, 'input', VALID_OBJECT_ID);
-    await addConnection(
+    await addConnection({ name: 'test', nodeId }, 'input', VALID_OBJECT_ID, {
       db,
+      userId: ''
+    });
+    await addConnection({ name: 'test', nodeId }, 'output', VALID_OBJECT_ID, {
+      db,
+      userId: ''
+    });
+    await removeConnection({ name: 'test', nodeId }, 'input', VALID_OBJECT_ID, {
+      db,
+      userId: ''
+    });
+    await removeConnection(
       { name: 'test', nodeId },
       'output',
-      VALID_OBJECT_ID
-    );
-    await removeConnection(
-      db,
-      { name: 'test', nodeId },
-      'input',
-      VALID_OBJECT_ID
-    );
-    await removeConnection(
-      db,
-      { name: 'test', nodeId },
-      'output',
-      VALID_OBJECT_ID
+      VALID_OBJECT_ID,
+      {
+        db,
+        userId: ''
+      }
     );
     expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(4);
   });

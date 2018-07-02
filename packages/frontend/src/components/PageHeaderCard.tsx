@@ -43,7 +43,7 @@ export const PageHeaderCard: SFC<IPageHeaderProps> = ({
               <span
                 {...css({ color: Colors.GrayMedium, fontWeight: 'initial' })}
               >
-                {` // ${typeTitle}`}
+                {` | ${typeTitle}`}
               </span>
             ) : null}
           </h1>

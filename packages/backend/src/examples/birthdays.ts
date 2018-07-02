@@ -1,6 +1,5 @@
-import { DataType, Values } from '@masterthesis/shared';
+import { ApolloContext, DataType, Values } from '@masterthesis/shared';
 import * as casual from 'casual';
-import { Db } from 'mongodb';
 
 import {
   addValueSchema,
@@ -12,15 +11,17 @@ import { createWorkspace } from '../main/workspace/workspace';
 
 const ENTRIES_COUNT = 2500;
 
-export const createBirthdaysDemoData = async (db: Db) => {
-  const ds = await createDataset(db, 'Birthdays');
+export const createBirthdaysDemoData = async (reqContext: ApolloContext) => {
+  const ds = await createDataset('Birthdays', reqContext);
   for (const s of birthdaysSchema) {
-    await addValueSchema(db, ds.id, s);
+    await addValueSchema(ds.id, s, reqContext);
   }
 
-  await Promise.all(birthdaysEntries.map(b => createEntry(db, ds.id, b)));
+  await Promise.all(
+    birthdaysEntries.map(b => createEntry(ds.id, b, reqContext))
+  );
 
-  await createWorkspace(db, 'Birthdays Months', 'Aggregate by months');
+  await createWorkspace('Birthdays Months', reqContext, 'Aggregate by months');
   return true;
 };
 
