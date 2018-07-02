@@ -61,11 +61,14 @@ Resources:
         - Namespace: aws:autoscaling:launchconfiguration
           OptionName: InstanceType
           Value: t2.micro
-        - Namespace: aws:elasticbeanstalk:environment:process:default
-          OptionName: HealthCheckInterval
-          Value: 30
-        - Namespace: aws:elasticbeanstalk:environment:process:default
-          OptionName: HealthCheckPath
+        - Namespace: aws:elb:healthcheck
+          OptionName: HealthyThreshold
+          Value: 2
+        - Namespace: aws:elb:healthcheck
+          OptionName: Interval
+          Value: 60
+        - Namespace: aws:elasticbeanstalk:application
+          OptionName: Application Healthcheck URL
           Value: /still-alive
         - Namespace: aws:elb:listener:443
           OptionName: ListenerProtocol

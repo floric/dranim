@@ -7,39 +7,19 @@ export const generateErrorResponse = (message: string) =>
   JSON.stringify({ error: { message } });
 
 export const registerRoutes = (app: Express, db: Db) => {
-  app.post('/logout', async (req, res, next) => {
-    if (req.session) {
-      req.session.destroy(err => {
-        if (err) {
-          return next(err);
-        } else {
-          return res.status(200).send();
-        }
-      });
-    }
-  });
-  app.post('/login', async (req, res, next) => {
-    if (!req.body || !req.body.mail || !req.body.pw) {
-      res.status(301).send(generateErrorResponse('Invalid request'));
-    }
+  registerHealthEndpoint(app);
+  registerLogin(app, db);
+  registerLogout(app);
+  registerRegistration(app, db);
+};
 
-    const mail = req.body.mail;
-    const pw = req.body.pw;
-    const result = await login(mail, pw, { db, userId: req.session!.userId });
-    if (result) {
-      (req.session as any).userId = result.id;
-      res.status(200).send(JSON.stringify(result));
-    } else {
-      res
-        .status(401)
-        .send(generateErrorResponse('Login to access this resource'));
-    }
-  });
-
+const registerHealthEndpoint = (app: Express) => {
   app.get('/still-alive', (req, res) => {
     res.sendStatus(200);
   });
+};
 
+const registerRegistration = (app: Express, db: Db) => {
   app.post('/registration', async (req, res) => {
     if (
       !req.body ||
@@ -62,6 +42,40 @@ export const registerRoutes = (app: Express, db: Db) => {
       res.status(200).send(JSON.stringify(result));
     } catch (err) {
       res.status(500).send();
+    }
+  });
+};
+
+const registerLogout = (app: Express) => {
+  app.post('/logout', async (req, res, next) => {
+    if (req.session) {
+      req.session.destroy(err => {
+        if (err) {
+          return next(err);
+        } else {
+          return res.status(200).send();
+        }
+      });
+    }
+  });
+};
+
+const registerLogin = (app: Express, db: Db) => {
+  app.post('/login', async (req, res, next) => {
+    if (!req.body || !req.body.mail || !req.body.pw) {
+      res.status(301).send(generateErrorResponse('Invalid request'));
+    }
+
+    const mail = req.body.mail;
+    const pw = req.body.pw;
+    const result = await login(mail, pw, { db, userId: req.session!.userId });
+    if (result) {
+      (req.session as any).userId = result.id;
+      res.status(200).send(JSON.stringify(result));
+    } else {
+      res
+        .status(401)
+        .send(generateErrorResponse('Login to access this resource'));
     }
   });
 };
