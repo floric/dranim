@@ -2,6 +2,11 @@ import { Db } from 'mongodb';
 
 import { DataType, SocketDefs, SocketMetas } from './sockets';
 
+export interface ApolloContext {
+  db: Db;
+  userId: string;
+}
+
 export enum NodeState {
   VALID = 'VALID',
   ERROR = 'ERROR',
@@ -67,14 +72,14 @@ export interface ServerNodeDef<
     form: FormValues<NodeForm>,
     inputs: IOValues<NodeInputs>,
     context: {
-      db: Db;
+      reqContext: ApolloContext;
       node: NodeInstance;
     }
   ) => Promise<NodeExecutionResult<NodeOutputs, NodeResults>>;
   onMetaExecution: (
     form: FormValues<NodeForm>,
     inputs: SocketMetas<NodeInputs>,
-    db: Db
+    reqContext: ApolloContext
   ) => Promise<SocketMetas<NodeOutputs>>;
 }
 
@@ -89,7 +94,7 @@ export interface ServerNodeDefWithContextFn<
     inputs: IOValues<NodeInputs>,
     context: {
       node: NodeInstance;
-      db: Db;
+      reqContext: ApolloContext;
       contextFnExecution?: (
         input: IOValues<any>
       ) => Promise<NodeExecutionResult<any>>;
@@ -98,7 +103,7 @@ export interface ServerNodeDefWithContextFn<
   transformInputDefsToContextInputDefs: (
     inputsDefs: SocketDefs<NodeInputs>,
     inputs: SocketMetas<NodeInputs>,
-    db: Db
+    reqContext: ApolloContext
   ) => Promise<SocketDefs<{}>>;
   transformContextInputDefsToContextOutputDefs: (
     inputsDefs: SocketDefs<NodeInputs>,
@@ -106,7 +111,7 @@ export interface ServerNodeDefWithContextFn<
     contextInputDefs: SocketDefs<{}>,
     contextInputs: SocketMetas<{}>,
     form: FormValues<NodeForm>,
-    db: Db
+    reqContext: ApolloContext
   ) => Promise<SocketDefs<{}>>;
 }
 

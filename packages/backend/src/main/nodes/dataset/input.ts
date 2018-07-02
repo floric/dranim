@@ -14,14 +14,14 @@ export const DatasetInputNode: ServerNodeDef<
 > = {
   type: DatasetInputNodeDef.type,
   isFormValid: form => Promise.resolve(form.dataset != null),
-  onMetaExecution: async (form, inputs, db) => {
+  onMetaExecution: async (form, inputs, reqContext) => {
     if (form.dataset == null) {
       return {
         dataset: { isPresent: false, content: { schema: [] } }
       };
     }
 
-    const ds = await getDataset(db, form.dataset);
+    const ds = await getDataset(form.dataset, reqContext);
     if (!ds) {
       return {
         dataset: { isPresent: false, content: { schema: [] } }
@@ -37,7 +37,7 @@ export const DatasetInputNode: ServerNodeDef<
       }
     };
   },
-  onNodeExecution: async (form, inputs, { db }) => {
+  onNodeExecution: async form => {
     return {
       outputs: {
         dataset: {

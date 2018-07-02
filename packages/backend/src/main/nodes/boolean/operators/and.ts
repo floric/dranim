@@ -11,7 +11,7 @@ export const AndNode: ServerNodeDef<
   BooleanOperatorOutputs
 > = {
   type: AndNodeDef.type,
-  onMetaExecution: async (form, inputs, db) => {
+  onMetaExecution: async (form, inputs) => {
     if (!allAreDefinedAndPresent(inputs)) {
       return {
         value: {

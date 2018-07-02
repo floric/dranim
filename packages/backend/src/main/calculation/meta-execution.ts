@@ -1,4 +1,5 @@
 import {
+  ApolloContext,
   ContextNodeType,
   hasContextFn,
   NodeInstance,
@@ -6,15 +7,17 @@ import {
   SocketMetaDef,
   SocketMetas
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { getNodeType, tryGetNodeType } from '../nodes/all-nodes';
 import { tryGetConnection } from '../workspace/connections';
 import { tryGetNode } from '../workspace/nodes';
 import { getInputDefs, tryGetParentNode } from '../workspace/nodes-detail';
 
-export const getMetaInputs = async (node: NodeInstance, db: Db) => {
-  const inputDefs = await getInputDefs(node, db);
+export const getMetaInputs = async (
+  node: NodeInstance,
+  reqContext: ApolloContext
+) => {
+  const inputDefs = await getInputDefs(node, reqContext);
   const inputs: { [name: string]: SocketMetaDef<any> } = {};
 
   await Promise.all(
@@ -28,9 +31,9 @@ export const getMetaInputs = async (node: NodeInstance, db: Db) => {
         return;
       }
 
-      const conn = await tryGetConnection(connection.connectionId, db);
-      const inputNode = await tryGetNode(conn.from.nodeId, db);
-      inputs[connection.name] = (await getMetaOutputs(inputNode, db))[
+      const conn = await tryGetConnection(connection.connectionId, reqContext);
+      const inputNode = await tryGetNode(conn.from.nodeId, reqContext);
+      inputs[connection.name] = (await getMetaOutputs(inputNode, reqContext))[
         conn.from.name
       ];
     })
@@ -41,10 +44,10 @@ export const getMetaInputs = async (node: NodeInstance, db: Db) => {
 
 export const getMetaOutputs = async (
   node: NodeInstance,
-  db: Db
+  reqContext: ApolloContext
 ): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> => {
   if (node.type === ContextNodeType.INPUT) {
-    return await getDynamitMetaOutputs(node, db);
+    return await getDynamitMetaOutputs(node, reqContext);
   }
 
   const nodeType = getNodeType(node.type);
@@ -52,25 +55,28 @@ export const getMetaOutputs = async (
     return {};
   }
 
-  const allInputs = await getMetaInputs(node, db);
+  const allInputs = await getMetaInputs(node, reqContext);
   return await nodeType.onMetaExecution(
     parseNodeForm(node.form),
     allInputs,
-    db
+    reqContext
   );
 };
 
-const getDynamitMetaOutputs = async (node: NodeInstance, db: Db) => {
-  const parent = await tryGetParentNode(node, db);
+const getDynamitMetaOutputs = async (
+  node: NodeInstance,
+  reqContext: ApolloContext
+) => {
+  const parent = await tryGetParentNode(node, reqContext);
   const parentType = await tryGetNodeType(parent.type);
   if (!hasContextFn(parentType)) {
     throw new Error('Should have context fn');
   }
 
   const dynContextDefs = await parentType.transformInputDefsToContextInputDefs(
-    await getInputDefs(parent, db),
-    await getMetaInputs(parent, db),
-    db
+    await getInputDefs(parent, reqContext),
+    await getMetaInputs(parent, reqContext),
+    reqContext
   );
 
   const res = {};

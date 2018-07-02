@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Colors } from '@masterthesis/shared';
 import { Layout } from 'antd';
-import { css } from 'glamor';
 import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
 import { withRouter } from 'react-router';
@@ -58,19 +57,13 @@ class LoggedInApp extends React.Component<
     const { collapsed } = this.state;
     return (
       <Layout style={{ minHeight: '100vh' }}>
-        <Sider collapsible collapsed={collapsed} onCollapse={this.onCollapse}>
-          <div
-            className="logo"
-            {...css({ color: Colors.GrayLight, padding: '24px' })}
-          >
-            {!collapsed ? (
-              <>
-                <span {...css({ fontWeight: '900', fontSize: '150%' })}>
-                  draniM
-                </span>
-              </>
-            ) : null}
-          </div>
+        <Sider
+          collapsible
+          collapsed={collapsed}
+          onCollapse={this.onCollapse}
+          breakpoint="md"
+          style={{ color: Colors.GrayLight }}
+        >
           <Query query={MENU_QUERY}>
             {res => {
               if (res.loading || res.error) {
@@ -88,7 +81,9 @@ class LoggedInApp extends React.Component<
             }}
           </Query>
         </Sider>
-        <Content {...css({ background: Colors.Background, padding: '30px' })}>
+        <Content
+          style={{ backgroundColor: Colors.Background, padding: '16px' }}
+        >
           <Switch>
             <Route exact path="/" component={StartPage} />
             <Route exact path="/data" component={DataPage} />

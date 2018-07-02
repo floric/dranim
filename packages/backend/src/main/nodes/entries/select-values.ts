@@ -1,4 +1,5 @@
 import {
+  ApolloContext,
   Dataset,
   Entry,
   SelectValuesNodeDef,
@@ -8,7 +9,6 @@ import {
   ServerNodeDef,
   Values
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import {
   addValueSchema,
@@ -46,8 +46,11 @@ export const SelectValuesNode: ServerNodeDef<
       }
     };
   },
-  onNodeExecution: async (form, inputs, { db, node }) => {
-    const existingDs = await tryGetDataset(inputs.dataset.datasetId, db);
+  onNodeExecution: async (form, inputs, { reqContext, node }) => {
+    const existingDs = await tryGetDataset(
+      inputs.dataset.datasetId,
+      reqContext
+    );
     const schemasOnDs = existingDs!.valueschemas.map(n => n.name);
     const unknownValues = form.values!.filter(n => !schemasOnDs.includes(n));
     if (unknownValues.length > 0) {
@@ -56,14 +59,13 @@ export const SelectValuesNode: ServerNodeDef<
 
     const usedValues = new Set(form.values!);
     const newDs = await createDataset(
-      db,
       createDynamicDatasetName(SelectValuesNodeDef.type, node.id),
+      reqContext,
       node.workspaceId
     );
 
-    await filterSchema(existingDs, newDs, usedValues, db);
+    await filterSchema(existingDs, newDs, usedValues, reqContext);
     await copyTransformedToOtherDataset(
-      db,
       existingDs.id,
       newDs.id,
       node.id,
@@ -74,7 +76,8 @@ export const SelectValuesNode: ServerNodeDef<
         });
 
         return newValues;
-      }
+      },
+      reqContext
     );
 
     return {
@@ -91,23 +94,28 @@ const filterSchema = (
   existingDs: Dataset,
   newDs: Dataset,
   usedValues: Set<string>,
-  db: Db
+  reqContext: ApolloContext
 ) =>
   Promise.all(
     existingDs!.valueschemas
       .filter(s => usedValues.has(s.name))
-      .map(s => addValueSchema(db, newDs.id, s))
+      .map(s => addValueSchema(newDs.id, s, reqContext))
   );
 
 const copyTransformedToOtherDataset = async (
-  db: Db,
   oldDsId: string,
   newDsId: string,
   nodeId: string,
-  transformFn: (obj: Entry) => Values
+  transformFn: (obj: Entry) => Values,
+  reqContext: ApolloContext
 ) => {
-  processEntries(db, oldDsId, nodeId, async doc => {
-    const newValues = transformFn(doc);
-    await createEntry(db, newDsId, newValues);
-  });
+  processEntries(
+    oldDsId,
+    nodeId,
+    async doc => {
+      const newValues = transformFn(doc);
+      await createEntry(newDsId, newValues, reqContext);
+    },
+    reqContext
+  );
 };

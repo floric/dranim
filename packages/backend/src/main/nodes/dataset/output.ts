@@ -26,8 +26,8 @@ export const DatasetOutputNode: ServerNodeDef<
 
     return inputs;
   },
-  onNodeExecution: async (form, inputs, { db }) => {
-    const ds = await tryGetDataset(inputs.dataset.datasetId, db);
+  onNodeExecution: async (form, inputs, { reqContext }) => {
+    const ds = await tryGetDataset(inputs.dataset.datasetId, reqContext);
     return {
       outputs: {},
       results: {

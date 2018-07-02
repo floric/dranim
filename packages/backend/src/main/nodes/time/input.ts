@@ -23,7 +23,7 @@ export const TimeInputNode: ServerNodeDef<
       value: { content: {}, isPresent: true }
     };
   },
-  onNodeExecution: (form, values) =>
+  onNodeExecution: form =>
     Promise.resolve({
       outputs: {
         value: form.value!

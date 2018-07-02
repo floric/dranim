@@ -1,4 +1,5 @@
 import {
+  ApolloContext,
   ConnectionInstance,
   NodeInstance,
   Workspace
@@ -23,11 +24,11 @@ export const getWorkspacesCollection = (
 };
 
 export const createWorkspace = async (
-  db: Db,
   name: string,
+  reqContext: ApolloContext,
   description: string | null
 ): Promise<Workspace> => {
-  const wsCollection = getWorkspacesCollection(db);
+  const wsCollection = getWorkspacesCollection(reqContext.db);
   if (!name.length) {
     throw new Error('Name of workspace must not be empty.');
   }
@@ -50,14 +51,17 @@ export const createWorkspace = async (
   };
 };
 
-export const deleteWorkspace = async (db: Db, id: string) => {
+export const deleteWorkspace = async (
+  id: string,
+  reqContext: ApolloContext
+) => {
   if (!ObjectID.isValid(id)) {
     throw new Error('Invalid ID');
   }
 
-  const wsCollection = getWorkspacesCollection(db);
-  const connectionsCollection = getConnectionsCollection(db);
-  const nodesCollection = getNodesCollection(db);
+  const wsCollection = getWorkspacesCollection(reqContext.db);
+  const connectionsCollection = getConnectionsCollection(reqContext.db);
+  const nodesCollection = getNodesCollection(reqContext.db);
 
   const wsRes = await wsCollection.deleteOne({ _id: new ObjectID(id) });
 
@@ -74,16 +78,16 @@ export const deleteWorkspace = async (db: Db, id: string) => {
 };
 
 export const updateWorkspace = async (
-  db: Db,
   id: string,
   nodes: Array<NodeInstance>,
-  connections: Array<ConnectionInstance>
+  connections: Array<ConnectionInstance>,
+  reqContext: ApolloContext
 ) => {
   if (!ObjectID.isValid(id)) {
     throw new Error('Invalid ID');
   }
 
-  const nodesCollection = getNodesCollection(db);
+  const nodesCollection = getNodesCollection(reqContext.db);
   await Promise.all(
     nodes.map(n =>
       nodesCollection.updateOne(
@@ -93,7 +97,7 @@ export const updateWorkspace = async (
     )
   );
 
-  const connectionsCollection = getConnectionsCollection(db);
+  const connectionsCollection = getConnectionsCollection(reqContext.db);
   await Promise.all(
     connections.map(c =>
       connectionsCollection.updateOne(
@@ -103,21 +107,26 @@ export const updateWorkspace = async (
     )
   );
 
-  await updateLastChange(db, id);
+  await updateLastChange(id, reqContext);
 
   return true;
 };
 
-export const updateLastChange = async (db: Db, wsId: string) => {
-  const wsCollection = getWorkspacesCollection(db);
+export const updateLastChange = async (
+  wsId: string,
+  reqContext: ApolloContext
+) => {
+  const wsCollection = getWorkspacesCollection(reqContext.db);
   await wsCollection.findOneAndUpdate(
     { _id: new ObjectID(wsId) },
     { $set: { lastChange: new Date() } }
   );
 };
 
-export const getAllWorkspaces = async (db: Db): Promise<Array<Workspace>> => {
-  const wsCollection = getWorkspacesCollection(db);
+export const getAllWorkspaces = async (
+  reqContext: ApolloContext
+): Promise<Array<Workspace>> => {
+  const wsCollection = getWorkspacesCollection(reqContext.db);
   const all = await wsCollection.find().toArray();
   return all.map(ws => ({
     id: ws._id.toHexString(),
@@ -126,14 +135,14 @@ export const getAllWorkspaces = async (db: Db): Promise<Array<Workspace>> => {
 };
 
 export const getWorkspace = async (
-  db: Db,
-  id: string
+  id: string,
+  reqContext: ApolloContext
 ): Promise<Workspace & { _id: ObjectID } | null> => {
   if (!ObjectID.isValid(id)) {
     return null;
   }
 
-  const wsCollection = getWorkspacesCollection(db);
+  const wsCollection = getWorkspacesCollection(reqContext.db);
   const ws = await wsCollection.findOne({
     _id: new ObjectID(id)
   });

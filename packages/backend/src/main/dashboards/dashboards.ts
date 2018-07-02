@@ -1,5 +1,7 @@
-import { Dashboard } from '@masterthesis/shared';
+import { ApolloContext, Dashboard } from '@masterthesis/shared';
+
 import { Collection, Db, ObjectID } from 'mongodb';
+
 import { deleteResultsByDashboard } from './results';
 
 export const getDashboardCollection = (
@@ -10,9 +12,9 @@ export const getDashboardCollection = (
 
 export const createDashboard = async (
   name: string,
-  db: Db
+  reqContext: ApolloContext
 ): Promise<Dashboard> => {
-  const collection = getDashboardCollection(db);
+  const collection = getDashboardCollection(reqContext.db);
   if (name.length === 0) {
     throw new Error('Name must not be empty');
   }
@@ -37,20 +39,25 @@ export const createDashboard = async (
   };
 };
 
-export const deleteDashboard = async (id: string, db: Db) => {
-  const coll = getDashboardCollection(db);
+export const deleteDashboard = async (
+  id: string,
+  reqContext: ApolloContext
+) => {
+  const coll = getDashboardCollection(reqContext.db);
   const res = await coll.deleteOne({ _id: new ObjectID(id) });
   if (res.result.ok !== 1 || res.deletedCount !== 1) {
     throw new Error('Deletion of Dashboard failed.');
   }
 
-  await deleteResultsByDashboard(id, db);
+  await deleteResultsByDashboard(id, reqContext);
 
   return true;
 };
 
-export const getAllDashboards = async (db: Db): Promise<Array<Dashboard>> => {
-  const collection = getDashboardCollection(db);
+export const getAllDashboards = async (
+  reqContext: ApolloContext
+): Promise<Array<Dashboard>> => {
+  const collection = getDashboardCollection(reqContext.db);
   const allDbs = await collection.find().toArray();
   return allDbs.map(ds => ({
     id: ds._id.toHexString(),
@@ -60,13 +67,13 @@ export const getAllDashboards = async (db: Db): Promise<Array<Dashboard>> => {
 
 export const getDashboard = async (
   id: string,
-  db: Db
+  reqContext: ApolloContext
 ): Promise<(Dashboard & { _id: ObjectID }) | null> => {
   if (!ObjectID.isValid(id)) {
     return null;
   }
 
-  const collection = getDashboardCollection(db);
+  const collection = getDashboardCollection(reqContext.db);
   const obj = await collection.findOne({ _id: new ObjectID(id) });
   if (!obj) {
     return null;
@@ -80,9 +87,9 @@ export const getDashboard = async (
 
 export const tryGetDashboard = async (
   id: string,
-  db: Db
+  reqContext: ApolloContext
 ): Promise<Dashboard> => {
-  const dashboard = await getDashboard(id, db);
+  const dashboard = await getDashboard(id, reqContext);
   if (!dashboard) {
     throw new Error('Unknown dashboard');
   }

@@ -3,8 +3,8 @@ import { Entry } from '@masterthesis/shared';
 import { getEntriesCount, getLatestEntries } from '../../main/workspace/entry';
 
 export const Dataset = {
-  entriesCount: ({ id }, __, { db }): Promise<number> =>
-    getEntriesCount(db, id),
-  latestEntries: ({ id }, __, { db }): Promise<Array<Entry>> =>
-    getLatestEntries(db, id)
+  entriesCount: ({ id }, __, context): Promise<number> =>
+    getEntriesCount(id, context),
+  latestEntries: ({ id }, __, context): Promise<Array<Entry>> =>
+    getLatestEntries(id, context)
 };

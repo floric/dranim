@@ -1,4 +1,4 @@
-import { Dataset, DataType } from '@masterthesis/shared';
+import { ApolloContext, Dataset, DataType } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { clearEntries, getEntryCollection } from './entry';
@@ -18,11 +18,11 @@ export const getDatasetsCollection = (
 };
 
 export const createDataset = async (
-  db: Db,
   name: string,
+  reqContext: ApolloContext,
   workspaceId: string | null = null
 ): Promise<Dataset> => {
-  const collection = getDatasetsCollection(db);
+  const collection = getDatasetsCollection(reqContext.db);
   if (name.length === 0) {
     throw new Error('Name must not be empty');
   }
@@ -49,9 +49,9 @@ export const createDataset = async (
   };
 };
 
-export const deleteDataset = async (db: Db, id: string) => {
-  await clearEntries(db, id);
-  const collection = getDatasetsCollection(db);
+export const deleteDataset = async (id: string, reqContext: ApolloContext) => {
+  await clearEntries(id, reqContext);
+  const collection = getDatasetsCollection(reqContext.db);
   const res = await collection.deleteOne({ _id: new ObjectID(id) });
   if (res.result.ok !== 1 || res.deletedCount !== 1) {
     throw new Error('Deletion of Dataset failed');
@@ -60,8 +60,10 @@ export const deleteDataset = async (db: Db, id: string) => {
   return true;
 };
 
-export const getAllDatasets = async (db: Db): Promise<Array<Dataset>> => {
-  const collection = getDatasetsCollection(db);
+export const getAllDatasets = async (
+  reqContext: ApolloContext
+): Promise<Array<Dataset>> => {
+  const collection = getDatasetsCollection(reqContext.db);
   const allDatasets = await collection.find().toArray();
   return allDatasets.map(ds => {
     const { _id, ...obj } = ds;
@@ -73,14 +75,14 @@ export const getAllDatasets = async (db: Db): Promise<Array<Dataset>> => {
 };
 
 export const getDataset = async (
-  db: Db,
-  id: string
+  id: string,
+  reqContext: ApolloContext
 ): Promise<Dataset | null> => {
   if (!ObjectID.isValid(id)) {
     return null;
   }
 
-  const collection = getDatasetsCollection(db);
+  const collection = getDatasetsCollection(reqContext.db);
   const res = await collection.findOne({ _id: new ObjectID(id) });
   if (!res) {
     return null;
@@ -94,8 +96,8 @@ export const getDataset = async (
   };
 };
 
-export const tryGetDataset = async (id: string, db: Db) => {
-  const ds = await getDataset(db, id);
+export const tryGetDataset = async (id: string, reqContext: ApolloContext) => {
+  const ds = await getDataset(id, reqContext);
   if (!ds) {
     throw new Error('Unknown dataset');
   }
@@ -104,12 +106,12 @@ export const tryGetDataset = async (id: string, db: Db) => {
 };
 
 export const addValueSchema = async (
-  db: Db,
   datasetId: string,
-  schema: Valueschema
+  schema: Valueschema,
+  reqContext: ApolloContext
 ): Promise<boolean> => {
-  const collection = getDatasetsCollection(db);
-  const ds = await getDataset(db, datasetId);
+  const collection = getDatasetsCollection(reqContext.db);
+  const ds = await getDataset(datasetId, reqContext);
   if (!ds) {
     throw new Error('Dataset not found');
   }
@@ -134,7 +136,7 @@ export const addValueSchema = async (
 
   // create unique index for identifiers
   if (schema.type === 'String' && schema.unique) {
-    const entryCollection = getEntryCollection(db, datasetId);
+    const entryCollection = getEntryCollection(datasetId, reqContext.db);
     await entryCollection.createIndex(`values.${schema.name}`, {
       unique: true
     });
@@ -143,7 +145,10 @@ export const addValueSchema = async (
   return res.modifiedCount === 1;
 };
 
-export const clearGeneratedDatasets = async (db: Db, wsId: string) => {
-  const coll = getDatasetsCollection(db);
+export const clearGeneratedDatasets = async (
+  wsId: string,
+  reqContext: ApolloContext
+) => {
+  const coll = getDatasetsCollection(reqContext.db);
   await coll.deleteMany({ workspaceId: wsId });
 };

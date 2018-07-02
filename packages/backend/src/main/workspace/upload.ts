@@ -1,4 +1,5 @@
 import {
+  ApolloContext,
   Dataset,
   DataType,
   ProcessState,
@@ -26,10 +27,10 @@ export const getUploadsCollection = (
 };
 
 export const getAllUploads = async (
-  db: Db,
-  datasetId: string | null
+  datasetId: string | null,
+  reqContext: ApolloContext
 ): Promise<Array<UploadProcess & { _id: ObjectID }>> => {
-  const collection = getUploadsCollection(db);
+  const collection = getUploadsCollection(reqContext.db);
   const all = await collection
     .find(datasetId ? { datasetId } : {})
     .sort({ start: -1 })
@@ -72,13 +73,13 @@ const validateEntry = (parsedObj: any, schema: Array<Valueschema>) => {
 const processValidEntry = async (
   values: any,
   ds: Dataset,
-  db: Db,
-  processId: ObjectID
+  processId: ObjectID,
+  reqContext: ApolloContext
 ) => {
-  const collection = getUploadsCollection(db);
+  const collection = getUploadsCollection(reqContext.db);
 
   try {
-    await createEntry(db, ds.id, values);
+    await createEntry(ds.id, values, reqContext);
     await collection.updateOne(
       { _id: processId },
       { $inc: { addedEntries: 1 } }
@@ -106,10 +107,10 @@ const processValidEntry = async (
 
 const processInvalidEntry = async (
   ds: Dataset,
-  db: Db,
-  processId: ObjectID
+  processId: ObjectID,
+  reqContext: ApolloContext
 ) => {
-  const collection = getUploadsCollection(db);
+  const collection = getUploadsCollection(reqContext.db);
   collection.updateOne({ _id: processId }, { $inc: { invalidEntries: 1 } });
 };
 
@@ -117,8 +118,8 @@ const parseCsvFile = async (
   stream: Readable,
   filename: string,
   ds: Dataset,
-  db: Db,
-  processId: ObjectID
+  processId: ObjectID,
+  reqContext: ApolloContext
 ): Promise<boolean> => {
   const csvStream = fastCsv({
     ignoreEmpty: true,
@@ -128,8 +129,8 @@ const parseCsvFile = async (
     headers: ds.valueschemas.map(s => s.name)
   })
     .validate(obj => validateEntry)
-    .on('data', values => processValidEntry(values, ds, db, processId))
-    .on('data-invalid', () => processInvalidEntry(ds, db, processId))
+    .on('data', values => processValidEntry(values, ds, processId, reqContext))
+    .on('data-invalid', () => processInvalidEntry(ds, processId, reqContext))
     .on('end', () => {
       console.log(`Finished import of ${filename}.`);
     });
@@ -154,14 +155,14 @@ const parseCsvFile = async (
 const processUpload = async (
   upload,
   ds: Dataset,
-  db: Db,
-  processId: ObjectID
+  processId: ObjectID,
+  reqContext: ApolloContext
 ): Promise<void> => {
-  const uploadsCollection = getUploadsCollection(db);
+  const uploadsCollection = getUploadsCollection(reqContext.db);
 
   try {
     const { stream, filename } = await upload;
-    await parseCsvFile(stream, filename, ds, db, processId);
+    await parseCsvFile(stream, filename, ds, processId, reqContext);
     await uploadsCollection.updateOne(
       { _id: processId },
       { $push: { fileNames: filename } }
@@ -173,13 +174,13 @@ const processUpload = async (
 };
 
 export const uploadEntriesCsv = async (
-  db: Db,
   files: Array<any>,
-  datasetId: string
+  datasetId: string,
+  reqContext: ApolloContext
 ): Promise<UploadProcess> => {
   try {
-    const uploadsCollection = getUploadsCollection(db);
-    const ds = await getDataset(db, datasetId);
+    const uploadsCollection = getUploadsCollection(reqContext.db);
+    const ds = await getDataset(datasetId, reqContext);
     if (!ds) {
       throw new Error('Dataset not found.');
     }
@@ -205,7 +206,7 @@ export const uploadEntriesCsv = async (
     };
     const processId = new ObjectID(process.id);
 
-    await doUploadAsync(db, ds, processId, files);
+    await doUploadAsync(ds, processId, files, reqContext);
 
     return process;
   } catch (err) {
@@ -215,14 +216,14 @@ export const uploadEntriesCsv = async (
 };
 
 export const doUploadAsync = async (
-  db: Db,
   ds: Dataset,
   processId: ObjectID,
-  files: Array<any>
+  files: Array<any>,
+  reqContext: ApolloContext
 ) => {
-  const uploadsCollection = getUploadsCollection(db);
+  const uploadsCollection = getUploadsCollection(reqContext.db);
   const { reject } = await promisesAll.all(
-    files.map(f => processUpload(f, ds, db, processId))
+    files.map(f => processUpload(f, ds, processId, reqContext))
   );
 
   if (reject.length) {

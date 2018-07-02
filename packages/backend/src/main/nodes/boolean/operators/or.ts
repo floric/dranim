@@ -11,7 +11,7 @@ export const OrNode: ServerNodeDef<
   BooleanOperatorOutputs
 > = {
   type: OrNodeDef.type,
-  onMetaExecution: async (form, inputs, db) => {
+  onMetaExecution: async (form, inputs) => {
     if (!allAreDefinedAndPresent(inputs)) {
       return {
         value: {

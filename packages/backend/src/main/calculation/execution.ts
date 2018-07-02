@@ -1,4 +1,5 @@
 import {
+  ApolloContext,
   ConnectionDescription,
   ContextNodeType,
   FormValues,
@@ -9,7 +10,6 @@ import {
   parseNodeForm,
   ServerNodeDefWithContextFn
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { tryGetNodeType } from '../nodes/all-nodes';
 import { tryGetConnection } from '../workspace/connections';
@@ -17,17 +17,17 @@ import { getContextNode, tryGetNode } from '../workspace/nodes';
 import { areNodeInputsValid, isNodeInMetaValid } from './validation';
 
 export const executeNodeWithId = async (
-  db: Db,
   nodeId: string,
+  reqContext: ApolloContext,
   contextInputs?: IOValues<any>
 ) => {
-  const node = await tryGetNode(nodeId, db);
-  return await executeNode(db, node, contextInputs);
+  const node = await tryGetNode(nodeId, reqContext);
+  return await executeNode(node, reqContext, contextInputs);
 };
 
 export const executeNode = async (
-  db: Db,
   node: NodeInstance,
+  reqContext: ApolloContext,
   contextInputs?: IOValues<any>
 ): Promise<NodeExecutionResult<{}>> => {
   if (node.type === ContextNodeType.INPUT) {
@@ -40,7 +40,7 @@ export const executeNode = async (
   }
 
   const inputValues = await Promise.all(
-    node.inputs.map(i => getConnectionResult(i, db, contextInputs))
+    node.inputs.map(i => getConnectionResult(i, reqContext, contextInputs))
   );
 
   if (node.type === ContextNodeType.OUTPUT) {
@@ -50,15 +50,15 @@ export const executeNode = async (
   const nodeInputs = inputValuesToObject(inputValues);
   const nodeForm = parseNodeForm(node.form);
 
-  await validateMetaAndExecution(node, nodeInputs, db);
+  await validateMetaAndExecution(node, nodeInputs, reqContext);
 
   const type = tryGetNodeType(node.type);
   if (hasContextFn(type)) {
-    return await calculateContext(node, type, nodeForm, nodeInputs, db);
+    return await calculateContext(node, type, nodeForm, nodeInputs, reqContext);
   }
 
   return await type.onNodeExecution(nodeForm, nodeInputs, {
-    db,
+    reqContext,
     node
   });
 };
@@ -66,11 +66,11 @@ export const executeNode = async (
 const validateMetaAndExecution = async (
   node: NodeInstance,
   nodeInputs: IOValues<{}>,
-  db: Db
+  reqContext: ApolloContext
 ) => {
   const [metaValid, execValid] = await Promise.all([
-    isNodeInMetaValid(node, db),
-    areNodeInputsValid(node, nodeInputs, db)
+    isNodeInMetaValid(node, reqContext),
+    areNodeInputsValid(node, nodeInputs, reqContext)
   ]);
   if (!metaValid) {
     throw new Error('Form values or inputs are missing');
@@ -85,17 +85,21 @@ const calculateContext = async (
   type: ServerNodeDefWithContextFn,
   nodeForm: FormValues<any>,
   nodeInputs: IOValues<any>,
-  db: Db
+  reqContext: ApolloContext
 ) => {
-  const outputNode = await getContextNode(node, ContextNodeType.OUTPUT, db);
+  const outputNode = await getContextNode(
+    node,
+    ContextNodeType.OUTPUT,
+    reqContext
+  );
   if (!outputNode) {
     throw Error('Missing output node');
   }
 
   return await type.onNodeExecution(nodeForm, nodeInputs, {
-    db,
+    reqContext,
     node,
-    contextFnExecution: inputs => executeNode(db, outputNode, inputs)
+    contextFnExecution: inputs => executeNode(outputNode, reqContext, inputs)
   });
 };
 
@@ -116,12 +120,12 @@ const getContextNodeOutputs = (
 
 const getConnectionResult = async (
   i: ConnectionDescription,
-  db: Db,
+  reqContext: ApolloContext,
   contextInputs?: IOValues<any>
 ) => {
-  const conn = await tryGetConnection(i.connectionId, db);
-  const inputNode = await tryGetNode(conn.from.nodeId, db);
-  const nodeRes = await executeNode(db, inputNode, contextInputs);
+  const conn = await tryGetConnection(i.connectionId, reqContext);
+  const inputNode = await tryGetNode(conn.from.nodeId, reqContext);
+  const nodeRes = await executeNode(inputNode, reqContext, contextInputs);
 
   return { socketName: i.name, value: nodeRes.outputs[conn.from.name] };
 };

@@ -1,4 +1,5 @@
 import {
+  ApolloContext,
   DatasetMeta,
   Entry,
   SocketDef,
@@ -15,13 +16,13 @@ import { setProgress } from '../../workspace/nodes-detail';
 export const copySchemas = (
   schemas: Array<ValueSchema>,
   newDsId: string,
-  db: Db
+  reqContext: ApolloContext
 ) => Promise.all(schemas.map(s => addValueSchema(db, newDsId, s)));
 
 export const getDynamicEntryContextInputs = async (
   inputDefs: SocketDefs<any>,
   inputs: { dataset: SocketMetaDef<DatasetMeta> },
-  db: Db
+  reqContext: ApolloContext
 ): Promise<{ [name: string]: SocketDef }> => {
   if (
     !inputs.dataset ||
@@ -44,10 +45,10 @@ export const getDynamicEntryContextInputs = async (
 };
 
 export const processEntries = async (
-  db: Db,
   dsId: string,
   nodeId: string,
-  processFn: (entry: Entry) => Promise<void>
+  processFn: (entry: Entry) => Promise<void>,
+  reqContext: ApolloContext
 ): Promise<void> => {
   const coll = getEntryCollection(db, dsId);
   const cursor = coll.find();

@@ -11,7 +11,7 @@ export const XorNode: ServerNodeDef<
   BooleanOperatorOutputs
 > = {
   type: XorNodeDef.type,
-  onMetaExecution: async (form, inputs, db) => {
+  onMetaExecution: async (form, inputs) => {
     if (!allAreDefinedAndPresent(inputs)) {
       return {
         value: {

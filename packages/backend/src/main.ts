@@ -12,8 +12,8 @@ import { Db } from 'mongodb';
 
 import { mongoDbClient } from './config/db';
 import Schema from './graphql/schema';
-import { login, register } from './main/users/management';
 import { initWorkspaceDb } from './main/workspace/workspace';
+import { generateErrorResponse, registerRoutes } from './routes';
 
 export const GRAPHQL_ROUTE = '/graphql';
 
@@ -30,9 +30,6 @@ function verbosePrint(port) {
 
 const MAX_UPLOAD_LIMIT = 100 * 1024 * 1024 * 1024;
 
-const generateErrorResponse = (message: string) =>
-  JSON.stringify({ error: { message } });
-
 export const main = async (options: IMainOptions) => {
   const client = await mongoDbClient();
   const db = client.db('timeseries_explorer');
@@ -47,27 +44,23 @@ export const main = async (options: IMainOptions) => {
         options.env === 'production'
           ? `https://${options.frontendDomain}`
           : 'http://localhost:1234'
-    })
-  );
-
-  app.use(helmet());
-  app.use(
+    }),
+    helmet(),
     session({
-      secret: 'work hard',
+      secret: process.env.SESSION_SECRET,
       sameSite: false,
       resave: true,
       saveUninitialized: false,
       store: new MongoStore({ db }),
       cookie: { secure: false }
-    })
-  );
-  app.use(morgan('combined'));
-  app.use(
+    }),
+    morgan('combined'),
     bodyParser.json({}),
     bodyParser.urlencoded({
       extended: true
     })
   );
+
   app.use(
     GRAPHQL_ROUTE,
     (req, res, next) => {
@@ -86,63 +79,11 @@ export const main = async (options: IMainOptions) => {
     }),
     graphqlExpress(req => ({
       schema: Schema,
-      context: { db, userId: req!.session!.userId || null }
+      context: { db, userId: req!.session!.userId }
     }))
   );
 
-  app.post('/logout', async (req, res, next) => {
-    if (req.session) {
-      req.session.destroy(err => {
-        if (err) {
-          return next(err);
-        } else {
-          return res.status(200).send();
-        }
-      });
-    }
-  });
-  app.post('/login', async (req, res, next) => {
-    if (!req.body || !req.body.mail || !req.body.pw) {
-      res.status(301).send(generateErrorResponse('Invalid request'));
-    }
-
-    const mail = req.body.mail;
-    const pw = req.body.pw;
-    const result = await login(mail, pw, db);
-    if (result) {
-      (req.session as any).userId = result.id;
-      res.status(200).send(JSON.stringify(result));
-    } else {
-      res
-        .status(401)
-        .send(generateErrorResponse('Login to access this resource'));
-    }
-  });
-
-  app.post('/registration', async (req, res) => {
-    if (
-      !req.body ||
-      !req.body.mail ||
-      !req.body.pw ||
-      !req.body.firstName ||
-      !req.body.lastName
-    ) {
-      res.status(301).send(generateErrorResponse('Invalid request'));
-    }
-    try {
-      const result = await register(
-        req.body.firstName,
-        req.body.lastName,
-        req.body.mail,
-        req.body.pw,
-        db
-      );
-      (req.session as any).userId = result.id;
-      res.status(200).send(JSON.stringify(result));
-    } catch (err) {
-      res.status(500).send();
-    }
-  });
+  registerRoutes(app, db);
 
   app
     .listen(options.port, () => {

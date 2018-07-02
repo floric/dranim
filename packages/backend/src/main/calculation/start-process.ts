@@ -1,4 +1,5 @@
 import {
+  ApolloContext,
   CalculationProcess,
   DataType,
   NodeInstance,
@@ -13,12 +14,16 @@ import { getNodeType, hasNodeType } from '../nodes/all-nodes';
 import { clearGeneratedDatasets } from '../workspace/dataset';
 import { getAllNodes, resetProgress } from '../workspace/nodes';
 
-const startProcess = async (db: Db, processId: string, workspaceId: string) => {
-  const processCollection = getCalculationsCollection(db);
+const startProcess = async (
+  processId: string,
+  workspaceId: string,
+  reqContext: ApolloContext
+) => {
+  const processCollection = getCalculationsCollection(reqContext.db);
 
   try {
-    await clearGeneratedDatasets(db, workspaceId);
-    const nodes = await getAllNodes(db, workspaceId);
+    await clearGeneratedDatasets(workspaceId, reqContext);
+    const nodes = await getAllNodes(workspaceId, reqContext);
     const outputNodesInstances = nodes.filter(
       n =>
         hasNodeType(n.type) ? getNodeType(n.type)!.isOutputNode === true : false
@@ -37,38 +42,46 @@ const startProcess = async (db: Db, processId: string, workspaceId: string) => {
     console.log('Started calculation.');
 
     const results = await Promise.all(
-      outputNodesInstances.map(o => executeOutputNode(db, o, processId))
+      outputNodesInstances.map(o => executeOutputNode(o, processId, reqContext))
     );
-    await saveResults(results as Array<OutputResult>, db);
+    await saveResults(results as Array<OutputResult>, reqContext);
     await updateFinishedProcess(
-      db,
       processId,
       workspaceId,
-      ProcessState.SUCCESSFUL
+      ProcessState.SUCCESSFUL,
+      reqContext
     );
     console.log('Finished calcuation successfully.');
   } catch (err) {
-    await updateFinishedProcess(db, processId, workspaceId, ProcessState.ERROR);
+    await updateFinishedProcess(
+      processId,
+      workspaceId,
+      ProcessState.ERROR,
+      reqContext
+    );
     console.error('Finished calculation with errors', err);
   }
 };
 
-const saveResults = async (results: Array<OutputResult | undefined>, db: Db) =>
+const saveResults = async (
+  results: Array<OutputResult | undefined>,
+  reqContext: ApolloContext
+) =>
   Promise.all(
     results
       .filter(r => r != null && Object.keys(r).length > 0)
       .filter(r => r!.type !== DataType.DATASET)
-      .map(r => addOrUpdateResult(r!, db))
+      .map(r => addOrUpdateResult(r!, reqContext))
   );
 
 const executeOutputNode = async (
-  db: Db,
   o: NodeInstance,
-  processId: string
+  processId: string,
+  reqContext: ApolloContext
 ) => {
-  const processCollection = getCalculationsCollection(db);
+  const processCollection = getCalculationsCollection(reqContext.db);
 
-  const res = await executeNode(db, o);
+  const res = await executeNode(o, reqContext);
   await processCollection.updateOne(
     { _id: new ObjectID(processId) },
     {
@@ -82,12 +95,12 @@ const executeOutputNode = async (
 };
 
 const updateFinishedProcess = async (
-  db: Db,
   processId: string,
   workspaceId: string,
-  state: ProcessState
+  state: ProcessState,
+  reqContext: ApolloContext
 ) => {
-  const processCollection = getCalculationsCollection(db);
+  const processCollection = getCalculationsCollection(reqContext.db);
   await processCollection.updateOne(
     { _id: new ObjectID(processId) },
     {
@@ -97,7 +110,7 @@ const updateFinishedProcess = async (
       }
     }
   );
-  await resetProgress(workspaceId, db);
+  await resetProgress(workspaceId, reqContext);
 };
 
 const getCalculationsCollection = (
@@ -107,11 +120,11 @@ const getCalculationsCollection = (
 };
 
 export const startCalculation = async (
-  db: Db,
   workspaceId: string,
+  reqContext: ApolloContext,
   awaitResult?: boolean
 ): Promise<CalculationProcess> => {
-  const coll = getCalculationsCollection(db);
+  const coll = getCalculationsCollection(reqContext.db);
   const newProcess = await coll.insertOne({
     start: new Date(),
     finish: null,
@@ -128,9 +141,9 @@ export const startCalculation = async (
   const id = newProcess.ops[0]._id.toHexString();
 
   if (awaitResult === true) {
-    await startProcess(db, id, workspaceId);
+    await startProcess(id, workspaceId, reqContext);
   } else {
-    startProcess(db, id, workspaceId);
+    startProcess(id, workspaceId, reqContext);
   }
 
   return {
@@ -140,10 +153,10 @@ export const startCalculation = async (
 };
 
 export const getAllCalculations = async (
-  db: Db,
-  workspaceId: string
+  workspaceId: string,
+  reqContext: ApolloContext
 ): Promise<Array<CalculationProcess>> => {
-  const collection = getCalculationsCollection(db);
+  const collection = getCalculationsCollection(reqContext.db);
   const all = await collection.find({ workspaceId }).toArray();
   return all.map(ds => ({
     id: ds._id.toHexString(),

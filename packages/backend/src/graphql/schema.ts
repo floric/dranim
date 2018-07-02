@@ -1,8 +1,7 @@
+import { ApolloContext, SocketDefs, SocketMetas } from '@masterthesis/shared';
 import { GraphQLUpload } from 'apollo-upload-server';
 import { GraphQLScalarType } from 'graphql';
 import { makeExecutableSchema } from 'graphql-tools';
-import { Db } from 'mongodb';
-import { SocketDefs, SocketMetas } from '../../../shared/lib';
 
 import { Dashboard } from './resolvers/dashboards';
 import { Dataset } from './resolvers/dataset';
@@ -23,10 +22,6 @@ import UploadProcessDef from './schemas/upload';
 import UserDef from './schemas/user';
 import ValueschemaDef from './schemas/valueschema';
 import WorkspaceDef from './schemas/workspace';
-
-export interface ApolloContext {
-  db: Db;
-}
 
 export const SchemaDefinition = `
   schema {

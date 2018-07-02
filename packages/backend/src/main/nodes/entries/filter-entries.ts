@@ -1,5 +1,6 @@
 import {
   allAreDefinedAndPresent,
+  ApolloContext,
   DataType,
   FilterEntriesNodeDef,
   ForEachEntryNodeInputs,
@@ -7,7 +8,6 @@ import {
   ServerNodeDefWithContextFn,
   ValueSchema
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { createDynamicDatasetName } from '../../calculation/utils';
 import {
@@ -50,30 +50,34 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
 
     return inputs;
   },
-  onNodeExecution: async (form, inputs, { db, contextFnExecution, node }) => {
+  onNodeExecution: async (
+    form,
+    inputs,
+    { reqContext, contextFnExecution, node }
+  ) => {
     const newDs = await createDataset(
-      db,
       createDynamicDatasetName(FilterEntriesNodeDef.type, node.id),
+      reqContext,
       node.workspaceId
     );
-    const oldDs = await getDataset(db, inputs.dataset.datasetId);
+    const oldDs = await getDataset(inputs.dataset.datasetId, reqContext);
     if (!oldDs) {
       throw new Error('Unknown dataset source');
     }
 
-    await copySchemas(oldDs.valueschemas, newDs.id, db);
+    await copySchemas(oldDs.valueschemas, newDs.id, reqContext);
 
     if (contextFnExecution) {
       await processEntries(
-        db,
         inputs.dataset.datasetId,
         node.id,
         async entry => {
           const result = await contextFnExecution(entry.values);
           if (result.outputs.keepEntry) {
-            await createEntry(db, newDs.id, entry.values);
+            await createEntry(newDs.id, entry.values, reqContext);
           }
-        }
+        },
+        reqContext
       );
     } else {
       throw new Error('Missing context function');
@@ -89,5 +93,8 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
   }
 };
 
-const copySchemas = (schemas: Array<ValueSchema>, newDsId: string, db: Db) =>
-  Promise.all(schemas.map(s => addValueSchema(db, newDsId, s)));
+const copySchemas = (
+  schemas: Array<ValueSchema>,
+  newDsId: string,
+  reqContext: ApolloContext
+) => Promise.all(schemas.map(s => addValueSchema(newDsId, s, reqContext)));

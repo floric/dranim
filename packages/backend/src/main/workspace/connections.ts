@@ -1,4 +1,5 @@
 import {
+  ApolloContext,
   ConnectionInstance,
   NodeInstance,
   SocketInstance
@@ -17,13 +18,13 @@ export const getConnectionsCollection = (
 export const createConnection = async (
   from: SocketInstance,
   to: SocketInstance,
-  db: Db
+  reqContext: ApolloContext
 ): Promise<ConnectionInstance> => {
   if (!from || !to) {
     throw new Error('Invalid connection');
   }
 
-  const collection = getConnectionsCollection(db);
+  const collection = getConnectionsCollection(reqContext.db);
 
   // check for existing connections to the input
   const res = await collection.findOne({
@@ -34,11 +35,11 @@ export const createConnection = async (
     throw new Error('Only one input allowed');
   }
 
-  const outputNode = await getNode(db, from.nodeId);
-  const inputNode = await getNode(db, to.nodeId);
+  const outputNode = await getNode(from.nodeId, reqContext);
+  const inputNode = await getNode(to.nodeId, reqContext);
   checkNodes(inputNode, outputNode);
 
-  const hasFoundCycles = await containsCycles(db, inputNode!, from, to);
+  const hasFoundCycles = await containsCycles(inputNode!, from, to, reqContext);
   if (hasFoundCycles) {
     throw new Error('Cyclic dependencies not allowed');
   }
@@ -58,8 +59,8 @@ export const createConnection = async (
   const connId = newItem._id.toHexString();
 
   await Promise.all([
-    addConnection(db, from, 'output', connId),
-    addConnection(db, to, 'input', connId)
+    addConnection(from, 'output', connId, reqContext),
+    addConnection(to, 'input', connId, reqContext)
   ]);
 
   return {
@@ -89,12 +90,12 @@ const checkNodes = (
 };
 
 const containsCycles = async (
-  db: Db,
   inputNode: NodeInstance,
   from: SocketInstance,
-  to: SocketInstance
+  to: SocketInstance,
+  reqContext: ApolloContext
 ): Promise<boolean> => {
-  const all = await getAllConnections(db, inputNode.workspaceId);
+  const all = await getAllConnections(inputNode.workspaceId, reqContext);
 
   let foundCycle = false;
   let curFromSocket: SocketInstance = from;
@@ -119,17 +120,20 @@ const containsCycles = async (
   return foundCycle;
 };
 
-export const deleteConnection = async (db: Db, id: string) => {
-  const connection = await tryGetConnection(id, db);
-  await tryGetNode(connection.from.nodeId, db);
-  await tryGetNode(connection.to.nodeId, db);
+export const deleteConnection = async (
+  id: string,
+  reqContext: ApolloContext
+) => {
+  const connection = await tryGetConnection(id, reqContext);
+  await tryGetNode(connection.from.nodeId, reqContext);
+  await tryGetNode(connection.to.nodeId, reqContext);
 
   await Promise.all([
-    removeConnection(db, connection.from, 'output', connection.id),
-    removeConnection(db, connection.to, 'input', connection.id)
+    removeConnection(connection.from, 'output', connection.id, reqContext),
+    removeConnection(connection.to, 'input', connection.id, reqContext)
   ]);
 
-  const connCollection = getConnectionsCollection(db);
+  const connCollection = getConnectionsCollection(reqContext.db);
   const res = await connCollection.deleteOne({ _id: new ObjectID(id) });
   if (res.deletedCount !== 1) {
     throw new Error('Deleting connection failed');
@@ -138,8 +142,11 @@ export const deleteConnection = async (db: Db, id: string) => {
   return true;
 };
 
-export const tryGetConnection = async (id: string, db: Db) => {
-  const conn = await getConnection(id, db);
+export const tryGetConnection = async (
+  id: string,
+  reqContext: ApolloContext
+) => {
+  const conn = await getConnection(id, reqContext);
   if (!conn) {
     throw new Error('Invalid connection');
   }
@@ -149,13 +156,13 @@ export const tryGetConnection = async (id: string, db: Db) => {
 
 export const getConnection = async (
   id: string,
-  db: Db
+  reqContext: ApolloContext
 ): Promise<ConnectionInstance & { _id: ObjectID } | null> => {
   if (!ObjectID.isValid(id)) {
     return null;
   }
 
-  const collection = getConnectionsCollection(db);
+  const collection = getConnectionsCollection(reqContext.db);
   const connection = await collection.findOne({ _id: new ObjectID(id) });
   if (!connection) {
     return null;
@@ -168,10 +175,10 @@ export const getConnection = async (
 };
 
 export const getAllConnections = async (
-  db: Db,
-  workspaceId: string
+  workspaceId: string,
+  reqContext: ApolloContext
 ): Promise<Array<ConnectionInstance>> => {
-  const collection = getConnectionsCollection(db);
+  const collection = getConnectionsCollection(reqContext.db);
   const all = await collection.find({ workspaceId }).toArray();
   return all.map(ds => ({
     id: ds._id.toHexString(),
@@ -179,8 +186,11 @@ export const getAllConnections = async (
   }));
 };
 
-export const deleteConnectionsInContext = async (contextId: string, db: Db) => {
-  const connectionsCollection = getConnectionsCollection(db);
+export const deleteConnectionsInContext = async (
+  contextId: string,
+  reqContext: ApolloContext
+) => {
+  const connectionsCollection = getConnectionsCollection(reqContext.db);
   await connectionsCollection.deleteMany({
     contextIds: { $elemMatch: { $eq: contextId } }
   });
