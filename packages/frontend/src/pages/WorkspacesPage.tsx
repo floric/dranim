@@ -22,6 +22,9 @@ export const ALL_WORKSPACES = gql`
       description
       created
       lastChange
+      results {
+        id
+      }
     }
   }
 `;

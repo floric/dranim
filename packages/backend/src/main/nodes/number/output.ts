@@ -18,14 +18,14 @@ export const NumberOutputNode: ServerNodeDef<
   type: NumberOutputNodeDef.type,
   isFormValid: isOutputFormValid,
   onMetaExecution: () => Promise.resolve({}),
-  onNodeExecution: (form, inputs) =>
+  onNodeExecution: (form, inputs, { node: { workspaceId } }) =>
     Promise.resolve({
       outputs: {},
       results: {
         name: form.name!,
         value: inputs.value,
         type: DataType.NUMBER,
-        dashboardId: form.dashboardId!,
+        workspaceId,
         description: form.description || ''
       }
     })

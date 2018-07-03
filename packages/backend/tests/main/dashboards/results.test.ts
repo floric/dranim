@@ -1,15 +1,15 @@
 import { DataType, OutputResult } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { tryGetDashboard } from '../../../src/main/dashboards/dashboards';
 import {
   addOrUpdateResult,
   deleteResultById,
   deleteResultByName,
-  deleteResultsByDashboard,
+  deleteResultsByWorkspace,
   getResult,
-  getResultsForDashboard
+  getResultsForWorkspace
 } from '../../../src/main/dashboards/results';
+import { tryGetWorkspace } from '../../../src/main/workspace/workspace';
 import {
   getTestMongoDb,
   NeverGoHereError,
@@ -20,7 +20,7 @@ let conn;
 let db: Db;
 let server;
 
-jest.mock('../../../src/main/dashboards/dashboards');
+jest.mock('../../../src/main/workspace/workspace');
 
 describe('Dashboard Results', () => {
   beforeAll(async () => {
@@ -42,7 +42,7 @@ describe('Dashboard Results', () => {
 
   test('should create result', async () => {
     const value: OutputResult<string> = {
-      dashboardId: 'abc',
+      workspaceId: 'abc',
       description: 'desc',
       name: 'test',
       type: DataType.STRING,
@@ -52,10 +52,10 @@ describe('Dashboard Results', () => {
     const res = await addOrUpdateResult(value, { db, userId: '' });
     expect(res).toBeDefined();
 
-    const all = await getResultsForDashboard('abc', { db, userId: '' });
+    const all = await getResultsForWorkspace('abc', { db, userId: '' });
     expect(all.length).toBe(1);
     expect(all[0].value).toEqual(JSON.stringify(value.value));
-    expect(all[0].dashboardId).toEqual(value.dashboardId);
+    expect(all[0].workspaceId).toEqual(value.workspaceId);
     expect(all[0].type).toEqual(value.type);
     expect(all[0].name).toEqual(value.name);
   });
@@ -67,7 +67,7 @@ describe('Dashboard Results', () => {
           name: '',
           description: 'desc',
           value: '',
-          dashboardId: 'test',
+          workspaceId: 'test',
           type: DataType.STRING
         },
         { db, userId: '' }
@@ -78,9 +78,9 @@ describe('Dashboard Results', () => {
     }
   });
 
-  test('should throw error for unknown dashboard', async () => {
-    (tryGetDashboard as jest.Mock).mockImplementation(() => {
-      throw new Error('Unknown Dashboard');
+  test('should throw error for unknown workspace', async () => {
+    (tryGetWorkspace as jest.Mock).mockImplementation(() => {
+      throw new Error('Unknown Workspace');
     });
     try {
       await addOrUpdateResult(
@@ -88,27 +88,27 @@ describe('Dashboard Results', () => {
           name: 'test',
           description: 'desc',
           value: '',
-          dashboardId: 'test',
+          workspaceId: 'test',
           type: DataType.STRING
         },
         { db, userId: '' }
       );
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Unknown Dashboard');
+      expect(err.message).toBe('Unknown Workspace');
     }
   });
 
   test('should update result', async () => {
     const oldValue: OutputResult<string> = {
-      dashboardId: 'abc',
+      workspaceId: 'abc',
       description: 'desc',
       name: 'test',
       type: DataType.STRING,
       value: 'val'
     };
     const newValue: OutputResult<number> = {
-      dashboardId: 'abc',
+      workspaceId: 'abc',
       description: 'new desc',
       name: 'test',
       type: DataType.NUMBER,
@@ -121,17 +121,17 @@ describe('Dashboard Results', () => {
     res = await addOrUpdateResult(newValue, { db, userId: '' });
     expect(res).toBeDefined();
 
-    const all = await getResultsForDashboard('abc', { db, userId: '' });
+    const all = await getResultsForWorkspace('abc', { db, userId: '' });
     expect(all.length).toBe(1);
     expect(all[0].value).toEqual(JSON.stringify(newValue.value));
-    expect(all[0].dashboardId).toEqual(newValue.dashboardId);
+    expect(all[0].workspaceId).toEqual(newValue.workspaceId);
     expect(all[0].type).toEqual(newValue.type);
     expect(all[0].name).toEqual(newValue.name);
   });
 
   test('should get result', async () => {
     const value: OutputResult<string> = {
-      dashboardId: 'abc',
+      workspaceId: 'abc',
       description: 'desc',
       name: 'test',
       type: DataType.STRING,
@@ -148,7 +148,7 @@ describe('Dashboard Results', () => {
 
   test('should delete result by id', async () => {
     const value: OutputResult<string> = {
-      dashboardId: 'abc',
+      workspaceId: 'abc',
       description: 'desc',
       name: 'test',
       type: DataType.STRING,
@@ -165,9 +165,9 @@ describe('Dashboard Results', () => {
     expect(newRes).toBe(null);
   });
 
-  test('should delete result by dashboard id', async () => {
+  test('should delete result by workspace id', async () => {
     const value: OutputResult<string> = {
-      dashboardId: 'abc',
+      workspaceId: 'abc',
       description: 'desc',
       name: 'test',
       type: DataType.STRING,
@@ -177,14 +177,14 @@ describe('Dashboard Results', () => {
     const savedRes = await addOrUpdateResult(value, { db, userId: '' });
     expect(savedRes.id).toBeDefined();
 
-    const res = await deleteResultsByDashboard('abc', { db, userId: '' });
+    const res = await deleteResultsByWorkspace('abc', { db, userId: '' });
     expect(res).toEqual(true);
 
     const newRes = await getResult(savedRes.id, { db, userId: '' });
     expect(newRes).toBe(null);
   });
 
-  test('should return null for unknown dashboards', async () => {
+  test('should return null for unknown results', async () => {
     let res = await getResult('test', { db, userId: '' });
     expect(res).toBe(null);
 
@@ -194,7 +194,7 @@ describe('Dashboard Results', () => {
 
   test('should delete result by name', async () => {
     const value: OutputResult<string> = {
-      dashboardId: 'abc',
+      workspaceId: 'abc',
       description: 'desc',
       name: 'test',
       type: DataType.STRING,
@@ -204,7 +204,7 @@ describe('Dashboard Results', () => {
     const savedRes = await addOrUpdateResult(value, { db, userId: '' });
     expect(savedRes.id).toBeDefined();
 
-    const res = await deleteResultByName(savedRes.name, savedRes.dashboardId, {
+    const res = await deleteResultByName(savedRes.name, savedRes.workspaceId, {
       db,
       userId: ''
     });
@@ -232,16 +232,16 @@ describe('Dashboard Results', () => {
     }
   });
 
-  test('should get only results for correct dashboard', async () => {
+  test('should get only results for correct workspace', async () => {
     const value: OutputResult<string> = {
-      dashboardId: 'abc',
+      workspaceId: 'abc',
       description: 'desc',
       name: 'test',
       type: DataType.STRING,
       value: 'val'
     };
     const otherValue: OutputResult<string> = {
-      dashboardId: 'otherDb',
+      workspaceId: 'otherDb',
       description: 'desc 2',
       name: 'test',
       type: DataType.STRING,
@@ -253,7 +253,7 @@ describe('Dashboard Results', () => {
       addOrUpdateResult(otherValue, { db, userId: '' })
     ]);
 
-    const res = await getResultsForDashboard(value.dashboardId, {
+    const res = await getResultsForWorkspace(value.workspaceId, {
       db,
       userId: ''
     });

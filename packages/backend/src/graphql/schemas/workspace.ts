@@ -73,6 +73,16 @@ const ConnectionInputDef = `
   }
 `;
 
+const OutputResultDef = `
+  type OutputResult {
+    id: String!
+    value: String!
+    type: String!
+    name: String!
+    description: String!
+  }
+`;
+
 const WorkspaceDef = `
   type Workspace {
     id: String!
@@ -82,6 +92,7 @@ const WorkspaceDef = `
     description: String!
     nodes: [Node!]!
     connections: [Connection!]!
+    results: [OutputResult!]!
   }
 `;
 
@@ -94,6 +105,7 @@ const SocketDefsDef = `
 `;
 
 export default () => [
+  OutputResultDef,
   MetaDef,
   SocketDefsDef,
   FormValueDef,

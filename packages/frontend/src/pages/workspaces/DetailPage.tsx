@@ -14,9 +14,10 @@ import {
 import { PageHeaderCard } from '../../components/PageHeaderCard';
 import { WorkspaceCalculationsPage } from './CalculationsPage';
 import { WorkspaceEditorPage } from './EditorPage';
+import VisDetailPage from './VisDetailPage';
 
 const WORKSPACE = gql`
-  query dataset($id: String!) {
+  query workspace($id: String!) {
     workspace(id: $id) {
       id
       name
@@ -33,7 +34,7 @@ export default class WorkspacesPage extends React.Component<
   public render() {
     return (
       <Query query={WORKSPACE} variables={{ id: this.props.match.params.id }}>
-        {({ loading, error, data, refetch }) => {
+        {({ loading, error, data }) => {
           if (loading) {
             return <LoadingCard />;
           }
@@ -58,12 +59,14 @@ export default class WorkspacesPage extends React.Component<
                 typeTitle="Workspace"
               />
               <Tabs
-                onChange={a => {
+                onChange={name => {
                   const history = this.props.history;
-                  if (a === 'calculations') {
+                  if (name === 'calculations') {
                     history.push(`${this.props.match.url}/calculations`);
-                  } else if (a === 'editor') {
+                  } else if (name === 'editor') {
                     history.push(`${this.props.match.url}`);
+                  } else if (name === 'visualizations') {
+                    history.push(`${this.props.match.url}/visualizations`);
                   }
                 }}
                 type="card"
@@ -76,6 +79,11 @@ export default class WorkspacesPage extends React.Component<
                   tab="Calculations"
                   key="calculations"
                 />
+                <Tabs.TabPane
+                  forceRender
+                  tab="Visualization"
+                  key="visualizations"
+                />
               </Tabs>
               <Switch>
                 <Route
@@ -87,6 +95,11 @@ export default class WorkspacesPage extends React.Component<
                   exact
                   path={`${this.props.match.path}/calculations`}
                   component={WorkspaceCalculationsPage}
+                />
+                <Route
+                  exact
+                  path={`${this.props.match.path}/visualizations`}
+                  component={VisDetailPage}
                 />
               </Switch>
             </>

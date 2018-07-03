@@ -5,16 +5,16 @@ import { Col, Row } from 'antd';
 
 export interface BooleanInfoProps {
   value: boolean;
-  title: string;
+  description: string;
 }
 
-export const BooleanInfo: SFC<BooleanInfoProps> = ({ value, title }) => (
+export const BooleanInfo: SFC<BooleanInfoProps> = ({ value, description }) => (
   <>
     <Row>
-      <Col>{title}</Col>
+      <Col>{value ? <strong>TRUE</strong> : <strong>FALSE</strong>}</Col>
     </Row>
     <Row>
-      <Col>{value ? <strong>TRUE</strong> : <strong>FALSE</strong>}</Col>
+      <Col>{description}</Col>
     </Row>
   </>
 );

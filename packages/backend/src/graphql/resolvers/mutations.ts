@@ -1,7 +1,6 @@
 import {
   CalculationProcess,
   ConnectionInstance,
-  Dashboard,
   Dataset,
   Entry,
   NodeInstance,
@@ -12,10 +11,6 @@ import {
 import { createBirthdaysDemoData } from '../../examples/birthdays';
 import { createSTRDemoData } from '../../examples/str';
 import { startCalculation } from '../../main/calculation/start-process';
-import {
-  createDashboard,
-  deleteDashboard
-} from '../../main/dashboards/dashboards';
 import {
   createConnection,
   deleteConnection
@@ -97,9 +92,5 @@ export const Mutation = {
     _,
     { workspaceId },
     context
-  ): Promise<CalculationProcess> => startCalculation(workspaceId, context),
-  createDashboard: (_, { name }, context): Promise<Dashboard> =>
-    createDashboard(name, context),
-  deleteDashboard: (_, { id }, context): Promise<boolean> =>
-    deleteDashboard(id, context)
+  ): Promise<CalculationProcess> => startCalculation(workspaceId, context)
 };

@@ -64,12 +64,10 @@ describe('Workspaces', () => {
     );
 
     expect(ws.id).toBeDefined();
-    expect(ws.connections).toBeUndefined();
     expect(ws.created).toBeDefined();
     expect(ws.description).toBe(description);
     expect(ws.name).toEqual(name);
     expect(ws.lastChange).toBeDefined();
-    expect(ws.nodes).toBeUndefined();
 
     const createdWs = await getWorkspace(ws.id, {
       db,

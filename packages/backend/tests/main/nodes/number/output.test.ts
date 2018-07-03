@@ -12,37 +12,50 @@ describe('NumberOutputNode', () => {
 
   test('should get output int value from input', async () => {
     let res = await NumberOutputNode.onNodeExecution(
-      { name: 'test', description: 'desc', dashboardId: 'abc' },
+      { name: 'test', description: 'desc' },
       {
         value: 2
       },
-      null
+      {
+        reqContext: null,
+        node: {
+          contextIds: [],
+          form: [],
+          id: 'abc',
+          inputs: [],
+          outputs: [],
+          type: 'a',
+          workspaceId: 'abc',
+          x: 0,
+          y: 0
+        }
+      }
     );
 
     expect(res.results.value).toBe(2);
     expect(res.results.type).toBe(DataType.NUMBER);
     expect(res.results.name).toBe('test');
-    expect(res.results.dashboardId).toBe('abc');
+    expect(res.results.workspaceId).toBe('abc');
     expect(res.results.description).toBe('desc');
     expect(Object.keys(res.outputs).length).toBe(0);
 
     res = await NumberOutputNode.onNodeExecution(
-      { name: 'test', description: null, dashboardId: 'abc' },
+      { name: 'test', description: null },
       {
         value: 2
       },
-      null
+      { node: { workspaceId: '' } } as any
     );
     expect(res.results.description).toBe('');
   });
 
   test('should get output negative float value from input', async () => {
     const res = await NumberOutputNode.onNodeExecution(
-      { name: 'test', description: '', dashboardId: 'abc' },
+      { name: 'test', description: '' },
       {
         value: -2.34
       },
-      null
+      { node: { workspaceId: '' } } as any
     );
 
     expect(res.results.value).toBe(-2.34);
@@ -51,23 +64,23 @@ describe('NumberOutputNode', () => {
 
   test('should always return empty object for onMetaExecution', async () => {
     let res = await NumberOutputNode.onMetaExecution(
-      { name: 'test', description: '', dashboardId: 'abc' },
+      { name: 'test', description: '' },
       { value: null },
-      null
+      { node: { workspaceId: '' } } as any
     );
     expect(res).toEqual({});
 
     res = await NumberOutputNode.onMetaExecution(
-      { name: 'test', description: '', dashboardId: 'abc' },
+      { name: 'test', description: '' },
       { value: { content: {}, isPresent: false } },
-      null
+      { node: { workspaceId: '' } } as any
     );
     expect(res).toEqual({});
 
     res = await NumberOutputNode.onMetaExecution(
-      { name: 'test', description: '', dashboardId: 'abc' },
+      { name: 'test', description: '' },
       { value: { content: {}, isPresent: true } },
-      null
+      { node: { workspaceId: '' } } as any
     );
     expect(res).toEqual({});
   });

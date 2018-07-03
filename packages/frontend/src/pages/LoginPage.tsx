@@ -7,6 +7,17 @@ import { Link } from 'react-router-dom';
 
 import { LoginForm } from './forms/LoginForm';
 
+const FLEX_SIZE = {
+  xs: {
+    span: 24,
+    offset: 0
+  },
+  md: {
+    span: 12,
+    offset: 6
+  }
+};
+
 export interface LoginPageProps extends RouteComponentProps<{}> {}
 
 export default class LoginPage extends React.Component<LoginPageProps> {
@@ -15,7 +26,7 @@ export default class LoginPage extends React.Component<LoginPageProps> {
       <Layout style={{ minHeight: '100vh' }}>
         <Layout.Content style={{ background: Colors.Background }}>
           <Row>
-            <Col span={12} offset={6}>
+            <Col {...FLEX_SIZE}>
               <Card bordered={false}>
                 <h1>Login</h1>
                 <p>

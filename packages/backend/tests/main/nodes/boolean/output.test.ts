@@ -12,26 +12,26 @@ describe('BooleanOutputNode', () => {
 
   test('should get output false value from input', async () => {
     let res = await BooleanOutputNode.onNodeExecution(
-      { name: 'test', description: 'desc', dashboardId: 'abc' },
+      { name: 'test', description: 'desc' },
       {
         value: true
       },
-      null
+      { node: { workspaceId: 'abc' } } as any
     );
 
     expect(res.results.value).toBe(true);
     expect(res.results.type).toBe(DataType.BOOLEAN);
     expect(res.results.name).toBe('test');
-    expect(res.results.dashboardId).toBe('abc');
+    expect(res.results.workspaceId).toBe('abc');
     expect(res.results.description).toBe('desc');
     expect(Object.keys(res.outputs).length).toBe(0);
 
     res = await BooleanOutputNode.onNodeExecution(
-      { name: 'test', description: null, dashboardId: 'abc' },
+      { name: 'test', description: null },
       {
         value: true
       },
-      null
+      { node: { workspaceId: '' } } as any
     );
 
     expect(res.results.description).toBe('');
@@ -39,11 +39,11 @@ describe('BooleanOutputNode', () => {
 
   test('should get output true value from input', async () => {
     const res = await BooleanOutputNode.onNodeExecution(
-      { name: 'test', description: '', dashboardId: 'abc' },
+      { name: 'test', description: '' },
       {
         value: false
       },
-      null
+      { node: { workspaceId: '' } } as any
     );
 
     expect(res.results.value).toBe(false);
@@ -52,23 +52,23 @@ describe('BooleanOutputNode', () => {
 
   test('should always return empty object for onMetaExecution', async () => {
     let res = await BooleanOutputNode.onMetaExecution(
-      { name: 'test', description: '', dashboardId: 'abc' },
+      { name: 'test', description: '' },
       { value: null },
-      null
+      { node: { workspaceId: '' } } as any
     );
     expect(res).toEqual({});
 
     res = await BooleanOutputNode.onMetaExecution(
-      { name: 'test', description: '', dashboardId: 'abc' },
+      { name: 'test', description: '' },
       { value: { content: {}, isPresent: false } },
-      null
+      { node: { workspaceId: '' } } as any
     );
     expect(res).toEqual({});
 
     res = await BooleanOutputNode.onMetaExecution(
-      { name: 'test', description: '', dashboardId: 'abc' },
+      { name: 'test', description: '' },
       { value: { content: {}, isPresent: true } },
-      null
+      { node: { workspaceId: '' } } as any
     );
     expect(res).toEqual({});
   });

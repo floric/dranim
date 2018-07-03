@@ -18,14 +18,14 @@ export const StringOutputNode: ServerNodeDef<
   type: StringOutputNodeDef.type,
   isFormValid: isOutputFormValid,
   onMetaExecution: () => Promise.resolve({}),
-  onNodeExecution: (form, inputs) =>
+  onNodeExecution: (form, inputs, { node: { workspaceId } }) =>
     Promise.resolve({
       outputs: {},
       results: {
         name: form.name!,
         value: inputs.value,
         type: DataType.STRING,
-        dashboardId: form.dashboardId!,
+        workspaceId,
         description: form.description || ''
       }
     })

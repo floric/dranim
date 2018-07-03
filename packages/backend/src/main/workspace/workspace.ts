@@ -156,3 +156,15 @@ export const getWorkspace = async (
     ...ws
   };
 };
+
+export const tryGetWorkspace = async (
+  id: string,
+  reqContext: ApolloContext
+) => {
+  const ws = await getWorkspace(id, reqContext);
+  if (!ws) {
+    throw new Error('Unknown workspace');
+  }
+
+  return ws;
+};

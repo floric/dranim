@@ -60,12 +60,6 @@ export const MutationDef = `
       nodes: [NodeInput!]!
       connections: [ConnectionInput!]!
     ): Boolean!
-    createDashboard (
-      name: String!
-    ): Dashboard!
-    deleteDashboard (
-      id: String!
-    ): Boolean!
     createSTRDemoData: Boolean!
     createBirthdaysDemoData: Boolean!
     uploadEntriesCsv (files: [Upload!]!, datasetId: String!): UploadProcess!

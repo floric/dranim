@@ -34,7 +34,7 @@ export const DatasetOutputNode: ServerNodeDef<
         name: ds.name,
         value: inputs.dataset,
         type: DataType.DATASET,
-        dashboardId: '',
+        workspaceId: '',
         description: ''
       }
     };

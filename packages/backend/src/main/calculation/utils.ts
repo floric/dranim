@@ -7,7 +7,4 @@ export const createDynamicDatasetName = (nodeName: string, nodeId: string) => {
 };
 
 export const isOutputFormValid = (form: FormValues<OutputNodeForm>) =>
-  Promise.resolve(
-    validateNonEmptyString(form.name) &&
-      validateNonEmptyString(form.dashboardId)
-  );
+  Promise.resolve(validateNonEmptyString(form.name));

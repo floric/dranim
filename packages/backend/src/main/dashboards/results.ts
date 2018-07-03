@@ -1,8 +1,7 @@
 import { ApolloContext, OutputResult } from '@masterthesis/shared';
 
 import { Collection, Db, ObjectID } from 'mongodb';
-
-import { tryGetDashboard } from './dashboards';
+import { tryGetWorkspace } from '../workspace/workspace';
 
 export const getResultsCollection = (
   db: Db
@@ -14,11 +13,11 @@ export const addOrUpdateResult = async (
   result: OutputResult,
   reqContext: ApolloContext
 ): Promise<OutputResult & { id: string }> => {
-  const { name, dashboardId } = result;
+  const { name, workspaceId } = result;
   const collection = getResultsCollection(reqContext.db);
   await validateInputs(result, reqContext);
 
-  const existing = await collection.findOne({ name, dashboardId });
+  const existing = await collection.findOne({ name, workspaceId });
 
   let safedRes: OutputResult & { _id: ObjectID };
   if (existing) {
@@ -35,14 +34,14 @@ const createResult = async (
   result: OutputResult,
   reqContext: ApolloContext
 ) => {
-  const { name, type, value, dashboardId, description } = result;
+  const { name, type, value, workspaceId, description } = result;
   const coll = getResultsCollection(reqContext.db);
   const res = await coll.insertOne({
     name,
     type,
     description,
     value: JSON.stringify(value),
-    dashboardId
+    workspaceId
   });
 
   if (res.insertedCount !== 1) {
@@ -56,16 +55,16 @@ const updateResult = async (
   result: OutputResult,
   reqContext: ApolloContext
 ) => {
-  const { name, type, value, dashboardId, description } = result;
+  const { name, type, value, workspaceId, description } = result;
   const coll = getResultsCollection(reqContext.db);
   const res = await coll.findOneAndUpdate(
-    { name, dashboardId },
+    { name, workspaceId },
     {
       name,
       type,
       description,
       value: JSON.stringify(value),
-      dashboardId
+      workspaceId
     }
   );
 
@@ -84,7 +83,7 @@ const validateInputs = async (
     throw new Error('Name must not be empty');
   }
 
-  await tryGetDashboard(result.dashboardId, reqContext);
+  await tryGetWorkspace(result.workspaceId, reqContext);
 };
 
 export const deleteResultById = async (
@@ -102,11 +101,11 @@ export const deleteResultById = async (
 
 export const deleteResultByName = async (
   name: string,
-  dashboardId: string,
+  workspaceId: string,
   reqContext: ApolloContext
 ) => {
   const coll = getResultsCollection(reqContext.db);
-  const res = await coll.deleteOne({ name, dashboardId });
+  const res = await coll.deleteOne({ name, workspaceId });
   if (res.result.ok !== 1 || res.deletedCount !== 1) {
     throw new Error('Deletion of Result failed');
   }
@@ -114,12 +113,12 @@ export const deleteResultByName = async (
   return true;
 };
 
-export const deleteResultsByDashboard = async (
-  dashboardId: string,
+export const deleteResultsByWorkspace = async (
+  workspaceId: string,
   reqContext: ApolloContext
 ) => {
   const coll = getResultsCollection(reqContext.db);
-  const res = await coll.deleteMany({ dashboardId });
+  const res = await coll.deleteMany({ workspaceId });
   if (res.result.ok !== 1) {
     throw new Error('Deletion of Result failed');
   }
@@ -127,12 +126,12 @@ export const deleteResultsByDashboard = async (
   return true;
 };
 
-export const getResultsForDashboard = async (
-  dashboardId: string,
+export const getResultsForWorkspace = async (
+  workspaceId: string,
   reqContext: ApolloContext
 ): Promise<Array<OutputResult & { id: string }>> => {
   const all = await getResultsCollection(reqContext.db)
-    .find({ dashboardId })
+    .find({ workspaceId })
     .toArray();
 
   return all.map(n => {

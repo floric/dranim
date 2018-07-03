@@ -1,6 +1,5 @@
 import {
   CalculationProcess,
-  Dashboard,
   Dataset,
   UploadProcess,
   User,
@@ -8,10 +7,6 @@ import {
 } from '@masterthesis/shared';
 
 import { getAllCalculations } from '../../main/calculation/start-process';
-import {
-  getAllDashboards,
-  getDashboard
-} from '../../main/dashboards/dashboards';
 import { tryGetUser } from '../../main/users/management';
 import { getAllDatasets, getDataset } from '../../main/workspace/dataset';
 import { getAllUploads } from '../../main/workspace/upload';
@@ -35,9 +30,5 @@ export const Query = {
     context
   ): Promise<Array<CalculationProcess>> =>
     getAllCalculations(workspaceId, context),
-  dashboards: (_, __, context): Promise<Array<Dashboard>> =>
-    getAllDashboards(context),
-  dashboard: (_, { id }, context): Promise<Dashboard | null> =>
-    getDashboard(id, context),
   user: (_, __, context): Promise<User> => tryGetUser(context)
 };

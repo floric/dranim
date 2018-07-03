@@ -14,11 +14,7 @@ export const AppMenu: SFC<{
     name: string;
     id: string;
   }>;
-  dashboards?: Array<{
-    name: string;
-    id: string;
-  }>;
-}> = ({ datasets, workspaces, dashboards, collapsed }) => (
+}> = ({ datasets, workspaces, collapsed }) => (
   <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
     <Menu.Item key="menu_start">
       <MenuItemContent
@@ -69,30 +65,6 @@ export const AppMenu: SFC<{
         workspaces.map((ws: { name: string; id: string }) => (
           <Menu.Item key={`menu_ws+${ws.id}`}>
             <NavLink to={`/workspaces/${ws.id}`}>{ws.name}</NavLink>
-          </Menu.Item>
-        ))}
-    </Menu.SubMenu>
-    <Menu.SubMenu
-      key="sub3"
-      title={
-        <span>
-          <Icon type="area-chart" />
-          {!collapsed ? ' Visualization' : null}
-        </span>
-      }
-    >
-      <Menu.Item key="menu_vis">
-        <MenuItemContent
-          collapsed={collapsed}
-          href="/dashboards"
-          title="Dashboards"
-        />
-      </Menu.Item>
-      {dashboards && dashboards.length > 0 && <Menu.Divider />}
-      {dashboards &&
-        dashboards.map(({ name, id }) => (
-          <Menu.Item key={`menu_vis+${id}`}>
-            <NavLink to={`/dashboards/${id}`}>{name}</NavLink>
           </Menu.Item>
         ))}
     </Menu.SubMenu>
