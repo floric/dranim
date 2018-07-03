@@ -82,6 +82,12 @@ Resources:
         - Namespace: aws:elb:listener:443
           OptionName: SSLCertificateId
           Value: !Ref EuWestCertArn
+        - Namespace: aws:elb:policies
+          OptionName: ConnectionDrainingEnabled
+          Value: true
+        - Namespace: aws:elb:policies
+          OptionName: ConnectionDrainingTimeout
+          Value: 60
         - Namespace: aws:elasticbeanstalk:application:environment
           OptionName: DB_USER
           Value: !Ref DatabaseUser

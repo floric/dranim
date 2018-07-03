@@ -27,13 +27,17 @@ export const createDataset = async (
     throw new Error('Name must not be empty');
   }
 
-  const existingDatasetsWithSameName = await collection.findOne({ name });
+  const existingDatasetsWithSameName = await collection.findOne({
+    name,
+    userId: reqContext.userId
+  });
   if (existingDatasetsWithSameName) {
     throw new Error('Names must be unique');
   }
 
   const res = await collection.insertOne({
     name,
+    userId: reqContext.userId,
     valueschemas: [],
     workspaceId
   });
@@ -64,7 +68,9 @@ export const getAllDatasets = async (
   reqContext: ApolloContext
 ): Promise<Array<Dataset>> => {
   const collection = getDatasetsCollection(reqContext.db);
-  const allDatasets = await collection.find().toArray();
+  const allDatasets = await collection
+    .find({ userId: reqContext.userId })
+    .toArray();
   return allDatasets.map(ds => {
     const { _id, ...obj } = ds;
     return {

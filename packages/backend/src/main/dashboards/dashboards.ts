@@ -19,12 +19,16 @@ export const createDashboard = async (
     throw new Error('Name must not be empty');
   }
 
-  const existingDbWithSameName = await collection.findOne({ name });
+  const existingDbWithSameName = await collection.findOne({
+    name,
+    userId: reqContext.userId
+  });
   if (existingDbWithSameName) {
     throw new Error('Names must be unique');
   }
 
   const res = await collection.insertOne({
+    userId: reqContext.userId,
     name
   });
 
@@ -35,6 +39,7 @@ export const createDashboard = async (
   const newItem = res.ops[0];
   return {
     id: newItem._id.toHexString(),
+    userId: reqContext.userId,
     ...newItem
   };
 };
@@ -58,7 +63,7 @@ export const getAllDashboards = async (
   reqContext: ApolloContext
 ): Promise<Array<Dashboard>> => {
   const collection = getDashboardCollection(reqContext.db);
-  const allDbs = await collection.find().toArray();
+  const allDbs = await collection.find({ userId: reqContext.userId }).toArray();
   return allDbs.map(ds => ({
     id: ds._id.toHexString(),
     ...ds

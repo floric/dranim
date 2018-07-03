@@ -27,12 +27,12 @@ export const getUploadsCollection = (
 };
 
 export const getAllUploads = async (
-  datasetId: string | null,
+  datasetId: string,
   reqContext: ApolloContext
 ): Promise<Array<UploadProcess & { _id: ObjectID }>> => {
   const collection = getUploadsCollection(reqContext.db);
   const all = await collection
-    .find(datasetId ? { datasetId } : {})
+    .find({ datasetId })
     .sort({ start: -1 })
     .toArray();
   return all.map(ds => ({

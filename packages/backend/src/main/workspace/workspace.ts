@@ -35,6 +35,7 @@ export const createWorkspace = async (
 
   const res = await wsCollection.insertOne({
     name,
+    userId: reqContext.userId,
     description: description || '',
     lastChange: new Date(),
     created: new Date()
@@ -127,7 +128,7 @@ export const getAllWorkspaces = async (
   reqContext: ApolloContext
 ): Promise<Array<Workspace>> => {
   const wsCollection = getWorkspacesCollection(reqContext.db);
-  const all = await wsCollection.find().toArray();
+  const all = await wsCollection.find({ userId: reqContext.userId }).toArray();
   return all.map(ws => ({
     id: ws._id.toHexString(),
     ...ws

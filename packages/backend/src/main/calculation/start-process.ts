@@ -126,6 +126,7 @@ export const startCalculation = async (
 ): Promise<CalculationProcess> => {
   const coll = getCalculationsCollection(reqContext.db);
   const newProcess = await coll.insertOne({
+    userId: reqContext.userId,
     start: new Date(),
     finish: null,
     workspaceId,
@@ -157,7 +158,9 @@ export const getAllCalculations = async (
   reqContext: ApolloContext
 ): Promise<Array<CalculationProcess>> => {
   const collection = getCalculationsCollection(reqContext.db);
-  const all = await collection.find({ workspaceId }).toArray();
+  const all = await collection
+    .find({ workspaceId, userId: reqContext.userId })
+    .toArray();
   return all.map(ds => ({
     id: ds._id.toHexString(),
     ...ds
