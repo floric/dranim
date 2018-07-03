@@ -29,7 +29,6 @@ export type IOValues<T> = { [Name in keyof T]: T[Name] };
 export interface OutputNodeForm {
   name: string;
   description: string;
-  dashboardId: string;
 }
 
 export interface OutputResult<T = any> {
@@ -37,7 +36,7 @@ export interface OutputResult<T = any> {
   type: DataType;
   name: string;
   description: string;
-  dashboardId: string;
+  workspaceId: string;
 }
 
 export interface GQLOutputResult extends OutputResult<any> {

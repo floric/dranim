@@ -13,8 +13,6 @@ import DataPage from './pages/DataPage';
 import DetailPage from './pages/dataset/DetailPage';
 import StartPage from './pages/StartPage';
 import UserPage from './pages/UserPage';
-import VisPage from './pages/VisPage';
-import VisDetailPage from './pages/visualizations/VisDetailPage';
 import WorkspaceDetailPage from './pages/workspaces/DetailPage';
 import WorkspacesPage from './pages/WorkspacesPage';
 
@@ -29,10 +27,6 @@ const MENU_QUERY = gql`
       name
     }
     workspaces {
-      id
-      name
-    }
-    dashboards {
       id
       name
     }
@@ -72,7 +66,6 @@ class LoggedInApp extends React.Component<
 
               return (
                 <AppMenu
-                  dashboards={res.data!.dashboards}
                   datasets={res.data!.datasets}
                   workspaces={res.data!.workspaces}
                   collapsed={collapsed}
@@ -90,8 +83,6 @@ class LoggedInApp extends React.Component<
             <Route path="/data/:id" component={DetailPage} />
             <Route exact path="/workspaces" component={WorkspacesPage} />
             <Route path="/workspaces/:id" component={WorkspaceDetailPage} />
-            <Route exact path="/dashboards" component={VisPage} />
-            <Route exact path="/dashboards/:id" component={VisDetailPage} />
             <Route exact path="/user" component={UserPage} />
           </Switch>
         </Content>

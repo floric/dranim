@@ -102,12 +102,6 @@ describe('Execution', () => {
       db,
       userId: ''
     });
-    await addOrUpdateFormValue(
-      nodeB.id,
-      'dashboardId',
-      JSON.stringify('dsid'),
-      { db, userId: '' }
-    );
     const { outputs, results } = await executeNodeWithId(nodeB.id, {
       db,
       userId: ''
@@ -223,12 +217,6 @@ describe('Execution', () => {
       db,
       userId: ''
     });
-    await addOrUpdateFormValue(
-      outputNode.id,
-      'dashboardId',
-      JSON.stringify('dsid'),
-      { db, userId: '' }
-    );
 
     await createConnection(
       { name: 'value', nodeId: nodeA.id },

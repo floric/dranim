@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { DataType, GQLDashboard, GQLOutputResult } from '@masterthesis/shared';
+import { DataType, GQLOutputResult, GQLWorkspace } from '@masterthesis/shared';
 import { Card, Col, Row } from 'antd';
 import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
@@ -13,21 +13,27 @@ import {
   UnknownErrorCard
 } from '../../components/CustomCards';
 import { NumberInfo } from '../../components/NumberInfo';
-import { PageHeaderCard } from '../../components/PageHeaderCard';
 import { StringInfo } from '../../components/StringInfo';
 
-const DASHBOARD = gql`
-  query dashboard($id: String!) {
-    dashboard(id: $id) {
+const WORKSPACE = gql`
+  query workspace($id: String!) {
+    workspace(id: $id) {
       id
       name
       results {
         id
         name
-        value
         type
-        description
+        value
       }
+    }
+    calculations(workspaceId: $id) {
+      id
+      start
+      finish
+      state
+      processedOutputs
+      totalOutputs
     }
   }
 `;
@@ -40,7 +46,7 @@ export interface VisDetailPageProps
 export default class VisDetailPage extends React.Component<VisDetailPageProps> {
   public render() {
     return (
-      <Query query={DASHBOARD} variables={{ id: this.props.match.params.id }}>
+      <Query query={WORKSPACE} variables={{ id: this.props.match.params.id }}>
         {({ loading, error, data, refetch }) => {
           if (loading) {
             return <LoadingCard />;
@@ -50,28 +56,27 @@ export default class VisDetailPage extends React.Component<VisDetailPageProps> {
             return <UnknownErrorCard error={error} />;
           }
 
-          if (!data.dashboard) {
+          if (!data.workspace) {
             return (
               <CustomErrorCard
-                title="Unknown Dashboard"
-                description="Dashboard doesn't exist."
+                title="Unknown Workspace"
+                description="Workspace doesn't exist."
               />
             );
           }
 
-          const dashboard: GQLDashboard = data.dashboard;
+          const workspace: GQLWorkspace = data.workspace;
 
           return (
-            <>
-              <PageHeaderCard title={dashboard.name} typeTitle="Dashboard" />
-              <Row gutter={8}>
-                {dashboard.results.map(r => (
-                  <Col {...resultCardSize} key={r.id}>
-                    <Card bordered={false}>{renderResult(r)}</Card>
-                  </Col>
-                ))}
-              </Row>
-            </>
+            <Row gutter={8}>
+              {workspace.results.map(r => (
+                <Col {...resultCardSize} key={r.id}>
+                  <Card bordered={false} title={r.name}>
+                    {renderResult(r)}
+                  </Card>
+                </Col>
+              ))}
+            </Row>
           );
         }}
       </Query>
@@ -81,11 +86,11 @@ export default class VisDetailPage extends React.Component<VisDetailPageProps> {
 
 const renderResult = (result: GQLOutputResult): JSX.Element => {
   if (result.type === DataType.NUMBER) {
-    return <NumberInfo title={result.name} total={result.value} />;
+    return <NumberInfo description={result.name} total={result.value} />;
   } else if (result.type === DataType.STRING) {
-    return <StringInfo title={result.name} value={result.value} />;
+    return <StringInfo description={result.name} value={result.value} />;
   } else if (result.type === DataType.BOOLEAN) {
-    return <BooleanInfo title={result.name} value={result.value} />;
+    return <BooleanInfo description={result.name} value={result.value} />;
   }
 
   return <p>Not yet supported Datatype</p>;

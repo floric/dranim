@@ -24,10 +24,6 @@ const WORKSPACE_NODE_SELECTION = gql`
         type
       }
     }
-    dashboards {
-      id
-      name
-    }
     workspace(id: $workspaceId) {
       id
       name

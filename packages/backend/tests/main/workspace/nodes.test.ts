@@ -65,8 +65,6 @@ describe('Nodes', () => {
       id: VALID_OBJECT_ID,
       name: 'ws',
       description: '',
-      nodes: [],
-      connections: [],
       created: '',
       lastChange: ''
     };
@@ -96,8 +94,6 @@ describe('Nodes', () => {
       id: VALID_OBJECT_ID,
       name: 'ws',
       description: '',
-      nodes: [],
-      connections: [],
       created: '',
       lastChange: ''
     };
@@ -179,8 +175,6 @@ describe('Nodes', () => {
       id: VALID_OBJECT_ID,
       name: 'ws',
       description: '',
-      nodes: [],
-      connections: [],
       created: '',
       lastChange: ''
     };
@@ -209,8 +203,6 @@ describe('Nodes', () => {
       id: VALID_OBJECT_ID,
       name: 'ws',
       description: '',
-      nodes: [],
-      connections: [],
       created: '',
       lastChange: ''
     };
@@ -256,8 +248,6 @@ describe('Nodes', () => {
       id: VALID_OBJECT_ID,
       name: 'ws',
       description: '',
-      nodes: [],
-      connections: [],
       created: '',
       lastChange: ''
     };
@@ -311,8 +301,6 @@ describe('Nodes', () => {
       id: VALID_OBJECT_ID,
       name: 'ws',
       description: '',
-      nodes: [],
-      connections: [],
       created: '',
       lastChange: ''
     };
@@ -364,8 +352,6 @@ describe('Nodes', () => {
       id: VALID_OBJECT_ID,
       name: 'ws',
       description: '',
-      nodes: [],
-      connections: [],
       created: '',
       lastChange: ''
     };
@@ -398,8 +384,6 @@ describe('Nodes', () => {
       id: VALID_OBJECT_ID,
       name: 'ws',
       description: '',
-      nodes: [],
-      connections: [],
       created: '',
       lastChange: ''
     };
@@ -421,8 +405,6 @@ describe('Nodes', () => {
       id: VALID_OBJECT_ID,
       name: 'ws',
       description: '',
-      nodes: [],
-      connections: [],
       created: '',
       lastChange: ''
     };
@@ -463,8 +445,6 @@ describe('Nodes', () => {
       id: VALID_OBJECT_ID,
       name: 'ws',
       description: '',
-      nodes: [],
-      connections: [],
       created: '',
       lastChange: ''
     };
@@ -499,8 +479,6 @@ describe('Nodes', () => {
       id: VALID_OBJECT_ID,
       name: 'ws',
       description: '',
-      nodes: [],
-      connections: [],
       created: '',
       lastChange: ''
     };
@@ -592,8 +570,6 @@ describe('Nodes', () => {
       id: VALID_OBJECT_ID,
       name: 'ws',
       description: '',
-      nodes: [],
-      connections: [],
       created: '',
       lastChange: ''
     };
@@ -661,8 +637,6 @@ describe('Nodes', () => {
       id: VALID_OBJECT_ID,
       name: 'ws',
       description: '',
-      nodes: [],
-      connections: [],
       created: '',
       lastChange: ''
     };
@@ -741,8 +715,6 @@ describe('Nodes', () => {
       id: VALID_OBJECT_ID,
       name: 'ws',
       description: '',
-      nodes: [],
-      connections: [],
       created: '',
       lastChange: ''
     };
@@ -777,8 +749,6 @@ describe('Nodes', () => {
       id: VALID_OBJECT_ID,
       name: 'ws',
       description: '',
-      nodes: [],
-      connections: [],
       created: '',
       lastChange: ''
     };

@@ -5,16 +5,16 @@ import { Col, Row } from 'antd';
 
 export interface NumberInfoProps {
   total: number;
-  title: string;
+  description: string;
 }
 
-export const NumberInfo: SFC<NumberInfoProps> = ({ total, title }) => (
+export const NumberInfo: SFC<NumberInfoProps> = ({ total, description }) => (
   <>
     <Row>
-      <Col>{title}</Col>
+      <Col>{total.toLocaleString()}</Col>
     </Row>
     <Row>
-      <Col>{total.toLocaleString()}</Col>
+      <Col>{description}</Col>
     </Row>
   </>
 );
