@@ -7,6 +7,7 @@ import * as EntryNodes from './entries';
 import * as NumberNodes from './number';
 import * as StringNodes from './string';
 import * as TimeNodes from './time';
+import { VisBarChartDef } from './visualizations';
 
 export * from './dataset';
 export * from './number';
@@ -15,6 +16,7 @@ export * from './entries';
 export * from './boolean';
 export * from './time';
 export * from './datetime';
+export * from './visualizations';
 
 export const NodesMap = new Map<string, NodeDef>(
   [
@@ -24,9 +26,10 @@ export const NodesMap = new Map<string, NodeDef>(
     DatasetNodes,
     BooleanNodes,
     TimeNodes,
-    DatetimeNodes
+    DatetimeNodes,
+    { VisBarChartDef }
   ]
     .map(n => Object.values(n))
-    .reduce<Array<NodeDef>>((list, elem, _, all) => [...list, ...elem], [])
+    .reduce<Array<NodeDef>>((list, elem) => [...list, ...elem], [])
     .map<[string, NodeDef]>(n => [n.type, n])
 );

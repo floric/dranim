@@ -125,7 +125,8 @@ class CreateValueSchemaFormImpl extends React.Component<
                   DataType.STRING,
                   DataType.NUMBER,
                   DataType.BOOLEAN,
-                  DataType.DATETIME
+                  DataType.DATETIME,
+                  DataType.TIME
                 ].map(type => (
                   <Select.Option value={type} key={`option-${type}`}>
                     {type}

@@ -20,5 +20,5 @@ export const getValueOrDefault = <T, Name extends keyof T>(
   valueName: Name,
   defaultVal: FormValues<T>[Name]
 ) => {
-  return form[valueName] !== null ? form[valueName] : defaultVal;
+  return form[valueName] != null ? form[valueName] : defaultVal;
 };

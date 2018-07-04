@@ -13,7 +13,8 @@ export enum DataType {
   BOOLEAN = 'Boolean',
   DATETIME = 'Datetime',
   TIME = 'Time',
-  STRING = 'String'
+  STRING = 'String',
+  CUSTOM = 'Custom'
 }
 
 export interface DatasetMeta {

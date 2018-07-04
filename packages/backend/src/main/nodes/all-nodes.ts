@@ -7,6 +7,7 @@ import * as EntriesNodes from './entries';
 import * as NumberNodes from './number';
 import * as StringNodes from './string';
 import * as TimeNodes from './time';
+import * as VisNodes from './visualizations';
 
 const serverNodeTypes: Map<string, ServerNodeDef & NodeDef> = new Map(
   [
@@ -16,7 +17,8 @@ const serverNodeTypes: Map<string, ServerNodeDef & NodeDef> = new Map(
     EntriesNodes,
     BooleanNodes,
     TimeNodes,
-    DatetimeNodes
+    DatetimeNodes,
+    VisNodes
   ]
     .map<Array<[string, ServerNodeDef]>>(nodes =>
       Object.values(nodes).map<[string, ServerNodeDef]>(n => [n.type, n])

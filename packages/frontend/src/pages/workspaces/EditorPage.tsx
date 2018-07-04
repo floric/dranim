@@ -196,7 +196,6 @@ export class WorkspaceEditorPage extends React.Component<
                                     <Mutation mutation={UPDATE_NODE}>
                                       {updateNode => (
                                         <ExplorerEditor
-                                          dashboards={data.dashboards}
                                           datasets={data.datasets}
                                           connections={deepCopyResponse(
                                             data.workspace.connections

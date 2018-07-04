@@ -180,13 +180,13 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
                 render: u => (
                   <Row>
                     <Col xs={8}>
-                      <NumberInfo title="Added" total={u.added} />
+                      <NumberInfo description="Added" total={u.added} />
                     </Col>
                     <Col xs={8}>
-                      <NumberInfo title="Failed" total={u.failed} />
+                      <NumberInfo description="Failed" total={u.failed} />
                     </Col>
                     <Col xs={8}>
-                      <NumberInfo title="Invalid" total={u.invalid} />
+                      <NumberInfo description="Invalid" total={u.invalid} />
                     </Col>
                   </Row>
                 )

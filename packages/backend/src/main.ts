@@ -54,7 +54,9 @@ export const main = async (options: IMainOptions) => {
       store: new MongoStore({ db }),
       cookie: { secure: false }
     }),
-    morgan('combined'),
+    morgan('combined', {
+      skip: req => req.headers['user-agent'] === 'ELB-HealthChecker/1.0'
+    }),
     bodyParser.json({}),
     bodyParser.urlencoded({
       extended: true
