@@ -1,8 +1,15 @@
+import * as d3 from 'd3';
 import * as React from 'react';
 
-import * as d3 from 'd3';
+import { Colors } from '@masterthesis/shared';
 
 import { SVGChartWithId } from '../CustomDataRenderer';
+import {
+  LABEL_COLOR,
+  LABEL_FONT_FAMILY,
+  LABEL_FONT_SIZE,
+  LABEL_FONT_WEIGHT
+} from './styles';
 
 export interface ColumnChartProps extends SVGChartWithId {
   value: any;
@@ -57,7 +64,7 @@ export class ColumnChart extends React.Component<
       .attr('y', d => height - y(d.value) - 0.5)
       .attr('width', width * 0.9)
       .attr('height', d => y(d.value))
-      .attr('fill', 'steelblue');
+      .attr('fill', Colors.VisDefault);
 
     const text = chart
       .selectAll('text')
@@ -69,9 +76,10 @@ export class ColumnChart extends React.Component<
       .text(d => d.label)
       .attr('x', (d, i) => x(i + 0.5))
       .attr('y', d => height)
-      .style('font-family', 'sans-serif')
-      .style('font-size', '10px')
-      .style('fill', 'white')
+      .style('font-family', LABEL_FONT_FAMILY)
+      .style('font-size', LABEL_FONT_SIZE)
+      .style('font-weight', LABEL_FONT_WEIGHT)
+      .style('fill', LABEL_COLOR)
       .style('text-anchor', 'end')
       .style('writing-mode', 'tb');
   }

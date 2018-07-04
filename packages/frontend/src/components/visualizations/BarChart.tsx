@@ -1,7 +1,15 @@
 import * as d3 from 'd3';
 import * as React from 'react';
 
+import { Colors } from '@masterthesis/shared';
+
 import { SVGChartWithId } from '../CustomDataRenderer';
+import {
+  LABEL_COLOR,
+  LABEL_FONT_FAMILY,
+  LABEL_FONT_SIZE,
+  LABEL_FONT_WEIGHT
+} from './styles';
 
 export interface BarChartProps extends SVGChartWithId {
   value: any;
@@ -53,7 +61,7 @@ export class BarChart extends React.Component<BarChartProps> {
       .attr('y', (d, i) => y(i))
       .attr('width', d => x(d.value))
       .attr('height', height * 0.9)
-      .attr('fill', 'steelblue');
+      .attr('fill', Colors.VisDefault);
 
     const text = chart
       .selectAll('text')
@@ -65,10 +73,11 @@ export class BarChart extends React.Component<BarChartProps> {
       .text(d => d.label)
       .attr('x', d => 5)
       .attr('y', (d, i) => y(i + 0.5))
-      .style('font-family', 'sans-serif')
-      .style('font-size', '10px')
-      .style('alignment-baseline', 'middle')
-      .style('fill', 'white');
+      .style('font-family', LABEL_FONT_FAMILY)
+      .style('font-size', LABEL_FONT_SIZE)
+      .style('font-weight', LABEL_FONT_WEIGHT)
+      .style('fill', LABEL_COLOR)
+      .style('alignment-baseline', 'middle');
   }
 
   public render() {

@@ -1,12 +1,13 @@
 import * as React from 'react';
 
 import { GQLOutputResult, LinearChartType } from '@masterthesis/shared';
-import { Button, Card } from 'antd';
+import { Button, Card, Divider } from 'antd';
 import { v4 } from 'uuid';
 
 import { showNotificationWithIcon } from '../utils/form';
 import { BarChart } from './visualizations/BarChart';
 import { ColumnChart } from './visualizations/ColumnChart';
+import { PieChart } from './visualizations/PieChart';
 
 export interface CustomDataRendererProps {
   value: any;
@@ -45,6 +46,11 @@ export const CustomDataRenderer: React.SFC<CustomDataRendererProps> = ({
       elem: <ColumnChart value={value} containerId={containerId} />,
       actions: [exportAsSvgAction(containerId, result)]
     };
+  } else if (value.type === LinearChartType.PIE) {
+    chart = {
+      elem: <PieChart value={value} containerId={containerId} />,
+      actions: [exportAsSvgAction(containerId, result)]
+    };
   }
 
   if (chart) {
@@ -68,7 +74,12 @@ export const CustomDataRenderer: React.SFC<CustomDataRendererProps> = ({
         }
       >
         {chart.elem}
-        <Card.Meta description="This is the description" />
+        {!!result.description && (
+          <>
+            <Divider />
+            <Card.Meta description={result.description} />
+          </>
+        )}
       </Card>
     );
   }

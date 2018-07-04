@@ -24,6 +24,6 @@ export const LinearChartDef: NodeDef<VisInputs, {}> = {
   },
   outputs: {},
   isOutputNode: true,
-  keywords: ['barchart', 'columnchart', 'piechart'],
+  keywords: ['bar', 'column', 'pie'],
   path: ['Visualizations']
 };
