@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Colors } from '@masterthesis/shared';
 
 import { SVGChartWithId } from '../CustomDataRenderer';
+import { BAR_HEIGHT, BAR_WIDTH, validateAndGetValues } from './BarChart';
 import {
   LABEL_COLOR,
   LABEL_FONT_FAMILY,
@@ -21,37 +22,24 @@ export class ColumnChart extends React.Component<
 > {
   public componentDidMount() {
     const { value, containerId } = this.props;
-    if (
-      !value.values ||
-      value.values.length === 0 ||
-      value.values[0].label == null ||
-      value.values[0].value == null
-    ) {
-      throw new Error('Unsupported value');
-    }
-
-    const values: Array<{ label: string; value: number }> = value.values;
-    const maxVal = values.map(n => n.value).reduce((a, b) => (a > b ? a : b));
-
-    const width = 25;
-    const height = 175;
+    const { values, maxVal } = validateAndGetValues(value);
 
     const chart = d3
       .select(`#${containerId}`)
       .append('svg')
       .attr('class', 'chart')
-      .attr('width', width * values.length)
-      .attr('height', height);
+      .attr('width', BAR_HEIGHT * values.length)
+      .attr('height', BAR_WIDTH);
 
     const x = d3
       .scaleLinear()
       .domain([0, 1])
-      .range([0, width]);
+      .range([0, BAR_HEIGHT]);
 
     const y = d3
       .scaleLinear()
       .domain([0, maxVal])
-      .rangeRound([0, height]);
+      .rangeRound([0, BAR_WIDTH]);
 
     const column = chart
       .selectAll('rect')
@@ -61,8 +49,8 @@ export class ColumnChart extends React.Component<
 
     column
       .attr('x', (d, i) => x(i))
-      .attr('y', d => height - y(d.value) - 0.5)
-      .attr('width', width * 0.9)
+      .attr('y', d => BAR_WIDTH - y(d.value) - 0.5)
+      .attr('width', BAR_HEIGHT * 0.9)
       .attr('height', d => y(d.value))
       .attr('fill', Colors.VisDefault);
 
@@ -75,7 +63,7 @@ export class ColumnChart extends React.Component<
     text
       .text(d => d.label)
       .attr('x', (d, i) => x(i + 0.5))
-      .attr('y', d => height)
+      .attr('y', d => BAR_WIDTH)
       .style('font-family', LABEL_FONT_FAMILY)
       .style('font-size', LABEL_FONT_SIZE)
       .style('font-weight', LABEL_FONT_WEIGHT)
