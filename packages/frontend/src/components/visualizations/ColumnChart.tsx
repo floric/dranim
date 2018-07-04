@@ -1,13 +1,17 @@
-import * as d3 from 'd3';
 import * as React from 'react';
+
+import * as d3 from 'd3';
 
 import { SVGChartWithId } from '../CustomDataRenderer';
 
-export interface BarChartProps extends SVGChartWithId {
+export interface ColumnChartProps extends SVGChartWithId {
   value: any;
 }
 
-export class BarChart extends React.Component<BarChartProps> {
+export class ColumnChart extends React.Component<
+  ColumnChartProps,
+  { chartId: string }
+> {
   public componentDidMount() {
     const { value, containerId } = this.props;
     if (
@@ -22,24 +26,24 @@ export class BarChart extends React.Component<BarChartProps> {
     const values: Array<{ label: string; value: number }> = value.values;
     const maxVal = values.map(n => n.value).reduce((a, b) => (a > b ? a : b));
 
-    const width = 250;
-    const height = 25;
+    const width = 25;
+    const height = 175;
 
     const chart = d3
       .select(`#${containerId}`)
       .append('svg')
       .attr('class', 'chart')
-      .attr('width', width)
-      .attr('height', height * values.length);
+      .attr('width', width * values.length)
+      .attr('height', height);
 
     const x = d3
       .scaleLinear()
-      .domain([0, maxVal])
+      .domain([0, 1])
       .range([0, width]);
 
     const y = d3
       .scaleLinear()
-      .domain([0, 1])
+      .domain([0, maxVal])
       .rangeRound([0, height]);
 
     const column = chart
@@ -49,10 +53,10 @@ export class BarChart extends React.Component<BarChartProps> {
       .append('rect');
 
     column
-      .attr('x', d => 0)
-      .attr('y', (d, i) => y(i))
-      .attr('width', d => x(d.value))
-      .attr('height', height * 0.9)
+      .attr('x', (d, i) => x(i))
+      .attr('y', d => height - y(d.value) - 0.5)
+      .attr('width', width * 0.9)
+      .attr('height', d => y(d.value))
       .attr('fill', 'steelblue');
 
     const text = chart
@@ -63,12 +67,13 @@ export class BarChart extends React.Component<BarChartProps> {
 
     text
       .text(d => d.label)
-      .attr('x', d => 5)
-      .attr('y', (d, i) => y(i + 0.5))
+      .attr('x', (d, i) => x(i + 0.5))
+      .attr('y', d => height)
       .style('font-family', 'sans-serif')
       .style('font-size', '10px')
-      .style('alignment-baseline', 'middle')
-      .style('fill', 'white');
+      .style('fill', 'white')
+      .style('text-anchor', 'end')
+      .style('writing-mode', 'tb');
   }
 
   public render() {

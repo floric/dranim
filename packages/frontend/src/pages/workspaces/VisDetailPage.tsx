@@ -73,9 +73,7 @@ export default class VisDetailPage extends React.Component<VisDetailPageProps> {
             <Row gutter={8}>
               {workspace.results.map(r => (
                 <Col {...resultCardSize} key={r.id}>
-                  <Card bordered={false} title={r.name}>
-                    {renderResult(r)}
-                  </Card>
+                  {renderResult(r)}
                 </Col>
               ))}
             </Row>
@@ -88,20 +86,23 @@ export default class VisDetailPage extends React.Component<VisDetailPageProps> {
 
 const renderResult = (result: GQLOutputResult): JSX.Element => {
   const value = JSON.parse(result.value);
-  if (result.type === DataType.NUMBER) {
-    return <NumberInfo description={result.name} total={value} />;
-  } else if (result.type === DataType.STRING) {
-    return <StringInfo description={result.name} value={value} />;
-  } else if (result.type === DataType.BOOLEAN) {
-    return <BooleanInfo description={result.name} value={value} />;
-  } else if (result.type === DataType.CUSTOM) {
+  if (result.type !== DataType.CUSTOM) {
     return (
-      <>
-        <CustomDataRenderer value={value} />
-        <p>{result.description}</p>
-      </>
+      <Card bordered={false}>
+        {() => {
+          if (result.type === DataType.NUMBER) {
+            return <NumberInfo description={result.name} total={value} />;
+          } else if (result.type === DataType.STRING) {
+            return <StringInfo description={result.name} value={value} />;
+          } else if (result.type === DataType.BOOLEAN) {
+            return <BooleanInfo description={result.name} value={value} />;
+          }
+
+          return <p>Unsupported Datatype!</p>;
+        }}
+      </Card>
     );
   }
 
-  return <p>Unsupported Datatype!</p>;
+  return <CustomDataRenderer result={result} value={value} />;
 };
