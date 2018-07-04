@@ -32,7 +32,7 @@ export const getDynamicEntryContextInputs = async (
   }
 
   const dynInputDefs = {};
-  inputs.dataset.content!.schema.forEach(s => {
+  inputs.dataset.content.schema.forEach(s => {
     dynInputDefs[s.name] = {
       dataType: s.type,
       displayName: s.name,

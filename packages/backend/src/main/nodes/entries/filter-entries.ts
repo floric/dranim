@@ -16,7 +16,7 @@ import {
   getDataset
 } from '../../workspace/dataset';
 import { createEntry } from '../../workspace/entry';
-import { processEntries } from './utils';
+import { getDynamicEntryContextInputs, processEntries } from './utils';
 
 export const FilterEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
@@ -26,22 +26,7 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
   { keepEntry: boolean }
 > = {
   type: FilterEntriesNodeDef.type,
-  transformInputDefsToContextInputDefs: async (inputDefs, inputs) => {
-    if (!allAreDefinedAndPresent(inputs)) {
-      return {};
-    }
-
-    const dynInputDefs = {};
-    inputs.dataset.content.schema.forEach(s => {
-      dynInputDefs[s.name] = {
-        dataType: s.type,
-        displayName: s.name,
-        isDynamic: true
-      };
-    });
-
-    return dynInputDefs;
-  },
+  transformInputDefsToContextInputDefs: getDynamicEntryContextInputs,
   transformContextInputDefsToContextOutputDefs: async () => ({
     keepEntry: { dataType: DataType.BOOLEAN, displayName: 'Keep entry' }
   }),

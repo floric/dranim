@@ -1,5 +1,4 @@
 import {
-  allAreDefinedAndPresent,
   DataType,
   OutputNodeForm,
   OutputResult,
@@ -11,7 +10,7 @@ import {
 } from '@masterthesis/shared';
 
 import { isOutputFormValid } from '../../calculation/utils';
-import { processEntries } from '../entries/utils';
+import { getDynamicEntryContextInputs, processEntries } from '../entries/utils';
 
 interface ValueLabelAssignment {
   value: number;
@@ -29,23 +28,10 @@ export const VisBarChartNode: ServerNodeDefWithContextFn<
   ValueLabelAssignment
 > = {
   type: VisBarChartDef.type,
-  isFormValid: isOutputFormValid,
-  transformInputDefsToContextInputDefs: async (inputDefs, inputs) => {
-    if (!allAreDefinedAndPresent(inputs)) {
-      return {};
-    }
-
-    const dynInputDefs = {};
-    inputs.dataset.content.schema.forEach(s => {
-      dynInputDefs[s.name] = {
-        dataType: s.type,
-        displayName: s.name,
-        isDynamic: true
-      };
-    });
-
-    return dynInputDefs;
-  },
+  isFormValid: async form =>
+    (await isOutputFormValid(form)) &&
+    Object.values(VisBarChartType).includes(form.type),
+  transformInputDefsToContextInputDefs: getDynamicEntryContextInputs,
   transformContextInputDefsToContextOutputDefs: () =>
     Promise.resolve({
       label: { dataType: DataType.STRING, displayName: 'Label' },

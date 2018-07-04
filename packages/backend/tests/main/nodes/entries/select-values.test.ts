@@ -4,7 +4,6 @@ import {
   Entry,
   SelectValuesNodeDef
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
 import { SelectValuesNode } from '../../../../src/main/nodes/entries/select-values';
@@ -14,16 +13,7 @@ import {
   tryGetDataset
 } from '../../../../src/main/workspace/dataset';
 import { createEntry } from '../../../../src/main/workspace/entry';
-import {
-  getTestMongoDb,
-  NeverGoHereError,
-  NODE,
-  VALID_OBJECT_ID
-} from '../../../test-utils';
-
-let conn;
-let db: Db;
-let server;
+import { NeverGoHereError, NODE, VALID_OBJECT_ID } from '../../../test-utils';
 
 jest.mock('@masterthesis/shared');
 jest.mock('../../../../src/main/nodes/entries/utils');
@@ -32,20 +22,7 @@ jest.mock('../../../../src/main/workspace/entry');
 jest.mock('../../../../src/main/calculation/utils');
 
 describe('SelectValuesNode', () => {
-  beforeAll(async () => {
-    const { connection, database, mongodbServer } = await getTestMongoDb();
-    conn = connection;
-    db = database;
-    server = mongodbServer;
-  });
-
-  afterAll(async () => {
-    await conn.close();
-    await server.stop();
-  });
-
-  beforeEach(async () => {
-    await db.dropDatabase();
+  beforeEach(() => {
     jest.resetAllMocks();
   });
 
@@ -90,7 +67,7 @@ describe('SelectValuesNode', () => {
       workspaceId: 'CDE'
     };
     (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
-    (processEntries as jest.Mock).mockImplementation(n => Promise.resolve());
+    (processEntries as jest.Mock).mockImplementation(() => Promise.resolve());
     (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
 
@@ -98,7 +75,7 @@ describe('SelectValuesNode', () => {
       { values: ['test'] },
       { dataset: { datasetId: oldDs.id } },
       {
-        reqContext: { db, userId: '' },
+        reqContext: { db: null, userId: '' },
         node: NODE
       }
     );
@@ -132,7 +109,7 @@ describe('SelectValuesNode', () => {
         { values: ['bla', 'test'] },
         { dataset: { datasetId: oldDs.id } },
         {
-          reqContext: { db, userId: '' },
+          reqContext: { db: null, userId: '' },
           node: NODE
         }
       );
@@ -180,7 +157,7 @@ describe('SelectValuesNode', () => {
       { values: ['test', 'abc'] },
       { dataset: { datasetId: oldDs.id } },
       {
-        reqContext: { db, userId: '' },
+        reqContext: { db: null, userId: '' },
         node: NODE
       }
     );
@@ -192,7 +169,7 @@ describe('SelectValuesNode', () => {
         test: 'bar',
         abc: '123'
       },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
   });
 
@@ -200,7 +177,7 @@ describe('SelectValuesNode', () => {
     let res = await SelectValuesNode.onMetaExecution(
       { values: ['test', 'abc'] },
       { dataset: null },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toEqual({
       dataset: { isPresent: false, content: { schema: [] } }
@@ -209,7 +186,7 @@ describe('SelectValuesNode', () => {
     res = await SelectValuesNode.onMetaExecution(
       { values: ['test', 'abc'] },
       { dataset: undefined },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toEqual({
       dataset: { isPresent: false, content: { schema: [] } }
@@ -218,7 +195,7 @@ describe('SelectValuesNode', () => {
     res = await SelectValuesNode.onMetaExecution(
       { values: ['test', 'abc'] },
       { dataset: { content: { schema: [] }, isPresent: false } },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toEqual({
       dataset: { isPresent: false, content: { schema: [] } }
@@ -229,7 +206,7 @@ describe('SelectValuesNode', () => {
     const res = await SelectValuesNode.onMetaExecution(
       { values: [] },
       { dataset: { content: { schema: [] }, isPresent: true } },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toEqual({
       dataset: { isPresent: false, content: { schema: [] } }
@@ -276,7 +253,7 @@ describe('SelectValuesNode', () => {
           isPresent: true
         }
       },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toEqual({
       dataset: {
