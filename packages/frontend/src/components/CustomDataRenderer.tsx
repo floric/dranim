@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { VisBarChartType } from '@masterthesis/shared';
+import { LinearChartType } from '@masterthesis/shared';
 
 import { BarChart } from './visualizations/BarChart';
 
@@ -11,7 +11,7 @@ export interface CustomDataRendererProps {
 export const CustomDataRenderer: React.SFC<CustomDataRendererProps> = ({
   value
 }) => {
-  if (value.type === VisBarChartType.BAR) {
+  if (value.type === LinearChartType.BAR) {
     return <BarChart value={value} />;
   }
 

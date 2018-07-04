@@ -6,19 +6,19 @@ export interface VisInputs {
   dataset: DatasetRef;
 }
 
-export enum VisBarChartType {
+export enum LinearChartType {
   BAR = 'Bar',
   COLUMN = 'Column',
   PIE = 'Pie'
 }
 
-export interface VisBarChartForm {
-  type: VisBarChartType;
+export interface LinearChartForm {
+  type: LinearChartType;
 }
 
-export const VisBarChartDef: NodeDef<VisInputs, {}> = {
+export const LinearChartDef: NodeDef<VisInputs, {}> = {
   name: 'Linear Charts',
-  type: 'BarChart',
+  type: 'LinearChart',
   inputs: {
     dataset: DatasetSocket('Dataset')
   },

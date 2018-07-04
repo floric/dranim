@@ -7,7 +7,7 @@ import * as EntryNodes from './entries';
 import * as NumberNodes from './number';
 import * as StringNodes from './string';
 import * as TimeNodes from './time';
-import { VisBarChartDef } from './visualizations';
+import { LinearChartDef } from './visualizations';
 
 export * from './dataset';
 export * from './number';
@@ -27,7 +27,7 @@ export const NodesMap = new Map<string, NodeDef>(
     BooleanNodes,
     TimeNodes,
     DatetimeNodes,
-    { VisBarChartDef }
+    { LinearChartDef }
   ]
     .map(n => Object.values(n))
     .reduce<Array<NodeDef>>((list, elem) => [...list, ...elem], [])

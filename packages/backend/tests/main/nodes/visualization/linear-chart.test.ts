@@ -2,50 +2,50 @@ import {
   DatasetSocket,
   DataType,
   Entry,
-  ValueSchema,
-  VisBarChartDef,
-  VisBarChartType
+  LinearChartDef,
+  LinearChartType,
+  ValueSchema
 } from '@masterthesis/shared';
 
 import {
   getDynamicEntryContextInputs,
   processEntries
 } from '../../../../src/main/nodes/entries/utils';
-import { VisBarChartNode } from '../../../../src/main/nodes/visualizations/bar-chart';
+import { LinearChartNode } from '../../../../src/main/nodes/visualizations/linear-chart';
 import { NODE, VALID_OBJECT_ID } from '../../../test-utils';
 
 jest.mock('../../../../src/main/nodes/entries/utils');
 
-describe('BarChart', () => {
+describe('LinearChart', () => {
   test('should have correct properties', () => {
-    expect(VisBarChartNode.type).toBe(VisBarChartDef.type);
-    expect(VisBarChartNode.isFormValid).toBeDefined();
-    expect(VisBarChartNode.isInputValid).toBeUndefined();
+    expect(LinearChartNode.type).toBe(LinearChartDef.type);
+    expect(LinearChartNode.isFormValid).toBeDefined();
+    expect(LinearChartNode.isInputValid).toBeUndefined();
   });
 
   test('should have invalid form', async () => {
-    let res = await VisBarChartNode.isFormValid({
+    let res = await LinearChartNode.isFormValid({
       name: '',
       description: '',
-      type: VisBarChartType.BAR
+      type: LinearChartType.BAR
     });
     expect(res).toBe(false);
 
-    res = await VisBarChartNode.isFormValid({
+    res = await LinearChartNode.isFormValid({
       name: null,
       description: null,
       type: null
     });
     expect(res).toBe(false);
 
-    res = await VisBarChartNode.isFormValid({
+    res = await LinearChartNode.isFormValid({
       name: 'test',
       description: null,
       type: null
     });
     expect(res).toBe(false);
 
-    res = await VisBarChartNode.isFormValid({
+    res = await LinearChartNode.isFormValid({
       name: 'test',
       description: null,
       type: 'abc' as any
@@ -54,17 +54,17 @@ describe('BarChart', () => {
   });
 
   test('should have valid form', async () => {
-    const res = await VisBarChartNode.isFormValid({
+    const res = await LinearChartNode.isFormValid({
       name: 'test',
       description: null,
-      type: VisBarChartType.BAR
+      type: LinearChartType.BAR
     });
     expect(res).toBe(true);
   });
 
   test('should call getDynamicEntryContextInputs', async () => {
     (getDynamicEntryContextInputs as jest.Mock).mockReturnValue({});
-    const res = await VisBarChartNode.transformInputDefsToContextInputDefs(
+    const res = await LinearChartNode.transformInputDefsToContextInputDefs(
       { dataset: DatasetSocket('Ds') },
       { dataset: { content: { schema: [] }, isPresent: true } },
       { db: null, userId: '' }
@@ -74,12 +74,12 @@ describe('BarChart', () => {
   });
 
   test('should have label and value outputs', async () => {
-    const res = await VisBarChartNode.transformContextInputDefsToContextOutputDefs(
+    const res = await LinearChartNode.transformContextInputDefsToContextOutputDefs(
       { dataset: DatasetSocket('Ds') },
       { dataset: { content: { schema: [] }, isPresent: true } },
       {},
       {},
-      { description: '', type: VisBarChartType.BAR, name: 'a' },
+      { description: '', type: LinearChartType.BAR, name: 'a' },
       { db: null, userId: '' }
     );
     expect(res).toEqual({
@@ -89,8 +89,8 @@ describe('BarChart', () => {
   });
 
   test('should have empty meta result', async () => {
-    const res = await VisBarChartNode.onMetaExecution(
-      { description: 'test', name: 'test', type: VisBarChartType.BAR },
+    const res = await LinearChartNode.onMetaExecution(
+      { description: 'test', name: 'test', type: LinearChartType.BAR },
       { dataset: { content: { schema: [] }, isPresent: true } },
       { db: null, userId: '' }
     );
@@ -125,8 +125,8 @@ describe('BarChart', () => {
       }
     );
 
-    const res = await VisBarChartNode.onNodeExecution(
-      { name: 'a', type: VisBarChartType.BAR, description: '' },
+    const res = await LinearChartNode.onNodeExecution(
+      { name: 'a', type: LinearChartType.BAR, description: '' },
       { dataset: { datasetId: VALID_OBJECT_ID } },
       {
         reqContext: { db: null, userId: '' },
@@ -145,7 +145,7 @@ describe('BarChart', () => {
         name: 'a',
         type: DataType.CUSTOM,
         value: {
-          type: VisBarChartType.BAR,
+          type: LinearChartType.BAR,
           values: [
             { label: 'test', value: 9 },
             { label: 'test', value: 9 },

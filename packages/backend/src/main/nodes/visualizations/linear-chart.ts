@@ -1,11 +1,11 @@
 import {
   DataType,
+  LinearChartDef,
+  LinearChartForm,
+  LinearChartType,
   OutputNodeForm,
   OutputResult,
   ServerNodeDefWithContextFn,
-  VisBarChartDef,
-  VisBarChartForm,
-  VisBarChartType,
   VisInputs
 } from '@masterthesis/shared';
 
@@ -17,20 +17,20 @@ interface ValueLabelAssignment {
   label: string;
 }
 
-export const VisBarChartNode: ServerNodeDefWithContextFn<
+export const LinearChartNode: ServerNodeDefWithContextFn<
   VisInputs,
   {},
-  OutputNodeForm & VisBarChartForm,
+  OutputNodeForm & LinearChartForm,
   OutputResult<{
-    type: VisBarChartType;
+    type: LinearChartType;
     values: Array<ValueLabelAssignment>;
   }>,
   ValueLabelAssignment
 > = {
-  type: VisBarChartDef.type,
+  type: LinearChartDef.type,
   isFormValid: async form =>
     (await isOutputFormValid(form)) &&
-    Object.values(VisBarChartType).includes(form.type),
+    Object.values(LinearChartType).includes(form.type),
   transformInputDefsToContextInputDefs: getDynamicEntryContextInputs,
   transformContextInputDefsToContextOutputDefs: () =>
     Promise.resolve({
@@ -63,7 +63,7 @@ export const VisBarChartNode: ServerNodeDefWithContextFn<
       outputs: {},
       results: {
         value: {
-          type: form.type || VisBarChartType.COLUMN,
+          type: form.type || LinearChartType.COLUMN,
           values
         },
         type: DataType.CUSTOM,
