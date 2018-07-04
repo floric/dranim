@@ -86,7 +86,8 @@ export interface ServerNodeDefWithContextFn<
   NodeInputs = {},
   NodeOutputs = {},
   NodeForm = {},
-  NodeResults = {}
+  NodeResults = {},
+  ContextResults = {}
 > extends ServerNodeDef<NodeInputs, NodeOutputs, NodeForm, NodeResults> {
   onNodeExecution: (
     form: FormValues<NodeForm>,
@@ -96,7 +97,7 @@ export interface ServerNodeDefWithContextFn<
       reqContext: ApolloContext;
       contextFnExecution?: (
         input: IOValues<any>
-      ) => Promise<NodeExecutionResult<any>>;
+      ) => Promise<NodeExecutionResult<ContextResults>>;
     }
   ) => Promise<NodeExecutionResult<NodeOutputs, NodeResults>>;
   transformInputDefsToContextInputDefs: (
@@ -111,7 +112,7 @@ export interface ServerNodeDefWithContextFn<
     contextInputs: SocketMetas<{}>,
     form: FormValues<NodeForm>,
     reqContext: ApolloContext
-  ) => Promise<SocketDefs<{}>>;
+  ) => Promise<SocketDefs<ContextResults>>;
 }
 
 export interface ConnectionDescription {

@@ -17,7 +17,6 @@ export const isNodeInMetaValid = async (
   reqContext: ApolloContext
 ) => {
   let isValidForm = true;
-  const isValidInput = true;
   if (
     node.type !== ContextNodeType.INPUT &&
     node.type !== ContextNodeType.OUTPUT
@@ -28,11 +27,11 @@ export const isNodeInMetaValid = async (
   }
 
   const metaDefs = await getMetaInputs(node, reqContext);
-  const allInputsPresent = Object.values(metaDefs)
+  const allInputsArePresent = Object.values(metaDefs)
     .map(a => a.isPresent)
     .reduce((a, b) => a && b, true);
 
-  return isValidForm && isValidInput && allInputsPresent;
+  return isValidForm && allInputsArePresent;
 };
 
 export const areNodeInputsValid = async (

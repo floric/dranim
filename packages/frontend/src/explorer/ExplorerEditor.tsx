@@ -262,7 +262,7 @@ export class ExplorerEditor extends React.Component<
                     icon="rocket"
                     onClick={this.handleStartCalulcation}
                   >
-                    Calculate Outputs
+                    Calculate
                   </AsyncButton>
                 </Col>
               </Row>

@@ -20,7 +20,10 @@ import { processEntries } from './utils';
 
 export const FilterEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
-  ForEachEntryNodeOutputs
+  ForEachEntryNodeOutputs,
+  {},
+  {},
+  { keepEntry: boolean }
 > = {
   type: FilterEntriesNodeDef.type,
   transformInputDefsToContextInputDefs: async (inputDefs, inputs) => {
@@ -39,10 +42,9 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
 
     return dynInputDefs;
   },
-  transformContextInputDefsToContextOutputDefs: () =>
-    Promise.resolve({
-      keepEntry: { dataType: DataType.BOOLEAN, displayName: 'Keep entry' }
-    }),
+  transformContextInputDefsToContextOutputDefs: async () => ({
+    keepEntry: { dataType: DataType.BOOLEAN, displayName: 'Keep entry' }
+  }),
   onMetaExecution: async (form, inputs) => {
     if (!allAreDefinedAndPresent(inputs)) {
       return { dataset: { content: { schema: [] }, isPresent: false } };
@@ -53,12 +55,12 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
   onNodeExecution: async (
     form,
     inputs,
-    { reqContext, contextFnExecution, node }
+    { reqContext, contextFnExecution, node: { workspaceId, id } }
   ) => {
     const newDs = await createDataset(
-      createDynamicDatasetName(FilterEntriesNodeDef.type, node.id),
+      createDynamicDatasetName(FilterEntriesNodeDef.type, id),
       reqContext,
-      node.workspaceId
+      workspaceId
     );
     const oldDs = await getDataset(inputs.dataset.datasetId, reqContext);
     if (!oldDs) {
@@ -70,7 +72,7 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
     if (contextFnExecution) {
       await processEntries(
         inputs.dataset.datasetId,
-        node.id,
+        id,
         async entry => {
           const result = await contextFnExecution(entry.values);
           if (result.outputs.keepEntry) {

@@ -46,7 +46,11 @@ export const SelectValuesNode: ServerNodeDef<
       }
     };
   },
-  onNodeExecution: async (form, inputs, { reqContext, node }) => {
+  onNodeExecution: async (
+    form,
+    inputs,
+    { reqContext, node: { workspaceId, id } }
+  ) => {
     const existingDs = await tryGetDataset(
       inputs.dataset.datasetId,
       reqContext
@@ -59,16 +63,16 @@ export const SelectValuesNode: ServerNodeDef<
 
     const usedValues = new Set(form.values!);
     const newDs = await createDataset(
-      createDynamicDatasetName(SelectValuesNodeDef.type, node.id),
+      createDynamicDatasetName(SelectValuesNodeDef.type, id),
       reqContext,
-      node.workspaceId
+      workspaceId
     );
 
     await filterSchema(existingDs, newDs, usedValues, reqContext);
     await copyTransformedToOtherDataset(
       existingDs.id,
       newDs.id,
-      node.id,
+      id,
       entry => {
         const newValues = {};
         usedValues.forEach(u => {

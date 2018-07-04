@@ -13,11 +13,11 @@ import { ObjectID } from 'mongodb';
 
 import { getMetaInputs } from '../calculation/meta-execution';
 import { isNodeInMetaValid } from '../calculation/validation';
-import { hasNodeType, tryGetNodeType } from '../nodes/all-nodes';
+import { getNodeType, hasNodeType, tryGetNodeType } from '../nodes/all-nodes';
 import {
-  getContextNode,
   getNode,
   getNodesCollection,
+  tryGetContextNode,
   tryGetNode
 } from './nodes';
 
@@ -66,14 +66,11 @@ export const getContextOutputDefs = async (
     reqContext
   );
 
-  const contextInputNode = await getContextNode(
+  const contextInputNode = await tryGetContextNode(
     parent,
     ContextNodeType.INPUT,
     reqContext
   );
-  if (!contextInputNode) {
-    throw new Error('Context input node unknown');
-  }
 
   const contextInputs = await getMetaInputs(contextInputNode, reqContext);
 
@@ -110,15 +107,7 @@ export const getInputDefs = async (
 ): Promise<SocketDefs<any>> => {
   let inputDefs: SocketDefs<any> = {};
   if (node.type === ContextNodeType.INPUT) {
-    const parent = await tryGetParentNode(node, reqContext);
-    const parentType = tryGetNodeType(parent.type);
-    if (hasContextFn(parentType)) {
-      return parentType.transformInputDefsToContextInputDefs(
-        parentType.inputs,
-        await getMetaInputs(parent, reqContext),
-        reqContext
-      );
-    }
+    return {};
   } else if (node.type === ContextNodeType.OUTPUT) {
     inputDefs = (await getContextOutputDefs(node, reqContext)) || {};
   } else {
@@ -133,24 +122,25 @@ export const getNodeState = async (
   node: NodeInstance,
   reqContext: ApolloContext
 ) => {
-  if (
-    node.type === ContextNodeType.INPUT ||
-    node.type === ContextNodeType.OUTPUT
-  ) {
-    return await getNodeState(
-      await tryGetParentNode(node, reqContext),
-      reqContext
-    );
-  }
-
   try {
     const isValid = await isNodeInMetaValid(node, reqContext);
     if (!isValid) {
       return NodeState.INVALID;
     }
 
+    const nodeType = getNodeType(node.type);
+    if (nodeType && hasContextFn(nodeType)) {
+      const contextOutputNode = await tryGetContextNode(
+        node,
+        ContextNodeType.OUTPUT,
+        reqContext
+      );
+      return getNodeState(contextOutputNode, reqContext);
+    }
+
     return NodeState.VALID;
   } catch (err) {
+    console.error(err);
     return NodeState.ERROR;
   }
 };

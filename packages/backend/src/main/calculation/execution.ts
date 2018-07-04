@@ -13,7 +13,7 @@ import {
 
 import { tryGetNodeType } from '../nodes/all-nodes';
 import { tryGetConnection } from '../workspace/connections';
-import { getContextNode, tryGetNode } from '../workspace/nodes';
+import { tryGetContextNode, tryGetNode } from '../workspace/nodes';
 import { areNodeInputsValid, isNodeInMetaValid } from './validation';
 
 export const executeNodeWithId = async (
@@ -87,14 +87,11 @@ const calculateContext = async (
   nodeInputs: IOValues<any>,
   reqContext: ApolloContext
 ) => {
-  const outputNode = await getContextNode(
+  const outputNode = await tryGetContextNode(
     node,
     ContextNodeType.OUTPUT,
     reqContext
   );
-  if (!outputNode) {
-    throw Error('Missing output node');
-  }
 
   return await type.onNodeExecution(nodeForm, nodeInputs, {
     reqContext,
