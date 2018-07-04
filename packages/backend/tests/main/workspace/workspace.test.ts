@@ -9,6 +9,7 @@ import {
   getAllWorkspaces,
   getWorkspace,
   initWorkspaceDb,
+  tryGetWorkspace,
   updateLastChange,
   updateWorkspace
 } from '../../../src/main/workspace/workspace';
@@ -91,6 +92,29 @@ describe('Workspaces', () => {
 
     expect(getNodesCollection(db).deleteMany).toHaveBeenCalledTimes(1);
     expect(getConnectionsCollection(db).deleteMany).toHaveBeenCalledTimes(1);
+  });
+
+  test('should throw error when trying to get unknown workspace', async () => {
+    try {
+      await tryGetWorkspace('test', { db, userId: '123' });
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Unknown workspace');
+    }
+  });
+
+  test('should try to get unknown workspace', async () => {
+    const ws = await createWorkspace(
+      'test',
+      {
+        db,
+        userId: ''
+      },
+      ''
+    );
+
+    const res = await tryGetWorkspace(ws.id, { db, userId: '123' });
+    expect(res).toEqual(ws);
   });
 
   test('should not create workspace with empty name', async () => {

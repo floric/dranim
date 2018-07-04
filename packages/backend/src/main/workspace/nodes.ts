@@ -266,3 +266,16 @@ export const getContextNode = async (
     ...res
   };
 };
+
+export const tryGetContextNode = async (
+  node: NodeInstance,
+  type: ContextNodeType,
+  reqContext: ApolloContext
+): Promise<NodeInstance> => {
+  const contextNode = await getContextNode(node, type, reqContext);
+  if (!contextNode) {
+    throw new Error('Unknown context node');
+  }
+
+  return contextNode;
+};

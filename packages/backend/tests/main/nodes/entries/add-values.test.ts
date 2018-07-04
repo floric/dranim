@@ -6,7 +6,6 @@ import {
   Entry,
   ValueSchema
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
 import { AddValuesNode } from '../../../../src/main/nodes/entries/add-values';
@@ -16,16 +15,7 @@ import {
   getDataset
 } from '../../../../src/main/workspace/dataset';
 import { createEntry } from '../../../../src/main/workspace/entry';
-import {
-  getTestMongoDb,
-  NeverGoHereError,
-  NODE,
-  VALID_OBJECT_ID
-} from '../../../test-utils';
-
-let conn;
-let db: Db;
-let server;
+import { NeverGoHereError, NODE, VALID_OBJECT_ID } from '../../../test-utils';
 
 jest.mock('@masterthesis/shared');
 jest.mock('../../../../src/main/nodes/entries/utils');
@@ -34,20 +24,7 @@ jest.mock('../../../../src/main/workspace/entry');
 jest.mock('../../../../src/main/calculation/utils');
 
 describe('AddValuesNode', () => {
-  beforeAll(async () => {
-    const { connection, database, mongodbServer } = await getTestMongoDb();
-    conn = connection;
-    db = database;
-    server = mongodbServer;
-  });
-
-  afterAll(async () => {
-    await conn.close();
-    await server.stop();
-  });
-
-  beforeEach(async () => {
-    await db.dropDatabase();
+  beforeEach(() => {
     jest.resetAllMocks();
   });
 
@@ -312,7 +289,7 @@ describe('AddValuesNode', () => {
       },
       { dataset: { datasetId: oldDs.id } },
       {
-        reqContext: { db, userId: '' },
+        reqContext: { db: null, userId: '' },
         node: {
           id: VALID_OBJECT_ID,
           contextIds: [],
@@ -338,7 +315,7 @@ describe('AddValuesNode', () => {
         [oldVS.name]: 'foo',
         new: 'super'
       },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
   });
 
@@ -379,7 +356,7 @@ describe('AddValuesNode', () => {
         },
         { dataset: { datasetId: oldDs.id } },
         {
-          reqContext: { db, userId: '' },
+          reqContext: { db: null, userId: '' },
           node: {
             id: VALID_OBJECT_ID,
             contextIds: [],
@@ -405,7 +382,7 @@ describe('AddValuesNode', () => {
         { values: [] },
         { dataset: { datasetId: VALID_OBJECT_ID } },
         {
-          reqContext: { db, userId: '' },
+          reqContext: { db: null, userId: '' },
           node: NODE
         }
       );

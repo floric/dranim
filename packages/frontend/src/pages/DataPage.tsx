@@ -104,13 +104,13 @@ export default class DataPage extends React.Component<{}, {}> {
                           <Col xs={{ span: 24 }} md={{ span: 12 }}>
                             <NumberInfo
                               total={ds.valueschemas.length}
-                              title="Schemas"
+                              description="Schemas"
                             />
                           </Col>
                           <Col xs={{ span: 24 }} md={{ span: 12 }}>
                             <NumberInfo
                               total={ds.entriesCount}
-                              title="Entries"
+                              description="Entries"
                             />
                           </Col>
                         </CardItem>

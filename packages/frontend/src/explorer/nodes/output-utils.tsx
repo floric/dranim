@@ -1,45 +1,45 @@
 import * as React from 'react';
 
-import { FormValues } from '@masterthesis/shared';
 import { Form, Input } from 'antd';
 
-import { WrappedFormUtils } from 'antd/lib/form/Form';
+import { RenderFormItemsProps } from './all-nodes';
 import { getValueOrDefault } from './utils';
 
-const formItemLayout = {
-  labelCol: {
-    xs: { span: 24 },
-    sm: { span: 8 }
-  },
-  wrapperCol: {
-    xs: { span: 24 },
-    sm: { span: 16 }
-  }
-};
-
-export const renderOutputFormItems: (
-  props: {
-    form: WrappedFormUtils;
-    nodeForm: FormValues<{
+export const createRenderOutputFormItems = (
+  renderFormItems?: (props: RenderFormItemsProps<any, any>) => JSX.Element
+) => (
+  props: RenderFormItemsProps<
+    any,
+    {
       name: string;
       description: string;
-    }>;
-  }
-) => JSX.Element = ({ form: { getFieldDecorator }, nodeForm }) => {
+    }
+  >
+) => {
+  const {
+    form: { getFieldDecorator },
+    nodeForm
+  } = props;
   return (
     <>
       <h4>Output</h4>
-      <Form.Item label="Name" {...formItemLayout}>
+      <Form.Item label="Name">
         {getFieldDecorator('name', {
           initialValue: getValueOrDefault(nodeForm, 'name', ''),
           rules: [{ required: true }]
         })(<Input />)}
       </Form.Item>
-      <Form.Item label="Description" {...formItemLayout}>
+      <Form.Item label="Description">
         {getFieldDecorator('description', {
           initialValue: getValueOrDefault(nodeForm, 'description', '')
         })(<Input.TextArea />)}
       </Form.Item>
+      {renderFormItems ? (
+        <>
+          <h4>Properties</h4>
+          {renderFormItems(props)}
+        </>
+      ) : null}
     </>
   );
 };

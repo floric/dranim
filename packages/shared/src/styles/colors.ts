@@ -15,3 +15,5 @@ export const White = '#fff';
 
 export const Background = '#ececec';
 export const Selection = '#1890ff';
+
+export const VisDefault = '#1070c0';

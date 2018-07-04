@@ -16,33 +16,20 @@ import {
   getDataset
 } from '../../workspace/dataset';
 import { createEntry } from '../../workspace/entry';
-import { processEntries } from './utils';
+import { getDynamicEntryContextInputs, processEntries } from './utils';
 
 export const FilterEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
-  ForEachEntryNodeOutputs
+  ForEachEntryNodeOutputs,
+  {},
+  {},
+  { keepEntry: boolean }
 > = {
   type: FilterEntriesNodeDef.type,
-  transformInputDefsToContextInputDefs: async (inputDefs, inputs) => {
-    if (!allAreDefinedAndPresent(inputs)) {
-      return {};
-    }
-
-    const dynInputDefs = {};
-    inputs.dataset.content.schema.forEach(s => {
-      dynInputDefs[s.name] = {
-        dataType: s.type,
-        displayName: s.name,
-        isDynamic: true
-      };
-    });
-
-    return dynInputDefs;
-  },
-  transformContextInputDefsToContextOutputDefs: () =>
-    Promise.resolve({
-      keepEntry: { dataType: DataType.BOOLEAN, displayName: 'Keep entry' }
-    }),
+  transformInputDefsToContextInputDefs: getDynamicEntryContextInputs,
+  transformContextInputDefsToContextOutputDefs: async () => ({
+    keepEntry: { dataType: DataType.BOOLEAN, displayName: 'Keep entry' }
+  }),
   onMetaExecution: async (form, inputs) => {
     if (!allAreDefinedAndPresent(inputs)) {
       return { dataset: { content: { schema: [] }, isPresent: false } };
@@ -53,12 +40,12 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
   onNodeExecution: async (
     form,
     inputs,
-    { reqContext, contextFnExecution, node }
+    { reqContext, contextFnExecution, node: { workspaceId, id } }
   ) => {
     const newDs = await createDataset(
-      createDynamicDatasetName(FilterEntriesNodeDef.type, node.id),
+      createDynamicDatasetName(FilterEntriesNodeDef.type, id),
       reqContext,
-      node.workspaceId
+      workspaceId
     );
     const oldDs = await getDataset(inputs.dataset.datasetId, reqContext);
     if (!oldDs) {
@@ -70,7 +57,7 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
     if (contextFnExecution) {
       await processEntries(
         inputs.dataset.datasetId,
-        node.id,
+        id,
         async entry => {
           const result = await contextFnExecution(entry.values);
           if (result.outputs.keepEntry) {

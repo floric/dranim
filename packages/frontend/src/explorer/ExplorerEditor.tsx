@@ -4,7 +4,6 @@ import {
   Colors,
   ConnectionInstance,
   Dataset,
-  GQLDashboard,
   GQLNodeInstance,
   SocketInstance
 } from '@masterthesis/shared';
@@ -30,7 +29,6 @@ export interface ExplorerEditorProps {
   connections: Array<ConnectionInstance>;
   nodes: Array<GQLNodeInstance>;
   datasets: Array<Dataset>;
-  dashboards: Array<GQLDashboard>;
   onNodeCreate: (
     type: string,
     x: number,
@@ -264,7 +262,7 @@ export class ExplorerEditor extends React.Component<
                     icon="rocket"
                     onClick={this.handleStartCalulcation}
                   >
-                    Calculate Outputs
+                    Calculate
                   </AsyncButton>
                 </Col>
               </Row>

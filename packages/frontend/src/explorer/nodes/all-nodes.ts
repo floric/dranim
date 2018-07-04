@@ -16,9 +16,10 @@ import * as EntriesNodes from './entries';
 import * as NumberNodes from './number';
 import * as StringNodes from './string';
 import * as TimeNodes from './time';
+import * as VisNodes from './visualization';
 
 import { ExplorerEditorProps } from '../ExplorerEditor';
-import { renderOutputFormItems } from './output-utils';
+import { createRenderOutputFormItems } from './output-utils';
 
 export interface EditorProps {
   x?: number;
@@ -63,7 +64,8 @@ const allNodes = [
   BooleanNodes,
   EntriesNodes,
   TimeNodes,
-  DatetimeNodes
+  DatetimeNodes,
+  VisNodes
 ];
 
 const buildTree = (
@@ -120,13 +122,22 @@ export const nodeTypes: Map<string, ClientNodeDef & NodeDef> = new Map(
     .map<[string, ClientNodeDef & NodeDef]>(n => [
       n[0],
       {
-        ...(clientNodeMap.get(n[0]) || {
-          type: n[0],
-          renderFormItems:
-            n[1].isOutputNode && n[0] !== DatasetOutputNodeDef.type
-              ? (renderOutputFormItems as any)
-              : undefined
-        }),
+        ...(clientNodeMap.get(n[0])
+          ? {
+              renderFormItems:
+                n[1].isOutputNode && n[0] !== DatasetOutputNodeDef.type
+                  ? (createRenderOutputFormItems(
+                      clientNodeMap.get(n[0]).renderFormItems
+                    ) as any)
+                  : clientNodeMap.get(n[0]).renderFormItems
+            }
+          : {
+              type: n[0],
+              renderFormItems:
+                n[1].isOutputNode && n[0] !== DatasetOutputNodeDef.type
+                  ? (createRenderOutputFormItems() as any)
+                  : undefined
+            }),
         ...n[1]
       }
     ])

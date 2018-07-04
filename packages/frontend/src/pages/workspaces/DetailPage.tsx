@@ -65,8 +65,8 @@ export default class WorkspacesPage extends React.Component<
                     history.push(`${this.props.match.url}/calculations`);
                   } else if (name === 'editor') {
                     history.push(`${this.props.match.url}`);
-                  } else if (name === 'visualizations') {
-                    history.push(`${this.props.match.url}/visualizations`);
+                  } else if (name === 'results') {
+                    history.push(`${this.props.match.url}/results`);
                   }
                 }}
                 type="card"
@@ -79,11 +79,7 @@ export default class WorkspacesPage extends React.Component<
                   tab="Calculations"
                   key="calculations"
                 />
-                <Tabs.TabPane
-                  forceRender
-                  tab="Visualization"
-                  key="visualizations"
-                />
+                <Tabs.TabPane forceRender tab="Results" key="results" />
               </Tabs>
               <Switch>
                 <Route
@@ -98,7 +94,7 @@ export default class WorkspacesPage extends React.Component<
                 />
                 <Route
                   exact
-                  path={`${this.props.match.path}/visualizations`}
+                  path={`${this.props.match.path}/results`}
                   component={VisDetailPage}
                 />
               </Switch>

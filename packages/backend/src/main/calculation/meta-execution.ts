@@ -33,9 +33,8 @@ export const getMetaInputs = async (
 
       const conn = await tryGetConnection(connection.connectionId, reqContext);
       const inputNode = await tryGetNode(conn.from.nodeId, reqContext);
-      inputs[connection.name] = (await getMetaOutputs(inputNode, reqContext))[
-        conn.from.name
-      ];
+      const metaOutputsFromInput = await getMetaOutputs(inputNode, reqContext);
+      inputs[connection.name] = metaOutputsFromInput[conn.from.name];
     })
   );
 
@@ -47,7 +46,7 @@ export const getMetaOutputs = async (
   reqContext: ApolloContext
 ): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> => {
   if (node.type === ContextNodeType.INPUT) {
-    return await getDynamitMetaOutputs(node, reqContext);
+    return await getDynamicMetaOutputs(node, reqContext);
   }
 
   const nodeType = getNodeType(node.type);
@@ -63,7 +62,7 @@ export const getMetaOutputs = async (
   );
 };
 
-const getDynamitMetaOutputs = async (
+const getDynamicMetaOutputs = async (
   node: NodeInstance,
   reqContext: ApolloContext
 ) => {

@@ -87,10 +87,10 @@ export class WorkspaceCalculationsPage extends Component<
               render: u => (
                 <Row>
                   <Col xs={8}>
-                    <NumberInfo title="Processed" total={u.processed} />
+                    <NumberInfo description="Processed" total={u.processed} />
                   </Col>
                   <Col xs={8}>
-                    <NumberInfo title="Total" total={u.total} />
+                    <NumberInfo description="Total" total={u.total} />
                   </Col>
                 </Row>
               )

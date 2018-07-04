@@ -9,7 +9,6 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { getMetaInputs } from '../../../src/main/calculation/meta-execution';
 import { isNodeInMetaValid } from '../../../src/main/calculation/validation';
 import {
   getNodeType,
@@ -17,9 +16,9 @@ import {
   tryGetNodeType
 } from '../../../src/main/nodes/all-nodes';
 import {
-  getContextNode,
   getNode,
   getNodesCollection,
+  tryGetContextNode,
   tryGetNode
 } from '../../../src/main/workspace/nodes';
 import {
@@ -47,7 +46,6 @@ jest.mock('../../../src/main/workspace/nodes');
 jest.mock('../../../src/main/nodes/all-nodes');
 jest.mock('../../../src/main/calculation/validation');
 jest.mock('../../../src/main/workspace/connections');
-jest.mock('../../../src/main/calculation/meta-execution');
 
 describe('Node Details', () => {
   beforeAll(async () => {
@@ -398,7 +396,7 @@ describe('Node Details', () => {
     (getNode as jest.Mock).mockResolvedValue(parentNode);
     (getNodeType as jest.Mock).mockReturnValue(parentType);
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
-    (getContextNode as jest.Mock).mockResolvedValue(inputNode);
+    (tryGetContextNode as jest.Mock).mockResolvedValue(inputNode);
     (hasContextFn as any).mockReturnValue(true);
 
     const outputRes = await getContextOutputDefs(inputNode, {
@@ -454,7 +452,9 @@ describe('Node Details', () => {
     (getNode as jest.Mock).mockResolvedValue(parentNode);
     (getNodeType as jest.Mock).mockReturnValue(parentType);
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
-    (getContextNode as jest.Mock).mockResolvedValue(null);
+    (tryGetContextNode as jest.Mock).mockImplementation(() => {
+      throw new Error('Unknown context node');
+    });
     (hasContextFn as any).mockReturnValue(true);
 
     try {
@@ -464,7 +464,7 @@ describe('Node Details', () => {
       });
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Context input node unknown');
+      expect(err.message).toBe('Unknown context node');
     }
   });
 
@@ -567,7 +567,7 @@ describe('Node Details', () => {
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
     (hasNodeType as jest.Mock).mockReturnValueOnce(false);
     (hasContextFn as any).mockReturnValue(true);
-    (getContextNode as jest.Mock).mockReturnValue(contextInputNode);
+    (tryGetContextNode as jest.Mock).mockReturnValue(contextInputNode);
 
     const res = await getInputDefs(
       {
@@ -606,29 +606,6 @@ describe('Node Details', () => {
       x: 0,
       y: 0
     };
-    const parentType: ServerNodeDefWithContextFn & NodeDef = {
-      type: parentTypeName,
-      name: parentTypeName,
-      inputs: {},
-      outputs: {},
-      keywords: [],
-      path: [],
-      isFormValid: async () => false,
-      onMetaExecution: async () => ({ test: { content: {}, isPresent: true } }),
-      onNodeExecution: async () => ({ outputs: {} }),
-      transformContextInputDefsToContextOutputDefs: async inputs => inputs,
-      transformInputDefsToContextInputDefs: async () => ({
-        test: {
-          dataType: DataType.DATETIME,
-          displayName: 'date',
-          isDynamic: true
-        }
-      })
-    };
-    (getNode as jest.Mock).mockResolvedValueOnce(parentNode);
-    (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
-    (hasNodeType as jest.Mock).mockReturnValueOnce(true);
-    (hasContextFn as any).mockReturnValue(true);
 
     const res = await getInputDefs(
       {
@@ -644,15 +621,7 @@ describe('Node Details', () => {
       },
       null
     );
-    expect(hasContextFn).toHaveBeenCalledTimes(1);
-    expect(getMetaInputs).toHaveBeenCalledTimes(1);
-    expect(res).toEqual({
-      test: {
-        dataType: DataType.DATETIME,
-        displayName: 'date',
-        isDynamic: true
-      }
-    });
+    expect(res).toEqual({});
   });
 
   test('should set progress', async () => {

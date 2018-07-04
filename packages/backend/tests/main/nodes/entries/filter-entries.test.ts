@@ -7,26 +7,19 @@ import {
   FilterEntriesNodeDef,
   ValueSchema
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
 import { FilterEntriesNode } from '../../../../src/main/nodes/entries/filter-entries';
-import { processEntries } from '../../../../src/main/nodes/entries/utils';
+import {
+  getDynamicEntryContextInputs,
+  processEntries
+} from '../../../../src/main/nodes/entries/utils';
 import {
   createDataset,
   getDataset
 } from '../../../../src/main/workspace/dataset';
 import { createEntry } from '../../../../src/main/workspace/entry';
-import {
-  getTestMongoDb,
-  NeverGoHereError,
-  NODE,
-  VALID_OBJECT_ID
-} from '../../../test-utils';
-
-let conn;
-let db: Db;
-let server;
+import { NeverGoHereError, NODE, VALID_OBJECT_ID } from '../../../test-utils';
 
 jest.mock('@masterthesis/shared');
 jest.mock('../../../../src/main/nodes/entries/utils');
@@ -35,20 +28,7 @@ jest.mock('../../../../src/main/workspace/entry');
 jest.mock('../../../../src/main/calculation/utils');
 
 describe('FilterEntriesNode', () => {
-  beforeAll(async () => {
-    const { connection, database, mongodbServer } = await getTestMongoDb();
-    conn = connection;
-    db = database;
-    server = mongodbServer;
-  });
-
-  afterAll(async () => {
-    await conn.close();
-    await server.stop();
-  });
-
-  beforeEach(async () => {
-    await db.dropDatabase();
+  beforeEach(() => {
     jest.resetAllMocks();
   });
 
@@ -90,7 +70,7 @@ describe('FilterEntriesNode', () => {
       {},
       { dataset: { datasetId: oldDs.id } },
       {
-        reqContext: { db, userId: '' },
+        reqContext: { db: null, userId: '' },
         node: NODE,
         contextFnExecution: () =>
           Promise.resolve({ outputs: { keepEntry: true } })
@@ -120,7 +100,7 @@ describe('FilterEntriesNode', () => {
     const res = await FilterEntriesNode.onMetaExecution(
       {},
       { dataset: validDs },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
 
     expect(res.dataset).toEqual(validDs);
@@ -130,7 +110,7 @@ describe('FilterEntriesNode', () => {
     let res = await FilterEntriesNode.onMetaExecution(
       {},
       { dataset: null },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res.dataset.isPresent).toBe(false);
     expect(res.dataset.content.schema).toEqual([]);
@@ -138,59 +118,21 @@ describe('FilterEntriesNode', () => {
     res = await FilterEntriesNode.onMetaExecution(
       {},
       { dataset: undefined },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res.dataset.isPresent).toBe(false);
     expect(res.dataset.content.schema).toEqual([]);
   });
 
-  test('should use dataset schemas as dynamic inputs of context fn', async () => {
-    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(true);
-
-    const validDs = {
-      content: {
-        schema: [
-          {
-            type: DataType.BOOLEAN,
-            name: 'super',
-            required: false,
-            unique: false,
-            fallback: ''
-          }
-        ]
-      },
-      isPresent: true
-    };
-
+  test('should call getDynamicEntryContextInputs', async () => {
+    (getDynamicEntryContextInputs as jest.Mock).mockReturnValue({});
     const res = await FilterEntriesNode.transformInputDefsToContextInputDefs(
       { dataset: DatasetSocket('Ds') },
-      { dataset: validDs },
-      { db, userId: '' }
-    );
-
-    expect(res).toEqual({
-      super: {
-        dataType: DataType.BOOLEAN,
-        displayName: 'super',
-        isDynamic: true
-      }
-    });
-  });
-
-  test('should return absent meta if dataset input is missing', async () => {
-    let res = await FilterEntriesNode.transformInputDefsToContextInputDefs(
-      { dataset: DatasetSocket('Ds') },
-      { dataset: { content: { schema: [] }, isPresent: false } },
-      { db, userId: '' }
+      { dataset: { content: { schema: [] }, isPresent: true } },
+      { db: null, userId: '' }
     );
     expect(res).toEqual({});
-
-    res = await FilterEntriesNode.transformInputDefsToContextInputDefs(
-      { dataset: DatasetSocket('Ds') },
-      { dataset: null },
-      { db, userId: '' }
-    );
-    expect(res).toEqual({});
+    expect(getDynamicEntryContextInputs as jest.Mock).toHaveBeenCalledTimes(1);
   });
 
   test('should always have keepEntry socket as output', async () => {
@@ -212,7 +154,7 @@ describe('FilterEntriesNode', () => {
     const inputRes = await FilterEntriesNode.transformInputDefsToContextInputDefs(
       { dataset: DatasetSocket('Ds') },
       { dataset: validDs },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
 
     const res = await FilterEntriesNode.transformContextInputDefsToContextOutputDefs(
@@ -221,7 +163,7 @@ describe('FilterEntriesNode', () => {
       inputRes,
       {},
       [],
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
 
     expect(res).toEqual({
@@ -283,7 +225,7 @@ describe('FilterEntriesNode', () => {
       {},
       { dataset: { datasetId: oldDs.id } },
       {
-        reqContext: { db, userId: '' },
+        reqContext: { db: null, userId: '' },
         node: NODE,
         contextFnExecution: input =>
           Promise.resolve({
@@ -298,14 +240,14 @@ describe('FilterEntriesNode', () => {
       {
         [vs.name]: 1
       },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(createEntry as jest.Mock).toHaveBeenCalledWith(
       newDs.id,
       {
         [vs.name]: 2
       },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
   });
 
@@ -336,7 +278,7 @@ describe('FilterEntriesNode', () => {
         {},
         { dataset: { datasetId: oldDs.id } },
         {
-          reqContext: { db, userId: '' },
+          reqContext: { db: null, userId: '' },
           node: NODE
         }
       );
@@ -352,7 +294,7 @@ describe('FilterEntriesNode', () => {
         {},
         { dataset: { datasetId: VALID_OBJECT_ID } },
         {
-          reqContext: { db, userId: '' },
+          reqContext: { db: null, userId: '' },
           node: NODE
         }
       );

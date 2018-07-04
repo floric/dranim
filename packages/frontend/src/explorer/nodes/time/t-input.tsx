@@ -2,8 +2,8 @@ import * as React from 'react';
 
 import {
   TimeInputNodeDef,
-  TimeInputNodeOutputs,
-  TimeInputNodeForm
+  TimeInputNodeForm,
+  TimeInputNodeOutputs
 } from '@masterthesis/shared';
 import { Form, TimePicker } from 'antd';
 import * as moment from 'moment';

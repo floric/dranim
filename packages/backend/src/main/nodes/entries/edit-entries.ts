@@ -42,7 +42,7 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
   onNodeExecution: async (
     form,
     inputs,
-    { reqContext, contextFnExecution, node }
+    { reqContext, contextFnExecution, node: { workspaceId, id } }
   ) => {
     const oldDs = await getDataset(inputs.dataset.datasetId, reqContext);
     if (!oldDs) {
@@ -50,16 +50,16 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
     }
 
     const newDs = await createDataset(
-      createDynamicDatasetName(EditEntriesNodeDef.type, node.id),
+      createDynamicDatasetName(EditEntriesNodeDef.type, id),
       reqContext,
-      node.workspaceId
+      workspaceId
     );
     await copySchemas(oldDs.valueschemas, newDs.id, reqContext);
 
     if (contextFnExecution) {
       await processEntries(
         inputs.dataset.datasetId,
-        node.id,
+        id,
         async entry => {
           const result = await contextFnExecution(entry.values);
           await createEntry(newDs.id, result.outputs, reqContext);

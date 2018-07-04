@@ -5,7 +5,6 @@ import {
   DataType,
   EditEntriesNodeDef
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
 import { EditEntriesNode } from '../../../../src/main/nodes/entries/edit-entries';
@@ -17,16 +16,7 @@ import {
   createDataset,
   getDataset
 } from '../../../../src/main/workspace/dataset';
-import {
-  getTestMongoDb,
-  NeverGoHereError,
-  NODE,
-  VALID_OBJECT_ID
-} from '../../../test-utils';
-
-let conn;
-let db: Db;
-let server;
+import { NeverGoHereError, NODE, VALID_OBJECT_ID } from '../../../test-utils';
 
 jest.mock('@masterthesis/shared');
 jest.mock('../../../../src/main/nodes/entries/utils');
@@ -34,20 +24,7 @@ jest.mock('../../../../src/main/workspace/dataset');
 jest.mock('../../../../src/main/calculation/utils');
 
 describe('EditEntriesNode', () => {
-  beforeAll(async () => {
-    const { connection, database, mongodbServer } = await getTestMongoDb();
-    conn = connection;
-    db = database;
-    server = mongodbServer;
-  });
-
-  afterAll(async () => {
-    await conn.close();
-    await server.stop();
-  });
-
-  beforeEach(async () => {
-    await db.dropDatabase();
+  beforeEach(() => {
     jest.resetAllMocks();
   });
 
@@ -87,7 +64,7 @@ describe('EditEntriesNode', () => {
       {},
       { dataset: { datasetId: oldDs.id } },
       {
-        reqContext: { db, userId: '' },
+        reqContext: { db: null, userId: '' },
         node: NODE,
         contextFnExecution: () => Promise.resolve({ outputs: {} })
       }
@@ -116,7 +93,7 @@ describe('EditEntriesNode', () => {
     const res = await EditEntriesNode.onMetaExecution(
       {},
       { dataset: validDs },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
 
     expect(res.dataset).toEqual(validDs);
@@ -128,7 +105,7 @@ describe('EditEntriesNode', () => {
     let res = await EditEntriesNode.onMetaExecution(
       {},
       { dataset: null },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res.dataset.isPresent).toBe(false);
     expect(res.dataset.content.schema).toEqual([]);
@@ -136,7 +113,7 @@ describe('EditEntriesNode', () => {
     res = await EditEntriesNode.onMetaExecution(
       {},
       { dataset: undefined },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res.dataset.isPresent).toBe(false);
     expect(res.dataset.content.schema).toEqual([]);
@@ -168,7 +145,7 @@ describe('EditEntriesNode', () => {
     const res = await EditEntriesNode.transformInputDefsToContextInputDefs(
       { dataset: DatasetSocket('Ds') },
       { dataset: validDs },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
 
     expect(res).toEqual({
@@ -210,7 +187,7 @@ describe('EditEntriesNode', () => {
       },
       {},
       [],
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
 
     expect(res).toEqual({});
@@ -246,7 +223,7 @@ describe('EditEntriesNode', () => {
       },
       {},
       [],
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
 
     expect(res).toEqual({
@@ -284,7 +261,7 @@ describe('EditEntriesNode', () => {
       {},
       { dataset: { datasetId: oldDs.id } },
       {
-        reqContext: { db, userId: '' },
+        reqContext: { db: null, userId: '' },
         node: NODE,
         contextFnExecution: input => Promise.resolve({ outputs: { val: ':)' } })
       }
@@ -320,7 +297,7 @@ describe('EditEntriesNode', () => {
         {},
         { dataset: { datasetId: oldDs.id } },
         {
-          reqContext: { db, userId: '' },
+          reqContext: { db: null, userId: '' },
           node: NODE
         }
       );
@@ -336,7 +313,7 @@ describe('EditEntriesNode', () => {
         {},
         { dataset: { datasetId: VALID_OBJECT_ID } },
         {
-          reqContext: { db, userId: '' },
+          reqContext: { db: null, userId: '' },
           node: NODE
         }
       );
