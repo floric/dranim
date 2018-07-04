@@ -20,7 +20,6 @@ export const createRenderOutputFormItems = (
     form: { getFieldDecorator },
     nodeForm
   } = props;
-  console.log(nodeForm);
   return (
     <>
       <h4>Output</h4>

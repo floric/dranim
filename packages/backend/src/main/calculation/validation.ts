@@ -24,7 +24,6 @@ export const isNodeInMetaValid = async (
   ) {
     const type = tryGetNodeType(node.type);
     const form = parseNodeForm(node.form);
-
     isValidForm = type.isFormValid ? await type.isFormValid(form) : true;
   }
 
