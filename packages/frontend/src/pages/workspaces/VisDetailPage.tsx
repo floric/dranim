@@ -12,6 +12,7 @@ import {
   LoadingCard,
   UnknownErrorCard
 } from '../../components/CustomCards';
+import { CustomDataRenderer } from '../../components/CustomDataRenderer';
 import { NumberInfo } from '../../components/NumberInfo';
 import { StringInfo } from '../../components/StringInfo';
 
@@ -25,6 +26,7 @@ const WORKSPACE = gql`
         name
         type
         value
+        description
       }
     }
     calculations(workspaceId: $id) {
@@ -38,7 +40,7 @@ const WORKSPACE = gql`
   }
 `;
 
-const resultCardSize = { xs: 24, md: 12, lg: 8, xl: 6 };
+const resultCardSize = { md: 24, l: 12, xl: 8 };
 
 export interface VisDetailPageProps
   extends RouteComponentProps<{ id: string }> {}
@@ -85,13 +87,21 @@ export default class VisDetailPage extends React.Component<VisDetailPageProps> {
 }
 
 const renderResult = (result: GQLOutputResult): JSX.Element => {
+  const value = JSON.parse(result.value);
   if (result.type === DataType.NUMBER) {
-    return <NumberInfo description={result.name} total={result.value} />;
+    return <NumberInfo description={result.name} total={value} />;
   } else if (result.type === DataType.STRING) {
-    return <StringInfo description={result.name} value={result.value} />;
+    return <StringInfo description={result.name} value={value} />;
   } else if (result.type === DataType.BOOLEAN) {
-    return <BooleanInfo description={result.name} value={result.value} />;
+    return <BooleanInfo description={result.name} value={value} />;
+  } else if (result.type === DataType.CUSTOM) {
+    return (
+      <>
+        <CustomDataRenderer value={value} />
+        <p>{result.description}</p>
+      </>
+    );
   }
 
-  return <p>Not yet supported Datatype</p>;
+  return <p>Unsupported Datatype!</p>;
 };

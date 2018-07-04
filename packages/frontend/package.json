@@ -16,6 +16,7 @@
     "apollo-link-http": "^1.5.4",
     "apollo-link-state": "^0.4.1",
     "apollo-upload-client": "^8.1.0",
+    "d3": "^5.5.0",
     "date-fns": "^1.29.0",
     "glamor": "^2.20.40",
     "graphql": "^0.13.2",
@@ -24,6 +25,7 @@
     "moment": "^2.22.2",
     "react": "^16.4.1",
     "react-apollo": "^2.1.6",
+    "react-async-component": "^2.0.0",
     "react-dev-utils": "^5.0.1",
     "react-dom": "^16.4.1",
     "react-fontawesome": "^1.6.1",
@@ -43,6 +45,7 @@
     "clean": "rm -rf build node_modules dist .cache"
   },
   "devDependencies": {
+    "@types/d3": "^5.0.0",
     "@types/history": "^4.6.2",
     "@types/node": "^10.3.5",
     "@types/prop-types": "^15.5.3",
