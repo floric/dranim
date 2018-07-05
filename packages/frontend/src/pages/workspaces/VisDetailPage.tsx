@@ -89,7 +89,7 @@ const renderResult = (result: GQLOutputResult): JSX.Element => {
   if (result.type !== DataType.CUSTOM) {
     return (
       <Card bordered={false}>
-        {() => {
+        {(() => {
           if (result.type === DataType.NUMBER) {
             return <NumberInfo description={result.name} total={value} />;
           } else if (result.type === DataType.STRING) {
@@ -99,7 +99,7 @@ const renderResult = (result: GQLOutputResult): JSX.Element => {
           }
 
           return <p>Unsupported Datatype!</p>;
-        }}
+        })()}
       </Card>
     );
   }
