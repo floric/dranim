@@ -2,10 +2,10 @@ import * as React from 'react';
 
 import {
   DatetimeInputNodeDef,
-  DatetimeInputNodeOutputs,
-  DatetimeInputNodeForm
+  DatetimeInputNodeForm,
+  DatetimeInputNodeOutputs
 } from '@masterthesis/shared';
-import { Form, DatePicker } from 'antd';
+import { DatePicker, Form } from 'antd';
 import * as moment from 'moment';
 
 import { ClientNodeDef } from '../all-nodes';
