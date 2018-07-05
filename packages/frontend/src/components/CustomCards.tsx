@@ -23,7 +23,7 @@ const DefaultErrorActions = withRouter(DefaultErrorActionsImpl);
 export const LoadingCard: SFC<SpinProps & { text?: string }> = props => (
   <Card bordered={false} style={{ textAlign: 'center' }}>
     <Spin indicator={LoadingIcon} {...props} />
-    <p>{props.text}</p>
+    <p>{props.text || 'Loading...'}</p>
   </Card>
 );
 

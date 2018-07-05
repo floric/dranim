@@ -9,13 +9,19 @@ import { RouteComponentProps } from 'react-router';
 import { Route, Switch } from 'react-router-dom';
 
 import { AppMenu } from './components/AppMenu';
-import DataPage from './pages/DataPage';
-import DetailPage from './pages/dataset/DetailPage';
-import StartPage from './pages/StartPage';
-import UserPage from './pages/UserPage';
-import WorkspaceDetailPage from './pages/workspaces/DetailPage';
-import WorkspacesPage from './pages/WorkspacesPage';
 import { LoadingCard } from './components/CustomCards';
+import { getAsyncPage } from './utils/async';
+
+const WorkspacesPage = getAsyncPage(() => import('./pages/WorkspacesPage'));
+const WorkspaceDetailPage = getAsyncPage(() =>
+  import('./pages/workspaces/DetailPage')
+);
+const UserPage = getAsyncPage(() => import('./pages/UserPage'));
+const StartPage = getAsyncPage(() => import('./pages/StartPage'));
+const DatasetDetailPage = getAsyncPage(() =>
+  import('./pages/dataset/DetailPage')
+);
+const DataPage = getAsyncPage(() => import('./pages/DataPage'));
 
 const { Content, Sider } = Layout;
 
@@ -79,7 +85,7 @@ class LoggedInApp extends React.Component<
                 <Switch>
                   <Route exact path="/" component={StartPage} />
                   <Route exact path="/data" component={DataPage} />
-                  <Route path="/data/:id" component={DetailPage} />
+                  <Route path="/data/:id" component={DatasetDetailPage} />
                   <Route exact path="/workspaces" component={WorkspacesPage} />
                   <Route
                     path="/workspaces/:id"

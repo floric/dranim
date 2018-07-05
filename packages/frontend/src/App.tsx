@@ -4,10 +4,12 @@ import { Redirect, RouteComponentProps, withRouter } from 'react-router';
 import { Route, Switch } from 'react-router-dom';
 
 import { isLoggedIn } from './io/auth';
-import LoggedInApp from './LoggedInApp';
-import LoginPage from './pages/LoginPage';
-import LogoutPage from './pages/LogoutPage';
-import RegistrationPage from './pages/RegistrationPage';
+import { getAsyncPage } from './utils/async';
+
+const RegistrationPage = getAsyncPage(() => import('./pages/RegistrationPage'));
+const LoginPage = getAsyncPage(() => import('./pages/LoginPage'));
+const LogoutPage = getAsyncPage(() => import('./pages/LogoutPage'));
+const LoggedInApp = getAsyncPage(() => import('./LoggedInApp'));
 
 export interface AppProps extends RouteComponentProps<{}, {}> {}
 
