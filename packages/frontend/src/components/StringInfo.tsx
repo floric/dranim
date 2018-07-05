@@ -5,16 +5,10 @@ import { Col, Row } from 'antd';
 
 export interface StringInfoProps {
   value: string;
-  description: string;
 }
 
-export const StringInfo: SFC<StringInfoProps> = ({ value, description }) => (
-  <>
-    <Row>
-      <Col>{value}</Col>
-    </Row>
-    <Row>
-      <Col>{description}</Col>
-    </Row>
-  </>
+export const StringInfo: SFC<StringInfoProps> = ({ value }) => (
+  <Row>
+    <Col>{value}</Col>
+  </Row>
 );

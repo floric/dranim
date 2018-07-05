@@ -91,11 +91,11 @@ const renderResult = (result: GQLOutputResult): JSX.Element => {
       <Card bordered={false} title={result.name}>
         {(() => {
           if (result.type === DataType.NUMBER) {
-            return <NumberInfo description={result.name} total={value} />;
+            return <NumberInfo total={value} />;
           } else if (result.type === DataType.STRING) {
-            return <StringInfo description={result.name} value={value} />;
+            return <StringInfo value={value} />;
           } else if (result.type === DataType.BOOLEAN) {
-            return <BooleanInfo description={result.name} value={value} />;
+            return <BooleanInfo value={value} />;
           }
 
           return <p>Unsupported Datatype!</p>;
