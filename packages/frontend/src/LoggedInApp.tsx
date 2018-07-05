@@ -15,6 +15,7 @@ import StartPage from './pages/StartPage';
 import UserPage from './pages/UserPage';
 import WorkspaceDetailPage from './pages/workspaces/DetailPage';
 import WorkspacesPage from './pages/WorkspacesPage';
+import { LoadingCard } from './components/CustomCards';
 
 const { Content, Sider } = Layout;
 
@@ -49,44 +50,48 @@ class LoggedInApp extends React.Component<
 
   public render() {
     const { collapsed } = this.state;
-    return (
-      <Layout style={{ minHeight: '100vh' }}>
-        <Sider
-          collapsible
-          collapsed={collapsed}
-          onCollapse={this.onCollapse}
-          breakpoint="md"
-          style={{ color: Colors.GrayLight }}
-        >
-          <Query query={MENU_QUERY}>
-            {res => {
-              if (res.loading || res.error) {
-                return <AppMenu collapsed={collapsed} />;
-              }
 
-              return (
+    return (
+      <Query query={MENU_QUERY}>
+        {res => {
+          if (res.loading || res.error) {
+            return <LoadingCard text="Loading App..." />;
+          }
+
+          return (
+            <Layout style={{ minHeight: '100vh' }}>
+              <Sider
+                collapsible
+                collapsed={collapsed}
+                onCollapse={this.onCollapse}
+                breakpoint="md"
+                style={{ color: Colors.GrayLight }}
+              >
                 <AppMenu
                   datasets={res.data!.datasets}
                   workspaces={res.data!.workspaces}
                   collapsed={collapsed}
                 />
-              );
-            }}
-          </Query>
-        </Sider>
-        <Content
-          style={{ backgroundColor: Colors.Background, padding: '16px' }}
-        >
-          <Switch>
-            <Route exact path="/" component={StartPage} />
-            <Route exact path="/data" component={DataPage} />
-            <Route path="/data/:id" component={DetailPage} />
-            <Route exact path="/workspaces" component={WorkspacesPage} />
-            <Route path="/workspaces/:id" component={WorkspaceDetailPage} />
-            <Route exact path="/user" component={UserPage} />
-          </Switch>
-        </Content>
-      </Layout>
+              </Sider>
+              <Content
+                style={{ backgroundColor: Colors.Background, padding: '16px' }}
+              >
+                <Switch>
+                  <Route exact path="/" component={StartPage} />
+                  <Route exact path="/data" component={DataPage} />
+                  <Route path="/data/:id" component={DetailPage} />
+                  <Route exact path="/workspaces" component={WorkspacesPage} />
+                  <Route
+                    path="/workspaces/:id"
+                    component={WorkspaceDetailPage}
+                  />
+                  <Route exact path="/user" component={UserPage} />
+                </Switch>
+              </Content>
+            </Layout>
+          );
+        }}
+      </Query>
     );
   }
 }

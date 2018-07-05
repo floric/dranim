@@ -26,8 +26,7 @@ export default class LogoutPage extends React.Component<LogoutPageProps> {
         <Layout.Content style={{ background: Colors.Background }}>
           <Row>
             <Col span={12} offset={6}>
-              <h1>Logout</h1>
-              <LoadingCard />
+              <LoadingCard text="Logging out..." />
             </Col>
           </Row>
         </Layout.Content>

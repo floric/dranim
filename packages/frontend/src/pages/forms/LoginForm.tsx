@@ -6,10 +6,17 @@ import { History } from 'history';
 
 import { login } from '../../io/auth';
 
-class LoginFormImpl extends React.Component<{
-  form: WrappedFormUtils;
-  history: History;
-}> {
+class LoginFormImpl extends React.Component<
+  {
+    form: WrappedFormUtils;
+    history: History;
+  },
+  { isLoading: boolean }
+> {
+  public componentWillMount() {
+    this.setState({ isLoading: false });
+  }
+
   private handleSubmit = e => {
     e.preventDefault();
 
@@ -18,24 +25,33 @@ class LoginFormImpl extends React.Component<{
       history
     } = this.props;
 
-    validateFields(async (err, values) => {
-      if (!err) {
-        const res = await login(values.mail, values.pw);
-        if (res) {
-          history.push('/');
+    try {
+      validateFields(async (err, values) => {
+        this.setState({ isLoading: true });
+
+        if (!err) {
+          const res = await login(values.mail, values.pw);
+          if (res) {
+            history.push('/');
+          }
         }
-      }
-    });
+
+        this.setState({ isLoading: false });
+      });
+    } catch (err) {
+      console.error(err);
+      this.setState({ isLoading: false });
+    }
   };
 
   public render() {
     const { getFieldDecorator } = this.props.form;
     return (
-      <Form onSubmit={this.handleSubmit} className="login-form">
+      <Form onSubmit={this.handleSubmit}>
         <Form.Item>
           {getFieldDecorator('mail', {
             rules: [
-              { required: true, message: 'Please input your Email address!' }
+              { required: true, message: 'Please enter your mail address' }
             ]
           })(
             <Input
@@ -46,7 +62,7 @@ class LoginFormImpl extends React.Component<{
         </Form.Item>
         <Form.Item>
           {getFieldDecorator('pw', {
-            rules: [{ required: true, message: 'Please input your Password!' }]
+            rules: [{ required: true, message: 'Please enter your password' }]
           })(
             <Input
               prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
@@ -59,7 +75,7 @@ class LoginFormImpl extends React.Component<{
           <Button
             type="primary"
             htmlType="submit"
-            className="login-form-button"
+            loading={this.state.isLoading}
           >
             Login
           </Button>

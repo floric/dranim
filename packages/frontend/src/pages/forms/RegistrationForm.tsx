@@ -10,11 +10,12 @@ const FormItem = Form.Item;
 
 class RegistrationFormImpl extends React.Component<
   { form: WrappedFormUtils; history: History },
-  { confirmDirty: boolean }
+  { confirmDirty: boolean; isLoading: boolean }
 > {
-  public componentDidMount() {
+  public componentWillMount() {
     this.setState({
-      confirmDirty: false
+      confirmDirty: false,
+      isLoading: false
     });
   }
 
@@ -26,19 +27,28 @@ class RegistrationFormImpl extends React.Component<
       history
     } = this.props;
 
-    validateFieldsAndScroll(async (err, values) => {
-      if (!err) {
-        const res = await register(
-          values.firstName,
-          values.lastName,
-          values.mail,
-          values.password
-        );
-        if (res) {
-          history.push('/');
+    try {
+      validateFieldsAndScroll(async (err, values) => {
+        this.setState({ isLoading: true });
+
+        if (!err) {
+          const res = await register(
+            values.firstName,
+            values.lastName,
+            values.mail,
+            values.password
+          );
+          if (res) {
+            history.push('/');
+          }
         }
-      }
-    });
+
+        this.setState({ isLoading: false });
+      });
+    } catch (err) {
+      console.error(err);
+      this.setState({ isLoading: false });
+    }
   };
 
   private handleConfirmBlur = e => {
@@ -49,7 +59,7 @@ class RegistrationFormImpl extends React.Component<
   private compareToFirstPassword = (rule, value, callback) => {
     const form = this.props.form;
     if (value && value !== form.getFieldValue('password')) {
-      callback('Two passwords that you enter is inconsistent!');
+      callback(`Passwords don't match`);
     } else {
       callback();
     }
@@ -73,11 +83,11 @@ class RegistrationFormImpl extends React.Component<
             rules: [
               {
                 type: 'email',
-                message: 'The input is not valid Email!'
+                message: 'This mail address is not valid'
               },
               {
                 required: true,
-                message: 'Please input your Email!'
+                message: 'Please enter your mail address'
               }
             ]
           })(
@@ -94,7 +104,7 @@ class RegistrationFormImpl extends React.Component<
                 rules: [
                   {
                     required: true,
-                    message: 'Please input your first name!',
+                    message: 'Please enter your first name',
                     whitespace: true
                   }
                 ]
@@ -114,7 +124,7 @@ class RegistrationFormImpl extends React.Component<
                 rules: [
                   {
                     required: true,
-                    message: 'Please input your last name!',
+                    message: 'Please enter your last name',
                     whitespace: true
                   }
                 ]
@@ -127,7 +137,7 @@ class RegistrationFormImpl extends React.Component<
             rules: [
               {
                 required: true,
-                message: 'Please input your password!'
+                message: 'Please choose a password'
               },
               {
                 validator: this.validateToNextPassword
@@ -146,7 +156,7 @@ class RegistrationFormImpl extends React.Component<
             rules: [
               {
                 required: true,
-                message: 'Please confirm your password!'
+                message: 'Please confirm your password'
               },
               {
                 validator: this.compareToFirstPassword
@@ -162,7 +172,11 @@ class RegistrationFormImpl extends React.Component<
           )}
         </FormItem>
         <FormItem>
-          <Button type="primary" htmlType="submit">
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={this.state.isLoading}
+          >
             Register
           </Button>
         </FormItem>

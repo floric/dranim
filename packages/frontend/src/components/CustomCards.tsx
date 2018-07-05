@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { SFC } from 'react';
 
-import { Button, Card, Col, Icon, List, Row, Spin } from 'antd';
+import { Button, Card, Icon, List, Spin } from 'antd';
 import { SpinProps } from 'antd/lib/spin';
 import { History } from 'history';
 import { withRouter } from 'react-router';
@@ -20,21 +20,18 @@ const DefaultErrorActionsImpl: SFC<{ history: History }> = ({ history }) => (
 
 const DefaultErrorActions = withRouter(DefaultErrorActionsImpl);
 
-export const LoadingCard: SFC<SpinProps> = props => (
-  <Row>
-    <Col>
-      <Card bordered={false} style={{ textAlign: 'center' }}>
-        <Spin indicator={LoadingIcon} {...props} />
-      </Card>
-    </Col>
-  </Row>
+export const LoadingCard: SFC<SpinProps & { text?: string }> = props => (
+  <Card bordered={false} style={{ textAlign: 'center' }}>
+    <Spin indicator={LoadingIcon} {...props} />
+    <p>{props.text}</p>
+  </Card>
 );
 
 export const Exception: SFC<{
   title: string;
   desc: JSX.Element | string;
   actions: JSX.Element;
-}> = ({ title, desc, actions }) => <p>{title}</p>;
+}> = ({ title }) => <p>{title}</p>;
 
 export interface UnknownErrorCardProps {
   error: Error;
@@ -79,9 +76,7 @@ export interface CustomErrorCardProps {
 
 export const CustomErrorCard: SFC<CustomErrorCardProps> = ({
   title,
-  description,
-  actions,
-  type = '500'
+  description
 }) => (
   <Card bordered={false}>
     <Exception
