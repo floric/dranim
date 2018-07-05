@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { DataType, GQLOutputResult, GQLWorkspace } from '@masterthesis/shared';
-import { Card, Col, Row } from 'antd';
+import { Card, Col, Divider, Row } from 'antd';
 import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
 import { RouteComponentProps } from 'react-router';
@@ -88,7 +88,7 @@ const renderResult = (result: GQLOutputResult): JSX.Element => {
   const value = JSON.parse(result.value);
   if (result.type !== DataType.CUSTOM) {
     return (
-      <Card bordered={false}>
+      <Card bordered={false} title={result.name}>
         {(() => {
           if (result.type === DataType.NUMBER) {
             return <NumberInfo description={result.name} total={value} />;
@@ -100,6 +100,12 @@ const renderResult = (result: GQLOutputResult): JSX.Element => {
 
           return <p>Unsupported Datatype!</p>;
         })()}
+        {!!result.description && (
+          <>
+            <Divider />
+            <Card.Meta description={result.description} />
+          </>
+        )}
       </Card>
     );
   }
