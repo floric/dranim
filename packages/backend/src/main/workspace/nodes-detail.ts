@@ -40,6 +40,7 @@ export const getContextInputDefs = async (
   return await parentType.transformInputDefsToContextInputDefs(
     parentType.inputs,
     parentInputs,
+    parseNodeForm(parent.form),
     reqContext
   );
 };
@@ -63,6 +64,7 @@ export const getContextOutputDefs = async (
   const contextInputDefs = await parentType.transformInputDefsToContextInputDefs(
     parentType.inputs,
     parentInputs,
+    parseNodeForm(parent.form),
     reqContext
   );
 

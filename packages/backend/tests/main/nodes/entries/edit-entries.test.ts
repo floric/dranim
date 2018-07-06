@@ -145,6 +145,7 @@ describe('EditEntriesNode', () => {
     const res = await EditEntriesNode.transformInputDefsToContextInputDefs(
       { dataset: DatasetSocket('Ds') },
       { dataset: validDs },
+      {},
       { db: null, userId: '' }
     );
 

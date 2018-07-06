@@ -31,6 +31,7 @@ export const client = new ApolloClient({
         const { graphQLErrors, networkError } = err;
 
         if (
+          networkError &&
           (networkError as any).response &&
           (networkError as any).response.status === 401
         ) {

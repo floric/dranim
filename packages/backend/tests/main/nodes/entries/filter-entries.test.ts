@@ -129,6 +129,7 @@ describe('FilterEntriesNode', () => {
     const res = await FilterEntriesNode.transformInputDefsToContextInputDefs(
       { dataset: DatasetSocket('Ds') },
       { dataset: { content: { schema: [] }, isPresent: true } },
+      {},
       { db: null, userId: '' }
     );
     expect(res).toEqual({});
@@ -154,6 +155,7 @@ describe('FilterEntriesNode', () => {
     const inputRes = await FilterEntriesNode.transformInputDefsToContextInputDefs(
       { dataset: DatasetSocket('Ds') },
       { dataset: validDs },
+      {},
       { db: null, userId: '' }
     );
 
