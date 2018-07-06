@@ -6,7 +6,7 @@ import {
   DatetimeInputNodeOutputs
 } from '@masterthesis/shared';
 import { DatePicker, Form } from 'antd';
-import * as moment from 'moment';
+import moment from 'moment';
 
 import { ClientNodeDef } from '../all-nodes';
 import { getValueOrDefault } from '../utils';

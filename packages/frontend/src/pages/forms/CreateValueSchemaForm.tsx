@@ -9,10 +9,11 @@ import {
   Form,
   Input,
   InputNumber,
-  Select
+  Select,
+  TimePicker
 } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
-import * as moment from 'moment';
+import moment from 'moment';
 
 import { hasErrors } from '../../utils/form';
 
@@ -53,6 +54,9 @@ class CreateValueSchemaFormImpl extends React.Component<
           break;
         case DataType.DATETIME:
           fallback = form.getFieldValue('fallbackDatetime');
+          break;
+        case DataType.TIME:
+          fallback = form.getFieldValue('fallbackTime');
           break;
         case DataType.NUMBER:
           fallback = form.getFieldValue('fallbackNumber');
@@ -162,6 +166,14 @@ class CreateValueSchemaFormImpl extends React.Component<
                 placeholder="Select Date and Time"
               />
             )}
+          </Form.Item>
+        )}
+        {valueType === DataType.TIME && (
+          <Form.Item label="Fallback">
+            {getFieldDecorator('fallbackTime', {
+              initialValue: moment(),
+              rules: [{ required: true, message: 'Please specify a value.' }]
+            })(<TimePicker placeholder="Select Time" />)}
           </Form.Item>
         )}
         {valueType === DataType.NUMBER && (

@@ -1,9 +1,17 @@
 import * as React from 'react';
 
 import { DataType, Values, ValueSchema } from '@masterthesis/shared';
-import { Button, Checkbox, DatePicker, Form, Input, InputNumber } from 'antd';
+import {
+  Button,
+  Checkbox,
+  DatePicker,
+  Form,
+  Input,
+  InputNumber,
+  TimePicker
+} from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
-import * as moment from 'moment';
+import moment from 'moment';
 
 import { hasErrors } from '../../utils/form';
 
@@ -111,6 +119,11 @@ class CreateEntryFormImpl extends React.Component<
                     placeholder="Select Date and Time"
                   />
                 )}
+              {valueType === DataType.TIME &&
+                getFieldDecorator(s.name, {
+                  initialValue: moment(),
+                  rules
+                })(<TimePicker placeholder="Select Time" />)}
               {valueType === DataType.NUMBER &&
                 getFieldDecorator(s.name, {
                   initialValue: 0,

@@ -6,7 +6,7 @@ import {
   TimeInputNodeOutputs
 } from '@masterthesis/shared';
 import { Form, TimePicker } from 'antd';
-import * as moment from 'moment';
+import moment from 'moment';
 
 import { ClientNodeDef } from '../all-nodes';
 import { getValueOrDefault } from '../utils';
