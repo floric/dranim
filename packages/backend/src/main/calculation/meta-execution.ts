@@ -8,7 +8,7 @@ import {
   SocketMetas
 } from '@masterthesis/shared';
 
-import { getNodeType, tryGetNodeType } from '../nodes/all-nodes';
+import { tryGetNodeType } from '../nodes/all-nodes';
 import { tryGetConnection } from '../workspace/connections';
 import { tryGetNode } from '../workspace/nodes';
 import { getInputDefs, tryGetParentNode } from '../workspace/nodes-detail';
@@ -46,14 +46,12 @@ export const getMetaOutputs = async (
   reqContext: ApolloContext
 ): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> => {
   if (node.type === ContextNodeType.INPUT) {
-    return await getDynamicMetaOutputs(node, reqContext);
-  }
-
-  const nodeType = getNodeType(node.type);
-  if (!nodeType) {
+    return await getDynamicContextInputMetas(node, reqContext);
+  } else if (node.type === ContextNodeType.OUTPUT) {
     return {};
   }
 
+  const nodeType = tryGetNodeType(node.type);
   const allInputs = await getMetaInputs(node, reqContext);
   return await nodeType.onMetaExecution(
     parseNodeForm(node.form),
@@ -62,7 +60,7 @@ export const getMetaOutputs = async (
   );
 };
 
-const getDynamicMetaOutputs = async (
+const getDynamicContextInputMetas = async (
   node: NodeInstance,
   reqContext: ApolloContext
 ) => {
@@ -72,9 +70,15 @@ const getDynamicMetaOutputs = async (
     throw new Error('Should have context fn');
   }
 
+  const [parentInputDefs, parentMetaInputs] = await Promise.all([
+    getInputDefs(parent, reqContext),
+    getMetaInputs(parent, reqContext)
+  ]);
+
   const dynContextDefs = await parentType.transformInputDefsToContextInputDefs(
-    await getInputDefs(parent, reqContext),
-    await getMetaInputs(parent, reqContext),
+    parentInputDefs,
+    parentMetaInputs,
+    parseNodeForm(parent.form),
     reqContext
   );
 
@@ -85,5 +89,6 @@ const getDynamicMetaOutputs = async (
       isPresent: true
     };
   });
+
   return res;
 };

@@ -12,7 +12,7 @@ import { AddValuesNode } from '../../../../src/main/nodes/entries/add-values';
 import { processEntries } from '../../../../src/main/nodes/entries/utils';
 import {
   createDataset,
-  getDataset
+  tryGetDataset
 } from '../../../../src/main/workspace/dataset';
 import { createEntry } from '../../../../src/main/workspace/entry';
 import { NeverGoHereError, NODE, VALID_OBJECT_ID } from '../../../test-utils';
@@ -271,7 +271,7 @@ describe('AddValuesNode', () => {
     (processEntries as jest.Mock).mockImplementation(async (a, b, processFn) =>
       processFn(entryA)
     );
-    (getDataset as jest.Mock).mockResolvedValue(oldDs);
+    (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
     (createEntry as jest.Mock).mockResolvedValue({});
 
@@ -319,64 +319,10 @@ describe('AddValuesNode', () => {
     );
   });
 
-  test('should throw error for missing context function', async () => {
-    const oldDs: Dataset = {
-      id: VALID_OBJECT_ID,
-      entriesCount: 0,
-      latestEntries: [],
-      valueschemas: [],
-      name: 'Old DS',
-      workspaceId: 'CDE'
-    };
-    const newDs: Dataset = {
-      id: 'ABC',
-      entriesCount: 0,
-      latestEntries: [],
-      valueschemas: [],
-      name: 'New DS',
-      workspaceId: 'CDE'
-    };
-    (createDynamicDatasetName as jest.Mock).mockReturnValue('AddEntries-123');
-    (processEntries as jest.Mock).mockImplementation(() => Promise.resolve());
-    (getDataset as jest.Mock).mockResolvedValue(oldDs);
-    (createDataset as jest.Mock).mockResolvedValue(newDs);
-
-    try {
-      await AddValuesNode.onNodeExecution(
-        {
-          values: [
-            {
-              name: 'new',
-              required: true,
-              unique: true,
-              fallback: '',
-              type: DataType.STRING
-            }
-          ]
-        },
-        { dataset: { datasetId: oldDs.id } },
-        {
-          reqContext: { db: null, userId: '' },
-          node: {
-            id: VALID_OBJECT_ID,
-            contextIds: [],
-            inputs: [],
-            outputs: [],
-            type: AddValuesNode.type,
-            workspaceId: VALID_OBJECT_ID,
-            form: [],
-            x: 0,
-            y: 0
-          }
-        }
-      );
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Missing context function');
-    }
-  });
-
   test('should throw error for invalid dataset input', async () => {
+    (tryGetDataset as jest.Mock).mockImplementation(() => {
+      throw new Error('Unknown dataset source');
+    });
     try {
       await AddValuesNode.onNodeExecution(
         { values: [] },

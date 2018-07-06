@@ -21,15 +21,26 @@ jest.mock('../../../../src/main/workspace/nodes-detail');
 
 describe.only('Entries Utils', () => {
   test('should return empty inputs for missing dataset', async () => {
-    let res = await getDynamicEntryContextInputs({}, { dataset: null }, null);
+    let res = await getDynamicEntryContextInputs(
+      {},
+      { dataset: null },
+      {},
+      null
+    );
     expect(res).toEqual({});
 
-    res = await getDynamicEntryContextInputs({}, { dataset: undefined }, null);
+    res = await getDynamicEntryContextInputs(
+      {},
+      { dataset: undefined },
+      {},
+      null
+    );
     expect(res).toEqual({});
 
     res = await getDynamicEntryContextInputs(
       {},
       { dataset: { content: { schema: null }, isPresent: true } },
+      {},
       null
     );
     expect(res).toEqual({});
@@ -39,6 +50,7 @@ describe.only('Entries Utils', () => {
     const res = await getDynamicEntryContextInputs(
       {},
       { dataset: { content: { schema: [] }, isPresent: true } },
+      {},
       null
     );
     expect(res).toEqual({});
@@ -70,6 +82,7 @@ describe.only('Entries Utils', () => {
           isPresent: true
         }
       },
+      {},
       null
     );
     expect(res).toEqual({

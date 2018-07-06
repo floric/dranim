@@ -17,3 +17,7 @@ export const Background = '#ececec';
 export const Selection = '#1890ff';
 
 export const VisDefault = '#1070c0';
+
+export const Success = '#9ae010';
+export const Warning = '#ffdf09';
+export const Error = '#ff3333';

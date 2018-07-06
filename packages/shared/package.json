@@ -4,8 +4,6 @@
   "license": "MIT",
   "main": "lib/index.js",
   "dependencies": {
-    "date-fns": "^1.29.0",
-    "moment": "^2.22.2",
     "mongodb": "^3.0.10",
     "sleep-promise": "^8.0.1",
     "uuid": "^3.2.1"

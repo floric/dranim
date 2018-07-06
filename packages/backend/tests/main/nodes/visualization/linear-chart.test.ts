@@ -67,6 +67,7 @@ describe('LinearChart', () => {
     const res = await LinearChartNode.transformInputDefsToContextInputDefs(
       { dataset: DatasetSocket('Ds') },
       { dataset: { content: { schema: [] }, isPresent: true } },
+      { description: '', name: 'test', type: LinearChartType.PIE },
       { db: null, userId: '' }
     );
     expect(res).toEqual({});

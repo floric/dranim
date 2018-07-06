@@ -103,8 +103,9 @@ export interface ServerNodeDefWithContextFn<
   transformInputDefsToContextInputDefs: (
     inputsDefs: SocketDefs<NodeInputs>,
     inputs: SocketMetas<NodeInputs>,
+    form: FormValues<NodeForm>,
     reqContext: ApolloContext
-  ) => Promise<SocketDefs<{}>>;
+  ) => Promise<SocketDefs<any>>;
   transformContextInputDefsToContextOutputDefs: (
     inputsDefs: SocketDefs<NodeInputs>,
     inputs: SocketMetas<NodeInputs>,

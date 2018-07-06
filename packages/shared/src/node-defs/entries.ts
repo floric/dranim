@@ -47,6 +47,27 @@ export const FilterEntriesNodeDef: NodeDef<
   keywords: []
 };
 
+export interface DistinctEntriesNodeForm {
+  schema: ValueSchema;
+  newSchemas: Array<ValueSchema>;
+}
+
+export const DistinctEntriesNodeDef: NodeDef<
+  ForEachEntryNodeInputs,
+  ForEachEntryNodeOutputs
+> = {
+  name: 'Distinct',
+  type: 'DistinctEntries',
+  inputs: {
+    dataset: DatasetSocket('Dataset')
+  },
+  outputs: {
+    dataset: DatasetSocket('Dataset')
+  },
+  path: ['Entries'],
+  keywords: []
+};
+
 export interface AddValuesNodeForm {
   values: Array<ValueSchema>;
 }

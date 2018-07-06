@@ -60,11 +60,13 @@ const updateResult = async (
   const res = await coll.findOneAndUpdate(
     { name, workspaceId },
     {
-      name,
-      type,
-      description,
-      value: JSON.stringify(value),
-      workspaceId
+      $set: {
+        name,
+        type,
+        description,
+        value: JSON.stringify(value),
+        workspaceId
+      }
     }
   );
 

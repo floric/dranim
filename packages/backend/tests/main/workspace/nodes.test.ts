@@ -26,13 +26,15 @@ import {
   getNode,
   getNodesCollection,
   tryGetNode,
-  updateNode
+  updateNode,
+  tryGetContextNode
 } from '../../../src/main/workspace/nodes';
 import { getWorkspace } from '../../../src/main/workspace/workspace';
 import {
   getTestMongoDb,
   NeverGoHereError,
-  VALID_OBJECT_ID
+  VALID_OBJECT_ID,
+  NODE
 } from '../../test-utils';
 
 let conn;
@@ -144,6 +146,29 @@ describe('Nodes', () => {
     });
 
     expect(unknownNode).toBe(null);
+  });
+
+  test('should try to get node', async () => {
+    const ws: Workspace = {
+      id: VALID_OBJECT_ID,
+      name: 'ws',
+      description: '',
+      created: '',
+      lastChange: ''
+    };
+    (getWorkspace as jest.Mock).mockResolvedValue(ws);
+    const reqContext = { db, userId: '123' };
+
+    const node = await createNode(
+      StringInputNodeDef.type,
+      ws.id,
+      [],
+      0,
+      0,
+      reqContext
+    );
+    const res = await tryGetNode(node.id, reqContext);
+    expect(res.id).toBe(node.id);
   });
 
   test('should throw error for unknown node', async () => {
@@ -770,5 +795,44 @@ describe('Nodes', () => {
       userId: ''
     });
     expect(res).toBe(null);
+  });
+
+  test('should try to get context node', async () => {
+    const ws: Workspace = {
+      id: VALID_OBJECT_ID,
+      name: 'ws',
+      description: '',
+      created: '',
+      lastChange: ''
+    };
+    (getWorkspace as jest.Mock).mockResolvedValue(ws);
+
+    const reqContext = { db, userId: '123' };
+    const node = await createNode(
+      EditEntriesNodeDef.type,
+      ws.id,
+      [],
+      0,
+      0,
+      reqContext
+    );
+    const res = await tryGetContextNode(
+      node,
+      ContextNodeType.INPUT,
+      reqContext
+    );
+    expect(res.id).toBeDefined();
+  });
+
+  test('should throw error for unknown context node', async () => {
+    try {
+      await tryGetContextNode(NODE, ContextNodeType.INPUT, {
+        db,
+        userId: '123'
+      });
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Unknown context node');
+    }
   });
 });

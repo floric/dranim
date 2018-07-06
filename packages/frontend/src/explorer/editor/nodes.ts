@@ -22,7 +22,7 @@ import {
 
 export const NODE_WIDTH = 180;
 const TEXT_HEIGHT = 20;
-const STATE_LINE_HEIGHT = 1;
+const STATE_LINE_HEIGHT = 2;
 
 export const renderContextNode = (
   n: GQLNodeInstance,
@@ -144,10 +144,10 @@ const getStateRect = (
     y: height - STATE_LINE_HEIGHT,
     fill:
       state === NodeState.VALID
-        ? 'green'
+        ? Colors.Success
         : state === NodeState.ERROR
-          ? 'red'
-          : 'orange'
+          ? Colors.Error
+          : Colors.Warning
   });
 
 const getBackgroundRect = (height: number) =>

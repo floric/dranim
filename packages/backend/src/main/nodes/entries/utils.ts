@@ -2,6 +2,7 @@ import {
   ApolloContext,
   DatasetMeta,
   Entry,
+  FormValues,
   SocketDef,
   SocketDefs,
   SocketMetaDef,
@@ -21,6 +22,7 @@ export const copySchemas = (
 export const getDynamicEntryContextInputs = async (
   inputDefs: SocketDefs<any>,
   inputs: { dataset: SocketMetaDef<DatasetMeta> },
+  form: FormValues<any>,
   reqContext: ApolloContext
 ): Promise<{ [name: string]: SocketDef }> => {
   if (
