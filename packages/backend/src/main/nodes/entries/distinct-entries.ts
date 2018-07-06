@@ -10,7 +10,11 @@ import {
 } from '@masterthesis/shared';
 
 import { createDynamicDatasetName } from '../../calculation/utils';
-import { addValueSchema, createDataset } from '../../workspace/dataset';
+import {
+  addValueSchema,
+  createDataset,
+  tryGetDataset
+} from '../../workspace/dataset';
 import { createEntry, getEntryCollection } from '../../workspace/entry';
 
 const getDistinctValueName = (vs: ValueSchema) => `${vs.name}-distinct`;
@@ -62,13 +66,18 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
     return { ...contextInputDefs, ...contextOutputDefs };
   },
   onMetaExecution: async (form, inputs) => {
-    if (!allAreDefinedAndPresent(inputs)) {
+    if (!allAreDefinedAndPresent(inputs) || !form.schema || !form.newSchemas) {
       return { dataset: { content: { schema: [] }, isPresent: false } };
     }
 
     return {
       dataset: {
-        content: { schema: [form.schema!, ...form.newSchemas!] },
+        content: {
+          schema: [
+            { ...form.schema!, name: getDistinctValueName(form.schema!) },
+            ...form.newSchemas!
+          ]
+        },
         isPresent: true
       }
     };
@@ -78,6 +87,7 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
     inputs,
     { reqContext, contextFnExecution, node: { workspaceId, id } }
   ) => {
+    await tryGetDataset(inputs.dataset.datasetId, reqContext);
     const newDs = await createDataset(
       createDynamicDatasetName(DistinctEntriesNodeDef.type, id),
       reqContext,

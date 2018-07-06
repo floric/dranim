@@ -14,7 +14,7 @@ import { createDynamicDatasetName } from '../../calculation/utils';
 import {
   addValueSchema,
   createDataset,
-  getDataset
+  tryGetDataset
 } from '../../workspace/dataset';
 import { createEntry } from '../../workspace/entry';
 import {
@@ -82,11 +82,7 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
     inputs,
     { reqContext, contextFnExecution, node: { workspaceId, id } }
   ) => {
-    const oldDs = await getDataset(inputs.dataset.datasetId, reqContext);
-    if (!oldDs) {
-      throw new Error('Unknown dataset source');
-    }
-
+    const oldDs = await tryGetDataset(inputs.dataset.datasetId, reqContext);
     const newDs = await createDataset(
       createDynamicDatasetName(AddValuesNodeDef.type, id),
       reqContext,

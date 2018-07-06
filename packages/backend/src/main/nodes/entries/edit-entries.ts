@@ -7,7 +7,7 @@ import {
 } from '@masterthesis/shared';
 
 import { createDynamicDatasetName } from '../../calculation/utils';
-import { createDataset, getDataset } from '../../workspace/dataset';
+import { createDataset, tryGetDataset } from '../../workspace/dataset';
 import { createEntry } from '../../workspace/entry';
 import {
   copySchemas,
@@ -44,11 +44,7 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
     inputs,
     { reqContext, contextFnExecution, node: { workspaceId, id } }
   ) => {
-    const oldDs = await getDataset(inputs.dataset.datasetId, reqContext);
-    if (!oldDs) {
-      throw new Error('Unknown dataset source');
-    }
-
+    const oldDs = await tryGetDataset(inputs.dataset.datasetId, reqContext);
     const newDs = await createDataset(
       createDynamicDatasetName(EditEntriesNodeDef.type, id),
       reqContext,

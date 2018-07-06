@@ -10,7 +10,7 @@ import { Collection, Db, ObjectID } from 'mongodb';
 import * as promisesAll from 'promises-all';
 import { Readable } from 'stream';
 
-import { getDataset } from '../../main/workspace/dataset';
+import { tryGetDataset } from '../../main/workspace/dataset';
 import { Valueschema } from '../../main/workspace/dataset';
 import { createEntry } from '../../main/workspace/entry';
 
@@ -180,11 +180,7 @@ export const uploadEntriesCsv = async (
 ): Promise<UploadProcess> => {
   try {
     const uploadsCollection = getUploadsCollection(reqContext.db);
-    const ds = await getDataset(datasetId, reqContext);
-    if (!ds) {
-      throw new Error('Dataset not found.');
-    }
-
+    const ds = await tryGetDataset(datasetId, reqContext);
     const newProcess = {
       addedEntries: 0,
       failedEntries: 0,

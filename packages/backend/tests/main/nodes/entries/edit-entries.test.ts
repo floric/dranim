@@ -14,7 +14,7 @@ import {
 } from '../../../../src/main/nodes/entries/utils';
 import {
   createDataset,
-  getDataset
+  tryGetDataset
 } from '../../../../src/main/workspace/dataset';
 import { NeverGoHereError, NODE, VALID_OBJECT_ID } from '../../../test-utils';
 
@@ -58,7 +58,7 @@ describe('EditEntriesNode', () => {
     };
     (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
     (processEntries as jest.Mock).mockImplementation(n => Promise.resolve());
-    (getDataset as jest.Mock).mockResolvedValue(oldDs);
+    (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
 
     const res = await EditEntriesNode.onNodeExecution(
@@ -256,7 +256,7 @@ describe('EditEntriesNode', () => {
     };
     (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
     (processEntries as jest.Mock).mockImplementation(n => Promise.resolve());
-    (getDataset as jest.Mock).mockResolvedValue(oldDs);
+    (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
 
     const res = await EditEntriesNode.onNodeExecution(
@@ -273,6 +273,9 @@ describe('EditEntriesNode', () => {
   });
 
   test('should throw error for invalid dataset', async () => {
+    (tryGetDataset as jest.Mock).mockImplementation(() => {
+      throw new Error('Unknown dataset source');
+    });
     try {
       await EditEntriesNode.onNodeExecution(
         {},
