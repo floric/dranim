@@ -23,7 +23,10 @@ export const mongoDbClient = async (): Promise<MongoClient> => {
 
 const tryConnectToDb = async () => {
   console.log(`Trying to connect to ${config.db}`);
-  const client = await MongoClient.connect(config.db);
+  const client = await MongoClient.connect(
+    config.db,
+    { useNewUrlParser: true } as any
+  );
   console.log('Connected to MongoDB');
   return client;
 };

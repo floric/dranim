@@ -45,19 +45,15 @@ export const LinearChartNode: ServerNodeDefWithContextFn<
   ) => {
     const values: Array<ValueLabelAssignment> = [];
 
-    if (contextFnExecution) {
-      await processEntries(
-        inputs.dataset.datasetId,
-        id,
-        async entry => {
-          const res = await contextFnExecution(entry.values);
-          values.push(res.outputs);
-        },
-        reqContext
-      );
-    } else {
-      throw new Error('Missing context function');
-    }
+    await processEntries(
+      inputs.dataset.datasetId,
+      id,
+      async entry => {
+        const res = await contextFnExecution!(entry.values);
+        values.push(res.outputs);
+      },
+      reqContext
+    );
 
     return {
       outputs: {},

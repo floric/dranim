@@ -2,15 +2,18 @@ import {
   allAreDefinedAndPresent,
   DistinctEntriesNodeDef,
   DistinctEntriesNodeForm,
-  FilterEntriesNodeDef,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
   ServerNodeDefWithContextFn,
-  SocketDefs
+  SocketDefs,
+  ValueSchema
 } from '@masterthesis/shared';
 
 import { createDynamicDatasetName } from '../../calculation/utils';
-import { createDataset } from '../../workspace/dataset';
+import { addValueSchema, createDataset } from '../../workspace/dataset';
+import { createEntry, getEntryCollection } from '../../workspace/entry';
+
+const getDistinctValueName = (vs: ValueSchema) => `${vs.name}-distinct`;
 
 export const DistinctEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
@@ -32,9 +35,9 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
     }
 
     return {
-      distinct: {
+      [getDistinctValueName(form.schema)]: {
         dataType: form.schema.type,
-        displayName: `${form.schema.name}-distinct`,
+        displayName: getDistinctValueName(form.schema),
         isDynamic: true
       }
     };
@@ -73,13 +76,40 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
   onNodeExecution: async (
     form,
     inputs,
-    { reqContext, node: { workspaceId, id } }
+    { reqContext, contextFnExecution, node: { workspaceId, id } }
   ) => {
     const newDs = await createDataset(
-      createDynamicDatasetName(FilterEntriesNodeDef.type, id),
+      createDynamicDatasetName(DistinctEntriesNodeDef.type, id),
       reqContext,
       workspaceId
     );
+
+    await Promise.all(
+      [
+        { ...form.schema!, name: getDistinctValueName(form.schema!) },
+        ...form.newSchemas!
+      ].map(s => addValueSchema(newDs.id, s, reqContext))
+    );
+
+    const entryColl = getEntryCollection(
+      inputs.dataset.datasetId,
+      reqContext.db
+    );
+    const cursor = entryColl.aggregate([
+      { $group: { _id: `$values.${form.schema!.name}` } }
+    ]);
+
+    while (await (cursor as any).hasNext()) {
+      const doc = await cursor.next();
+      const distinctValue = doc._id;
+      const values = {
+        [getDistinctValueName(form.schema!)]: distinctValue
+      };
+      const { outputs } = await contextFnExecution!(values);
+      await createEntry(newDs.id, outputs, reqContext);
+    }
+
+    await cursor.close();
 
     return {
       outputs: {

@@ -53,22 +53,17 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
     }
 
     await copySchemas(oldDs.valueschemas, newDs.id, reqContext);
-
-    if (contextFnExecution) {
-      await processEntries(
-        inputs.dataset.datasetId,
-        id,
-        async entry => {
-          const result = await contextFnExecution(entry.values);
-          if (result.outputs.keepEntry) {
-            await createEntry(newDs.id, entry.values, reqContext);
-          }
-        },
-        reqContext
-      );
-    } else {
-      throw new Error('Missing context function');
-    }
+    await processEntries(
+      inputs.dataset.datasetId,
+      id,
+      async entry => {
+        const result = await contextFnExecution!(entry.values);
+        if (result.outputs.keepEntry) {
+          await createEntry(newDs.id, entry.values, reqContext);
+        }
+      },
+      reqContext
+    );
 
     return {
       outputs: {

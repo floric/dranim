@@ -115,13 +115,13 @@ describe('Dashboard Results', () => {
       value: 123
     };
 
-    let res = await addOrUpdateResult(oldValue, { db, userId: '' });
+    let res = await addOrUpdateResult(oldValue, { db, userId: '123' });
     expect(res).toBeDefined();
 
-    res = await addOrUpdateResult(newValue, { db, userId: '' });
+    res = await addOrUpdateResult(newValue, { db, userId: '123' });
     expect(res).toBeDefined();
 
-    const all = await getResultsForWorkspace('abc', { db, userId: '' });
+    const all = await getResultsForWorkspace('abc', { db, userId: '123' });
     expect(all.length).toBe(1);
     expect(all[0].value).toEqual(JSON.stringify(newValue.value));
     expect(all[0].workspaceId).toEqual(newValue.workspaceId);

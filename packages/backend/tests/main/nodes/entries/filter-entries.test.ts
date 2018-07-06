@@ -254,43 +254,6 @@ describe('FilterEntriesNode', () => {
   });
 
   test('should throw errors for missing context', async () => {
-    const oldDs: Dataset = {
-      id: VALID_OBJECT_ID,
-      entriesCount: 0,
-      latestEntries: [],
-      valueschemas: [],
-      name: 'Old DS',
-      workspaceId: 'CDE'
-    };
-    const newDs: Dataset = {
-      id: 'ABC',
-      entriesCount: 0,
-      latestEntries: [],
-      valueschemas: [],
-      name: 'New DS',
-      workspaceId: 'CDE'
-    };
-    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
-    (processEntries as jest.Mock).mockImplementation(() => Promise.resolve());
-    (getDataset as jest.Mock).mockResolvedValue(oldDs);
-    (createDataset as jest.Mock).mockResolvedValue(newDs);
-
-    try {
-      await FilterEntriesNode.onNodeExecution(
-        {},
-        { dataset: { datasetId: oldDs.id } },
-        {
-          reqContext: { db: null, userId: '' },
-          node: NODE
-        }
-      );
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Missing context function');
-    }
-  });
-
-  test('should throw errors for missing context', async () => {
     try {
       await FilterEntriesNode.onNodeExecution(
         {},
