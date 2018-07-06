@@ -48,7 +48,7 @@ export const getMetaOutputs = async (
   if (node.type === ContextNodeType.INPUT) {
     return await getDynamicContextInputMetas(node, reqContext);
   } else if (node.type === ContextNodeType.OUTPUT) {
-    return await getDynamicContextOutputMetas(node, reqContext);
+    return {};
   }
 
   const nodeType = tryGetNodeType(node.type);
@@ -70,54 +70,15 @@ const getDynamicContextInputMetas = async (
     throw new Error('Should have context fn');
   }
 
+  const [parentInputDefs, parentMetaInputs] = await Promise.all([
+    getInputDefs(parent, reqContext),
+    getMetaInputs(parent, reqContext)
+  ]);
+
   const dynContextDefs = await parentType.transformInputDefsToContextInputDefs(
-    await getInputDefs(parent, reqContext),
-    await getMetaInputs(parent, reqContext),
-    parseNodeForm(node.form),
-    reqContext
-  );
-
-  console.log(dynContextDefs);
-
-  const res = {};
-  Object.keys(dynContextDefs).forEach(e => {
-    res[e] = {
-      content: {},
-      isPresent: true
-    };
-  });
-
-  return res;
-};
-
-const getDynamicContextOutputMetas = async (
-  node: NodeInstance,
-  reqContext: ApolloContext
-) => {
-  const parent = await tryGetParentNode(node, reqContext);
-  const parentType = await tryGetNodeType(parent.type);
-  if (!hasContextFn(parentType)) {
-    throw new Error('Should have context fn');
-  }
-
-  const inputDefs = await getInputDefs(parent, reqContext);
-  const metaInputs = await getMetaInputs(parent, reqContext);
-  const contextMetaInputs = await getMetaInputs(node, reqContext);
-  const form = parseNodeForm(parent.form);
-
-  const dynContextInputDefs = await parentType.transformInputDefsToContextInputDefs(
-    inputDefs,
-    metaInputs,
-    form,
-    reqContext
-  );
-
-  const dynContextDefs = await parentType.transformContextInputDefsToContextOutputDefs(
-    inputDefs,
-    metaInputs,
-    dynContextInputDefs,
-    contextMetaInputs,
-    form,
+    parentInputDefs,
+    parentMetaInputs,
+    parseNodeForm(parent.form),
     reqContext
   );
 
@@ -128,5 +89,6 @@ const getDynamicContextOutputMetas = async (
       isPresent: true
     };
   });
+
   return res;
 };

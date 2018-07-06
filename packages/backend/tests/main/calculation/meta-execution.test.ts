@@ -60,7 +60,7 @@ describe('Meta Execution', () => {
     });
   });
 
-  test('should get for present metas', async () => {
+  test('should get meta defs for present metas', async () => {
     const conn: ConnectionInstance = {
       workspaceId: '',
       contextIds: [],
@@ -103,7 +103,7 @@ describe('Meta Execution', () => {
     });
     (tryGetConnection as jest.Mock).mockResolvedValueOnce(conn);
     (tryGetNode as jest.Mock).mockResolvedValueOnce(inputNode);
-    (getNodeType as jest.Mock).mockReturnValueOnce(inputType);
+    (tryGetNodeType as jest.Mock).mockReturnValueOnce(inputType);
 
     const res = await getMetaInputs(
       {
