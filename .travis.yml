@@ -56,3 +56,7 @@ deploy:
   bucket_name: $AWS_APP_ARTIFACTS
   zip_file: packages/backend/backend-docker.zip
   skip_cleanup: true
+after_deploy:
+  - pip install --user awscli
+  - export PATH=$PATH:$HOME/.local/bin
+  - aws cloudfront create-invalidation --distribution-id $AWS_CF_DISTRIBUTION_ID --paths "/*"
