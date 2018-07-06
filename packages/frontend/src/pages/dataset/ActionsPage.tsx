@@ -15,7 +15,6 @@ import {
 import { UploadFile } from 'antd/lib/upload/interface';
 import { AsyncButton } from '../../components/AsyncButton';
 import { LoadingCard, UnknownErrorCard } from '../../components/CustomCards';
-import { NumberInfo } from '../../components/NumberInfo';
 import { ProcessTime } from '../../components/ProcessTime';
 import { tryOperation } from '../../utils/form';
 
@@ -179,15 +178,9 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
                 key: 'results',
                 render: u => (
                   <Row>
-                    <Col xs={8}>
-                      <NumberInfo description="Added" total={u.added} />
-                    </Col>
-                    <Col xs={8}>
-                      <NumberInfo description="Failed" total={u.failed} />
-                    </Col>
-                    <Col xs={8}>
-                      <NumberInfo description="Invalid" total={u.invalid} />
-                    </Col>
+                    <Col xs={8}>{`${u.added} Added`}</Col>
+                    <Col xs={8}>{`${u.failed} Failed`}</Col>
+                    <Col xs={8}>{`${u.invalid} Invalid`}</Col>
                   </Row>
                 )
               },

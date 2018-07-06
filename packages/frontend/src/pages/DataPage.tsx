@@ -8,7 +8,6 @@ import { Mutation, Query } from 'react-apollo';
 import { CardItem } from '../components/CardItem';
 import { cardItemProps, CardsLayout } from '../components/CardsLayout';
 import { LoadingCard, UnknownErrorCard } from '../components/CustomCards';
-import { NumberInfo } from '../components/NumberInfo';
 import { PageHeaderCard } from '../components/PageHeaderCard';
 import { tryOperation } from '../utils/form';
 import { CreateDataSetForm } from './forms/CreateDatasetForm';
@@ -102,16 +101,10 @@ export default class DataPage extends React.Component<{}, {}> {
                           }
                         >
                           <Col xs={{ span: 24 }} md={{ span: 12 }}>
-                            <NumberInfo
-                              total={ds.valueschemas.length}
-                              description="Schemas"
-                            />
+                            {`${ds.valueschemas.length} Schemas`}
                           </Col>
                           <Col xs={{ span: 24 }} md={{ span: 12 }}>
-                            <NumberInfo
-                              total={ds.entriesCount}
-                              description="Entries"
-                            />
+                            {`${ds.entriesCount} Entries`}
                           </Col>
                         </CardItem>
                       )}

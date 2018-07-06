@@ -8,7 +8,6 @@ import { Query } from 'react-apollo';
 import { RouteComponentProps } from 'react-router';
 
 import { LoadingCard, UnknownErrorCard } from '../../components/CustomCards';
-import { NumberInfo } from '../../components/NumberInfo';
 import { ProcessTime } from '../../components/ProcessTime';
 
 const CALCULATIONS = gql`
@@ -86,12 +85,8 @@ export class WorkspaceCalculationsPage extends Component<
               key: 'results',
               render: u => (
                 <Row>
-                  <Col xs={8}>
-                    <NumberInfo description="Processed" total={u.processed} />
-                  </Col>
-                  <Col xs={8}>
-                    <NumberInfo description="Total" total={u.total} />
-                  </Col>
+                  <Col xs={8}>{`${u.processed} Processed`}</Col>
+                  <Col xs={8}>{`${u.total} Total`}</Col>
                 </Row>
               )
             }
