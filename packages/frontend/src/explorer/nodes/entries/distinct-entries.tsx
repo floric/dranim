@@ -9,7 +9,7 @@ import {
   ForEachEntryNodeOutputs,
   ValueSchema
 } from '@masterthesis/shared';
-import { Button, Checkbox, Col, Input, Row, Select, Tag } from 'antd';
+import { Alert, Button, Checkbox, Col, Input, Row, Select, Tag } from 'antd';
 
 import { showNotificationWithIcon } from '../../../utils/form';
 import { ClientNodeDef } from '../all-nodes';
@@ -24,7 +24,6 @@ export const DistinctEntriesNode: ClientNodeDef<
 > = {
   type: DistinctEntriesNodeDef.type,
   renderFormItems: ({
-    form,
     form: { getFieldDecorator, setFieldsValue, getFieldValue },
     nodeForm,
     touchForm,
@@ -41,7 +40,14 @@ export const DistinctEntriesNode: ClientNodeDef<
     const values = getFieldValue('newSchemas');
 
     if (!inputs.dataset || !inputs.dataset.isPresent) {
-      return <p>Input Dataset first</p>;
+      return (
+        <Alert
+          message="Dataset required"
+          description="Please input a valid Dataset."
+          type="warning"
+          showIcon
+        />
+      );
     }
 
     return (
@@ -53,7 +59,7 @@ export const DistinctEntriesNode: ClientNodeDef<
               defaultValue={
                 nodeForm.schema && nodeForm.schema.name
                   ? nodeForm.schema.name
-                  : null
+                  : undefined
               }
               style={{ width: 200 }}
               placeholder="Select Schema"

@@ -29,9 +29,16 @@ export const renderContextNode = (
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   changeState: (newState: Partial<ExplorerEditorState>) => void,
-  socketsMap: Map<string, Konva.Group>
+  socketsMap: Map<string, Konva.Group>,
+  stage: Konva.Stage
 ) => {
   const nodeGroup = new Konva.Group({ draggable: true, x: n.x, y: n.y });
+  nodeGroup.on('mouseenter', () => {
+    stage.container().style.cursor = 'move';
+  });
+  nodeGroup.on('mouseleave', () => {
+    stage.container().style.cursor = 'default';
+  });
 
   const inputs =
     n.type === ContextNodeType.INPUT ? {} : JSON.parse(n.contextOutputDefs);
@@ -68,7 +75,8 @@ export const renderNode = (
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   changeState: (newState: Partial<ExplorerEditorState>) => void,
-  socketsMap: Map<string, Konva.Group>
+  socketsMap: Map<string, Konva.Group>,
+  stage: Konva.Stage
 ) => {
   const nodeType = nodeTypes.get(n.type);
   if (!nodeType) {
@@ -76,6 +84,12 @@ export const renderNode = (
   }
 
   const nodeGroup = new Konva.Group({ draggable: true, x: n.x, y: n.y });
+  nodeGroup.on('mouseenter', () => {
+    stage.container().style.cursor = 'move';
+  });
+  nodeGroup.on('mouseleave', () => {
+    stage.container().style.cursor = 'default';
+  });
 
   const { inputs, outputs, name, renderName } = nodeType;
   const height = getNodeHeight(inputs, outputs);

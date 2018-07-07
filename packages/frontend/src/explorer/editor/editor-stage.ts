@@ -17,13 +17,13 @@ export const updateStage = (
     throw new Error('Canvas container not found.');
   }
 
-  const canvasWidth = canvasContainer.clientWidth;
-  const canvasHeight = canvasContainer.clientHeight;
+  const width = canvasContainer.clientWidth;
+  const height = canvasContainer.clientHeight;
 
   const stage = new Konva.Stage({
     container: EXPLORER_CONTAINER,
-    width: canvasWidth,
-    height: canvasHeight
+    width,
+    height
   });
 
   const nodeMap: Map<string, Konva.Group> = new Map();
@@ -34,7 +34,8 @@ export const updateStage = (
     state,
     socketsMap,
     nodeMap,
-    changeState
+    changeState,
+    stage
   );
 
   const connsLayer = createConnectionsLayer(
@@ -55,7 +56,8 @@ const createNodesLayer = (
   state: ExplorerEditorState,
   socketsMap: Map<string, Konva.Group>,
   nodeMap: Map<string, Konva.Group>,
-  changeState: (newState: Partial<ExplorerEditorState>) => void
+  changeState: (newState: Partial<ExplorerEditorState>) => void,
+  stage: Konva.Stage
 ) => {
   const nodesLayer = new Konva.Layer();
 
@@ -69,7 +71,14 @@ const createNodesLayer = (
         n.type !== ContextNodeType.OUTPUT
     )
     .forEach(n => {
-      const nodeGroup = renderNode(n, server, state, changeState, socketsMap);
+      const nodeGroup = renderNode(
+        n,
+        server,
+        state,
+        changeState,
+        socketsMap,
+        stage
+      );
       nodesLayer.add(nodeGroup);
       nodeMap.set(n.id, nodeGroup);
     });
@@ -86,7 +95,8 @@ const createNodesLayer = (
         server,
         state,
         changeState,
-        socketsMap
+        socketsMap,
+        stage
       );
       nodesLayer.add(nodeGroup);
       nodeMap.set(n.id, nodeGroup);

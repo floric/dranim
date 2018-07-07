@@ -22,7 +22,7 @@ const renderSocket = (
   type: SocketType,
   i: number,
   isConnected: boolean,
-  onClick?: () => void
+  onClick: () => void
 ) => {
   const socketGroup = new Konva.Group({
     x: 0,
@@ -49,11 +49,9 @@ const renderSocket = (
     radius: SOCKET_RADIUS
   });
 
-  if (onClick) {
-    socket.on('mousedown', () => {
-      onClick();
-    });
-  }
+  socket.on('mousedown', () => {
+    onClick();
+  });
 
   socketGroup.add(text);
   socketGroup.add(socket);
@@ -88,7 +86,7 @@ const beginNewConnection = (
   socketName: string,
   type: SocketType,
   changeState: (newState: Partial<ExplorerEditorState>) => void
-) => {
+) =>
   changeState({
     openConnection: {
       dataType: s.dataType,
@@ -96,7 +94,6 @@ const beginNewConnection = (
       outputs: type !== SocketType.INPUT ? [{ name: socketName, nodeId }] : null
     }
   });
-};
 
 const beginEditExistingConnection = async (
   connectionsInSocket: Array<ConnectionInstance>,
