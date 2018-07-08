@@ -1,116 +1,167 @@
 import {
+  ConnectionInstance,
   ContextNodeType,
-  DatasetInputNodeDef,
-  DatasetOutputNodeDef,
   DataType,
-  EditEntriesNodeDef,
-  NumberInputNodeDef,
-  NumberOutputNodeDef,
-  StringInputNodeDef,
-  StringOutputNodeDef,
-  SumNodeDef
+  hasContextFn,
+  NodeDef,
+  NodeInstance,
+  parseNodeForm,
+  ServerNodeDef,
+  ServerNodeDefWithContextFn
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import {
   executeNode,
   executeNodeWithId
 } from '../../../src/main/calculation/execution';
-import { createConnection } from '../../../src/main/workspace/connections';
 import {
-  addValueSchema,
-  createDataset
-} from '../../../src/main/workspace/dataset';
-import { createEntry, getAllEntries } from '../../../src/main/workspace/entry';
+  areNodeInputsValid,
+  isNodeInMetaValid
+} from '../../../src/main/calculation/validation';
+import { tryGetNodeType } from '../../../src/main/nodes/all-nodes';
+import { tryGetConnection } from '../../../src/main/workspace/connections';
 import {
-  createNode,
-  getContextNode,
-  getNode
+  tryGetContextNode,
+  tryGetNode
 } from '../../../src/main/workspace/nodes';
-import { addOrUpdateFormValue } from '../../../src/main/workspace/nodes-detail';
-import { createWorkspace } from '../../../src/main/workspace/workspace';
-import {
-  getTestMongoDb,
-  NeverGoHereError,
-  VALID_OBJECT_ID
-} from '../../test-utils';
+import { NeverGoHereError, VALID_OBJECT_ID } from '../../test-utils';
 
-let conn;
-let db: Db;
-let server;
+jest.mock('@masterthesis/shared');
+jest.mock('../../../src/main/workspace/workspace');
+jest.mock('../../../src/main/workspace/nodes');
+jest.mock('../../../src/main/calculation/validation');
+jest.mock('../../../src/main/nodes/all-nodes');
+jest.mock('../../../src/main/workspace/connections');
 
 describe('Execution', () => {
-  beforeAll(async () => {
-    const { connection, database, mongodbServer } = await getTestMongoDb();
-    conn = connection;
-    db = database;
-    server = mongodbServer;
-  });
-
-  afterAll(async () => {
-    await conn.close();
-    await server.stop();
-  });
-
   beforeEach(async () => {
-    await db.dropDatabase();
     jest.resetAllMocks();
   });
 
   test('should execute simple node', async () => {
-    const ws = await createWorkspace('test', { db, userId: '' }, '');
-    const node = await createNode(StringInputNodeDef.type, ws.id, [], 0, 0, {
-      db,
-      userId: ''
-    });
+    const node: NodeInstance = {
+      id: 'node',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    const type: ServerNodeDef & NodeDef = {
+      type: 'type',
+      name: 'a',
+      inputs: {
+        value: {
+          dataType: DataType.STRING,
+          displayName: 'value',
+          isDynamic: false
+        }
+      },
+      outputs: {},
+      keywords: [],
+      path: [],
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: {} })
+    };
+    (tryGetNode as jest.Mock).mockResolvedValue(node);
+    (tryGetNodeType as jest.Mock).mockReturnValue(type);
+    (parseNodeForm as jest.Mock).mockReturnValue({});
+    (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
+    (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
 
-    await addOrUpdateFormValue(node.id, 'value', JSON.stringify('test'), {
-      db,
-      userId: ''
-    });
-
-    const { outputs, results } = await executeNodeWithId(node.id, {
-      db,
+    const { outputs, results } = await executeNodeWithId(VALID_OBJECT_ID, {
+      db: null,
       userId: ''
     });
 
     expect(outputs).toBeDefined();
     expect(results).toBeUndefined();
-    expect(Object.keys(outputs).length).toBe(1);
   });
 
   test('should execute connected nodes', async () => {
-    const ws = await createWorkspace('test', { db, userId: '' }, '');
-    const nodeA = await createNode(StringInputNodeDef.type, ws.id, [], 0, 0, {
-      db,
-      userId: ''
-    });
-    const nodeB = await createNode(StringOutputNodeDef.type, ws.id, [], 0, 0, {
-      db,
-      userId: ''
-    });
-    await createConnection(
-      { name: 'value', nodeId: nodeA.id },
-      { name: 'value', nodeId: nodeB.id },
-      { db, userId: '' }
-    );
-    await addOrUpdateFormValue(nodeA.id, 'value', JSON.stringify('test'), {
-      db,
-      userId: ''
-    });
-    await addOrUpdateFormValue(nodeB.id, 'name', JSON.stringify('test'), {
-      db,
-      userId: ''
-    });
-    const { outputs, results } = await executeNodeWithId(nodeB.id, {
-      db,
+    const connectionId = '123';
+    const nodeA: NodeInstance = {
+      id: 'nodeA',
+      contextIds: [],
+      form: [{ name: 'value', value: JSON.stringify('test') }],
+      inputs: [{ name: 'a', connectionId }],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    const nodeB: NodeInstance = {
+      id: 'nodeB',
+      contextIds: [],
+      form: [{ name: 'name', value: JSON.stringify('test') }],
+      inputs: [],
+      outputs: [{ name: 'a', connectionId }],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    const typeA: ServerNodeDef & NodeDef = {
+      type: 'type',
+      name: 'a',
+      inputs: {
+        a: {
+          dataType: DataType.STRING,
+          displayName: 'value',
+          isDynamic: false
+        }
+      },
+      outputs: {},
+      keywords: [],
+      path: [],
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: {} })
+    };
+    const typeB: ServerNodeDef & NodeDef = {
+      type: 'type',
+      name: 'b',
+      inputs: {},
+      outputs: {
+        a: {
+          dataType: DataType.STRING,
+          displayName: 'value',
+          isDynamic: false
+        }
+      },
+      keywords: [],
+      path: [],
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: { a: 1 } })
+    };
+    const conn: ConnectionInstance = {
+      from: { name: 'a', nodeId: nodeA.id },
+      to: { name: 'a', nodeId: nodeB.id },
+      id: connectionId,
+      workspaceId: VALID_OBJECT_ID,
+      contextIds: []
+    };
+
+    (tryGetNode as jest.Mock)
+      .mockResolvedValueOnce(nodeA)
+      .mockResolvedValueOnce(nodeB);
+    (tryGetNodeType as jest.Mock)
+      .mockReturnValueOnce(typeA)
+      .mockReturnValueOnce(typeB);
+    (parseNodeForm as jest.Mock).mockReturnValue({});
+    (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
+    (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
+    (tryGetConnection as jest.Mock).mockResolvedValue(conn);
+
+    const res = await executeNodeWithId(nodeB.id, {
+      db: null,
       userId: ''
     });
 
-    expect(outputs).toBeDefined();
-    expect(results).toBeDefined();
-    expect(Object.keys(outputs).length).toBe(0);
-    expect((results as any).value).toBe('test');
+    expect(res).toEqual({ outputs: { a: 1 } });
   });
 
   test('should return outputs from context for context input nodes', async () => {
@@ -127,13 +178,31 @@ describe('Execution', () => {
         form: [],
         contextIds: [VALID_OBJECT_ID]
       },
-      { db, userId: '' },
+      { db: null, userId: '' },
       contextInputs
     );
     expect(res).toEqual({ outputs: contextInputs });
   });
 
   test('should throw error for unknown node type', async () => {
+    const node: NodeInstance = {
+      id: 'nodeB',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    (tryGetNode as jest.Mock).mockResolvedValue(node);
+    (tryGetNodeType as jest.Mock).mockImplementation(() => {
+      throw new Error('Unknown node type: UnknownNodeType');
+    });
+    (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
+    (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
+
     try {
       await executeNode(
         {
@@ -147,7 +216,7 @@ describe('Execution', () => {
           form: [],
           contextIds: [VALID_OBJECT_ID]
         },
-        { db, userId: '' }
+        { db: null, userId: '' }
       );
       throw NeverGoHereError;
     } catch (err) {
@@ -156,15 +225,26 @@ describe('Execution', () => {
   });
 
   test('should fail for invalid form', async () => {
-    const ws = await createWorkspace('test', { db, userId: '' }, '');
-    const node = await createNode(NumberInputNodeDef.type, ws.id, [], 0, 0, {
-      db,
-      userId: ''
+    const node: NodeInstance = {
+      id: 'nodeB',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    (tryGetNode as jest.Mock).mockResolvedValue(node);
+    (tryGetNodeType as jest.Mock).mockImplementation(() => {
+      throw new Error('Unknown node type: UnknownNodeType');
     });
-    await addOrUpdateFormValue(node.id, 'value', '{NaN', { db, userId: '' });
+    (isNodeInMetaValid as jest.Mock).mockResolvedValue(false);
+    (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
 
     try {
-      await executeNode(node, { db, userId: '' });
+      await executeNode(node, { db: null, userId: '' });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Form values or inputs are missing');
@@ -172,192 +252,279 @@ describe('Execution', () => {
   });
 
   test('should fail for invalid input', async () => {
-    const ws = await createWorkspace('test', { db, userId: '' }, '');
-    const [nodeA, nodeB] = await Promise.all([
-      createNode(StringInputNodeDef.type, ws.id, [], 0, 0, { db, userId: '' }),
-      createNode(NumberOutputNodeDef.type, ws.id, [], 0, 0, { db, userId: '' })
-    ]);
-    await addOrUpdateFormValue(nodeA.id, 'value', 'NaN', { db, userId: '' });
-    await createConnection(
-      { name: 'value', nodeId: nodeA.id },
-      { name: 'value', nodeId: nodeB.id },
-      { db, userId: '' }
-    );
+    const node: NodeInstance = {
+      id: 'nodeB',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    const type: ServerNodeDef & NodeDef = {
+      type: 'type',
+      name: 'b',
+      inputs: {},
+      outputs: {},
+      keywords: [],
+      path: [],
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: {} })
+    };
+    (tryGetNode as jest.Mock).mockResolvedValue(node);
+    (tryGetNodeType as jest.Mock).mockReturnValue(type);
+    (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
+    (areNodeInputsValid as jest.Mock).mockResolvedValue(false);
 
     try {
-      await executeNode(nodeB, { db, userId: '' });
+      await executeNode(node, { db: null, userId: '' });
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Form values or inputs are missing');
+      expect(err.message).toBe('Execution inputs are not valid');
     }
   });
 
   test('should wait for inputs and combine them as sum', async () => {
-    const ws = await createWorkspace('test', { db, userId: '' }, '');
-    const [nodeA, nodeB] = await Promise.all([
-      createNode(NumberInputNodeDef.type, ws.id, [], 0, 0, { db, userId: '' }),
-      createNode(NumberInputNodeDef.type, ws.id, [], 0, 0, { db, userId: '' })
-    ]);
-    const sumNode = await createNode(SumNodeDef.type, ws.id, [], 0, 0, {
-      db,
+    const connAId = '123';
+    const connBId = '456';
+    const nodeA: NodeInstance = {
+      id: 'nodeA',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [{ name: 'a', connectionId: connBId }],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    const nodeB: NodeInstance = {
+      id: 'nodeB',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [{ name: 'b', connectionId: connAId }],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    const sumNode: NodeInstance = {
+      id: 'nodeB',
+      contextIds: [],
+      form: [],
+      inputs: [
+        { name: 'a', connectionId: connAId },
+        { name: 'b', connectionId: connBId }
+      ],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    const typeA: ServerNodeDef & NodeDef = {
+      type: 'type',
+      name: 'a',
+      inputs: {},
+      outputs: {
+        a: {
+          dataType: DataType.STRING,
+          displayName: 'value',
+          isDynamic: false
+        }
+      },
+      keywords: [],
+      path: [],
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: { c: 3 } })
+    };
+    const typeB: ServerNodeDef & NodeDef = {
+      type: 'type',
+      name: 'b',
+      inputs: {},
+      outputs: {
+        b: {
+          dataType: DataType.STRING,
+          displayName: 'value',
+          isDynamic: false
+        }
+      },
+      keywords: [],
+      path: [],
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: { b: 2 } })
+    };
+    const sumType: ServerNodeDef & NodeDef = {
+      type: 'type',
+      name: 'b',
+      inputs: {
+        a: {
+          dataType: DataType.STRING,
+          displayName: 'value',
+          isDynamic: false
+        },
+        b: {
+          dataType: DataType.STRING,
+          displayName: 'value',
+          isDynamic: false
+        }
+      },
+      outputs: {},
+      keywords: [],
+      path: [],
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: { a: 1 } })
+    };
+    const connA: ConnectionInstance = {
+      from: { name: 'a', nodeId: nodeB.id },
+      to: { name: 'a', nodeId: sumNode.id },
+      id: connAId,
+      workspaceId: VALID_OBJECT_ID,
+      contextIds: []
+    };
+    const connB: ConnectionInstance = {
+      from: { name: 'b', nodeId: nodeA.id },
+      to: { name: 'b', nodeId: sumNode.id },
+      id: connBId,
+      workspaceId: VALID_OBJECT_ID,
+      contextIds: []
+    };
+
+    (tryGetNode as jest.Mock)
+      .mockResolvedValueOnce(nodeA)
+      .mockResolvedValueOnce(nodeB);
+    (tryGetNodeType as jest.Mock)
+      .mockReturnValueOnce(typeA)
+      .mockReturnValueOnce(typeB)
+      .mockReturnValueOnce(sumType);
+    (parseNodeForm as jest.Mock).mockReturnValue({});
+    (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
+    (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
+    (tryGetConnection as jest.Mock)
+      .mockResolvedValueOnce(connA)
+      .mockResolvedValueOnce(connB);
+
+    const res = await executeNode(sumNode, {
+      db: null,
       userId: ''
     });
-    const outputNode = await createNode(
-      NumberOutputNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0,
-      { db, userId: '' }
-    );
 
-    await addOrUpdateFormValue(nodeA.id, 'value', '18', { db, userId: '' });
-    await addOrUpdateFormValue(nodeB.id, 'value', '81', { db, userId: '' });
-    await addOrUpdateFormValue(outputNode.id, 'name', JSON.stringify('test'), {
-      db,
-      userId: ''
-    });
-
-    await createConnection(
-      { name: 'value', nodeId: nodeA.id },
-      { name: 'a', nodeId: sumNode.id },
-      { db, userId: '' }
-    );
-    await createConnection(
-      { name: 'value', nodeId: nodeB.id },
-      { name: 'b', nodeId: sumNode.id },
-      { db, userId: '' }
-    );
-    await createConnection(
-      { name: 'sum', nodeId: sumNode.id },
-      { name: 'value', nodeId: outputNode.id },
-      { db, userId: '' }
-    );
-
-    const updatedNode = await getNode(outputNode.id, { db, userId: '' });
-    const { outputs, results } = await executeNode(updatedNode, {
-      db,
-      userId: ''
-    });
-
-    expect(outputs).toBeDefined();
-    expect(results).toBeDefined();
-    expect((results as any).value).toBe(99);
+    expect(res).toEqual({ outputs: { a: 1 } });
   });
 
   test('should support context functions', async () => {
-    const ws = await createWorkspace('test', { db, userId: '' }, '');
-    const ds = await createDataset('test', { db, userId: '' });
-    await addValueSchema(
-      ds.id,
-      {
-        name: 'val',
-        type: DataType.STRING,
-        unique: true,
-        required: true,
-        fallback: ''
+    const node: NodeInstance = {
+      id: 'node',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    const cNode: NodeInstance = {
+      id: 'cNode',
+      contextIds: [],
+      form: [],
+      inputs: [{ connectionId: 'c', name: 'x' }],
+      outputs: [],
+      type: ContextNodeType.OUTPUT,
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    const iNode: NodeInstance = {
+      id: 'iNode',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [{ connectionId: 'c', name: 'x' }],
+      type: 'a',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    const type: ServerNodeDefWithContextFn & NodeDef = {
+      type: 'type',
+      name: 'a',
+      inputs: {},
+      outputs: {},
+      keywords: [],
+      path: [],
+      transformContextInputDefsToContextOutputDefs: async () => ({}),
+      transformInputDefsToContextInputDefs: async () => ({}),
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async (form, inputs, { contextFnExecution }) => ({
+        outputs: { a: (await contextFnExecution({})).outputs }
+      })
+    };
+    const cType: ServerNodeDef & NodeDef = {
+      type: ContextNodeType.OUTPUT,
+      name: 'a',
+      inputs: {},
+      outputs: {},
+      keywords: [],
+      path: [],
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({
+        outputs: { x: 1 }
+      })
+    };
+    const conn: ConnectionInstance = {
+      contextIds: [],
+      from: {
+        name: 'x',
+        nodeId: iNode.id
       },
-      { db, userId: '' }
-    );
-    await createEntry(
-      ds.id,
-      { val: JSON.stringify('test') },
-      { db, userId: '' }
-    );
+      to: {
+        name: 'x',
+        nodeId: cNode.id
+      },
+      id: '123',
+      workspaceId: VALID_OBJECT_ID
+    };
+    (tryGetNode as jest.Mock).mockResolvedValue(node);
+    (tryGetContextNode as jest.Mock).mockResolvedValue(cNode);
+    (tryGetNodeType as jest.Mock)
+      .mockReturnValueOnce(type)
+      .mockReturnValueOnce(cType);
+    (tryGetConnection as jest.Mock).mockResolvedValue(conn);
+    (parseNodeForm as jest.Mock).mockReturnValue({});
+    (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
+    (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
+    (hasContextFn as any)
+      .mockReturnValueOnce(true)
+      .mockResolvedValueOnce(false);
 
-    const [editEntriesNode, inputNode, outputNode] = await Promise.all(
-      [
-        EditEntriesNodeDef.type,
-        DatasetInputNodeDef.type,
-        DatasetOutputNodeDef.type
-      ].map(type => createNode(type, ws.id, [], 0, 0, { db, userId: '' }))
-    );
-
-    const contextOutputNode = await getContextNode(
-      editEntriesNode,
-      ContextNodeType.OUTPUT,
-      { db, userId: '' }
-    );
-
-    expect(contextOutputNode).toBeDefined();
-    const stringInputNode = await createNode(
-      StringInputNodeDef.type,
-      ws.id,
-      [editEntriesNode.id],
-      0,
-      0,
-      { db, userId: '' }
-    );
-
-    await createConnection(
-      { name: 'value', nodeId: stringInputNode.id },
-      { name: 'val', nodeId: contextOutputNode.id },
-      { db, userId: '' }
-    );
-    await addOrUpdateFormValue(inputNode.id, 'dataset', JSON.stringify(ds.id), {
-      db,
+    const res = await executeNode(node, {
+      db: null,
       userId: ''
     });
-    await addOrUpdateFormValue(
-      stringInputNode.id,
-      'value',
-      JSON.stringify('test'),
-      { db, userId: '' }
-    );
-    await addOrUpdateFormValue(outputNode.id, 'name', 'test', {
-      db,
-      userId: ''
-    });
-    await Promise.all(
-      [
-        { from: inputNode.id, to: editEntriesNode.id },
-        { from: editEntriesNode.id, to: outputNode.id }
-      ].map(pair =>
-        createConnection(
-          { name: 'dataset', nodeId: pair.from },
-          { name: 'dataset', nodeId: pair.to },
-          { db, userId: '' }
-        )
-      )
-    );
-    const updatedNode = await getNode(outputNode.id, { db, userId: '' });
-
-    const { outputs, results } = await executeNode(updatedNode, {
-      db,
-      userId: ''
-    });
-    expect(outputs).toBeDefined();
-    expect(results).toBeDefined();
-    expect((results as any).value).toBeDefined();
-
-    const newDsId = (results as any).value.datasetId;
-    const allEntries = await getAllEntries(newDsId, { db, userId: '' });
-    expect(allEntries.length).toBe(1);
+    expect(res).toEqual({ outputs: { a: { x: 1 } } });
   });
 
   test('should throw error', async () => {
-    const ws = await createWorkspace('test', { db, userId: '' }, '');
-    const editEntriesNode = await createNode(
-      EditEntriesNodeDef.type,
-      ws.id,
-      [],
-      0,
-      0,
-      {
-        db,
-        userId: ''
-      }
-    );
-
-    const inputNode = await getContextNode(
-      editEntriesNode,
-      ContextNodeType.INPUT,
-      { db, userId: '' }
-    );
+    const node: NodeInstance = {
+      id: 'node',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: ContextNodeType.INPUT,
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    (tryGetNode as jest.Mock).mockResolvedValue(node);
 
     try {
-      await executeNode(inputNode, {
-        db,
+      await executeNode(node, {
+        db: null,
         userId: ''
       });
       throw NeverGoHereError;
