@@ -71,19 +71,17 @@ describe('Users Management', () => {
   });
 
   test('should not register user with same mail', async () => {
-    try {
-      await register('Florian', 'Richter', 'flo@flo.de', '123', {
-        db,
-        userId: ''
-      });
-      await register('Florian', 'Richter', 'flo@flo.de', '123', {
-        db,
-        userId: ''
-      });
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.code).toBe(11000);
-    }
+    let res = await register('Florian', 'Richter', 'flo@flo.de', '123', {
+      db,
+      userId: ''
+    });
+    expect(res).toBeDefined();
+
+    res = await register('Florian', 'Richter', 'flo@flo.de', '123', {
+      db,
+      userId: ''
+    });
+    expect(res).toBe(null);
   });
 
   test('should get user', async () => {

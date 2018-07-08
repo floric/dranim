@@ -18,7 +18,10 @@ export const getTestMongoDb = async () => {
 
   const uri = await mongodbServer.getConnectionString();
 
-  const connection = await MongoClient.connect(uri);
+  const connection = await MongoClient.connect(
+    uri,
+    { useNewUrlParser: true }
+  );
   const database: Db = await connection.db(MONGO_DB_NAME);
 
   return {

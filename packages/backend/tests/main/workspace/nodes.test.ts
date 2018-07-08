@@ -29,6 +29,7 @@ import {
   tryGetNode,
   updateNodePosition
 } from '../../../src/main/workspace/nodes';
+import { addOrUpdateFormValue } from '../../../src/main/workspace/nodes-detail';
 import { getWorkspace } from '../../../src/main/workspace/workspace';
 import {
   getTestMongoDb,
@@ -382,7 +383,7 @@ describe('Nodes', () => {
     };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
 
-    const nodes = await Promise.all([
+    const [nodeA, nodeB, nodeC] = await Promise.all([
       createNode(NumberInputNodeDef.type, ws.id, [], 0, 0, {
         db,
         userId: ''
@@ -396,12 +397,28 @@ describe('Nodes', () => {
         userId: ''
       })
     ]);
+    await addOrUpdateFormValue(nodeA.id, 'test', 'a', {
+      db,
+      userId: ''
+    });
 
     const allNodes = await getAllNodes(ws.id, {
       db,
       userId: ''
     });
-    nodes.forEach(n => expect(allNodes).toContainEqual(n));
+    expect(allNodes).toContainEqual({
+      contextIds: [],
+      form: [{ name: 'test', value: 'a' }],
+      id: nodeA.id,
+      inputs: [],
+      outputs: [],
+      type: 'NumberInput',
+      workspaceId: '5b07b3129ba658500b75a29a',
+      x: 0,
+      y: 0
+    });
+    expect(allNodes).toContainEqual(nodeB);
+    expect(allNodes).toContainEqual(nodeC);
   });
 
   test('should throw error for invalid node type', async () => {
