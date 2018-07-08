@@ -360,6 +360,7 @@ describe('Execution', () => {
         db,
         userId: ''
       });
+      throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Context needs context inputs');
     }

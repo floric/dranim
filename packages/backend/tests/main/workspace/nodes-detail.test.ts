@@ -4,12 +4,10 @@ import {
   hasContextFn,
   NodeDef,
   NodeInstance,
-  NodeState,
   ServerNodeDefWithContextFn
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { isNodeInMetaValid } from '../../../src/main/calculation/validation';
 import {
   getNodeType,
   hasNodeType,
@@ -27,7 +25,6 @@ import {
   getContextInputDefs,
   getContextOutputDefs,
   getInputDefs,
-  getNodeState,
   removeConnection,
   setProgress
 } from '../../../src/main/workspace/nodes-detail';
@@ -43,6 +40,7 @@ let server;
 
 jest.mock('@masterthesis/shared');
 jest.mock('../../../src/main/workspace/nodes');
+jest.mock('../../../src/main/workspace/nodes-state');
 jest.mock('../../../src/main/nodes/all-nodes');
 jest.mock('../../../src/main/calculation/validation');
 jest.mock('../../../src/main/workspace/connections');
@@ -63,149 +61,6 @@ describe('Node Details', () => {
   beforeEach(async () => {
     await db.dropDatabase();
     jest.resetAllMocks();
-  });
-
-  test('should get valid node state', async () => {
-    (isNodeInMetaValid as jest.Mock).mockReturnValue(true);
-    const state = await getNodeState(
-      {
-        id: VALID_OBJECT_ID,
-        form: [],
-        inputs: [],
-        outputs: [],
-        contextIds: [],
-        type: 'type',
-        workspaceId: VALID_OBJECT_ID,
-        x: 0,
-        y: 0
-      },
-      {
-        db,
-        userId: ''
-      }
-    );
-
-    expect(state).toBe(NodeState.VALID);
-  });
-
-  test('should get valid node state for ContextInputNode', async () => {
-    const parentNode: NodeInstance = {
-      id: 'testnode',
-      contextIds: [],
-      form: [],
-      inputs: [{ name: 'dataset', connectionId: '123' }],
-      outputs: [],
-      type: 'type',
-      workspaceId: VALID_OBJECT_ID,
-      x: 0,
-      y: 0
-    };
-    (isNodeInMetaValid as jest.Mock).mockReturnValue(true);
-    (getNode as jest.Mock).mockReturnValue(parentNode);
-
-    const state = await getNodeState(
-      {
-        id: VALID_OBJECT_ID,
-        form: [],
-        inputs: [],
-        outputs: [],
-        contextIds: [parentNode.id],
-        type: ContextNodeType.INPUT,
-        workspaceId: VALID_OBJECT_ID,
-        x: 0,
-        y: 0
-      },
-      {
-        db,
-        userId: ''
-      }
-    );
-
-    expect(state).toBe(NodeState.VALID);
-  });
-
-  test('should get valid node state for ContextOutputNode', async () => {
-    const parentNode: NodeInstance = {
-      id: 'testnode',
-      contextIds: [],
-      form: [],
-      inputs: [{ name: 'dataset', connectionId: '123' }],
-      outputs: [],
-      type: 'type',
-      workspaceId: VALID_OBJECT_ID,
-      x: 0,
-      y: 0
-    };
-    (isNodeInMetaValid as jest.Mock).mockReturnValue(true);
-    (getNode as jest.Mock).mockReturnValue(parentNode);
-
-    const state = await getNodeState(
-      {
-        id: VALID_OBJECT_ID,
-        form: [],
-        inputs: [],
-        outputs: [],
-        contextIds: [parentNode.id],
-        type: ContextNodeType.OUTPUT,
-        workspaceId: VALID_OBJECT_ID,
-        x: 0,
-        y: 0
-      },
-      {
-        db,
-        userId: ''
-      }
-    );
-
-    expect(state).toBe(NodeState.VALID);
-  });
-
-  test('should get invalid node state', async () => {
-    (isNodeInMetaValid as jest.Mock).mockReturnValue(false);
-    const state = await getNodeState(
-      {
-        id: VALID_OBJECT_ID,
-        form: [],
-        inputs: [],
-        outputs: [],
-        contextIds: [],
-        type: 'type',
-        workspaceId: VALID_OBJECT_ID,
-        x: 0,
-        y: 0
-      },
-      {
-        db,
-        userId: ''
-      }
-    );
-
-    expect(state).toBe(NodeState.INVALID);
-  });
-
-  test('should get error node state', async () => {
-    (isNodeInMetaValid as jest.Mock).mockImplementation(() => {
-      throw new Error();
-    });
-    const state = await getNodeState(
-      {
-        id: VALID_OBJECT_ID,
-        form: [],
-        inputs: [],
-        outputs: [],
-        contextIds: [],
-        type: 'type',
-        workspaceId: VALID_OBJECT_ID,
-        x: 0,
-        y: 0
-      },
-      {
-        db,
-        userId: ''
-      }
-    );
-
-    expect(state).toBe(NodeState.ERROR);
   });
 
   test('should get null for nodes without contexts', async () => {
@@ -688,6 +543,18 @@ describe('Node Details', () => {
     (getNodesCollection as jest.Mock).mockReturnValue({
       updateOne: jest.fn()
     });
+    const node: NodeInstance = {
+      id: 'node',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    (tryGetNode as jest.Mock).mockResolvedValue(node);
 
     const nodeId = VALID_OBJECT_ID;
     await addConnection({ name: 'test', nodeId }, 'input', VALID_OBJECT_ID, {

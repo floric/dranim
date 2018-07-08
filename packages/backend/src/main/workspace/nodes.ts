@@ -10,7 +10,7 @@ import { Collection, Db, ObjectID } from 'mongodb';
 
 import { getNodeType, tryGetNodeType } from '../nodes/all-nodes';
 import { deleteConnection, deleteConnectionsInContext } from './connections';
-import { updateState } from './nodes-detail';
+import { updateState } from './nodes-state';
 import { getWorkspace, updateLastChange } from './workspace';
 
 export const getNodesCollection = (

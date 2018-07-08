@@ -4,6 +4,7 @@ import {
   DatasetOutputNodeDef,
   EditEntriesNodeDef,
   JoinDatasetsNodeDef,
+  NodeState,
   NumberInputNodeDef,
   SelectValuesNodeDef,
   StringInputNodeDef,
@@ -30,6 +31,7 @@ import {
   updateNodePosition
 } from '../../../src/main/workspace/nodes';
 import { addOrUpdateFormValue } from '../../../src/main/workspace/nodes-detail';
+import { updateState } from '../../../src/main/workspace/nodes-state';
 import { getWorkspace } from '../../../src/main/workspace/workspace';
 import {
   getTestMongoDb,
@@ -44,6 +46,7 @@ let server;
 
 jest.mock('../../../src/main/workspace/workspace');
 jest.mock('../../../src/main/workspace/connections');
+jest.mock('../../../src/main/workspace/nodes-state');
 
 describe('Nodes', () => {
   beforeAll(async () => {
@@ -72,6 +75,7 @@ describe('Nodes', () => {
       lastChange: ''
     };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
+    (updateState as jest.Mock).mockResolvedValue({});
 
     const newNode = await createNode(NumberInputNodeDef.type, ws.id, [], 0, 0, {
       db,
@@ -382,6 +386,7 @@ describe('Nodes', () => {
       lastChange: ''
     };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
+    (updateState as jest.Mock).mockResolvedValue({});
 
     const [nodeA, nodeB, nodeC] = await Promise.all([
       createNode(NumberInputNodeDef.type, ws.id, [], 0, 0, {
@@ -410,6 +415,7 @@ describe('Nodes', () => {
       contextIds: [],
       form: [{ name: 'test', value: 'a' }],
       id: nodeA.id,
+      state: NodeState.VALID,
       inputs: [],
       outputs: [],
       type: 'NumberInput',
@@ -491,6 +497,7 @@ describe('Nodes', () => {
       lastChange: ''
     };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
+    (updateState as jest.Mock).mockResolvedValue({});
 
     await createNode(EditEntriesNodeDef.type, ws.id, [], 0, 0, {
       db,
