@@ -5,7 +5,8 @@ import {
   ConnectionInstance,
   Dataset,
   GQLNodeInstance,
-  SocketInstance
+  SocketInstance,
+  NodeState
 } from '@masterthesis/shared';
 import { Card, Col, Row, TreeSelect } from 'antd';
 import { css } from 'glamor';
@@ -261,6 +262,11 @@ export class ExplorerEditor extends React.Component<
                   <AsyncButton
                     icon="rocket"
                     onClick={this.handleStartCalulcation}
+                    disabled={
+                      !nodes
+                        .map(n => n.state === NodeState.VALID)
+                        .reduce((a, b) => a && b)
+                    }
                   >
                     Calculate
                   </AsyncButton>

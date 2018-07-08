@@ -162,7 +162,7 @@ export const deleteNode = async (id: string, reqContext: ApolloContext) => {
   return true;
 };
 
-export const updateNode = async (
+export const updateNodePosition = async (
   id: string,
   x: number,
   y: number,

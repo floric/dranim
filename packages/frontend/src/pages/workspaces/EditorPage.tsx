@@ -101,8 +101,8 @@ const DELETE_NODE = gql`
 `;
 
 const UPDATE_NODE = gql`
-  mutation updateNode($id: String!, $x: Float!, $y: Float!) {
-    updateNode(id: $id, x: $x, y: $y)
+  mutation updateNodePosition($id: String!, $x: Float!, $y: Float!) {
+    updateNodePosition(id: $id, x: $x, y: $y)
   }
 `;
 
@@ -194,7 +194,7 @@ export class WorkspaceEditorPage extends React.Component<
                                 <Mutation mutation={CREATE_NODE}>
                                   {createNode => (
                                     <Mutation mutation={UPDATE_NODE}>
-                                      {updateNode => (
+                                      {updateNodePosition => (
                                         <ExplorerEditor
                                           datasets={data.datasets}
                                           connections={deepCopyResponse(
@@ -239,7 +239,7 @@ export class WorkspaceEditorPage extends React.Component<
                                           onNodeUpdate={(nodeId, x, y) =>
                                             tryOperation({
                                               op: () =>
-                                                updateNode({
+                                                updateNodePosition({
                                                   variables: {
                                                     id: nodeId,
                                                     x,

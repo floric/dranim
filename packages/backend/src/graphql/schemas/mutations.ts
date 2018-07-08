@@ -38,7 +38,7 @@ export const MutationDef = `
     deleteNode (
       id: String!
     ): Boolean!
-    updateNode (
+    updateNodePosition (
       id: String!
       x: Float!
       y: Float!

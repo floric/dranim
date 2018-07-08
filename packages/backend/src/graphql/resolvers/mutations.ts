@@ -21,7 +21,11 @@ import {
   deleteDataset
 } from '../../main/workspace/dataset';
 import { createEntryFromJSON, deleteEntry } from '../../main/workspace/entry';
-import { createNode, deleteNode, updateNode } from '../../main/workspace/nodes';
+import {
+  createNode,
+  deleteNode,
+  updateNodePosition
+} from '../../main/workspace/nodes';
 import { addOrUpdateFormValue } from '../../main/workspace/nodes-detail';
 import { uploadEntriesCsv } from '../../main/workspace/upload';
 import {
@@ -70,8 +74,8 @@ export const Mutation = {
     context
   ): Promise<NodeInstance> =>
     createNode(type, workspaceId, contextIds, x, y, context),
-  updateNode: (_, { id, x, y }, context): Promise<boolean> =>
-    updateNode(id, x, y, context),
+  updateNodePosition: (_, { id, x, y }, context): Promise<boolean> =>
+    updateNodePosition(id, x, y, context),
   deleteNode: (_, { id }, context): Promise<boolean> => deleteNode(id, context),
   addOrUpdateFormValue: (
     _,

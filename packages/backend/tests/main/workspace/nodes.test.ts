@@ -25,16 +25,16 @@ import {
   getContextNode,
   getNode,
   getNodesCollection,
+  tryGetContextNode,
   tryGetNode,
-  updateNode,
-  tryGetContextNode
+  updateNodePosition
 } from '../../../src/main/workspace/nodes';
 import { getWorkspace } from '../../../src/main/workspace/workspace';
 import {
   getTestMongoDb,
   NeverGoHereError,
-  VALID_OBJECT_ID,
-  NODE
+  NODE,
+  VALID_OBJECT_ID
 } from '../../test-utils';
 
 let conn;
@@ -344,7 +344,7 @@ describe('Nodes', () => {
     );
 
     const newPos = [123, 456];
-    const res = await updateNode(createdNode.id, newPos[0], newPos[1], {
+    const res = await updateNodePosition(createdNode.id, newPos[0], newPos[1], {
       db,
       userId: ''
     });
@@ -361,9 +361,9 @@ describe('Nodes', () => {
     expect(updatedNode.type).toBe(NumberInputNodeDef.type);
   });
 
-  test('should throw error for invalid ID in updateNode', async () => {
+  test('should throw error for invalid ID in updateNodePosition', async () => {
     try {
-      await updateNode('test', 0, 0, {
+      await updateNodePosition('test', 0, 0, {
         db,
         userId: ''
       });
