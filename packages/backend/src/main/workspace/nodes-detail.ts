@@ -15,6 +15,7 @@ import { getMetaInputs } from '../calculation/meta-execution';
 import { isNodeInMetaValid } from '../calculation/validation';
 import { getNodeType, hasNodeType, tryGetNodeType } from '../nodes/all-nodes';
 import {
+  getContextNode,
   getNode,
   getNodesCollection,
   tryGetContextNode,
@@ -29,7 +30,6 @@ export const getContextInputDefs = async (
     return null;
   }
 
-  // will only be accessed by context io nodes
   const parent = await tryGetParentNode(node, reqContext);
   const parentType = tryGetNodeType(parent.type);
   if (!hasContextFn(parentType)) {
@@ -53,7 +53,6 @@ export const getContextOutputDefs = async (
     return null;
   }
 
-  // will only be accessed by context io nodes
   const parent = await tryGetParentNode(node, reqContext);
   const parentType = tryGetNodeType(parent.type);
   if (!hasContextFn(parentType)) {
@@ -120,10 +119,12 @@ export const getInputDefs = async (
   return inputDefs;
 };
 
-export const getNodeState = async (
-  node: NodeInstance,
+const calculateNodeState = async (
+  nodeId: string,
   reqContext: ApolloContext
 ) => {
+  const node = await tryGetNode(nodeId, reqContext);
+
   try {
     const isValid = await isNodeInMetaValid(node, reqContext);
     if (!isValid) {
@@ -137,7 +138,7 @@ export const getNodeState = async (
         ContextNodeType.OUTPUT,
         reqContext
       );
-      return getNodeState(contextOutputNode, reqContext);
+      return calculateNodeState(contextOutputNode.id, reqContext);
     }
 
     return NodeState.VALID;
@@ -158,17 +159,18 @@ export const addOrUpdateFormValue = async (
   }
 
   await tryGetNode(nodeId, reqContext);
-  const nodeObjId = new ObjectID(nodeId);
 
   const collection = getNodesCollection(reqContext.db);
   const res = await collection.updateOne(
-    { _id: nodeObjId },
+    { _id: new ObjectID(nodeId) },
     { $set: { [`form.${name}`]: value } }
   );
 
   if (res.result.ok !== 1) {
     throw new Error('Adding or updating form value failed');
   }
+
+  await updateState(nodeId, reqContext);
 
   return true;
 };
@@ -179,8 +181,8 @@ export const addConnection = async (
   connId: string,
   reqContext: ApolloContext
 ) => {
-  const nodesCollection = getNodesCollection(reqContext.db);
-  await nodesCollection.updateOne(
+  const coll = getNodesCollection(reqContext.db);
+  await coll.updateOne(
     { _id: new ObjectID(socket.nodeId) },
     {
       $push: {
@@ -191,6 +193,7 @@ export const addConnection = async (
       }
     }
   );
+  await updateState(socket.nodeId, reqContext);
 };
 
 export const removeConnection = async (
@@ -199,8 +202,8 @@ export const removeConnection = async (
   connId: string,
   reqContext: ApolloContext
 ) => {
-  const nodesCollection = getNodesCollection(reqContext.db);
-  await nodesCollection.updateOne(
+  const coll = getNodesCollection(reqContext.db);
+  await coll.updateOne(
     { _id: new ObjectID(socket.nodeId) },
     {
       $pull: {
@@ -211,6 +214,7 @@ export const removeConnection = async (
       }
     }
   );
+  await updateState(socket.nodeId, reqContext);
 };
 
 export const setProgress = async (
@@ -222,13 +226,46 @@ export const setProgress = async (
     throw new Error('Invalid progress value');
   }
 
-  const nodesCollection = getNodesCollection(reqContext.db);
-  await nodesCollection.updateOne(
+  const coll = getNodesCollection(reqContext.db);
+  await coll.updateOne(
     { _id: new ObjectID(nodeId) },
     {
       $set: { progress: value }
     }
   );
+
+  return true;
+};
+
+export const updateState = async (
+  nodeId: string,
+  reqContext: ApolloContext
+) => {
+  const state = await calculateNodeState(nodeId, reqContext);
+
+  const nodesCollection = getNodesCollection(reqContext.db);
+  await nodesCollection.updateOne(
+    { _id: new ObjectID(nodeId) },
+    {
+      $set: { state }
+    }
+  );
+
+  const node = await tryGetNode(nodeId, reqContext);
+  if (hasContextFn(node.type)) {
+    const contextOutputNode = await tryGetContextNode(
+      node,
+      ContextNodeType.OUTPUT,
+      reqContext
+    );
+    await updateState(contextOutputNode.id, reqContext);
+  } else if (
+    node.type === ContextNodeType.INPUT ||
+    node.type === ContextNodeType.OUTPUT
+  ) {
+    const parent = await tryGetParentNode(node, reqContext);
+    await updateState(parent.id, reqContext);
+  }
 
   return true;
 };

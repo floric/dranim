@@ -7,9 +7,8 @@ import { UploadEntryError } from './upload';
 export const getEntryCollection = (
   datasetId: string,
   db: Db
-): Collection<Entry & { _id: ObjectID }> => {
-  return db.collection(`Entries_${datasetId}`);
-};
+): Collection<Entry & { _id: ObjectID }> =>
+  db.collection(`Entries_${datasetId}`);
 
 export const getEntry = async (
   datasetId: string,

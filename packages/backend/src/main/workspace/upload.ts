@@ -22,9 +22,7 @@ export class UploadEntryError extends Error {
 
 export const getUploadsCollection = (
   db: Db
-): Collection<UploadProcess & { _id: ObjectID }> => {
-  return db.collection('Uploads');
-};
+): Collection<UploadProcess & { _id: ObjectID }> => db.collection('Uploads');
 
 export const getAllUploads = async (
   datasetId: string,

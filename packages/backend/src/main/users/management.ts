@@ -5,9 +5,7 @@ import { Collection, Db, ObjectID } from 'mongodb';
 
 const getUsersCollection = (
   db: Db
-): Collection<User & { _id: ObjectID; pw: string }> => {
-  return db.collection('Users');
-};
+): Collection<User & { _id: ObjectID; pw: string }> => db.collection('Users');
 
 export const login = async (
   mail: string,

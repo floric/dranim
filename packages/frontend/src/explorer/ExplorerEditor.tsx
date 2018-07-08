@@ -265,7 +265,7 @@ export class ExplorerEditor extends React.Component<
                     disabled={
                       !nodes
                         .map(n => n.state === NodeState.VALID)
-                        .reduce((a, b) => a && b)
+                        .reduce((a, b) => a && b, false)
                     }
                   >
                     Calculate

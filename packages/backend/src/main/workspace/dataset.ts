@@ -13,9 +13,7 @@ export interface Valueschema {
 
 export const getDatasetsCollection = (
   db: Db
-): Collection<Dataset & { _id: ObjectID }> => {
-  return db.collection('Datasets');
-};
+): Collection<Dataset & { _id: ObjectID }> => db.collection('Datasets');
 
 export const createDataset = async (
   name: string,

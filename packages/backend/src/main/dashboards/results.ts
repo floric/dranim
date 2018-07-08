@@ -5,9 +5,8 @@ import { tryGetWorkspace } from '../workspace/workspace';
 
 export const getResultsCollection = (
   db: Db
-): Collection<OutputResult & { _id: ObjectID; id: string }> => {
-  return db.collection('Results');
-};
+): Collection<OutputResult & { _id: ObjectID; id: string }> =>
+  db.collection('Results');
 
 export const addOrUpdateResult = async (
   result: OutputResult,

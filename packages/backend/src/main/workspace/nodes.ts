@@ -3,19 +3,19 @@ import {
   ContextNodeType,
   hasContextFn,
   NodeInstance,
+  NodeState,
   ServerNodeDef
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { getNodeType, tryGetNodeType } from '../nodes/all-nodes';
 import { deleteConnection, deleteConnectionsInContext } from './connections';
+import { updateState } from './nodes-detail';
 import { getWorkspace, updateLastChange } from './workspace';
 
 export const getNodesCollection = (
   db: Db
-): Collection<NodeInstance & { _id: ObjectID }> => {
-  return db.collection('Nodes');
-};
+): Collection<NodeInstance & { _id: ObjectID }> => db.collection('Nodes');
 
 export const createNode = async (
   type: string,
@@ -39,7 +39,8 @@ export const createNode = async (
     inputs: [],
     contextIds: contextNodeIds,
     workspaceId,
-    type
+    type,
+    state: NodeState.VALID
   });
 
   if (res.result.ok !== 1 || res.ops.length !== 1) {
@@ -55,6 +56,7 @@ export const createNode = async (
     workspaceId,
     reqContext
   );
+  await updateState(newNodeId, reqContext);
 
   const { _id, ...other } = res.ops[0];
 
@@ -83,7 +85,8 @@ const addContextNodesIfNecessary = async (
         inputs: [],
         contextIds: nestedContextIds,
         workspaceId,
-        type: contextType
+        type: contextType,
+        state: NodeState.VALID
       })
     );
 

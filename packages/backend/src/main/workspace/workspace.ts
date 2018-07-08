@@ -19,9 +19,7 @@ export const initWorkspaceDb = async (db: Db) => {
 
 export const getWorkspacesCollection = (
   db: Db
-): Collection<Workspace & { _id: ObjectID }> => {
-  return db.collection('Workspaces');
-};
+): Collection<Workspace & { _id: ObjectID }> => db.collection('Workspaces');
 
 export const createWorkspace = async (
   name: string,

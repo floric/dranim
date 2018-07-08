@@ -1,7 +1,5 @@
 import {
   hasContextFn,
-  NodeInstance,
-  NodeState,
   SocketDef,
   SocketDefs,
   SocketMetaDef,
@@ -16,14 +14,11 @@ import {
 import { getNodeType, hasNodeType } from '../../main/nodes/all-nodes';
 import {
   getContextInputDefs,
-  getContextOutputDefs,
-  getNodeState
+  getContextOutputDefs
 } from '../../main/workspace/nodes-detail';
 import { getWorkspace } from '../../main/workspace/workspace';
 
 export const Node = {
-  state: (node: NodeInstance, _, context): Promise<NodeState> =>
-    getNodeState(node, context),
   workspace: ({ workspaceId }, __, context): Promise<Workspace | null> =>
     getWorkspace(workspaceId, context),
   metaOutputs: (

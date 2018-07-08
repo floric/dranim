@@ -11,9 +11,8 @@ import { addConnection, removeConnection } from './nodes-detail';
 
 export const getConnectionsCollection = (
   db: Db
-): Collection<ConnectionInstance & { _id: ObjectID }> => {
-  return db.collection('Connections');
-};
+): Collection<ConnectionInstance & { _id: ObjectID }> =>
+  db.collection('Connections');
 
 export const createConnection = async (
   from: SocketInstance,

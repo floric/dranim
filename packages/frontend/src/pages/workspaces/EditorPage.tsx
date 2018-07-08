@@ -191,11 +191,10 @@ export class WorkspaceEditorPage extends React.Component<
       failedTitle: 'Node not deleted'
     });
 
-  private handleNodeUpdate = (updateNodePosition: MutationFn<any, any>) => (
-    nodeId: string,
-    x: number,
-    y: number
-  ) =>
+  private handleNodeUpdate = (
+    updateNodePosition: MutationFn<any, any>,
+    refetch: () => Promise<ApolloQueryResult<any>>
+  ) => (nodeId: string, x: number, y: number) =>
     tryOperation({
       op: () =>
         updateNodePosition({
@@ -205,6 +204,7 @@ export class WorkspaceEditorPage extends React.Component<
             y
           }
         }),
+      refetch,
       successTitle: null,
       failedTitle: 'Node not updated'
     });
@@ -332,7 +332,8 @@ export class WorkspaceEditorPage extends React.Component<
                                             refetch
                                           )}
                                           onNodeUpdate={this.handleNodeUpdate(
-                                            updateNodePosition
+                                            updateNodePosition,
+                                            refetch
                                           )}
                                           onConnectionCreate={this.handleConnectionCreate(
                                             createConnection,
