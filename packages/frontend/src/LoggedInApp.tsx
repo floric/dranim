@@ -88,7 +88,7 @@ class LoggedInApp extends React.Component<
                   <Route path="/data/:id" component={DatasetDetailPage} />
                   <Route exact path="/workspaces" component={WorkspacesPage} />
                   <Route
-                    path="/workspaces/:id"
+                    path="/workspaces/:workspaceId"
                     component={WorkspaceDetailPage}
                   />
                   <Route exact path="/user" component={UserPage} />

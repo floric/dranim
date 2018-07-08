@@ -11,6 +11,7 @@ import {
   TimePicker
 } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
+import { WrappedFormUtils } from 'antd/lib/form/Form';
 import moment from 'moment';
 
 import { hasErrors } from '../../utils/form';
@@ -57,81 +58,78 @@ class CreateEntryFormImpl extends React.Component<
     });
   };
 
+  private renderType = (
+    { getFieldDecorator, getFieldError, isFieldTouched }: WrappedFormUtils,
+    s: ValueSchema
+  ) => {
+    const valueType = s.type;
+    const rules = [
+      {
+        required: s.required,
+        message: `Please specify ${s.name}`
+      }
+    ];
+    return (
+      <Form.Item
+        key={s.name}
+        labelCol={{
+          sm: 12,
+          md: 4
+        }}
+        wrapperCol={{
+          sm: 12
+        }}
+        label={s.name}
+        validateStatus={
+          isFieldTouched(s.name) && getFieldError(s.name) ? 'error' : 'success'
+        }
+        help={(isFieldTouched(s.name) && getFieldError(s.name)) || ''}
+      >
+        {valueType === DataType.BOOLEAN &&
+          getFieldDecorator(s.name, {
+            initialValue: true,
+            rules
+          })(<Checkbox>Value</Checkbox>)}
+        {valueType === DataType.STRING &&
+          getFieldDecorator(s.name, {
+            initialValue: '',
+            rules
+          })(<Input placeholder="Fallback" />)}
+        {valueType === DataType.DATETIME &&
+          getFieldDecorator(s.name, {
+            initialValue: moment(),
+            rules
+          })(
+            <DatePicker
+              showTime
+              format="YYYY-MM-DD HH:mm:ss"
+              placeholder="Select Date and Time"
+            />
+          )}
+        {valueType === DataType.TIME &&
+          getFieldDecorator(s.name, {
+            initialValue: moment(),
+            rules
+          })(<TimePicker placeholder="Select Time" />)}
+        {valueType === DataType.NUMBER &&
+          getFieldDecorator(s.name, {
+            initialValue: 0,
+            rules
+          })(<InputNumber />)}
+      </Form.Item>
+    );
+  };
+
   public render() {
     const {
-      form: {
-        getFieldDecorator,
-        getFieldsError,
-        getFieldError,
-        isFieldTouched
-      },
+      form,
+      form: { getFieldsError },
       schema
     } = this.props;
 
     return (
       <Form onSubmit={this.handleSubmit}>
-        {schema.map(s => {
-          const valueType = s.type;
-          const rules = [
-            {
-              required: s.required,
-              message: `Please specify ${s.name}`
-            }
-          ];
-
-          return (
-            <Form.Item
-              key={s.name}
-              labelCol={{
-                sm: 12,
-                md: 4
-              }}
-              wrapperCol={{
-                sm: 12,
-                md: 12
-              }}
-              label={s.name}
-              validateStatus={
-                isFieldTouched(s.name) && getFieldError(s.name)
-                  ? 'error'
-                  : 'success'
-              }
-              help={(isFieldTouched(s.name) && getFieldError(s.name)) || ''}
-            >
-              {valueType === DataType.BOOLEAN &&
-                getFieldDecorator(s.name, {
-                  initialValue: true,
-                  rules
-                })(<Checkbox>Value</Checkbox>)}
-              {valueType === DataType.STRING &&
-                getFieldDecorator(s.name, {
-                  initialValue: '',
-                  rules
-                })(<Input placeholder="Fallback" />)}
-              {valueType === DataType.DATETIME &&
-                getFieldDecorator(s.name, {
-                  initialValue: moment(),
-                  rules
-                })(
-                  <DatePicker
-                    showTime
-                    format="YYYY-MM-DD HH:mm:ss"
-                    placeholder="Select Date and Time"
-                  />
-                )}
-              {valueType === DataType.TIME &&
-                getFieldDecorator(s.name, {
-                  initialValue: moment(),
-                  rules
-                })(<TimePicker placeholder="Select Time" />)}
-              {valueType === DataType.NUMBER &&
-                getFieldDecorator(s.name, {
-                  initialValue: 0,
-                  rules
-                })(<InputNumber />)}
-            </Form.Item>
-          );
-        })}
+        {schema.map(s => this.renderType(form, s))}
         <Form.Item
           wrapperCol={{
             xs: 24,

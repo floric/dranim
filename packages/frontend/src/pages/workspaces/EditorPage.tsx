@@ -1,9 +1,11 @@
 import * as React from 'react';
 
+import { SocketInstance } from '@masterthesis/shared';
 import gql from 'graphql-tag';
-import { Mutation, Query } from 'react-apollo';
+import { Mutation, MutationFn, Query } from 'react-apollo';
 import { RouteComponentProps } from 'react-router';
 
+import { ApolloQueryResult } from 'apollo-client';
 import {
   CustomErrorCard,
   LoadingCard,
@@ -149,19 +151,136 @@ const START_CALCULATION = gql`
 `;
 
 export interface WorkspaceEditorPageProps
-  extends RouteComponentProps<{ id: string }> {}
+  extends RouteComponentProps<{ workspaceId: string }> {}
 
 export class WorkspaceEditorPage extends React.Component<
   WorkspaceEditorPageProps
 > {
+  private handleNodeCreate = (
+    createNode: MutationFn<any, any>,
+    workspaceId: string,
+    refetch: () => Promise<ApolloQueryResult<any>>
+  ) => (type: string, x: number, y: number, contextIds: Array<string>) =>
+    tryOperation({
+      op: () =>
+        createNode({
+          variables: {
+            type,
+            x,
+            y,
+            contextIds,
+            workspaceId
+          }
+        }),
+      refetch,
+      successTitle: null,
+      failedTitle: 'Node not created'
+    });
+
+  private handleNodeDelete = (
+    deleteNode: MutationFn<any, any>,
+    refetch: () => Promise<ApolloQueryResult<any>>
+  ) => (nodeId: string) =>
+    tryOperation({
+      op: () =>
+        deleteNode({
+          variables: { id: nodeId }
+        }),
+      refetch,
+      successTitle: null,
+      failedTitle: 'Node not deleted'
+    });
+
+  private handleNodeUpdate = (updateNodePosition: MutationFn<any, any>) => (
+    nodeId: string,
+    x: number,
+    y: number
+  ) =>
+    tryOperation({
+      op: () =>
+        updateNodePosition({
+          variables: {
+            id: nodeId,
+            x,
+            y
+          }
+        }),
+      successTitle: null,
+      failedTitle: 'Node not updated'
+    });
+
+  private handleConnectionCreate = (
+    createConnection: MutationFn<any, any>,
+    refetch: () => Promise<ApolloQueryResult<any>>
+  ) => (from: SocketInstance, to: SocketInstance) =>
+    tryOperation({
+      op: () =>
+        createConnection({
+          variables: {
+            input: { from, to }
+          }
+        }),
+      refetch,
+      successTitle: null,
+      failedTitle: 'Connection not created'
+    });
+
+  private handleConnectionDelete = (
+    deleteConnection: MutationFn<any, any>,
+    refetch: () => Promise<ApolloQueryResult<any>>
+  ) => (connId: string) =>
+    tryOperation({
+      op: () =>
+        deleteConnection({
+          variables: { id: connId }
+        }),
+      refetch,
+      successTitle: null,
+      failedTitle: 'Connection not deleted'
+    });
+
+  private handleAddOrUpdateFormValue = (
+    addOrUpdateFormValue: MutationFn<any, any>,
+    refetch: () => Promise<ApolloQueryResult<any>>
+  ) => (nodeId, name, value) =>
+    tryOperation({
+      op: () =>
+        addOrUpdateFormValue({
+          variables: {
+            nodeId,
+            name,
+            value
+          }
+        }),
+      refetch,
+      successTitle: null,
+      failedTitle: 'Value not changed'
+    });
+
+  private handleStartCalculation = (
+    startCalculation: MutationFn<any, any>,
+    refetch: () => Promise<ApolloQueryResult<any>>,
+    workspaceId: string
+  ) => () =>
+    tryOperation({
+      op: () =>
+        startCalculation({
+          variables: { workspaceId }
+        }),
+      refetch,
+      successTitle: () => 'Process started',
+      successMessage: () => 'This might take several minutes',
+      failedTitle: 'Process start has failed'
+    });
+
   public render() {
     const {
       match: {
-        params: { id }
+        params: { workspaceId }
       }
     } = this.props;
     return (
-      <Query query={WORKSPACE_NODE_SELECTION} variables={{ workspaceId: id }}>
+      <Query query={WORKSPACE_NODE_SELECTION} variables={{ workspaceId }}>
         {({ loading, error, data, refetch }) => {
           if (loading) {
             return <LoadingCard />;
@@ -203,114 +322,35 @@ export class WorkspaceEditorPage extends React.Component<
                                           nodes={deepCopyResponse(
                                             data.workspace.nodes
                                           )}
-                                          onNodeCreate={(
-                                            type,
-                                            x,
-                                            y,
-                                            contextIds
-                                          ) =>
-                                            tryOperation({
-                                              op: () =>
-                                                createNode({
-                                                  variables: {
-                                                    type,
-                                                    x,
-                                                    y,
-                                                    contextIds,
-                                                    workspaceId: id
-                                                  }
-                                                }),
-                                              refetch,
-                                              successTitle: null,
-                                              failedTitle: 'Node not created'
-                                            })
-                                          }
-                                          onNodeDelete={nodeId =>
-                                            tryOperation({
-                                              op: () =>
-                                                deleteNode({
-                                                  variables: { id: nodeId }
-                                                }),
-                                              refetch,
-                                              successTitle: null,
-                                              failedTitle: 'Node not deleted'
-                                            })
-                                          }
-                                          onNodeUpdate={(nodeId, x, y) =>
-                                            tryOperation({
-                                              op: () =>
-                                                updateNodePosition({
-                                                  variables: {
-                                                    id: nodeId,
-                                                    x,
-                                                    y
-                                                  }
-                                                }),
-                                              refetch,
-                                              successTitle: null,
-                                              failedTitle: 'Node not updated'
-                                            })
-                                          }
-                                          onConnectionCreate={(from, to) =>
-                                            tryOperation({
-                                              op: () =>
-                                                createConnection({
-                                                  variables: {
-                                                    input: { from, to }
-                                                  }
-                                                }),
-                                              refetch,
-                                              successTitle: null,
-                                              failedTitle:
-                                                'Connection not created'
-                                            })
-                                          }
-                                          onConnectionDelete={connId =>
-                                            tryOperation({
-                                              op: () =>
-                                                deleteConnection({
-                                                  variables: { id: connId }
-                                                }),
-                                              refetch,
-                                              successTitle: null,
-                                              failedTitle:
-                                                'Connection not deleted'
-                                            })
-                                          }
-                                          onAddOrUpdateFormValue={(
-                                            nodeId,
-                                            name,
-                                            value
-                                          ) =>
-                                            tryOperation({
-                                              op: () =>
-                                                addOrUpdateFormValue({
-                                                  variables: {
-                                                    nodeId,
-                                                    name,
-                                                    value
-                                                  }
-                                                }),
-                                              refetch,
-                                              successTitle: null,
-                                              failedTitle: 'Value not changed'
-                                            })
-                                          }
-                                          onStartCalculation={() =>
-                                            tryOperation({
-                                              op: () =>
-                                                startCalculation({
-                                                  variables: { workspaceId: id }
-                                                }),
-                                              refetch,
-                                              successTitle: () =>
-                                                'Process started',
-                                              successMessage: () =>
-                                                'This might take several minutes',
-                                              failedTitle:
-                                                'Process start has failed'
-                                            })
-                                          }
+                                          onNodeCreate={this.handleNodeCreate(
+                                            createNode,
+                                            workspaceId,
+                                            refetch
+                                          )}
+                                          onNodeDelete={this.handleNodeDelete(
+                                            deleteNode,
+                                            refetch
+                                          )}
+                                          onNodeUpdate={this.handleNodeUpdate(
+                                            updateNodePosition
+                                          )}
+                                          onConnectionCreate={this.handleConnectionCreate(
+                                            createConnection,
+                                            refetch
+                                          )}
+                                          onConnectionDelete={this.handleConnectionDelete(
+                                            deleteConnection,
+                                            refetch
+                                          )}
+                                          onAddOrUpdateFormValue={this.handleAddOrUpdateFormValue(
+                                            addOrUpdateFormValue,
+                                            refetch
+                                          )}
+                                          onStartCalculation={this.handleStartCalculation(
+                                            startCalculation,
+                                            refetch,
+                                            workspaceId
+                                          )}
                                         />
                                       )}
                                     </Mutation>

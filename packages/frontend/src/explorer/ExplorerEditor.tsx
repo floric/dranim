@@ -5,8 +5,8 @@ import {
   ConnectionInstance,
   Dataset,
   GQLNodeInstance,
-  SocketInstance,
-  NodeState
+  NodeState,
+  SocketInstance
 } from '@masterthesis/shared';
 import { Card, Col, Row, TreeSelect } from 'antd';
 import { css } from 'glamor';

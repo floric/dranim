@@ -26,14 +26,17 @@ const WORKSPACE = gql`
 `;
 
 export interface IWorkspacesPageProps
-  extends RouteComponentProps<{ id: string }> {}
+  extends RouteComponentProps<{ workspaceId: string }> {}
 
 export default class WorkspacesPage extends React.Component<
   IWorkspacesPageProps
 > {
   public render() {
     return (
-      <Query query={WORKSPACE} variables={{ id: this.props.match.params.id }}>
+      <Query
+        query={WORKSPACE}
+        variables={{ id: this.props.match.params.workspaceId }}
+      >
         {({ loading, error, data }) => {
           if (loading) {
             return <LoadingCard />;

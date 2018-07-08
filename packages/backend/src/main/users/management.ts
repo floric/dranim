@@ -63,30 +63,39 @@ export const register = async (
   mail: string,
   pw: string,
   reqContext: ApolloContext
-): Promise<User> => {
+): Promise<User | null> => {
   const saltedPw = await hash(pw, 10);
   const coll = getUsersCollection(reqContext.db);
   await coll.createIndex('mail', {
     unique: true
   });
-  const res = await coll.insertOne({
-    firstName,
-    lastName,
-    mail,
-    pw: saltedPw
-  });
-  if (res.insertedCount !== 1) {
-    throw new Error('Creating user failed');
+  try {
+    const res = await coll.insertOne({
+      firstName,
+      lastName,
+      mail,
+      pw: saltedPw
+    });
+
+    if (res.insertedCount !== 1) {
+      throw new Error('Creating user failed');
+    }
+
+    const user = res.ops[0];
+
+    return {
+      id: user._id.toHexString(),
+      mail: user.mail,
+      firstName: user.firstName,
+      lastName: user.lastName
+    };
+  } catch (err) {
+    if (err.code === 11000) {
+      return null;
+    }
+
+    throw new Error('Unknown registration error');
   }
-
-  const user = res.ops[0];
-
-  return {
-    id: user._id.toHexString(),
-    mail: user.mail,
-    firstName: user.firstName,
-    lastName: user.lastName
-  };
 };
 
 export const tryGetUser = async (reqContext: ApolloContext): Promise<User> => {

@@ -24,7 +24,7 @@ const CALCULATIONS = gql`
 `;
 
 export interface WorkspaceCalculationsPageProps
-  extends RouteComponentProps<{ id: string }> {}
+  extends RouteComponentProps<{ workspaceId: string }> {}
 
 export class WorkspaceCalculationsPage extends Component<
   WorkspaceCalculationsPageProps
@@ -32,12 +32,12 @@ export class WorkspaceCalculationsPage extends Component<
   public render() {
     const {
       match: {
-        params: { id }
+        params: { workspaceId }
       }
     } = this.props;
     return (
-      <Query query={CALCULATIONS} variables={{ workspaceId: id }}>
-        {({ loading, error, data, refetch }) => {
+      <Query query={CALCULATIONS} variables={{ workspaceId }}>
+        {({ loading, error, data }) => {
           if (loading) {
             return <LoadingCard />;
           }

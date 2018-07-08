@@ -38,9 +38,14 @@ const registerRegistration = (app: Express, db: Db) => {
         req.body.pw,
         { db, userId: req.session!.userId }
       );
-      (req.session as any).userId = result.id;
-      res.status(200).send(JSON.stringify(result));
+      if (result) {
+        (req.session as any).userId = result.id;
+        res.status(200).send(JSON.stringify(result));
+      } else {
+        res.status(400).send();
+      }
     } catch (err) {
+      console.error(err);
       res.status(500).send();
     }
   });

@@ -43,13 +43,16 @@ const WORKSPACE = gql`
 const resultCardSize = { md: 24, l: 12, xl: 8 };
 
 export interface VisDetailPageProps
-  extends RouteComponentProps<{ id: string }> {}
+  extends RouteComponentProps<{ workspaceId: string }> {}
 
 export default class VisDetailPage extends React.Component<VisDetailPageProps> {
   public render() {
     return (
-      <Query query={WORKSPACE} variables={{ id: this.props.match.params.id }}>
-        {({ loading, error, data, refetch }) => {
+      <Query
+        query={WORKSPACE}
+        variables={{ id: this.props.match.params.workspaceId }}
+      >
+        {({ loading, error, data }) => {
           if (loading) {
             return <LoadingCard />;
           }
