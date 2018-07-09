@@ -8,6 +8,7 @@ import {
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
+import { Logger } from '../../logging';
 import { getNodeType, tryGetNodeType } from '../nodes/all-nodes';
 import { deleteConnection, deleteConnectionsInContext } from './connections';
 import { updateStates } from './nodes-state';
@@ -59,6 +60,8 @@ export const createNode = async (
   await updateStates(workspaceId, reqContext);
 
   const { _id, ...other } = res.ops[0];
+
+  Logger.info(`Node ${newNodeId} created`);
 
   return {
     id: newNodeId,
@@ -161,6 +164,8 @@ export const deleteNode = async (id: string, reqContext: ApolloContext) => {
   if (!res || !res.deletedCount || res.deletedCount < 1) {
     throw new Error('Deleting node failed');
   }
+
+  Logger.info(`Node ${id} deleted`);
 
   return true;
 };

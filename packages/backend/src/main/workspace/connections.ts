@@ -6,6 +6,7 @@ import {
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
+import { Logger } from '../../logging';
 import { tryGetNode } from './nodes';
 import { addConnection, removeConnection } from './nodes-detail';
 import { updateStates } from './nodes-state';
@@ -64,6 +65,8 @@ export const createConnection = async (
   ]);
 
   await updateStates(inputNode.workspaceId, reqContext);
+
+  Logger.info(`Connection ${connId} created`);
 
   return {
     id: newItem._id.toHexString(),
@@ -136,6 +139,8 @@ export const deleteConnection = async (
   await connCollection.deleteOne({ _id: new ObjectID(id) });
 
   await updateStates(connection.workspaceId, reqContext);
+
+  Logger.info(`Connection ${id} deleted`);
 
   return true;
 };

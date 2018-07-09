@@ -8,6 +8,7 @@ import {
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
+import { Logger } from '../../logging';
 import { executeNode } from '../calculation/execution';
 import { addOrUpdateResult } from '../dashboards/results';
 import { getNodeType, hasNodeType } from '../nodes/all-nodes';
@@ -39,7 +40,7 @@ const startProcess = async (
       }
     );
 
-    console.log('Started calculation.');
+    Logger.info('Started calculation.');
 
     const results = await Promise.all(
       outputNodesInstances.map(o => executeOutputNode(o, processId, reqContext))
@@ -51,7 +52,7 @@ const startProcess = async (
       ProcessState.SUCCESSFUL,
       reqContext
     );
-    console.log('Finished calcuation successfully.');
+    Logger.info('Finished calcuation successfully.');
   } catch (err) {
     await updateFinishedProcess(
       processId,
@@ -59,7 +60,7 @@ const startProcess = async (
       ProcessState.ERROR,
       reqContext
     );
-    console.error('Finished calculation with errors', err);
+    Logger.info('Finished calculation with errors', err);
   }
 };
 

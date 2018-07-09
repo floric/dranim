@@ -7,6 +7,7 @@ import {
 } from '@masterthesis/shared';
 import { ObjectID } from 'mongodb';
 
+import { Logger } from '../../logging';
 import { isNodeInMetaValid } from '../calculation/validation';
 import { getNodeType } from '../nodes/all-nodes';
 import { deleteConnection, getAllConnections } from './connections';
@@ -96,7 +97,7 @@ const calculateState = async (
 
     return NodeState.VALID;
   } catch (err) {
-    console.error(err);
+    Logger.error('Calculation error', err);
     return NodeState.ERROR;
   }
 };

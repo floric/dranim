@@ -263,9 +263,11 @@ export class ExplorerEditor extends React.Component<
                     icon="rocket"
                     onClick={this.handleStartCalulcation}
                     disabled={
-                      !nodes
-                        .map(n => n.state === NodeState.VALID)
-                        .reduce((a, b) => a && b, false)
+                      nodes.length > 0
+                        ? !nodes
+                            .map(n => n.state === NodeState.VALID)
+                            .reduce((a, b) => a && b)
+                        : true
                     }
                   >
                     Calculate

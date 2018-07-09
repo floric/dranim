@@ -10,6 +10,7 @@ import { Collection, Db, ObjectID } from 'mongodb';
 import * as promisesAll from 'promises-all';
 import { Readable } from 'stream';
 
+import { Logger } from '../../logging';
 import { tryGetDataset } from '../../main/workspace/dataset';
 import { Valueschema } from '../../main/workspace/dataset';
 import { createEntry } from '../../main/workspace/entry';
@@ -98,7 +99,7 @@ const processValidEntry = async (
         { upsert: true }
       );
     } else {
-      console.log(err);
+      Logger.error(err);
     }
   }
 };
@@ -130,21 +131,21 @@ const parseCsvFile = async (
     .on('data', values => processValidEntry(values, ds, processId, reqContext))
     .on('data-invalid', () => processInvalidEntry(ds, processId, reqContext))
     .on('end', () => {
-      console.log(`Finished import of ${filename}.`);
+      Logger.info(`Finished import of ${filename}.`);
     });
 
-  console.log(`Started import of ${filename}.`);
+  Logger.info(`Started import of ${filename}.`);
 
   try {
     await new Promise((resolve, reject) =>
       stream
-        .on('error', err => console.log(err))
+        .on('error', err => Logger.error(err))
         .pipe(csvStream)
-        .on('error', err => console.log(err))
+        .on('error', err => Logger.error(err))
         .on('finish', () => resolve())
     );
   } catch (err) {
-    console.log(err);
+    Logger.error(err);
   }
 
   return true;
@@ -166,7 +167,7 @@ const processUpload = async (
       { $push: { fileNames: filename } }
     );
   } catch (err) {
-    console.log(err);
+    Logger.error(err);
     throw new Error('Upload has failed.');
   }
 };
@@ -204,7 +205,7 @@ export const uploadEntriesCsv = async (
 
     return process;
   } catch (err) {
-    console.log(err);
+    Logger.error(err);
     throw new Error('Upload failed');
   }
 };
@@ -222,7 +223,7 @@ export const doUploadAsync = async (
 
   if (reject.length) {
     reject.forEach(({ name, message }) => {
-      console.error(`${name}: ${message}`);
+      Logger.error(`Upload failed for ${name}: ${message}`);
     });
     await uploadsCollection.updateOne(
       { _id: processId },

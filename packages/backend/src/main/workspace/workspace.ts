@@ -6,6 +6,7 @@ import {
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
+import { Logger } from '../../logging';
 import { getConnectionsCollection } from './connections';
 import { getNodesCollection } from './nodes';
 
@@ -44,6 +45,9 @@ export const createWorkspace = async (
   }
 
   const newItem = res.ops[0];
+
+  Logger.info(`Workspace ${newItem._id.toHexString()} created`);
+
   return {
     id: newItem._id.toHexString(),
     ...newItem
@@ -72,6 +76,8 @@ export const deleteWorkspace = async (
     nodesCollection.deleteMany({ workspaceId: id }),
     connectionsCollection.deleteMany({ workspaceId: id })
   ]);
+
+  Logger.info(`Workspace ${id} deleted`);
 
   return true;
 };

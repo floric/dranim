@@ -12,6 +12,7 @@ import { Db } from 'mongodb';
 
 import { mongoDbClient } from './config/db';
 import Schema from './graphql/schema';
+import { Logger, MorganLogStream } from './logging';
 import { initWorkspaceDb } from './main/workspace/workspace';
 import { generateErrorResponse, registerRoutes } from './routes';
 
@@ -21,11 +22,6 @@ export interface IMainOptions {
   env: string;
   port: number;
   frontendDomain: string;
-  verbose?: boolean;
-}
-
-function verbosePrint(port) {
-  console.log(`Server running on http://localhost${GRAPHQL_ROUTE}`);
 }
 
 const MAX_UPLOAD_LIMIT = 100 * 1024 * 1024 * 1024;
@@ -54,8 +50,9 @@ export const main = async (options: IMainOptions) => {
       store: new MongoStore({ db }),
       cookie: { secure: false }
     }),
-    morgan('combined', {
-      skip: req => req.headers['user-agent'] === 'ELB-HealthChecker/1.0'
+    morgan('short', {
+      skip: req => req.headers['user-agent'] === 'ELB-HealthChecker/1.0',
+      stream: new MorganLogStream()
     }),
     bodyParser.json({}),
     bodyParser.urlencoded({
@@ -89,12 +86,12 @@ export const main = async (options: IMainOptions) => {
 
   app
     .listen(options.port, () => {
-      if (options.verbose) {
-        verbosePrint(options.port);
-      }
+      Logger.info(
+        `Server running on http://localhost${GRAPHQL_ROUTE}:${options.port}`
+      );
     })
     .on('error', (err: Error) => {
-      console.error(err);
+      Logger.error('App error', err);
     });
 };
 
@@ -109,6 +106,5 @@ const FRONTEND_DOMAIN = process.env.FRONTEND_DOMAIN || 'localhost:1234';
 main({
   env: NODE_ENV,
   frontendDomain: FRONTEND_DOMAIN!,
-  port: PORT,
-  verbose: true
+  port: PORT
 });

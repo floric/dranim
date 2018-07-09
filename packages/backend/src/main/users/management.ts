@@ -3,6 +3,8 @@ import { ApolloContext, User } from '@masterthesis/shared';
 import { compare, hash } from 'bcrypt';
 import { Collection, Db, ObjectID } from 'mongodb';
 
+import { Logger } from '../../logging';
+
 const getUsersCollection = (
   db: Db
 ): Collection<User & { _id: ObjectID; pw: string }> => db.collection('Users');
@@ -14,13 +16,17 @@ export const login = async (
 ): Promise<User | null> => {
   const user = await getFullUserByMail(mail, reqContext);
   if (!user) {
+    Logger.info(`Failed login with invalid mail`);
     return null;
   }
 
   const isPwCorrect = await compare(pw, user.pw);
   if (!isPwCorrect) {
+    Logger.info(`Failed login with password`);
     return null;
   }
+
+  Logger.info(`Successful login: ${user.id}`);
 
   return {
     id: user._id.toHexString(),
@@ -80,6 +86,8 @@ export const register = async (
     }
 
     const user = res.ops[0];
+
+    Logger.info(`Successfull registration`);
 
     return {
       id: user._id.toHexString(),

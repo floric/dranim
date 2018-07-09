@@ -1,4 +1,5 @@
 import { MongoClient } from 'mongodb';
+import { Logger } from '../logging';
 const promiseRetry = require('promise-retry');
 
 const config = {
@@ -22,11 +23,11 @@ export const mongoDbClient = async (): Promise<MongoClient> => {
 };
 
 const tryConnectToDb = async () => {
-  console.log(`Trying to connect to ${config.db}`);
+  Logger.info(`Trying to connect to ${config.db}`);
   const client = await MongoClient.connect(
     config.db,
     { useNewUrlParser: true } as any
   );
-  console.log('Connected to MongoDB');
+  Logger.info('Connected to MongoDB');
   return client;
 };

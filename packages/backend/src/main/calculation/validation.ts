@@ -7,6 +7,7 @@ import {
   parseNodeForm
 } from '@masterthesis/shared';
 
+import { Logger } from '../../logging';
 import { getMetaInputs } from '../calculation/meta-execution';
 import { tryGetNodeType } from '../nodes/all-nodes';
 import { getDataset } from '../workspace/dataset';
@@ -102,7 +103,7 @@ export const isInputValid = async (
   }
 
   if (!validationMethods.has(dataType)) {
-    console.warn('Unsupported data type: ' + dataType);
+    Logger.warn('Unsupported data type: ' + dataType);
     return true;
   }
 
