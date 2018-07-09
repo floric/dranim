@@ -6,7 +6,7 @@ import {
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
-import { getNode, tryGetNode } from './nodes';
+import { tryGetNode } from './nodes';
 import { addConnection, removeConnection } from './nodes-detail';
 import { updateStates } from './nodes-state';
 

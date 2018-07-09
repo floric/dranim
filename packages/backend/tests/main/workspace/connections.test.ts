@@ -9,12 +9,13 @@ import {
   getConnectionsCollection,
   tryGetConnection
 } from '../../../src/main/workspace/connections';
-import { getNode } from '../../../src/main/workspace/nodes';
+import { tryGetNode } from '../../../src/main/workspace/nodes';
 import {
   getTestMongoDb,
   NeverGoHereError,
   VALID_OBJECT_ID
 } from '../../test-utils';
+import { updateStates } from '../../../src/main/workspace/nodes-state';
 
 let conn;
 let db: Db;
@@ -22,6 +23,7 @@ let server;
 
 jest.mock('../../../src/main/workspace/nodes');
 jest.mock('../../../src/main/workspace/nodes-detail');
+jest.mock('../../../src/main/workspace/nodes-state');
 
 describe('Connections', () => {
   beforeAll(async () => {
@@ -70,7 +72,7 @@ describe('Connections', () => {
       state: NodeState.VALID
     };
 
-    (getNode as jest.Mock)
+    (tryGetNode as jest.Mock)
       .mockResolvedValueOnce(nodeA)
       .mockResolvedValueOnce(nodeB);
 
@@ -99,6 +101,7 @@ describe('Connections', () => {
       userId: ''
     });
     expect(unknownConn).toBe(null);
+    expect(updateStates).toHaveBeenCalledTimes(2);
   });
 
   test('should return null for invalid id', async () => {
@@ -147,7 +150,7 @@ describe('Connections', () => {
       state: NodeState.VALID
     };
 
-    (getNode as jest.Mock)
+    (tryGetNode as jest.Mock)
       .mockResolvedValueOnce(nodeA)
       .mockResolvedValueOnce(nodeB);
 
@@ -213,7 +216,7 @@ describe('Connections', () => {
       state: NodeState.VALID
     };
 
-    (getNode as jest.Mock)
+    (tryGetNode as jest.Mock)
       .mockResolvedValueOnce(nodeAinContext)
       .mockResolvedValueOnce(nodeBinContext);
 
@@ -273,7 +276,7 @@ describe('Connections', () => {
       state: NodeState.VALID
     };
 
-    (getNode as jest.Mock)
+    (tryGetNode as jest.Mock)
       .mockResolvedValueOnce(nodeA)
       .mockResolvedValueOnce(nodeB)
       .mockResolvedValueOnce(nodeA)
@@ -313,7 +316,11 @@ describe('Connections', () => {
       state: NodeState.VALID
     };
 
-    (getNode as jest.Mock).mockResolvedValueOnce(nodeA);
+    (tryGetNode as jest.Mock)
+      .mockResolvedValueOnce(nodeA)
+      .mockImplementationOnce(() => {
+        throw new Error('Unknown node');
+      });
 
     const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
     const toSocket: SocketInstance = {
@@ -358,7 +365,7 @@ describe('Connections', () => {
       state: NodeState.VALID
     };
 
-    (getNode as jest.Mock)
+    (tryGetNode as jest.Mock)
       .mockResolvedValueOnce(nodeA)
       .mockResolvedValueOnce(nodeB);
 
@@ -405,7 +412,7 @@ describe('Connections', () => {
       state: NodeState.VALID
     };
 
-    (getNode as jest.Mock)
+    (tryGetNode as jest.Mock)
       .mockResolvedValueOnce(nodeA)
       .mockResolvedValueOnce(nodeB);
 

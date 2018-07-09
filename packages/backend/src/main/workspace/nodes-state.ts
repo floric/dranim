@@ -59,23 +59,14 @@ export const updateState = async (
   reqContext: ApolloContext
 ): Promise<NodeState> => {
   const state = await calculateState(node, reqContext);
-  await setState(node.id, state, reqContext);
-
-  return state;
-};
-
-const setState = async (
-  nodeId: string,
-  state: NodeState,
-  reqContext: ApolloContext
-) => {
   const nodesCollection = getNodesCollection(reqContext.db);
   await nodesCollection.updateOne(
-    { _id: new ObjectID(nodeId) },
+    { _id: new ObjectID(node.id) },
     {
       $set: { state }
     }
   );
+  return state;
 };
 
 const calculateState = async (
