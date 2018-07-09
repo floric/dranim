@@ -5,7 +5,8 @@ import {
   NodeDef,
   NodeInstance,
   NodeState,
-  ServerNodeDefWithContextFn
+  ServerNodeDefWithContextFn,
+  SocketState
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
@@ -167,7 +168,7 @@ describe('Node Details', () => {
         value: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},
@@ -224,7 +225,7 @@ describe('Node Details', () => {
         value: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},
@@ -282,7 +283,7 @@ describe('Node Details', () => {
         value: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},
@@ -418,7 +419,7 @@ describe('Node Details', () => {
         test: {
           dataType: DataType.DATETIME,
           displayName: 'date',
-          isDynamic: true
+          state: SocketState.DYNAMIC
         }
       }),
       transformInputDefsToContextInputDefs: async () => ({})
@@ -461,7 +462,7 @@ describe('Node Details', () => {
       test: {
         dataType: DataType.DATETIME,
         displayName: 'date',
-        isDynamic: true
+        state: SocketState.DYNAMIC
       }
     });
   });

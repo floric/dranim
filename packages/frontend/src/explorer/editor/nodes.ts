@@ -2,11 +2,13 @@ import {
   Colors,
   ConditionalMetaTypes,
   ContextNodeType,
+  DataType,
   GQLNodeInstance,
   NodeState,
   parseNodeForm,
   SocketDef,
   SocketDefs,
+  SocketState,
   SocketType
 } from '@masterthesis/shared';
 import * as Konva from 'konva';
@@ -92,6 +94,14 @@ export const renderNode = (
   });
 
   const { inputs, outputs, name, renderName } = nodeType;
+  if (n.hasContextFn) {
+    inputs['add-var'] = {
+      dataType: DataType.ANY,
+      displayName: 'Insert Variable',
+      state: SocketState.VARIABLE
+    };
+  }
+
   const height = getNodeHeight(inputs, outputs);
   const isSelected =
     state.selectedNodeId !== null && state.selectedNodeId === n.id;
@@ -113,6 +123,7 @@ export const renderNode = (
       ? renderName({ node: n, state: server }, parseNodeForm(n.form))
       : name
   );
+
   const [inputsGroup, outputsGroup] = [
     { defs: inputs, type: SocketType.INPUT },
     { defs: outputs, type: SocketType.OUTPUT }

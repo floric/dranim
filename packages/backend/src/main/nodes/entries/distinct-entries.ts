@@ -6,6 +6,7 @@ import {
   ForEachEntryNodeOutputs,
   ServerNodeDefWithContextFn,
   SocketDefs,
+  SocketState,
   ValueSchema
 } from '@masterthesis/shared';
 
@@ -42,7 +43,7 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
       [getDistinctValueName(form.schema)]: {
         dataType: form.schema.type,
         displayName: getDistinctValueName(form.schema),
-        isDynamic: true
+        state: SocketState.DYNAMIC
       }
     };
   },
@@ -59,7 +60,7 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
         contextOutputDefs[s.name] = {
           dataType: s.type,
           displayName: s.name,
-          isDynamic: true
+          state: SocketState.DYNAMIC
         };
       });
     }

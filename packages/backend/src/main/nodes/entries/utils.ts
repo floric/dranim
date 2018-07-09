@@ -6,6 +6,7 @@ import {
   SocketDef,
   SocketDefs,
   SocketMetaDef,
+  SocketState,
   ValueSchema
 } from '@masterthesis/shared';
 
@@ -38,7 +39,7 @@ export const getDynamicEntryContextInputs = async (
     dynInputDefs[s.name] = {
       dataType: s.type,
       displayName: s.name,
-      isDynamic: true
+      state: SocketState.DYNAMIC
     };
   });
 

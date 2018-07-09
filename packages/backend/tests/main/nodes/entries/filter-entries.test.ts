@@ -5,7 +5,8 @@ import {
   DataType,
   Entry,
   FilterEntriesNodeDef,
-  ValueSchema
+  ValueSchema,
+  SocketState
 } from '@masterthesis/shared';
 
 import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
@@ -171,7 +172,8 @@ describe('FilterEntriesNode', () => {
     expect(res).toEqual({
       keepEntry: {
         dataType: DataType.BOOLEAN,
-        displayName: 'Keep entry'
+        displayName: 'Keep entry',
+        state: SocketState.STATIC
       }
     });
   });

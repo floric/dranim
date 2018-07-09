@@ -3,7 +3,8 @@ import {
   Dataset,
   DatasetSocket,
   DataType,
-  EditEntriesNodeDef
+  EditEntriesNodeDef,
+  SocketState
 } from '@masterthesis/shared';
 
 import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
@@ -125,7 +126,7 @@ describe('EditEntriesNode', () => {
       super: {
         dataType: DataType.BOOLEAN,
         displayName: 'super',
-        isDynamic: true
+        state: SocketState.DYNAMIC
       }
     });
     const validDs = {
@@ -154,7 +155,7 @@ describe('EditEntriesNode', () => {
       super: {
         dataType: DataType.BOOLEAN,
         displayName: 'super',
-        isDynamic: true
+        state: SocketState.DYNAMIC
       }
     });
   });
@@ -184,7 +185,7 @@ describe('EditEntriesNode', () => {
         super: {
           dataType: DataType.BOOLEAN,
           displayName: 'super',
-          isDynamic: true
+          state: SocketState.DYNAMIC
         }
       },
       {},
@@ -220,7 +221,7 @@ describe('EditEntriesNode', () => {
         super: {
           dataType: DataType.BOOLEAN,
           displayName: 'super',
-          isDynamic: true
+          state: SocketState.DYNAMIC
         }
       },
       {},
@@ -232,7 +233,7 @@ describe('EditEntriesNode', () => {
       super: {
         dataType: DataType.BOOLEAN,
         displayName: 'super',
-        isDynamic: true
+        state: SocketState.DYNAMIC
       }
     });
   });

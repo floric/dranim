@@ -7,6 +7,7 @@ import {
   ForEachEntryNodeOutputs,
   ServerNodeDefWithContextFn,
   SocketDef,
+  SocketState,
   ValueSchema
 } from '@masterthesis/shared';
 
@@ -49,7 +50,7 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
       dynOutputs[f.name] = {
         dataType: f.type,
         displayName: f.name,
-        isDynamic: true
+        state: SocketState.DYNAMIC
       };
     });
 

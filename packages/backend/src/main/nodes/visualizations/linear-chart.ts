@@ -6,6 +6,7 @@ import {
   OutputNodeForm,
   OutputResult,
   ServerNodeDefWithContextFn,
+  SocketState,
   VisInputs
 } from '@masterthesis/shared';
 
@@ -34,8 +35,16 @@ export const LinearChartNode: ServerNodeDefWithContextFn<
   transformInputDefsToContextInputDefs: getDynamicEntryContextInputs,
   transformContextInputDefsToContextOutputDefs: () =>
     Promise.resolve({
-      label: { dataType: DataType.STRING, displayName: 'Label' },
-      value: { dataType: DataType.NUMBER, displayName: 'Value' }
+      label: {
+        dataType: DataType.STRING,
+        displayName: 'Label',
+        state: SocketState.STATIC
+      },
+      value: {
+        dataType: DataType.NUMBER,
+        displayName: 'Value',
+        state: SocketState.STATIC
+      }
     }),
   onMetaExecution: () => Promise.resolve({}),
   onNodeExecution: async (
@@ -62,7 +71,7 @@ export const LinearChartNode: ServerNodeDefWithContextFn<
           type: form.type || LinearChartType.COLUMN,
           values
         },
-        type: DataType.CUSTOM,
+        type: DataType.VIS,
         name: form.name!,
         workspaceId,
         description: form.description || ''

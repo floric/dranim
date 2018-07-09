@@ -8,7 +8,8 @@ import {
   NodeState,
   parseNodeForm,
   ServerNodeDef,
-  ServerNodeDefWithContextFn
+  ServerNodeDefWithContextFn,
+  SocketState
 } from '@masterthesis/shared';
 
 import {
@@ -59,7 +60,7 @@ describe('Execution', () => {
         value: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},
@@ -116,7 +117,7 @@ describe('Execution', () => {
         a: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},
@@ -133,7 +134,7 @@ describe('Execution', () => {
         a: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       keywords: [],
@@ -345,7 +346,7 @@ describe('Execution', () => {
         a: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       keywords: [],
@@ -361,7 +362,7 @@ describe('Execution', () => {
         b: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       keywords: [],
@@ -376,12 +377,12 @@ describe('Execution', () => {
         a: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         },
         b: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},

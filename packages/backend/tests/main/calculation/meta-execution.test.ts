@@ -7,7 +7,8 @@ import {
   NodeInstance,
   NodeState,
   ServerNodeDef,
-  ServerNodeDefWithContextFn
+  ServerNodeDefWithContextFn,
+  SocketState
 } from '@masterthesis/shared';
 
 import {
@@ -77,7 +78,7 @@ describe('Meta Execution', () => {
         value: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},
@@ -175,12 +176,12 @@ describe('Meta Execution', () => {
           test: {
             dataType: DataType.DATETIME,
             displayName: 'date',
-            isDynamic: true
+            state: SocketState.DYNAMIC
           },
           abc: {
             dataType: DataType.STRING,
             displayName: 'abc test',
-            isDynamic: true
+            state: SocketState.DYNAMIC
           }
         })
     };

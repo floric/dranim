@@ -4,7 +4,9 @@ import {
   Dataset,
   DataType,
   Entry,
-  ValueSchema
+  ValueSchema,
+  SocketState,
+  NodeState
 } from '@masterthesis/shared';
 
 import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
@@ -132,7 +134,7 @@ describe('AddValuesNode', () => {
       {
         dataset: {
           dataType: DataType.DATASET,
-          isDynamic: false,
+          state: SocketState.STATIC
           displayName: 'Dataset'
         }
       },
@@ -140,7 +142,7 @@ describe('AddValuesNode', () => {
       {
         test: {
           dataType: DataType.NUMBER,
-          isDynamic: true,
+          state: SocketState.DYNAMIC,
           displayName: 'Test'
         }
       },
@@ -152,7 +154,7 @@ describe('AddValuesNode', () => {
     expect(res).toEqual({
       test: {
         dataType: DataType.NUMBER,
-        isDynamic: true,
+        state: SocketState.DYNAMIC,
         displayName: 'Test'
       }
     });
@@ -165,7 +167,7 @@ describe('AddValuesNode', () => {
       {
         dataset: {
           dataType: DataType.DATASET,
-          isDynamic: false,
+          state: SocketState.STATIC
           displayName: 'Dataset'
         }
       },
@@ -173,7 +175,7 @@ describe('AddValuesNode', () => {
       {
         test: {
           dataType: DataType.NUMBER,
-          isDynamic: true,
+          state: SocketState.DYNAMIC,
           displayName: 'Test'
         }
       },
@@ -194,12 +196,12 @@ describe('AddValuesNode', () => {
     expect(res).toEqual({
       test: {
         dataType: DataType.NUMBER,
-        isDynamic: true,
+        state: SocketState.DYNAMIC,
         displayName: 'Test'
       },
       test2: {
         dataType: DataType.STRING,
-        isDynamic: true,
+        state: SocketState.DYNAMIC,
         displayName: 'test2'
       }
     });
@@ -210,7 +212,7 @@ describe('AddValuesNode', () => {
       {
         dataset: {
           dataType: DataType.DATASET,
-          isDynamic: false,
+          state: SocketState.STATIC,
           displayName: 'Dataset'
         }
       },
@@ -218,7 +220,7 @@ describe('AddValuesNode', () => {
       {
         test: {
           dataType: DataType.NUMBER,
-          isDynamic: true,
+          state: SocketState.DYNAMIC,
           displayName: 'Test'
         }
       },
@@ -299,7 +301,8 @@ describe('AddValuesNode', () => {
           workspaceId: VALID_OBJECT_ID,
           form: [],
           x: 0,
-          y: 0
+          y: 0,
+          state: NodeState.VALID
         },
         contextFnExecution: async inputs => ({
           outputs: { ...inputs, new: 'super' }

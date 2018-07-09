@@ -6,7 +6,8 @@ import {
   NodeInstance,
   NodeState,
   parseNodeForm,
-  ServerNodeDef
+  ServerNodeDef,
+  SocketState
 } from '@masterthesis/shared';
 
 import { getMetaInputs } from '../../../src/main/calculation/meta-execution';
@@ -40,7 +41,7 @@ describe('Validation', () => {
         value: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},
@@ -108,7 +109,7 @@ describe('Validation', () => {
         value: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},
@@ -151,7 +152,7 @@ describe('Validation', () => {
         value: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},
@@ -189,7 +190,7 @@ describe('Validation', () => {
         value: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},
@@ -230,7 +231,7 @@ describe('Validation', () => {
         value: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},

@@ -89,7 +89,7 @@ export default class VisDetailPage extends React.Component<VisDetailPageProps> {
 
 const renderResult = (result: GQLOutputResult): JSX.Element => {
   const value = JSON.parse(result.value);
-  if (result.type !== DataType.CUSTOM) {
+  if (result.type !== DataType.VIS) {
     return (
       <Card bordered={false} title={result.name}>
         {(() => {

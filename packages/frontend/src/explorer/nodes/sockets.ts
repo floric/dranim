@@ -6,5 +6,6 @@ export const socketColors = new Map([
   [DataType.DATETIME, Colors.Datetime],
   [DataType.TIME, Colors.Time],
   [DataType.STRING, Colors.String],
-  [DataType.BOOLEAN, Colors.Boolean]
+  [DataType.BOOLEAN, Colors.Boolean],
+  [DataType.ANY, Colors.GrayDark]
 ]);
