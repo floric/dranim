@@ -10,15 +10,11 @@ import {
 import { isNodeInMetaValid } from '../../../src/main/calculation/validation';
 import { getNodeType, tryGetNodeType } from '../../../src/main/nodes/all-nodes';
 import {
-  getNode,
   getNodesCollection,
   tryGetContextNode,
   tryGetNode
 } from '../../../src/main/workspace/nodes';
-import {
-  calculateNodeState,
-  updateState
-} from '../../../src/main/workspace/nodes-state';
+import { updateState } from '../../../src/main/workspace/nodes-state';
 import { VALID_OBJECT_ID } from '../../test-utils';
 
 jest.mock('@masterthesis/shared');
@@ -32,7 +28,7 @@ describe('Node State', () => {
     jest.resetAllMocks();
   });
 
-  test('should get valid node state', async () => {
+  /*test('should get valid node state', async () => {
     const node: NodeInstance = {
       id: 'testnode',
       contextIds: [],
@@ -239,7 +235,7 @@ describe('Node State', () => {
 
     const res = await calculateNodeState(node, { db: null, userId: '' });
     expect(res).toBe(NodeState.INVALID);
-  });
+  });*/
 
   test('should update state for simple node', async () => {
     const node: NodeInstance = {

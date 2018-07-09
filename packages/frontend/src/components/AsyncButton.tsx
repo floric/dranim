@@ -38,8 +38,8 @@ export class AsyncButton extends React.Component<
       if (this.props.onClick) {
         await this.props.onClick();
       }
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err);
     }
     if (this.mounted) {
       await this.setState({ isLoading: false });

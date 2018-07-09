@@ -18,7 +18,7 @@ import {
   tryGetContextNode,
   tryGetNode
 } from './nodes';
-import { updateStateWithId } from './nodes-state';
+import { updateStates } from './nodes-state';
 
 export const getContextInputDefs = async (
   node: NodeInstance,
@@ -127,8 +127,7 @@ export const addOrUpdateFormValue = async (
     throw new Error('No form value name specified');
   }
 
-  await tryGetNode(nodeId, reqContext);
-
+  const node = await tryGetNode(nodeId, reqContext);
   const collection = getNodesCollection(reqContext.db);
   const res = await collection.updateOne(
     { _id: new ObjectID(nodeId) },
@@ -139,7 +138,7 @@ export const addOrUpdateFormValue = async (
     throw new Error('Adding or updating form value failed');
   }
 
-  await updateStateWithId(nodeId, reqContext);
+  await updateStates(node.workspaceId, reqContext);
 
   return true;
 };
@@ -162,7 +161,6 @@ export const addConnection = async (
       }
     }
   );
-  await updateStateWithId(socket.nodeId, reqContext);
 };
 
 export const removeConnection = async (
@@ -183,7 +181,6 @@ export const removeConnection = async (
       }
     }
   );
-  await updateStateWithId(socket.nodeId, reqContext);
 };
 
 export const setProgress = async (

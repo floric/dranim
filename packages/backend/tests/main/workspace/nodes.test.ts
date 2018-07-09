@@ -31,7 +31,7 @@ import {
   updateNodePosition
 } from '../../../src/main/workspace/nodes';
 import { addOrUpdateFormValue } from '../../../src/main/workspace/nodes-detail';
-import { updateStateWithId } from '../../../src/main/workspace/nodes-state';
+import { updateStates } from '../../../src/main/workspace/nodes-state';
 import { getWorkspace } from '../../../src/main/workspace/workspace';
 import {
   getTestMongoDb,
@@ -78,7 +78,7 @@ describe('Nodes', () => {
       lastChange: ''
     };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
-    (updateStateWithId as jest.Mock).mockResolvedValue({});
+    (updateStates as jest.Mock).mockResolvedValue({});
 
     const newNode = await createNode(NumberInputNodeDef.type, ws.id, [], 0, 0, {
       db,
@@ -389,7 +389,7 @@ describe('Nodes', () => {
       lastChange: ''
     };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
-    (updateStateWithId as jest.Mock).mockResolvedValue({});
+    (updateStates as jest.Mock).mockResolvedValue({});
 
     const [nodeA, nodeB, nodeC] = await Promise.all([
       createNode(NumberInputNodeDef.type, ws.id, [], 0, 0, {
@@ -500,7 +500,7 @@ describe('Nodes', () => {
       lastChange: ''
     };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
-    (updateStateWithId as jest.Mock).mockResolvedValue({});
+    (updateStates as jest.Mock).mockResolvedValue({});
 
     await createNode(EditEntriesNodeDef.type, ws.id, [], 0, 0, {
       db,

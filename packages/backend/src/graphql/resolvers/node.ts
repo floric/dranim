@@ -1,4 +1,5 @@
 import {
+  ContextNodeType,
   hasContextFn,
   SocketDef,
   SocketDefs,
@@ -38,13 +39,17 @@ export const Node = {
     _,
     context
   ): Promise<(SocketDefs<{}> & { [name: string]: SocketDef }) | null> =>
-    getContextInputDefs(node, context),
+    node.type === ContextNodeType.INPUT
+      ? getContextInputDefs(node, context)
+      : Promise.resolve(null),
   contextOutputDefs: (
     node,
     _,
     context
   ): Promise<(SocketDefs<{}> & { [name: string]: SocketDef }) | null> =>
-    getContextOutputDefs(node, context),
+    node.type === ContextNodeType.OUTPUT
+      ? getContextOutputDefs(node, context)
+      : Promise.resolve(null),
   hasContextFn: ({ type }): boolean =>
     hasNodeType(type) ? hasContextFn(getNodeType(type)!) : false
 };

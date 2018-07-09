@@ -8,6 +8,7 @@ import { Collection, Db, ObjectID } from 'mongodb';
 
 import { getNode, tryGetNode } from './nodes';
 import { addConnection, removeConnection } from './nodes-detail';
+import { updateStates } from './nodes-state';
 
 export const getConnectionsCollection = (
   db: Db
@@ -34,11 +35,11 @@ export const createConnection = async (
     throw new Error('Only one input allowed');
   }
 
-  const outputNode = await getNode(from.nodeId, reqContext);
-  const inputNode = await getNode(to.nodeId, reqContext);
+  const outputNode = await tryGetNode(from.nodeId, reqContext);
+  const inputNode = await tryGetNode(to.nodeId, reqContext);
   checkNodes(inputNode, outputNode);
 
-  const hasFoundCycles = await containsCycles(inputNode!, from, to, reqContext);
+  const hasFoundCycles = await containsCycles(inputNode, from, to, reqContext);
   if (hasFoundCycles) {
     throw new Error('Cyclic dependencies not allowed');
   }
@@ -46,8 +47,8 @@ export const createConnection = async (
   const insertRes = await collection.insertOne({
     from,
     to,
-    contextIds: inputNode!.contextIds,
-    workspaceId: inputNode!.workspaceId
+    contextIds: inputNode.contextIds,
+    workspaceId: inputNode.workspaceId
   });
 
   if (insertRes.result.ok !== 1 || insertRes.ops.length !== 1) {
@@ -62,20 +63,15 @@ export const createConnection = async (
     addConnection(to, 'input', connId, reqContext)
   ]);
 
+  await updateStates(inputNode.workspaceId, reqContext);
+
   return {
     id: newItem._id.toHexString(),
     ...newItem
   };
 };
 
-const checkNodes = (
-  inputNode: NodeInstance | null,
-  outputNode: NodeInstance | null
-) => {
-  if (!outputNode || !inputNode) {
-    throw new Error('Unknown node');
-  }
-
+const checkNodes = (inputNode: NodeInstance, outputNode: NodeInstance) => {
   if (inputNode.workspaceId !== outputNode.workspaceId) {
     throw new Error('Nodes live in different workspaces');
   }
@@ -123,7 +119,11 @@ export const deleteConnection = async (
   id: string,
   reqContext: ApolloContext
 ) => {
-  const connection = await tryGetConnection(id, reqContext);
+  const connection = await getConnection(id, reqContext);
+  if (!connection) {
+    return true;
+  }
+
   await tryGetNode(connection.from.nodeId, reqContext);
   await tryGetNode(connection.to.nodeId, reqContext);
 
@@ -133,10 +133,9 @@ export const deleteConnection = async (
   ]);
 
   const connCollection = getConnectionsCollection(reqContext.db);
-  const res = await connCollection.deleteOne({ _id: new ObjectID(id) });
-  if (res.deletedCount !== 1) {
-    throw new Error('Deleting connection failed');
-  }
+  await connCollection.deleteOne({ _id: new ObjectID(id) });
+
+  await updateStates(connection.workspaceId, reqContext);
 
   return true;
 };
