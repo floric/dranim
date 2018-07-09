@@ -10,7 +10,7 @@ import { Collection, Db, ObjectID } from 'mongodb';
 
 import { getNodeType, tryGetNodeType } from '../nodes/all-nodes';
 import { deleteConnection, deleteConnectionsInContext } from './connections';
-import { updateState } from './nodes-state';
+import { updateStateWithId } from './nodes-state';
 import { getWorkspace, updateLastChange } from './workspace';
 
 export const getNodesCollection = (
@@ -56,7 +56,7 @@ export const createNode = async (
     workspaceId,
     reqContext
   );
-  await updateState(newNodeId, reqContext);
+  await updateStateWithId(newNodeId, reqContext);
 
   const { _id, ...other } = res.ops[0];
 

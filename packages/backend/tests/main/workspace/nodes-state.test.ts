@@ -1,30 +1,25 @@
 import {
+  ContextNodeType,
+  hasContextFn,
+  NodeDef,
   NodeInstance,
   NodeState,
-  ServerNodeDef,
-  NodeDef,
-  hasContextFn,
-  ContextNodeType
+  ServerNodeDef
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { isNodeInMetaValid } from '../../../src/main/calculation/validation';
+import { getNodeType, tryGetNodeType } from '../../../src/main/nodes/all-nodes';
 import {
   getNode,
-  tryGetNode,
+  getNodesCollection,
   tryGetContextNode,
-  getNodesCollection
+  tryGetNode
 } from '../../../src/main/workspace/nodes';
 import {
   calculateNodeState,
   updateState
 } from '../../../src/main/workspace/nodes-state';
-import { getTestMongoDb, VALID_OBJECT_ID } from '../../test-utils';
-import { tryGetNodeType, getNodeType } from '../../../src/main/nodes/all-nodes';
-
-let conn;
-let db: Db;
-let server;
+import { VALID_OBJECT_ID } from '../../test-utils';
 
 jest.mock('@masterthesis/shared');
 jest.mock('../../../src/main/workspace/nodes');
@@ -34,20 +29,7 @@ jest.mock('../../../src/main/calculation/validation');
 jest.mock('../../../src/main/workspace/connections');
 
 describe('Node State', () => {
-  beforeAll(async () => {
-    const { connection, database, mongodbServer } = await getTestMongoDb();
-    conn = connection;
-    db = database;
-    server = mongodbServer;
-  });
-
-  afterAll(async () => {
-    await conn.close();
-    await server.stop();
-  });
-
   beforeEach(async () => {
-    await db.dropDatabase();
     jest.resetAllMocks();
   });
 
@@ -66,8 +48,8 @@ describe('Node State', () => {
     (tryGetNode as jest.Mock).mockReturnValue(node);
     (isNodeInMetaValid as jest.Mock).mockReturnValue(true);
 
-    const state = await calculateNodeState(node.id, {
-      db,
+    const state = await calculateNodeState(node, {
+      db: null,
       userId: ''
     });
 
@@ -101,8 +83,8 @@ describe('Node State', () => {
     (isNodeInMetaValid as jest.Mock).mockReturnValue(true);
     (getNode as jest.Mock).mockReturnValue(parentNode);
 
-    const state = await calculateNodeState(node.id, {
-      db,
+    const state = await calculateNodeState(node, {
+      db: null,
       userId: ''
     });
 
@@ -136,8 +118,8 @@ describe('Node State', () => {
     (isNodeInMetaValid as jest.Mock).mockReturnValue(true);
     (getNode as jest.Mock).mockReturnValue(parentNode);
 
-    const state = await calculateNodeState(node.id, {
-      db,
+    const state = await calculateNodeState(node, {
+      db: null,
       userId: ''
     });
 
@@ -158,8 +140,8 @@ describe('Node State', () => {
     };
     (tryGetNode as jest.Mock).mockReturnValue(node);
     (isNodeInMetaValid as jest.Mock).mockReturnValue(false);
-    const state = await calculateNodeState(node.id, {
-      db,
+    const state = await calculateNodeState(node, {
+      db: null,
       userId: ''
     });
 
@@ -182,8 +164,8 @@ describe('Node State', () => {
     (isNodeInMetaValid as jest.Mock).mockImplementation(() => {
       throw new Error();
     });
-    const state = await calculateNodeState(node.id, {
-      db,
+    const state = await calculateNodeState(node, {
+      db: null,
       userId: ''
     });
 
@@ -195,7 +177,7 @@ describe('Node State', () => {
       id: 'testnode',
       contextIds: [],
       form: [],
-      inputs: [{ name: 'dataset', connectionId: '123' }],
+      inputs: [],
       outputs: [],
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
@@ -206,7 +188,7 @@ describe('Node State', () => {
       id: 'testnode',
       contextIds: [],
       form: [],
-      inputs: [{ name: 'dataset', connectionId: '123' }],
+      inputs: [],
       outputs: [],
       type: ContextNodeType.OUTPUT,
       workspaceId: VALID_OBJECT_ID,
@@ -247,46 +229,114 @@ describe('Node State', () => {
     (hasContextFn as any).mockReturnValue(true);
     (tryGetContextNode as jest.Mock).mockResolvedValue(cNode);
 
-    const res = await calculateNodeState(node.id, { db, userId: '' });
+    const res = await calculateNodeState(node, { db: null, userId: '' });
     expect(res).toBe(NodeState.INVALID);
   });
 
-  test('should update state', async () => {
+  test('should update state for simple node', async () => {
     const node: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
       form: [],
-      inputs: [{ name: 'dataset', connectionId: '123' }],
+      inputs: [],
       outputs: [],
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0
     };
-    const cNode: NodeInstance = {
-      id: VALID_OBJECT_ID,
-      contextIds: [],
-      form: [],
-      inputs: [{ name: 'dataset', connectionId: '123' }],
-      outputs: [],
-      type: ContextNodeType.OUTPUT,
-      workspaceId: VALID_OBJECT_ID,
-      x: 0,
-      y: 0
+    const type: ServerNodeDef & NodeDef = {
+      type: 'type',
+      name: 't',
+      inputs: {},
+      outputs: {},
+      keywords: [],
+      path: [],
+      isFormValid: async () => false,
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: {} })
     };
-    (tryGetNode as jest.Mock)
-      .mockReturnValueOnce(node)
-      .mockReturnValueOnce(node)
-      .mockReturnValueOnce(cNode)
-      .mockReturnValueOnce(cNode);
-    (hasContextFn as any).mockReturnValue(true);
-    (tryGetContextNode as jest.Mock).mockResolvedValue(cNode);
+    (isNodeInMetaValid as jest.Mock).mockReturnValue(true);
+    (getNodeType as jest.Mock).mockReturnValueOnce(type);
+
+    (tryGetNodeType as jest.Mock).mockReturnValueOnce(type);
+    (tryGetNode as jest.Mock).mockReturnValueOnce(node);
+    (hasContextFn as any).mockReturnValue(false);
     (getNodesCollection as jest.Mock).mockReturnValue({
       updateOne: jest.fn()
     });
 
-    const res = await updateState(node.id, { db, userId: '' });
-    expect(res).toBe(0);
-    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(9);
+    const res = await updateState(node, { db: null, userId: '' });
+    expect(res).toBe(true);
+    expect(getNodesCollection(null).updateOne).toHaveBeenCalledTimes(1);
+    expect(hasContextFn).toHaveBeenCalledTimes(2);
+  });
+
+  test('should update state for node with context', async () => {
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    const type: ServerNodeDef & NodeDef = {
+      type: 'type',
+      name: 't',
+      inputs: {},
+      outputs: {},
+      keywords: [],
+      path: [],
+      isFormValid: async () => false,
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: {} })
+    };
+    const cNode: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0
+    };
+    const cType: ServerNodeDef & NodeDef = {
+      type: ContextNodeType.OUTPUT,
+      name: 't',
+      inputs: {},
+      outputs: {},
+      keywords: [],
+      path: [],
+      isFormValid: async () => false,
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: {} })
+    };
+    (isNodeInMetaValid as jest.Mock).mockReturnValue(true);
+    (getNodeType as jest.Mock)
+      .mockReturnValueOnce(type)
+      .mockReturnValueOnce(cType);
+    (tryGetContextNode as jest.Mock).mockResolvedValue(cNode);
+
+    (tryGetNodeType as jest.Mock).mockReturnValueOnce(type);
+    (tryGetNode as jest.Mock).mockReturnValueOnce(node);
+    (hasContextFn as any)
+      .mockReturnValueOnce(true)
+      .mockReturnValueOnce(false)
+      .mockReturnValueOnce(false)
+      .mockReturnValueOnce(true);
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateOne: jest.fn()
+    });
+
+    const res = await updateState(node, { db: null, userId: '' });
+    expect(res).toBe(true);
+    expect(getNodesCollection(null).updateOne).toHaveBeenCalledTimes(1);
+    expect(hasContextFn).toHaveBeenCalledTimes(3);
   });
 });

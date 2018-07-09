@@ -5,9 +5,11 @@ import {
   ValueSchema
 } from '../../../../../shared/lib';
 import {
+  copySchemas,
   getDynamicEntryContextInputs,
   processEntries
 } from '../../../../src/main/nodes/entries/utils';
+import { addValueSchema } from '../../../../src/main/workspace/dataset';
 import {
   getEntriesCount,
   getEntryCollection
@@ -18,6 +20,7 @@ import { VALID_OBJECT_ID } from '../../../test-utils';
 jest.mock('mongodb');
 jest.mock('../../../../src/main/workspace/entry');
 jest.mock('../../../../src/main/workspace/nodes-detail');
+jest.mock('../../../../src/main/workspace/dataset');
 
 describe.only('Entries Utils', () => {
   test('should return empty inputs for missing dataset', async () => {
@@ -145,5 +148,31 @@ describe.only('Entries Utils', () => {
     expect(processFn).toHaveBeenCalledTimes(250);
     expect(progressFn).toHaveBeenCalledTimes(3);
     expect(res).toBeUndefined();
+  });
+
+  test('should copy schemas', async () => {
+    (addValueSchema as jest.Mock).mockImplementation(jest.fn(async () => true));
+    const res = await copySchemas(
+      [
+        {
+          name: 'test',
+          required: true,
+          type: DataType.STRING,
+          unique: false,
+          fallback: 'a'
+        },
+        {
+          name: 'abc',
+          required: true,
+          type: DataType.STRING,
+          unique: false,
+          fallback: 'a'
+        }
+      ],
+      VALID_OBJECT_ID,
+      { db: null, userId: '' }
+    );
+    expect(res).toEqual([true, true]);
+    expect(addValueSchema).toHaveBeenCalledTimes(2);
   });
 });

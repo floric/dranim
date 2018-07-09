@@ -18,7 +18,7 @@ import {
   tryGetContextNode,
   tryGetNode
 } from './nodes';
-import { updateState } from './nodes-state';
+import { updateStateWithId } from './nodes-state';
 
 export const getContextInputDefs = async (
   node: NodeInstance,
@@ -139,7 +139,7 @@ export const addOrUpdateFormValue = async (
     throw new Error('Adding or updating form value failed');
   }
 
-  await updateState(nodeId, reqContext);
+  await updateStateWithId(nodeId, reqContext);
 
   return true;
 };
@@ -162,7 +162,7 @@ export const addConnection = async (
       }
     }
   );
-  await updateState(socket.nodeId, reqContext);
+  await updateStateWithId(socket.nodeId, reqContext);
 };
 
 export const removeConnection = async (
@@ -183,7 +183,7 @@ export const removeConnection = async (
       }
     }
   );
-  await updateState(socket.nodeId, reqContext);
+  await updateStateWithId(socket.nodeId, reqContext);
 };
 
 export const setProgress = async (
