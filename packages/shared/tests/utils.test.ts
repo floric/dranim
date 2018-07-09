@@ -1,10 +1,4 @@
-import {
-  EditEntriesNodeDef,
-  FormValue,
-  NodeInstance,
-  NodeState,
-  NumberInputNodeDef
-} from '../src';
+import { FormValue, NodeInstance, NodeState } from '../src';
 import {
   allAreDefinedAndPresent,
   hasContextFn,
@@ -22,7 +16,8 @@ const createNodeWithForm = (form: Array<FormValue>): NodeInstance => ({
   workspaceId: '2',
   x: 0,
   y: 0,
-  form
+  form,
+  state: NodeState.VALID
 });
 
 describe('Utils', () => {

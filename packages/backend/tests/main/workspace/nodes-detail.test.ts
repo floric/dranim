@@ -4,6 +4,7 @@ import {
   hasContextFn,
   NodeDef,
   NodeInstance,
+  NodeState,
   ServerNodeDefWithContextFn
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
@@ -76,7 +77,8 @@ describe('Node Details', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (hasNodeType as jest.Mock).mockReturnValue(true);
 
@@ -103,7 +105,8 @@ describe('Node Details', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (getNode as jest.Mock).mockResolvedValue(null);
     (hasNodeType as jest.Mock).mockReturnValue(false);
@@ -129,7 +132,8 @@ describe('Node Details', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const node: NodeInstance = {
       id: 'testnode',
@@ -140,7 +144,8 @@ describe('Node Details', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (getNode as jest.Mock).mockResolvedValue(parentNode);
     (hasNodeType as jest.Mock).mockReturnValue(false);
@@ -183,7 +188,8 @@ describe('Node Details', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const inputNode: NodeInstance = {
       id: 'abc',
@@ -194,7 +200,8 @@ describe('Node Details', () => {
       type: ContextNodeType.INPUT,
       workspaceId: '123',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (getNode as jest.Mock).mockResolvedValue(parentNode);
     (getNodeType as jest.Mock).mockReturnValue(parentType);
@@ -238,7 +245,8 @@ describe('Node Details', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const inputNode: NodeInstance = {
       id: 'abc',
@@ -249,7 +257,8 @@ describe('Node Details', () => {
       type: ContextNodeType.INPUT,
       workspaceId: '123',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (getNode as jest.Mock).mockResolvedValue(parentNode);
     (getNodeType as jest.Mock).mockReturnValue(parentType);
@@ -294,7 +303,8 @@ describe('Node Details', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const inputNode: NodeInstance = {
       id: 'abc',
@@ -305,7 +315,8 @@ describe('Node Details', () => {
       type: ContextNodeType.INPUT,
       workspaceId: '123',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (getNode as jest.Mock).mockResolvedValue(parentNode);
     (getNodeType as jest.Mock).mockReturnValue(parentType);
@@ -336,7 +347,8 @@ describe('Node Details', () => {
       type: ContextNodeType.INPUT,
       workspaceId: '123',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
 
     try {
@@ -389,7 +401,8 @@ describe('Node Details', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const parentType: ServerNodeDefWithContextFn & NodeDef = {
       type: parentTypeName,
@@ -419,7 +432,8 @@ describe('Node Details', () => {
       outputs: [],
       workspaceId: 'abc',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (getNode as jest.Mock).mockResolvedValueOnce(parentNode);
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
@@ -437,7 +451,8 @@ describe('Node Details', () => {
         outputs: [],
         workspaceId: 'abc',
         x: 0,
-        y: 0
+        y: 0,
+        state: NodeState.VALID
       },
       null
     );
@@ -462,7 +477,8 @@ describe('Node Details', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
 
     const res = await getInputDefs(
@@ -475,7 +491,8 @@ describe('Node Details', () => {
         outputs: [],
         workspaceId: 'abc',
         x: 0,
-        y: 0
+        y: 0,
+        state: NodeState.VALID
       },
       null
     );
@@ -555,7 +572,8 @@ describe('Node Details', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (tryGetNode as jest.Mock).mockResolvedValue(node);
 

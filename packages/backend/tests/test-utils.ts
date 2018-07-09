@@ -1,4 +1,4 @@
-import { NodeInstance } from '@masterthesis/shared';
+import { NodeInstance, NodeState } from '@masterthesis/shared';
 import { Db, MongoClient } from 'mongodb';
 import MongodbMemoryServer from 'mongodb-memory-server';
 
@@ -40,5 +40,6 @@ export const NODE: NodeInstance = {
   type: '',
   workspaceId: VALID_OBJECT_ID,
   x: 0,
-  y: 9
+  y: 9,
+  state: NodeState.VALID
 };

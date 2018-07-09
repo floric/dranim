@@ -5,6 +5,7 @@ import {
   hasContextFn,
   NodeDef,
   NodeInstance,
+  NodeState,
   ServerNodeDef,
   ServerNodeDefWithContextFn
 } from '@masterthesis/shared';
@@ -50,7 +51,8 @@ describe('Meta Execution', () => {
         type: 'type',
         workspaceId: '',
         x: 0,
-        y: 0
+        y: 0,
+        state: NodeState.VALID
       },
       null
     );
@@ -93,7 +95,8 @@ describe('Meta Execution', () => {
       outputs: [{ name: 'test', connectionId: 'id' }],
       type: 't',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (getInputDefs as jest.Mock).mockResolvedValue({
       test: {
@@ -115,7 +118,8 @@ describe('Meta Execution', () => {
         type: 'type',
         workspaceId: '',
         x: 0,
-        y: 0
+        y: 0,
+        state: NodeState.VALID
       },
       null
     );
@@ -135,7 +139,8 @@ describe('Meta Execution', () => {
         type: ContextNodeType.OUTPUT,
         workspaceId: '',
         x: 0,
-        y: 0
+        y: 0,
+        state: NodeState.VALID
       },
       null
     );
@@ -152,7 +157,8 @@ describe('Meta Execution', () => {
       inputs: [],
       outputs: [],
       type: 'p',
-      workspaceId: ''
+      workspaceId: '',
+      state: NodeState.VALID
     };
     const parentType: ServerNodeDefWithContextFn & NodeDef = {
       type: 'test',
@@ -193,7 +199,8 @@ describe('Meta Execution', () => {
         type: ContextNodeType.INPUT,
         workspaceId: '',
         x: 0,
-        y: 0
+        y: 0,
+        state: NodeState.VALID
       },
       null
     );
@@ -214,7 +221,8 @@ describe('Meta Execution', () => {
         inputs: [],
         outputs: [],
         type: 'p',
-        workspaceId: ''
+        workspaceId: '',
+        state: NodeState.VALID
       };
       const parentType: ServerNodeDefWithContextFn & NodeDef = {
         type: 'test',
@@ -242,7 +250,8 @@ describe('Meta Execution', () => {
           type: ContextNodeType.INPUT,
           workspaceId: '',
           x: 0,
-          y: 0
+          y: 0,
+          state: NodeState.VALID
         },
         null
       );

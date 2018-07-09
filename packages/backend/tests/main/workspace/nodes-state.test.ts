@@ -42,7 +42,8 @@ describe('Node State', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (tryGetNode as jest.Mock).mockReturnValue(node);
     (isNodeInMetaValid as jest.Mock).mockReturnValue(true);
@@ -65,7 +66,8 @@ describe('Node State', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (tryGetNode as jest.Mock).mockReturnValue(node);
     const parentNode: NodeInstance = {
@@ -77,7 +79,8 @@ describe('Node State', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (isNodeInMetaValid as jest.Mock).mockReturnValue(true);
     (getNode as jest.Mock).mockReturnValue(parentNode);
@@ -100,7 +103,8 @@ describe('Node State', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (tryGetNode as jest.Mock).mockReturnValue(node);
     const parentNode: NodeInstance = {
@@ -112,7 +116,8 @@ describe('Node State', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (isNodeInMetaValid as jest.Mock).mockReturnValue(true);
     (getNode as jest.Mock).mockReturnValue(parentNode);
@@ -135,7 +140,8 @@ describe('Node State', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (tryGetNode as jest.Mock).mockReturnValue(node);
     (isNodeInMetaValid as jest.Mock).mockReturnValue(false);
@@ -157,7 +163,8 @@ describe('Node State', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (tryGetNode as jest.Mock).mockReturnValue(node);
     (isNodeInMetaValid as jest.Mock).mockImplementation(() => {
@@ -181,7 +188,8 @@ describe('Node State', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const cNode: NodeInstance = {
       id: 'testnode',
@@ -192,7 +200,8 @@ describe('Node State', () => {
       type: ContextNodeType.OUTPUT,
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const type: ServerNodeDef & NodeDef = {
       type: 'type',
@@ -242,7 +251,8 @@ describe('Node State', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const type: ServerNodeDef & NodeDef = {
       type: 'type',
@@ -281,7 +291,8 @@ describe('Node State', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const type: ServerNodeDef & NodeDef = {
       type: 'type',
@@ -303,7 +314,8 @@ describe('Node State', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const cType: ServerNodeDef & NodeDef = {
       type: ContextNodeType.OUTPUT,

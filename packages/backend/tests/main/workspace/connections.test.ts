@@ -1,4 +1,4 @@
-import { NodeInstance, SocketInstance } from '@masterthesis/shared';
+import { NodeInstance, NodeState, SocketInstance } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import {
@@ -54,7 +54,8 @@ describe('Connections', () => {
       type: 'abc',
       workspaceId: '123',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const nodeB: NodeInstance = {
       id: 'idb',
@@ -65,7 +66,8 @@ describe('Connections', () => {
       type: 'test',
       workspaceId: '123',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
 
     (getNode as jest.Mock)
@@ -129,7 +131,8 @@ describe('Connections', () => {
       type: 'abc',
       workspaceId: '123',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const nodeB: NodeInstance = {
       id: 'idb',
@@ -140,7 +143,8 @@ describe('Connections', () => {
       type: 'test',
       workspaceId: '123',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
 
     (getNode as jest.Mock)
@@ -181,7 +185,8 @@ describe('Connections', () => {
       type: 'abc',
       workspaceId: '123',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const nodeAinContext: NodeInstance = {
       id: 'idb-i',
@@ -192,7 +197,8 @@ describe('Connections', () => {
       type: '123',
       workspaceId: '123',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const nodeBinContext: NodeInstance = {
       id: 'idb-o',
@@ -203,7 +209,8 @@ describe('Connections', () => {
       type: 'abc',
       workspaceId: '123',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
 
     (getNode as jest.Mock)
@@ -250,7 +257,8 @@ describe('Connections', () => {
       type: 'abc',
       workspaceId: '123',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const nodeB: NodeInstance = {
       id: 'idb',
@@ -261,7 +269,8 @@ describe('Connections', () => {
       type: 'test',
       workspaceId: '123',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
 
     (getNode as jest.Mock)
@@ -300,7 +309,8 @@ describe('Connections', () => {
       type: 'abc',
       workspaceId: '123',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
 
     (getNode as jest.Mock).mockResolvedValueOnce(nodeA);
@@ -332,7 +342,8 @@ describe('Connections', () => {
       type: 'abc',
       workspaceId: '123',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const nodeB: NodeInstance = {
       id: 'idb',
@@ -343,7 +354,8 @@ describe('Connections', () => {
       type: 'test',
       workspaceId: 'otherws',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
 
     (getNode as jest.Mock)
@@ -377,7 +389,8 @@ describe('Connections', () => {
       type: 'abc',
       workspaceId: '123',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const nodeB: NodeInstance = {
       id: 'idb',
@@ -388,7 +401,8 @@ describe('Connections', () => {
       type: 'test',
       workspaceId: '123',
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
 
     (getNode as jest.Mock)

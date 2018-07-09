@@ -131,6 +131,7 @@ export interface NodeInstance {
   inputs: Array<ConnectionDescription>;
   type: string;
   form: Array<FormValue>;
+  state: NodeState;
 }
 
 export interface GQLNodeInstance extends NodeInstance {

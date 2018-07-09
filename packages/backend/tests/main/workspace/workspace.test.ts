@@ -1,4 +1,4 @@
-import { NodeInstance, sleep } from '@masterthesis/shared';
+import { NodeInstance, NodeState, sleep } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import { getConnectionsCollection } from '../../../src/main/workspace/connections';
@@ -260,7 +260,8 @@ describe('Workspaces', () => {
       type: 'a',
       x: 0,
       y: 0,
-      workspaceId: ws.id
+      workspaceId: ws.id,
+      state: NodeState.VALID
     };
     const nodeB: NodeInstance = {
       id: VALID_OBJECT_ID,
@@ -271,7 +272,8 @@ describe('Workspaces', () => {
       type: 'a',
       x: 0,
       y: 0,
-      workspaceId: ws.id
+      workspaceId: ws.id,
+      state: NodeState.VALID
     };
 
     const res = await updateWorkspace(

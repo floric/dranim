@@ -4,6 +4,7 @@ import {
   DataType,
   NodeDef,
   NodeInstance,
+  NodeState,
   parseNodeForm,
   ServerNodeDef
 } from '@masterthesis/shared';
@@ -57,7 +58,8 @@ describe('Validation', () => {
       type: typeName,
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
 
     (getMetaInputs as jest.Mock).mockResolvedValue({
@@ -83,7 +85,8 @@ describe('Validation', () => {
       type: typeName,
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
 
     (getInputDefs as jest.Mock).mockResolvedValue({});
@@ -123,7 +126,8 @@ describe('Validation', () => {
       type: typeName,
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
 
     (getMetaInputs as jest.Mock).mockResolvedValue({
@@ -166,7 +170,8 @@ describe('Validation', () => {
       type: typeName,
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
 
     (getMetaInputs as jest.Mock).mockResolvedValue({});
@@ -203,7 +208,8 @@ describe('Validation', () => {
       type: ContextNodeType.INPUT,
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
 
     (getMetaInputs as jest.Mock).mockResolvedValue({});
@@ -243,7 +249,8 @@ describe('Validation', () => {
       type: ContextNodeType.OUTPUT,
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
 
     (getMetaInputs as jest.Mock).mockResolvedValue({});
@@ -274,7 +281,8 @@ describe('Validation', () => {
         type: 'type',
         workspaceId: VALID_OBJECT_ID,
         x: 0,
-        y: 0
+        y: 0,
+        state: NodeState.VALID
       },
       {},
       { db: null, userId: '' }
@@ -300,7 +308,8 @@ describe('Validation', () => {
         type: 'type',
         workspaceId: VALID_OBJECT_ID,
         x: 0,
-        y: 0
+        y: 0,
+        state: NodeState.VALID
       },
       { dataset: { datasetId: VALID_OBJECT_ID } },
       { db: null, userId: '' }
@@ -335,7 +344,8 @@ describe('Validation', () => {
         type: 'type',
         workspaceId: VALID_OBJECT_ID,
         x: 0,
-        y: 0
+        y: 0,
+        state: NodeState.VALID
       },
       { dataset: { datasetId: VALID_OBJECT_ID } },
       { db: null, userId: '' }
@@ -361,7 +371,8 @@ describe('Validation', () => {
         type: 'type',
         workspaceId: VALID_OBJECT_ID,
         x: 0,
-        y: 0
+        y: 0,
+        state: NodeState.VALID
       },
       { test: 'abc' },
       { db: null, userId: '' }
@@ -402,7 +413,8 @@ describe('Validation', () => {
         type: 'type',
         workspaceId: VALID_OBJECT_ID,
         x: 0,
-        y: 0
+        y: 0,
+        state: NodeState.VALID
       },
       {
         datasetA: { datasetId: ds.id },

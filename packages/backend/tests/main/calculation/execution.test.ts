@@ -5,6 +5,7 @@ import {
   hasContextFn,
   NodeDef,
   NodeInstance,
+  NodeState,
   parseNodeForm,
   ServerNodeDef,
   ServerNodeDefWithContextFn
@@ -48,7 +49,8 @@ describe('Execution', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const type: ServerNodeDef & NodeDef = {
       type: 'type',
@@ -92,7 +94,8 @@ describe('Execution', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const nodeB: NodeInstance = {
       id: 'nodeB',
@@ -103,7 +106,8 @@ describe('Execution', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const typeA: ServerNodeDef & NodeDef = {
       type: 'type',
@@ -176,7 +180,8 @@ describe('Execution', () => {
         outputs: [],
         inputs: [],
         form: [],
-        contextIds: [VALID_OBJECT_ID]
+        contextIds: [VALID_OBJECT_ID],
+        state: NodeState.VALID
       },
       { db: null, userId: '' },
       contextInputs
@@ -194,7 +199,8 @@ describe('Execution', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (tryGetNode as jest.Mock).mockResolvedValue(node);
     (tryGetNodeType as jest.Mock).mockImplementation(() => {
@@ -214,7 +220,8 @@ describe('Execution', () => {
           outputs: [],
           inputs: [],
           form: [],
-          contextIds: [VALID_OBJECT_ID]
+          contextIds: [VALID_OBJECT_ID],
+          state: NodeState.VALID
         },
         { db: null, userId: '' }
       );
@@ -234,7 +241,8 @@ describe('Execution', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (tryGetNode as jest.Mock).mockResolvedValue(node);
     (tryGetNodeType as jest.Mock).mockImplementation(() => {
@@ -261,7 +269,8 @@ describe('Execution', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const type: ServerNodeDef & NodeDef = {
       type: 'type',
@@ -298,7 +307,8 @@ describe('Execution', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const nodeB: NodeInstance = {
       id: 'nodeB',
@@ -309,7 +319,8 @@ describe('Execution', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const sumNode: NodeInstance = {
       id: 'nodeB',
@@ -323,7 +334,8 @@ describe('Execution', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const typeA: ServerNodeDef & NodeDef = {
       type: 'type',
@@ -425,7 +437,8 @@ describe('Execution', () => {
       type: 'type',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const cNode: NodeInstance = {
       id: 'cNode',
@@ -436,7 +449,8 @@ describe('Execution', () => {
       type: ContextNodeType.OUTPUT,
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const iNode: NodeInstance = {
       id: 'iNode',
@@ -447,7 +461,8 @@ describe('Execution', () => {
       type: 'a',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     const type: ServerNodeDefWithContextFn & NodeDef = {
       type: 'type',
@@ -518,7 +533,8 @@ describe('Execution', () => {
       type: ContextNodeType.INPUT,
       workspaceId: VALID_OBJECT_ID,
       x: 0,
-      y: 0
+      y: 0,
+      state: NodeState.VALID
     };
     (tryGetNode as jest.Mock).mockResolvedValue(node);
 
