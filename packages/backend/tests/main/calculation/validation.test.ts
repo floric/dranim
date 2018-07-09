@@ -1,12 +1,12 @@
 import {
   ContextNodeType,
+  Dataset,
   DataType,
   NodeDef,
   NodeInstance,
   parseNodeForm,
   ServerNodeDef
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { getMetaInputs } from '../../../src/main/calculation/meta-execution';
 import {
@@ -15,34 +15,18 @@ import {
   isNodeInMetaValid
 } from '../../../src/main/calculation/validation';
 import { tryGetNodeType } from '../../../src/main/nodes/all-nodes';
-import { createDataset } from '../../../src/main/workspace/dataset';
+import { getDataset } from '../../../src/main/workspace/dataset';
 import { getInputDefs } from '../../../src/main/workspace/nodes-detail';
-import { getTestMongoDb, VALID_OBJECT_ID } from '../../test-utils';
-
-let conn;
-let db: Db;
-let server;
+import { VALID_OBJECT_ID } from '../../test-utils';
 
 jest.mock('@masterthesis/shared');
 jest.mock('../../../src/main/nodes/all-nodes');
 jest.mock('../../../src/main/workspace/nodes-detail');
 jest.mock('../../../src/main/calculation/meta-execution');
+jest.mock('../../../src/main/workspace/dataset');
 
 describe('Validation', () => {
-  beforeAll(async () => {
-    const { connection, database, mongodbServer } = await getTestMongoDb();
-    conn = connection;
-    db = database;
-    server = mongodbServer;
-  });
-
-  afterAll(async () => {
-    await conn.close();
-    await server.stop();
-  });
-
   beforeEach(async () => {
-    await db.dropDatabase();
     jest.resetAllMocks();
   });
 
@@ -84,7 +68,7 @@ describe('Validation', () => {
     });
     (tryGetNodeType as jest.Mock).mockReturnValue(type);
 
-    const res = await isNodeInMetaValid(node, { db, userId: '' });
+    const res = await isNodeInMetaValid(node, { db: null, userId: '' });
     expect(res).toBe(true);
   });
 
@@ -107,7 +91,7 @@ describe('Validation', () => {
     const res = await areNodeInputsValid(
       node,
       { value: 'test' },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toBe(true);
   });
@@ -150,7 +134,7 @@ describe('Validation', () => {
     });
     (tryGetNodeType as jest.Mock).mockReturnValue(type);
 
-    const res = await isNodeInMetaValid(node, { db, userId: '' });
+    const res = await isNodeInMetaValid(node, { db: null, userId: '' });
     expect(res).toBe(false);
   });
 
@@ -188,7 +172,7 @@ describe('Validation', () => {
     (getMetaInputs as jest.Mock).mockResolvedValue({});
     (tryGetNodeType as jest.Mock).mockReturnValue(type);
 
-    const res = await isNodeInMetaValid(node, { db, userId: '' });
+    const res = await isNodeInMetaValid(node, { db: null, userId: '' });
     expect(res).toBe(false);
   });
 
@@ -225,7 +209,7 @@ describe('Validation', () => {
     (getMetaInputs as jest.Mock).mockResolvedValue({});
     (tryGetNodeType as jest.Mock).mockReturnValue(type);
 
-    const res = await isNodeInMetaValid(node, { db, userId: '' });
+    const res = await isNodeInMetaValid(node, { db: null, userId: '' });
     expect(res).toBe(true);
 
     expect(parseNodeForm as jest.Mock).toHaveBeenCalledTimes(0);
@@ -265,7 +249,7 @@ describe('Validation', () => {
     (getMetaInputs as jest.Mock).mockResolvedValue({});
     (tryGetNodeType as jest.Mock).mockReturnValue(type);
 
-    const res = await isNodeInMetaValid(node, { db, userId: '' });
+    const res = await isNodeInMetaValid(node, { db: null, userId: '' });
     expect(res).toBe(true);
 
     expect(parseNodeForm as jest.Mock).toHaveBeenCalledTimes(0);
@@ -293,7 +277,7 @@ describe('Validation', () => {
         y: 0
       },
       {},
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toBe(false);
   });
@@ -319,20 +303,28 @@ describe('Validation', () => {
         y: 0
       },
       { dataset: { datasetId: VALID_OBJECT_ID } },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toBe(false);
   });
 
   test('should have valid dataset input', async () => {
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      entriesCount: 0,
+      latestEntries: [],
+      workspaceId: VALID_OBJECT_ID,
+      valueschemas: []
+    };
     (getInputDefs as jest.Mock).mockResolvedValue({
       dataset: {
         dataType: DataType.DATASET,
         displayName: 'dataset'
       }
     });
+    (getDataset as jest.Mock).mockResolvedValue(ds);
 
-    const ds = await createDataset('test', { db, userId: '' });
     const res = await areNodeInputsValid(
       {
         id: VALID_OBJECT_ID,
@@ -345,8 +337,8 @@ describe('Validation', () => {
         x: 0,
         y: 0
       },
-      { dataset: { datasetId: ds.id } },
-      { db, userId: '' }
+      { dataset: { datasetId: VALID_OBJECT_ID } },
+      { db: null, userId: '' }
     );
     expect(res).toBe(true);
   });
@@ -372,12 +364,20 @@ describe('Validation', () => {
         y: 0
       },
       { test: 'abc' },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toBe(false);
   });
 
   test('should have valid and invalid input', async () => {
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      entriesCount: 0,
+      latestEntries: [],
+      workspaceId: VALID_OBJECT_ID,
+      valueschemas: []
+    };
     (getInputDefs as jest.Mock).mockResolvedValue({
       datasetA: {
         dataType: DataType.DATASET,
@@ -388,8 +388,10 @@ describe('Validation', () => {
         displayName: 'dsB'
       }
     });
+    (getDataset as jest.Mock)
+      .mockResolvedValueOnce(ds)
+      .mockResolvedValueOnce(null);
 
-    const ds = await createDataset('test', { db, userId: '' });
     const res = await areNodeInputsValid(
       {
         id: VALID_OBJECT_ID,
@@ -406,107 +408,125 @@ describe('Validation', () => {
         datasetA: { datasetId: ds.id },
         datasetB: { datasetId: null }
       },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toBe(false);
   });
 
   test('should have invalid input', async () => {
     let res = await isInputValid(undefined, DataType.STRING, {
-      db,
+      db: null,
       userId: ''
     });
     expect(res).toBe(false);
 
-    res = await isInputValid(null, DataType.NUMBER, { db, userId: '' });
+    res = await isInputValid(null, DataType.NUMBER, { db: null, userId: '' });
     expect(res).toBe(false);
   });
 
   test('should have valid number input', async () => {
-    let res = await isInputValid(9.4523, DataType.NUMBER, { db, userId: '' });
+    let res = await isInputValid(9.4523, DataType.NUMBER, {
+      db: null,
+      userId: ''
+    });
     expect(res).toBe(true);
 
-    res = await isInputValid(0, DataType.NUMBER, { db, userId: '' });
+    res = await isInputValid(0, DataType.NUMBER, { db: null, userId: '' });
     expect(res).toBe(true);
 
-    res = await isInputValid(-0.3, DataType.NUMBER, { db, userId: '' });
+    res = await isInputValid(-0.3, DataType.NUMBER, { db: null, userId: '' });
     expect(res).toBe(true);
 
-    res = await isInputValid(11, DataType.NUMBER, { db, userId: '' });
+    res = await isInputValid(11, DataType.NUMBER, { db: null, userId: '' });
     expect(res).toBe(true);
   });
 
   test('should have invalid number input', async () => {
-    let res = await isInputValid(NaN, DataType.NUMBER, { db, userId: '' });
+    let res = await isInputValid(NaN, DataType.NUMBER, {
+      db: null,
+      userId: ''
+    });
     expect(res).toBe(false);
 
-    res = await isInputValid({}, DataType.NUMBER, { db, userId: '' });
+    res = await isInputValid({}, DataType.NUMBER, { db: null, userId: '' });
     expect(res).toBe(false);
 
-    res = await isInputValid('9', DataType.NUMBER, { db, userId: '' });
+    res = await isInputValid('9', DataType.NUMBER, { db: null, userId: '' });
     expect(res).toBe(false);
   });
 
   test('should have valid string input', async () => {
-    let res = await isInputValid('true', DataType.STRING, { db, userId: '' });
+    let res = await isInputValid('true', DataType.STRING, {
+      db: null,
+      userId: ''
+    });
     expect(res).toBe(true);
 
-    res = await isInputValid('', DataType.STRING, { db, userId: '' });
+    res = await isInputValid('', DataType.STRING, { db: null, userId: '' });
     expect(res).toBe(true);
   });
 
   test('should have invalid string input', async () => {
-    let res = await isInputValid(9, DataType.STRING, { db, userId: '' });
+    let res = await isInputValid(9, DataType.STRING, { db: null, userId: '' });
     expect(res).toBe(false);
 
-    res = await isInputValid({}, DataType.STRING, { db, userId: '' });
+    res = await isInputValid({}, DataType.STRING, { db: null, userId: '' });
     expect(res).toBe(false);
   });
 
   test('should have valid boolean input', async () => {
-    let res = await isInputValid(true, DataType.BOOLEAN, { db, userId: '' });
+    let res = await isInputValid(true, DataType.BOOLEAN, {
+      db: null,
+      userId: ''
+    });
     expect(res).toBe(true);
 
-    res = await isInputValid(false, DataType.BOOLEAN, { db, userId: '' });
+    res = await isInputValid(false, DataType.BOOLEAN, { db: null, userId: '' });
     expect(res).toBe(true);
   });
 
   test('should have invalid boolean input', async () => {
-    let res = await isInputValid('true', DataType.BOOLEAN, { db, userId: '' });
+    let res = await isInputValid('true', DataType.BOOLEAN, {
+      db: null,
+      userId: ''
+    });
     expect(res).toBe(false);
 
-    res = await isInputValid(0, DataType.BOOLEAN, { db, userId: '' });
+    res = await isInputValid(0, DataType.BOOLEAN, { db: null, userId: '' });
     expect(res).toBe(false);
   });
 
   test('should have valid time input', async () => {
     const res = await isInputValid(new Date(), DataType.TIME, {
-      db,
+      db: null,
       userId: ''
     });
     expect(res).toBe(true);
   });
 
   test('should have invalid time input', async () => {
-    const res = await isInputValid({}, DataType.TIME, { db, userId: '' });
+    const res = await isInputValid({}, DataType.TIME, { db: null, userId: '' });
     expect(res).toBe(false);
   });
 
   test('should have valid datetime input', async () => {
     const res = await isInputValid(new Date(), DataType.DATETIME, {
-      db,
+      db: null,
       userId: ''
     });
     expect(res).toBe(true);
   });
 
   test('should have invalid datetime input', async () => {
-    const res = await isInputValid({}, DataType.DATETIME, { db, userId: '' });
+    const res = await isInputValid({}, DataType.DATETIME, {
+      db: null,
+      userId: ''
+    });
     expect(res).toBe(false);
   });
 
   test('should return true for validation of unknown datatypes', async () => {
-    const res = await isInputValid({}, 'test' as any, { db, userId: '' });
+    const res = await isInputValid({}, 'test' as any, { db: null, userId: '' });
     expect(res).toBe(true);
   });
 });

@@ -20,6 +20,9 @@ describe('DatasetInputNode', () => {
   afterAll(async () => {
     await conn.close();
     await server.stop();
+    db = undefined;
+    conn = undefined;
+    server = undefined;
   });
 
   beforeEach(async () => {

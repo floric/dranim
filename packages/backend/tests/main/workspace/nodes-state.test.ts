@@ -26,7 +26,6 @@ jest.mock('../../../src/main/workspace/nodes');
 jest.mock('../../../src/main/workspace/nodes-detail');
 jest.mock('../../../src/main/nodes/all-nodes');
 jest.mock('../../../src/main/calculation/validation');
-jest.mock('../../../src/main/workspace/connections');
 
 describe('Node State', () => {
   beforeEach(async () => {
