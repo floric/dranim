@@ -10,12 +10,12 @@ import {
   tryGetConnection
 } from '../../../src/main/workspace/connections';
 import { tryGetNode } from '../../../src/main/workspace/nodes';
+import { updateStates } from '../../../src/main/workspace/nodes-state';
 import {
   getTestMongoDb,
   NeverGoHereError,
   VALID_OBJECT_ID
 } from '../../test-utils';
-import { updateStates } from '../../../src/main/workspace/nodes-state';
 
 let conn;
 let db: Db;

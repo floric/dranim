@@ -15,10 +15,10 @@ import {
   getAllConnections
 } from '../../../src/main/workspace/connections';
 import {
+  getAllNodes,
   getNodesCollection,
   tryGetContextNode,
-  tryGetNode,
-  getAllNodes
+  tryGetNode
 } from '../../../src/main/workspace/nodes';
 import {
   getContextInputDefs,
