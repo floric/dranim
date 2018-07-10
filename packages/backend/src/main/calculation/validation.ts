@@ -29,6 +29,7 @@ export const isNodeInMetaValid = async (
 
   const metaDefs = await getMetaInputs(node, reqContext);
   const allInputsArePresent = Object.values(metaDefs)
+    .filter(a => !!a)
     .map(a => a.isPresent)
     .reduce((a, b) => a && b, true);
 

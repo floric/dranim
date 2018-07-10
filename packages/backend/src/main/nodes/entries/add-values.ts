@@ -37,10 +37,6 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
     contextInputs,
     form
   ) => {
-    if (!allAreDefinedAndPresent(inputs)) {
-      return {};
-    }
-
     if (!form.values) {
       return contextInputDefs;
     }

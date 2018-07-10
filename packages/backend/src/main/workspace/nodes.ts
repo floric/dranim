@@ -41,6 +41,7 @@ export const createNode = async (
     contextIds: contextNodeIds,
     workspaceId,
     type,
+    variables: {},
     state: NodeState.VALID
   });
 
@@ -89,6 +90,7 @@ const addContextNodesIfNecessary = async (
         contextIds: nestedContextIds,
         workspaceId,
         type: contextType,
+        variables: {},
         state: NodeState.VALID
       })
     );

@@ -11,17 +11,10 @@ export const BooleanInputNode: ServerNodeDef<
   BooleanInputNodeForm
 > = {
   type: BooleanInputNodeDef.type,
-  onMetaExecution: async form => {
-    if (form.value == null) {
-      return {
-        value: { content: {}, isPresent: false }
-      };
-    }
-
-    return {
+  onMetaExecution: () =>
+    Promise.resolve({
       value: { content: {}, isPresent: true }
-    };
-  },
+    }),
   onNodeExecution: form =>
     Promise.resolve({
       outputs: {
