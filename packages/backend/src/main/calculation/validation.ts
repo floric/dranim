@@ -74,7 +74,7 @@ const validateBoolean = (value: any) => {
   return Promise.resolve(typeof value === 'boolean');
 };
 
-const validateDatatime = (value: any) => {
+const validateDatetime = (value: any) => {
   return Promise.resolve(value instanceof Date);
 };
 
@@ -91,7 +91,7 @@ const validationMethods: Map<
   [DataType.NUMBER, validateNumber],
   [DataType.BOOLEAN, validateBoolean],
   [DataType.TIME, validateTime],
-  [DataType.DATETIME, validateDatatime]
+  [DataType.DATETIME, validateDatetime]
 ]);
 
 export const isInputValid = async (

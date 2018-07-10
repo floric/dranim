@@ -29,36 +29,11 @@ export const createConnection = async (
   to: SocketInstance,
   reqContext: ApolloContext
 ): Promise<ConnectionInstance> => {
-  if (!from || !to) {
-    throw new Error('Invalid connection');
-  }
+  await validateConnection(from, to, reqContext);
+
+  const destination = await tryGetNode(to.nodeId, reqContext);
 
   const collection = getConnectionsCollection(reqContext.db);
-
-  // check for existing connections to the input
-  const res = await collection.findOne({
-    'to.name': to.name,
-    'to.nodeId': to.nodeId
-  });
-  if (res !== null) {
-    throw new Error('Only one input allowed');
-  }
-
-  const source = await tryGetNode(from.nodeId, reqContext);
-  const destination = await tryGetNode(to.nodeId, reqContext);
-  checkNodes(destination, source);
-  await checkAndGetDataType(from, to, source, destination, reqContext);
-
-  const hasFoundCycles = await containsCycles(
-    destination,
-    from,
-    to,
-    reqContext
-  );
-  if (hasFoundCycles) {
-    throw new Error('Cyclic dependencies not allowed');
-  }
-
   const insertRes = await collection.insertOne({
     from,
     to,
@@ -88,6 +63,40 @@ export const createConnection = async (
   };
 };
 
+const validateConnection = async (
+  from: SocketInstance,
+  to: SocketInstance,
+  reqContext: ApolloContext
+) => {
+  if (!from || !to) {
+    throw new Error('Invalid connection');
+  }
+
+  const destination = await tryGetNode(to.nodeId, reqContext);
+  const collection = getConnectionsCollection(reqContext.db);
+  const res = await collection.findOne({
+    'to.name': to.name,
+    'to.nodeId': to.nodeId
+  });
+  if (res !== null) {
+    throw new Error('Only one input allowed');
+  }
+
+  const source = await tryGetNode(from.nodeId, reqContext);
+  checkNodes(destination, source);
+  await checkAndGetDataType(from, to, source, destination, reqContext);
+
+  const hasFoundCycles = await containsCycles(
+    destination,
+    from,
+    to,
+    reqContext
+  );
+  if (hasFoundCycles) {
+    throw new Error('Cyclic dependencies not allowed');
+  }
+};
+
 const checkAndGetDataType = async (
   from: SocketInstance,
   to: SocketInstance,
@@ -110,10 +119,27 @@ const checkAndGetDataType = async (
     return expectedDatatype;
   }
 
+  await checkDatatypeIsValidAndMatches(
+    expectedDatatype,
+    destination,
+    to,
+    reqContext
+  );
+
+  return expectedDatatype;
+};
+
+const checkDatatypeIsValidAndMatches = async (
+  expectedDatatype: DataType,
+  destination: NodeInstance,
+  to: SocketInstance,
+  reqContext: ApolloContext
+) => {
   const destinationDefs = await getInputDefs(destination, reqContext);
   const matchedDatatype = destinationDefs[to.name]
     ? destinationDefs[to.name].dataType
     : null;
+
   if (!matchedDatatype) {
     throw new Error('Unknown input socket');
   }
@@ -121,8 +147,6 @@ const checkAndGetDataType = async (
   if (expectedDatatype !== matchedDatatype) {
     throw new Error('Datatypes dont match');
   }
-
-  return expectedDatatype;
 };
 
 const checkNodes = (inputNode: NodeInstance, outputNode: NodeInstance) => {

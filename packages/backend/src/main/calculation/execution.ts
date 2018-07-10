@@ -54,7 +54,7 @@ export const executeNode = async (
 
   const type = tryGetNodeType(node.type);
   if (hasContextFn(type)) {
-    return await calculateContext(node, type, nodeForm, nodeInputs, reqContext);
+    return await executeContext(node, type, nodeForm, nodeInputs, reqContext);
   }
 
   return await type.onNodeExecution(nodeForm, nodeInputs, {
@@ -80,7 +80,7 @@ const validateMetaAndExecution = async (
   }
 };
 
-const calculateContext = async (
+const executeContext = async (
   node: NodeInstance,
   type: ServerNodeDefWithContextFn,
   nodeForm: FormValues<any>,
@@ -96,7 +96,8 @@ const calculateContext = async (
   return await type.onNodeExecution(nodeForm, nodeInputs, {
     reqContext,
     node,
-    contextFnExecution: inputs => executeNode(outputNode, reqContext, inputs)
+    contextFnExecution: inputs =>
+      executeNode(outputNode, reqContext, { ...nodeInputs, ...inputs })
   });
 };
 

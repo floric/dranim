@@ -200,7 +200,9 @@ const getHeight = (
   openConnection: OpenConnection | null
 ) => {
   const inputsCount =
-    openConnection !== null && n.hasContextFn
+    openConnection !== null &&
+    n.hasContextFn &&
+    openConnection.destinations === null
       ? Object.keys(inputs).length + 1
       : Object.keys(inputs).length;
   const outputsCount = Object.keys(outputs).length;

@@ -60,6 +60,7 @@ const startProcess = async (
       ProcessState.ERROR,
       reqContext
     );
+    console.error(err);
     Logger.info('Finished calculation with errors', err);
   }
 };

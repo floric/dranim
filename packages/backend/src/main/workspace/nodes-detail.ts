@@ -1,7 +1,6 @@
 import {
   ApolloContext,
   ContextNodeType,
-  DataType,
   hasContextFn,
   NodeDef,
   NodeInstance,
