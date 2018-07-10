@@ -1,14 +1,22 @@
 import {
   ApolloContext,
   ConnectionInstance,
+  DataType,
+  hasContextFn,
   NodeInstance,
   SocketInstance
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { Logger } from '../../logging';
+import { getNodeType } from '../nodes/all-nodes';
 import { tryGetNode } from './nodes';
-import { addConnection, removeConnection } from './nodes-detail';
+import {
+  addConnection,
+  getInputDefs,
+  getOutputDefs,
+  removeConnection
+} from './nodes-detail';
 import { updateStates } from './nodes-state';
 
 export const getConnectionsCollection = (
@@ -36,11 +44,17 @@ export const createConnection = async (
     throw new Error('Only one input allowed');
   }
 
-  const outputNode = await tryGetNode(from.nodeId, reqContext);
-  const inputNode = await tryGetNode(to.nodeId, reqContext);
-  checkNodes(inputNode, outputNode);
+  const source = await tryGetNode(from.nodeId, reqContext);
+  const destination = await tryGetNode(to.nodeId, reqContext);
+  checkNodes(destination, source);
+  await checkAndGetDataType(from, to, source, destination, reqContext);
 
-  const hasFoundCycles = await containsCycles(inputNode, from, to, reqContext);
+  const hasFoundCycles = await containsCycles(
+    destination,
+    from,
+    to,
+    reqContext
+  );
   if (hasFoundCycles) {
     throw new Error('Cyclic dependencies not allowed');
   }
@@ -48,8 +62,8 @@ export const createConnection = async (
   const insertRes = await collection.insertOne({
     from,
     to,
-    contextIds: inputNode.contextIds,
-    workspaceId: inputNode.workspaceId
+    contextIds: destination.contextIds,
+    workspaceId: destination.workspaceId
   });
 
   if (insertRes.result.ok !== 1 || insertRes.ops.length !== 1) {
@@ -60,11 +74,11 @@ export const createConnection = async (
   const connId = newItem._id.toHexString();
 
   await Promise.all([
-    addConnection(from, 'output', connId, reqContext),
-    addConnection(to, 'input', connId, reqContext)
+    addConnection(from, to, 'output', connId, reqContext),
+    addConnection(to, from, 'input', connId, reqContext)
   ]);
 
-  await updateStates(inputNode.workspaceId, reqContext);
+  await updateStates(destination.workspaceId, reqContext);
 
   Logger.info(`Connection ${connId} created`);
 
@@ -72,6 +86,43 @@ export const createConnection = async (
     id: newItem._id.toHexString(),
     ...newItem
   };
+};
+
+const checkAndGetDataType = async (
+  from: SocketInstance,
+  to: SocketInstance,
+  source: NodeInstance,
+  destination: NodeInstance,
+  reqContext
+): Promise<DataType> => {
+  const destinationNodeType = getNodeType(destination.type);
+  const sourceDefs = await getOutputDefs(source, reqContext);
+
+  const expectedDatatype = sourceDefs[from.name]
+    ? sourceDefs[from.name].dataType
+    : null;
+  if (!expectedDatatype) {
+    throw new Error('Unknown output socket');
+  }
+
+  if (destinationNodeType && hasContextFn(destinationNodeType)) {
+    // might be a variable
+    return expectedDatatype;
+  }
+
+  const destinationDefs = await getInputDefs(destination, reqContext);
+  const matchedDatatype = destinationDefs[to.name]
+    ? destinationDefs[to.name].dataType
+    : null;
+  if (!matchedDatatype) {
+    throw new Error('Unknown input socket');
+  }
+
+  if (expectedDatatype !== matchedDatatype) {
+    throw new Error('Datatypes dont match');
+  }
+
+  return expectedDatatype;
 };
 
 const checkNodes = (inputNode: NodeInstance, outputNode: NodeInstance) => {

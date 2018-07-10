@@ -1,17 +1,22 @@
 import {
   ApolloContext,
   ContextNodeType,
+  DataType,
   hasContextFn,
+  NodeDef,
   NodeInstance,
   parseNodeForm,
+  ServerNodeDef,
   SocketDef,
   SocketDefs,
-  SocketInstance
+  SocketInstance,
+  SocketState
 } from '@masterthesis/shared';
 import { ObjectID } from 'mongodb';
 
+import { Logger } from '../../logging';
 import { getMetaInputs } from '../calculation/meta-execution';
-import { hasNodeType, tryGetNodeType } from '../nodes/all-nodes';
+import { getNodeType, hasNodeType, tryGetNodeType } from '../nodes/all-nodes';
 import {
   getNode,
   getNodesCollection,
@@ -23,38 +28,43 @@ import { updateStates } from './nodes-state';
 export const getContextInputDefs = async (
   node: NodeInstance,
   reqContext: ApolloContext
-): Promise<SocketDefs<any> | null> => {
+): Promise<SocketDefs<any>> => {
   if (hasNodeType(node.type)) {
-    return null;
+    return {};
   }
 
   const parent = await tryGetParentNode(node, reqContext);
   const parentType = tryGetNodeType(parent.type);
   if (!hasContextFn(parentType)) {
-    return null;
+    return {};
   }
 
   const parentInputs = await getMetaInputs(parent, reqContext);
-  return await parentType.transformInputDefsToContextInputDefs(
+  const parentDefs = await parentType.transformInputDefsToContextInputDefs(
     parentType.inputs,
     parentInputs,
     parseNodeForm(parent.form),
     reqContext
   );
+  const variableDefs: SocketDefs<{}> = {};
+  Object.entries(await getInputDefs(parent, reqContext))
+    .filter(n => n[1].state === SocketState.VARIABLE)
+    .forEach(n => (variableDefs[n[0]] = n[1]));
+  return { ...parentDefs, ...variableDefs };
 };
 
 export const getContextOutputDefs = async (
   node: NodeInstance,
   reqContext: ApolloContext
-): Promise<(SocketDefs<any> & { [name: string]: SocketDef }) | null> => {
+): Promise<SocketDefs<any> & { [name: string]: SocketDef }> => {
   if (hasNodeType(node.type)) {
-    return null;
+    return {};
   }
 
   const parent = await tryGetParentNode(node, reqContext);
   const parentType = tryGetNodeType(parent.type);
   if (!hasContextFn(parentType)) {
-    return null;
+    return {};
   }
 
   const parentInputs = await getMetaInputs(parent, reqContext);
@@ -111,7 +121,26 @@ export const getInputDefs = async (
     inputDefs = (await getContextOutputDefs(node, reqContext)) || {};
   } else {
     const type = tryGetNodeType(node.type);
-    inputDefs = type.inputs;
+    inputDefs = hasContextFn(type)
+      ? { ...type.inputs, ...node.variables }
+      : type.inputs;
+  }
+
+  return inputDefs;
+};
+
+export const getOutputDefs = async (
+  node: NodeInstance,
+  reqContext: ApolloContext
+): Promise<SocketDefs<any>> => {
+  let inputDefs: SocketDefs<any> = {};
+  if (node.type === ContextNodeType.OUTPUT) {
+    return {};
+  } else if (node.type === ContextNodeType.INPUT) {
+    inputDefs = (await getContextInputDefs(node, reqContext)) || {};
+  } else {
+    const type = tryGetNodeType(node.type);
+    inputDefs = type.outputs;
   }
 
   return inputDefs;
@@ -139,16 +168,21 @@ export const addOrUpdateFormValue = async (
   }
 
   await updateStates(node.workspaceId, reqContext);
+  Logger.info(`Added or updated form value of ${nodeId} with name ${name}`);
 
   return true;
 };
 
 export const addConnection = async (
   socket: SocketInstance,
+  otherSocket: SocketInstance,
   type: 'output' | 'input',
   connId: string,
   reqContext: ApolloContext
 ) => {
+  const targetNode = await tryGetNode(socket.nodeId, reqContext);
+  const nodeType = getNodeType(targetNode.type);
+
   const coll = getNodesCollection(reqContext.db);
   await coll.updateOne(
     { _id: new ObjectID(socket.nodeId) },
@@ -161,7 +195,35 @@ export const addConnection = async (
       }
     }
   );
+
+  if (fulfillsVariableRequirements(type, socket.name, nodeType)) {
+    const otherNode = await tryGetNode(otherSocket.nodeId, reqContext);
+    const inputDef = (await getOutputDefs(otherNode, reqContext))[
+      otherSocket.name
+    ];
+
+    await addOrUpdateVariable(
+      socket.name,
+      {
+        dataType: inputDef.dataType,
+        displayName: inputDef.displayName,
+        state: SocketState.VARIABLE
+      },
+      socket.nodeId,
+      reqContext
+    );
+  }
 };
+
+const fulfillsVariableRequirements = (
+  type: string,
+  socketName: string,
+  nodeType: ServerNodeDef & NodeDef | null
+) =>
+  type === 'input' &&
+  nodeType &&
+  hasContextFn(nodeType) &&
+  nodeType.inputs[socketName] == null;
 
 export const removeConnection = async (
   socket: SocketInstance,
@@ -169,6 +231,9 @@ export const removeConnection = async (
   connId: string,
   reqContext: ApolloContext
 ) => {
+  const node = await tryGetNode(socket.nodeId, reqContext);
+  const nodeType = getNodeType(node.type);
+
   const coll = getNodesCollection(reqContext.db);
   await coll.updateOne(
     { _id: new ObjectID(socket.nodeId) },
@@ -181,6 +246,14 @@ export const removeConnection = async (
       }
     }
   );
+
+  if (
+    nodeType &&
+    hasContextFn(nodeType) &&
+    nodeType.inputs[socket.name] == null
+  ) {
+    await deleteVariable(socket.name, socket.nodeId, reqContext);
+  }
 };
 
 export const setProgress = async (
@@ -200,5 +273,45 @@ export const setProgress = async (
     }
   );
 
+  return true;
+};
+
+export const addOrUpdateVariable = async (
+  varId: string,
+  variable: SocketDef,
+  nodeId: string,
+  reqContext: ApolloContext
+) => {
+  const node = await tryGetNode(nodeId, reqContext);
+  const coll = getNodesCollection(reqContext.db);
+  await coll.updateOne(
+    { _id: new ObjectID(nodeId) },
+    {
+      $set: { [`variables.${varId}`]: variable }
+    }
+  );
+
+  await updateStates(node.workspaceId, reqContext);
+  Logger.info(`Created variable ${varId}`);
+  return true;
+};
+
+export const deleteVariable = async (
+  varId: string,
+  nodeId: string,
+  reqContext: ApolloContext
+) => {
+  const node = await tryGetNode(nodeId, reqContext);
+  const coll = getNodesCollection(reqContext.db);
+  await coll.updateOne(
+    { _id: new ObjectID(nodeId) },
+    {
+      $unset: { [`variables.${varId}`]: '' }
+    }
+  );
+
+  await updateStates(node.workspaceId, reqContext);
+
+  Logger.info(`Deleted variable ${varId}`);
   return true;
 };

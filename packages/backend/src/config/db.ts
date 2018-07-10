@@ -26,7 +26,7 @@ const tryConnectToDb = async () => {
   Logger.info(`Trying to connect to ${config.db}`);
   const client = await MongoClient.connect(
     config.db,
-    { useNewUrlParser: true } as any
+    { useNewUrlParser: true }
   );
   Logger.info('Connected to MongoDB');
   return client;

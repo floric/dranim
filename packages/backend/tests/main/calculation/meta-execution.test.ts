@@ -15,7 +15,7 @@ import {
   getMetaInputs,
   getMetaOutputs
 } from '../../../src/main/calculation/meta-execution';
-import { getNodeType, tryGetNodeType } from '../../../src/main/nodes/all-nodes';
+import { tryGetNodeType } from '../../../src/main/nodes/all-nodes';
 import { tryGetConnection } from '../../../src/main/workspace/connections';
 import { tryGetNode } from '../../../src/main/workspace/nodes';
 import {
@@ -53,7 +53,8 @@ describe('Meta Execution', () => {
         workspaceId: '',
         x: 0,
         y: 0,
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       },
       null
     );
@@ -97,7 +98,8 @@ describe('Meta Execution', () => {
       type: 't',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     (getInputDefs as jest.Mock).mockResolvedValue({
       test: {
@@ -120,7 +122,8 @@ describe('Meta Execution', () => {
         workspaceId: '',
         x: 0,
         y: 0,
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       },
       null
     );
@@ -141,7 +144,8 @@ describe('Meta Execution', () => {
         workspaceId: '',
         x: 0,
         y: 0,
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       },
       null
     );
@@ -159,7 +163,8 @@ describe('Meta Execution', () => {
       outputs: [],
       type: 'p',
       workspaceId: '',
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const parentType: ServerNodeDefWithContextFn & NodeDef = {
       type: 'test',
@@ -201,7 +206,8 @@ describe('Meta Execution', () => {
         workspaceId: '',
         x: 0,
         y: 0,
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       },
       null
     );
@@ -223,7 +229,8 @@ describe('Meta Execution', () => {
         outputs: [],
         type: 'p',
         workspaceId: '',
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       };
       const parentType: ServerNodeDefWithContextFn & NodeDef = {
         type: 'test',
@@ -252,7 +259,8 @@ describe('Meta Execution', () => {
           workspaceId: '',
           x: 0,
           y: 0,
-          state: NodeState.VALID
+          state: NodeState.VALID,
+          variables: {}
         },
         null
       );

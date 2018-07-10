@@ -1,7 +1,6 @@
 import {
   Colors,
   ConditionalMetaTypes,
-  ContextNodeType,
   DataType,
   GQLNodeInstance,
   NodeState,
@@ -12,8 +11,13 @@ import {
   SocketType
 } from '@masterthesis/shared';
 import * as Konva from 'konva';
+import { v4 } from 'uuid';
 
-import { ExplorerEditorProps, ExplorerEditorState } from '../ExplorerEditor';
+import {
+  ExplorerEditorProps,
+  ExplorerEditorState,
+  OpenConnection
+} from '../ExplorerEditor';
 import { nodeTypes } from '../nodes/all-nodes';
 import {
   getSocketId,
@@ -42,12 +46,10 @@ export const renderContextNode = (
     stage.container().style.cursor = 'default';
   });
 
-  const inputs =
-    n.type === ContextNodeType.INPUT ? {} : JSON.parse(n.contextOutputDefs);
-  const outputs =
-    n.type === ContextNodeType.OUTPUT ? {} : JSON.parse(n.contextInputDefs);
+  const inputs = JSON.parse(n.inputSockets);
+  const outputs = JSON.parse(n.outputSockets);
 
-  const height = getNodeHeight(inputs, outputs);
+  const height = getHeight(n, inputs, outputs, state.openConnection);
 
   nodeGroup.on('dragend', ev => {
     server.onNodeUpdate(n.id, ev.target.x(), ev.target.y());
@@ -59,7 +61,7 @@ export const renderContextNode = (
     { defs: inputs, type: SocketType.INPUT },
     { defs: outputs, type: SocketType.OUTPUT }
   ].map(p =>
-    renderSockets(p.defs, n.id, server, state, p.type, socketsMap, changeState)
+    renderSockets(p.defs, n, server, state, p.type, socketsMap, changeState)
   );
   const stateRect = getStateRect(height, n.progress, n.state);
 
@@ -93,16 +95,11 @@ export const renderNode = (
     stage.container().style.cursor = 'default';
   });
 
-  const { inputs, outputs, name, renderName } = nodeType;
-  if (n.hasContextFn) {
-    inputs['add-var'] = {
-      dataType: DataType.ANY,
-      displayName: 'Insert Variable',
-      state: SocketState.VARIABLE
-    };
-  }
+  const { name, renderName } = nodeType;
+  const inputs = JSON.parse(n.inputSockets);
+  const outputs = JSON.parse(n.outputSockets);
 
-  const height = getNodeHeight(inputs, outputs);
+  const height = getHeight(n, inputs, outputs, state.openConnection);
   const isSelected =
     state.selectedNodeId !== null && state.selectedNodeId === n.id;
 
@@ -128,7 +125,7 @@ export const renderNode = (
     { defs: inputs, type: SocketType.INPUT },
     { defs: outputs, type: SocketType.OUTPUT }
   ].map(p =>
-    renderSockets(p.defs, n.id, server, state, p.type, socketsMap, changeState)
+    renderSockets(p.defs, n, server, state, p.type, socketsMap, changeState)
   );
   const stateRect = getStateRect(height, n.progress, n.state);
 
@@ -196,11 +193,16 @@ const getHeaderText = (isSelected: boolean, text: string) =>
     y: 10
   });
 
-const getNodeHeight = (
+const getHeight = (
+  n: GQLNodeInstance,
   inputs: ConditionalMetaTypes<{}>,
-  outputs: ConditionalMetaTypes<{}>
+  outputs: ConditionalMetaTypes<{}>,
+  openConnection: OpenConnection | null
 ) => {
-  const inputsCount = Object.keys(inputs).length;
+  const inputsCount =
+    openConnection !== null && n.hasContextFn
+      ? Object.keys(inputs).length + 1
+      : Object.keys(inputs).length;
   const outputsCount = Object.keys(outputs).length;
 
   const maxSocketsCount =
@@ -211,7 +213,7 @@ const getNodeHeight = (
 
 const renderSockets = (
   sockets: SocketDefs<any>,
-  nodeId: string,
+  node: GQLNodeInstance,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   type: SocketType,
@@ -232,20 +234,53 @@ const renderSockets = (
       type,
       i,
       server,
-      nodeId,
+      node.id,
       () =>
         onClickSocket(
           socketDef[1],
           socketDef[0],
           type,
-          nodeId,
+          node.id,
           server,
           state,
           changeState
         )
     );
     group.add(socket);
-    socketsMap.set(getSocketId(type, nodeId, socketDef[0]), socket);
+    socketsMap.set(getSocketId(type, node.id, socketDef[0]), socket);
+  }
+
+  if (
+    node.hasContextFn &&
+    state.openConnection !== null &&
+    state.openConnection.destinations === null &&
+    type === SocketType.INPUT
+  ) {
+    const socketDef: SocketDef = {
+      dataType: DataType.ANY,
+      displayName: 'Add Variable',
+      state: SocketState.VARIABLE
+    };
+    const varName = v4();
+    const addVarSocket = renderSocketWithUsages(
+      socketDef,
+      varName,
+      SocketType.INPUT,
+      all.length,
+      server,
+      node.id,
+      () =>
+        onClickSocket(
+          socketDef,
+          varName,
+          type,
+          node.id,
+          server,
+          state,
+          changeState
+        )
+    );
+    group.add(addVarSocket);
   }
 
   return group;

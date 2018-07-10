@@ -1,8 +1,8 @@
 import * as winston from 'winston';
 
-const format = winston.format.printf(info => {
-  return `${info.timestamp} ${info.level}: ${info.message}`;
-});
+const format = winston.format.printf(
+  info => `${info.timestamp} ${info.level}: ${info.message}`
+);
 
 export const Logger = winston.createLogger({
   level: 'verbose',

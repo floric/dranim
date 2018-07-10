@@ -261,7 +261,8 @@ describe('Workspaces', () => {
       x: 0,
       y: 0,
       workspaceId: ws.id,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeB: NodeInstance = {
       id: VALID_OBJECT_ID,
@@ -273,7 +274,8 @@ describe('Workspaces', () => {
       x: 0,
       y: 0,
       workspaceId: ws.id,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     const res = await updateWorkspace(

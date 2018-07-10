@@ -5,8 +5,8 @@ import {
   DataType,
   Entry,
   FilterEntriesNodeDef,
-  ValueSchema,
-  SocketState
+  SocketState,
+  ValueSchema
 } from '@masterthesis/shared';
 
 import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';

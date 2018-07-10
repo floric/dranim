@@ -60,7 +60,8 @@ describe('Validation', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     (getMetaInputs as jest.Mock).mockResolvedValue({
@@ -87,7 +88,8 @@ describe('Validation', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     (getInputDefs as jest.Mock).mockResolvedValue({});
@@ -128,7 +130,8 @@ describe('Validation', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     (getMetaInputs as jest.Mock).mockResolvedValue({
@@ -172,7 +175,8 @@ describe('Validation', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     (getMetaInputs as jest.Mock).mockResolvedValue({});
@@ -210,7 +214,8 @@ describe('Validation', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     (getMetaInputs as jest.Mock).mockResolvedValue({});
@@ -251,7 +256,8 @@ describe('Validation', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     (getMetaInputs as jest.Mock).mockResolvedValue({});
@@ -283,7 +289,8 @@ describe('Validation', () => {
         workspaceId: VALID_OBJECT_ID,
         x: 0,
         y: 0,
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       },
       {},
       { db: null, userId: '' }
@@ -310,7 +317,8 @@ describe('Validation', () => {
         workspaceId: VALID_OBJECT_ID,
         x: 0,
         y: 0,
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       },
       { dataset: { datasetId: VALID_OBJECT_ID } },
       { db: null, userId: '' }
@@ -346,7 +354,8 @@ describe('Validation', () => {
         workspaceId: VALID_OBJECT_ID,
         x: 0,
         y: 0,
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       },
       { dataset: { datasetId: VALID_OBJECT_ID } },
       { db: null, userId: '' }
@@ -373,7 +382,8 @@ describe('Validation', () => {
         workspaceId: VALID_OBJECT_ID,
         x: 0,
         y: 0,
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       },
       { test: 'abc' },
       { db: null, userId: '' }
@@ -415,7 +425,8 @@ describe('Validation', () => {
         workspaceId: VALID_OBJECT_ID,
         x: 0,
         y: 0,
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       },
       {
         datasetA: { datasetId: ds.id },

@@ -36,7 +36,7 @@ export const updateStates = async (wsId: string, reqContext: ApolloContext) => {
           inputNode,
           reqContext
         );
-        if (contextInputDefs && contextInputDefs[c.from.name] === undefined) {
+        if (contextInputDefs[c.from.name] === undefined) {
           await deleteConnection(c.id, reqContext);
         }
       } else if (outputNode.type === ContextNodeType.OUTPUT) {
@@ -44,7 +44,7 @@ export const updateStates = async (wsId: string, reqContext: ApolloContext) => {
           outputNode,
           reqContext
         );
-        if (contextOutputDefs && contextOutputDefs[c.to.name] === undefined) {
+        if (contextOutputDefs[c.to.name] === undefined) {
           await deleteConnection(c.id, reqContext);
         }
       }
@@ -97,7 +97,7 @@ const calculateState = async (
 
     return NodeState.VALID;
   } catch (err) {
-    Logger.error('Calculation error', err);
+    Logger.error(`Calculation error: ${err.message}`);
     return NodeState.ERROR;
   }
 };

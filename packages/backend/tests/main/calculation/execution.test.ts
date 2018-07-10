@@ -51,7 +51,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const type: ServerNodeDef & NodeDef = {
       type: 'type',
@@ -96,7 +97,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeB: NodeInstance = {
       id: 'nodeB',
@@ -108,7 +110,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const typeA: ServerNodeDef & NodeDef = {
       type: 'type',
@@ -182,7 +185,8 @@ describe('Execution', () => {
         inputs: [],
         form: [],
         contextIds: [VALID_OBJECT_ID],
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       },
       { db: null, userId: '' },
       contextInputs
@@ -201,7 +205,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     (tryGetNode as jest.Mock).mockResolvedValue(node);
     (tryGetNodeType as jest.Mock).mockImplementation(() => {
@@ -222,7 +227,8 @@ describe('Execution', () => {
           inputs: [],
           form: [],
           contextIds: [VALID_OBJECT_ID],
-          state: NodeState.VALID
+          state: NodeState.VALID,
+          variables: {}
         },
         { db: null, userId: '' }
       );
@@ -243,7 +249,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     (tryGetNode as jest.Mock).mockResolvedValue(node);
     (tryGetNodeType as jest.Mock).mockImplementation(() => {
@@ -271,7 +278,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const type: ServerNodeDef & NodeDef = {
       type: 'type',
@@ -309,7 +317,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeB: NodeInstance = {
       id: 'nodeB',
@@ -321,7 +330,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const sumNode: NodeInstance = {
       id: 'nodeB',
@@ -336,7 +346,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const typeA: ServerNodeDef & NodeDef = {
       type: 'type',
@@ -439,7 +450,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const cNode: NodeInstance = {
       id: 'cNode',
@@ -451,7 +463,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const iNode: NodeInstance = {
       id: 'iNode',
@@ -463,7 +476,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const type: ServerNodeDefWithContextFn & NodeDef = {
       type: 'type',
@@ -535,7 +549,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     (tryGetNode as jest.Mock).mockResolvedValue(node);
 

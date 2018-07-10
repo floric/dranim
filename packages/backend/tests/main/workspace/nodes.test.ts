@@ -241,7 +241,7 @@ describe('Nodes', () => {
     };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
 
-    let nrOfNodes = await getNodesCollection(db).count({});
+    let nrOfNodes = await getNodesCollection(db).countDocuments();
     expect(nrOfNodes).toBe(0);
 
     const newNode = await createNode(NumberInputNodeDef.type, ws.id, [], 0, 0, {
@@ -251,7 +251,7 @@ describe('Nodes', () => {
 
     expect(newNode).not.toBe(null);
 
-    nrOfNodes = await getNodesCollection(db).count({});
+    nrOfNodes = await getNodesCollection(db).countDocuments();
     expect(nrOfNodes).toBe(1);
 
     const res = await deleteNode(newNode.id, {
@@ -260,7 +260,7 @@ describe('Nodes', () => {
     });
     expect(res).toBe(true);
 
-    nrOfNodes = await getNodesCollection(db).count({});
+    nrOfNodes = await getNodesCollection(db).countDocuments();
     expect(nrOfNodes).toBe(0);
   });
 

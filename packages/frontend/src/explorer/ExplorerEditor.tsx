@@ -53,8 +53,8 @@ export interface ExplorerEditorProps {
 
 export interface OpenConnection {
   dataType: string;
-  inputs: null | Array<SocketInstance>;
-  outputs: null | Array<SocketInstance>;
+  destinations: null | Array<SocketInstance>;
+  sources: null | Array<SocketInstance>;
 }
 
 export interface ExplorerEditorState {

@@ -57,7 +57,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeB: NodeInstance = {
       id: 'idb',
@@ -69,7 +70,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     (tryGetNode as jest.Mock)
@@ -135,7 +137,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeB: NodeInstance = {
       id: 'idb',
@@ -147,7 +150,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     (tryGetNode as jest.Mock)
@@ -189,7 +193,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeAinContext: NodeInstance = {
       id: 'idb-i',
@@ -201,7 +206,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeBinContext: NodeInstance = {
       id: 'idb-o',
@@ -213,7 +219,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     (tryGetNode as jest.Mock)
@@ -261,7 +268,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeB: NodeInstance = {
       id: 'idb',
@@ -273,7 +281,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     (tryGetNode as jest.Mock)
@@ -313,7 +322,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     (tryGetNode as jest.Mock)
@@ -350,7 +360,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeB: NodeInstance = {
       id: 'idb',
@@ -362,7 +373,8 @@ describe('Connections', () => {
       workspaceId: 'otherws',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     (tryGetNode as jest.Mock)
@@ -397,7 +409,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeB: NodeInstance = {
       id: 'idb',
@@ -409,7 +422,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     (tryGetNode as jest.Mock)
@@ -450,7 +464,7 @@ describe('Connections', () => {
       userId: ''
     });
 
-    const count = await connectionsCollection.count({});
+    const count = await connectionsCollection.countDocuments();
     expect(count).toBe(0);
   });
 });

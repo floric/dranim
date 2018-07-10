@@ -4,9 +4,9 @@ import {
   Dataset,
   DataType,
   Entry,
-  ValueSchema,
+  NodeState,
   SocketState,
-  NodeState
+  ValueSchema
 } from '@masterthesis/shared';
 
 import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
@@ -134,7 +134,7 @@ describe('AddValuesNode', () => {
       {
         dataset: {
           dataType: DataType.DATASET,
-          state: SocketState.STATIC
+          state: SocketState.STATIC,
           displayName: 'Dataset'
         }
       },
@@ -167,7 +167,7 @@ describe('AddValuesNode', () => {
       {
         dataset: {
           dataType: DataType.DATASET,
-          state: SocketState.STATIC
+          state: SocketState.STATIC,
           displayName: 'Dataset'
         }
       },

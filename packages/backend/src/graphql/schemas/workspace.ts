@@ -30,6 +30,8 @@ const NodeDef = `
     contextInputDefs: SocketDefs
     contextOutputDefs: SocketDefs
     progress: Float
+    inputSockets: SocketDefs
+    outputSockets: SocketDefs
   }
 `;
 

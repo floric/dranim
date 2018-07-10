@@ -134,8 +134,8 @@ const createConnectionsLayer = (
       connsLayer.add(line);
     });
 
-  if (openConnection && openConnection.outputs) {
-    openConnection.outputs.forEach(c => {
+  if (openConnection && openConnection.sources) {
+    openConnection.sources.forEach(c => {
       const line = renderConnection(
         { from: { name: c.name, nodeId: c.nodeId }, to: null },
         stage,
@@ -146,8 +146,8 @@ const createConnectionsLayer = (
       );
       connsLayer.add(line);
     });
-  } else if (openConnection && openConnection.inputs) {
-    openConnection.inputs.forEach(c => {
+  } else if (openConnection && openConnection.destinations) {
+    openConnection.destinations.forEach(c => {
       const line = renderConnection(
         { from: null, to: { name: c.name, nodeId: c.nodeId } },
         stage,

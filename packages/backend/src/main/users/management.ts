@@ -26,10 +26,12 @@ export const login = async (
     return null;
   }
 
-  Logger.info(`Successful login: ${user.id}`);
+  const id = user._id.toHexString();
+
+  Logger.info(`Successful login: ${id}`);
 
   return {
-    id: user._id.toHexString(),
+    id,
     mail: user.mail,
     firstName: user.firstName,
     lastName: user.lastName
