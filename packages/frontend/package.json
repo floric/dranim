@@ -59,6 +59,7 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-react-optimize": "^1.0.1",
     "parcel-bundler": "^1.9.3",
+    "parcel-plugin-sw-precache": "^0.5.2",
     "parcel-plugin-typescript": "^1.0.0",
     "tslint": "^5.2.0",
     "tslint-config-prettier": "^1.13.0",
@@ -69,5 +70,8 @@
     "nohoist": [
       "**/@masterthesis/**"
     ]
+  },
+  "sw-precache": {
+    "maximumFileSizeToCacheInBytes": 10485760
   }
 }
