@@ -1,17 +1,17 @@
-import * as winston from 'winston';
+import { createLogger, format, Logger, transports } from 'winston';
 
-const format = winston.format.printf(info => {
-  return `${info.timestamp} ${info.level}: ${info.message}`;
-});
+const logFormat = format.printf(
+  info => `${info.timestamp} ${info.level}: ${info.message}`
+);
 
-export const Logger = winston.createLogger({
+export const Log: Logger = createLogger({
   level: 'verbose',
-  format: winston.format.json(),
+  format: format.json(),
   transports: [
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'combined.log' }),
-    new winston.transports.Console({
-      format: winston.format.combine(winston.format.timestamp(), format),
+    new transports.File({ filename: 'error.log', level: 'error' }),
+    new transports.File({ filename: 'combined.log' }),
+    new transports.Console({
+      format: format.combine(format.timestamp(), logFormat),
       level: process.env.NODE_ENV !== 'production' ? 'verbose' : 'info'
     })
   ]
@@ -19,6 +19,6 @@ export const Logger = winston.createLogger({
 
 export class MorganLogStream {
   public write(text: string) {
-    Logger.verbose(text.trim());
+    Log.verbose(text.trim());
   }
 }

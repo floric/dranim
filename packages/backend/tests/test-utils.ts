@@ -41,5 +41,6 @@ export const NODE: NodeInstance = {
   workspaceId: VALID_OBJECT_ID,
   x: 0,
   y: 9,
-  state: NodeState.VALID
+  state: NodeState.VALID,
+  variables: {}
 };

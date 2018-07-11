@@ -7,7 +7,7 @@ import {
   parseNodeForm
 } from '@masterthesis/shared';
 
-import { Logger } from '../../logging';
+import { Log } from '../../logging';
 import { getMetaInputs } from '../calculation/meta-execution';
 import { tryGetNodeType } from '../nodes/all-nodes';
 import { getDataset } from '../workspace/dataset';
@@ -29,6 +29,7 @@ export const isNodeInMetaValid = async (
 
   const metaDefs = await getMetaInputs(node, reqContext);
   const allInputsArePresent = Object.values(metaDefs)
+    .filter(a => !!a)
     .map(a => a.isPresent)
     .reduce((a, b) => a && b, true);
 
@@ -73,7 +74,7 @@ const validateBoolean = (value: any) => {
   return Promise.resolve(typeof value === 'boolean');
 };
 
-const validateDatatime = (value: any) => {
+const validateDatetime = (value: any) => {
   return Promise.resolve(value instanceof Date);
 };
 
@@ -90,7 +91,7 @@ const validationMethods: Map<
   [DataType.NUMBER, validateNumber],
   [DataType.BOOLEAN, validateBoolean],
   [DataType.TIME, validateTime],
-  [DataType.DATETIME, validateDatatime]
+  [DataType.DATETIME, validateDatetime]
 ]);
 
 export const isInputValid = async (
@@ -103,7 +104,7 @@ export const isInputValid = async (
   }
 
   if (!validationMethods.has(dataType)) {
-    Logger.warn('Unsupported data type: ' + dataType);
+    Log.warn('Unsupported data type: ' + dataType);
     return true;
   }
 

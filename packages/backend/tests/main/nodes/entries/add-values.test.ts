@@ -4,6 +4,8 @@ import {
   Dataset,
   DataType,
   Entry,
+  NodeState,
+  SocketState,
   ValueSchema
 } from '@masterthesis/shared';
 
@@ -132,7 +134,7 @@ describe('AddValuesNode', () => {
       {
         dataset: {
           dataType: DataType.DATASET,
-          isDynamic: false,
+          state: SocketState.STATIC,
           displayName: 'Dataset'
         }
       },
@@ -140,7 +142,7 @@ describe('AddValuesNode', () => {
       {
         test: {
           dataType: DataType.NUMBER,
-          isDynamic: true,
+          state: SocketState.DYNAMIC,
           displayName: 'Test'
         }
       },
@@ -152,7 +154,7 @@ describe('AddValuesNode', () => {
     expect(res).toEqual({
       test: {
         dataType: DataType.NUMBER,
-        isDynamic: true,
+        state: SocketState.DYNAMIC,
         displayName: 'Test'
       }
     });
@@ -165,7 +167,7 @@ describe('AddValuesNode', () => {
       {
         dataset: {
           dataType: DataType.DATASET,
-          isDynamic: false,
+          state: SocketState.STATIC,
           displayName: 'Dataset'
         }
       },
@@ -173,7 +175,7 @@ describe('AddValuesNode', () => {
       {
         test: {
           dataType: DataType.NUMBER,
-          isDynamic: true,
+          state: SocketState.DYNAMIC,
           displayName: 'Test'
         }
       },
@@ -194,23 +196,23 @@ describe('AddValuesNode', () => {
     expect(res).toEqual({
       test: {
         dataType: DataType.NUMBER,
-        isDynamic: true,
+        state: SocketState.DYNAMIC,
         displayName: 'Test'
       },
       test2: {
         dataType: DataType.STRING,
-        isDynamic: true,
+        state: SocketState.DYNAMIC,
         displayName: 'test2'
       }
     });
   });
 
-  test('should return empty object for missing dataset input for context', async () => {
+  test('should return context inputs as well as dynamic inputs from form even with missing dataset input', async () => {
     const res = await AddValuesNode.transformContextInputDefsToContextOutputDefs(
       {
         dataset: {
           dataType: DataType.DATASET,
-          isDynamic: false,
+          state: SocketState.STATIC,
           displayName: 'Dataset'
         }
       },
@@ -218,7 +220,7 @@ describe('AddValuesNode', () => {
       {
         test: {
           dataType: DataType.NUMBER,
-          isDynamic: true,
+          state: SocketState.DYNAMIC,
           displayName: 'Test'
         }
       },
@@ -236,7 +238,10 @@ describe('AddValuesNode', () => {
       },
       null
     );
-    expect(res).toEqual({});
+    expect(res).toEqual({
+      test: { dataType: 'Number', displayName: 'Test', state: 'Dynamic' },
+      test2: { dataType: 'String', displayName: 'test2', state: 'Dynamic' }
+    });
   });
 
   test('should add new value to dataset', async () => {
@@ -299,7 +304,9 @@ describe('AddValuesNode', () => {
           workspaceId: VALID_OBJECT_ID,
           form: [],
           x: 0,
-          y: 0
+          y: 0,
+          state: NodeState.VALID,
+          variables: {}
         },
         contextFnExecution: async inputs => ({
           outputs: { ...inputs, new: 'super' }

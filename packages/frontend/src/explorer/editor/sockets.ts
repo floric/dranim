@@ -1,7 +1,9 @@
 import {
   Colors,
   ConnectionInstance,
+  DataType,
   SocketDef,
+  SocketState,
   SocketType
 } from '@masterthesis/shared';
 import * as Konva from 'konva';
@@ -31,7 +33,7 @@ const renderSocket = (
   const text = new Konva.Text({
     fill: Colors.GrayDark,
     text: s.displayName,
-    fontStyle: s.isDynamic ? 'italic' : undefined,
+    fontStyle: s.state === SocketState.DYNAMIC ? 'italic' : undefined,
     align: type === SocketType.INPUT ? 'left' : 'right',
     width: NODE_WIDTH / 2,
     x:
@@ -90,8 +92,9 @@ const beginNewConnection = (
   changeState({
     openConnection: {
       dataType: s.dataType,
-      inputs: type === SocketType.INPUT ? [{ name: socketName, nodeId }] : null,
-      outputs: type !== SocketType.INPUT ? [{ name: socketName, nodeId }] : null
+      destinations:
+        type === SocketType.INPUT ? [{ name: socketName, nodeId }] : null,
+      sources: type !== SocketType.INPUT ? [{ name: socketName, nodeId }] : null
     }
   });
 
@@ -114,13 +117,21 @@ const beginEditExistingConnection = async (
   await Promise.all(
     connectionsInSocket.map(c => server.onConnectionDelete(c.id!))
   );
+  const sources =
+    type === SocketType.INPUT ? existingConnections.map(c => c.from!) : null;
+
+  if (!sources) {
+    return;
+  }
+
+  const destinations =
+    type !== SocketType.INPUT ? existingConnections.map(c => c.to!) : null;
+
   changeState({
     openConnection: {
       dataType: s.dataType,
-      inputs:
-        type !== SocketType.INPUT ? existingConnections.map(c => c.to!) : null,
-      outputs:
-        type === SocketType.INPUT ? existingConnections.map(c => c.from!) : null
+      destinations,
+      sources
     }
   });
 };
@@ -161,15 +172,15 @@ export const onClickSocket = (
     return;
   }
 
-  if (s.dataType !== openConnection.dataType) {
+  if (s.dataType !== DataType.ANY && s.dataType !== openConnection.dataType) {
     handleDifferentDataTypes();
     return;
   }
 
   if (
     type === SocketType.INPUT
-      ? openConnection.inputs !== null
-      : openConnection.outputs !== null
+      ? openConnection.destinations !== null
+      : openConnection.sources !== null
   ) {
     handleNotAllowedConnection();
     return;
@@ -185,16 +196,16 @@ export const onClickSocket = (
     return;
   }
 
-  (openConnection.inputs
-    ? openConnection.inputs.map(c => ({
+  (openConnection.destinations
+    ? openConnection.destinations.map(c => ({
         to: { nodeId: c.nodeId, name: c.name },
         from: { nodeId, name: socketName }
       }))
     : []
   )
     .concat(
-      openConnection.outputs
-        ? openConnection.outputs.map(c => ({
+      openConnection.sources
+        ? openConnection.sources.map(c => ({
             to: { nodeId, name: socketName },
             from: { nodeId: c.nodeId, name: c.name }
           }))

@@ -129,6 +129,7 @@ export interface NodeInstance {
   contextIds: Array<string>;
   outputs: Array<ConnectionDescription>;
   inputs: Array<ConnectionDescription>;
+  variables: SocketDefs<{}>;
   type: string;
   form: Array<FormValue>;
   state: NodeState;
@@ -139,9 +140,9 @@ export interface GQLNodeInstance extends NodeInstance {
   metaInputs: string;
   metaOutputs: string;
   hasContextFn: boolean;
-  contextInputDefs: string | null;
-  contextOutputDefs: string | null;
   progress: number | null;
+  inputSockets: string;
+  outputSockets: string;
 }
 
 export interface SocketInstance {

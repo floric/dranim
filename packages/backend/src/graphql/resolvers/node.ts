@@ -1,7 +1,6 @@
 import {
-  ContextNodeType,
   hasContextFn,
-  SocketDef,
+  NodeInstance,
   SocketDefs,
   SocketMetaDef,
   SocketMetas,
@@ -13,10 +12,7 @@ import {
   getMetaOutputs
 } from '../../main/calculation/meta-execution';
 import { getNodeType, hasNodeType } from '../../main/nodes/all-nodes';
-import {
-  getContextInputDefs,
-  getContextOutputDefs
-} from '../../main/workspace/nodes-detail';
+import { getInputDefs, getOutputDefs } from '../../main/workspace/nodes-detail';
 import { getWorkspace } from '../../main/workspace/workspace';
 
 export const Node = {
@@ -34,22 +30,13 @@ export const Node = {
     context
   ): Promise<SocketMetas<{}> & { [name: string]: SocketMetaDef<any> }> =>
     getMetaInputs(node, context),
-  contextInputDefs: (
-    node,
-    _,
-    context
-  ): Promise<(SocketDefs<{}> & { [name: string]: SocketDef }) | null> =>
-    node.type === ContextNodeType.INPUT
-      ? getContextInputDefs(node, context)
-      : Promise.resolve(null),
-  contextOutputDefs: (
-    node,
-    _,
-    context
-  ): Promise<(SocketDefs<{}> & { [name: string]: SocketDef }) | null> =>
-    node.type === ContextNodeType.OUTPUT
-      ? getContextOutputDefs(node, context)
-      : Promise.resolve(null),
   hasContextFn: ({ type }): boolean =>
-    hasNodeType(type) ? hasContextFn(getNodeType(type)!) : false
+    hasNodeType(type) ? hasContextFn(getNodeType(type)!) : false,
+  inputSockets: async (
+    node: NodeInstance,
+    _,
+    context
+  ): Promise<SocketDefs<{}>> => getInputDefs(node, context),
+  outputSockets: async (node, _, context): Promise<SocketDefs<{}>> =>
+    getOutputDefs(node, context)
 };

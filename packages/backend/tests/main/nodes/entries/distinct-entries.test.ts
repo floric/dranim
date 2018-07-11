@@ -2,7 +2,8 @@ import {
   allAreDefinedAndPresent,
   Dataset,
   DataType,
-  DistinctEntriesNodeDef
+  DistinctEntriesNodeDef,
+  SocketState
 } from '@masterthesis/shared';
 
 import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
@@ -75,7 +76,11 @@ describe('DistinctEntriesNode', () => {
 
   test('should get context outputs from form and contextinputs', async () => {
     const contextInputDefs = {
-      abc: { displayName: 'test', dataType: DataType.STRING, isDynamic: true }
+      abc: {
+        displayName: 'test',
+        dataType: DataType.STRING,
+        state: SocketState.DYNAMIC
+      }
     };
     const newSchemas = [
       {
@@ -95,7 +100,13 @@ describe('DistinctEntriesNode', () => {
     ];
 
     const res = await DistinctEntriesNode.transformContextInputDefsToContextOutputDefs(
-      { dataset: { dataType: DataType.DATASET, displayName: 'ds' } },
+      {
+        dataset: {
+          dataType: DataType.DATASET,
+          displayName: 'ds',
+          state: SocketState.STATIC
+        }
+      },
       { dataset: { content: { schema: [] }, isPresent: true } },
       contextInputDefs,
       {},
@@ -103,19 +114,33 @@ describe('DistinctEntriesNode', () => {
       { db: null, userId: '' }
     );
     expect(res).toEqual({
-      abc: { dataType: 'String', displayName: 'test', isDynamic: true },
-      x: { dataType: 'Datetime', displayName: 'x', isDynamic: true },
-      y: { dataType: 'Number', displayName: 'y', isDynamic: true }
+      abc: {
+        dataType: 'String',
+        displayName: 'test',
+        state: SocketState.DYNAMIC
+      },
+      x: { dataType: 'Datetime', displayName: 'x', state: SocketState.DYNAMIC },
+      y: { dataType: 'Number', displayName: 'y', state: SocketState.DYNAMIC }
     });
   });
 
   test('should get context outputs from form and contextinputs 2', async () => {
     const contextInputDefs = {
-      abc: { displayName: 'test', dataType: DataType.STRING, isDynamic: true }
+      abc: {
+        displayName: 'test',
+        dataType: DataType.STRING,
+        state: SocketState.DYNAMIC
+      }
     };
 
     const res = await DistinctEntriesNode.transformContextInputDefsToContextOutputDefs(
-      { dataset: { dataType: DataType.DATASET, displayName: 'ds' } },
+      {
+        dataset: {
+          dataType: DataType.DATASET,
+          displayName: 'ds',
+          state: SocketState.STATIC
+        }
+      },
       { dataset: { content: { schema: [] }, isPresent: true } },
       contextInputDefs,
       {},
@@ -123,13 +148,23 @@ describe('DistinctEntriesNode', () => {
       { db: null, userId: '' }
     );
     expect(res).toEqual({
-      abc: { dataType: 'String', displayName: 'test', isDynamic: true }
+      abc: {
+        dataType: 'String',
+        displayName: 'test',
+        state: SocketState.DYNAMIC
+      }
     });
   });
 
   test('should have empty context inputs for missing schema in form', async () => {
     const res = await DistinctEntriesNode.transformInputDefsToContextInputDefs(
-      { dataset: { dataType: DataType.DATASET, displayName: 'ds' } },
+      {
+        dataset: {
+          dataType: DataType.DATASET,
+          displayName: 'ds',
+          state: SocketState.STATIC
+        }
+      },
       { dataset: { isPresent: true, content: { schema: [] } } },
       { schema: null, newSchemas: [] },
       { db: null, userId: '' }
@@ -139,7 +174,13 @@ describe('DistinctEntriesNode', () => {
 
   test('should get context inputs from schema in form', async () => {
     const res = await DistinctEntriesNode.transformInputDefsToContextInputDefs(
-      { dataset: { dataType: DataType.DATASET, displayName: 'ds' } },
+      {
+        dataset: {
+          dataType: DataType.DATASET,
+          displayName: 'ds',
+          state: SocketState.STATIC
+        }
+      },
       { dataset: { isPresent: true, content: { schema: [] } } },
       {
         schema: {
@@ -157,7 +198,7 @@ describe('DistinctEntriesNode', () => {
       'test-distinct': {
         dataType: 'String',
         displayName: 'test-distinct',
-        isDynamic: true
+        state: SocketState.DYNAMIC
       }
     });
   });
@@ -326,16 +367,16 @@ describe('DistinctEntriesNode', () => {
     (createEntry as jest.Mock).mockImplementation(jest.fn);
     (getEntryCollection as jest.Mock).mockReturnValue({
       aggregate: jest.fn(() => {
-        let entriesToProces = 20;
+        let entriesToProcess = 20;
         return {
           close: async () => true,
           next: async () => ({ _id: 'distinct-value' }),
           hasNext: async () => {
-            if (entriesToProces === 0) {
+            if (entriesToProcess === 0) {
               return false;
             }
 
-            entriesToProces -= 1;
+            entriesToProcess -= 1;
             return true;
           }
         };

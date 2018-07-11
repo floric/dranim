@@ -54,7 +54,8 @@ describe('Node State', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const type: ServerNodeDef & NodeDef = {
       type: 'type',
@@ -94,7 +95,8 @@ describe('Node State', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const contextNode: NodeInstance = {
       id: VALID_OBJECT_ID,
@@ -106,7 +108,8 @@ describe('Node State', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const parentNode: NodeInstance = {
       id: VALID_OBJECT_ID,
@@ -118,7 +121,8 @@ describe('Node State', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const parentType: ServerNodeDef & NodeDef = {
       type: 'type',
@@ -160,7 +164,8 @@ describe('Node State', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const type: ServerNodeDef & NodeDef = {
       type: 'type',
@@ -183,7 +188,8 @@ describe('Node State', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const cType: ServerNodeDef & NodeDef = {
       type: ContextNodeType.OUTPUT,
@@ -246,7 +252,8 @@ describe('Node State', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const otherNode: NodeInstance = {
       id: 'other',
@@ -258,7 +265,8 @@ describe('Node State', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeB: NodeInstance = {
       id: 'o',
@@ -270,7 +278,8 @@ describe('Node State', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     (getAllConnections as jest.Mock).mockResolvedValueOnce(conns);
     (tryGetNode as jest.Mock).mockImplementation(
@@ -320,7 +329,8 @@ describe('Node State', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const otherNode: NodeInstance = {
       id: 'other',
@@ -332,7 +342,8 @@ describe('Node State', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeB: NodeInstance = {
       id: 'o',
@@ -344,7 +355,8 @@ describe('Node State', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     (getAllConnections as jest.Mock).mockResolvedValueOnce(conns);
     (tryGetNode as jest.Mock).mockImplementation(
@@ -372,7 +384,8 @@ describe('Node State', () => {
         workspaceId: VALID_OBJECT_ID,
         x: 0,
         y: 0,
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       },
       {
         id: VALID_OBJECT_ID,
@@ -384,7 +397,8 @@ describe('Node State', () => {
         workspaceId: VALID_OBJECT_ID,
         x: 0,
         y: 0,
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       },
       {
         id: VALID_OBJECT_ID,
@@ -396,7 +410,8 @@ describe('Node State', () => {
         workspaceId: VALID_OBJECT_ID,
         x: 0,
         y: 0,
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       }
     ];
     (getAllConnections as jest.Mock).mockResolvedValueOnce([]);

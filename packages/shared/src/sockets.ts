@@ -14,7 +14,14 @@ export enum DataType {
   DATETIME = 'Datetime',
   TIME = 'Time',
   STRING = 'String',
-  CUSTOM = 'Custom'
+  VIS = 'Vis',
+  ANY = 'Any'
+}
+
+export enum SocketState {
+  STATIC = 'Static',
+  DYNAMIC = 'Dynamic',
+  VARIABLE = 'Variable'
 }
 
 export interface DatasetMeta {
@@ -24,7 +31,7 @@ export interface DatasetMeta {
 export interface SocketDef {
   dataType: DataType;
   displayName: string;
-  isDynamic?: boolean;
+  state: SocketState;
 }
 
 export interface SocketMetaDef<Meta = {}> {
@@ -48,30 +55,36 @@ export type SocketMetas<T> = SocketMetasGeneric<ConditionalMetaTypes<T>>;
 
 export const DatasetSocket = (name: string): SocketDef => ({
   dataType: DataType.DATASET,
-  displayName: name
+  displayName: name,
+  state: SocketState.STATIC
 });
 
 export const NumberSocket = (name: string): SocketDef => ({
   dataType: DataType.NUMBER,
-  displayName: name
+  displayName: name,
+  state: SocketState.STATIC
 });
 
 export const StringSocket = (name: string): SocketDef => ({
   dataType: DataType.STRING,
-  displayName: name
+  displayName: name,
+  state: SocketState.STATIC
 });
 
 export const BooleanSocket = (name: string): SocketDef => ({
   dataType: DataType.BOOLEAN,
-  displayName: name
+  displayName: name,
+  state: SocketState.STATIC
 });
 
 export const DatetimeSocket = (name: string): SocketDef => ({
   dataType: DataType.DATETIME,
-  displayName: name
+  displayName: name,
+  state: SocketState.STATIC
 });
 
 export const TimeSocket = (name: string): SocketDef => ({
   dataType: DataType.TIME,
-  displayName: name
+  displayName: name,
+  state: SocketState.STATIC
 });

@@ -7,14 +7,15 @@ import {
   NodeInstance,
   NodeState,
   ServerNodeDef,
-  ServerNodeDefWithContextFn
+  ServerNodeDefWithContextFn,
+  SocketState
 } from '@masterthesis/shared';
 
 import {
   getMetaInputs,
   getMetaOutputs
 } from '../../../src/main/calculation/meta-execution';
-import { getNodeType, tryGetNodeType } from '../../../src/main/nodes/all-nodes';
+import { tryGetNodeType } from '../../../src/main/nodes/all-nodes';
 import { tryGetConnection } from '../../../src/main/workspace/connections';
 import { tryGetNode } from '../../../src/main/workspace/nodes';
 import {
@@ -52,7 +53,8 @@ describe('Meta Execution', () => {
         workspaceId: '',
         x: 0,
         y: 0,
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       },
       null
     );
@@ -77,7 +79,7 @@ describe('Meta Execution', () => {
         value: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},
@@ -96,7 +98,8 @@ describe('Meta Execution', () => {
       type: 't',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     (getInputDefs as jest.Mock).mockResolvedValue({
       test: {
@@ -119,7 +122,8 @@ describe('Meta Execution', () => {
         workspaceId: '',
         x: 0,
         y: 0,
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       },
       null
     );
@@ -140,7 +144,8 @@ describe('Meta Execution', () => {
         workspaceId: '',
         x: 0,
         y: 0,
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       },
       null
     );
@@ -158,7 +163,8 @@ describe('Meta Execution', () => {
       outputs: [],
       type: 'p',
       workspaceId: '',
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const parentType: ServerNodeDefWithContextFn & NodeDef = {
       type: 'test',
@@ -175,12 +181,12 @@ describe('Meta Execution', () => {
           test: {
             dataType: DataType.DATETIME,
             displayName: 'date',
-            isDynamic: true
+            state: SocketState.DYNAMIC
           },
           abc: {
             dataType: DataType.STRING,
             displayName: 'abc test',
-            isDynamic: true
+            state: SocketState.DYNAMIC
           }
         })
     };
@@ -200,7 +206,8 @@ describe('Meta Execution', () => {
         workspaceId: '',
         x: 0,
         y: 0,
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       },
       null
     );
@@ -222,7 +229,8 @@ describe('Meta Execution', () => {
         outputs: [],
         type: 'p',
         workspaceId: '',
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       };
       const parentType: ServerNodeDefWithContextFn & NodeDef = {
         type: 'test',
@@ -251,7 +259,8 @@ describe('Meta Execution', () => {
           workspaceId: '',
           x: 0,
           y: 0,
-          state: NodeState.VALID
+          state: NodeState.VALID,
+          variables: {}
         },
         null
       );

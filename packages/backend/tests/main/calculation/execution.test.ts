@@ -8,7 +8,8 @@ import {
   NodeState,
   parseNodeForm,
   ServerNodeDef,
-  ServerNodeDefWithContextFn
+  ServerNodeDefWithContextFn,
+  SocketState
 } from '@masterthesis/shared';
 
 import {
@@ -50,7 +51,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const type: ServerNodeDef & NodeDef = {
       type: 'type',
@@ -59,7 +61,7 @@ describe('Execution', () => {
         value: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},
@@ -95,7 +97,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeB: NodeInstance = {
       id: 'nodeB',
@@ -107,7 +110,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const typeA: ServerNodeDef & NodeDef = {
       type: 'type',
@@ -116,7 +120,7 @@ describe('Execution', () => {
         a: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},
@@ -133,7 +137,7 @@ describe('Execution', () => {
         a: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       keywords: [],
@@ -181,7 +185,8 @@ describe('Execution', () => {
         inputs: [],
         form: [],
         contextIds: [VALID_OBJECT_ID],
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       },
       { db: null, userId: '' },
       contextInputs
@@ -200,7 +205,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     (tryGetNode as jest.Mock).mockResolvedValue(node);
     (tryGetNodeType as jest.Mock).mockImplementation(() => {
@@ -221,7 +227,8 @@ describe('Execution', () => {
           inputs: [],
           form: [],
           contextIds: [VALID_OBJECT_ID],
-          state: NodeState.VALID
+          state: NodeState.VALID,
+          variables: {}
         },
         { db: null, userId: '' }
       );
@@ -242,7 +249,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     (tryGetNode as jest.Mock).mockResolvedValue(node);
     (tryGetNodeType as jest.Mock).mockImplementation(() => {
@@ -270,7 +278,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const type: ServerNodeDef & NodeDef = {
       type: 'type',
@@ -308,7 +317,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeB: NodeInstance = {
       id: 'nodeB',
@@ -320,7 +330,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const sumNode: NodeInstance = {
       id: 'nodeB',
@@ -335,7 +346,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const typeA: ServerNodeDef & NodeDef = {
       type: 'type',
@@ -345,7 +357,7 @@ describe('Execution', () => {
         a: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       keywords: [],
@@ -361,7 +373,7 @@ describe('Execution', () => {
         b: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       keywords: [],
@@ -376,12 +388,12 @@ describe('Execution', () => {
         a: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         },
         b: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},
@@ -438,7 +450,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const cNode: NodeInstance = {
       id: 'cNode',
@@ -450,7 +463,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const iNode: NodeInstance = {
       id: 'iNode',
@@ -462,7 +476,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const type: ServerNodeDefWithContextFn & NodeDef = {
       type: 'type',
@@ -534,7 +549,8 @@ describe('Execution', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     (tryGetNode as jest.Mock).mockResolvedValue(node);
 

@@ -6,6 +6,7 @@ import {
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
   ServerNodeDefWithContextFn,
+  SocketState,
   ValueSchema
 } from '@masterthesis/shared';
 
@@ -28,7 +29,11 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
   type: FilterEntriesNodeDef.type,
   transformInputDefsToContextInputDefs: getDynamicEntryContextInputs,
   transformContextInputDefsToContextOutputDefs: async () => ({
-    keepEntry: { dataType: DataType.BOOLEAN, displayName: 'Keep entry' }
+    keepEntry: {
+      dataType: DataType.BOOLEAN,
+      displayName: 'Keep entry',
+      state: SocketState.STATIC
+    }
   }),
   onMetaExecution: async (form, inputs) => {
     if (!allAreDefinedAndPresent(inputs)) {

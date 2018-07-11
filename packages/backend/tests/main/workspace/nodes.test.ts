@@ -91,12 +91,20 @@ describe('Nodes', () => {
     expect(newNode.workspaceId).toBe(ws.id);
     expect(newNode.type).toBe(NumberInputNodeDef.type);
 
+    await addOrUpdateFormValue(newNode.id, 'test', JSON.stringify('abc'), {
+      db,
+      userId: ''
+    });
+
     const node = await getNode(newNode.id, {
       db,
       userId: ''
     });
 
-    expect(node).toEqual(newNode);
+    expect(node).toEqual({
+      ...newNode,
+      ...{ form: [{ name: 'test', value: '"abc"' }] }
+    });
   });
 
   test('should create and get node in context', async () => {
@@ -241,7 +249,7 @@ describe('Nodes', () => {
     };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
 
-    let nrOfNodes = await getNodesCollection(db).count({});
+    let nrOfNodes = await getNodesCollection(db).countDocuments();
     expect(nrOfNodes).toBe(0);
 
     const newNode = await createNode(NumberInputNodeDef.type, ws.id, [], 0, 0, {
@@ -251,7 +259,7 @@ describe('Nodes', () => {
 
     expect(newNode).not.toBe(null);
 
-    nrOfNodes = await getNodesCollection(db).count({});
+    nrOfNodes = await getNodesCollection(db).countDocuments();
     expect(nrOfNodes).toBe(1);
 
     const res = await deleteNode(newNode.id, {
@@ -260,7 +268,7 @@ describe('Nodes', () => {
     });
     expect(res).toBe(true);
 
-    nrOfNodes = await getNodesCollection(db).count({});
+    nrOfNodes = await getNodesCollection(db).countDocuments();
     expect(nrOfNodes).toBe(0);
   });
 
@@ -423,6 +431,7 @@ describe('Nodes', () => {
       outputs: [],
       type: 'NumberInput',
       workspaceId: '5b07b3129ba658500b75a29a',
+      variables: {},
       x: 0,
       y: 0
     });

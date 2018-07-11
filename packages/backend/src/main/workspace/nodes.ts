@@ -8,7 +8,7 @@ import {
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
-import { Logger } from '../../logging';
+import { Log } from '../../logging';
 import { getNodeType, tryGetNodeType } from '../nodes/all-nodes';
 import { deleteConnection, deleteConnectionsInContext } from './connections';
 import { updateStates } from './nodes-state';
@@ -41,6 +41,7 @@ export const createNode = async (
     contextIds: contextNodeIds,
     workspaceId,
     type,
+    variables: {},
     state: NodeState.VALID
   });
 
@@ -61,7 +62,7 @@ export const createNode = async (
 
   const { _id, ...other } = res.ops[0];
 
-  Logger.info(`Node ${newNodeId} created`);
+  Log.info(`Node ${newNodeId} created`);
 
   return {
     id: newNodeId,
@@ -89,6 +90,7 @@ const addContextNodesIfNecessary = async (
         contextIds: nestedContextIds,
         workspaceId,
         type: contextType,
+        variables: {},
         state: NodeState.VALID
       })
     );
@@ -165,7 +167,7 @@ export const deleteNode = async (id: string, reqContext: ApolloContext) => {
     throw new Error('Deleting node failed');
   }
 
-  Logger.info(`Node ${id} deleted`);
+  Log.info(`Node ${id} deleted`);
 
   return true;
 };

@@ -1,6 +1,15 @@
-import { NodeInstance, NodeState, SocketInstance } from '@masterthesis/shared';
+import {
+  DataType,
+  hasContextFn,
+  NodeInstance,
+  NodeState,
+  SocketDef,
+  SocketInstance,
+  SocketState
+} from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
+import { getNodeType } from '../../../src/main/nodes/all-nodes';
 import {
   createConnection,
   deleteConnection,
@@ -10,6 +19,10 @@ import {
   tryGetConnection
 } from '../../../src/main/workspace/connections';
 import { tryGetNode } from '../../../src/main/workspace/nodes';
+import {
+  getInputDefs,
+  getOutputDefs
+} from '../../../src/main/workspace/nodes-detail';
 import { updateStates } from '../../../src/main/workspace/nodes-state';
 import {
   getTestMongoDb,
@@ -21,9 +34,12 @@ let conn;
 let db: Db;
 let server;
 
+jest.mock('@masterthesis/shared');
 jest.mock('../../../src/main/workspace/nodes');
 jest.mock('../../../src/main/workspace/nodes-detail');
 jest.mock('../../../src/main/workspace/nodes-state');
+jest.mock('../../../src/main/workspace/nodes-state');
+jest.mock('../../../src/main/nodes/all-nodes');
 
 describe('Connections', () => {
   beforeAll(async () => {
@@ -57,7 +73,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeB: NodeInstance = {
       id: 'idb',
@@ -69,12 +86,27 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
+    };
+    const sourceSocket: SocketDef = {
+      dataType: DataType.STRING,
+      displayName: 'test',
+      state: SocketState.STATIC
+    };
+    const destinationSocket: SocketDef = {
+      dataType: DataType.STRING,
+      displayName: 'test',
+      state: SocketState.STATIC
     };
 
     (tryGetNode as jest.Mock)
       .mockResolvedValueOnce(nodeA)
+      .mockResolvedValueOnce(nodeB)
+      .mockResolvedValueOnce(nodeA)
       .mockResolvedValueOnce(nodeB);
+    (getOutputDefs as jest.Mock).mockResolvedValue({ val: sourceSocket });
+    (getInputDefs as jest.Mock).mockResolvedValue({ val: destinationSocket });
 
     const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
     const toSocket: SocketInstance = { name: 'val', nodeId: nodeB.id };
@@ -89,6 +121,12 @@ describe('Connections', () => {
     expect(newConn.to).toEqual(toSocket);
     expect(newConn.workspaceId).toBe('123');
     expect(newConn.contextIds).toEqual([]);
+
+    const tryConn = await tryGetConnection(newConn.id, {
+      db,
+      userId: ''
+    });
+    expect(tryConn).toEqual(newConn);
 
     const res = await deleteConnection(newConn.id, {
       db,
@@ -135,7 +173,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeB: NodeInstance = {
       id: 'idb',
@@ -147,12 +186,32 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
+    };
+
+    const sourceSocket: SocketDef = {
+      dataType: DataType.STRING,
+      displayName: 'test',
+      state: SocketState.STATIC
+    };
+    const destinationSocket: SocketDef = {
+      dataType: DataType.STRING,
+      displayName: 'test',
+      state: SocketState.STATIC
     };
 
     (tryGetNode as jest.Mock)
       .mockResolvedValueOnce(nodeA)
+      .mockResolvedValueOnce(nodeB)
+      .mockResolvedValueOnce(nodeA)
+      .mockResolvedValueOnce(nodeB)
+      .mockResolvedValueOnce(nodeA)
+      .mockResolvedValueOnce(nodeB)
+      .mockResolvedValueOnce(nodeA)
       .mockResolvedValueOnce(nodeB);
+    (getOutputDefs as jest.Mock).mockResolvedValue({ test: sourceSocket });
+    (getInputDefs as jest.Mock).mockResolvedValue({ test: destinationSocket });
 
     await createConnection(
       { name: 'test', nodeId: nodeA.id },
@@ -189,7 +248,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeAinContext: NodeInstance = {
       id: 'idb-i',
@@ -201,7 +261,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeBinContext: NodeInstance = {
       id: 'idb-o',
@@ -213,12 +274,31 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     (tryGetNode as jest.Mock)
       .mockResolvedValueOnce(nodeAinContext)
       .mockResolvedValueOnce(nodeBinContext);
+    const sourceSocket: SocketDef = {
+      dataType: DataType.STRING,
+      displayName: 'test',
+      state: SocketState.STATIC
+    };
+    const destinationSocket: SocketDef = {
+      dataType: DataType.STRING,
+      displayName: 'test',
+      state: SocketState.STATIC
+    };
+
+    (tryGetNode as jest.Mock)
+      .mockResolvedValueOnce(nodeAinContext)
+      .mockResolvedValueOnce(nodeBinContext)
+      .mockResolvedValueOnce(nodeAinContext)
+      .mockResolvedValueOnce(nodeBinContext);
+    (getOutputDefs as jest.Mock).mockResolvedValue({ val: sourceSocket });
+    (getInputDefs as jest.Mock).mockResolvedValue({ val: destinationSocket });
 
     const fromSocket: SocketInstance = {
       name: 'val',
@@ -261,7 +341,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeB: NodeInstance = {
       id: 'idb',
@@ -273,14 +354,31 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     (tryGetNode as jest.Mock)
       .mockResolvedValueOnce(nodeA)
       .mockResolvedValueOnce(nodeB)
       .mockResolvedValueOnce(nodeA)
+      .mockResolvedValueOnce(nodeB)
+      .mockResolvedValueOnce(nodeA)
+      .mockResolvedValueOnce(nodeB)
+      .mockResolvedValueOnce(nodeA)
       .mockResolvedValueOnce(nodeB);
+    const sourceSocket: SocketDef = {
+      dataType: DataType.STRING,
+      displayName: 'test',
+      state: SocketState.STATIC
+    };
+    const destinationSocket: SocketDef = {
+      dataType: DataType.STRING,
+      displayName: 'test',
+      state: SocketState.STATIC
+    };
+    (getOutputDefs as jest.Mock).mockResolvedValue({ val: sourceSocket });
+    (getInputDefs as jest.Mock).mockResolvedValue({ val: destinationSocket });
 
     const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
     const toSocket: SocketInstance = { name: 'val', nodeId: nodeB.id };
@@ -313,7 +411,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     (tryGetNode as jest.Mock)
@@ -350,7 +449,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeB: NodeInstance = {
       id: 'idb',
@@ -362,7 +462,8 @@ describe('Connections', () => {
       workspaceId: 'otherws',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     (tryGetNode as jest.Mock)
@@ -397,7 +498,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const nodeB: NodeInstance = {
       id: 'idb',
@@ -409,7 +511,8 @@ describe('Connections', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     (tryGetNode as jest.Mock)
@@ -450,7 +553,249 @@ describe('Connections', () => {
       userId: ''
     });
 
-    const count = await connectionsCollection.count({});
+    const count = await connectionsCollection.countDocuments();
     expect(count).toBe(0);
+  });
+
+  test('should return true when deleting connection with unknown id to support parallel cleanups', async () => {
+    const res = await deleteConnection(VALID_OBJECT_ID, { db, userId: '' });
+    expect(res).toBe(true);
+  });
+
+  test('should throw error for non matching datatypes', async () => {
+    try {
+      const nodeA: NodeInstance = {
+        id: 'ida',
+        contextIds: [],
+        form: [],
+        inputs: [],
+        outputs: [],
+        type: 'abc',
+        workspaceId: '123',
+        x: 0,
+        y: 0,
+        state: NodeState.VALID,
+        variables: {}
+      };
+      const nodeB: NodeInstance = {
+        id: 'idb',
+        contextIds: [],
+        form: [],
+        inputs: [],
+        outputs: [],
+        type: 'test',
+        workspaceId: '123',
+        x: 0,
+        y: 0,
+        state: NodeState.VALID,
+        variables: {}
+      };
+      const sourceSocket: SocketDef = {
+        dataType: DataType.NUMBER,
+        displayName: 'test',
+        state: SocketState.STATIC
+      };
+      const destinationSocket: SocketDef = {
+        dataType: DataType.STRING,
+        displayName: 'test',
+        state: SocketState.STATIC
+      };
+
+      (tryGetNode as jest.Mock)
+        .mockResolvedValueOnce(nodeA)
+        .mockResolvedValueOnce(nodeB)
+        .mockResolvedValueOnce(nodeA)
+        .mockResolvedValueOnce(nodeB);
+      (getOutputDefs as jest.Mock).mockResolvedValue({ val: sourceSocket });
+      (getInputDefs as jest.Mock).mockResolvedValue({ val: destinationSocket });
+
+      const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
+      const toSocket: SocketInstance = { name: 'val', nodeId: nodeB.id };
+
+      await createConnection(fromSocket, toSocket, {
+        db,
+        userId: ''
+      });
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Datatypes dont match');
+    }
+  });
+
+  test('should throw error for unknown input socket', async () => {
+    try {
+      const nodeA: NodeInstance = {
+        id: 'ida',
+        contextIds: [],
+        form: [],
+        inputs: [],
+        outputs: [],
+        type: 'abc',
+        workspaceId: '123',
+        x: 0,
+        y: 0,
+        state: NodeState.VALID,
+        variables: {}
+      };
+      const nodeB: NodeInstance = {
+        id: 'idb',
+        contextIds: [],
+        form: [],
+        inputs: [],
+        outputs: [],
+        type: 'test',
+        workspaceId: '123',
+        x: 0,
+        y: 0,
+        state: NodeState.VALID,
+        variables: {}
+      };
+      const sourceSocket: SocketDef = {
+        dataType: DataType.STRING,
+        displayName: 'test',
+        state: SocketState.STATIC
+      };
+
+      (tryGetNode as jest.Mock)
+        .mockResolvedValueOnce(nodeA)
+        .mockResolvedValueOnce(nodeB)
+        .mockResolvedValueOnce(nodeA)
+        .mockResolvedValueOnce(nodeB);
+      (getOutputDefs as jest.Mock).mockResolvedValue({ val: sourceSocket });
+      (getInputDefs as jest.Mock).mockResolvedValue({});
+
+      const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
+      const toSocket: SocketInstance = { name: 'val', nodeId: nodeB.id };
+
+      await createConnection(fromSocket, toSocket, {
+        db,
+        userId: ''
+      });
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Unknown input socket');
+    }
+  });
+
+  test('should throw error for unknown output socket', async () => {
+    try {
+      const nodeA: NodeInstance = {
+        id: 'ida',
+        contextIds: [],
+        form: [],
+        inputs: [],
+        outputs: [],
+        type: 'abc',
+        workspaceId: '123',
+        x: 0,
+        y: 0,
+        state: NodeState.VALID,
+        variables: {}
+      };
+      const nodeB: NodeInstance = {
+        id: 'idb',
+        contextIds: [],
+        form: [],
+        inputs: [],
+        outputs: [],
+        type: 'test',
+        workspaceId: '123',
+        x: 0,
+        y: 0,
+        state: NodeState.VALID,
+        variables: {}
+      };
+      const destinationSocket: SocketDef = {
+        dataType: DataType.STRING,
+        displayName: 'test',
+        state: SocketState.STATIC
+      };
+
+      (tryGetNode as jest.Mock)
+        .mockResolvedValueOnce(nodeA)
+        .mockResolvedValueOnce(nodeB)
+        .mockResolvedValueOnce(nodeA)
+        .mockResolvedValueOnce(nodeB);
+      (getOutputDefs as jest.Mock).mockResolvedValue({});
+      (getInputDefs as jest.Mock).mockResolvedValue({ val: destinationSocket });
+
+      const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
+      const toSocket: SocketInstance = { name: 'val', nodeId: nodeB.id };
+
+      await createConnection(fromSocket, toSocket, {
+        db,
+        userId: ''
+      });
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Unknown output socket');
+    }
+  });
+
+  test('should skip type validation for context nodes and instead create variable', async () => {
+    const nodeA: NodeInstance = {
+      id: 'ida',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'abc',
+      workspaceId: '123',
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    const nodeB: NodeInstance = {
+      id: 'idb',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'test',
+      workspaceId: '123',
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    const destinationSocket: SocketDef = {
+      dataType: DataType.STRING,
+      displayName: 'test',
+      state: SocketState.STATIC
+    };
+    const contextType: NodeInstance = {
+      id: 'parentnode',
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+
+    (tryGetNode as jest.Mock)
+      .mockResolvedValueOnce(nodeA)
+      .mockResolvedValueOnce(nodeB)
+      .mockResolvedValueOnce(nodeA)
+      .mockResolvedValueOnce(nodeB);
+    (getOutputDefs as jest.Mock).mockResolvedValue({ val: destinationSocket });
+    (getNodeType as jest.Mock).mockReturnValue(contextType);
+    (hasContextFn as any).mockReturnValue(true);
+
+    const fromSocket: SocketInstance = { name: 'val', nodeId: nodeA.id };
+    const toSocket: SocketInstance = { name: 'val', nodeId: nodeB.id };
+
+    await createConnection(fromSocket, toSocket, {
+      db,
+      userId: ''
+    });
+
+    expect(hasContextFn).toHaveBeenCalledWith(contextType);
+    expect(hasContextFn).toHaveBeenCalledTimes(1);
   });
 });

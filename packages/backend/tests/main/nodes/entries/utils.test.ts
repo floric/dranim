@@ -1,9 +1,9 @@
 import {
-  Dataset,
   DataType,
   Entry,
+  SocketState,
   ValueSchema
-} from '../../../../../shared/lib';
+} from '@masterthesis/shared';
 import {
   copySchemas,
   getDynamicEntryContextInputs,
@@ -89,8 +89,16 @@ describe.only('Entries Utils', () => {
       null
     );
     expect(res).toEqual({
-      test: { dataType: DataType.STRING, displayName: 'test', isDynamic: true },
-      abc: { dataType: DataType.NUMBER, displayName: 'abc', isDynamic: true }
+      test: {
+        dataType: DataType.STRING,
+        displayName: 'test',
+        state: SocketState.DYNAMIC
+      },
+      abc: {
+        dataType: DataType.NUMBER,
+        displayName: 'abc',
+        state: SocketState.DYNAMIC
+      }
     });
   });
 

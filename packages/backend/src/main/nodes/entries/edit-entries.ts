@@ -24,13 +24,7 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
     inputDefs,
     inputs,
     contextInputDefs
-  ) => {
-    if (!allAreDefinedAndPresent(inputs)) {
-      return {};
-    }
-
-    return contextInputDefs;
-  },
+  ) => contextInputDefs,
   transformInputDefsToContextInputDefs: getDynamicEntryContextInputs,
   onMetaExecution: async (form, inputs) => {
     if (!allAreDefinedAndPresent(inputs)) {
@@ -50,8 +44,8 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
       reqContext,
       workspaceId
     );
-    await copySchemas(oldDs.valueschemas, newDs.id, reqContext);
 
+    await copySchemas(oldDs.valueschemas, newDs.id, reqContext);
     await processEntries(
       inputs.dataset.datasetId,
       id,

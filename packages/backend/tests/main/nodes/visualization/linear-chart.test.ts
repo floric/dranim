@@ -4,6 +4,7 @@ import {
   Entry,
   LinearChartDef,
   LinearChartType,
+  SocketState,
   ValueSchema
 } from '@masterthesis/shared';
 
@@ -84,8 +85,16 @@ describe('LinearChart', () => {
       { db: null, userId: '' }
     );
     expect(res).toEqual({
-      label: { dataType: DataType.STRING, displayName: 'Label' },
-      value: { dataType: DataType.NUMBER, displayName: 'Value' }
+      label: {
+        dataType: DataType.STRING,
+        displayName: 'Label',
+        state: SocketState.STATIC
+      },
+      value: {
+        dataType: DataType.NUMBER,
+        displayName: 'Value',
+        state: SocketState.STATIC
+      }
     });
   });
 
@@ -144,7 +153,7 @@ describe('LinearChart', () => {
       results: {
         description: '',
         name: 'a',
-        type: DataType.CUSTOM,
+        type: DataType.VIS,
         value: {
           type: LinearChartType.BAR,
           values: [

@@ -5,9 +5,11 @@ import {
   NodeDef,
   NodeInstance,
   NodeState,
-  ServerNodeDefWithContextFn
+  ServerNodeDefWithContextFn,
+  SocketDef,
+  SocketState
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
+import { Db, ObjectID } from 'mongodb';
 
 import {
   getNodeType,
@@ -23,12 +25,16 @@ import {
 import {
   addConnection,
   addOrUpdateFormValue,
+  addOrUpdateVariable,
+  deleteVariable,
   getContextInputDefs,
   getContextOutputDefs,
   getInputDefs,
+  getOutputDefs,
   removeConnection,
   setProgress
 } from '../../../src/main/workspace/nodes-detail';
+import { updateStates } from '../../../src/main/workspace/nodes-state';
 import {
   getTestMongoDb,
   NeverGoHereError,
@@ -67,7 +73,7 @@ describe('Node Details', () => {
     jest.resetAllMocks();
   });
 
-  test('should get null for nodes without contexts', async () => {
+  test('should get empty object for nodes with type', async () => {
     const node: NodeInstance = {
       id: 'testnode',
       contextIds: [],
@@ -78,7 +84,8 @@ describe('Node Details', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     (hasNodeType as jest.Mock).mockReturnValue(true);
 
@@ -86,13 +93,13 @@ describe('Node Details', () => {
       db,
       userId: ''
     });
-    expect(inputRes).toBe(null);
+    expect(inputRes).toEqual({});
 
     const outputRes = await getContextOutputDefs(node, {
       db,
       userId: ''
     });
-    expect(outputRes).toBe(null);
+    expect(outputRes).toEqual({});
   });
 
   test('should throw error for missing parent node', async () => {
@@ -106,7 +113,8 @@ describe('Node Details', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     (getNode as jest.Mock).mockResolvedValue(null);
     (hasNodeType as jest.Mock).mockReturnValue(false);
@@ -122,42 +130,6 @@ describe('Node Details', () => {
     }
   });
 
-  test('should return null for non context node as parent (should never happen)', async () => {
-    const parentNode: NodeInstance = {
-      id: 'parentnode',
-      contextIds: [],
-      form: [],
-      inputs: [{ name: 'dataset', connectionId: '123' }],
-      outputs: [],
-      type: 'type',
-      workspaceId: VALID_OBJECT_ID,
-      x: 0,
-      y: 0,
-      state: NodeState.VALID
-    };
-    const node: NodeInstance = {
-      id: 'testnode',
-      contextIds: [parentNode.id],
-      form: [],
-      inputs: [{ name: 'dataset', connectionId: '123' }],
-      outputs: [],
-      type: 'type',
-      workspaceId: VALID_OBJECT_ID,
-      x: 0,
-      y: 0,
-      state: NodeState.VALID
-    };
-    (getNode as jest.Mock).mockResolvedValue(parentNode);
-    (hasNodeType as jest.Mock).mockReturnValue(false);
-
-    const res = await getContextInputDefs(node, {
-      db,
-      userId: ''
-    });
-
-    expect(res).toBe(null);
-  });
-
   test('should get empty context inputs', async () => {
     const parentTypeName = 'p';
     const parentType: ServerNodeDefWithContextFn & NodeDef = {
@@ -167,7 +139,7 @@ describe('Node Details', () => {
         value: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},
@@ -189,7 +161,8 @@ describe('Node Details', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const inputNode: NodeInstance = {
       id: 'abc',
@@ -201,7 +174,8 @@ describe('Node Details', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     (getNode as jest.Mock).mockResolvedValue(parentNode);
     (getNodeType as jest.Mock).mockReturnValue(parentType);
@@ -224,7 +198,7 @@ describe('Node Details', () => {
         value: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},
@@ -246,7 +220,8 @@ describe('Node Details', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const inputNode: NodeInstance = {
       id: 'abc',
@@ -258,7 +233,8 @@ describe('Node Details', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     (getNode as jest.Mock).mockResolvedValue(parentNode);
     (getNodeType as jest.Mock).mockReturnValue(parentType);
@@ -282,7 +258,7 @@ describe('Node Details', () => {
         value: {
           dataType: DataType.STRING,
           displayName: 'value',
-          isDynamic: false
+          state: SocketState.STATIC
         }
       },
       outputs: {},
@@ -304,7 +280,8 @@ describe('Node Details', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const inputNode: NodeInstance = {
       id: 'abc',
@@ -316,7 +293,8 @@ describe('Node Details', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     (getNode as jest.Mock).mockResolvedValue(parentNode);
     (getNodeType as jest.Mock).mockReturnValue(parentType);
@@ -348,7 +326,8 @@ describe('Node Details', () => {
       workspaceId: '123',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     try {
@@ -402,7 +381,8 @@ describe('Node Details', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     const parentType: ServerNodeDefWithContextFn & NodeDef = {
       type: parentTypeName,
@@ -414,11 +394,11 @@ describe('Node Details', () => {
       isFormValid: async () => false,
       onMetaExecution: async () => ({ test: { content: {}, isPresent: true } }),
       onNodeExecution: async () => ({ outputs: {} }),
-      transformContextInputDefsToContextOutputDefs: async inputs => ({
+      transformContextInputDefsToContextOutputDefs: async () => ({
         test: {
           dataType: DataType.DATETIME,
           displayName: 'date',
-          isDynamic: true
+          state: SocketState.DYNAMIC
         }
       }),
       transformInputDefsToContextInputDefs: async () => ({})
@@ -433,12 +413,13 @@ describe('Node Details', () => {
       workspaceId: 'abc',
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     (getNode as jest.Mock).mockResolvedValueOnce(parentNode);
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
     (hasNodeType as jest.Mock).mockReturnValueOnce(false);
-    (hasContextFn as any).mockReturnValue(true);
+    (hasContextFn as any).mockReturnValueOnce(false).mockReturnValueOnce(true);
     (tryGetContextNode as jest.Mock).mockReturnValue(contextInputNode);
 
     const res = await getInputDefs(
@@ -452,21 +433,22 @@ describe('Node Details', () => {
         workspaceId: 'abc',
         x: 0,
         y: 0,
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
       },
       null
     );
-    expect(hasContextFn).toHaveBeenCalledTimes(1);
+    expect(hasContextFn).toHaveBeenCalledTimes(2);
     expect(res).toEqual({
       test: {
         dataType: DataType.DATETIME,
         displayName: 'date',
-        isDynamic: true
+        state: SocketState.DYNAMIC
       }
     });
   });
 
-  test('should get input defs for ContextInputNode from context input defs from parent node', async () => {
+  test('should get output defs for ContextInputNode from context input defs from parent node', async () => {
     const parentTypeName = 'parentnode';
     const parentNode: NodeInstance = {
       id: parentTypeName,
@@ -478,7 +460,87 @@ describe('Node Details', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
+    };
+    const parentType: ServerNodeDefWithContextFn & NodeDef = {
+      type: parentTypeName,
+      name: parentTypeName,
+      inputs: {},
+      outputs: {},
+      keywords: [],
+      path: [],
+      isFormValid: async () => false,
+      onMetaExecution: async () => ({ test: { content: {}, isPresent: true } }),
+      onNodeExecution: async () => ({ outputs: {} }),
+      transformContextInputDefsToContextOutputDefs: async () => ({}),
+      transformInputDefsToContextInputDefs: async () => ({
+        test: {
+          dataType: DataType.DATETIME,
+          displayName: 'date',
+          state: SocketState.DYNAMIC
+        }
+      })
+    };
+    const contextOutputNode: NodeInstance = {
+      id: 'abc',
+      type: ContextNodeType.OUTPUT,
+      contextIds: [parentNode.id],
+      form: [],
+      inputs: [],
+      outputs: [],
+      workspaceId: 'abc',
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    (getNode as jest.Mock).mockResolvedValueOnce(parentNode);
+    (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
+    (hasNodeType as jest.Mock).mockReturnValueOnce(false);
+    (hasContextFn as any).mockReturnValueOnce(false).mockReturnValueOnce(true);
+    (tryGetContextNode as jest.Mock).mockReturnValue(contextOutputNode);
+
+    const res = await getOutputDefs(
+      {
+        id: 'abc',
+        type: ContextNodeType.INPUT,
+        contextIds: [parentNode.id],
+        form: [],
+        inputs: [],
+        outputs: [],
+        workspaceId: 'abc',
+        x: 0,
+        y: 0,
+        state: NodeState.VALID,
+        variables: {}
+      },
+      null
+    );
+    expect(hasContextFn).toHaveBeenCalledTimes(3);
+    expect(res).toEqual({
+      test: {
+        dataType: DataType.DATETIME,
+        displayName: 'date',
+        state: SocketState.DYNAMIC
+      }
+    });
+  });
+
+  test('should get empty input defs for ContextInputNode', async () => {
+    const parentTypeName = 'parentnode';
+    const parentNode: NodeInstance = {
+      id: parentTypeName,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
     };
 
     const res = await getInputDefs(
@@ -492,7 +554,43 @@ describe('Node Details', () => {
         workspaceId: 'abc',
         x: 0,
         y: 0,
-        state: NodeState.VALID
+        state: NodeState.VALID,
+        variables: {}
+      },
+      null
+    );
+    expect(res).toEqual({});
+  });
+
+  test('should get empty output defs for ContextOutputNode', async () => {
+    const parentTypeName = 'parentnode';
+    const parentNode: NodeInstance = {
+      id: parentTypeName,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+
+    const res = await getOutputDefs(
+      {
+        id: 'abc',
+        type: ContextNodeType.OUTPUT,
+        contextIds: [parentNode.id],
+        form: [],
+        inputs: [{ connectionId: 'abc', name: 'test' }],
+        outputs: [],
+        workspaceId: 'abc',
+        x: 0,
+        y: 0,
+        state: NodeState.VALID,
+        variables: {}
       },
       null
     );
@@ -573,19 +671,32 @@ describe('Node Details', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
     (tryGetNode as jest.Mock).mockResolvedValue(node);
 
     const nodeId = VALID_OBJECT_ID;
-    await addConnection({ name: 'test', nodeId }, 'input', VALID_OBJECT_ID, {
-      db,
-      userId: ''
-    });
-    await addConnection({ name: 'test', nodeId }, 'output', VALID_OBJECT_ID, {
-      db,
-      userId: ''
-    });
+    await addConnection(
+      { name: 'test', nodeId },
+      { name: 'test', nodeId: VALID_OBJECT_ID },
+      'input',
+      VALID_OBJECT_ID,
+      {
+        db,
+        userId: ''
+      }
+    );
+    await addConnection(
+      { name: 'test', nodeId },
+      { name: 'test', nodeId: VALID_OBJECT_ID },
+      'output',
+      VALID_OBJECT_ID,
+      {
+        db,
+        userId: ''
+      }
+    );
     await removeConnection({ name: 'test', nodeId }, 'input', VALID_OBJECT_ID, {
       db,
       userId: ''
@@ -600,5 +711,202 @@ describe('Node Details', () => {
       }
     );
     expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(4);
+  });
+
+  test('should add variable if connection is a variable connection', async () => {
+    const targetNode: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    const sourceNode: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    const inputSocketDef: SocketDef = {
+      displayName: 'abc',
+      state: SocketState.STATIC,
+      dataType: DataType.STRING
+    };
+    const contextNodeType: ServerNodeDefWithContextFn & NodeDef = {
+      type: 'type',
+      name: 'name',
+      inputs: {},
+      outputs: { test: inputSocketDef },
+      keywords: [],
+      path: [],
+      isFormValid: async () => false,
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: {} }),
+      transformContextInputDefsToContextOutputDefs: async () => ({}),
+      transformInputDefsToContextInputDefs: async () => ({})
+    };
+
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateOne: jest.fn()
+    });
+    (tryGetNode as jest.Mock)
+      .mockResolvedValueOnce(targetNode)
+      .mockResolvedValueOnce(sourceNode);
+    (getNodeType as jest.Mock).mockReturnValue(contextNodeType);
+    (tryGetNodeType as jest.Mock).mockReturnValue(contextNodeType);
+    (hasContextFn as any).mockReturnValue(true);
+
+    await addConnection(
+      { name: 'test', nodeId: targetNode.id },
+      { name: 'test', nodeId: VALID_OBJECT_ID },
+      'input',
+      VALID_OBJECT_ID,
+      { db, userId: '' }
+    );
+
+    expect(updateStates).toHaveBeenCalledTimes(1);
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(2);
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledWith(
+      { _id: new ObjectID(VALID_OBJECT_ID) },
+      {
+        $set: {
+          [`variables.test`]: {
+            displayName: 'abc',
+            dataType: DataType.STRING,
+            state: SocketState.VARIABLE
+          }
+        }
+      }
+    );
+  });
+
+  /*test('should add or update variable', async () => {
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateOne: jest.fn()
+    });
+
+    const res = await addOrUpdateVariable(
+      '123',
+      'test',
+      DataType.STRING,
+      node,
+      { db, userId: '' }
+    );
+
+    expect(res).toBe(true);
+    expect(updateStates).toHaveBeenCalledTimes(1);
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(1);
+    
+  });*/
+
+  /*test('should delete variable', async () => {
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateOne: jest.fn()
+    });
+
+    const res = await deleteVariable('123', node, {
+      db,
+      userId: ''
+    });
+
+    expect(res).toBe(true);
+    expect(updateStates).toHaveBeenCalledTimes(1);
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(1);
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledWith(
+      { _id: new ObjectID(VALID_OBJECT_ID) },
+      {
+        $unset: { [`variables.123`]: '' }
+      }
+    );
+  });*/
+
+  test('should also delete variable when deleting variable connection', async () => {
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    const contextNodeType: ServerNodeDefWithContextFn & NodeDef = {
+      type: 'type',
+      name: 'name',
+      inputs: {},
+      outputs: {},
+      keywords: [],
+      path: [],
+      isFormValid: async () => false,
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: {} }),
+      transformContextInputDefsToContextOutputDefs: async () => ({}),
+      transformInputDefsToContextInputDefs: async () => ({})
+    };
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateOne: jest.fn()
+    });
+    (tryGetNode as jest.Mock).mockResolvedValue(node);
+    (getNodeType as jest.Mock).mockReturnValue(contextNodeType);
+    (hasContextFn as any).mockReturnValue(true);
+
+    await removeConnection(
+      { name: 'test', nodeId: VALID_OBJECT_ID },
+      'input',
+      VALID_OBJECT_ID,
+      { db, userId: '' }
+    );
+
+    expect(updateStates).toHaveBeenCalledTimes(1);
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(2);
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledWith(
+      { _id: new ObjectID(VALID_OBJECT_ID) },
+      {
+        $unset: { [`variables.test`]: '' }
+      }
+    );
   });
 });

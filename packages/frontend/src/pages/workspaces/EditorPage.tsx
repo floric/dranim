@@ -50,9 +50,9 @@ const WORKSPACE_NODE_SELECTION = gql`
         }
         metaInputs
         hasContextFn
-        contextInputDefs
-        contextOutputDefs
         progress
+        inputSockets
+        outputSockets
       }
       connections {
         id

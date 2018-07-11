@@ -17,16 +17,16 @@ describe('BooleanInputNode', () => {
     expect(res.outputs.value).toBe(false);
   });
 
-  test('should return empty object for onMetaExecution', async () => {
+  test('should always return present object for onMetaExecution', async () => {
     let res = await BooleanInputNode.onMetaExecution({ value: null }, {}, null);
-    expect(res).toEqual({ value: { content: {}, isPresent: false } });
+    expect(res).toEqual({ value: { content: {}, isPresent: true } });
 
     res = await BooleanInputNode.onMetaExecution(
       { value: undefined },
       {},
       null
     );
-    expect(res).toEqual({ value: { content: {}, isPresent: false } });
+    expect(res).toEqual({ value: { content: {}, isPresent: true } });
   });
 
   test('should valid empty object for onMetaExecution', async () => {

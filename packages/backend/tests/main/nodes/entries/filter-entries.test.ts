@@ -5,6 +5,7 @@ import {
   DataType,
   Entry,
   FilterEntriesNodeDef,
+  SocketState,
   ValueSchema
 } from '@masterthesis/shared';
 
@@ -171,7 +172,8 @@ describe('FilterEntriesNode', () => {
     expect(res).toEqual({
       keepEntry: {
         dataType: DataType.BOOLEAN,
-        displayName: 'Keep entry'
+        displayName: 'Keep entry',
+        state: SocketState.STATIC
       }
     });
   });
