@@ -1,5 +1,5 @@
 import { NodeDef } from '../nodes';
-import { DatasetSocket } from '../sockets';
+import { DatasetSocket, NumberSocket } from '../sockets';
 import { ValueSchema } from '../workspace';
 import { DatasetRef } from './dataset';
 
@@ -113,5 +113,66 @@ export const SelectValuesNodeDef: NodeDef<
     dataset: DatasetSocket('Dataset')
   },
   path: ['Dataset', 'Operators'],
+  keywords: []
+};
+
+export interface CountEntriesNodeInputs {
+  dataset: DatasetRef;
+}
+
+export interface CountEntriesNodeOutputs {
+  count: number;
+}
+
+export const CountEntriesNodeDef: NodeDef<
+  CountEntriesNodeInputs,
+  CountEntriesNodeOutputs
+> = {
+  name: 'Count',
+  type: 'CountEntries',
+  inputs: {
+    dataset: DatasetSocket('Dataset')
+  },
+  outputs: {
+    count: NumberSocket('Count')
+  },
+  path: ['Entries'],
+  keywords: []
+};
+
+export enum AggregationEntriesType {
+  SUM = 'Sum',
+  AVG = 'Average',
+  MIN = 'Minimum',
+  MAX = 'Maximum',
+  MED = 'Median'
+}
+
+export interface AggregateEntriesNodeInputs {
+  dataset: DatasetRef;
+}
+
+export interface AggregateEntriesNodeOutputs {
+  value: number;
+}
+
+export interface AggregateEntriesNodeForm {
+  type: AggregationEntriesType;
+  valueName: string;
+}
+
+export const AggregateEntriesNodeDef: NodeDef<
+  AggregateEntriesNodeInputs,
+  AggregateEntriesNodeOutputs
+> = {
+  name: 'Aggregate',
+  type: 'AggregateEntries',
+  inputs: {
+    dataset: DatasetSocket('Dataset')
+  },
+  outputs: {
+    value: NumberSocket('Aggregated value')
+  },
+  path: ['Entries'],
   keywords: []
 };

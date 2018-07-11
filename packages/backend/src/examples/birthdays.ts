@@ -29,7 +29,10 @@ const birthdaysEntries: Array<Values> = Array(ENTRIES_COUNT)
   .fill(0)
   .map((_, i) => ({
     id: i.toString(),
-    name: casual.name,
+    firstName: casual.first_name,
+    lastName: casual.last_name,
+    gender: casual.boolean ? 'm' : 'w',
+    value: casual.random,
     birthday: casual.date('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
   }));
 
@@ -42,10 +45,31 @@ const birthdaysSchema: Array<Valueschema> = [
     unique: true
   },
   {
-    name: 'name',
+    name: 'lastName',
     type: DataType.STRING,
     required: true,
     fallback: '',
+    unique: false
+  },
+  {
+    name: 'firstName',
+    type: DataType.STRING,
+    required: true,
+    fallback: '',
+    unique: false
+  },
+  {
+    name: 'gender',
+    type: DataType.STRING,
+    required: true,
+    fallback: '',
+    unique: false
+  },
+  {
+    name: 'value',
+    type: DataType.NUMBER,
+    required: true,
+    fallback: '0',
     unique: false
   },
   {

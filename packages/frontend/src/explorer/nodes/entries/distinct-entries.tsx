@@ -83,7 +83,6 @@ export const DistinctEntriesNode: ClientNodeDef<
                 ))}
             </Select>
           </Col>
-          >
         </Row>
         <Row style={{ marginBottom: 8 }} gutter={8}>
           <Col xs={24} lg={6} xxl={6}>
