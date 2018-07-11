@@ -35,10 +35,6 @@ export const getContextInputDefs = async (
 
   const parent = await tryGetParentNode(node, reqContext);
   const parentType = tryGetNodeType(parent.type);
-  if (!hasContextFn(parentType)) {
-    return {};
-  }
-
   const parentInputs = await getMetaInputs(parent, reqContext);
   const parentDefs = await parentType.transformInputDefsToContextInputDefs(
     parentType.inputs,
@@ -46,10 +42,12 @@ export const getContextInputDefs = async (
     parseNodeForm(parent.form),
     reqContext
   );
+
   const variableDefs: SocketDefs<{}> = {};
   Object.entries(await getInputDefs(parent, reqContext))
     .filter(n => n[1].state === SocketState.VARIABLE)
     .forEach(n => (variableDefs[n[0]] = n[1]));
+
   return { ...parentDefs, ...variableDefs };
 };
 
@@ -63,10 +61,6 @@ export const getContextOutputDefs = async (
 
   const parent = await tryGetParentNode(node, reqContext);
   const parentType = tryGetNodeType(parent.type);
-  if (!hasContextFn(parentType)) {
-    return {};
-  }
-
   const parentInputs = await getMetaInputs(parent, reqContext);
   const contextInputDefs = await parentType.transformInputDefsToContextInputDefs(
     parentType.inputs,
@@ -244,11 +238,7 @@ export const removeConnection = async (
     }
   );
 
-  if (
-    nodeType &&
-    hasContextFn(nodeType) &&
-    nodeType.inputs[socket.name] == null
-  ) {
+  if (fulfillsVariableRequirements(type, socket.name, nodeType)) {
     await deleteVariable(socket.name, node, reqContext);
   }
 };

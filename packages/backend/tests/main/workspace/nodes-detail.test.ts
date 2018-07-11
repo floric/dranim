@@ -73,7 +73,7 @@ describe('Node Details', () => {
     jest.resetAllMocks();
   });
 
-  test('should get null for nodes without contexts', async () => {
+  test('should get empty object for nodes with type', async () => {
     const node: NodeInstance = {
       id: 'testnode',
       contextIds: [],
@@ -128,44 +128,6 @@ describe('Node Details', () => {
     } catch (err) {
       expect(err.message).toBe('Parent node missing');
     }
-  });
-
-  test('should return null for non context node as parent (should never happen)', async () => {
-    const parentNode: NodeInstance = {
-      id: 'parentnode',
-      contextIds: [],
-      form: [],
-      inputs: [{ name: 'dataset', connectionId: '123' }],
-      outputs: [],
-      type: 'type',
-      workspaceId: VALID_OBJECT_ID,
-      x: 0,
-      y: 0,
-      state: NodeState.VALID,
-      variables: {}
-    };
-    const node: NodeInstance = {
-      id: 'testnode',
-      contextIds: [parentNode.id],
-      form: [],
-      inputs: [{ name: 'dataset', connectionId: '123' }],
-      outputs: [],
-      type: 'type',
-      workspaceId: VALID_OBJECT_ID,
-      x: 0,
-      y: 0,
-      state: NodeState.VALID,
-      variables: {}
-    };
-    (getNode as jest.Mock).mockResolvedValue(parentNode);
-    (hasNodeType as jest.Mock).mockReturnValue(false);
-
-    const res = await getContextInputDefs(node, {
-      db,
-      userId: ''
-    });
-
-    expect(res).toEqual({});
   });
 
   test('should get empty context inputs', async () => {
@@ -476,6 +438,85 @@ describe('Node Details', () => {
       },
       null
     );
+    expect(hasContextFn).toHaveBeenCalledTimes(1);
+    expect(res).toEqual({
+      test: {
+        dataType: DataType.DATETIME,
+        displayName: 'date',
+        state: SocketState.DYNAMIC
+      }
+    });
+  });
+
+  test('should get output defs for ContextInputNode from context input defs from parent node', async () => {
+    const parentTypeName = 'parentnode';
+    const parentNode: NodeInstance = {
+      id: parentTypeName,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    const parentType: ServerNodeDefWithContextFn & NodeDef = {
+      type: parentTypeName,
+      name: parentTypeName,
+      inputs: {},
+      outputs: {},
+      keywords: [],
+      path: [],
+      isFormValid: async () => false,
+      onMetaExecution: async () => ({ test: { content: {}, isPresent: true } }),
+      onNodeExecution: async () => ({ outputs: {} }),
+      transformContextInputDefsToContextOutputDefs: async () => ({}),
+      transformInputDefsToContextInputDefs: async () => ({
+        test: {
+          dataType: DataType.DATETIME,
+          displayName: 'date',
+          state: SocketState.DYNAMIC
+        }
+      })
+    };
+    const contextOutputNode: NodeInstance = {
+      id: 'abc',
+      type: ContextNodeType.OUTPUT,
+      contextIds: [parentNode.id],
+      form: [],
+      inputs: [],
+      outputs: [],
+      workspaceId: 'abc',
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    (getNode as jest.Mock).mockResolvedValueOnce(parentNode);
+    (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
+    (hasNodeType as jest.Mock).mockReturnValueOnce(false);
+    (hasContextFn as any).mockReturnValueOnce(true).mockReturnValueOnce(false);
+    (tryGetContextNode as jest.Mock).mockReturnValue(contextOutputNode);
+
+    const res = await getOutputDefs(
+      {
+        id: 'abc',
+        type: ContextNodeType.INPUT,
+        contextIds: [parentNode.id],
+        form: [],
+        inputs: [],
+        outputs: [],
+        workspaceId: 'abc',
+        x: 0,
+        y: 0,
+        state: NodeState.VALID,
+        variables: {}
+      },
+      null
+    );
     expect(hasContextFn).toHaveBeenCalledTimes(2);
     expect(res).toEqual({
       test: {
@@ -486,7 +527,7 @@ describe('Node Details', () => {
     });
   });
 
-  test('should get input defs for ContextInputNode from context input defs from parent node', async () => {
+  test('should get empty input defs for ContextInputNode', async () => {
     const parentTypeName = 'parentnode';
     const parentNode: NodeInstance = {
       id: parentTypeName,
@@ -506,6 +547,41 @@ describe('Node Details', () => {
       {
         id: 'abc',
         type: ContextNodeType.INPUT,
+        contextIds: [parentNode.id],
+        form: [],
+        inputs: [{ connectionId: 'abc', name: 'test' }],
+        outputs: [],
+        workspaceId: 'abc',
+        x: 0,
+        y: 0,
+        state: NodeState.VALID,
+        variables: {}
+      },
+      null
+    );
+    expect(res).toEqual({});
+  });
+
+  test('should get empty output defs for ContextOutputNode', async () => {
+    const parentTypeName = 'parentnode';
+    const parentNode: NodeInstance = {
+      id: parentTypeName,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+
+    const res = await getOutputDefs(
+      {
+        id: 'abc',
+        type: ContextNodeType.OUTPUT,
         contextIds: [parentNode.id],
         form: [],
         inputs: [{ connectionId: 'abc', name: 'test' }],
@@ -703,9 +779,21 @@ describe('Node Details', () => {
 
     expect(updateStates).toHaveBeenCalledTimes(1);
     expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(2);
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledWith(
+      { _id: new ObjectID(VALID_OBJECT_ID) },
+      {
+        $set: {
+          [`variables.test`]: {
+            displayName: 'abc',
+            dataType: DataType.STRING,
+            state: SocketState.VARIABLE
+          }
+        }
+      }
+    );
   });
 
-  test('should add or update variable', async () => {
+  /*test('should add or update variable', async () => {
     const node: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
@@ -734,21 +822,10 @@ describe('Node Details', () => {
     expect(res).toBe(true);
     expect(updateStates).toHaveBeenCalledTimes(1);
     expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(1);
-    expect(getNodesCollection(db).updateOne).toHaveBeenCalledWith(
-      { _id: new ObjectID(VALID_OBJECT_ID) },
-      {
-        $set: {
-          [`variables.123`]: {
-            displayName: 'test',
-            dataType: DataType.STRING,
-            state: SocketState.VARIABLE
-          }
-        }
-      }
-    );
-  });
+    
+  });*/
 
-  test('should delete variable', async () => {
+  /*test('should delete variable', async () => {
     const node: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
@@ -780,7 +857,7 @@ describe('Node Details', () => {
         $unset: { [`variables.123`]: '' }
       }
     );
-  });
+  });*/
 
   test('should also delete variable when deleting variable connection', async () => {
     const node: NodeInstance = {
@@ -825,5 +902,11 @@ describe('Node Details', () => {
 
     expect(updateStates).toHaveBeenCalledTimes(1);
     expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(2);
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledWith(
+      { _id: new ObjectID(VALID_OBJECT_ID) },
+      {
+        $unset: { [`variables.test`]: '' }
+      }
+    );
   });
 });
