@@ -419,7 +419,7 @@ describe('Node Details', () => {
     (getNode as jest.Mock).mockResolvedValueOnce(parentNode);
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
     (hasNodeType as jest.Mock).mockReturnValueOnce(false);
-    (hasContextFn as any).mockReturnValueOnce(true).mockReturnValueOnce(false);
+    (hasContextFn as any).mockReturnValueOnce(false).mockReturnValueOnce(true);
     (tryGetContextNode as jest.Mock).mockReturnValue(contextInputNode);
 
     const res = await getInputDefs(
@@ -438,7 +438,7 @@ describe('Node Details', () => {
       },
       null
     );
-    expect(hasContextFn).toHaveBeenCalledTimes(1);
+    expect(hasContextFn).toHaveBeenCalledTimes(2);
     expect(res).toEqual({
       test: {
         dataType: DataType.DATETIME,
@@ -498,7 +498,7 @@ describe('Node Details', () => {
     (getNode as jest.Mock).mockResolvedValueOnce(parentNode);
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
     (hasNodeType as jest.Mock).mockReturnValueOnce(false);
-    (hasContextFn as any).mockReturnValueOnce(true).mockReturnValueOnce(false);
+    (hasContextFn as any).mockReturnValueOnce(false).mockReturnValueOnce(true);
     (tryGetContextNode as jest.Mock).mockReturnValue(contextOutputNode);
 
     const res = await getOutputDefs(
@@ -517,7 +517,7 @@ describe('Node Details', () => {
       },
       null
     );
-    expect(hasContextFn).toHaveBeenCalledTimes(2);
+    expect(hasContextFn).toHaveBeenCalledTimes(3);
     expect(res).toEqual({
       test: {
         dataType: DataType.DATETIME,

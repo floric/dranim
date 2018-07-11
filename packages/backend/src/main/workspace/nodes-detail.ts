@@ -36,6 +36,11 @@ export const getContextInputDefs = async (
   const parent = await tryGetParentNode(node, reqContext);
   const parentType = tryGetNodeType(parent.type);
   const parentInputs = await getMetaInputs(parent, reqContext);
+
+  if (!hasContextFn(parentType)) {
+    throw new Error('Parent nodes should always have a context function');
+  }
+
   const parentDefs = await parentType.transformInputDefsToContextInputDefs(
     parentType.inputs,
     parentInputs,
@@ -62,6 +67,11 @@ export const getContextOutputDefs = async (
   const parent = await tryGetParentNode(node, reqContext);
   const parentType = tryGetNodeType(parent.type);
   const parentInputs = await getMetaInputs(parent, reqContext);
+
+  if (!hasContextFn(parentType)) {
+    throw new Error('Parent nodes should always have a context function');
+  }
+
   const contextInputDefs = await parentType.transformInputDefsToContextInputDefs(
     parentType.inputs,
     parentInputs,
