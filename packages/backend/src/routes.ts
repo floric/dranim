@@ -1,7 +1,7 @@
 import { Express } from 'express';
 import { Db } from 'mongodb';
 
-import { Logger } from './logging';
+import { Log } from './logging';
 import { login, register } from './main/users/management';
 
 export const generateErrorResponse = (message: string) =>
@@ -46,7 +46,7 @@ const registerRegistration = (app: Express, db: Db) => {
         res.status(400).send();
       }
     } catch (err) {
-      Logger.error('Registration error', err);
+      Log.error('Registration error', err);
       res.status(500).send();
     }
   });

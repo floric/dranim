@@ -10,7 +10,7 @@ import { Collection, Db, ObjectID } from 'mongodb';
 import * as promisesAll from 'promises-all';
 import { Readable } from 'stream';
 
-import { Logger } from '../../logging';
+import { Log } from '../../logging';
 import { tryGetDataset } from '../../main/workspace/dataset';
 import { Valueschema } from '../../main/workspace/dataset';
 import { createEntry } from '../../main/workspace/entry';
@@ -99,7 +99,7 @@ const processValidEntry = async (
         { upsert: true }
       );
     } else {
-      Logger.error(err);
+      Log.error(err);
     }
   }
 };
@@ -131,21 +131,21 @@ const parseCsvFile = async (
     .on('data', values => processValidEntry(values, ds, processId, reqContext))
     .on('data-invalid', () => processInvalidEntry(ds, processId, reqContext))
     .on('end', () => {
-      Logger.info(`Finished import of ${filename}.`);
+      Log.info(`Finished import of ${filename}.`);
     });
 
-  Logger.info(`Started import of ${filename}.`);
+  Log.info(`Started import of ${filename}.`);
 
   try {
     await new Promise((resolve, reject) =>
       stream
-        .on('error', err => Logger.error(err))
+        .on('error', err => Log.error(err))
         .pipe(csvStream)
-        .on('error', err => Logger.error(err))
+        .on('error', err => Log.error(err))
         .on('finish', () => resolve())
     );
   } catch (err) {
-    Logger.error(err);
+    Log.error(err);
   }
 
   return true;
@@ -167,7 +167,7 @@ const processUpload = async (
       { $push: { fileNames: filename } }
     );
   } catch (err) {
-    Logger.error(err);
+    Log.error(err);
     throw new Error('Upload has failed.');
   }
 };
@@ -205,7 +205,7 @@ export const uploadEntriesCsv = async (
 
     return process;
   } catch (err) {
-    Logger.error(err);
+    Log.error(err);
     throw new Error('Upload failed');
   }
 };
@@ -223,7 +223,7 @@ export const doUploadAsync = async (
 
   if (reject.length) {
     reject.forEach(({ name, message }) => {
-      Logger.error(`Upload failed for ${name}: ${message}`);
+      Log.error(`Upload failed for ${name}: ${message}`);
     });
     await uploadsCollection.updateOne(
       { _id: processId },

@@ -8,7 +8,7 @@ import {
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
-import { Logger } from '../../logging';
+import { Log } from '../../logging';
 import { getNodeType } from '../nodes/all-nodes';
 import { tryGetNode } from './nodes';
 import {
@@ -32,7 +32,6 @@ export const createConnection = async (
   await validateConnection(from, to, reqContext);
 
   const destination = await tryGetNode(to.nodeId, reqContext);
-
   const collection = getConnectionsCollection(reqContext.db);
   const insertRes = await collection.insertOne({
     from,
@@ -55,7 +54,7 @@ export const createConnection = async (
 
   await updateStates(destination.workspaceId, reqContext);
 
-  Logger.info(`Connection ${connId} created`);
+  Log.info(`Connection ${connId} created`);
 
   return {
     id: newItem._id.toHexString(),
@@ -104,7 +103,6 @@ const checkAndGetDataType = async (
   destination: NodeInstance,
   reqContext
 ): Promise<DataType> => {
-  const destinationNodeType = getNodeType(destination.type);
   const sourceDefs = await getOutputDefs(source, reqContext);
 
   const expectedDatatype = sourceDefs[from.name]
@@ -114,6 +112,7 @@ const checkAndGetDataType = async (
     throw new Error('Unknown output socket');
   }
 
+  const destinationNodeType = getNodeType(destination.type);
   if (destinationNodeType && hasContextFn(destinationNodeType)) {
     // might be a variable
     return expectedDatatype;
@@ -215,7 +214,7 @@ export const deleteConnection = async (
 
   await updateStates(connection.workspaceId, reqContext);
 
-  Logger.info(`Connection ${id} deleted`);
+  Log.info(`Connection ${id} deleted`);
 
   return true;
 };

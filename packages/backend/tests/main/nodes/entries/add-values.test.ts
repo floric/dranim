@@ -207,7 +207,7 @@ describe('AddValuesNode', () => {
     });
   });
 
-  test('should return empty object for missing dataset input for context', async () => {
+  test('should return context inputs as well as dynamic inputs from form even with missing dataset input', async () => {
     const res = await AddValuesNode.transformContextInputDefsToContextOutputDefs(
       {
         dataset: {
@@ -238,7 +238,10 @@ describe('AddValuesNode', () => {
       },
       null
     );
-    expect(res).toEqual({});
+    expect(res).toEqual({
+      test: { dataType: 'Number', displayName: 'Test', state: 'Dynamic' },
+      test2: { dataType: 'String', displayName: 'test2', state: 'Dynamic' }
+    });
   });
 
   test('should add new value to dataset', async () => {
@@ -302,7 +305,8 @@ describe('AddValuesNode', () => {
           form: [],
           x: 0,
           y: 0,
-          state: NodeState.VALID
+          state: NodeState.VALID,
+          variables: {}
         },
         contextFnExecution: async inputs => ({
           outputs: { ...inputs, new: 'super' }

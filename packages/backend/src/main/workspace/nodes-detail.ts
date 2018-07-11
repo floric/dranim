@@ -13,7 +13,7 @@ import {
 } from '@masterthesis/shared';
 import { ObjectID } from 'mongodb';
 
-import { Logger } from '../../logging';
+import { Log } from '../../logging';
 import { getMetaInputs } from '../calculation/meta-execution';
 import { getNodeType, hasNodeType, tryGetNodeType } from '../nodes/all-nodes';
 import {
@@ -167,7 +167,7 @@ export const addOrUpdateFormValue = async (
   }
 
   await updateStates(node.workspaceId, reqContext);
-  Logger.info(`Added or updated form value of ${nodeId} with name ${name}`);
+  Log.info(`Added or updated form value of ${nodeId} with name ${name}`);
 
   return true;
 };
@@ -291,7 +291,7 @@ export const addOrUpdateVariable = async (
   );
 
   await updateStates(node.workspaceId, reqContext);
-  Logger.info(`Created variable ${varId}`);
+  Log.info(`Created variable ${varId}`);
   return true;
 };
 
@@ -311,6 +311,6 @@ export const deleteVariable = async (
 
   await updateStates(node.workspaceId, reqContext);
 
-  Logger.info(`Deleted variable ${varId}`);
+  Log.info(`Deleted variable ${varId}`);
   return true;
 };

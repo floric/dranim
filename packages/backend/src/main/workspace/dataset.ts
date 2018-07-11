@@ -1,7 +1,7 @@
 import { ApolloContext, Dataset, DataType } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
-import { Logger } from '../../logging';
+import { Log } from '../../logging';
 import { clearEntries, getEntryCollection } from './entry';
 
 export interface Valueschema {
@@ -46,7 +46,7 @@ export const createDataset = async (
   }
 
   const { _id, ...obj } = res.ops[0];
-  Logger.info(`Dataset ${_id.toHexString()} created`);
+  Log.info(`Dataset ${_id.toHexString()} created`);
 
   return {
     id: _id.toHexString(),
@@ -62,7 +62,7 @@ export const deleteDataset = async (id: string, reqContext: ApolloContext) => {
     throw new Error('Deletion of Dataset failed');
   }
 
-  Logger.info(`Dataset ${id} deleted`);
+  Log.info(`Dataset ${id} deleted`);
 
   return true;
 };

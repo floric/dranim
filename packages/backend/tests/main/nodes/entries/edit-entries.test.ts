@@ -4,6 +4,7 @@ import {
   DatasetSocket,
   DataType,
   EditEntriesNodeDef,
+  Entry,
   SocketState
 } from '@masterthesis/shared';
 
@@ -17,6 +18,7 @@ import {
   createDataset,
   tryGetDataset
 } from '../../../../src/main/workspace/dataset';
+import { createEntry } from '../../../../src/main/workspace/entry';
 import { NeverGoHereError, NODE, VALID_OBJECT_ID } from '../../../test-utils';
 
 jest.mock('@masterthesis/shared');
@@ -160,7 +162,7 @@ describe('EditEntriesNode', () => {
     });
   });
 
-  test('should return empty object for missing inputs', async () => {
+  test('should return context inputs for missing inputs', async () => {
     (allAreDefinedAndPresent as jest.Mock).mockReturnValue(false);
 
     const validDs = {
@@ -193,7 +195,13 @@ describe('EditEntriesNode', () => {
       { db: null, userId: '' }
     );
 
-    expect(res).toEqual({});
+    expect(res).toEqual({
+      super: {
+        dataType: DataType.BOOLEAN,
+        displayName: 'super',
+        state: SocketState.DYNAMIC
+      }
+    });
   });
 
   test('should passthrough dynamic inputs of context input node', async () => {
@@ -255,10 +263,16 @@ describe('EditEntriesNode', () => {
       name: 'New DS',
       workspaceId: 'CDE'
     };
+    const entry: Entry = {
+      id: 'eA',
+      values: {}
+    };
     (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
-    (processEntries as jest.Mock).mockImplementation(n => Promise.resolve());
     (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
+    (processEntries as jest.Mock).mockImplementation(async (a, b, processFn) =>
+      processFn(entry)
+    );
 
     const res = await EditEntriesNode.onNodeExecution(
       {},
@@ -271,6 +285,7 @@ describe('EditEntriesNode', () => {
     );
     expect(res.outputs.dataset).toBeDefined();
     expect(newDs.valueschemas).toEqual(oldDs.valueschemas);
+    expect(createEntry).toHaveBeenCalledTimes(1);
   });
 
   test('should throw error for invalid dataset', async () => {

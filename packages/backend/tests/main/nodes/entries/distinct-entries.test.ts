@@ -367,16 +367,16 @@ describe('DistinctEntriesNode', () => {
     (createEntry as jest.Mock).mockImplementation(jest.fn);
     (getEntryCollection as jest.Mock).mockReturnValue({
       aggregate: jest.fn(() => {
-        let entriesToProces = 20;
+        let entriesToProcess = 20;
         return {
           close: async () => true,
           next: async () => ({ _id: 'distinct-value' }),
           hasNext: async () => {
-            if (entriesToProces === 0) {
+            if (entriesToProcess === 0) {
               return false;
             }
 
-            entriesToProces -= 1;
+            entriesToProcess -= 1;
             return true;
           }
         };

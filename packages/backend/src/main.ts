@@ -12,7 +12,7 @@ import { Db } from 'mongodb';
 
 import { mongoDbClient } from './config/db';
 import Schema from './graphql/schema';
-import { Logger, MorganLogStream } from './logging';
+import { Log, MorganLogStream } from './logging';
 import { initWorkspaceDb } from './main/workspace/workspace';
 import { generateErrorResponse, registerRoutes } from './routes';
 
@@ -86,12 +86,12 @@ export const main = async (options: IMainOptions) => {
 
   app
     .listen(options.port, () => {
-      Logger.info(
+      Log.info(
         `Server running on http://localhost${GRAPHQL_ROUTE}:${options.port}`
       );
     })
     .on('error', (err: Error) => {
-      Logger.error('App error', err);
+      Log.error('App error', err);
     });
 };
 

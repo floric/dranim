@@ -88,13 +88,13 @@ describe('Node Details', () => {
       db,
       userId: ''
     });
-    expect(inputRes).toBe(null);
+    expect(inputRes).toEqual({});
 
     const outputRes = await getContextOutputDefs(node, {
       db,
       userId: ''
     });
-    expect(outputRes).toBe(null);
+    expect(outputRes).toEqual({});
   });
 
   test('should throw error for missing parent node', async () => {
@@ -160,7 +160,7 @@ describe('Node Details', () => {
       userId: ''
     });
 
-    expect(res).toBe(null);
+    expect(res).toEqual({});
   });
 
   test('should get empty context inputs', async () => {
@@ -427,7 +427,7 @@ describe('Node Details', () => {
       isFormValid: async () => false,
       onMetaExecution: async () => ({ test: { content: {}, isPresent: true } }),
       onNodeExecution: async () => ({ outputs: {} }),
-      transformContextInputDefsToContextOutputDefs: async inputs => ({
+      transformContextInputDefsToContextOutputDefs: async () => ({
         test: {
           dataType: DataType.DATETIME,
           displayName: 'date',
@@ -452,7 +452,7 @@ describe('Node Details', () => {
     (getNode as jest.Mock).mockResolvedValueOnce(parentNode);
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
     (hasNodeType as jest.Mock).mockReturnValueOnce(false);
-    (hasContextFn as any).mockReturnValue(true);
+    (hasContextFn as any).mockReturnValueOnce(true).mockReturnValueOnce(false);
     (tryGetContextNode as jest.Mock).mockReturnValue(contextInputNode);
 
     const res = await getInputDefs(
@@ -471,7 +471,7 @@ describe('Node Details', () => {
       },
       null
     );
-    expect(hasContextFn).toHaveBeenCalledTimes(1);
+    expect(hasContextFn).toHaveBeenCalledTimes(2);
     expect(res).toEqual({
       test: {
         dataType: DataType.DATETIME,
@@ -493,7 +493,8 @@ describe('Node Details', () => {
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
-      state: NodeState.VALID
+      state: NodeState.VALID,
+      variables: {}
     };
 
     const res = await getInputDefs(
@@ -595,14 +596,26 @@ describe('Node Details', () => {
     (tryGetNode as jest.Mock).mockResolvedValue(node);
 
     const nodeId = VALID_OBJECT_ID;
-    await addConnection({ name: 'test', nodeId }, 'input', VALID_OBJECT_ID, {
-      db,
-      userId: ''
-    });
-    await addConnection({ name: 'test', nodeId }, 'output', VALID_OBJECT_ID, {
-      db,
-      userId: ''
-    });
+    await addConnection(
+      { name: 'test', nodeId },
+      { name: 'test', nodeId: VALID_OBJECT_ID },
+      'input',
+      VALID_OBJECT_ID,
+      {
+        db,
+        userId: ''
+      }
+    );
+    await addConnection(
+      { name: 'test', nodeId },
+      { name: 'test', nodeId: VALID_OBJECT_ID },
+      'output',
+      VALID_OBJECT_ID,
+      {
+        db,
+        userId: ''
+      }
+    );
     await removeConnection({ name: 'test', nodeId }, 'input', VALID_OBJECT_ID, {
       db,
       userId: ''

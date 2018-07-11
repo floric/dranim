@@ -423,6 +423,7 @@ describe('Nodes', () => {
       outputs: [],
       type: 'NumberInput',
       workspaceId: '5b07b3129ba658500b75a29a',
+      variables: {},
       x: 0,
       y: 0
     });
