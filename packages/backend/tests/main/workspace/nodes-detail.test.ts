@@ -6,9 +6,10 @@ import {
   NodeInstance,
   NodeState,
   ServerNodeDefWithContextFn,
+  SocketDef,
   SocketState
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
+import { Db, ObjectID } from 'mongodb';
 
 import {
   getNodeType,
@@ -24,12 +25,16 @@ import {
 import {
   addConnection,
   addOrUpdateFormValue,
+  addOrUpdateVariable,
+  deleteVariable,
   getContextInputDefs,
   getContextOutputDefs,
   getInputDefs,
+  getOutputDefs,
   removeConnection,
   setProgress
 } from '../../../src/main/workspace/nodes-detail';
+import { updateStates } from '../../../src/main/workspace/nodes-state';
 import {
   getTestMongoDb,
   NeverGoHereError,
@@ -630,5 +635,195 @@ describe('Node Details', () => {
       }
     );
     expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(4);
+  });
+
+  test('should add variable if connection is a variable connection', async () => {
+    const targetNode: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    const sourceNode: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    const inputSocketDef: SocketDef = {
+      displayName: 'abc',
+      state: SocketState.STATIC,
+      dataType: DataType.STRING
+    };
+    const contextNodeType: ServerNodeDefWithContextFn & NodeDef = {
+      type: 'type',
+      name: 'name',
+      inputs: {},
+      outputs: { test: inputSocketDef },
+      keywords: [],
+      path: [],
+      isFormValid: async () => false,
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: {} }),
+      transformContextInputDefsToContextOutputDefs: async () => ({}),
+      transformInputDefsToContextInputDefs: async () => ({})
+    };
+
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateOne: jest.fn()
+    });
+    (tryGetNode as jest.Mock)
+      .mockResolvedValueOnce(targetNode)
+      .mockResolvedValueOnce(sourceNode);
+    (getNodeType as jest.Mock).mockReturnValue(contextNodeType);
+    (tryGetNodeType as jest.Mock).mockReturnValue(contextNodeType);
+    (hasContextFn as any).mockReturnValue(true);
+
+    await addConnection(
+      { name: 'test', nodeId: targetNode.id },
+      { name: 'test', nodeId: VALID_OBJECT_ID },
+      'input',
+      VALID_OBJECT_ID,
+      { db, userId: '' }
+    );
+
+    expect(updateStates).toHaveBeenCalledTimes(1);
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(2);
+  });
+
+  test('should add or update variable', async () => {
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateOne: jest.fn()
+    });
+
+    const res = await addOrUpdateVariable(
+      '123',
+      'test',
+      DataType.STRING,
+      node,
+      { db, userId: '' }
+    );
+
+    expect(res).toBe(true);
+    expect(updateStates).toHaveBeenCalledTimes(1);
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(1);
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledWith(
+      { _id: new ObjectID(VALID_OBJECT_ID) },
+      {
+        $set: {
+          [`variables.123`]: {
+            displayName: 'test',
+            dataType: DataType.STRING,
+            state: SocketState.VARIABLE
+          }
+        }
+      }
+    );
+  });
+
+  test('should delete variable', async () => {
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateOne: jest.fn()
+    });
+
+    const res = await deleteVariable('123', node, {
+      db,
+      userId: ''
+    });
+
+    expect(res).toBe(true);
+    expect(updateStates).toHaveBeenCalledTimes(1);
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(1);
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledWith(
+      { _id: new ObjectID(VALID_OBJECT_ID) },
+      {
+        $unset: { [`variables.123`]: '' }
+      }
+    );
+  });
+
+  test('should also delete variable when deleting variable connection', async () => {
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    const contextNodeType: ServerNodeDefWithContextFn & NodeDef = {
+      type: 'type',
+      name: 'name',
+      inputs: {},
+      outputs: {},
+      keywords: [],
+      path: [],
+      isFormValid: async () => false,
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: {} }),
+      transformContextInputDefsToContextOutputDefs: async () => ({}),
+      transformInputDefsToContextInputDefs: async () => ({})
+    };
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateOne: jest.fn()
+    });
+    (tryGetNode as jest.Mock).mockResolvedValue(node);
+    (getNodeType as jest.Mock).mockReturnValue(contextNodeType);
+    (hasContextFn as any).mockReturnValue(true);
+
+    await removeConnection(
+      { name: 'test', nodeId: VALID_OBJECT_ID },
+      'input',
+      VALID_OBJECT_ID,
+      { db, userId: '' }
+    );
+
+    expect(updateStates).toHaveBeenCalledTimes(1);
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(2);
   });
 });

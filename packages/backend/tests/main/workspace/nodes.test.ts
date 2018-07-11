@@ -91,12 +91,20 @@ describe('Nodes', () => {
     expect(newNode.workspaceId).toBe(ws.id);
     expect(newNode.type).toBe(NumberInputNodeDef.type);
 
+    await addOrUpdateFormValue(newNode.id, 'test', JSON.stringify('abc'), {
+      db,
+      userId: ''
+    });
+
     const node = await getNode(newNode.id, {
       db,
       userId: ''
     });
 
-    expect(node).toEqual(newNode);
+    expect(node).toEqual({
+      ...newNode,
+      ...{ form: [{ name: 'test', value: '"abc"' }] }
+    });
   });
 
   test('should create and get node in context', async () => {

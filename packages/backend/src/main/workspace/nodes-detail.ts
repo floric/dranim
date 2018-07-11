@@ -1,6 +1,7 @@
 import {
   ApolloContext,
   ContextNodeType,
+  DataType,
   hasContextFn,
   NodeDef,
   NodeInstance,
@@ -203,12 +204,9 @@ export const addConnection = async (
 
     await addOrUpdateVariable(
       socket.name,
-      {
-        dataType: inputDef.dataType,
-        displayName: inputDef.displayName,
-        state: SocketState.VARIABLE
-      },
-      socket.nodeId,
+      inputDef.displayName,
+      inputDef.dataType,
+      targetNode,
       reqContext
     );
   }
@@ -251,7 +249,7 @@ export const removeConnection = async (
     hasContextFn(nodeType) &&
     nodeType.inputs[socket.name] == null
   ) {
-    await deleteVariable(socket.name, socket.nodeId, reqContext);
+    await deleteVariable(socket.name, node, reqContext);
   }
 };
 
@@ -277,33 +275,39 @@ export const setProgress = async (
 
 export const addOrUpdateVariable = async (
   varId: string,
-  variable: SocketDef,
-  nodeId: string,
+  displayName: string,
+  dataType: DataType,
+  node: NodeInstance,
   reqContext: ApolloContext
 ) => {
-  const node = await tryGetNode(nodeId, reqContext);
   const coll = getNodesCollection(reqContext.db);
   await coll.updateOne(
-    { _id: new ObjectID(nodeId) },
+    { _id: new ObjectID(node.id) },
     {
-      $set: { [`variables.${varId}`]: variable }
+      $set: {
+        [`variables.${varId}`]: {
+          displayName,
+          dataType,
+          state: SocketState.VARIABLE
+        }
+      }
     }
   );
 
   await updateStates(node.workspaceId, reqContext);
+
   Log.info(`Created variable ${varId}`);
   return true;
 };
 
 export const deleteVariable = async (
   varId: string,
-  nodeId: string,
+  node: NodeInstance,
   reqContext: ApolloContext
 ) => {
-  const node = await tryGetNode(nodeId, reqContext);
   const coll = getNodesCollection(reqContext.db);
   await coll.updateOne(
-    { _id: new ObjectID(nodeId) },
+    { _id: new ObjectID(node.id) },
     {
       $unset: { [`variables.${varId}`]: '' }
     }

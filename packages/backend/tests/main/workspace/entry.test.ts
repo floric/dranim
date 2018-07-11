@@ -10,7 +10,8 @@ import {
   getEntriesCount,
   getEntry,
   getEntryCollection,
-  getLatestEntries
+  getLatestEntries,
+  getAllEntries
 } from '../../../src/main/workspace/entry';
 import {
   getTestMongoDb,
@@ -626,6 +627,9 @@ describe('Entry', () => {
       userId: ''
     });
     expect(entriesCount).toBe(5);
+
+    const allEntries = await getAllEntries(ds.id, { db, userId: '' });
+    expect(allEntries.length).toBe(5);
 
     await clearEntries(ds.id, {
       db,

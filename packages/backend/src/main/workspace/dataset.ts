@@ -144,7 +144,7 @@ export const addValueSchema = async (
   );
 
   // create unique index for identifiers
-  if (schema.type === 'String' && schema.unique) {
+  if (schema.type === DataType.STRING && schema.unique) {
     const entryCollection = getEntryCollection(datasetId, reqContext.db);
     await entryCollection.createIndex(`values.${schema.name}`, {
       unique: true

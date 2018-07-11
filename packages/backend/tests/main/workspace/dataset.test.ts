@@ -7,13 +7,15 @@ import {
   createDataset,
   deleteDataset,
   getAllDatasets,
-  getDataset
+  getDataset,
+  tryGetDataset
 } from '../../../src/main/workspace/dataset';
 import {
   getTestMongoDb,
   NeverGoHereError,
   VALID_OBJECT_ID
 } from '../../test-utils';
+import { getEntryCollection } from '../../../src/main/workspace/entry';
 
 let conn;
 let db: Db;
@@ -101,6 +103,46 @@ describe('Dataset', () => {
 
     const fetchedSchema = ds.valueschemas[0];
     expect(fetchedSchema).toEqual(SCHEMA);
+  });
+
+  test('should add valueschemas for String and create string index', async () => {
+    (getEntryCollection as jest.Mock).mockReturnValue({
+      createIndex: jest.fn()
+    });
+
+    const newDs = await createDataset('test', {
+      db,
+      userId: ''
+    });
+    expect(newDs.id).toBeDefined();
+    expect(newDs.name).toBe('test');
+    expect(newDs.valueschemas).toEqual([]);
+
+    const res = await addValueSchema(
+      newDs.id,
+      {
+        name: 'test',
+        required: true,
+        unique: true,
+        type: DataType.STRING,
+        fallback: ''
+      },
+      {
+        db,
+        userId: ''
+      }
+    );
+    expect(res).toBe(true);
+
+    expect(getEntryCollection(newDs.id, db).createIndex).toHaveBeenCalledTimes(
+      1
+    );
+    expect(getEntryCollection(newDs.id, db).createIndex).toHaveBeenCalledWith(
+      `values.test`,
+      {
+        unique: true
+      }
+    );
   });
 
   test('should throw error for invalid dataset', async () => {
@@ -209,5 +251,14 @@ describe('Dataset', () => {
 
     expect(all).toContainEqual(dsA);
     expect(all).toContainEqual(dsB);
+  });
+
+  test('should throw error for unknown dataset', async () => {
+    try {
+      await tryGetDataset(VALID_OBJECT_ID, { db, userId: '' });
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Unknown dataset');
+    }
   });
 });
