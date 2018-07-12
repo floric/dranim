@@ -58,9 +58,7 @@ describe('Entry', () => {
       id: VALID_OBJECT_ID,
       name: 'ds',
       workspaceId: 'ws',
-      valueschemas: [schema],
-      latestEntries: [],
-      entriesCount: 0
+      valueschemas: [schema]
     };
 
     (getDataset as jest.Mock).mockResolvedValue(ds);
@@ -103,9 +101,7 @@ describe('Entry', () => {
       id: VALID_OBJECT_ID,
       name: 'ds',
       workspaceId: 'ws',
-      valueschemas: [],
-      latestEntries: [],
-      entriesCount: 0
+      valueschemas: []
     };
 
     (getDataset as jest.Mock).mockResolvedValue(ds);
@@ -138,9 +134,7 @@ describe('Entry', () => {
       id: VALID_OBJECT_ID,
       name: 'ds',
       workspaceId: 'ws',
-      valueschemas: [schemaA, schemaB],
-      latestEntries: [],
-      entriesCount: 0
+      valueschemas: [schemaA, schemaB]
     };
 
     (getDataset as jest.Mock).mockResolvedValue(ds);
@@ -194,9 +188,7 @@ describe('Entry', () => {
       id: VALID_OBJECT_ID,
       name: 'ds',
       workspaceId: 'ws',
-      valueschemas: [schema],
-      latestEntries: [],
-      entriesCount: 0
+      valueschemas: [schema]
     };
 
     (getDataset as jest.Mock).mockResolvedValue(ds);
@@ -236,9 +228,7 @@ describe('Entry', () => {
       id: VALID_OBJECT_ID,
       name: 'ds',
       workspaceId: 'ws',
-      valueschemas: [schema],
-      latestEntries: [],
-      entriesCount: 0
+      valueschemas: [schema]
     };
 
     (getDataset as jest.Mock).mockResolvedValue(ds);
@@ -273,9 +263,7 @@ describe('Entry', () => {
       id: VALID_OBJECT_ID,
       name: 'ds',
       workspaceId: 'ws',
-      valueschemas: [],
-      latestEntries: [],
-      entriesCount: 0
+      valueschemas: []
     };
 
     (getDataset as jest.Mock).mockResolvedValue(ds);
@@ -301,9 +289,7 @@ describe('Entry', () => {
       id: VALID_OBJECT_ID,
       name: 'ds',
       workspaceId: 'ws',
-      valueschemas: [],
-      latestEntries: [],
-      entriesCount: 0
+      valueschemas: []
     };
 
     (getDataset as jest.Mock).mockResolvedValue(ds);
@@ -329,9 +315,7 @@ describe('Entry', () => {
       id: VALID_OBJECT_ID,
       name: 'ds',
       workspaceId: 'ws',
-      valueschemas: [],
-      latestEntries: [],
-      entriesCount: 0
+      valueschemas: []
     };
 
     (getDataset as jest.Mock).mockResolvedValue(ds);
@@ -405,9 +389,7 @@ describe('Entry', () => {
       id: VALID_OBJECT_ID,
       name: 'ds',
       workspaceId: 'ws',
-      valueschemas: [schemaA, schemaB],
-      latestEntries: [],
-      entriesCount: 0
+      valueschemas: [schemaA, schemaB]
     };
 
     (getDataset as jest.Mock).mockResolvedValue(ds);
@@ -440,9 +422,7 @@ describe('Entry', () => {
       id: VALID_OBJECT_ID,
       name: 'ds',
       workspaceId: 'ws',
-      valueschemas: [schema],
-      latestEntries: [],
-      entriesCount: 0
+      valueschemas: [schema]
     };
 
     (getDataset as jest.Mock).mockResolvedValue(ds);
@@ -478,9 +458,7 @@ describe('Entry', () => {
       id: VALID_OBJECT_ID,
       name: 'ds',
       workspaceId: 'ws',
-      valueschemas: [schema],
-      latestEntries: [],
-      entriesCount: 0
+      valueschemas: [schema]
     };
 
     const coll = getEntryCollection(ds.id, db);
@@ -550,9 +528,7 @@ describe('Entry', () => {
           fallback: '',
           required: true
         }
-      ],
-      latestEntries: [],
-      entriesCount: 0
+      ]
     };
 
     (getDataset as jest.Mock).mockResolvedValue(ds);
@@ -602,9 +578,7 @@ describe('Entry', () => {
           fallback: '',
           required: true
         }
-      ],
-      latestEntries: [],
-      entriesCount: 0
+      ]
     };
 
     (getDataset as jest.Mock).mockResolvedValue(ds);

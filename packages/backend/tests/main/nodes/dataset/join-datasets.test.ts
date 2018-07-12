@@ -87,8 +87,6 @@ describe('JoinDatasetsNode', () => {
   test('should stop for not found schemas', async () => {
     const dsA: Dataset = {
       id: VALID_OBJECT_ID,
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: ['name', 'test', 'abc'].map(n => ({
         type: DataType.STRING,
         name: n,
@@ -101,8 +99,6 @@ describe('JoinDatasetsNode', () => {
     };
     const dsB: Dataset = {
       id: VALID_OBJECT_ID,
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: ['name', 'test', 'abc'].map(n => ({
         type: DataType.STRING,
         name: n,
@@ -135,8 +131,6 @@ describe('JoinDatasetsNode', () => {
   test('should throw error for unequal datatypes of values', async () => {
     const dsA: Dataset = {
       id: VALID_OBJECT_ID,
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: [
         {
           name: 'colA',
@@ -151,8 +145,6 @@ describe('JoinDatasetsNode', () => {
     };
     const dsB: Dataset = {
       id: VALID_OBJECT_ID,
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: [
         {
           name: 'colB',
@@ -223,24 +215,18 @@ describe('JoinDatasetsNode', () => {
 
     const dsA: Dataset = {
       id: VALID_OBJECT_ID,
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: [schemaA, schemaOnlyA],
       name: 'DS B',
       workspaceId: 'CDE'
     };
     const dsB: Dataset = {
       id: VALID_OBJECT_ID,
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: [schemaB, schemaOnlyB, otherColAinB],
       name: 'DS A',
       workspaceId: 'CDE'
     };
     const newDs: Dataset = {
       id: 'newid',
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: [schemaB, schemaOnlyB],
       name: 'New DS',
       workspaceId: 'CDE'
@@ -346,24 +332,18 @@ describe('JoinDatasetsNode', () => {
 
     const dsA: Dataset = {
       id: VALID_OBJECT_ID,
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: [schemaA],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
     const dsB: Dataset = {
       id: VALID_OBJECT_ID,
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: [schemaB, schemaOnlyB],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
     const newDs: Dataset = {
       id: 'newid',
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: [schemaB, schemaOnlyB],
       name: 'New DS',
       workspaceId: 'CDE'
@@ -456,24 +436,18 @@ describe('JoinDatasetsNode', () => {
 
     const dsA: Dataset = {
       id: VALID_OBJECT_ID,
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: [schemaA, schemaOnlyA],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
     const dsB: Dataset = {
       id: VALID_OBJECT_ID,
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: [schemaB, schemaOnlyB],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
     const newDs: Dataset = {
       id: 'newid',
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: [schemaB, schemaOnlyB],
       name: 'New DS',
       workspaceId: 'CDE'

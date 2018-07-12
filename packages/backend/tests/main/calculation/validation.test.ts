@@ -330,8 +330,6 @@ describe('Validation', () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
       name: 'ds',
-      entriesCount: 0,
-      latestEntries: [],
       workspaceId: VALID_OBJECT_ID,
       valueschemas: []
     };
@@ -395,8 +393,6 @@ describe('Validation', () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
       name: 'ds',
-      entriesCount: 0,
-      latestEntries: [],
       workspaceId: VALID_OBJECT_ID,
       valueschemas: []
     };

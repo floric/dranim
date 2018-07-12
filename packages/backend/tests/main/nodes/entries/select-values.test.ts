@@ -46,8 +46,6 @@ describe('SelectValuesNode', () => {
   test('should select values from dataset and create new', async () => {
     const oldDs: Dataset = {
       id: VALID_OBJECT_ID,
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: ['name', 'test', 'abc'].map(n => ({
         type: DataType.STRING,
         name: n,
@@ -60,8 +58,6 @@ describe('SelectValuesNode', () => {
     };
     const newDs: Dataset = {
       id: 'ABC',
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: [],
       name: 'New DS',
       workspaceId: 'CDE'
@@ -85,16 +81,12 @@ describe('SelectValuesNode', () => {
   test('should throw error for unknown specified value names', async () => {
     const oldDs: Dataset = {
       id: VALID_OBJECT_ID,
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: [],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
     const newDs: Dataset = {
       id: 'ABC',
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: [],
       name: 'New DS',
       workspaceId: 'CDE'
@@ -122,8 +114,6 @@ describe('SelectValuesNode', () => {
   test('should copy all entries but only with selected values', async () => {
     const oldDs: Dataset = {
       id: VALID_OBJECT_ID,
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: ['name', 'test', 'abc'].map(n => ({
         type: DataType.STRING,
         name: n,
@@ -136,8 +126,6 @@ describe('SelectValuesNode', () => {
     };
     const newDs: Dataset = {
       id: 'ABC',
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: [],
       name: 'New DS',
       workspaceId: 'CDE'

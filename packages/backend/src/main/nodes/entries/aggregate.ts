@@ -6,6 +6,7 @@ import {
   AggregationEntriesType,
   allAreDefinedAndPresent,
   ApolloContext,
+  DataType,
   ServerNodeDef
 } from '@masterthesis/shared';
 
@@ -27,6 +28,14 @@ export const AggregateEntriesNode: ServerNodeDef<
   },
   onNodeExecution: async (form, inputs, { reqContext }) => {
     const ds = await tryGetDataset(inputs.dataset.datasetId, reqContext);
+    const matchingSchema = ds.valueschemas.find(n => n.name === form.valueName);
+    if (!matchingSchema) {
+      throw new Error('Schema not found');
+    }
+
+    if (matchingSchema.type !== DataType.NUMBER) {
+      throw new Error('Datatype not supported');
+    }
 
     let value = 0;
     if (form.type === AggregationEntriesType.AVG) {
@@ -37,6 +46,8 @@ export const AggregateEntriesNode: ServerNodeDef<
       value = await getValue('max', ds.id, form.valueName!, reqContext);
     } else if (form.type === AggregationEntriesType.SUM) {
       value = await getValue('sum', ds.id, form.valueName!, reqContext);
+    } else if (form.type === AggregationEntriesType.MED) {
+      throw new Error('Median not supported yet');
     }
 
     return {
@@ -55,16 +66,11 @@ const getValue = async (
 ): Promise<number> => {
   const entryColl = getEntryCollection(dsId, reqContext.db);
 
-  console.log(type);
-  console.log(valueName);
-
   const value = await entryColl
     .aggregate([
       { $group: { _id: null, value: { [`$${type}`]: `$values.${valueName}` } } }
     ])
     .next();
 
-  console.log(value);
-
-  return 0;
+  return (value as any).value;
 };
