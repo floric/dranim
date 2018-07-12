@@ -254,16 +254,12 @@ describe('AddValuesNode', () => {
     };
     const oldDs: Dataset = {
       id: VALID_OBJECT_ID,
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: [oldVS],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
     const newDs: Dataset = {
       id: 'ABC',
-      entriesCount: 0,
-      latestEntries: [],
       valueschemas: [],
       name: 'New DS',
       workspaceId: 'CDE'

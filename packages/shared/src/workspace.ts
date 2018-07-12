@@ -21,15 +21,11 @@ export interface ValueSchema {
 export interface Dataset {
   id: string;
   name: string;
-  entriesCount: number;
   valueschemas: Array<ValueSchema>;
-  latestEntries: Array<Entry>;
   workspaceId: string | null;
 }
 
-export interface GQLDataset {
-  id: string;
-  name: string;
+export interface GQLDataset extends Dataset {
   entriesCount: number;
   valueschemas: Array<ValueSchema>;
   latestEntries: Array<Entry>;

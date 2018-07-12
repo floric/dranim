@@ -3,7 +3,15 @@ import { NodeDef } from '../nodes';
 import * as BooleanNodes from './boolean';
 import * as DatasetNodes from './dataset';
 import * as DatetimeNodes from './datetime';
-import * as EntryNodes from './entries';
+import {
+  AddValuesNodeDef,
+  AggregateEntriesNodeDef,
+  CountEntriesNodeDef,
+  DistinctEntriesNodeDef,
+  EditEntriesNodeDef,
+  FilterEntriesNodeDef,
+  SelectValuesNodeDef
+} from './entries';
 import * as NumberNodes from './number';
 import * as StringNodes from './string';
 import * as TimeNodes from './time';
@@ -20,7 +28,15 @@ export * from './visualizations';
 
 export const NodesMap = new Map<string, NodeDef>(
   [
-    EntryNodes,
+    {
+      DistinctEntriesNodeDef,
+      AddValuesNodeDef,
+      AggregateEntriesNodeDef,
+      CountEntriesNodeDef,
+      EditEntriesNodeDef,
+      FilterEntriesNodeDef,
+      SelectValuesNodeDef
+    },
     StringNodes,
     NumberNodes,
     DatasetNodes,

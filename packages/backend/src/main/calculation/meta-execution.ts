@@ -5,7 +5,8 @@ import {
   NodeInstance,
   parseNodeForm,
   SocketMetaDef,
-  SocketMetas
+  SocketMetas,
+  SocketState
 } from '@masterthesis/shared';
 
 import { tryGetNodeType } from '../nodes/all-nodes';
@@ -89,6 +90,11 @@ const getDynamicContextInputMetas = async (
       isPresent: true
     };
   });
+  Object.entries(parentInputDefs)
+    .filter(n => n[1].state === SocketState.VARIABLE)
+    .forEach(c => {
+      res[c[0]] = parentMetaInputs[c[0]];
+    });
 
   return res;
 };
