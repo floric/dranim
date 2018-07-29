@@ -68,21 +68,5 @@ export const AppMenu: SFC<{
           </Menu.Item>
         ))}
     </Menu.SubMenu>
-    <Menu.SubMenu
-      key="sub4"
-      title={
-        <span>
-          <Icon type="user" />
-          {!collapsed ? ' User' : null}
-        </span>
-      }
-    >
-      <Menu.Item key="menu_user">
-        <MenuItemContent collapsed={collapsed} href="/user" title="User" />
-      </Menu.Item>
-      <Menu.Item key="menu_user_logout">
-        <MenuItemContent collapsed={collapsed} href="/logout" title="Logout" />
-      </Menu.Item>
-    </Menu.SubMenu>
   </Menu>
 );

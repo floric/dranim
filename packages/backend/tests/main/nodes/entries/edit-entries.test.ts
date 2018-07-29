@@ -8,7 +8,7 @@ import {
   SocketState
 } from '@masterthesis/shared';
 
-import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
+import { createUniqueDatasetName } from '../../../../src/main/calculation/utils';
 import { EditEntriesNode } from '../../../../src/main/nodes/entries/edit-entries';
 import {
   getDynamicEntryContextInputs,
@@ -45,17 +45,21 @@ describe('EditEntriesNode', () => {
   test('should create new DS and do changes on this one', async () => {
     const oldDs: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: [],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
     const newDs: Dataset = {
       id: 'ABC',
+      created: '',
+      description: '',
       valueschemas: [],
       name: 'New DS',
       workspaceId: 'CDE'
     };
-    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
+    (createUniqueDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
     (processEntries as jest.Mock).mockImplementation(n => Promise.resolve());
     (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
@@ -245,12 +249,16 @@ describe('EditEntriesNode', () => {
   test('should edit entries', async () => {
     const oldDs: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: [],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
     const newDs: Dataset = {
       id: 'ABC',
+      created: '',
+      description: '',
       valueschemas: [],
       name: 'New DS',
       workspaceId: 'CDE'
@@ -259,7 +267,7 @@ describe('EditEntriesNode', () => {
       id: 'eA',
       values: {}
     };
-    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
+    (createUniqueDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
     (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
     (processEntries as jest.Mock).mockImplementation(async (a, b, processFn) =>

@@ -1,11 +1,12 @@
 import * as React from 'react';
 
 import { SocketInstance } from '@masterthesis/shared';
+import { ApolloQueryResult } from 'apollo-client';
+import { distanceInWordsToNow } from 'date-fns';
 import gql from 'graphql-tag';
 import { Mutation, MutationFn, Query } from 'react-apollo';
 import { RouteComponentProps } from 'react-router';
 
-import { ApolloQueryResult } from 'apollo-client';
 import {
   CustomErrorCard,
   LoadingCard,
@@ -13,6 +14,8 @@ import {
 } from '../../components/CustomCards';
 import { ExplorerEditor } from '../../explorer/ExplorerEditor';
 import { deepCopyResponse, tryOperation } from '../../utils/form';
+
+const POLLING_FREQUENCY = 5000;
 
 const WORKSPACE_NODE_SELECTION = gql`
   query dataset($workspaceId: String!) {
@@ -25,6 +28,13 @@ const WORKSPACE_NODE_SELECTION = gql`
         unique
         type
       }
+    }
+    calculations(workspaceId: $workspaceId) {
+      id
+      start
+      state
+      processedOutputs
+      totalOutputs
     }
     workspace(id: $workspaceId) {
       id
@@ -281,7 +291,7 @@ export class WorkspaceEditorPage extends React.Component<
     } = this.props;
     return (
       <Query query={WORKSPACE_NODE_SELECTION} variables={{ workspaceId }}>
-        {({ loading, error, data, refetch }) => {
+        {({ loading, error, data, refetch, startPolling, stopPolling }) => {
           if (loading) {
             return <LoadingCard />;
           }
@@ -297,6 +307,34 @@ export class WorkspaceEditorPage extends React.Component<
                 description="Workspace doesn't exist."
               />
             );
+          }
+
+          const inprocessCalculations = data.calculations.filter(
+            n => n.state === 'PROCESSING'
+          );
+
+          if (inprocessCalculations.length > 0) {
+            startPolling(POLLING_FREQUENCY);
+
+            return (
+              <LoadingCard
+                text={`Calculation in progress... Processed ${
+                  inprocessCalculations[0].processedOutputs
+                } of ${
+                  inprocessCalculations[0].totalOutputs
+                } (Started ${distanceInWordsToNow(
+                  inprocessCalculations[0].start,
+                  {
+                    includeSeconds: true,
+                    addSuffix: true
+                  }
+                )})`}
+              />
+            );
+          }
+
+          if (inprocessCalculations.length === 0) {
+            stopPolling();
           }
 
           return (

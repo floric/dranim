@@ -5,7 +5,7 @@ import {
   SelectValuesNodeDef
 } from '@masterthesis/shared';
 
-import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
+import { createUniqueDatasetName } from '../../../../src/main/calculation/utils';
 import { SelectValuesNode } from '../../../../src/main/nodes/entries/select-values';
 import { processEntries } from '../../../../src/main/nodes/entries/utils';
 import {
@@ -46,6 +46,8 @@ describe('SelectValuesNode', () => {
   test('should select values from dataset and create new', async () => {
     const oldDs: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: ['name', 'test', 'abc'].map(n => ({
         type: DataType.STRING,
         name: n,
@@ -58,11 +60,13 @@ describe('SelectValuesNode', () => {
     };
     const newDs: Dataset = {
       id: 'ABC',
+      created: '',
+      description: '',
       valueschemas: [],
       name: 'New DS',
       workspaceId: 'CDE'
     };
-    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
+    (createUniqueDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
     (processEntries as jest.Mock).mockImplementation(() => Promise.resolve());
     (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
@@ -81,17 +85,21 @@ describe('SelectValuesNode', () => {
   test('should throw error for unknown specified value names', async () => {
     const oldDs: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: [],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
     const newDs: Dataset = {
       id: 'ABC',
+      created: '',
+      description: '',
       valueschemas: [],
       name: 'New DS',
       workspaceId: 'CDE'
     };
-    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
+    (createUniqueDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
     (processEntries as jest.Mock).mockImplementation(n => Promise.resolve());
     (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
@@ -114,6 +122,8 @@ describe('SelectValuesNode', () => {
   test('should copy all entries but only with selected values', async () => {
     const oldDs: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: ['name', 'test', 'abc'].map(n => ({
         type: DataType.STRING,
         name: n,
@@ -126,6 +136,8 @@ describe('SelectValuesNode', () => {
     };
     const newDs: Dataset = {
       id: 'ABC',
+      created: '',
+      description: '',
       valueschemas: [],
       name: 'New DS',
       workspaceId: 'CDE'
@@ -134,7 +146,7 @@ describe('SelectValuesNode', () => {
       id: 'eA',
       values: { name: 'foo', test: 'bar', abc: '123' }
     };
-    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
+    (createUniqueDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
     (processEntries as jest.Mock).mockImplementation(async (a, b, processFn) =>
       processFn(entryA)
     );

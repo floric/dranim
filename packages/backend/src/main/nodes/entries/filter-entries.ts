@@ -10,7 +10,7 @@ import {
   ValueSchema
 } from '@masterthesis/shared';
 
-import { createDynamicDatasetName } from '../../calculation/utils';
+import { createUniqueDatasetName } from '../../calculation/utils';
 import {
   addValueSchema,
   createDataset,
@@ -48,7 +48,7 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
     { reqContext, contextFnExecution, node: { workspaceId, id } }
   ) => {
     const newDs = await createDataset(
-      createDynamicDatasetName(FilterEntriesNodeDef.type, id),
+      createUniqueDatasetName(FilterEntriesNodeDef.type, id),
       reqContext,
       workspaceId
     );

@@ -1,10 +1,12 @@
 import {
+  ApolloContext,
   CalculationProcess,
   Dataset,
   UploadProcess,
   User,
   Workspace
 } from '@masterthesis/shared';
+import { IResolverObject } from 'graphql-tools';
 
 import { getAllCalculations } from '../../main/calculation/start-process';
 import { tryGetUser } from '../../main/users/management';
@@ -12,7 +14,7 @@ import { getAllDatasets, getDataset } from '../../main/workspace/dataset';
 import { getAllUploads } from '../../main/workspace/upload';
 import { getAllWorkspaces, getWorkspace } from '../../main/workspace/workspace';
 
-export const Query = {
+export const Query: IResolverObject<any, ApolloContext> = {
   datasets: (_, __, context): Promise<Array<Dataset>> =>
     getAllDatasets(context),
   dataset: (_, { id }, context): Promise<Dataset | null> =>

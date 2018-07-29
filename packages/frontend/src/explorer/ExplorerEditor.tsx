@@ -196,13 +196,11 @@ export class ExplorerEditor extends React.Component<
                 <Col xs={24} md={16} xl={20}>
                   {node &&
                     renderFormItems && (
-                      <>
-                        <PropertiesForm
-                          renderFormItems={renderFormItems}
-                          handleSubmit={this.handleSave}
-                          context={{ state: this.props, node }}
-                        />
-                      </>
+                      <PropertiesForm
+                        renderFormItems={renderFormItems}
+                        handleSubmit={this.handleSave}
+                        context={{ state: this.props, node }}
+                      />
                     )}
                 </Col>
                 <Col xs={24} md={8} xl={4}>

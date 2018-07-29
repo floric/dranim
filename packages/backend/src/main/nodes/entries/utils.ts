@@ -52,14 +52,15 @@ export const processEntries = async (
   processFn: (entry: Entry) => Promise<void>,
   reqContext: ApolloContext
 ): Promise<void> => {
+  const entriesCount = await getEntriesCount(dsId, reqContext);
+
   const coll = getEntryCollection(dsId, reqContext.db);
   const cursor = coll.find();
-  const entriesCount = await getEntriesCount(dsId, reqContext);
   let i = 0;
 
   while (await cursor.hasNext()) {
     const doc = await cursor.next();
-    await processFn(doc);
+    await processFn(doc!);
 
     if (i % 100 === 0) {
       await setProgress(nodeId, i / entriesCount, reqContext);

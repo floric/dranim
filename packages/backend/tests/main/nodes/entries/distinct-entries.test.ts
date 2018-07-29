@@ -6,8 +6,9 @@ import {
   SocketState
 } from '@masterthesis/shared';
 
-import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
+import { createUniqueDatasetName } from '../../../../src/main/calculation/utils';
 import { DistinctEntriesNode } from '../../../../src/main/nodes/entries/distinct-entries';
+import { processEntries } from '../../../../src/main/nodes/entries/utils';
 import {
   createDataset,
   tryGetDataset
@@ -22,6 +23,7 @@ jest.mock('@masterthesis/shared');
 jest.mock('../../../../src/main/workspace/dataset');
 jest.mock('../../../../src/main/calculation/utils');
 jest.mock('../../../../src/main/workspace/entry');
+jest.mock('../../../../src/main/nodes/entries/utils');
 
 describe('DistinctEntriesNode', () => {
   beforeEach(() => {
@@ -195,10 +197,15 @@ describe('DistinctEntriesNode', () => {
       { db: null, userId: '' }
     );
     expect(res).toEqual({
+      filteredDataset: {
+        dataType: 'Dataset',
+        displayName: 'Filtered Dataset',
+        state: 'Dynamic'
+      },
       'test-distinct': {
         dataType: 'String',
         displayName: 'test-distinct',
-        state: SocketState.DYNAMIC
+        state: 'Dynamic'
       }
     });
   });
@@ -347,17 +354,21 @@ describe('DistinctEntriesNode', () => {
   test('should call context function for distinct values', async () => {
     const oldDs: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: [],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
     const newDs: Dataset = {
       id: 'ABC',
+      created: '',
+      description: '',
       valueschemas: [],
       name: 'New DS',
       workspaceId: 'CDE'
     };
-    (createDynamicDatasetName as jest.Mock).mockReturnValue('123');
+    (createUniqueDatasetName as jest.Mock).mockReturnValue('123');
     (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
     (createEntry as jest.Mock).mockImplementation(jest.fn);
@@ -378,6 +389,7 @@ describe('DistinctEntriesNode', () => {
         };
       })
     });
+    (processEntries as jest.Mock).mockResolvedValue(true);
 
     const contextFnExecution = jest.fn(() => ({
       outputs: { test: 'abc', 'other-test': 2 }
@@ -414,6 +426,7 @@ describe('DistinctEntriesNode', () => {
       1
     );
     expect(contextFnExecution).toHaveBeenCalledWith({
+      filteredDataset: { datasetId: 'ABC' },
       'test-distinct': 'distinct-value'
     });
     expect(createEntry as jest.Mock).toHaveBeenCalledTimes(20);

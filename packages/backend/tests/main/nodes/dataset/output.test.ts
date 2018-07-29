@@ -33,7 +33,7 @@ describe('DatasetOutputNode', () => {
   test('should have correct properties', () => {
     expect(DatasetOutputNode.type).toBe(DatasetOutputNodeDef.type);
     expect(DatasetOutputNode.isInputValid).toBeUndefined();
-    expect(DatasetOutputNode.isFormValid).toBeUndefined();
+    expect(DatasetOutputNode.isFormValid).toBeDefined();
     expect(DatasetOutputNodeDef.isOutputNode).toBe(true);
   });
 
@@ -41,7 +41,7 @@ describe('DatasetOutputNode', () => {
     const ds = await createDataset('test', { db, userId: '' });
 
     const res = await DatasetOutputNode.onNodeExecution(
-      {},
+      { name: '', description: '' },
       { dataset: { datasetId: ds.id } },
       {
         reqContext: { db, userId: '' },
@@ -53,36 +53,7 @@ describe('DatasetOutputNode', () => {
     expect(res.results.value.datasetId).toBe(ds.id);
   });
 
-  test('should return absent meta for missing dataset', async () => {
-    let res = await DatasetOutputNode.onMetaExecution(
-      {},
-      { dataset: null },
-      { db, userId: '' }
-    );
-    expect(res).toEqual({
-      dataset: { content: { schema: [] }, isPresent: false }
-    });
-
-    res = await DatasetOutputNode.onMetaExecution(
-      {},
-      { dataset: undefined },
-      { db, userId: '' }
-    );
-    expect(res).toEqual({
-      dataset: { content: { schema: [] }, isPresent: false }
-    });
-
-    res = await DatasetOutputNode.onMetaExecution(
-      {},
-      { dataset: { content: { schema: [] }, isPresent: false } },
-      { db, userId: '' }
-    );
-    expect(res).toEqual({
-      dataset: { content: { schema: [] }, isPresent: false }
-    });
-  });
-
-  test('should return valid meta for dataset', async () => {
+  test('should return empty meta for dataset', async () => {
     const inputDef = {
       dataset: {
         isPresent: true,
@@ -100,10 +71,14 @@ describe('DatasetOutputNode', () => {
       }
     };
 
-    const res = await DatasetOutputNode.onMetaExecution({}, inputDef, {
-      db,
-      userId: ''
-    });
-    expect(res).toEqual(inputDef);
+    const res = await DatasetOutputNode.onMetaExecution(
+      { description: '', name: '' },
+      inputDef,
+      {
+        db,
+        userId: ''
+      }
+    );
+    expect(res).toEqual({});
   });
 });

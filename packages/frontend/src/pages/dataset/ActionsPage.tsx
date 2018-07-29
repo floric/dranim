@@ -98,9 +98,9 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
         refetch: client.reFetchObservableQueries,
         onFail: () => this.setState({ uploading: false }),
         failedTitle: 'Upload failed',
-        successTitle: () => 'Upload successfull',
+        successTitle: () => 'Upload successful',
         failedMessage: 'Upload has failed.',
-        successMessage: res => 'Upload succesfull. Processing is in progress.'
+        successMessage: res => 'Upload succesful. Processing is in progress.'
       });
     };
 

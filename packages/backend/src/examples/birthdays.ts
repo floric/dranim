@@ -1,11 +1,12 @@
-import { ApolloContext, DataType, Values } from '@masterthesis/shared';
+import {
+  ApolloContext,
+  DataType,
+  Values,
+  ValueSchema
+} from '@masterthesis/shared';
 import * as casual from 'casual';
 
-import {
-  addValueSchema,
-  createDataset,
-  Valueschema
-} from '../main/workspace/dataset';
+import { addValueSchema, createDataset } from '../main/workspace/dataset';
 import { createEntry } from '../main/workspace/entry';
 import { createWorkspace } from '../main/workspace/workspace';
 
@@ -36,7 +37,7 @@ const birthdaysEntries: Array<Values> = Array(ENTRIES_COUNT)
     birthday: casual.date('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
   }));
 
-const birthdaysSchema: Array<Valueschema> = [
+const birthdaysSchema: Array<ValueSchema> = [
   {
     name: 'id',
     type: DataType.STRING,

@@ -60,6 +60,15 @@ export default class WorkspacesPage extends React.Component<
               <PageHeaderCard
                 title={data.workspace.name}
                 typeTitle="Workspace"
+                helpContent={
+                  <>
+                    <p>
+                      Each Workspace contains an <strong>Explorer</strong> for
+                      data manipulation and creating outputs from the given
+                      data. Outputs are shown in the Results tab.
+                    </p>
+                  </>
+                }
               />
               <Tabs
                 onChange={name => {

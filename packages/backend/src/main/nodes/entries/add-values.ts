@@ -11,7 +11,7 @@ import {
   ValueSchema
 } from '@masterthesis/shared';
 
-import { createDynamicDatasetName } from '../../calculation/utils';
+import { createUniqueDatasetName } from '../../calculation/utils';
 import {
   addValueSchema,
   createDataset,
@@ -81,7 +81,7 @@ export const AddValuesNode: ServerNodeDefWithContextFn<
   ) => {
     const oldDs = await tryGetDataset(inputs.dataset.datasetId, reqContext);
     const newDs = await createDataset(
-      createDynamicDatasetName(AddValuesNodeDef.type, id),
+      createUniqueDatasetName(AddValuesNodeDef.type, id),
       reqContext,
       workspaceId
     );

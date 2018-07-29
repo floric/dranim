@@ -1,4 +1,5 @@
 import {
+  ApolloContext,
   CalculationProcess,
   ConnectionInstance,
   Dataset,
@@ -7,6 +8,7 @@ import {
   UploadProcess,
   Workspace
 } from '@masterthesis/shared';
+import { IResolverObject } from 'graphql-tools';
 
 import { createBirthdaysDemoData } from '../../examples/birthdays';
 import { createSTRDemoData } from '../../examples/str';
@@ -34,7 +36,7 @@ import {
   updateWorkspace
 } from '../../main/workspace/workspace';
 
-export const Mutation = {
+export const Mutation: IResolverObject<any, ApolloContext> = {
   createDataset: (_, { name }, context): Promise<Dataset> =>
     createDataset(name, context),
   addValueSchema: (

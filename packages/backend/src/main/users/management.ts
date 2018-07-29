@@ -89,7 +89,7 @@ export const register = async (
 
     const user = res.ops[0];
 
-    Log.info(`Successfull registration`);
+    Log.info(`Successful registration`);
 
     return {
       id: user._id.toHexString(),

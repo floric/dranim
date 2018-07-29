@@ -1,5 +1,4 @@
 import {
-  DatasetOutputNodeDef,
   FormValues,
   GQLNodeInstance,
   NodeDef,
@@ -87,7 +86,7 @@ const buildTree = (
   );
 
   return distinctPaths.map(e => ({
-    label: e[e.length - 1],
+    title: e[e.length - 1],
     value: e.join('-'),
     key: e.join('-'),
     selectable: false,
@@ -95,7 +94,7 @@ const buildTree = (
       ...elems
         .filter(elem => JSON.stringify(elem.path) === JSON.stringify(e))
         .map(elem => ({
-          label: elem.name,
+          title: elem.name,
           value: elem.type,
           key: elem.type,
           index: `${elem.name}, ${elem.path.join(' ')}, ${elem.keywords.join(
@@ -124,19 +123,17 @@ export const nodeTypes: Map<string, ClientNodeDef & NodeDef> = new Map(
       {
         ...(clientNodeMap.get(n[0])
           ? {
-              renderFormItems:
-                n[1].isOutputNode && n[0] !== DatasetOutputNodeDef.type
-                  ? (createRenderOutputFormItems(
-                      clientNodeMap.get(n[0]).renderFormItems
-                    ) as any)
-                  : clientNodeMap.get(n[0]).renderFormItems
+              renderFormItems: n[1].isOutputNode
+                ? (createRenderOutputFormItems(
+                    clientNodeMap.get(n[0]).renderFormItems
+                  ) as any)
+                : clientNodeMap.get(n[0]).renderFormItems
             }
           : {
               type: n[0],
-              renderFormItems:
-                n[1].isOutputNode && n[0] !== DatasetOutputNodeDef.type
-                  ? (createRenderOutputFormItems() as any)
-                  : undefined
+              renderFormItems: n[1].isOutputNode
+                ? (createRenderOutputFormItems() as any)
+                : undefined
             }),
         ...n[1]
       }

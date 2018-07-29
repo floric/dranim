@@ -1,5 +1,6 @@
 import {
   allAreDefinedAndPresent,
+  DataType,
   DistinctEntriesNodeDef,
   DistinctEntriesNodeForm,
   ForEachEntryNodeInputs,
@@ -10,13 +11,14 @@ import {
   ValueSchema
 } from '@masterthesis/shared';
 
-import { createDynamicDatasetName } from '../../calculation/utils';
+import { createUniqueDatasetName } from '../../calculation/utils';
 import {
   addValueSchema,
   createDataset,
   tryGetDataset
 } from '../../workspace/dataset';
 import { createEntry, getEntryCollection } from '../../workspace/entry';
+import { copySchemas, processEntries } from './utils';
 
 const getDistinctValueName = (vs: ValueSchema) => `${vs.name}-distinct`;
 
@@ -44,6 +46,11 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
         dataType: form.schema.type,
         displayName: getDistinctValueName(form.schema),
         state: SocketState.DYNAMIC
+      },
+      filteredDataset: {
+        dataType: DataType.DATASET,
+        displayName: 'Filtered Dataset',
+        state: SocketState.DYNAMIC
       }
     };
   },
@@ -64,7 +71,8 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
         };
       });
     }
-    return { ...contextInputDefs, ...contextOutputDefs };
+    const { filteredDataset, ...other } = contextInputDefs;
+    return { ...other, ...contextOutputDefs };
   },
   onMetaExecution: async (form, inputs) => {
     if (!allAreDefinedAndPresent(inputs) || !form.schema || !form.newSchemas) {
@@ -88,9 +96,12 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
     inputs,
     { reqContext, contextFnExecution, node: { workspaceId, id } }
   ) => {
-    await tryGetDataset(inputs.dataset.datasetId, reqContext);
+    const existingDs = await tryGetDataset(
+      inputs.dataset.datasetId,
+      reqContext
+    );
     const newDs = await createDataset(
-      createDynamicDatasetName(DistinctEntriesNodeDef.type, id),
+      createUniqueDatasetName(DistinctEntriesNodeDef.type, id),
       reqContext,
       workspaceId
     );
@@ -112,9 +123,29 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
 
     while (await (cursor as any).hasNext()) {
       const doc = await cursor.next();
-      const distinctValue = doc._id;
+      const distinctValue = doc!._id;
+      const filteredDs = await createDataset(
+        'test' + Math.random() * 1000,
+        reqContext,
+        workspaceId
+      );
+      await copySchemas(existingDs.valueschemas, filteredDs.id, reqContext);
+      await processEntries(
+        existingDs.id,
+        id,
+        async e => {
+          if (e.values[form.schema!.name] === distinctValue) {
+            await createEntry(filteredDs.id, e.values, reqContext);
+          }
+        },
+        reqContext
+      );
+
       const values = {
-        [getDistinctValueName(form.schema!)]: distinctValue
+        [getDistinctValueName(form.schema!)]: distinctValue,
+        filteredDataset: {
+          datasetId: filteredDs.id
+        }
       };
       const { outputs } = await contextFnExecution!(values);
       await createEntry(newDs.id, outputs, reqContext);

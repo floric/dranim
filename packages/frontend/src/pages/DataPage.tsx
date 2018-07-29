@@ -18,6 +18,8 @@ const ALL_DATASETS = gql`
       id
       name
       entriesCount
+      description
+      created
       valueschemas {
         name
       }
@@ -77,6 +79,7 @@ export default class DataPage extends React.Component<{}, {}> {
                     <Mutation mutation={DELETE_DATASET}>
                       {deleteDataset => (
                         <CardItem
+                          description={ds.description}
                           id={ds.id}
                           name={ds.name}
                           path="/data"

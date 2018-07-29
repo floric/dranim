@@ -21,6 +21,8 @@ describe('CountEntriesNode', () => {
   test('should count entries', async () => {
     const ds: Dataset = {
       id: '1',
+      created: '',
+      description: '',
       name: 'name',
       workspaceId: '1',
       valueschemas: []

@@ -9,7 +9,7 @@ import {
   ValueSchema
 } from '@masterthesis/shared';
 
-import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
+import { createUniqueDatasetName } from '../../../../src/main/calculation/utils';
 import { AddValuesNode } from '../../../../src/main/nodes/entries/add-values';
 import { processEntries } from '../../../../src/main/nodes/entries/utils';
 import {
@@ -254,12 +254,16 @@ describe('AddValuesNode', () => {
     };
     const oldDs: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: [oldVS],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
     const newDs: Dataset = {
       id: 'ABC',
+      created: '',
+      description: '',
       valueschemas: [],
       name: 'New DS',
       workspaceId: 'CDE'
@@ -268,7 +272,7 @@ describe('AddValuesNode', () => {
       id: 'eA',
       values: { [oldVS.name]: 'foo' }
     };
-    (createDynamicDatasetName as jest.Mock).mockReturnValue('AddEntries');
+    (createUniqueDatasetName as jest.Mock).mockReturnValue('AddEntries');
     (processEntries as jest.Mock).mockImplementation(async (a, b, processFn) =>
       processFn(entryA)
     );

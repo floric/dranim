@@ -1,4 +1,5 @@
 import {
+  ApolloContext,
   hasContextFn,
   NodeInstance,
   SocketDefs,
@@ -6,6 +7,7 @@ import {
   SocketMetas,
   Workspace
 } from '@masterthesis/shared';
+import { IResolverObject } from 'graphql-tools';
 
 import {
   getMetaInputs,
@@ -15,7 +17,7 @@ import { getNodeType, hasNodeType } from '../../main/nodes/all-nodes';
 import { getInputDefs, getOutputDefs } from '../../main/workspace/nodes-detail';
 import { getWorkspace } from '../../main/workspace/workspace';
 
-export const Node = {
+export const Node: IResolverObject<any, ApolloContext> = {
   workspace: ({ workspaceId }, __, context): Promise<Workspace | null> =>
     getWorkspace(workspaceId, context),
   metaOutputs: (
