@@ -23,7 +23,6 @@ const startProcess = async (
   const processCollection = getCalculationsCollection(reqContext.db);
 
   try {
-    await clearGeneratedDatasets(workspaceId, reqContext);
     const nodes = await getAllNodes(workspaceId, reqContext);
     const outputNodesInstances = nodes.filter(
       n =>
@@ -63,6 +62,8 @@ const startProcess = async (
     console.error(err);
     Log.info('Finished calculation with errors', err);
   }
+
+  await clearGeneratedDatasets(workspaceId, reqContext);
 };
 
 const saveResults = async (

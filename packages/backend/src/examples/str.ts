@@ -1,10 +1,6 @@
-import { ApolloContext, DataType } from '@masterthesis/shared';
+import { ApolloContext, DataType, ValueSchema } from '@masterthesis/shared';
 
-import {
-  addValueSchema,
-  createDataset,
-  Valueschema
-} from '../main/workspace/dataset';
+import { addValueSchema, createDataset } from '../main/workspace/dataset';
 import { createWorkspace } from '../main/workspace/workspace';
 
 export const createSTRDemoData = async (reqContext: ApolloContext) => {
@@ -47,7 +43,7 @@ const createStringValueSchema = (
   unique
 });
 
-const passagesSchemas: Array<Valueschema> = [
+const passagesSchemas: Array<ValueSchema> = [
   createStringValueSchema('passage_id', true, true),
   createNumberValueSchema('pass_day', true),
   createNumberValueSchema('pass_month', true),
@@ -90,7 +86,7 @@ const passagesSchemas: Array<Valueschema> = [
   createNumberValueSchema('tonnes', true)
 ];
 
-const commoditiesSchemas: Array<Valueschema> = [
+const commoditiesSchemas: Array<ValueSchema> = [
   createStringValueSchema('commodity_id', true, true),
   createStringValueSchema('passage_id', true),
   createNumberValueSchema('pass_day', true),

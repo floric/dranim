@@ -15,7 +15,7 @@ import {
   createDataset,
   tryGetDataset
 } from '../../../main/workspace/dataset';
-import { createDynamicDatasetName } from '../../calculation/utils';
+import { createUniqueDatasetName } from '../../calculation/utils';
 import { createEntry } from '../../workspace/entry';
 import { processEntries } from './utils';
 
@@ -63,7 +63,7 @@ export const SelectValuesNode: ServerNodeDef<
 
     const usedValues = new Set(form.values!);
     const newDs = await createDataset(
-      createDynamicDatasetName(SelectValuesNodeDef.type, id),
+      createUniqueDatasetName(SelectValuesNodeDef.type, id),
       reqContext,
       workspaceId
     );

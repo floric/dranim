@@ -9,7 +9,7 @@ import {
   ValueSchema
 } from '@masterthesis/shared';
 
-import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
+import { createUniqueDatasetName } from '../../../../src/main/calculation/utils';
 import { FilterEntriesNode } from '../../../../src/main/nodes/entries/filter-entries';
 import {
   getDynamicEntryContextInputs,
@@ -48,17 +48,21 @@ describe('FilterEntriesNode', () => {
   test('should create new DS and do changes on this one', async () => {
     const oldDs: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: [],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
     const newDs: Dataset = {
       id: 'ABC',
+      created: '',
+      description: '',
       valueschemas: [],
       name: 'New DS',
       workspaceId: 'CDE'
     };
-    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
+    (createUniqueDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
     (processEntries as jest.Mock).mockImplementation(() => Promise.resolve());
     (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
@@ -184,12 +188,16 @@ describe('FilterEntriesNode', () => {
     };
     const oldDs: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: [vs],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
     const newDs: Dataset = {
       id: 'ABC',
+      created: '',
+      description: '',
       valueschemas: [],
       name: 'New DS',
       workspaceId: 'CDE'
@@ -206,7 +214,7 @@ describe('FilterEntriesNode', () => {
       id: 'eC',
       values: { [vs.name]: 2 }
     };
-    (createDynamicDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
+    (createUniqueDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
     (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
     (processEntries as jest.Mock).mockImplementation(

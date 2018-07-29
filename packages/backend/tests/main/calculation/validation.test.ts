@@ -329,6 +329,8 @@ describe('Validation', () => {
   test('should have valid dataset input', async () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       name: 'ds',
       workspaceId: VALID_OBJECT_ID,
       valueschemas: []
@@ -392,6 +394,8 @@ describe('Validation', () => {
   test('should have valid and invalid input', async () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       name: 'ds',
       workspaceId: VALID_OBJECT_ID,
       valueschemas: []

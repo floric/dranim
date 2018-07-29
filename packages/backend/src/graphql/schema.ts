@@ -1,7 +1,7 @@
 import { ApolloContext, SocketDefs, SocketMetas } from '@masterthesis/shared';
 import { GraphQLUpload } from 'apollo-upload-server';
 import { GraphQLScalarType } from 'graphql';
-import { makeExecutableSchema } from 'graphql-tools';
+import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 
 import { Dataset } from './resolvers/dataset';
 import { Entry } from './resolvers/entry';
@@ -28,7 +28,7 @@ export const SchemaDefinition = `
   }
 `;
 
-const resolvers: any = {
+const resolvers: IResolvers<any, ApolloContext> = {
   Query,
   Entry,
   Dataset,
@@ -87,4 +87,4 @@ const typeDefs = [
 export default makeExecutableSchema<ApolloContext>({
   typeDefs,
   resolvers
-}) as any;
+});

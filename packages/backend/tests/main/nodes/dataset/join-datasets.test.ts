@@ -8,7 +8,7 @@ import {
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
-import { createDynamicDatasetName } from '../../../../src/main/calculation/utils';
+import { createUniqueDatasetName } from '../../../../src/main/calculation/utils';
 import { JoinDatasetsNode } from '../../../../src/main/nodes/dataset/join-datasets';
 import { processEntries } from '../../../../src/main/nodes/entries/utils';
 import {
@@ -87,6 +87,8 @@ describe('JoinDatasetsNode', () => {
   test('should stop for not found schemas', async () => {
     const dsA: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: ['name', 'test', 'abc'].map(n => ({
         type: DataType.STRING,
         name: n,
@@ -99,6 +101,8 @@ describe('JoinDatasetsNode', () => {
     };
     const dsB: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: ['name', 'test', 'abc'].map(n => ({
         type: DataType.STRING,
         name: n,
@@ -131,6 +135,8 @@ describe('JoinDatasetsNode', () => {
   test('should throw error for unequal datatypes of values', async () => {
     const dsA: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: [
         {
           name: 'colA',
@@ -145,6 +151,8 @@ describe('JoinDatasetsNode', () => {
     };
     const dsB: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: [
         {
           name: 'colB',
@@ -215,18 +223,24 @@ describe('JoinDatasetsNode', () => {
 
     const dsA: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: [schemaA, schemaOnlyA],
       name: 'DS B',
       workspaceId: 'CDE'
     };
     const dsB: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: [schemaB, schemaOnlyB, otherColAinB],
       name: 'DS A',
       workspaceId: 'CDE'
     };
     const newDs: Dataset = {
       id: 'newid',
+      created: '',
+      description: '',
       valueschemas: [schemaB, schemaOnlyB],
       name: 'New DS',
       workspaceId: 'CDE'
@@ -236,9 +250,7 @@ describe('JoinDatasetsNode', () => {
       .mockResolvedValueOnce(dsA)
       .mockResolvedValueOnce(dsB);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
-    (createDynamicDatasetName as jest.Mock).mockReturnValue(
-      'FilterEntries-123'
-    );
+    (createUniqueDatasetName as jest.Mock).mockReturnValue('FilterEntries-123');
     (processEntries as jest.Mock).mockImplementation(() => ({}));
 
     const res = await JoinDatasetsNode.onNodeExecution(
@@ -332,18 +344,24 @@ describe('JoinDatasetsNode', () => {
 
     const dsA: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: [schemaA],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
     const dsB: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: [schemaB, schemaOnlyB],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
     const newDs: Dataset = {
       id: 'newid',
+      created: '',
+      description: '',
       valueschemas: [schemaB, schemaOnlyB],
       name: 'New DS',
       workspaceId: 'CDE'
@@ -353,9 +371,7 @@ describe('JoinDatasetsNode', () => {
       .mockResolvedValueOnce(dsA)
       .mockResolvedValueOnce(dsB);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
-    (createDynamicDatasetName as jest.Mock).mockReturnValue(
-      'FilterEntries-123'
-    );
+    (createUniqueDatasetName as jest.Mock).mockReturnValue('FilterEntries-123');
     (processEntries as jest.Mock).mockImplementation(() => ({}));
 
     const res = await JoinDatasetsNode.onNodeExecution(
@@ -436,18 +452,24 @@ describe('JoinDatasetsNode', () => {
 
     const dsA: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: [schemaA, schemaOnlyA],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
     const dsB: Dataset = {
       id: VALID_OBJECT_ID,
+      created: '',
+      description: '',
       valueschemas: [schemaB, schemaOnlyB],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
     const newDs: Dataset = {
       id: 'newid',
+      created: '',
+      description: '',
       valueschemas: [schemaB, schemaOnlyB],
       name: 'New DS',
       workspaceId: 'CDE'
@@ -474,9 +496,7 @@ describe('JoinDatasetsNode', () => {
       .mockResolvedValueOnce(dsB);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
     (addValueSchema as jest.Mock).mockResolvedValue(true);
-    (createDynamicDatasetName as jest.Mock).mockReturnValue(
-      'FilterEntries-123'
-    );
+    (createUniqueDatasetName as jest.Mock).mockReturnValue('FilterEntries-123');
     (createEntry as jest.Mock).mockResolvedValue({});
     (getEntryCollection as jest.Mock).mockReturnValue({
       find: () => {

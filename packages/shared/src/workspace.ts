@@ -23,6 +23,8 @@ export interface Dataset {
   name: string;
   valueschemas: Array<ValueSchema>;
   workspaceId: string | null;
+  created: string;
+  description: string;
 }
 
 export interface GQLDataset extends Dataset {

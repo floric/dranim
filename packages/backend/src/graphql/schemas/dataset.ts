@@ -8,6 +8,8 @@ const DatasetDef = `
     valueschemas: [Valueschema!]!
     entriesCount: Int!
     latestEntries: [Entry!]!
+    created: String!
+    description: String!
   }
 `;
 

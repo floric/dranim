@@ -41,7 +41,7 @@ export const getEntriesCount = async (
   reqContext: ApolloContext
 ): Promise<number> => {
   const collection = getEntryCollection(datasetId, reqContext.db);
-  return await collection.countDocuments();
+  return await collection.estimatedDocumentCount();
 };
 
 export const clearEntries = async (

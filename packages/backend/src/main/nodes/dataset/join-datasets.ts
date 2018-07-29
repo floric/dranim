@@ -13,7 +13,7 @@ import {
   ValueSchema
 } from '@masterthesis/shared';
 
-import { createDynamicDatasetName } from '../../calculation/utils';
+import { createUniqueDatasetName } from '../../calculation/utils';
 import {
   addValueSchema,
   createDataset,
@@ -70,7 +70,7 @@ export const JoinDatasetsNode: ServerNodeDef<
     validateSchemas(form, dsA, dsB);
 
     const newDs = await createDataset(
-      createDynamicDatasetName(JoinDatasetsNodeDef.type, node.id),
+      createUniqueDatasetName(JoinDatasetsNodeDef.type, node.id),
       reqContext,
       node.workspaceId
     );
@@ -99,15 +99,19 @@ const getMatchesAndCreateEntries = async (
   valNameA: string,
   valNameB: string,
   newDsId: string,
-  dsBid: string,
+  dsBId: string,
   reqContext: ApolloContext
 ) => {
-  const col = getEntryCollection(dsBid, reqContext.db);
+  const col = getEntryCollection(dsBId, reqContext.db);
   const valFromA = docA.values[valNameA];
   const cursor = col.find({ [`values.${valNameB}`]: valFromA });
   while (await cursor.hasNext()) {
     const docB = await cursor.next();
-    await createEntry(newDsId, joinEntry(docA.values, docB.values), reqContext);
+    await createEntry(
+      newDsId,
+      joinEntry(docA.values, docB!.values),
+      reqContext
+    );
   }
   await cursor.close();
 };

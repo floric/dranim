@@ -2,8 +2,9 @@ import * as React from 'react';
 import { SFC } from 'react';
 
 import { Colors } from '@masterthesis/shared';
-import { Button, Card, Col, Modal, Row } from 'antd';
+import { Button, Card, Col, Divider, Modal, Row, Tooltip } from 'antd';
 import { css } from 'glamor';
+import { UserInfo } from './UserInfo';
 
 export interface IPageHeaderProps {
   title: string;
@@ -36,30 +37,43 @@ export const PageHeaderCard: SFC<IPageHeaderProps> = ({
       }}
     >
       <Row justify="space-between" align="middle">
-        <Col xs={24} md={helpContent ? 20 : 24}>
+        <Col xs={24} sm={12} md={16} xl={18}>
           <h1 {...css({ marginBottom: 0 })}>
             {title}
             {typeTitle ? (
-              <span
-                {...css({ color: Colors.GrayMedium, fontWeight: 'initial' })}
-              >
-                {` | ${typeTitle}`}
-              </span>
+              <>
+                <Divider type="vertical" />
+                <span
+                  {...css({ color: Colors.GrayMedium, fontWeight: 'initial' })}
+                >
+                  {typeTitle}
+                </span>
+              </>
             ) : null}
           </h1>
         </Col>
-        {helpContent && (
-          <Col xs={24} md={4} style={{ textAlign: 'right' }}>
-            <Button
-              onClick={() => {
-                showInfo(helpContent);
-              }}
-              icon="question-circle"
-            >
-              Help
-            </Button>
-          </Col>
-        )}
+
+        <Col xs={24} sm={12} md={8} xl={6} style={{ textAlign: 'right' }}>
+          <Row justify="space-between" align="middle">
+            <Col>
+              {helpContent && (
+                <>
+                  <Tooltip title="Help" mouseEnterDelay={1}>
+                    <Button
+                      style={{ border: 'none' }}
+                      onClick={() => {
+                        showInfo(helpContent);
+                      }}
+                      icon="question-circle"
+                    />
+                  </Tooltip>
+                  <Divider type="vertical" />
+                </>
+              )}
+              <UserInfo />
+            </Col>
+          </Row>
+        </Col>
       </Row>
     </Card>
   </>

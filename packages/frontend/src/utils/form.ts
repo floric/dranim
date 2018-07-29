@@ -51,8 +51,8 @@ export const tryOperation = async <T>(
     op,
     refetch,
     onFail,
-    successTitle = () => 'Operation successfull',
-    successMessage = () => 'Operation successfully done.',
+    successTitle = () => 'Operation successful',
+    successMessage = () => 'Operation done successfully.',
     failedTitle = 'Operation failed',
     failedMessage = 'Operation has failed.'
   } = args;

@@ -3,7 +3,8 @@ import {
   Dataset,
   DataType,
   ProcessState,
-  UploadProcess
+  UploadProcess,
+  ValueSchema
 } from '@masterthesis/shared';
 import * as fastCsv from 'fast-csv';
 import { Collection, Db, ObjectID } from 'mongodb';
@@ -12,7 +13,6 @@ import { Readable } from 'stream';
 
 import { Log } from '../../logging';
 import { tryGetDataset } from '../../main/workspace/dataset';
-import { Valueschema } from '../../main/workspace/dataset';
 import { createEntry } from '../../main/workspace/entry';
 
 export class UploadEntryError extends Error {
@@ -41,7 +41,7 @@ export const getAllUploads = async (
   }));
 };
 
-const validateEntry = (parsedObj: any, schema: Array<Valueschema>) => {
+const validateEntry = (parsedObj: any, schema: Array<ValueSchema>) => {
   if (Object.keys(parsedObj).length !== schema.length) {
     return false;
   }

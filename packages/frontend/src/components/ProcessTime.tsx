@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { Row, Col, Tooltip } from 'antd';
 import { SFC } from 'react';
-import { distanceInWordsToNow, distanceInWords } from 'date-fns';
+
+import { Col, Row, Tooltip } from 'antd';
+import { distanceInWords, distanceInWordsToNow } from 'date-fns';
 
 export interface IProcessTimeProps {
   start: string;

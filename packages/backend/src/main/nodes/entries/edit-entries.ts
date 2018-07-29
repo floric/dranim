@@ -6,7 +6,7 @@ import {
   ServerNodeDefWithContextFn
 } from '@masterthesis/shared';
 
-import { createDynamicDatasetName } from '../../calculation/utils';
+import { createUniqueDatasetName } from '../../calculation/utils';
 import { createDataset, tryGetDataset } from '../../workspace/dataset';
 import { createEntry } from '../../workspace/entry';
 import {
@@ -40,7 +40,7 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
   ) => {
     const oldDs = await tryGetDataset(inputs.dataset.datasetId, reqContext);
     const newDs = await createDataset(
-      createDynamicDatasetName(EditEntriesNodeDef.type, id),
+      createUniqueDatasetName(EditEntriesNodeDef.type, id),
       reqContext,
       workspaceId
     );

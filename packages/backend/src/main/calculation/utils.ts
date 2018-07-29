@@ -1,9 +1,10 @@
 import { FormValues, OutputNodeForm } from '@masterthesis/shared';
+import { v4 } from 'uuid';
 
 import { validateNonEmptyString } from '../nodes/string/utils';
 
-export const createDynamicDatasetName = (nodeName: string, nodeId: string) => {
-  return `${nodeName}-${nodeId}`;
+export const createUniqueDatasetName = (nodeName: string, nodeId: string) => {
+  return `${nodeName}-${nodeId}-${v4()}`;
 };
 
 export const isOutputFormValid = (form: FormValues<OutputNodeForm>) =>

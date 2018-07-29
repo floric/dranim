@@ -27,6 +27,8 @@ describe('AggregateEntriesNode', () => {
   test('should get average', async () => {
     const ds: Dataset = {
       id: '1',
+      created: '',
+      description: '',
       name: 'name',
       workspaceId: '1',
       valueschemas: [
@@ -59,6 +61,8 @@ describe('AggregateEntriesNode', () => {
   test('should get minimum', async () => {
     const ds: Dataset = {
       id: '1',
+      created: '',
+      description: '',
       name: 'name',
       workspaceId: '1',
       valueschemas: [
@@ -92,6 +96,8 @@ describe('AggregateEntriesNode', () => {
     const ds: Dataset = {
       id: '1',
       name: 'name',
+      created: '',
+      description: '',
       workspaceId: '1',
       valueschemas: [
         {
@@ -123,6 +129,8 @@ describe('AggregateEntriesNode', () => {
   test('should get median', async () => {
     const ds: Dataset = {
       id: '1',
+      created: '',
+      description: '',
       name: 'name',
       workspaceId: '1',
       valueschemas: [
@@ -159,6 +167,8 @@ describe('AggregateEntriesNode', () => {
   test('should get sum', async () => {
     const ds: Dataset = {
       id: '1',
+      created: '',
+      description: '',
       name: 'name',
       workspaceId: '1',
       valueschemas: [
@@ -191,6 +201,8 @@ describe('AggregateEntriesNode', () => {
   test('should throw error for missing schema', async () => {
     const ds: Dataset = {
       id: '1',
+      created: '',
+      description: '',
       name: 'name',
       workspaceId: '1',
       valueschemas: []
@@ -218,6 +230,8 @@ describe('AggregateEntriesNode', () => {
   test('should throw error for wrong datatype', async () => {
     const ds: Dataset = {
       id: '1',
+      created: '',
+      description: '',
       name: 'name',
       workspaceId: '1',
       valueschemas: [

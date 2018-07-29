@@ -16,7 +16,6 @@ const WorkspacesPage = getAsyncPage(() => import('./pages/WorkspacesPage'));
 const WorkspaceDetailPage = getAsyncPage(() =>
   import('./pages/workspaces/DetailPage')
 );
-const UserPage = getAsyncPage(() => import('./pages/UserPage'));
 const StartPage = getAsyncPage(() => import('./pages/StartPage'));
 const DatasetDetailPage = getAsyncPage(() =>
   import('./pages/dataset/DetailPage')
@@ -91,7 +90,6 @@ class LoggedInApp extends React.Component<
                     path="/workspaces/:workspaceId"
                     component={WorkspaceDetailPage}
                   />
-                  <Route exact path="/user" component={UserPage} />
                 </Switch>
               </Content>
             </Layout>

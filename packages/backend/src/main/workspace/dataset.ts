@@ -1,16 +1,13 @@
-import { ApolloContext, Dataset, DataType } from '@masterthesis/shared';
+import {
+  ApolloContext,
+  Dataset,
+  DataType,
+  ValueSchema
+} from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { Log } from '../../logging';
 import { clearEntries, getEntryCollection } from './entry';
-
-export interface Valueschema {
-  name: string;
-  type: DataType;
-  required: boolean;
-  fallback: string;
-  unique: boolean;
-}
 
 export const getDatasetsCollection = (
   db: Db
@@ -38,7 +35,9 @@ export const createDataset = async (
     name,
     userId: reqContext.userId,
     valueschemas: [],
-    workspaceId
+    workspaceId,
+    description: '',
+    created: new Date()
   });
 
   if (res.result.ok !== 1 || res.ops.length !== 1) {
@@ -116,7 +115,7 @@ export const tryGetDataset = async (id: string, reqContext: ApolloContext) => {
 
 export const addValueSchema = async (
   datasetId: string,
-  schema: Valueschema,
+  schema: ValueSchema,
   reqContext: ApolloContext
 ): Promise<boolean> => {
   const collection = getDatasetsCollection(reqContext.db);
@@ -159,5 +158,23 @@ export const clearGeneratedDatasets = async (
   reqContext: ApolloContext
 ) => {
   const coll = getDatasetsCollection(reqContext.db);
-  await coll.deleteMany({ workspaceId: wsId });
+  const res = await coll.deleteMany({ workspaceId: wsId });
+  Log.info(`Cleared ${res.deletedCount} temporary datasets.`);
+};
+
+export const saveTemporaryDataset = async (
+  dsId: string,
+  name: string,
+  reqContext: ApolloContext
+) => {
+  const coll = getDatasetsCollection(reqContext.db);
+  const res = await coll.updateOne(
+    { _id: new ObjectID(dsId) },
+    {
+      $set: { name, workspaceId: null, description: 'Generated with Explorer' }
+    }
+  );
+  if (res.modifiedCount !== 1) {
+    throw new Error('Saving temporary dataset failed');
+  }
 };

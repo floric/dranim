@@ -1,41 +1,36 @@
 import {
-  allAreDefinedAndPresent,
   DatasetOutputNodeDef,
   DatasetOutputNodeInputs,
   DatasetRef,
   DataType,
+  OutputNodeForm,
   OutputResult,
   ServerNodeDef
 } from '@masterthesis/shared';
 
-import { tryGetDataset } from '../../workspace/dataset';
+import { isOutputFormValid } from '../../calculation/utils';
+import { saveTemporaryDataset, tryGetDataset } from '../../workspace/dataset';
 
 export const DatasetOutputNode: ServerNodeDef<
   DatasetOutputNodeInputs,
   {},
-  {},
+  OutputNodeForm,
   OutputResult<DatasetRef>
 > = {
   type: DatasetOutputNodeDef.type,
-  onMetaExecution: async (form, inputs) => {
-    if (!allAreDefinedAndPresent(inputs)) {
-      return {
-        dataset: { content: { schema: [] }, isPresent: false }
-      };
-    }
-
-    return inputs;
-  },
+  isFormValid: isOutputFormValid,
+  onMetaExecution: () => Promise.resolve({}),
   onNodeExecution: async (form, inputs, { reqContext }) => {
     const ds = await tryGetDataset(inputs.dataset.datasetId, reqContext);
+    await saveTemporaryDataset(ds.id, form.name!, reqContext);
     return {
       outputs: {},
       results: {
-        name: ds.name,
+        name: form.name!,
         value: inputs.dataset,
         type: DataType.DATASET,
         workspaceId: '',
-        description: ''
+        description: form.description || ''
       }
     };
   }
