@@ -1,5 +1,4 @@
 import {
-  DatasetOutputNodeDef,
   FormValues,
   GQLNodeInstance,
   NodeDef,

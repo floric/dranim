@@ -188,22 +188,16 @@ describe('FilterEntriesNode', () => {
     };
     const oldDs: Dataset = {
       id: VALID_OBJECT_ID,
-<<<<<<< HEAD
       created: '',
       description: '',
-=======
->>>>>>> master
       valueschemas: [vs],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
     const newDs: Dataset = {
       id: 'ABC',
-<<<<<<< HEAD
       created: '',
       description: '',
-=======
->>>>>>> master
       valueschemas: [],
       name: 'New DS',
       workspaceId: 'CDE'
