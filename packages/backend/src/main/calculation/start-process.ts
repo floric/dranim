@@ -23,6 +23,7 @@ const startProcess = async (
   const processCollection = getCalculationsCollection(reqContext.db);
 
   try {
+    const start = new Date().getTime();
     const nodes = await getAllNodes(workspaceId, reqContext);
     const outputNodesInstances = nodes.filter(
       n =>
@@ -51,7 +52,8 @@ const startProcess = async (
       ProcessState.SUCCESSFUL,
       reqContext
     );
-    Log.info('Finished calcuation successfully.');
+    const durationMs = new Date().getTime() - start;
+    Log.info(`Finished calculation in ${durationMs / 1000} s`);
   } catch (err) {
     await updateFinishedProcess(
       processId,
@@ -84,7 +86,7 @@ const executeOutputNode = async (
 ) => {
   const processCollection = getCalculationsCollection(reqContext.db);
 
-  const res = await executeNode(o, reqContext);
+  const res = await executeNode(o, processId, reqContext);
   await processCollection.updateOne(
     { _id: new ObjectID(processId) },
     {
@@ -122,10 +124,14 @@ const getCalculationsCollection = (
   return db.collection('Calculations');
 };
 
+export interface StartCalculationOptions {
+  awaitResult?: boolean;
+}
+
 export const startCalculation = async (
   workspaceId: string,
   reqContext: ApolloContext,
-  awaitResult?: boolean
+  options?: StartCalculationOptions
 ): Promise<CalculationProcess> => {
   const coll = getCalculationsCollection(reqContext.db);
   const newProcess = await coll.insertOne({
@@ -144,7 +150,7 @@ export const startCalculation = async (
 
   const id = newProcess.ops[0]._id.toHexString();
 
-  if (awaitResult === true) {
+  if (options && options.awaitResult) {
     await startProcess(id, workspaceId, reqContext);
   } else {
     startProcess(id, workspaceId, reqContext);
@@ -154,6 +160,60 @@ export const startCalculation = async (
     id,
     ...newProcess.ops[0]
   };
+};
+
+export const stopCalculation = async (
+  id: string,
+  reqContext: ApolloContext
+): Promise<boolean> => {
+  const coll = getCalculationsCollection(reqContext.db);
+  const res = await coll.updateOne(
+    { _id: new ObjectID(id) },
+    {
+      $set: {
+        state: ProcessState.CANCELED
+      }
+    }
+  );
+
+  if (res.modifiedCount !== 1) {
+    throw new Error('Process update failed');
+  }
+  return true;
+};
+
+const getCalculation = async (
+  id: string,
+  reqContext: ApolloContext
+): Promise<CalculationProcess | null> => {
+  if (!ObjectID.isValid(id)) {
+    return null;
+  }
+
+  const coll = getCalculationsCollection(reqContext.db);
+  const res = await coll.findOne({ _id: new ObjectID(id) });
+  if (!res) {
+    return null;
+  }
+
+  const { _id, ...obj } = res;
+
+  return {
+    id: _id.toHexString(),
+    ...obj
+  };
+};
+
+export const tryGetCalculation = async (
+  id: string,
+  reqContext: ApolloContext
+) => {
+  const calculation = await getCalculation(id, reqContext);
+  if (!calculation) {
+    throw new Error('Unknown calculation');
+  }
+
+  return calculation;
 };
 
 export const getAllCalculations = async (

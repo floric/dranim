@@ -51,7 +51,8 @@ export enum ProcessState {
   STARTED = 'STARTED',
   PROCESSING = 'PROCESSING',
   ERROR = 'ERROR',
-  SUCCESSFUL = 'SUCCESSFUL'
+  SUCCESSFUL = 'SUCCESSFUL',
+  CANCELED = 'CANCELED'
 }
 
 export interface CalculationProcess {

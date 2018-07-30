@@ -61,7 +61,11 @@ describe('Start Process', () => {
     );
 
     const ws = await createWorkspace('test', { db, userId: '' }, '');
-    const newProcess = await startCalculation(ws.id, { db, userId: '' }, true);
+    const newProcess = await startCalculation(
+      ws.id,
+      { db, userId: '' },
+      { awaitResult: true }
+    );
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
     expect(newProcess.finish).toBeNull();
@@ -113,7 +117,11 @@ describe('Start Process', () => {
       )
     );
 
-    const newProcess = await startCalculation(ws.id, { db, userId: '' }, true);
+    const newProcess = await startCalculation(
+      ws.id,
+      { db, userId: '' },
+      { awaitResult: true }
+    );
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
     expect(newProcess.finish).toBeNull();
@@ -179,7 +187,11 @@ describe('Start Process', () => {
       )
     );
 
-    const newProcess = await startCalculation(ws.id, { db, userId: '' }, true);
+    const newProcess = await startCalculation(
+      ws.id,
+      { db, userId: '' },
+      { awaitResult: true }
+    );
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
     expect(newProcess.finish).toBeNull();
@@ -234,7 +246,11 @@ describe('Start Process', () => {
       )
     );
 
-    const newProcess = await startCalculation(ws.id, { db, userId: '' }, true);
+    const newProcess = await startCalculation(
+      ws.id,
+      { db, userId: '' },
+      { awaitResult: true }
+    );
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
     expect(newProcess.finish).toBeNull();

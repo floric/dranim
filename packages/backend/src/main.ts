@@ -42,10 +42,13 @@ export const main = async (options: IMainOptions) => {
   const server = new ApolloServer({
     schema: Schema,
     context: context => ({ db, userId: context.req!.session!.userId }),
-    engine: {
-      apiKey: 'service:dranim:KJaelzMjRvYP7sbSpKkgSQ'
-    },
-    tracing: true,
+    engine:
+      options.env === 'production'
+        ? {
+            apiKey: process.env.APOLLO_ENGINE_KEY
+          }
+        : undefined,
+    tracing: options.env === 'production' ? true : undefined,
     uploads: {
       maxFieldSize: MAX_UPLOAD_LIMIT,
       maxFiles: 10,

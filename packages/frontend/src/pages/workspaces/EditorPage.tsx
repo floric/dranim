@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { SocketInstance } from '@masterthesis/shared';
+import { ProcessState, SocketInstance } from '@masterthesis/shared';
+import { Button } from 'antd';
 import { ApolloQueryResult } from 'apollo-client';
 import { distanceInWordsToNow } from 'date-fns';
 import gql from 'graphql-tag';
@@ -160,6 +161,12 @@ const START_CALCULATION = gql`
   }
 `;
 
+const STOP_CALCULATION = gql`
+  mutation stopCalculation($id: String!) {
+    stopCalculation(id: $id)
+  }
+`;
+
 export interface WorkspaceEditorPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
@@ -310,26 +317,37 @@ export class WorkspaceEditorPage extends React.Component<
           }
 
           const inprocessCalculations = data.calculations.filter(
-            n => n.state === 'PROCESSING'
+            n => n.state === ProcessState.PROCESSING
           );
 
           if (inprocessCalculations.length > 0) {
             startPolling(POLLING_FREQUENCY);
-
+            const currentCalculation = inprocessCalculations[0];
             return (
               <LoadingCard
                 text={`Calculation in progress... Processed ${
-                  inprocessCalculations[0].processedOutputs
+                  currentCalculation.processedOutputs
                 } of ${
-                  inprocessCalculations[0].totalOutputs
-                } (Started ${distanceInWordsToNow(
-                  inprocessCalculations[0].start,
-                  {
-                    includeSeconds: true,
-                    addSuffix: true
-                  }
-                )})`}
-              />
+                  currentCalculation.totalOutputs
+                } (Started ${distanceInWordsToNow(currentCalculation.start, {
+                  includeSeconds: true,
+                  addSuffix: true
+                })})`}
+              >
+                <Mutation mutation={STOP_CALCULATION}>
+                  {stopCalculation => (
+                    <Button
+                      onClick={() =>
+                        stopCalculation({
+                          variables: { id: currentCalculation.id }
+                        })
+                      }
+                    >
+                      Stop
+                    </Button>
+                  )}
+                </Mutation>
+              </LoadingCard>
             );
           }
 

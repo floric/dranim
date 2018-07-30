@@ -8,25 +8,29 @@ import {
   NodeExecutionResult,
   NodeInstance,
   parseNodeForm,
+  ProcessState,
   ServerNodeDefWithContextFn
 } from '@masterthesis/shared';
 
-import { tryGetNodeType } from '../nodes/all-nodes';
+import { tryGetNodeType, getNodeType } from '../nodes/all-nodes';
 import { tryGetConnection } from '../workspace/connections';
 import { tryGetContextNode, tryGetNode } from '../workspace/nodes';
-import { areNodeInputsValid, isNodeInMetaValid } from './validation';
+import { tryGetCalculation } from './start-process';
+import { areNodeInputsValid } from './validation';
 
 export const executeNodeWithId = async (
   nodeId: string,
+  processId: string,
   reqContext: ApolloContext,
   contextInputs?: IOValues<any>
 ) => {
   const node = await tryGetNode(nodeId, reqContext);
-  return await executeNode(node, reqContext, contextInputs);
+  return await executeNode(node, processId, reqContext, contextInputs);
 };
 
 export const executeNode = async (
   node: NodeInstance,
+  processId: string,
   reqContext: ApolloContext,
   contextInputs?: IOValues<any>
 ): Promise<NodeExecutionResult<{}>> => {
@@ -40,7 +44,9 @@ export const executeNode = async (
   }
 
   const inputValues = await Promise.all(
-    node.inputs.map(i => getConnectionResult(i, reqContext, contextInputs))
+    node.inputs.map(i =>
+      getConnectionResult(i, processId, reqContext, contextInputs)
+    )
   );
 
   if (node.type === ContextNodeType.OUTPUT) {
@@ -50,11 +56,28 @@ export const executeNode = async (
   const nodeInputs = inputValuesToObject(inputValues);
   const nodeForm = parseNodeForm(node.form);
 
-  await validateMetaAndExecution(node, nodeInputs, reqContext);
+  await validateInputsAndForm(node, nodeInputs, reqContext);
 
   const type = tryGetNodeType(node.type);
   if (hasContextFn(type)) {
-    return await executeContext(node, type, nodeForm, nodeInputs, reqContext);
+    return await executeContext(
+      node,
+      type,
+      nodeForm,
+      nodeInputs,
+      processId,
+      reqContext
+    );
+  }
+
+  if (node.contextIds.length === 0) {
+    const process = await tryGetCalculation(processId, reqContext);
+    if (
+      process.state !== ProcessState.PROCESSING &&
+      process.state !== ProcessState.STARTED
+    ) {
+      throw new Error('Process canceled or failed');
+    }
   }
 
   return await type.onNodeExecution(nodeForm, nodeInputs, {
@@ -63,18 +86,23 @@ export const executeNode = async (
   });
 };
 
-const validateMetaAndExecution = async (
+const validateInputsAndForm = async (
   node: NodeInstance,
   nodeInputs: IOValues<{}>,
   reqContext: ApolloContext
 ) => {
-  const [metaValid, execValid] = await Promise.all([
-    isNodeInMetaValid(node, reqContext),
-    areNodeInputsValid(node, nodeInputs, reqContext)
-  ]);
-  if (!metaValid) {
-    throw new Error('Form values or inputs are missing');
+  const nodeType = getNodeType(node.type);
+  if (nodeType) {
+    const isFormValid = nodeType.isFormValid
+      ? await nodeType.isFormValid(node.form)
+      : true;
+    if (!isFormValid) {
+      throw new Error('Form is invalid');
+    }
   }
+
+  const execValid = await areNodeInputsValid(node, nodeInputs, reqContext);
+
   if (!execValid) {
     throw new Error('Execution inputs are not valid');
   }
@@ -85,6 +113,7 @@ const executeContext = async (
   type: ServerNodeDefWithContextFn,
   nodeForm: FormValues<any>,
   nodeInputs: IOValues<any>,
+  processId: string,
   reqContext: ApolloContext
 ) => {
   const outputNode = await tryGetContextNode(
@@ -97,7 +126,10 @@ const executeContext = async (
     reqContext,
     node,
     contextFnExecution: inputs =>
-      executeNode(outputNode, reqContext, { ...nodeInputs, ...inputs })
+      executeNode(outputNode, processId, reqContext, {
+        ...nodeInputs,
+        ...inputs
+      })
   });
 };
 
@@ -118,12 +150,18 @@ const getContextNodeOutputs = (
 
 const getConnectionResult = async (
   i: ConnectionDescription,
+  processId: string,
   reqContext: ApolloContext,
   contextInputs?: IOValues<any>
 ) => {
   const conn = await tryGetConnection(i.connectionId, reqContext);
   const inputNode = await tryGetNode(conn.from.nodeId, reqContext);
-  const nodeRes = await executeNode(inputNode, reqContext, contextInputs);
+  const nodeRes = await executeNode(
+    inputNode,
+    processId,
+    reqContext,
+    contextInputs
+  );
 
   return { socketName: i.name, value: nodeRes.outputs[conn.from.name] };
 };

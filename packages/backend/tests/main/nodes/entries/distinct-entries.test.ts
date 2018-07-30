@@ -44,34 +44,44 @@ describe('DistinctEntriesNode', () => {
 
   test('should have invalid form', async () => {
     let res = await DistinctEntriesNode.isFormValid({
-      newSchemas: [],
-      schema: null
+      addedSchemas: [],
+      distinctSchemas: null
     });
     expect(res).toBe(false);
 
     res = await DistinctEntriesNode.isFormValid({
-      newSchemas: null,
-      schema: {
-        name: 'y',
-        type: DataType.NUMBER,
-        fallback: '',
-        required: true,
-        unique: false
-      }
+      addedSchemas: [],
+      distinctSchemas: []
+    });
+    expect(res).toBe(false);
+
+    res = await DistinctEntriesNode.isFormValid({
+      addedSchemas: null,
+      distinctSchemas: [
+        {
+          name: 'y',
+          type: DataType.NUMBER,
+          fallback: '',
+          required: true,
+          unique: false
+        }
+      ]
     });
     expect(res).toBe(false);
   });
 
   test('should have valid form', async () => {
     const res = await DistinctEntriesNode.isFormValid({
-      newSchemas: [],
-      schema: {
-        name: 'y',
-        type: DataType.NUMBER,
-        fallback: '',
-        required: true,
-        unique: false
-      }
+      addedSchemas: [],
+      distinctSchemas: [
+        {
+          name: 'y',
+          type: DataType.NUMBER,
+          fallback: '',
+          required: true,
+          unique: false
+        }
+      ]
     });
     expect(res).toBe(true);
   });
@@ -84,7 +94,7 @@ describe('DistinctEntriesNode', () => {
         state: SocketState.DYNAMIC
       }
     };
-    const newSchemas = [
+    const addedSchemas = [
       {
         name: 'y',
         type: DataType.NUMBER,
@@ -112,7 +122,7 @@ describe('DistinctEntriesNode', () => {
       { dataset: { content: { schema: [] }, isPresent: true } },
       contextInputDefs,
       {},
-      { schema: null, newSchemas },
+      { distinctSchemas: null, addedSchemas },
       { db: null, userId: '' }
     );
     expect(res).toEqual({
@@ -146,7 +156,7 @@ describe('DistinctEntriesNode', () => {
       { dataset: { content: { schema: [] }, isPresent: true } },
       contextInputDefs,
       {},
-      { schema: null, newSchemas: null },
+      { distinctSchemas: null, addedSchemas: null },
       { db: null, userId: '' }
     );
     expect(res).toEqual({
@@ -168,7 +178,7 @@ describe('DistinctEntriesNode', () => {
         }
       },
       { dataset: { isPresent: true, content: { schema: [] } } },
-      { schema: null, newSchemas: [] },
+      { distinctSchemas: null, addedSchemas: [] },
       { db: null, userId: '' }
     );
     expect(res).toEqual({});
@@ -185,14 +195,16 @@ describe('DistinctEntriesNode', () => {
       },
       { dataset: { isPresent: true, content: { schema: [] } } },
       {
-        schema: {
-          name: 'test',
-          type: DataType.STRING,
-          fallback: '',
-          required: true,
-          unique: false
-        },
-        newSchemas: []
+        distinctSchemas: [
+          {
+            name: 'test',
+            type: DataType.STRING,
+            fallback: '',
+            required: true,
+            unique: false
+          }
+        ],
+        addedSchemas: []
       },
       { db: null, userId: '' }
     );
@@ -214,8 +226,8 @@ describe('DistinctEntriesNode', () => {
     (allAreDefinedAndPresent as jest.Mock).mockReturnValue(false);
     let res = await DistinctEntriesNode.onMetaExecution(
       {
-        schema: null,
-        newSchemas: null
+        distinctSchemas: null,
+        addedSchemas: null
       },
       { dataset: { content: { schema: [] }, isPresent: false } },
       { db: null, userId: '' }
@@ -226,14 +238,16 @@ describe('DistinctEntriesNode', () => {
 
     res = await DistinctEntriesNode.onMetaExecution(
       {
-        schema: {
-          name: 'test',
-          type: DataType.STRING,
-          fallback: '',
-          required: true,
-          unique: false
-        },
-        newSchemas: []
+        distinctSchemas: [
+          {
+            name: 'test',
+            type: DataType.STRING,
+            fallback: '',
+            required: true,
+            unique: false
+          }
+        ],
+        addedSchemas: []
       },
       { dataset: { content: { schema: [] }, isPresent: false } },
       { db: null, userId: '' }
@@ -244,8 +258,8 @@ describe('DistinctEntriesNode', () => {
 
     res = await DistinctEntriesNode.onMetaExecution(
       {
-        schema: null,
-        newSchemas: []
+        distinctSchemas: null,
+        addedSchemas: []
       },
       { dataset: { content: { schema: [] }, isPresent: true } },
       { db: null, userId: '' }
@@ -259,14 +273,16 @@ describe('DistinctEntriesNode', () => {
     (allAreDefinedAndPresent as jest.Mock).mockReturnValue(true);
     let res = await DistinctEntriesNode.onMetaExecution(
       {
-        schema: {
-          name: 'test',
-          type: DataType.STRING,
-          fallback: '',
-          required: true,
-          unique: false
-        },
-        newSchemas: null
+        distinctSchemas: [
+          {
+            name: 'test',
+            type: DataType.STRING,
+            fallback: '',
+            required: true,
+            unique: false
+          }
+        ],
+        addedSchemas: null
       },
       { dataset: { content: { schema: [] }, isPresent: false } },
       { db: null, userId: '' }
@@ -277,8 +293,8 @@ describe('DistinctEntriesNode', () => {
 
     res = await DistinctEntriesNode.onMetaExecution(
       {
-        schema: null,
-        newSchemas: []
+        distinctSchemas: null,
+        addedSchemas: []
       },
       { dataset: { content: { schema: [] }, isPresent: true } },
       { db: null, userId: '' }
@@ -292,14 +308,16 @@ describe('DistinctEntriesNode', () => {
     (allAreDefinedAndPresent as jest.Mock).mockReturnValue(true);
     const res = await DistinctEntriesNode.onMetaExecution(
       {
-        schema: {
-          name: 'test',
-          type: DataType.STRING,
-          fallback: '',
-          required: true,
-          unique: false
-        },
-        newSchemas: [
+        distinctSchemas: [
+          {
+            name: 'test',
+            type: DataType.STRING,
+            fallback: '',
+            required: true,
+            unique: false
+          }
+        ],
+        addedSchemas: [
           {
             name: 'y',
             type: DataType.NUMBER,
@@ -374,10 +392,10 @@ describe('DistinctEntriesNode', () => {
     (createEntry as jest.Mock).mockImplementation(jest.fn);
     (getEntryCollection as jest.Mock).mockReturnValue({
       aggregate: jest.fn(() => {
-        let entriesToProcess = 20;
+        let entriesToProcess = 1;
         return {
           close: async () => true,
-          next: async () => ({ _id: 'distinct-value' }),
+          next: async () => ({ _id: { test: 'distinct-value' } }),
           hasNext: async () => {
             if (entriesToProcess === 0) {
               return false;
@@ -397,14 +415,16 @@ describe('DistinctEntriesNode', () => {
 
     const res = await DistinctEntriesNode.onNodeExecution(
       {
-        schema: {
-          name: 'test',
-          type: DataType.STRING,
-          fallback: '',
-          required: true,
-          unique: false
-        },
-        newSchemas: [
+        distinctSchemas: [
+          {
+            name: 'test',
+            type: DataType.STRING,
+            fallback: '',
+            required: true,
+            unique: false
+          }
+        ],
+        addedSchemas: [
           {
             name: 'other-test',
             type: DataType.NUMBER,
@@ -423,13 +443,13 @@ describe('DistinctEntriesNode', () => {
     );
 
     expect(getEntryCollection(oldDs.id, null).aggregate).toHaveBeenCalledTimes(
-      1
+      2
     );
     expect(contextFnExecution).toHaveBeenCalledWith({
       filteredDataset: { datasetId: 'ABC' },
       'test-distinct': 'distinct-value'
     });
-    expect(createEntry as jest.Mock).toHaveBeenCalledTimes(20);
+    expect(createEntry as jest.Mock).toHaveBeenCalledTimes(1);
     expect(createEntry as jest.Mock).toHaveBeenCalledWith(
       newDs.id,
       { 'other-test': 2, test: 'abc' },
@@ -455,14 +475,16 @@ describe('DistinctEntriesNode', () => {
     try {
       await DistinctEntriesNode.onNodeExecution(
         {
-          schema: {
-            name: 'test',
-            type: DataType.STRING,
-            fallback: '',
-            required: true,
-            unique: false
-          },
-          newSchemas: []
+          distinctSchemas: [
+            {
+              name: 'test',
+              type: DataType.STRING,
+              fallback: '',
+              required: true,
+              unique: false
+            }
+          ],
+          addedSchemas: []
         },
         { dataset: { datasetId: VALID_OBJECT_ID } },
         {

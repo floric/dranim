@@ -12,7 +12,10 @@ import { IResolverObject } from 'graphql-tools';
 
 import { createBirthdaysDemoData } from '../../examples/birthdays';
 import { createSTRDemoData } from '../../examples/str';
-import { startCalculation } from '../../main/calculation/start-process';
+import {
+  startCalculation,
+  stopCalculation
+} from '../../main/calculation/start-process';
 import {
   createConnection,
   deleteConnection
@@ -98,5 +101,7 @@ export const Mutation: IResolverObject<any, ApolloContext> = {
     _,
     { workspaceId },
     context
-  ): Promise<CalculationProcess> => startCalculation(workspaceId, context)
+  ): Promise<CalculationProcess> => startCalculation(workspaceId, context),
+  stopCalculation: (_, { id }, context): Promise<boolean> =>
+    stopCalculation(id, context)
 };

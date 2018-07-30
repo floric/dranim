@@ -10,12 +10,12 @@ import {
   getDataset,
   tryGetDataset
 } from '../../../src/main/workspace/dataset';
+import { getEntryCollection } from '../../../src/main/workspace/entry';
 import {
   getTestMongoDb,
   NeverGoHereError,
   VALID_OBJECT_ID
 } from '../../test-utils';
-import { getEntryCollection } from '../../../src/main/workspace/entry';
 
 let conn;
 let db: Db;
@@ -243,6 +243,14 @@ describe('Dataset', () => {
       db,
       userId: ''
     });
+    const dsC = await createDataset(
+      'test3',
+      {
+        db,
+        userId: ''
+      },
+      VALID_OBJECT_ID
+    );
 
     const all = await getAllDatasets({
       db,
@@ -251,6 +259,8 @@ describe('Dataset', () => {
 
     expect(all).toContainEqual(dsA);
     expect(all).toContainEqual(dsB);
+    expect(all).not.toContainEqual(dsC);
+    expect(all.length).toBe(2);
   });
 
   test('should throw error for unknown dataset', async () => {
