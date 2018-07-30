@@ -13,6 +13,8 @@ Parameters:
     Type: String
   SessionSecret:
     Type: String
+  ApolloEngineKey:
+    Type: String
   EuWestCertArn:
     Type: String
     AllowedPattern: "arn:aws:acm:.*"
@@ -42,6 +44,17 @@ Resources:
                 - ec2.amazonaws.com
             Action:
               - sts:AssumeRole
+      Policies: 
+        - PolicyName: root
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement: 
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+       
   ProdInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
@@ -88,6 +101,15 @@ Resources:
         - Namespace: aws:elb:policies
           OptionName: ConnectionDrainingTimeout
           Value: 60
+        - Namespace: aws:elasticbeanstalk:cloudwatch:logs
+          OptionName: StreamLogs
+          Value: true
+        - Namespace: aws:elasticbeanstalk:cloudwatch:logs
+          OptionName: DeleteOnTerminate
+          Value: true
+        - Namespace: aws:elasticbeanstalk:cloudwatch:logs
+          OptionName: RetentionInDays
+          Value: 30
         - Namespace: aws:elasticbeanstalk:application:environment
           OptionName: DB_USER
           Value: !Ref DatabaseUser
@@ -109,6 +131,9 @@ Resources:
         - Namespace: aws:elasticbeanstalk:application:environment
           OptionName: BACKEND_PORT
           Value: 80
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: APOLLO_ENGINE_KEY
+          Value: !Ref ApolloEngineKey
       SolutionStackName: 64bit Amazon Linux 2018.03 v2.11.0 running Docker 18.03.1-ce
 
   EBEnvironment:

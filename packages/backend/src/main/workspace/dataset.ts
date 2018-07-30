@@ -45,7 +45,9 @@ export const createDataset = async (
   }
 
   const { _id, ...obj } = res.ops[0];
-  Log.info(`Dataset ${_id.toHexString()} created`);
+  if (!workspaceId) {
+    Log.info(`Dataset ${_id.toHexString()} created`);
+  }
 
   return {
     id: _id.toHexString(),
@@ -61,8 +63,6 @@ export const deleteDataset = async (id: string, reqContext: ApolloContext) => {
     throw new Error('Deletion of Dataset failed');
   }
 
-  Log.info(`Dataset ${id} deleted`);
-
   return true;
 };
 
@@ -71,7 +71,7 @@ export const getAllDatasets = async (
 ): Promise<Array<Dataset>> => {
   const collection = getDatasetsCollection(reqContext.db);
   const allDatasets = await collection
-    .find({ userId: reqContext.userId })
+    .find({ userId: reqContext.userId, workspaceId: null })
     .toArray();
   return allDatasets.map(ds => {
     const { _id, ...obj } = ds;

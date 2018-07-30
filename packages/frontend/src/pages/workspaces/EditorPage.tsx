@@ -1,164 +1,40 @@
 import * as React from 'react';
 
-import { SocketInstance } from '@masterthesis/shared';
+import {
+  CalculationProcess,
+  ProcessState,
+  SocketInstance
+} from '@masterthesis/shared';
 import { ApolloQueryResult } from 'apollo-client';
 import { distanceInWordsToNow } from 'date-fns';
-import gql from 'graphql-tag';
 import { Mutation, MutationFn, Query } from 'react-apollo';
 import { RouteComponentProps } from 'react-router';
 
+import { AsyncButton } from '../../components/AsyncButton';
 import {
   CustomErrorCard,
   LoadingCard,
   UnknownErrorCard
 } from '../../components/CustomCards';
 import { ExplorerEditor } from '../../explorer/ExplorerEditor';
-import { deepCopyResponse, tryOperation } from '../../utils/form';
+import {
+  ADD_OR_UPDATE_FORM_VALUE,
+  CREATE_CONNECTION,
+  CREATE_NODE,
+  DELETE_CONNECTION,
+  DELETE_NODE,
+  START_CALCULATION,
+  STOP_CALCULATION,
+  UPDATE_NODE,
+  WORKSPACE_NODE_SELECTION
+} from '../../graphql/editor-page';
+import {
+  deepCopyResponse,
+  showNotificationWithIcon,
+  tryOperation
+} from '../../utils/form';
 
 const POLLING_FREQUENCY = 5000;
-
-const WORKSPACE_NODE_SELECTION = gql`
-  query dataset($workspaceId: String!) {
-    datasets {
-      id
-      name
-      entriesCount
-      valueschemas {
-        name
-        unique
-        type
-      }
-    }
-    calculations(workspaceId: $workspaceId) {
-      id
-      start
-      state
-      processedOutputs
-      totalOutputs
-    }
-    workspace(id: $workspaceId) {
-      id
-      name
-      nodes {
-        id
-        type
-        x
-        y
-        state
-        contextIds
-        inputs {
-          name
-          connectionId
-        }
-        outputs {
-          name
-          connectionId
-        }
-        form {
-          name
-          value
-        }
-        metaInputs
-        hasContextFn
-        progress
-        inputSockets
-        outputSockets
-      }
-      connections {
-        id
-        from {
-          nodeId
-          name
-        }
-        to {
-          nodeId
-          name
-        }
-        contextIds
-      }
-    }
-  }
-`;
-
-const CREATE_NODE = gql`
-  mutation createNode(
-    $type: String!
-    $workspaceId: String!
-    $contextIds: [String!]!
-    $x: Float!
-    $y: Float!
-  ) {
-    createNode(
-      type: $type
-      workspaceId: $workspaceId
-      contextIds: $contextIds
-      x: $x
-      y: $y
-    ) {
-      id
-      x
-      y
-      workspace {
-        id
-      }
-      type
-    }
-  }
-`;
-
-const DELETE_NODE = gql`
-  mutation deleteNode($id: String!) {
-    deleteNode(id: $id)
-  }
-`;
-
-const UPDATE_NODE = gql`
-  mutation updateNodePosition($id: String!, $x: Float!, $y: Float!) {
-    updateNodePosition(id: $id, x: $x, y: $y)
-  }
-`;
-
-const CREATE_CONNECTION = gql`
-  mutation createConnection($input: ConnectionInput!) {
-    createConnection(input: $input) {
-      id
-      from {
-        nodeId
-        name
-      }
-      to {
-        nodeId
-        name
-      }
-    }
-  }
-`;
-
-const DELETE_CONNECTION = gql`
-  mutation deleteConnection($id: String!) {
-    deleteConnection(id: $id)
-  }
-`;
-
-const ADD_OR_UPDATE_FORM_VALUE = gql`
-  mutation addOrUpdateFormValue(
-    $nodeId: String!
-    $name: String!
-    $value: String!
-  ) {
-    addOrUpdateFormValue(nodeId: $nodeId, name: $name, value: $value)
-  }
-`;
-
-const START_CALCULATION = gql`
-  mutation startCalculation($workspaceId: String!) {
-    startCalculation(workspaceId: $workspaceId) {
-      id
-      start
-      state
-    }
-  }
-`;
 
 export interface WorkspaceEditorPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
@@ -283,12 +159,49 @@ export class WorkspaceEditorPage extends React.Component<
       failedTitle: 'Process start has failed'
     });
 
+  private renderCalculationProcessCard = (
+    currentCalculation: CalculationProcess
+  ) => (
+    <Mutation mutation={STOP_CALCULATION}>
+      {stopCalculation => (
+        <LoadingCard text="Calculation in progress...">
+          <p>
+            {`Processed ${currentCalculation.processedOutputs} of ${
+              currentCalculation.totalOutputs
+            } nodes | Started ${distanceInWordsToNow(currentCalculation.start, {
+              includeSeconds: true,
+              addSuffix: true
+            })}`}
+          </p>
+          <AsyncButton
+            type="danger"
+            icon="close"
+            fullWidth={false}
+            onClick={async () => {
+              await stopCalculation({
+                variables: { id: currentCalculation.id }
+              });
+              showNotificationWithIcon({
+                icon: 'info',
+                title: 'Calculation will be stopped',
+                content: 'Please wait until the calculation has been stopped'
+              });
+            }}
+          >
+            Cancel Calculation
+          </AsyncButton>
+        </LoadingCard>
+      )}
+    </Mutation>
+  );
+
   public render() {
     const {
       match: {
         params: { workspaceId }
       }
     } = this.props;
+
     return (
       <Query query={WORKSPACE_NODE_SELECTION} variables={{ workspaceId }}>
         {({ loading, error, data, refetch, startPolling, stopPolling }) => {
@@ -310,27 +223,12 @@ export class WorkspaceEditorPage extends React.Component<
           }
 
           const inprocessCalculations = data.calculations.filter(
-            n => n.state === 'PROCESSING'
+            n => n.state === ProcessState.PROCESSING
           );
 
           if (inprocessCalculations.length > 0) {
             startPolling(POLLING_FREQUENCY);
-
-            return (
-              <LoadingCard
-                text={`Calculation in progress... Processed ${
-                  inprocessCalculations[0].processedOutputs
-                } of ${
-                  inprocessCalculations[0].totalOutputs
-                } (Started ${distanceInWordsToNow(
-                  inprocessCalculations[0].start,
-                  {
-                    includeSeconds: true,
-                    addSuffix: true
-                  }
-                )})`}
-              />
-            );
+            return this.renderCalculationProcessCard(inprocessCalculations[0]);
           }
 
           if (inprocessCalculations.length === 0) {

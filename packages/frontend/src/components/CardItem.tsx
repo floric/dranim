@@ -36,6 +36,7 @@ export const CardItem: React.SFC<CardItemProps> = ({
     <Row type="flex" justify="end" style={{ marginTop: 12 }} gutter={12}>
       <Col>
         <AsyncButton
+          type="danger"
           confirmClick={!!confirmDeleteMessage}
           confirmMessage={confirmDeleteMessage}
           icon="delete"

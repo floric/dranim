@@ -7,6 +7,7 @@ import {
   NodeInstance,
   NodeState,
   parseNodeForm,
+  ProcessState,
   ServerNodeDef,
   ServerNodeDefWithContextFn,
   SocketState
@@ -16,11 +17,12 @@ import {
   executeNode,
   executeNodeWithId
 } from '../../../src/main/calculation/execution';
+import { tryGetCalculation } from '../../../src/main/calculation/start-process';
 import {
   areNodeInputsValid,
   isNodeInMetaValid
 } from '../../../src/main/calculation/validation';
-import { tryGetNodeType } from '../../../src/main/nodes/all-nodes';
+import { getNodeType, tryGetNodeType } from '../../../src/main/nodes/all-nodes';
 import { tryGetConnection } from '../../../src/main/workspace/connections';
 import {
   tryGetContextNode,
@@ -34,6 +36,7 @@ jest.mock('../../../src/main/workspace/nodes');
 jest.mock('../../../src/main/calculation/validation');
 jest.mock('../../../src/main/nodes/all-nodes');
 jest.mock('../../../src/main/workspace/connections');
+jest.mock('../../../src/main/calculation/start-process');
 
 describe('Execution', () => {
   beforeEach(async () => {
@@ -75,11 +78,18 @@ describe('Execution', () => {
     (parseNodeForm as jest.Mock).mockReturnValue({});
     (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
     (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
-
-    const { outputs, results } = await executeNodeWithId(VALID_OBJECT_ID, {
-      db: null,
-      userId: ''
+    (tryGetCalculation as jest.Mock).mockResolvedValue({
+      state: ProcessState.PROCESSING
     });
+
+    const { outputs, results } = await executeNodeWithId(
+      VALID_OBJECT_ID,
+      VALID_OBJECT_ID,
+      {
+        db: null,
+        userId: ''
+      }
+    );
 
     expect(outputs).toBeDefined();
     expect(results).toBeUndefined();
@@ -163,8 +173,11 @@ describe('Execution', () => {
     (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
     (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
     (tryGetConnection as jest.Mock).mockResolvedValue(conn);
+    (tryGetCalculation as jest.Mock).mockResolvedValue({
+      state: ProcessState.PROCESSING
+    });
 
-    const res = await executeNodeWithId(nodeB.id, {
+    const res = await executeNodeWithId(nodeB.id, VALID_OBJECT_ID, {
       db: null,
       userId: ''
     });
@@ -188,6 +201,7 @@ describe('Execution', () => {
         state: NodeState.VALID,
         variables: {}
       },
+      VALID_OBJECT_ID,
       { db: null, userId: '' },
       contextInputs
     );
@@ -214,6 +228,9 @@ describe('Execution', () => {
     });
     (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
     (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
+    (tryGetCalculation as jest.Mock).mockResolvedValue({
+      state: ProcessState.PROCESSING
+    });
 
     try {
       await executeNode(
@@ -230,6 +247,7 @@ describe('Execution', () => {
           state: NodeState.VALID,
           variables: {}
         },
+        VALID_OBJECT_ID,
         { db: null, userId: '' }
       );
       throw NeverGoHereError;
@@ -238,32 +256,56 @@ describe('Execution', () => {
     }
   });
 
-  test('should fail for invalid form', async () => {
-    const node: NodeInstance = {
-      id: 'nodeB',
-      contextIds: [],
-      form: [],
-      inputs: [],
-      outputs: [],
+  test('should throw error for canceled process', async () => {
+    const type: ServerNodeDef & NodeDef = {
       type: 'type',
-      workspaceId: VALID_OBJECT_ID,
-      x: 0,
-      y: 0,
-      state: NodeState.VALID,
-      variables: {}
+      name: 'a',
+      inputs: {
+        a: {
+          dataType: DataType.STRING,
+          displayName: 'value',
+          state: SocketState.STATIC
+        }
+      },
+      outputs: {},
+      keywords: [],
+      path: [],
+      isFormValid: async () => true,
+      onMetaExecution: async () => ({}),
+      onNodeExecution: jest.fn()
     };
-    (tryGetNode as jest.Mock).mockResolvedValue(node);
-    (tryGetNodeType as jest.Mock).mockImplementation(() => {
-      throw new Error('Unknown node type: UnknownNodeType');
-    });
-    (isNodeInMetaValid as jest.Mock).mockResolvedValue(false);
+    (getNodeType as jest.Mock).mockReturnValue(type);
+    (tryGetNodeType as jest.Mock).mockReturnValue(type);
+    (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
     (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
+    (hasContextFn as any).mockReturnValue(false);
+    (tryGetCalculation as jest.Mock).mockResolvedValue({
+      state: ProcessState.CANCELED
+    });
 
     try {
-      await executeNode(node, { db: null, userId: '' });
+      await executeNode(
+        {
+          type: 'UnknownNodeType',
+          x: 0,
+          y: 0,
+          workspaceId: VALID_OBJECT_ID,
+          id: VALID_OBJECT_ID,
+          outputs: [],
+          inputs: [],
+          form: [],
+          contextIds: [],
+          state: NodeState.VALID,
+          variables: {}
+        },
+        VALID_OBJECT_ID,
+        { db: null, userId: '' }
+      );
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Form values or inputs are missing');
+      expect(type.onNodeExecution).not.toHaveBeenCalled();
+      expect(tryGetCalculation).toHaveBeenCalled();
+      expect(err.message).toBe('Process canceled or failed');
     }
   });
 
@@ -295,9 +337,12 @@ describe('Execution', () => {
     (tryGetNodeType as jest.Mock).mockReturnValue(type);
     (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
     (areNodeInputsValid as jest.Mock).mockResolvedValue(false);
+    (tryGetCalculation as jest.Mock).mockResolvedValue({
+      state: ProcessState.PROCESSING
+    });
 
     try {
-      await executeNode(node, { db: null, userId: '' });
+      await executeNode(node, VALID_OBJECT_ID, { db: null, userId: '' });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Execution inputs are not valid');
@@ -430,8 +475,11 @@ describe('Execution', () => {
     (tryGetConnection as jest.Mock)
       .mockResolvedValueOnce(connA)
       .mockResolvedValueOnce(connB);
+    (tryGetCalculation as jest.Mock).mockResolvedValue({
+      state: ProcessState.PROCESSING
+    });
 
-    const res = await executeNode(sumNode, {
+    const res = await executeNode(sumNode, VALID_OBJECT_ID, {
       db: null,
       userId: ''
     });
@@ -530,8 +578,11 @@ describe('Execution', () => {
     (hasContextFn as any)
       .mockReturnValueOnce(true)
       .mockResolvedValueOnce(false);
+    (tryGetCalculation as jest.Mock).mockResolvedValue({
+      state: ProcessState.PROCESSING
+    });
 
-    const res = await executeNode(node, {
+    const res = await executeNode(node, VALID_OBJECT_ID, {
       db: null,
       userId: ''
     });
@@ -553,9 +604,12 @@ describe('Execution', () => {
       variables: {}
     };
     (tryGetNode as jest.Mock).mockResolvedValue(node);
+    (tryGetCalculation as jest.Mock).mockResolvedValue({
+      state: ProcessState.PROCESSING
+    });
 
     try {
-      await executeNode(node, {
+      await executeNode(node, VALID_OBJECT_ID, {
         db: null,
         userId: ''
       });

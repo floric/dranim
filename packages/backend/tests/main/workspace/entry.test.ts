@@ -10,8 +10,7 @@ import {
   getEntriesCount,
   getEntry,
   getEntryCollection,
-  getLatestEntries,
-  getAllEntries
+  getLatestEntries
 } from '../../../src/main/workspace/entry';
 import {
   getTestMongoDb,
@@ -55,6 +54,8 @@ describe('Entry', () => {
       fallback: ''
     };
     const ds: Dataset = {
+      created: '',
+      description: '',
       id: VALID_OBJECT_ID,
       name: 'ds',
       workspaceId: 'ws',
@@ -100,6 +101,8 @@ describe('Entry', () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
       name: 'ds',
+      created: '',
+      description: '',
       workspaceId: 'ws',
       valueschemas: []
     };
@@ -133,6 +136,8 @@ describe('Entry', () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
       name: 'ds',
+      created: '',
+      description: '',
       workspaceId: 'ws',
       valueschemas: [schemaA, schemaB]
     };
@@ -187,6 +192,8 @@ describe('Entry', () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
       name: 'ds',
+      created: '',
+      description: '',
       workspaceId: 'ws',
       valueschemas: [schema]
     };
@@ -227,6 +234,8 @@ describe('Entry', () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
       name: 'ds',
+      created: '',
+      description: '',
       workspaceId: 'ws',
       valueschemas: [schema]
     };
@@ -262,6 +271,8 @@ describe('Entry', () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
       name: 'ds',
+      created: '',
+      description: '',
       workspaceId: 'ws',
       valueschemas: []
     };
@@ -288,6 +299,8 @@ describe('Entry', () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
       name: 'ds',
+      created: '',
+      description: '',
       workspaceId: 'ws',
       valueschemas: []
     };
@@ -314,6 +327,8 @@ describe('Entry', () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
       name: 'ds',
+      created: '',
+      description: '',
       workspaceId: 'ws',
       valueschemas: []
     };
@@ -388,6 +403,8 @@ describe('Entry', () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
       name: 'ds',
+      created: '',
+      description: '',
       workspaceId: 'ws',
       valueschemas: [schemaA, schemaB]
     };
@@ -421,6 +438,8 @@ describe('Entry', () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
       name: 'ds',
+      created: '',
+      description: '',
       workspaceId: 'ws',
       valueschemas: [schema]
     };
@@ -457,6 +476,8 @@ describe('Entry', () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
       name: 'ds',
+      created: '',
+      description: '',
       workspaceId: 'ws',
       valueschemas: [schema]
     };
@@ -493,6 +514,46 @@ describe('Entry', () => {
     }
   });
 
+  test('should bypass schema validation when creating entry', async () => {
+    const schema: ValueSchema = {
+      name: 'test',
+      type: DataType.STRING,
+      required: true,
+      unique: true,
+      fallback: ''
+    };
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      created: '',
+      description: '',
+      workspaceId: 'ws',
+      valueschemas: [schema]
+    };
+
+    (getDataset as jest.Mock).mockResolvedValue(ds);
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
+
+    await createEntry(
+      ds.id,
+      { unknown: 'test' },
+      {
+        db,
+        userId: ''
+      },
+      { skipSchemaValidation: true }
+    );
+    await createEntry(
+      ds.id,
+      { else: 'test' },
+      {
+        db,
+        userId: ''
+      },
+      { skipSchemaValidation: true }
+    );
+  });
+
   test('should throw error for invalid id formats', async () => {
     try {
       await deleteEntry('test', VALID_OBJECT_ID, {
@@ -519,6 +580,8 @@ describe('Entry', () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
       name: 'ds',
+      created: '',
+      description: '',
       workspaceId: 'ws',
       valueschemas: [
         {
@@ -565,10 +628,57 @@ describe('Entry', () => {
     expect(entriesCount).toBe(1);
   });
 
+  test('should get latest entries', async () => {
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      created: '',
+      description: '',
+      workspaceId: 'ws',
+      valueschemas: [
+        {
+          name: 'value',
+          type: DataType.STRING,
+          unique: false,
+          fallback: '',
+          required: true
+        }
+      ]
+    };
+
+    (getDataset as jest.Mock).mockResolvedValue(ds);
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
+
+    await Promise.all(
+      [1, 2, 3, 4, 5].map(n =>
+        createEntry(
+          ds.id,
+          { value: n },
+          {
+            db,
+            userId: ''
+          }
+        )
+      )
+    );
+
+    let allEntries = await getLatestEntries(ds.id, { db, userId: '' });
+    expect(allEntries.length).toBe(5);
+
+    allEntries = await getLatestEntries(
+      ds.id,
+      { db, userId: '' },
+      { count: 3 }
+    );
+    expect(allEntries.length).toBe(3);
+  });
+
   test('should clear entries', async () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
       name: 'ds',
+      created: '',
+      description: '',
       workspaceId: 'ws',
       valueschemas: [
         {
@@ -602,7 +712,7 @@ describe('Entry', () => {
     });
     expect(entriesCount).toBe(5);
 
-    const allEntries = await getAllEntries(ds.id, { db, userId: '' });
+    const allEntries = await getLatestEntries(ds.id, { db, userId: '' });
     expect(allEntries.length).toBe(5);
 
     await clearEntries(ds.id, {

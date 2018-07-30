@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { CalculationProcess, ProcessState } from '@masterthesis/shared';
-import { Card, Col, Icon, Row, Table } from 'antd';
+import { Card, Col, Icon, Row, Table, Tooltip } from 'antd';
 import gql from 'graphql-tag';
 import { Component } from 'react';
 import { Query } from 'react-apollo';
@@ -46,24 +46,34 @@ export class WorkspaceCalculationsPage extends Component<
             return <UnknownErrorCard error={error} />;
           }
 
-          const calculations: Array<CalculationProcess> = data.calculations;
+          const calculations: Array<CalculationProcess> = Array.from(
+            data.calculations
+          );
 
-          const schemasDataSource = calculations.map(e => ({
-            key: e.id,
-            time: { start: e.start, finish: e.finish },
-            state:
-              e.state === ProcessState.SUCCESSFUL ? (
-                <Icon type="check-circle" />
-              ) : e.state === ProcessState.PROCESSING ? (
-                <Icon type="clock-circle" />
-              ) : (
-                <Icon type="exclamation-circle" />
+          const schemasDataSource = calculations
+            .sort(
+              (a, b) =>
+                new Date(b.start).getTime() - new Date(a.start).getTime()
+            )
+            .map(e => ({
+              key: e.id,
+              time: { start: e.start, finish: e.finish },
+              state: (
+                <Tooltip title={e.state.toLowerCase()}>
+                  {e.state === ProcessState.SUCCESSFUL ? (
+                    <Icon type="check-circle" />
+                  ) : e.state === ProcessState.PROCESSING ? (
+                    <Icon type="clock-circle" />
+                  ) : (
+                    <Icon type="exclamation-circle" />
+                  )}
+                </Tooltip>
               ),
-            results: {
-              processed: e.processedOutputs.toLocaleString(),
-              total: e.totalOutputs.toLocaleString()
-            }
-          }));
+              results: {
+                processed: e.processedOutputs.toLocaleString(),
+                total: e.totalOutputs.toLocaleString()
+              }
+            }));
 
           const schemasColumns = [
             {

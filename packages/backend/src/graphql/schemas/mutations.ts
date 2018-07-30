@@ -64,5 +64,6 @@ export const MutationDef = `
     createBirthdaysDemoData: Boolean!
     uploadEntriesCsv (files: [Upload!]!, datasetId: String!): UploadProcess!
     startCalculation (workspaceId: String!): CalculationProcess!
+    stopCalculation (id: String!): Boolean!
   }
 `;

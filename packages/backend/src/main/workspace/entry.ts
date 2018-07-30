@@ -28,14 +28,6 @@ export const getEntry = async (
   };
 };
 
-export const getAllEntries = async (
-  datasetId: string,
-  reqContext: ApolloContext
-): Promise<Array<Entry>> => {
-  const collection = getEntryCollection(datasetId, reqContext.db);
-  return await collection.find().toArray();
-};
-
 export const getEntriesCount = async (
   datasetId: string,
   reqContext: ApolloContext
@@ -55,15 +47,20 @@ export const clearEntries = async (
   }
 };
 
+export interface LatestEntriesOptions {
+  count?: number;
+}
+
 export const getLatestEntries = async (
   datasetId: string,
-  reqContext: ApolloContext
+  reqContext: ApolloContext,
+  options?: LatestEntriesOptions
 ): Promise<Array<Entry>> => {
   const collection = getEntryCollection(datasetId, reqContext.db);
   // TODO Introduce pagination later
   const entries = await collection
     .find()
-    .limit(20)
+    .limit(options && options.count ? options.count : 100)
     .toArray();
   return entries.map(e => ({
     id: e._id.toHexString(),
@@ -71,10 +68,15 @@ export const getLatestEntries = async (
   }));
 };
 
+export interface CreateEntryOptions {
+  skipSchemaValidation?: boolean;
+}
+
 export const createEntry = async (
   datasetId: string,
   values: Values,
-  reqContext: ApolloContext
+  reqContext: ApolloContext,
+  options?: CreateEntryOptions
 ): Promise<Entry> => {
   const valuesArr = Array.from(Object.entries(values));
 
@@ -89,8 +91,10 @@ export const createEntry = async (
   });
 
   const ds = await tryGetDataset(datasetId, reqContext);
-  await checkForMissingValues(ds, valuesArr.map(v => v[0]));
-  await checkForUnsupportedValues(ds, valuesArr.map(v => v[0]));
+  if (!options || !options.skipSchemaValidation) {
+    await checkForMissingValues(ds, valuesArr.map(v => v[0]));
+    await checkForUnsupportedValues(ds, valuesArr.map(v => v[0]));
+  }
 
   try {
     const collection = getEntryCollection(ds.id, reqContext.db);
@@ -152,10 +156,11 @@ const checkForUnsupportedValues = async (
 export const createEntryFromJSON = async (
   datasetId: string,
   values: string,
-  reqContext: ApolloContext
+  reqContext: ApolloContext,
+  options?: CreateEntryOptions
 ): Promise<Entry> => {
   const parsedValues: Values = JSON.parse(values);
-  return await createEntry(datasetId, parsedValues, reqContext);
+  return await createEntry(datasetId, parsedValues, reqContext, options);
 };
 
 export const deleteEntry = async (

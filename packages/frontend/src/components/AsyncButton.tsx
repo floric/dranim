@@ -11,6 +11,7 @@ export interface AsyncButtonProps {
   onClick: () => Promise<any>;
   confirmClick?: boolean;
   confirmMessage?: string;
+  fullWidth?: boolean;
 }
 
 export class AsyncButton extends React.Component<
@@ -53,20 +54,21 @@ export class AsyncButton extends React.Component<
       disabled,
       type,
       icon,
+      fullWidth = true,
       confirmClick,
-      confirmMessage
+      confirmMessage = 'Really do this action?'
     } = this.props;
 
     if (confirmClick) {
       return (
         <Popconfirm
-          title={confirmMessage ? confirmMessage : 'Really do this action?'}
+          title={confirmMessage}
           onConfirm={ev => this.handleClick(ev)}
           okText="Confirm"
           cancelText="Cancel"
         >
           <Button
-            style={{ width: '100%' }}
+            style={fullWidth ? { width: '100%' } : undefined}
             type={type}
             icon={icon}
             disabled={disabled}
@@ -80,7 +82,7 @@ export class AsyncButton extends React.Component<
 
     return (
       <Button
-        style={{ width: '100%' }}
+        style={fullWidth ? { width: '100%' } : undefined}
         type={type}
         icon={icon}
         disabled={disabled}

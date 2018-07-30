@@ -17,6 +17,9 @@ import { ClientNodeDef } from '../all-nodes';
 const UNIQUE = 'unique';
 const REQUIRED = 'required';
 
+const ADDED_SCHEMAS = 'addedSchemas';
+const DISTINCT_SCHEMAS = 'distinctSchemas';
+
 export const DistinctEntriesNode: ClientNodeDef<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
@@ -31,13 +34,14 @@ export const DistinctEntriesNode: ClientNodeDef<
     setTempState,
     getTempState
   }) => {
-    getFieldDecorator('newSchemas', {
-      initialValue: nodeForm.newSchemas || []
+    getFieldDecorator(ADDED_SCHEMAS, {
+      initialValue: nodeForm[ADDED_SCHEMAS] || []
     });
-    getFieldDecorator('schema', {
-      initialValue: nodeForm.schema ? nodeForm.schema : null
+    getFieldDecorator(DISTINCT_SCHEMAS, {
+      initialValue: nodeForm[DISTINCT_SCHEMAS] || []
     });
-    const values = getFieldValue('newSchemas');
+    const schemas = getFieldValue(ADDED_SCHEMAS);
+    const values = getFieldValue(DISTINCT_SCHEMAS);
 
     if (!inputs.dataset || !inputs.dataset.isPresent) {
       return (
@@ -53,35 +57,47 @@ export const DistinctEntriesNode: ClientNodeDef<
     return (
       <>
         <Row style={{ marginBottom: 8 }} gutter={8}>
-          <Col xs={24} lg={6} xxl={6}>
+          <Col xs={24} lg={18} xxl={14}>
             <Select
               showSearch
-              defaultValue={
-                nodeForm.schema && nodeForm.schema.name
-                  ? nodeForm.schema.name
-                  : undefined
-              }
               style={{ width: 200 }}
-              placeholder="Select Schema"
-              onChange={name => {
-                setFieldsValue({
-                  schema: inputs.dataset.content.schema.find(
-                    n => n.name === name
+              placeholder="Select Value"
+              onChange={val =>
+                setTempState({
+                  newValue: inputs.dataset.content.schema.find(
+                    n => n.name === val
                   )
-                });
-                touchForm();
-              }}
+                })
+              }
             >
               {inputs.dataset.content.schema
                 .filter(n => n.type === DataType.STRING)
                 .filter(n => n.unique === false)
                 .filter(n => n.required === true)
+                .filter(n => values.find(v => v.name === n.name) === undefined)
                 .map(o => (
                   <Select.Option value={o.name} key={o.name}>
                     {o.name}
                   </Select.Option>
                 ))}
             </Select>
+          </Col>
+          <Col xs={24} lg={6} xxl={4}>
+            <Button
+              icon="plus"
+              style={{ width: '100%' }}
+              onClick={() =>
+                addValue(
+                  getFieldValue,
+                  setFieldsValue,
+                  touchForm,
+                  values,
+                  getTempState
+                )
+              }
+            >
+              Add distinct Value
+            </Button>
           </Col>
         </Row>
         <Row style={{ marginBottom: 8 }} gutter={8}>
@@ -121,16 +137,16 @@ export const DistinctEntriesNode: ClientNodeDef<
               }
             />
           </Col>
-          <Col xs={24} lg={6} xxl={3}>
+          <Col xs={24} lg={6} xxl={4}>
             <Button
               icon="plus"
               style={{ width: '100%' }}
               onClick={() =>
-                addValue(
+                addSchema(
                   getFieldValue,
                   setFieldsValue,
                   touchForm,
-                  values,
+                  schemas,
                   getTempState
                 )
               }
@@ -139,13 +155,14 @@ export const DistinctEntriesNode: ClientNodeDef<
             </Button>
           </Col>
         </Row>
+        {schemas.map(v => renderSchema(v, setFieldsValue, touchForm, schemas))}
         {values.map(v => renderValue(v, setFieldsValue, touchForm, values))}
       </>
     );
   }
 };
 
-const renderValue = (
+const renderSchema = (
   v: ValueSchema,
   setFieldsValue: (obj: object) => void,
   touchForm: () => void,
@@ -165,6 +182,27 @@ const renderValue = (
         type="dashed"
         shape="circle"
         icon="cross"
+        onClick={() => removeSchema(v, setFieldsValue, touchForm, values)}
+      />
+    </Col>
+  </Row>
+);
+
+const renderValue = (
+  v: ValueSchema,
+  setFieldsValue: (obj: object) => void,
+  touchForm: () => void,
+  values: Array<ValueSchema>
+) => (
+  <Row key={v.name} justify="space-around" gutter={8}>
+    <Col xs={9} lg={6} xxl={6}>
+      <p>{v.name}</p>
+    </Col>
+    <Col xs={6} lg={6} xxl={3}>
+      <Button
+        type="dashed"
+        shape="circle"
+        icon="cross"
         onClick={() => removeValue(v, setFieldsValue, touchForm, values)}
       />
     </Col>
@@ -175,19 +213,19 @@ const defaultName = '';
 const defaultType = DataType.STRING;
 const defaultTags = [REQUIRED];
 
-const removeValue = (
+const removeSchema = (
   v: ValueSchema,
   setFieldsValue: (obj: object) => void,
   touchForm: () => void,
   values: Array<ValueSchema>
 ) => {
   setFieldsValue({
-    newSchemas: values.filter(n => n.name !== v.name)
+    [ADDED_SCHEMAS]: values.filter(n => n.name !== v.name)
   });
   touchForm();
 };
 
-const addValue = (
+const addSchema = (
   getFieldValue: (name: string) => any,
   setFieldsValue: (obj: object) => void,
   touchForm: () => void,
@@ -211,7 +249,7 @@ const addValue = (
     showNotificationWithIcon({
       icon: 'error',
       content: 'Name must be unique and not empty',
-      title: 'Value not added'
+      title: 'Schema not added'
     });
     return;
   }
@@ -225,7 +263,33 @@ const addValue = (
   };
 
   setFieldsValue({
-    newSchemas: [...values, newVal]
+    [ADDED_SCHEMAS]: [...values, newVal]
+  });
+  touchForm();
+};
+
+const removeValue = (
+  v: ValueSchema,
+  setFieldsValue: (obj: object) => void,
+  touchForm: () => void,
+  values: Array<ValueSchema>
+) => {
+  setFieldsValue({
+    [DISTINCT_SCHEMAS]: values.filter(n => n.name !== v.name)
+  });
+  touchForm();
+};
+
+const addValue = (
+  getFieldValue: (name: string) => any,
+  setFieldsValue: (obj: object) => void,
+  touchForm: () => void,
+  values: Array<ValueSchema>,
+  getTempState: () => any
+) => {
+  const tempState = getTempState();
+  setFieldsValue({
+    [DISTINCT_SCHEMAS]: [...values, tempState.newValue]
   });
   touchForm();
 };

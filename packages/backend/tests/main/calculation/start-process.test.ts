@@ -1,4 +1,5 @@
 import {
+  ApolloContext,
   DatasetOutputNodeDef,
   DataType,
   IOValues,
@@ -12,12 +13,14 @@ import { Db } from 'mongodb';
 import { executeNode } from '../../../src/main/calculation/execution';
 import {
   getAllCalculations,
-  startCalculation
+  startCalculation,
+  stopCalculation,
+  tryGetCalculation
 } from '../../../src/main/calculation/start-process';
 import { addOrUpdateResult } from '../../../src/main/dashboards/results';
 import { createNode } from '../../../src/main/workspace/nodes';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
-import { getTestMongoDb } from '../../test-utils';
+import { getTestMongoDb, VALID_OBJECT_ID } from '../../test-utils';
 
 let conn;
 let db: Db;
@@ -61,7 +64,11 @@ describe('Start Process', () => {
     );
 
     const ws = await createWorkspace('test', { db, userId: '' }, '');
-    const newProcess = await startCalculation(ws.id, { db, userId: '' }, true);
+    const newProcess = await startCalculation(
+      ws.id,
+      { db, userId: '' },
+      { awaitResult: true }
+    );
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
     expect(newProcess.finish).toBeNull();
@@ -113,7 +120,11 @@ describe('Start Process', () => {
       )
     );
 
-    const newProcess = await startCalculation(ws.id, { db, userId: '' }, true);
+    const newProcess = await startCalculation(
+      ws.id,
+      { db, userId: '' },
+      { awaitResult: true }
+    );
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
     expect(newProcess.finish).toBeNull();
@@ -179,7 +190,11 @@ describe('Start Process', () => {
       )
     );
 
-    const newProcess = await startCalculation(ws.id, { db, userId: '' }, true);
+    const newProcess = await startCalculation(
+      ws.id,
+      { db, userId: '' },
+      { awaitResult: true }
+    );
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
     expect(newProcess.finish).toBeNull();
@@ -215,6 +230,51 @@ describe('Start Process', () => {
     );
   });
 
+  test('should stop calculation', async () => {
+    const ws = await createWorkspace('test', { db, userId: '' }, '');
+    const calculation = await startCalculation(
+      ws.id,
+      { db, userId: '' },
+      { awaitResult: true }
+    );
+
+    const res = await stopCalculation(calculation.id, { db, userId: '' });
+    expect(res).toBe(true);
+  });
+
+  test('should get calculation', async () => {
+    const ws = await createWorkspace('test', { db, userId: '' }, '');
+    const calculation = await startCalculation(
+      ws.id,
+      { db, userId: '' },
+      { awaitResult: true }
+    );
+
+    const res = await tryGetCalculation(calculation.id, { db, userId: '' });
+    expect({
+      ...res,
+      ...{ finish: null, state: ProcessState.STARTED }
+    }).toEqual(calculation);
+  });
+
+  test('should not get calculation', async () => {
+    const reqContext: ApolloContext = { userId: '', db };
+
+    try {
+      const res = await tryGetCalculation('abc', reqContext);
+      expect(res).toBe(null);
+    } catch (e) {
+      expect(e.message).toBe('Unknown calculation');
+    }
+
+    try {
+      const res = await tryGetCalculation(VALID_OBJECT_ID, reqContext);
+      expect(res).toBe(null);
+    } catch (e) {
+      expect(e.message).toBe('Unknown calculation');
+    }
+  });
+
   test('should catch error for failed node execution', async () => {
     (executeNode as jest.Mock).mockImplementation(n => {
       throw new Error('Something went wrong during node execution.');
@@ -234,7 +294,11 @@ describe('Start Process', () => {
       )
     );
 
-    const newProcess = await startCalculation(ws.id, { db, userId: '' }, true);
+    const newProcess = await startCalculation(
+      ws.id,
+      { db, userId: '' },
+      { awaitResult: true }
+    );
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
     expect(newProcess.finish).toBeNull();

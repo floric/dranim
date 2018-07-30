@@ -48,8 +48,8 @@ export const FilterEntriesNodeDef: NodeDef<
 };
 
 export interface DistinctEntriesNodeForm {
-  schema: ValueSchema;
-  newSchemas: Array<ValueSchema>;
+  distinctSchemas: Array<ValueSchema>;
+  addedSchemas: Array<ValueSchema>;
 }
 
 export const DistinctEntriesNodeDef: NodeDef<
