@@ -22,7 +22,7 @@ import {
   areNodeInputsValid,
   isNodeInMetaValid
 } from '../../../src/main/calculation/validation';
-import { tryGetNodeType, getNodeType } from '../../../src/main/nodes/all-nodes';
+import { getNodeType, tryGetNodeType } from '../../../src/main/nodes/all-nodes';
 import { tryGetConnection } from '../../../src/main/workspace/connections';
 import {
   tryGetContextNode,
@@ -257,19 +257,6 @@ describe('Execution', () => {
   });
 
   test('should throw error for canceled process', async () => {
-    const node: NodeInstance = {
-      id: 'nodeB',
-      contextIds: [],
-      form: [],
-      inputs: [],
-      outputs: [],
-      type: 'type',
-      workspaceId: VALID_OBJECT_ID,
-      x: 0,
-      y: 0,
-      state: NodeState.VALID,
-      variables: {}
-    };
     const type: ServerNodeDef & NodeDef = {
       type: 'type',
       name: 'a',
@@ -287,10 +274,11 @@ describe('Execution', () => {
       onMetaExecution: async () => ({}),
       onNodeExecution: jest.fn()
     };
-    (tryGetNode as jest.Mock).mockResolvedValue(node);
     (getNodeType as jest.Mock).mockReturnValue(type);
+    (tryGetNodeType as jest.Mock).mockReturnValue(type);
     (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
     (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
+    (hasContextFn as any).mockReturnValue(false);
     (tryGetCalculation as jest.Mock).mockResolvedValue({
       state: ProcessState.CANCELED
     });
@@ -306,7 +294,7 @@ describe('Execution', () => {
           outputs: [],
           inputs: [],
           form: [],
-          contextIds: [VALID_OBJECT_ID],
+          contextIds: [],
           state: NodeState.VALID,
           variables: {}
         },
@@ -315,8 +303,9 @@ describe('Execution', () => {
       );
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Process canceled or failed');
       expect(type.onNodeExecution).not.toHaveBeenCalled();
+      expect(tryGetCalculation).toHaveBeenCalled();
+      expect(err.message).toBe('Process canceled or failed');
     }
   });
 

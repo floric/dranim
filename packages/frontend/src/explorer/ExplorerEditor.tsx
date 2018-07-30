@@ -207,6 +207,7 @@ export class ExplorerEditor extends React.Component<
                   <h4>Actions</h4>
                   {node && (
                     <AsyncButton
+                      type="danger"
                       confirmMessage="Delete Node?"
                       icon="delete"
                       confirmClick
@@ -258,6 +259,7 @@ export class ExplorerEditor extends React.Component<
                   )}
                 <Col>
                   <AsyncButton
+                    type="primary"
                     icon="rocket"
                     onClick={this.handleStartCalulcation}
                     disabled={

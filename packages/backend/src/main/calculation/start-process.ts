@@ -40,7 +40,7 @@ const startProcess = async (
       }
     );
 
-    Log.info('Started calculation.');
+    Log.info(`Started calculation ${processId}`);
 
     const results = await Promise.all(
       outputNodesInstances.map(o => executeOutputNode(o, processId, reqContext))
@@ -148,7 +148,8 @@ export const startCalculation = async (
     throw new Error('Process creation failed');
   }
 
-  const id = newProcess.ops[0]._id.toHexString();
+  const { _id, ...obj } = newProcess.ops[0];
+  const id = _id.toHexString();
 
   if (options && options.awaitResult) {
     await startProcess(id, workspaceId, reqContext);
@@ -158,7 +159,7 @@ export const startCalculation = async (
 
   return {
     id,
-    ...newProcess.ops[0]
+    ...obj
   };
 };
 
@@ -179,6 +180,9 @@ export const stopCalculation = async (
   if (res.modifiedCount !== 1) {
     throw new Error('Process update failed');
   }
+
+  Log.info(`Stopped Calculation ${id}`);
+
   return true;
 };
 

@@ -12,7 +12,7 @@ import {
   ServerNodeDefWithContextFn
 } from '@masterthesis/shared';
 
-import { tryGetNodeType, getNodeType } from '../nodes/all-nodes';
+import { tryGetNodeType } from '../nodes/all-nodes';
 import { tryGetConnection } from '../workspace/connections';
 import { tryGetContextNode, tryGetNode } from '../workspace/nodes';
 import { tryGetCalculation } from './start-process';
@@ -56,7 +56,7 @@ export const executeNode = async (
   const nodeInputs = inputValuesToObject(inputValues);
   const nodeForm = parseNodeForm(node.form);
 
-  await validateInputsAndForm(node, nodeInputs, reqContext);
+  await validateInputs(node, nodeInputs, reqContext);
 
   const type = tryGetNodeType(node.type);
   if (hasContextFn(type)) {
@@ -70,6 +70,19 @@ export const executeNode = async (
     );
   }
 
+  await checkForCanceledProcess(node, processId, reqContext);
+
+  return await type.onNodeExecution(nodeForm, nodeInputs, {
+    reqContext,
+    node
+  });
+};
+
+const checkForCanceledProcess = async (
+  node: NodeInstance,
+  processId: string,
+  reqContext: ApolloContext
+) => {
   if (node.contextIds.length === 0) {
     const process = await tryGetCalculation(processId, reqContext);
     if (
@@ -79,30 +92,14 @@ export const executeNode = async (
       throw new Error('Process canceled or failed');
     }
   }
-
-  return await type.onNodeExecution(nodeForm, nodeInputs, {
-    reqContext,
-    node
-  });
 };
 
-const validateInputsAndForm = async (
+const validateInputs = async (
   node: NodeInstance,
   nodeInputs: IOValues<{}>,
   reqContext: ApolloContext
 ) => {
-  const nodeType = getNodeType(node.type);
-  if (nodeType) {
-    const isFormValid = nodeType.isFormValid
-      ? await nodeType.isFormValid(node.form)
-      : true;
-    if (!isFormValid) {
-      throw new Error('Form is invalid');
-    }
-  }
-
   const execValid = await areNodeInputsValid(node, nodeInputs, reqContext);
-
   if (!execValid) {
     throw new Error('Execution inputs are not valid');
   }

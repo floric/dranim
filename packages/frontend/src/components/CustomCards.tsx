@@ -20,11 +20,15 @@ const DefaultErrorActionsImpl: SFC<{ history: History }> = ({ history }) => (
 
 const DefaultErrorActions = withRouter(DefaultErrorActionsImpl);
 
-export const LoadingCard: SFC<SpinProps & { text?: string }> = props => (
+export const LoadingCard: SFC<SpinProps & { text?: string }> = ({
+  children,
+  text,
+  ...otherProps
+}) => (
   <Card bordered={false} style={{ textAlign: 'center' }}>
-    <Spin indicator={LoadingIcon} {...props} />
-    <p>{props.text || 'Loading...'}</p>
-    {props.children}
+    <Spin indicator={LoadingIcon} {...otherProps} />
+    <p>{text || 'Loading...'}</p>
+    {children}
   </Card>
 );
 

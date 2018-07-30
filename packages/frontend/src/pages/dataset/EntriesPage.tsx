@@ -92,6 +92,7 @@ export class DataEntriesPage extends React.Component<
           <Mutation mutation={DELETE_ENTRY}>
             {deleteEntry => (
               <AsyncButton
+                type="danger"
                 confirmMessage="Delete Entry?"
                 confirmClick
                 onClick={() =>
