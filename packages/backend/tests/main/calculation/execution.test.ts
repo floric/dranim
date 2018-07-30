@@ -309,53 +309,6 @@ describe('Execution', () => {
     }
   });
 
-  test('should fail for invalid form', async () => {
-    const node: NodeInstance = {
-      id: 'nodeB',
-      contextIds: [],
-      form: [],
-      inputs: [],
-      outputs: [],
-      type: 'type',
-      workspaceId: VALID_OBJECT_ID,
-      x: 0,
-      y: 0,
-      state: NodeState.VALID,
-      variables: {}
-    };
-    const type: ServerNodeDef & NodeDef = {
-      type: 'type',
-      name: 'a',
-      inputs: {
-        a: {
-          dataType: DataType.STRING,
-          displayName: 'value',
-          state: SocketState.STATIC
-        }
-      },
-      outputs: {},
-      keywords: [],
-      path: [],
-      isFormValid: async () => false,
-      onMetaExecution: async () => ({}),
-      onNodeExecution: async () => ({ outputs: {} })
-    };
-    (tryGetNode as jest.Mock).mockResolvedValue(node);
-    (getNodeType as jest.Mock).mockReturnValue(type);
-    (isNodeInMetaValid as jest.Mock).mockResolvedValue(false);
-    (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
-    (tryGetCalculation as jest.Mock).mockResolvedValue({
-      state: ProcessState.PROCESSING
-    });
-
-    try {
-      await executeNode(node, VALID_OBJECT_ID, { db: null, userId: '' });
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Form is invalid');
-    }
-  });
-
   test('should fail for invalid input', async () => {
     const node: NodeInstance = {
       id: 'nodeB',
