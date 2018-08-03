@@ -1,6 +1,10 @@
 import * as React from 'react';
 
-import { GQLOutputResult, LinearChartType } from '@masterthesis/shared';
+import {
+  GQLOutputResult,
+  LinearChartType,
+  SoundChartDef
+} from '@masterthesis/shared';
 import { Button, Card, Divider } from 'antd';
 import { v4 } from 'uuid';
 
@@ -49,6 +53,11 @@ export const CustomDataRenderer: React.SFC<CustomDataRendererProps> = ({
   } else if (value.type === LinearChartType.PIE) {
     chart = {
       elem: <PieChart value={value} containerId={containerId} />,
+      actions: [exportAsSvgAction(containerId, result)]
+    };
+  } else if (value.type === SoundChartDef.type) {
+    chart = {
+      elem: <p>STR Chart</p>,
       actions: [exportAsSvgAction(containerId, result)]
     };
   }

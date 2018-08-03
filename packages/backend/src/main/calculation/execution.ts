@@ -12,6 +12,7 @@ import {
   ServerNodeDefWithContextFn
 } from '@masterthesis/shared';
 
+import { Log } from '../../logging';
 import { tryGetNodeType } from '../nodes/all-nodes';
 import { tryGetConnection } from '../workspace/connections';
 import { tryGetContextNode, tryGetNode } from '../workspace/nodes';
@@ -57,6 +58,11 @@ export const executeNode = async (
   const nodeForm = parseNodeForm(node.form);
 
   await validateInputs(node, nodeInputs, reqContext);
+  await checkForCanceledProcess(node, processId, reqContext);
+
+  if (node.contextIds.length === 0) {
+    Log.info(`Executing node (type: ${node.type}, id: ${node.id})`);
+  }
 
   const type = tryGetNodeType(node.type);
   if (hasContextFn(type)) {
@@ -69,8 +75,6 @@ export const executeNode = async (
       reqContext
     );
   }
-
-  await checkForCanceledProcess(node, processId, reqContext);
 
   return await type.onNodeExecution(nodeForm, nodeInputs, {
     reqContext,

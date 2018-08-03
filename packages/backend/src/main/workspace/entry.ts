@@ -28,12 +28,21 @@ export const getEntry = async (
   };
 };
 
+interface GetEntriesCountOptions {
+  estimate?: boolean;
+}
+
 export const getEntriesCount = async (
   datasetId: string,
-  reqContext: ApolloContext
+  reqContext: ApolloContext,
+  options?: GetEntriesCountOptions
 ): Promise<number> => {
   const collection = getEntryCollection(datasetId, reqContext.db);
-  return await collection.estimatedDocumentCount();
+  if (options && options.estimate) {
+    return await collection.estimatedDocumentCount();
+  }
+
+  return await collection.countDocuments();
 };
 
 export const clearEntries = async (

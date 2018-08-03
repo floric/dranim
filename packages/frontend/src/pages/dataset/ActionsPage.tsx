@@ -130,7 +130,7 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
 
       return (
         <Query query={ALL_UPLOADS} variables={{ datasetId: dataset.id }}>
-          {({ loading, error, data, refetch }) => {
+          {({ loading, error, data }) => {
             if (loading) {
               return <LoadingCard />;
             }
@@ -276,6 +276,7 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
                     <h3>Uploads</h3>
                     <Table
                       size="small"
+                      pagination={{ size: 'small' }}
                       dataSource={entriesDataSource}
                       columns={entriesColumns}
                     />

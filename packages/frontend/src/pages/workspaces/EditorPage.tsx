@@ -188,7 +188,7 @@ export class WorkspaceEditorPage extends React.Component<
               });
             }}
           >
-            Cancel Calculation
+            Stop Calculation
           </AsyncButton>
         </LoadingCard>
       )}

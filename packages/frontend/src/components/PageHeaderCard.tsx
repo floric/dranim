@@ -16,10 +16,9 @@ export interface IPageHeaderProps {
 const showInfo = (content: JSX.Element) => {
   Modal.info({
     title: 'Help',
-    content,
-    onOk() {
-      //
-    }
+    iconType: 'question-circle',
+    width: '80%',
+    content
   });
 };
 
@@ -29,52 +28,52 @@ export const PageHeaderCard: SFC<IPageHeaderProps> = ({
   marginBottom = 'small',
   helpContent
 }) => (
-  <>
-    <Card
-      bordered={false}
-      style={{
-        marginBottom: marginBottom ? (marginBottom === 'big' ? 32 : 16) : 0
-      }}
-    >
-      <Row justify="space-between" align="middle">
-        <Col xs={24} sm={12} md={16} xl={18}>
-          <h1 {...css({ marginBottom: 0 })}>
-            {title}
-            {typeTitle ? (
-              <>
-                <Divider type="vertical" />
-                <span
-                  {...css({ color: Colors.GrayMedium, fontWeight: 'initial' })}
-                >
-                  {typeTitle}
-                </span>
-              </>
-            ) : null}
-          </h1>
-        </Col>
+  <Card
+    bordered={false}
+    bodyStyle={{
+      paddingLeft: 24,
+      paddingRight: 24,
+      paddingTop: 16,
+      paddingBottom: 16
+    }}
+    style={{
+      marginBottom: marginBottom ? (marginBottom === 'big' ? 32 : 16) : 0
+    }}
+  >
+    <Row type="flex" justify="space-around" align="middle">
+      <Col xs={24} sm={12} md={16} xl={18}>
+        <h1 {...css({ marginBottom: 0 })}>
+          {title}
+          {typeTitle ? (
+            <>
+              <Divider type="vertical" />
+              <span
+                {...css({ color: Colors.GrayMedium, fontWeight: 'initial' })}
+              >
+                {typeTitle}
+              </span>
+            </>
+          ) : null}
+        </h1>
+      </Col>
 
-        <Col xs={24} sm={12} md={8} xl={6} style={{ textAlign: 'right' }}>
-          <Row justify="space-between" align="middle">
-            <Col>
-              {helpContent && (
-                <>
-                  <Tooltip title="Help" mouseEnterDelay={1}>
-                    <Button
-                      style={{ border: 'none' }}
-                      onClick={() => {
-                        showInfo(helpContent);
-                      }}
-                      icon="question-circle"
-                    />
-                  </Tooltip>
-                  <Divider type="vertical" />
-                </>
-              )}
-              <UserInfo />
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-    </Card>
-  </>
+      <Col xs={24} sm={12} md={8} xl={6} style={{ textAlign: 'right' }}>
+        {helpContent && (
+          <>
+            <Tooltip title="Help" mouseEnterDelay={1}>
+              <Button
+                style={{ border: 'none' }}
+                onClick={() => {
+                  showInfo(helpContent);
+                }}
+                icon="question-circle"
+              />
+            </Tooltip>
+            <Divider type="vertical" />
+          </>
+        )}
+        <UserInfo />
+      </Col>
+    </Row>
+  </Card>
 );

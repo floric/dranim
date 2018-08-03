@@ -12,6 +12,10 @@ export const createSTRDemoData = async (reqContext: ApolloContext) => {
   for (const s of commoditiesSchemas) {
     await addValueSchema(ds.id, s, reqContext);
   }
+  ds = await createDataset('Cities', reqContext);
+  for (const s of citySchemas) {
+    await addValueSchema(ds.id, s, reqContext);
+  }
   await createWorkspace(
     'Trade volumes',
     reqContext,
@@ -40,6 +44,17 @@ const createStringValueSchema = (
   type: DataType.STRING,
   required,
   fallback: '',
+  unique
+});
+const createBoolValueSchema = (
+  name: string,
+  required: boolean = false,
+  unique: boolean = false
+) => ({
+  name,
+  type: DataType.BOOLEAN,
+  required,
+  fallback: 'true',
   unique
 });
 
@@ -84,6 +99,44 @@ const passagesSchemas: Array<ValueSchema> = [
   createNumberValueSchema('destination_decLongitude', true),
   createNumberValueSchema('commodities_number', true),
   createNumberValueSchema('tonnes', true)
+];
+
+const citySchemas: Array<ValueSchema> = [
+  createStringValueSchema('code', true, true),
+  createStringValueSchema('clean_code', true, false),
+  createStringValueSchema('place', true, true),
+  createStringValueSchema('region', true, false),
+  createStringValueSchema('big area', true, false),
+  createStringValueSchema('WS_land_1689', true, false),
+  createStringValueSchema('WS_land_1707', true, false),
+  createStringValueSchema('WS_land_1713', true, false),
+  createStringValueSchema('WS_land_1721', true, false),
+  createStringValueSchema('WS_land_1735', true, false),
+  createStringValueSchema('WS_land_1763', true, false),
+  createStringValueSchema('WS_land_1772', true, false),
+  createStringValueSchema('WS_land_1776', true, false),
+  createStringValueSchema('WS_land_1793', true, false),
+  createStringValueSchema('WS_land_1795', true, false),
+  createStringValueSchema('WS_land_1807', true, false),
+  createStringValueSchema('WS_land_1815', true, false),
+  createStringValueSchema('WS_land_1821', true, false),
+  createStringValueSchema('WS_land_1830', true, false),
+  createBoolValueSchema('west_of_Helsingør', true, false),
+  createStringValueSchema('Latitude', true, false),
+  createStringValueSchema('lat-NS', true, false),
+  createNumberValueSchema('lat-gr', true, false),
+  createNumberValueSchema('lat-mi', true, false),
+  createNumberValueSchema('lat-se', true, false),
+  createStringValueSchema('Longitude', true, false),
+  createStringValueSchema('long-EW', true, false),
+  createNumberValueSchema('long-gr', true, false),
+  createNumberValueSchema('long-mi', true, false),
+  createNumberValueSchema('long-se', true, false),
+  createNumberValueSchema('decLatitude', true, false),
+  createNumberValueSchema('decLongitude', true, false),
+  createStringValueSchema('Modern Country', true, false),
+  createStringValueSchema('Modern name', true, false),
+  createStringValueSchema('Province', true, false)
 ];
 
 const commoditiesSchemas: Array<ValueSchema> = [

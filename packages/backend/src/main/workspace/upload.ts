@@ -41,29 +41,72 @@ export const getAllUploads = async (
   }));
 };
 
-const validateEntry = (parsedObj: any, schema: Array<ValueSchema>) => {
-  if (Object.keys(parsedObj).length !== schema.length) {
+const cleanBooleanData = (transformedInput: {
+  obj: any;
+  schema: Array<ValueSchema>;
+}) => {
+  if (!transformedInput || !transformedInput.obj) {
+    return null;
+  }
+
+  const processedObj = {};
+  transformedInput.schema.forEach(s => {
+    const val = transformedInput.obj[s.name];
+    let parsedVal = val;
+
+    if (s.type === DataType.BOOLEAN) {
+      try {
+        parsedVal = `${Boolean(JSON.parse(val))}`;
+      } catch (err) {
+        //
+      }
+    }
+
+    processedObj[s.name] = parsedVal;
+  });
+
+  return {
+    obj: processedObj,
+    schema: transformedInput.schema
+  };
+};
+
+const isValidEntry = (transformedInput: {
+  obj: any;
+  schema: Array<ValueSchema>;
+}) => {
+  if (!transformedInput) {
     return false;
+  }
+
+  const parsedObj = transformedInput.obj;
+  const schema = transformedInput.schema;
+  if (!parsedObj) {
+    throw new Error('test');
+  }
+
+  if (Object.keys(parsedObj).length !== schema.length) {
+    throw new Error('abc');
   }
 
   schema.forEach(s => {
     const correspondingVal = parsedObj[s.name];
     if (correspondingVal === undefined) {
-      return false;
+      throw new Error('123');
     }
 
     if (s.type === DataType.NUMBER && Number.isNaN(correspondingVal)) {
       return false;
     } else if (
       s.type === DataType.BOOLEAN &&
-      (correspondingVal !== 'true' || correspondingVal !== 'false')
+      (correspondingVal !== 'true' && correspondingVal !== 'false')
     ) {
       return false;
     } else if (s.type === DataType.DATETIME) {
       // TODO validate date
     }
 
-    return false;
+    return true;
   });
 
   return true;
@@ -78,7 +121,7 @@ const processValidEntry = async (
   const collection = getUploadsCollection(reqContext.db);
 
   try {
-    await createEntry(ds.id, values, reqContext);
+    await createEntry(ds.id, values.obj, reqContext);
     await collection.updateOne(
       { _id: processId },
       { $inc: { addedEntries: 1 } }
@@ -105,7 +148,6 @@ const processValidEntry = async (
 };
 
 const processInvalidEntry = async (
-  ds: Dataset,
   processId: ObjectID,
   reqContext: ApolloContext
 ) => {
@@ -127,9 +169,10 @@ const parseCsvFile = async (
     trim: true,
     headers: ds.valueschemas.map(s => s.name)
   })
-    .validate(obj => validateEntry)
+    .transform(obj => cleanBooleanData({ obj, schema: ds.valueschemas }))
+    .validate(obj => isValidEntry(obj))
     .on('data', values => processValidEntry(values, ds, processId, reqContext))
-    .on('data-invalid', () => processInvalidEntry(ds, processId, reqContext))
+    .on('data-invalid', () => processInvalidEntry(processId, reqContext))
     .on('end', () => {
       Log.info(`Finished import of ${filename}.`);
     });
@@ -139,7 +182,6 @@ const parseCsvFile = async (
   try {
     await new Promise((resolve, reject) =>
       stream
-        .on('error', err => Log.error(err))
         .pipe(csvStream)
         .on('error', err => Log.error(err))
         .on('finish', () => resolve())

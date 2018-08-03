@@ -15,7 +15,7 @@ import {
 import * as NumberNodes from './number';
 import * as StringNodes from './string';
 import * as TimeNodes from './time';
-import { LinearChartDef } from './visualizations';
+import { LinearChartDef, SoundChartDef } from './visualizations';
 
 export * from './dataset';
 export * from './number';
@@ -43,7 +43,7 @@ export const NodesMap = new Map<string, NodeDef>(
     BooleanNodes,
     TimeNodes,
     DatetimeNodes,
-    { LinearChartDef }
+    { LinearChartDef, SoundChartDef }
   ]
     .map(n => Object.values(n))
     .reduce<Array<NodeDef>>((list, elem) => [...list, ...elem], [])

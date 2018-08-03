@@ -92,6 +92,7 @@ export class DataEntriesPage extends React.Component<
           <Mutation mutation={DELETE_ENTRY}>
             {deleteEntry => (
               <AsyncButton
+                icon="delete"
                 type="danger"
                 confirmMessage="Delete Entry?"
                 confirmClick
@@ -122,8 +123,8 @@ export class DataEntriesPage extends React.Component<
 
     return (
       <>
-        <Row style={{ marginBottom: 12 }}>
-          <Col>
+        <Row style={{ marginBottom: 12 }} gutter={12}>
+          <Col md={24} lg={12} xl={10}>
             <Card bordered={false}>
               <h3>Add Entry</h3>
               <Mutation mutation={ADD_ENTRY}>
@@ -151,13 +152,12 @@ export class DataEntriesPage extends React.Component<
               </Mutation>
             </Card>
           </Col>
-        </Row>
-        <Row style={{ marginBottom: 12 }}>
-          <Col>
+          <Col md={24} lg={12} xl={14}>
             <Card bordered={false}>
               <h3>Last Entries</h3>
               <Table
                 size="small"
+                pagination={{ size: 'small', pageSize: 20 }}
                 expandedRowRender={expandedRowRender}
                 dataSource={entriesDataSource}
                 columns={entriesColumns}

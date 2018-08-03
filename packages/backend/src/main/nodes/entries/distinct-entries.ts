@@ -8,6 +8,7 @@ import {
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
   IOValues,
+  NodeInstance,
   ServerNodeDefWithContextFn,
   SocketDefs,
   SocketState,
@@ -22,7 +23,6 @@ import {
   tryGetDataset
 } from '../../workspace/dataset';
 import { createEntry, getEntryCollection } from '../../workspace/entry';
-
 const getDistinctValueName = (vs: ValueSchema) => `${vs.name}-distinct`;
 
 export const DistinctEntriesNode: ServerNodeDefWithContextFn<
@@ -113,17 +113,16 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
   onNodeExecution: async (
     form,
     inputs,
-    { reqContext, contextFnExecution, node: { workspaceId, id } }
+    { reqContext, contextFnExecution, node }
   ) => {
-    const existingDs = await tryGetDataset(
-      inputs.dataset.datasetId,
-      reqContext
-    );
-    const newDs = await createDataset(
-      createUniqueDatasetName(DistinctEntriesNodeDef.type, id),
-      reqContext,
-      workspaceId
-    );
+    const [existingDs, newDs] = await Promise.all([
+      tryGetDataset(inputs.dataset.datasetId, reqContext),
+      createDataset(
+        createUniqueDatasetName(DistinctEntriesNodeDef.type, node.id),
+        reqContext,
+        node.workspaceId
+      )
+    ]);
 
     await Promise.all(
       [
@@ -154,8 +153,7 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
         form.distinctSchemas!,
         existingDs,
         newDs,
-        workspaceId,
-        id,
+        node,
         contextFnExecution!,
         reqContext
       );
@@ -178,15 +176,14 @@ const processDistinctDatasets = async (
   distinctSchemas: Array<ValueSchema>,
   existingDs: Dataset,
   newDs: Dataset,
-  workspaceId: string,
-  nodeId: string,
+  node: NodeInstance,
   contextFnExecution: (input: IOValues<any>) => any,
   reqContext: ApolloContext
 ) => {
   const tempDs = await createDataset(
-    createUniqueDatasetName(DistinctEntriesNodeDef.name, nodeId),
+    createUniqueDatasetName(DistinctEntriesNodeDef.name, node.id),
     reqContext,
-    workspaceId
+    node.workspaceId
   );
 
   const query = {};
@@ -195,10 +192,12 @@ const processDistinctDatasets = async (
   });
 
   const entryColl = getEntryCollection(existingDs.id, reqContext.db);
-  entryColl.aggregate([
-    { $match: query },
-    { $out: getEntryCollection(tempDs.id, reqContext.db).collectionName }
-  ]);
+  await entryColl
+    .aggregate([
+      { $match: query },
+      { $out: getEntryCollection(tempDs.id, reqContext.db).collectionName }
+    ])
+    .next();
 
   const values: IOValues<any> = {};
   distinctSchemas.forEach(ds => {
@@ -211,6 +210,8 @@ const processDistinctDatasets = async (
 
   const { outputs } = await contextFnExecution!(values);
 
-  await createEntry(newDs.id, outputs, reqContext);
-  await deleteDataset(tempDs.id, reqContext);
+  await Promise.all([
+    createEntry(newDs.id, outputs, reqContext),
+    deleteDataset(tempDs.id, reqContext)
+  ]);
 };

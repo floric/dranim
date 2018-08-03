@@ -27,3 +27,15 @@ export const LinearChartDef: NodeDef<VisInputs, {}> = {
   keywords: ['bar', 'column', 'pie'],
   path: ['Visualizations']
 };
+
+export const SoundChartDef: NodeDef<VisInputs, {}> = {
+  name: 'Sound Chart',
+  type: 'SoundChart',
+  inputs: {
+    dataset: DatasetSocket('Dataset')
+  },
+  outputs: {},
+  isOutputNode: true,
+  keywords: ['str', 'sound'],
+  path: ['Visualizations']
+};
