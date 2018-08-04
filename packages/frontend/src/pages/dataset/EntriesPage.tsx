@@ -122,50 +122,48 @@ export class DataEntriesPage extends React.Component<
     ];
 
     return (
-      <>
-        <Row style={{ marginBottom: 12 }} gutter={12}>
-          <Col md={24} lg={12} xl={10}>
-            <Card bordered={false}>
-              <h3>Add Entry</h3>
-              <Mutation mutation={ADD_ENTRY}>
-                {addEntry => (
-                  <CreateEntryForm
-                    handleCreateEntry={values =>
-                      tryOperation({
-                        op: () =>
-                          addEntry({
-                            variables: {
-                              datasetId: dataset.id,
-                              values: JSON.stringify(values)
-                            }
-                          }),
-                        refetch,
-                        successTitle: () => 'Entry created',
-                        successMessage: () => `Entry created successfully.`,
-                        failedTitle: 'Entry not created.',
-                        failedMessage: `Entry creation failed.`
-                      })
-                    }
-                    schema={dataset.valueschemas}
-                  />
-                )}
-              </Mutation>
-            </Card>
-          </Col>
-          <Col md={24} lg={12} xl={14}>
-            <Card bordered={false}>
-              <h3>Last Entries</h3>
-              <Table
-                size="small"
-                pagination={{ size: 'small', pageSize: 20 }}
-                expandedRowRender={expandedRowRender}
-                dataSource={entriesDataSource}
-                columns={entriesColumns}
-              />
-            </Card>
-          </Col>
-        </Row>
-      </>
+      <Row style={{ marginBottom: 12 }} gutter={12}>
+        <Col md={24} lg={12} xl={10}>
+          <Card bordered={false}>
+            <h3>Add Entry</h3>
+            <Mutation mutation={ADD_ENTRY}>
+              {addEntry => (
+                <CreateEntryForm
+                  handleCreateEntry={values =>
+                    tryOperation({
+                      op: () =>
+                        addEntry({
+                          variables: {
+                            datasetId: dataset.id,
+                            values: JSON.stringify(values)
+                          }
+                        }),
+                      refetch,
+                      successTitle: () => 'Entry created',
+                      successMessage: () => `Entry created successfully.`,
+                      failedTitle: 'Entry not created.',
+                      failedMessage: `Entry creation failed.`
+                    })
+                  }
+                  schema={dataset.valueschemas}
+                />
+              )}
+            </Mutation>
+          </Card>
+        </Col>
+        <Col md={24} lg={12} xl={14}>
+          <Card bordered={false}>
+            <h3>Last Entries</h3>
+            <Table
+              size="small"
+              pagination={{ size: 'small', pageSize: 20 }}
+              expandedRowRender={expandedRowRender}
+              dataSource={entriesDataSource}
+              columns={entriesColumns}
+            />
+          </Card>
+        </Col>
+      </Row>
     );
   }
 }

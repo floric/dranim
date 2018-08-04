@@ -21,6 +21,7 @@ import {
   ADD_OR_UPDATE_FORM_VALUE,
   CREATE_CONNECTION,
   CREATE_NODE,
+  DATASETS,
   DELETE_CONNECTION,
   DELETE_NODE,
   START_CALCULATION,
@@ -203,106 +204,129 @@ export class WorkspaceEditorPage extends React.Component<
     } = this.props;
 
     return (
-      <Query query={WORKSPACE_NODE_SELECTION} variables={{ workspaceId }}>
-        {({ loading, error, data, refetch, startPolling, stopPolling }) => {
-          if (loading) {
+      <Query query={DATASETS}>
+        {dsData => {
+          if (dsData.loading) {
             return <LoadingCard />;
           }
 
-          if (error) {
-            return <UnknownErrorCard error={error} />;
-          }
-
-          if (!data.workspace) {
-            return (
-              <CustomErrorCard
-                title="Unknown workspace"
-                description="Workspace doesn't exist."
-              />
-            );
-          }
-
-          const inprocessCalculations = data.calculations.filter(
-            n => n.state === ProcessState.PROCESSING
-          );
-
-          if (inprocessCalculations.length > 0) {
-            startPolling(POLLING_FREQUENCY);
-            return this.renderCalculationProcessCard(inprocessCalculations[0]);
-          }
-
-          if (inprocessCalculations.length === 0) {
-            stopPolling();
+          if (dsData.error) {
+            return <UnknownErrorCard error={dsData.error} />;
           }
 
           return (
-            <Mutation mutation={START_CALCULATION}>
-              {startCalculation => (
-                <Mutation mutation={ADD_OR_UPDATE_FORM_VALUE}>
-                  {addOrUpdateFormValue => (
-                    <Mutation mutation={DELETE_CONNECTION}>
-                      {deleteConnection => (
-                        <Mutation mutation={CREATE_CONNECTION}>
-                          {createConnection => (
-                            <Mutation mutation={DELETE_NODE}>
-                              {deleteNode => (
-                                <Mutation mutation={CREATE_NODE}>
-                                  {createNode => (
-                                    <Mutation mutation={UPDATE_NODE}>
-                                      {updateNodePosition => (
-                                        <ExplorerEditor
-                                          datasets={data.datasets}
-                                          connections={deepCopyResponse(
-                                            data.workspace.connections
-                                          )}
-                                          nodes={deepCopyResponse(
-                                            data.workspace.nodes
-                                          )}
-                                          onNodeCreate={this.handleNodeCreate(
-                                            createNode,
-                                            workspaceId,
-                                            refetch
-                                          )}
-                                          onNodeDelete={this.handleNodeDelete(
-                                            deleteNode,
-                                            refetch
-                                          )}
-                                          onNodeUpdate={this.handleNodeUpdate(
-                                            updateNodePosition,
-                                            refetch
-                                          )}
-                                          onConnectionCreate={this.handleConnectionCreate(
-                                            createConnection,
-                                            refetch
-                                          )}
-                                          onConnectionDelete={this.handleConnectionDelete(
-                                            deleteConnection,
-                                            refetch
-                                          )}
-                                          onAddOrUpdateFormValue={this.handleAddOrUpdateFormValue(
-                                            addOrUpdateFormValue,
-                                            refetch
-                                          )}
-                                          onStartCalculation={this.handleStartCalculation(
-                                            startCalculation,
-                                            refetch,
-                                            workspaceId
-                                          )}
-                                        />
-                                      )}
-                                    </Mutation>
-                                  )}
-                                </Mutation>
-                              )}
-                            </Mutation>
-                          )}
-                        </Mutation>
-                      )}
-                    </Mutation>
-                  )}
-                </Mutation>
-              )}
-            </Mutation>
+            <Query query={WORKSPACE_NODE_SELECTION} variables={{ workspaceId }}>
+              {({
+                loading,
+                error,
+                data,
+                refetch,
+                startPolling,
+                stopPolling
+              }) => {
+                if (loading) {
+                  return <LoadingCard />;
+                }
+
+                if (error) {
+                  return <UnknownErrorCard error={error} />;
+                }
+
+                if (!data.workspace) {
+                  return (
+                    <CustomErrorCard
+                      title="Unknown workspace"
+                      description="Workspace doesn't exist."
+                    />
+                  );
+                }
+
+                const inprocessCalculations = data.calculations.filter(
+                  n => n.state === ProcessState.PROCESSING
+                );
+
+                if (inprocessCalculations.length > 0) {
+                  startPolling(POLLING_FREQUENCY);
+                  return this.renderCalculationProcessCard(
+                    inprocessCalculations[0]
+                  );
+                }
+
+                if (inprocessCalculations.length === 0) {
+                  stopPolling();
+                }
+
+                return (
+                  <Mutation mutation={START_CALCULATION}>
+                    {startCalculation => (
+                      <Mutation mutation={ADD_OR_UPDATE_FORM_VALUE}>
+                        {addOrUpdateFormValue => (
+                          <Mutation mutation={DELETE_CONNECTION}>
+                            {deleteConnection => (
+                              <Mutation mutation={CREATE_CONNECTION}>
+                                {createConnection => (
+                                  <Mutation mutation={DELETE_NODE}>
+                                    {deleteNode => (
+                                      <Mutation mutation={CREATE_NODE}>
+                                        {createNode => (
+                                          <Mutation mutation={UPDATE_NODE}>
+                                            {updateNodePosition => (
+                                              <ExplorerEditor
+                                                datasets={dsData.data.datasets}
+                                                connections={deepCopyResponse(
+                                                  data.workspace.connections
+                                                )}
+                                                nodes={deepCopyResponse(
+                                                  data.workspace.nodes
+                                                )}
+                                                onNodeCreate={this.handleNodeCreate(
+                                                  createNode,
+                                                  workspaceId,
+                                                  refetch
+                                                )}
+                                                onNodeDelete={this.handleNodeDelete(
+                                                  deleteNode,
+                                                  refetch
+                                                )}
+                                                onNodeUpdate={this.handleNodeUpdate(
+                                                  updateNodePosition,
+                                                  refetch
+                                                )}
+                                                onConnectionCreate={this.handleConnectionCreate(
+                                                  createConnection,
+                                                  refetch
+                                                )}
+                                                onConnectionDelete={this.handleConnectionDelete(
+                                                  deleteConnection,
+                                                  refetch
+                                                )}
+                                                onAddOrUpdateFormValue={this.handleAddOrUpdateFormValue(
+                                                  addOrUpdateFormValue,
+                                                  refetch
+                                                )}
+                                                onStartCalculation={this.handleStartCalculation(
+                                                  startCalculation,
+                                                  refetch,
+                                                  workspaceId
+                                                )}
+                                              />
+                                            )}
+                                          </Mutation>
+                                        )}
+                                      </Mutation>
+                                    )}
+                                  </Mutation>
+                                )}
+                              </Mutation>
+                            )}
+                          </Mutation>
+                        )}
+                      </Mutation>
+                    )}
+                  </Mutation>
+                );
+              }}
+            </Query>
           );
         }}
       </Query>

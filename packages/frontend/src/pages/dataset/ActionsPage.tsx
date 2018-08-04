@@ -273,7 +273,7 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
                 </Row>
                 <Row>
                   <Card bordered={false}>
-                    <h3>Uploads</h3>
+                    <h3>Import</h3>
                     <Table
                       size="small"
                       pagination={{ size: 'small' }}

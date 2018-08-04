@@ -12,6 +12,7 @@ import { showNotificationWithIcon } from '../utils/form';
 import { BarChart } from './visualizations/BarChart';
 import { ColumnChart } from './visualizations/ColumnChart';
 import { PieChart } from './visualizations/PieChart';
+import { STRChart } from './visualizations/STRChart';
 
 export interface CustomDataRendererProps {
   value: any;
@@ -57,7 +58,7 @@ export const CustomDataRenderer: React.SFC<CustomDataRendererProps> = ({
     };
   } else if (value.type === SoundChartDef.type) {
     chart = {
-      elem: <p>STR Chart</p>,
+      elem: <STRChart value={value} containerId={containerId} />,
       actions: [exportAsSvgAction(containerId, result)]
     };
   }

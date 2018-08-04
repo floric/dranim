@@ -27,7 +27,6 @@ export class ColumnChart extends React.Component<
     const chart = d3
       .select(`#${containerId}`)
       .append('svg')
-      .attr('class', 'chart')
       .attr('width', BAR_HEIGHT * values.length)
       .attr('height', BAR_WIDTH);
 
@@ -63,7 +62,7 @@ export class ColumnChart extends React.Component<
     text
       .text(d => d.label)
       .attr('x', (d, i) => x(i + 0.5))
-      .attr('y', d => BAR_WIDTH)
+      .attr('y', () => BAR_WIDTH)
       .style('font-family', LABEL_FONT_FAMILY)
       .style('font-size', LABEL_FONT_SIZE)
       .style('font-weight', LABEL_FONT_WEIGHT)
