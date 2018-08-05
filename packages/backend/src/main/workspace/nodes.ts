@@ -185,7 +185,7 @@ export const updateNodePosition = async (
   const collection = getNodesCollection(reqContext.db);
   const res = await collection.findOneAndUpdate(
     { _id: new ObjectID(id) },
-    { $set: { x: x > 0 ? x : 0, y: y > 0 ? y : 0 } }
+    { $set: { x, y } }
   );
 
   if (res.ok !== 1) {
