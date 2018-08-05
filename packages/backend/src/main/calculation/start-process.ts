@@ -15,6 +15,8 @@ import { getNodeType, hasNodeType } from '../nodes/all-nodes';
 import { clearGeneratedDatasets } from '../workspace/dataset';
 import { getAllNodes, resetProgress } from '../workspace/nodes';
 
+const CANCEL_CHECKS_MS = 5000;
+
 const startProcess = async (
   processId: string,
   workspaceId: string,
@@ -42,9 +44,15 @@ const startProcess = async (
 
     Log.info(`Started calculation ${processId}`);
 
+    const timer = setInterval(() => {
+      checkForCanceledProcess(processId, reqContext, timer);
+    }, CANCEL_CHECKS_MS);
+
     const results = await Promise.all(
       outputNodesInstances.map(o => executeOutputNode(o, processId, reqContext))
     );
+
+    clearInterval(timer);
     await saveResults(results as Array<OutputResult>, reqContext);
     await updateFinishedProcess(
       processId,
@@ -66,6 +74,19 @@ const startProcess = async (
   }
 
   await clearGeneratedDatasets(workspaceId, reqContext);
+};
+
+const checkForCanceledProcess = async (
+  processId: string,
+  reqContext: ApolloContext,
+  timer: NodeJS.Timer
+) => {
+  const process = await tryGetCalculation(processId, reqContext);
+  if (process.state !== ProcessState.PROCESSING) {
+    Log.info(`Canceled calculation process ${processId} will be stopped`);
+    clearInterval(timer);
+    throw new Error('Process canceled or failed');
+  }
 };
 
 const saveResults = async (

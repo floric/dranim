@@ -105,7 +105,7 @@ const exportAsSvgAction = (
   icon: 'download',
   onClick: () => {
     try {
-      const svgData = document.getElementById(containerId).outerHTML;
+      const svgData = document.getElementById(containerId).innerHTML;
       const svgBlob = new Blob([svgData], {
         type: 'image/svg+xml;charset=utf-8'
       });

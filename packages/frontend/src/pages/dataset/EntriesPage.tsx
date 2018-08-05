@@ -156,7 +156,11 @@ export class DataEntriesPage extends React.Component<
             <h3>Last Entries</h3>
             <Table
               size="small"
-              pagination={{ size: 'small', pageSize: 20 }}
+              pagination={{
+                size: 'small',
+                pageSize: 20,
+                hideOnSinglePage: true
+              }}
               expandedRowRender={expandedRowRender}
               dataSource={entriesDataSource}
               columns={entriesColumns}

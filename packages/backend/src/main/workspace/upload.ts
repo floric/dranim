@@ -41,7 +41,7 @@ export const getAllUploads = async (
   }));
 };
 
-const cleanBooleanData = (transformedInput: {
+const cleanData = (transformedInput: {
   obj: any;
   schema: Array<ValueSchema>;
 }) => {
@@ -56,7 +56,13 @@ const cleanBooleanData = (transformedInput: {
 
     if (s.type === DataType.BOOLEAN) {
       try {
-        parsedVal = `${Boolean(JSON.parse(val))}`;
+        parsedVal = Boolean(JSON.parse(val));
+      } catch (err) {
+        //
+      }
+    } else if (s.type === DataType.NUMBER) {
+      try {
+        parsedVal = Number(JSON.parse(val));
       } catch (err) {
         //
       }
@@ -82,17 +88,17 @@ const isValidEntry = (transformedInput: {
   const parsedObj = transformedInput.obj;
   const schema = transformedInput.schema;
   if (!parsedObj) {
-    throw new Error('test');
+    return false;
   }
 
   if (Object.keys(parsedObj).length !== schema.length) {
-    throw new Error('abc');
+    return false;
   }
 
   schema.forEach(s => {
     const correspondingVal = parsedObj[s.name];
     if (correspondingVal === undefined) {
-      throw new Error('123');
+      return false;
     }
 
     if (s.type === DataType.NUMBER && Number.isNaN(correspondingVal)) {
@@ -169,7 +175,7 @@ const parseCsvFile = async (
     trim: true,
     headers: ds.valueschemas.map(s => s.name)
   })
-    .transform(obj => cleanBooleanData({ obj, schema: ds.valueschemas }))
+    .transform(obj => cleanData({ obj, schema: ds.valueschemas }))
     .validate(obj => isValidEntry(obj))
     .on('data', values => processValidEntry(values, ds, processId, reqContext))
     .on('data-invalid', () => processInvalidEntry(processId, reqContext))
@@ -180,7 +186,7 @@ const parseCsvFile = async (
   Log.info(`Started import of ${filename}.`);
 
   try {
-    await new Promise((resolve, reject) =>
+    await new Promise(resolve =>
       stream
         .pipe(csvStream)
         .on('error', err => Log.error(err))

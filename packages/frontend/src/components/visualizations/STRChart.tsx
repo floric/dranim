@@ -28,7 +28,7 @@ const OFFSET_MAX = 1000;
 interface Passage {
   source: string;
   destination: string;
-  isEastPassage: any;
+  isEastPassage: boolean;
   value: number;
 }
 
@@ -89,7 +89,7 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
     const chart = d3
       .select(`#${containerId}`)
       .append('svg')
-      .attr('width', '100%')
+      .attr('width', CANVAS_WIDTH)
       .attr('height', CANVAS_HEIGHT);
 
     renderNames(
@@ -252,10 +252,10 @@ const renderPassages = (
   state: STRChartState
 ) => {
   const maxEastPassageVal = d3.max(
-    values.filter(n => n.isEastPassage === 'true').map(n => n.value)
+    values.filter(n => n.isEastPassage).map(n => n.value)
   );
   const maxWestPassageVal = d3.max(
-    values.filter(n => n.isEastPassage === 'false').map(n => n.value)
+    values.filter(n => !n.isEastPassage).map(n => n.value)
   );
 
   chart
@@ -271,19 +271,15 @@ const renderPassages = (
       const destPos = cityPositions.get(d.destination);
 
       return `M ${sourcePos.x} ${
-        d.isEastPassage === 'true' ? sourcePos.y : sourcePos.y + 2
-      } L ${destPos.x} ${
-        d.isEastPassage === 'true' ? destPos.y : destPos.y + 2
-      } L ${sourcePos.x} ${
-        d.isEastPassage === 'true' ? sourcePos.y : sourcePos.y + 2
-      }`;
+        d.isEastPassage ? sourcePos.y : sourcePos.y + 2
+      } L ${destPos.x} ${d.isEastPassage ? destPos.y : destPos.y + 2} L ${
+        sourcePos.x
+      } ${d.isEastPassage ? sourcePos.y : sourcePos.y + 2}`;
     })
     .attr(
       'stroke',
       d =>
-        d.isEastPassage === 'true'
-          ? state.colors.eastPassage
-          : state.colors.westPassage
+        d.isEastPassage ? state.colors.eastPassage : state.colors.westPassage
     )
     .attr(
       'opacity',
