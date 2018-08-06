@@ -146,7 +146,8 @@ export const addValueSchema = async (
   if (schema.type === DataType.STRING && schema.unique) {
     const entryCollection = getEntryCollection(datasetId, reqContext.db);
     await entryCollection.createIndex(`values.${schema.name}`, {
-      unique: true
+      unique: true,
+      background: true
     });
   }
 
@@ -158,8 +159,13 @@ export const clearGeneratedDatasets = async (
   reqContext: ApolloContext
 ) => {
   const coll = getDatasetsCollection(reqContext.db);
-  const res = await coll.deleteMany({ workspaceId: wsId });
-  Log.info(`Cleared ${res.deletedCount} temporary datasets.`);
+  const existingDsCursor = coll.find({ workspaceId: wsId });
+  while (await (existingDsCursor as any).hasNext()) {
+    const doc = await existingDsCursor.next();
+    await deleteDataset(doc!._id.toHexString(), reqContext);
+  }
+
+  Log.info(`Cleared temporary datasets including entries.`);
 };
 
 export const saveTemporaryDataset = async (

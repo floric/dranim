@@ -1,26 +1,119 @@
-import { ApolloContext, DataType, ValueSchema } from '@masterthesis/shared';
+import {
+  ApolloContext,
+  DatasetInputNodeDef,
+  DatasetOutputNodeDef,
+  DataType,
+  DistinctEntriesNodeDef,
+  ValueSchema
+} from '@masterthesis/shared';
 
+import { createConnection } from '../main/workspace/connections';
 import { addValueSchema, createDataset } from '../main/workspace/dataset';
+import { createNode } from '../main/workspace/nodes';
 import { createWorkspace } from '../main/workspace/workspace';
+import { addOrUpdateFormValue } from '../main/workspace/nodes-detail';
 
 export const createSTRDemoData = async (reqContext: ApolloContext) => {
-  let ds = await createDataset('Passages', reqContext);
+  const dsPassages = await createDataset('Passages', reqContext);
   for (const s of passagesSchemas) {
-    await addValueSchema(ds.id, s, reqContext);
+    await addValueSchema(dsPassages.id, s, reqContext);
   }
-  ds = await createDataset('Commodities', reqContext);
+  const dsCommodities = await createDataset('Commodities', reqContext);
   for (const s of commoditiesSchemas) {
-    await addValueSchema(ds.id, s, reqContext);
+    await addValueSchema(dsCommodities.id, s, reqContext);
   }
-  ds = await createDataset('Cities', reqContext);
+  const dsCities = await createDataset('Cities', reqContext);
   for (const s of citySchemas) {
-    await addValueSchema(ds.id, s, reqContext);
+    await addValueSchema(dsCities.id, s, reqContext);
   }
-  await createWorkspace(
-    'Trade volumes',
+
+  const aggPassagesWs = await createWorkspace(
+    'Passages between cities',
     reqContext,
-    'Contains aggregation and filtering for trading development from 1600 until 1800.'
+    'Amount of passages between all cities'
   );
+
+  const [dsInputNode, distinctNode, dsOutputNode] = await Promise.all([
+    createNode(
+      DatasetInputNodeDef.type,
+      aggPassagesWs.id,
+      [],
+      10,
+      10,
+      reqContext
+    ),
+    createNode(
+      DistinctEntriesNodeDef.type,
+      aggPassagesWs.id,
+      [],
+      250,
+      10,
+      reqContext
+    ),
+    createNode(
+      DatasetOutputNodeDef.type,
+      aggPassagesWs.id,
+      [],
+      500,
+      10,
+      reqContext
+    )
+  ]);
+  await Promise.all([
+    createConnection(
+      { name: 'dataset', nodeId: dsInputNode.id },
+      { name: 'dataset', nodeId: distinctNode.id },
+      reqContext
+    ),
+    createConnection(
+      { name: 'dataset', nodeId: distinctNode.id },
+      { name: 'dataset', nodeId: dsOutputNode.id },
+      reqContext
+    )
+  ]);
+
+  await addOrUpdateFormValue(
+    dsInputNode.id,
+    'dataset',
+    JSON.stringify(dsPassages.id),
+    reqContext
+  );
+  await addOrUpdateFormValue(
+    distinctNode.id,
+    'addedSchemas',
+    JSON.stringify([
+      {
+        name: 'count',
+        type: 'Number',
+        fallback: '',
+        required: true,
+        unique: false
+      }
+    ]),
+    reqContext
+  );
+  await addOrUpdateFormValue(
+    distinctNode.id,
+    'distinctSchemas',
+    JSON.stringify([
+      {
+        name: 'departure_city',
+        type: 'String',
+        required: true,
+        fallback: '',
+        unique: false
+      },
+      {
+        name: 'destination_city',
+        type: 'String',
+        required: true,
+        fallback: '',
+        unique: false
+      }
+    ]),
+    reqContext
+  );
+
   return true;
 };
 

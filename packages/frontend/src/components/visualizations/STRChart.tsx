@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Col, Divider, Icon, Input, Row, Slider } from 'antd';
 
 import { SVGChartWithId } from '../CustomDataRenderer';
+import { SliderCol } from '../properties/Slider';
 import { LABEL_FONT_FAMILY, LABEL_FONT_SIZE } from './styles';
 
 export interface STRChartProps extends SVGChartWithId {
@@ -124,19 +125,17 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
               }}
             />
           </Col>
-          <Col xs={24} sm={12} md={6} lg={3}>
-            <p>Height</p>
-            <Slider
-              min={HEIGHT_MIN}
-              max={HEIGHT_MAX}
-              defaultValue={this.state.height}
-              onChange={(val: number) => {
-                this.setState({
-                  height: val
-                });
-              }}
-            />
-          </Col>
+          <SliderCol
+            label="Height"
+            min={HEIGHT_MIN}
+            max={HEIGHT_MAX}
+            value={this.state.height}
+            onChange={(val: number) => {
+              this.setState({
+                height: val
+              });
+            }}
+          />
           <Col xs={24} sm={12} md={6} lg={3}>
             <p>Curviness</p>
             <Slider

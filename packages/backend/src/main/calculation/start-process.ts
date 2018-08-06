@@ -44,8 +44,9 @@ const startProcess = async (
 
     Log.info(`Started calculation ${processId}`);
 
+    // TODO Refactor to support clean canceling
     const timer = setInterval(() => {
-      checkForCanceledProcess(processId, reqContext, timer);
+      checkForCanceledProcess(processId, workspaceId, reqContext, timer);
     }, CANCEL_CHECKS_MS);
 
     const results = await Promise.all(
@@ -78,6 +79,7 @@ const startProcess = async (
 
 const checkForCanceledProcess = async (
   processId: string,
+  wsId: string,
   reqContext: ApolloContext,
   timer: NodeJS.Timer
 ) => {
@@ -85,7 +87,7 @@ const checkForCanceledProcess = async (
   if (process.state !== ProcessState.PROCESSING) {
     Log.info(`Canceled calculation process ${processId} will be stopped`);
     clearInterval(timer);
-    throw new Error('Process canceled or failed');
+    await clearGeneratedDatasets(wsId, reqContext);
   }
 };
 

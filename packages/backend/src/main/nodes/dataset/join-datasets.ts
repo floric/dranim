@@ -74,6 +74,7 @@ export const JoinDatasetsNode: ServerNodeDef<
       reqContext,
       node.workspaceId
     );
+
     await addSchemasFromBothDatasets(newDs, dsA, dsB, reqContext);
     await processEntries(
       dsA!.id,
@@ -87,7 +88,8 @@ export const JoinDatasetsNode: ServerNodeDef<
           dsB.id,
           reqContext
         ),
-      reqContext
+      reqContext,
+      { concurrency: 16 }
     );
 
     return { outputs: { joined: { datasetId: newDs.id } } };

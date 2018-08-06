@@ -69,8 +69,7 @@ export const CustomDataRenderer: React.SFC<CustomDataRendererProps> = ({
         title={result.name}
         bordered={false}
         extra={
-          <>
-            {chart.actions.map(a => (
+          chart.actions.map(a => (
               <Button
                 icon="download"
                 key={`${a.name}-${result.name}`}
@@ -79,8 +78,7 @@ export const CustomDataRenderer: React.SFC<CustomDataRendererProps> = ({
               >
                 {a.name}
               </Button>
-            ))}
-          </>
+            ))
         }
       >
         {chart.elem}
