@@ -1,19 +1,29 @@
 import {
   ApolloContext,
+  Dataset,
   DatasetInputNodeDef,
   DatasetOutputNodeDef,
   DataType,
   DistinctEntriesNodeDef,
+  NodeInstance,
   ValueSchema
 } from '@masterthesis/shared';
 
 import { createConnection } from '../main/workspace/connections';
 import { addValueSchema, createDataset } from '../main/workspace/dataset';
 import { createNode } from '../main/workspace/nodes';
-import { createWorkspace } from '../main/workspace/workspace';
 import { addOrUpdateFormValue } from '../main/workspace/nodes-detail';
+import { createWorkspace } from '../main/workspace/workspace';
 
 export const createSTRDemoData = async (reqContext: ApolloContext) => {
+  const datasets = await createDatasets(reqContext);
+  const nodes = await createWorkspaces(datasets, reqContext);
+  await setFormValues(nodes, datasets[0].id, reqContext);
+
+  return true;
+};
+
+const createDatasets = async (reqContext: ApolloContext) => {
   const dsPassages = await createDataset('Passages', reqContext);
   for (const s of passagesSchemas) {
     await addValueSchema(dsPassages.id, s, reqContext);
@@ -27,6 +37,13 @@ export const createSTRDemoData = async (reqContext: ApolloContext) => {
     await addValueSchema(dsCities.id, s, reqContext);
   }
 
+  return [dsPassages, dsCommodities, dsCities];
+};
+
+const createWorkspaces = async (
+  [dsPassages, dsCommodities, dsCities]: Array<Dataset>,
+  reqContext: ApolloContext
+) => {
   const aggPassagesWs = await createWorkspace(
     'Passages between cities',
     reqContext,
@@ -71,11 +88,18 @@ export const createSTRDemoData = async (reqContext: ApolloContext) => {
       reqContext
     )
   ]);
+  return [dsInputNode, distinctNode, dsOutputNode];
+};
 
+const setFormValues = async (
+  [dsInputNode, distinctNode, dsOutputNode]: Array<NodeInstance>,
+  passagesId: string,
+  reqContext: ApolloContext
+) => {
   await addOrUpdateFormValue(
     dsInputNode.id,
     'dataset',
-    JSON.stringify(dsPassages.id),
+    JSON.stringify(passagesId),
     reqContext
   );
   await addOrUpdateFormValue(
@@ -113,8 +137,6 @@ export const createSTRDemoData = async (reqContext: ApolloContext) => {
     ]),
     reqContext
   );
-
-  return true;
 };
 
 const createNumberValueSchema = (
@@ -128,6 +150,7 @@ const createNumberValueSchema = (
   fallback: '1',
   unique
 });
+
 const createStringValueSchema = (
   name: string,
   required: boolean = false,
@@ -139,6 +162,7 @@ const createStringValueSchema = (
   fallback: '',
   unique
 });
+
 const createBoolValueSchema = (
   name: string,
   required: boolean = false,

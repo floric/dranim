@@ -140,7 +140,8 @@ describe('Dataset', () => {
     expect(getEntryCollection(newDs.id, db).createIndex).toHaveBeenCalledWith(
       `values.test`,
       {
-        unique: true
+        unique: true,
+        background: true
       }
     );
   });

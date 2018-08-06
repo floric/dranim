@@ -187,9 +187,14 @@ const processDistinctDatasets = async (
   );
 
   const query = {};
+  const values: IOValues<any> = {};
   distinctSchemas!.forEach(s => {
     query[`values.${s.name}`] = distinctValues[s.name];
+    values[getDistinctValueName(s)] = distinctValues[s.name];
   });
+  values.filteredDataset = {
+    datasetId: tempDs.id
+  };
 
   const entryColl = getEntryCollection(existingDs.id, reqContext.db);
   await entryColl
@@ -201,15 +206,6 @@ const processDistinctDatasets = async (
       { bypassDocumentValidation: true }
     )
     .next();
-
-  const values: IOValues<any> = {};
-  distinctSchemas.forEach(ds => {
-    values[getDistinctValueName(ds)] = distinctValues[ds.name];
-  });
-
-  values.filteredDataset = {
-    datasetId: tempDs.id
-  };
 
   const { outputs } = await contextFnExecution!(values);
   await createEntry(newDs.id, outputs, reqContext);

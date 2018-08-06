@@ -15,7 +15,7 @@ import { Log } from '../../../logging';
 import { addValueSchema } from '../../workspace/dataset';
 import { getEntryCollection } from '../../workspace/entry';
 
-export const CHECK_PROGRESS_DURATION = 5000;
+export const CHECK_FREQUENCY = 5000;
 export const CONCURRENT_JOBS_COUNT = 4;
 
 export const copySchemas = (
@@ -52,6 +52,7 @@ export const getDynamicEntryContextInputs = async (
 
 export interface ProcessOptions {
   concurrency?: number;
+  checkFrequency?: number;
 }
 
 export const processEntries = async (
@@ -86,6 +87,10 @@ export const processDocumentsWithCursor = async <T = any>(
   const queue = new PromiseQueue(
     options && options.concurrency ? options.concurrency : CONCURRENT_JOBS_COUNT
   );
+  const checkFrequency =
+    options && options.checkFrequency
+      ? options.checkFrequency
+      : CHECK_FREQUENCY;
 
   while (await cursor.hasNext!()) {
     const doc = await cursor.next();
@@ -93,28 +98,34 @@ export const processDocumentsWithCursor = async <T = any>(
   }
 
   await cursor.close();
-  await processQueue(queue);
+  await processQueue(queue, checkFrequency);
 };
 
-const processQueue = async (queue: PromiseQueue) => {
+const processQueue = async (queue: PromiseQueue, checkFrequency: number) => {
   let lastRemainingJobsCount = queue.getQueueLength();
 
   Log.info(
     `Processing queue with ${lastRemainingJobsCount} jobs with maximum ${queue.getPendingLength()} concurrently`
   );
 
-  await new Promise(resolveFn => {
-    const timer = setInterval(() => {
-      const currentRemainingJobsCount = queue.getQueueLength();
-      Log.info(
-        `${currentRemainingJobsCount} jobs left, done in ${CHECK_PROGRESS_DURATION /
-          1000} seconds: ${lastRemainingJobsCount - currentRemainingJobsCount}`
-      );
-      lastRemainingJobsCount = currentRemainingJobsCount;
-      if (currentRemainingJobsCount === 0) {
-        clearInterval(timer);
-        resolveFn();
-      }
-    }, CHECK_PROGRESS_DURATION);
+  await new Promise((resolve, reject) => {
+    try {
+      const timer = setInterval(() => {
+        const currentRemainingJobsCount = queue.getQueueLength();
+        Log.info(
+          `${currentRemainingJobsCount} jobs left, done in ${checkFrequency /
+            1000} seconds: ${lastRemainingJobsCount -
+            currentRemainingJobsCount}`
+        );
+        lastRemainingJobsCount = currentRemainingJobsCount;
+        if (currentRemainingJobsCount === 0) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, checkFrequency);
+    } catch (err) {
+      Log.error(`Queue failed with error: ${err.message}`);
+      reject();
+    }
   });
 };

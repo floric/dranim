@@ -22,7 +22,7 @@ import {
   areNodeInputsValid,
   isNodeInMetaValid
 } from '../../../src/main/calculation/validation';
-import { getNodeType, tryGetNodeType } from '../../../src/main/nodes/all-nodes';
+import { tryGetNodeType } from '../../../src/main/nodes/all-nodes';
 import { tryGetConnection } from '../../../src/main/workspace/connections';
 import {
   tryGetContextNode,
@@ -253,59 +253,6 @@ describe('Execution', () => {
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unknown node type: UnknownNodeType');
-    }
-  });
-
-  test('should throw error for canceled process', async () => {
-    const type: ServerNodeDef & NodeDef = {
-      type: 'type',
-      name: 'a',
-      inputs: {
-        a: {
-          dataType: DataType.STRING,
-          displayName: 'value',
-          state: SocketState.STATIC
-        }
-      },
-      outputs: {},
-      keywords: [],
-      path: [],
-      isFormValid: async () => true,
-      onMetaExecution: async () => ({}),
-      onNodeExecution: jest.fn()
-    };
-    (getNodeType as jest.Mock).mockReturnValue(type);
-    (tryGetNodeType as jest.Mock).mockReturnValue(type);
-    (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
-    (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
-    (hasContextFn as any).mockReturnValue(false);
-    (tryGetCalculation as jest.Mock).mockResolvedValue({
-      state: ProcessState.CANCELED
-    });
-
-    try {
-      await executeNode(
-        {
-          type: 'UnknownNodeType',
-          x: 0,
-          y: 0,
-          workspaceId: VALID_OBJECT_ID,
-          id: VALID_OBJECT_ID,
-          outputs: [],
-          inputs: [],
-          form: [],
-          contextIds: [],
-          state: NodeState.VALID,
-          variables: {}
-        },
-        VALID_OBJECT_ID,
-        { db: null, userId: '' }
-      );
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(type.onNodeExecution).not.toHaveBeenCalled();
-      expect(tryGetCalculation).toHaveBeenCalled();
-      expect(err.message).toBe('Process canceled or failed');
     }
   });
 

@@ -14,7 +14,6 @@ import {
   getEntriesCount,
   getEntryCollection
 } from '../../../../src/main/workspace/entry';
-import { setProgress } from '../../../../src/main/workspace/nodes-detail';
 import { VALID_OBJECT_ID } from '../../../test-utils';
 
 jest.mock('mongodb');
@@ -121,9 +120,6 @@ describe.only('Entries Utils', () => {
       id: 'eA',
       values: { [schemaA.name]: 'test', [schemaOnlyA.name]: true }
     };
-    const progressFn = jest.fn(async () => {
-      //
-    });
     const processFn = jest.fn(async () => {
       //
     });
@@ -145,16 +141,15 @@ describe.only('Entries Utils', () => {
       }
     });
     (getEntriesCount as jest.Mock).mockResolvedValue(250);
-    (setProgress as jest.Mock).mockImplementation(progressFn);
 
     const res = await processEntries(
       VALID_OBJECT_ID,
       VALID_OBJECT_ID,
       processFn,
-      { db: null, userId: '' }
+      { db: null, userId: '' },
+      { checkFrequency: 50 }
     );
     expect(processFn).toHaveBeenCalledTimes(250);
-    expect(progressFn).toHaveBeenCalledTimes(3);
     expect(res).toBeUndefined();
   });
 

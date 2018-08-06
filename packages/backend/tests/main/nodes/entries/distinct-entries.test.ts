@@ -8,7 +8,7 @@ import {
 
 import { createUniqueDatasetName } from '../../../../src/main/calculation/utils';
 import { DistinctEntriesNode } from '../../../../src/main/nodes/entries/distinct-entries';
-import { processEntries } from '../../../../src/main/nodes/entries/utils';
+import { processDocumentsWithCursor } from '../../../../src/main/nodes/entries/utils';
 import {
   createDataset,
   tryGetDataset
@@ -407,7 +407,14 @@ describe('DistinctEntriesNode', () => {
         };
       })
     });
-    (processEntries as jest.Mock).mockResolvedValue(true);
+    (processDocumentsWithCursor as jest.Mock).mockImplementation(
+      async (cursor, nodeId, processFn, reqContext) =>
+        processFn({
+          _id: {
+            test: 'distinct-value'
+          }
+        })
+    );
 
     const contextFnExecution = jest.fn(() => ({
       outputs: { test: 'abc', 'other-test': 2 }
