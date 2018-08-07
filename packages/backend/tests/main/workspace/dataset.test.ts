@@ -4,13 +4,18 @@ import { DataType, ValueSchema } from '@masterthesis/shared';
 
 import {
   addValueSchema,
+  clearGeneratedDatasets,
   createDataset,
   deleteDataset,
   getAllDatasets,
   getDataset,
+  saveTemporaryDataset,
   tryGetDataset
 } from '../../../src/main/workspace/dataset';
-import { getEntryCollection } from '../../../src/main/workspace/entry';
+import {
+  clearEntries,
+  getEntryCollection
+} from '../../../src/main/workspace/entry';
 import {
   getTestMongoDb,
   NeverGoHereError,
@@ -236,23 +241,24 @@ describe('Dataset', () => {
   });
 
   test('should return all datasets', async () => {
-    const dsA = await createDataset('test', {
-      db,
-      userId: ''
-    });
-    const dsB = await createDataset('test2', {
-      db,
-      userId: ''
-    });
-    const dsC = await createDataset(
-      'test3',
-      {
+    const [dsA, dsB, dsC] = await Promise.all([
+      createDataset('test', {
         db,
         userId: ''
-      },
-      VALID_OBJECT_ID
-    );
-
+      }),
+      createDataset('test2', {
+        db,
+        userId: ''
+      }),
+      createDataset(
+        'test3',
+        {
+          db,
+          userId: ''
+        },
+        VALID_OBJECT_ID
+      )
+    ]);
     const all = await getAllDatasets({
       db,
       userId: ''
@@ -270,6 +276,77 @@ describe('Dataset', () => {
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unknown dataset');
+    }
+  });
+
+  test('should clear datasets with workspace ID', async () => {
+    const [dsA, dsB, dsC] = await Promise.all([
+      createDataset('test', {
+        db,
+        userId: ''
+      }),
+      createDataset('test2', {
+        db,
+        userId: ''
+      }),
+      createDataset(
+        'test3',
+        {
+          db,
+          userId: ''
+        },
+        VALID_OBJECT_ID
+      )
+    ]);
+
+    await clearGeneratedDatasets(VALID_OBJECT_ID, { db, userId: '' });
+    const [resDsA, resDsB, resDsC] = await Promise.all(
+      [dsA, dsB, dsC].map(n => getDataset(n.id, { db, userId: '' }))
+    );
+
+    expect(resDsA.id).toBeDefined();
+    expect(resDsB.id).toBeDefined();
+    expect(resDsC).toBe(null);
+    expect(clearEntries).toHaveBeenCalledTimes(1);
+  });
+
+  test('should save temporary dataset', async () => {
+    const [dsA, dsB] = await Promise.all([
+      createDataset(
+        'test',
+        {
+          db,
+          userId: ''
+        },
+        VALID_OBJECT_ID
+      ),
+      createDataset(
+        'test2',
+        {
+          db,
+          userId: ''
+        },
+        VALID_OBJECT_ID
+      )
+    ]);
+
+    await saveTemporaryDataset(dsA.id, 'New DS', { db, userId: '' });
+
+    const [resDsA, resDsB] = await Promise.all(
+      [dsA, dsB].map(n => getDataset(n.id, { db, userId: '' }))
+    );
+
+    expect(resDsA.workspaceId).toBe(null);
+    expect(resDsB.workspaceId).toBe(VALID_OBJECT_ID);
+    expect(resDsA.description).toBe('Generated with Explorer');
+  });
+
+  test('should throw error trying to save temporary dataset', async () => {
+    try {
+      await saveTemporaryDataset(VALID_OBJECT_ID, 'New DS', { db, userId: '' });
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Saving temporary dataset failed');
     }
   });
 });

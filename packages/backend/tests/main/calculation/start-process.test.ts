@@ -3,23 +3,28 @@ import {
   DatasetOutputNodeDef,
   DataType,
   IOValues,
+  NodeInstance,
+  NodeState,
   NumberInputNodeDef,
   NumberOutputNodeDef,
   OutputResult,
-  ProcessState
+  ProcessState,
+  sleep,
+  Workspace
 } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import { executeNode } from '../../../src/main/calculation/execution';
 import {
+  CANCEL_CHECKS_MS,
   getAllCalculations,
-  startCalculation,
+  startProcess,
   stopCalculation,
   tryGetCalculation
 } from '../../../src/main/calculation/start-process';
 import { addOrUpdateResult } from '../../../src/main/dashboards/results';
-import { createNode } from '../../../src/main/workspace/nodes';
-import { createWorkspace } from '../../../src/main/workspace/workspace';
+import { clearGeneratedDatasets } from '../../../src/main/workspace/dataset';
+import { getAllNodes } from '../../../src/main/workspace/nodes';
 import { getTestMongoDb, VALID_OBJECT_ID } from '../../test-utils';
 
 let conn;
@@ -28,6 +33,17 @@ let server;
 
 jest.mock('../../../src/main/calculation/execution');
 jest.mock('../../../src/main/dashboards/results');
+jest.mock('../../../src/main/workspace/workspace');
+jest.mock('../../../src/main/workspace/nodes');
+jest.mock('../../../src/main/workspace/dataset');
+
+const ws: Workspace = {
+  name: 'test',
+  description: '',
+  created: '',
+  id: VALID_OBJECT_ID,
+  lastChange: ''
+};
 
 describe('Start Process', () => {
   beforeAll(async () => {
@@ -51,20 +67,18 @@ describe('Start Process', () => {
   });
 
   test('should get empty calculations collection', async () => {
-    const ws = await createWorkspace('test', { db, userId: '' }, '');
-
     const processes = await getAllCalculations(ws.id, { db, userId: '' });
 
     expect(processes.length).toBe(0);
   });
 
   test('should start new calculation process without any nodes', async () => {
-    (executeNode as jest.Mock).mockImplementation(n =>
+    (executeNode as jest.Mock).mockImplementation(() =>
       Promise.resolve<IOValues<{}>>({ outputs: {}, results: {} })
     );
+    (getAllNodes as jest.Mock).mockResolvedValue([]);
 
-    const ws = await createWorkspace('test', { db, userId: '' }, '');
-    const newProcess = await startCalculation(
+    const newProcess = await startProcess(
       ws.id,
       { db, userId: '' },
       { awaitResult: true }
@@ -90,37 +104,53 @@ describe('Start Process', () => {
   });
 
   test('should start new calculation process with one node', async () => {
+    const nodes: Array<NodeInstance> = [
+      {
+        contextIds: [],
+        form: [],
+        id: VALID_OBJECT_ID,
+        inputs: [],
+        outputs: [],
+        state: NodeState.VALID,
+        type: NumberOutputNodeDef.type,
+        variables: {},
+        workspaceId: VALID_OBJECT_ID,
+        x: 0,
+        y: 0
+      },
+      {
+        contextIds: [],
+        form: [],
+        id: VALID_OBJECT_ID,
+        inputs: [],
+        outputs: [],
+        state: NodeState.VALID,
+        type: DatasetOutputNodeDef.type,
+        variables: {},
+        workspaceId: VALID_OBJECT_ID,
+        x: 0,
+        y: 0
+      },
+      {
+        contextIds: [],
+        form: [],
+        id: VALID_OBJECT_ID,
+        inputs: [],
+        outputs: [],
+        state: NodeState.VALID,
+        type: NumberInputNodeDef.type,
+        variables: {},
+        workspaceId: VALID_OBJECT_ID,
+        x: 0,
+        y: 0
+      }
+    ];
     (executeNode as jest.Mock).mockImplementation(n =>
       Promise.resolve<IOValues<{}>>({ outputs: {}, results: {} })
     );
+    (getAllNodes as jest.Mock).mockResolvedValue(nodes);
 
-    const ws = await createWorkspace('test', { db, userId: '' }, '');
-    await Promise.all(
-      [
-        {
-          type: NumberOutputNodeDef.type,
-          workspaceId: ws.id,
-          x: 0,
-          y: 0
-        },
-        {
-          type: DatasetOutputNodeDef.type,
-          workspaceId: ws.id,
-          x: 0,
-          y: 0
-        },
-        {
-          type: NumberInputNodeDef.type,
-          workspaceId: ws.id,
-          x: 0,
-          y: 0
-        }
-      ].map(n =>
-        createNode(n.type, n.workspaceId, [], n.x, n.y, { db, userId: '' })
-      )
-    );
-
-    const newProcess = await startCalculation(
+    const newProcess = await startProcess(
       ws.id,
       { db, userId: '' },
       { awaitResult: true }
@@ -160,37 +190,53 @@ describe('Start Process', () => {
       value: 'test',
       description: 'desc'
     };
+    const nodes: Array<NodeInstance> = [
+      {
+        contextIds: [],
+        form: [],
+        id: VALID_OBJECT_ID,
+        inputs: [],
+        outputs: [],
+        state: NodeState.VALID,
+        type: NumberOutputNodeDef.type,
+        variables: {},
+        workspaceId: VALID_OBJECT_ID,
+        x: 0,
+        y: 0
+      },
+      {
+        contextIds: [],
+        form: [],
+        id: VALID_OBJECT_ID,
+        inputs: [],
+        outputs: [],
+        state: NodeState.VALID,
+        type: DatasetOutputNodeDef.type,
+        variables: {},
+        workspaceId: VALID_OBJECT_ID,
+        x: 0,
+        y: 0
+      },
+      {
+        contextIds: [],
+        form: [],
+        id: VALID_OBJECT_ID,
+        inputs: [],
+        outputs: [],
+        state: NodeState.VALID,
+        type: NumberInputNodeDef.type,
+        variables: {},
+        workspaceId: VALID_OBJECT_ID,
+        x: 0,
+        y: 0
+      }
+    ];
     (executeNode as jest.Mock)
       .mockResolvedValueOnce({ outputs: {}, results: { resultA } })
       .mockResolvedValueOnce({ outputs: {}, results: { resultB } });
+    (getAllNodes as jest.Mock).mockResolvedValue(nodes);
 
-    const ws = await createWorkspace('test', { db, userId: '' }, '');
-    await Promise.all(
-      [
-        {
-          type: NumberOutputNodeDef.type,
-          workspaceId: ws.id,
-          x: 0,
-          y: 0
-        },
-        {
-          type: DatasetOutputNodeDef.type,
-          workspaceId: ws.id,
-          x: 0,
-          y: 0
-        },
-        {
-          type: NumberInputNodeDef.type,
-          workspaceId: ws.id,
-          x: 0,
-          y: 0
-        }
-      ].map(n =>
-        createNode(n.type, n.workspaceId, [], n.x, n.y, { db, userId: '' })
-      )
-    );
-
-    const newProcess = await startCalculation(
+    const newProcess = await startProcess(
       ws.id,
       { db, userId: '' },
       { awaitResult: true }
@@ -213,6 +259,7 @@ describe('Start Process', () => {
     expect(finishedProcess.start).toBeDefined();
 
     expect(executeNode as jest.Mock).toHaveBeenCalledTimes(2);
+    expect(clearGeneratedDatasets).toHaveBeenCalledTimes(1);
     expect(addOrUpdateResult as jest.Mock).toHaveBeenCalledTimes(2);
     expect(addOrUpdateResult as jest.Mock).toHaveBeenCalledWith(
       { resultA },
@@ -231,8 +278,7 @@ describe('Start Process', () => {
   });
 
   test('should stop calculation', async () => {
-    const ws = await createWorkspace('test', { db, userId: '' }, '');
-    const calculation = await startCalculation(
+    const calculation = await startProcess(
       ws.id,
       { db, userId: '' },
       { awaitResult: true }
@@ -243,8 +289,7 @@ describe('Start Process', () => {
   });
 
   test('should get calculation', async () => {
-    const ws = await createWorkspace('test', { db, userId: '' }, '');
-    const calculation = await startCalculation(
+    const calculation = await startProcess(
       ws.id,
       { db, userId: '' },
       { awaitResult: true }
@@ -279,22 +324,23 @@ describe('Start Process', () => {
     (executeNode as jest.Mock).mockImplementation(n => {
       throw new Error('Something went wrong during node execution.');
     });
+    (getAllNodes as jest.Mock).mockResolvedValue([
+      {
+        contextIds: [],
+        form: [],
+        id: VALID_OBJECT_ID,
+        inputs: [],
+        outputs: [],
+        state: NodeState.VALID,
+        type: NumberOutputNodeDef.type,
+        variables: {},
+        workspaceId: VALID_OBJECT_ID,
+        x: 0,
+        y: 0
+      }
+    ]);
 
-    const ws = await createWorkspace('test', { db, userId: '' }, '');
-    await Promise.all(
-      [
-        {
-          type: NumberOutputNodeDef.type,
-          workspaceId: ws.id,
-          x: 0,
-          y: 0
-        }
-      ].map(n =>
-        createNode(n.type, n.workspaceId, [], n.x, n.y, { db, userId: '' })
-      )
-    );
-
-    const newProcess = await startCalculation(
+    const newProcess = await startProcess(
       ws.id,
       { db, userId: '' },
       { awaitResult: true }
@@ -316,6 +362,71 @@ describe('Start Process', () => {
     expect(finishedProcess.totalOutputs).toBe(1);
     expect(finishedProcess.start).toBeDefined();
 
-    expect((executeNode as jest.Mock).mock.calls.length).toBe(1);
+    expect(executeNode).toHaveBeenCalledTimes(1);
+    expect(clearGeneratedDatasets).toHaveBeenCalledTimes(1);
+  });
+
+  test('should check for canceled process and clear datasets', async () => {
+    jest.setTimeout(10000);
+    const nodes: Array<NodeInstance> = [
+      {
+        contextIds: [],
+        form: [],
+        id: VALID_OBJECT_ID,
+        inputs: [],
+        outputs: [],
+        state: NodeState.VALID,
+        type: NumberOutputNodeDef.type,
+        variables: {},
+        workspaceId: VALID_OBJECT_ID,
+        x: 0,
+        y: 0
+      }
+    ];
+    (executeNode as jest.Mock).mockImplementation(async () => {
+      await sleep(7000);
+      throw new Error('Should have been stopped');
+    });
+    (getAllNodes as jest.Mock).mockResolvedValue(nodes);
+
+    let res = await startProcess(ws.id, { db, userId: '' });
+
+    await sleep(100);
+    const stopRes = await stopCalculation(res.id, { db, userId: '' });
+    await sleep(CANCEL_CHECKS_MS);
+
+    res = await tryGetCalculation(res.id, { db, userId: '' });
+    const { finish, id, start, ...otherRes } = res;
+
+    expect(stopRes).toBe(true);
+    expect(clearGeneratedDatasets).toHaveBeenCalledTimes(1);
+    expect(otherRes).toEqual({
+      processedOutputs: 0,
+      state: ProcessState.CANCELED,
+      totalOutputs: 1,
+      userId: '',
+      workspaceId: VALID_OBJECT_ID
+    });
+  });
+
+  test('should stop cancel check for successful job', async () => {
+    jest.setTimeout(10000);
+    (getAllNodes as jest.Mock).mockResolvedValue([]);
+
+    let res = await startProcess(ws.id, { db, userId: '' });
+
+    await sleep(CANCEL_CHECKS_MS * 1.5);
+
+    res = await tryGetCalculation(res.id, { db, userId: '' });
+    const { finish, id, start, ...otherRes } = res;
+
+    expect(clearGeneratedDatasets).toHaveBeenCalled();
+    expect(otherRes).toEqual({
+      processedOutputs: 0,
+      state: ProcessState.SUCCESSFUL,
+      totalOutputs: 0,
+      userId: '',
+      workspaceId: VALID_OBJECT_ID
+    });
   });
 });
