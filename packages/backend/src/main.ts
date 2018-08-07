@@ -35,7 +35,7 @@ const CORS = (options: IMainOptions) => ({
 
 export const main = async (options: IMainOptions) => {
   const client = await mongoDbClient();
-  const db = client.db(process.env.DB_NAME);
+  const db = client.db(process.env.DB_NAME || 'dranim');
   await initDb(db);
 
   const app = express();

@@ -40,7 +40,7 @@
   "scripts": {
     "start": "parcel public/index.html --no-hmr --log-level 2 --no-cache",
     "lint": "tslint -p . --fix",
-    "build": "BACKEND_DOMAIN=$BACKEND_DOMAIN parcel build public/index.html --no-cache --log-level 1",
+    "build": "parcel build public/index.html --no-cache --log-level 1",
     "clean": "rm -rf build node_modules dist .cache"
   },
   "devDependencies": {

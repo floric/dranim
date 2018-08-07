@@ -70,6 +70,7 @@ class LoggedInApp extends React.Component<
                 collapsed={collapsed}
                 onCollapse={this.onCollapse}
                 breakpoint="md"
+                theme="dark"
                 style={{ color: Colors.GrayLight }}
               >
                 <AppMenu

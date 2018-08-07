@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import * as React from 'react';
 
-import { Col, Divider, Icon, Input, Row, Slider } from 'antd';
+import { Col, Divider, Icon, Input, Row, Slider, Tag, Tooltip } from 'antd';
 
 import { SVGChartWithId } from '../CustomDataRenderer';
 import { SliderCol } from '../properties/Slider';
@@ -51,6 +51,12 @@ interface STRChartState {
     eastPassage: string;
     westPassage: string;
   };
+  temp: {
+    inputVisible: boolean;
+    inputRef: React.Ref<any> | null;
+    inputValue: string;
+  };
+  soundNames: Array<string>;
 }
 
 export class STRChart extends React.Component<STRChartProps, STRChartState> {
@@ -64,6 +70,12 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
         minTextOpacity: MINIMUM_OPACITY,
         eastPassage: EAST_PASSAGE_COLOR,
         westPassage: WEST_PASSAGE_COLOR
+      },
+      soundNames: [],
+      temp: {
+        inputVisible: false,
+        inputRef: null,
+        inputValue: ''
       }
     });
   }
@@ -72,8 +84,16 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
     this.renderChart();
   }
 
-  public componentDidUpdate() {
-    this.renderChart();
+  public componentDidUpdate(
+    prevProps: STRChartProps,
+    prevState: STRChartState
+  ) {
+    if (
+      this.state.temp.inputValue === prevState.temp.inputValue &&
+      this.state.temp.inputVisible === prevState.temp.inputVisible
+    ) {
+      this.renderChart();
+    }
   }
 
   private renderChart() {
@@ -110,7 +130,41 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
     renderPassages(chart, value.values.passages, cityPositions, this.state);
   }
 
+  private handleClose = removedTag => {
+    const soundNames = this.state.soundNames.filter(tag => tag !== removedTag);
+    this.setState({ soundNames });
+  };
+
+  private showInput = () =>
+    this.setState({ temp: { ...this.state.temp, inputVisible: true } });
+
+  private handleInputChange = e =>
+    this.setState({ temp: { ...this.state.temp, inputValue: e.target.value } });
+
+  private handleInputConfirm = () => {
+    const {
+      soundNames,
+      temp: { inputValue }
+    } = this.state;
+    const newSoundNames = [...soundNames, inputValue];
+    this.setState({
+      soundNames: newSoundNames,
+      temp: {
+        ...this.state.temp,
+        inputVisible: false,
+        inputValue: ''
+      }
+    });
+  };
+
+  private saveInputRef = inputRef =>
+    this.setState({ temp: { ...this.state.temp, inputRef } });
+
   public render() {
+    const {
+      temp: { inputVisible, inputValue },
+      soundNames
+    } = this.state;
     return (
       <>
         <Row>
@@ -173,6 +227,23 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
               }}
             />
           </Col>
+          <Col xs={24} sm={12} md={6} lg={3}>
+            <p>Minimal Opacity</p>
+            <Slider
+              min={0}
+              max={1}
+              step={0.01}
+              defaultValue={this.state.colors.minTextOpacity}
+              onChange={(val: number) => {
+                this.setState({
+                  colors: {
+                    ...this.state.colors,
+                    minTextOpacity: val
+                  }
+                });
+              }}
+            />
+          </Col>
           <Col sm={24} md={12} lg={6}>
             <p>Colors</p>
             <Input.Group compact>
@@ -219,22 +290,37 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
               />
             </Input.Group>
           </Col>
-          <Col xs={24} sm={12} md={6} lg={3}>
-            <p>Minimal Opacity</p>
-            <Slider
-              min={0}
-              max={1}
-              step={0.01}
-              defaultValue={this.state.colors.minTextOpacity}
-              onChange={(val: number) => {
-                this.setState({
-                  colors: {
-                    ...this.state.colors,
-                    minTextOpacity: val
-                  }
-                });
-              }}
-            />
+          <Col sm={24} md={12} lg={6}>
+            <p>Sound Names</p>
+            {soundNames.map(tag => (
+              <Tag
+                key={tag}
+                closable={true}
+                afterClose={() => this.handleClose(tag)}
+              >
+                {tag}
+              </Tag>
+            ))}
+            {inputVisible && (
+              <Input
+                ref={this.saveInputRef}
+                type="text"
+                size="small"
+                style={{ width: 120, padding: 0, margin: 0 }}
+                value={inputValue}
+                onChange={this.handleInputChange}
+                onBlur={this.handleInputConfirm}
+                onPressEnter={this.handleInputConfirm}
+              />
+            )}
+            {!inputVisible && (
+              <Tag
+                onClick={this.showInput}
+                style={{ background: '#fff', borderStyle: 'dashed' }}
+              >
+                <Icon type="plus" /> New Tag
+              </Tag>
+            )}
           </Col>
         </Row>
         <Divider />
@@ -317,7 +403,10 @@ const renderNames = (
     .enter()
     .append('text')
     .attr('class', svgKey)
-    .text(d => `${d.name} (↑${d.exportVolume} ↓${d.importVolume})`)
+    .text(d => {
+      const ioName = `(↑${d.exportVolume} ↓${d.importVolume})`;
+      return d.isWest ? `${ioName} ${d.name}` : `${d.name} ${ioName}`;
+    })
     .attr('x', d => cityPositions.get(d.name).x)
     .attr('y', d => cityPositions.get(d.name).y)
     .style('opacity', d =>

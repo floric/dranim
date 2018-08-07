@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { SFC } from 'react';
 
+import { Workspace } from '@masterthesis/shared';
 import { Icon, Menu } from 'antd';
 import { NavLink } from 'react-router-dom';
 
-import { Workspace } from '../../../shared/lib/workspace';
 import { MenuItemContent } from './MenuItemContent';
 
 export const AppMenu: SFC<{
