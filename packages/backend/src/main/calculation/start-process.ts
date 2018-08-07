@@ -127,7 +127,11 @@ const checkForCanceledProcess = (
   new Promise((resolve, reject) => {
     const timer = setInterval(async () => {
       const process = await getCalculation(processId, reqContext);
-      if (!process) {
+      if (
+        !process ||
+        process.state === ProcessState.ERROR ||
+        process.state === ProcessState.SUCCESSFUL
+      ) {
         clearInterval(timer);
         resolve();
         return;
@@ -136,12 +140,6 @@ const checkForCanceledProcess = (
       if (process.state === ProcessState.CANCELED) {
         clearInterval(timer);
         reject(new Error('Process canceled'));
-      } else if (
-        process.state === ProcessState.ERROR ||
-        process.state === ProcessState.SUCCESSFUL
-      ) {
-        clearInterval(timer);
-        resolve();
       }
     }, CANCEL_CHECKS_MS);
   });
