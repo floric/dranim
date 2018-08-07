@@ -32,9 +32,23 @@ export default class StartPage extends React.Component<{}> {
       {
         type: NewsType.NOTIFICATION,
         date: new Date(2018, 7, 15),
-        title: 'Next Milestone',
+        title: 'Next Milestones',
         description:
-          'Implement STR visualization and polish UI to begin user onboarding.'
+          'Add more neded nodes and improve calculation progress reporting.'
+      },
+      {
+        type: NewsType.FEATURE,
+        date: new Date(2018, 7, 7),
+        title: 'Added STR Visualization',
+        description:
+          'A new visualization type for STR graphics was added. This visualization also supports interactive controls for graphi related parameters.'
+      },
+      {
+        type: NewsType.IMPROVEMENT,
+        date: new Date(2018, 7, 7),
+        title: 'Calculation process and cancellation improved',
+        description:
+          'The calculation process has been improved. Cancellations are handled better and some performance improvements were added.'
       },
       {
         type: NewsType.FEATURE,

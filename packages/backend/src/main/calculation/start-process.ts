@@ -15,7 +15,48 @@ import { getNodeType, hasNodeType } from '../nodes/all-nodes';
 import { clearGeneratedDatasets } from '../workspace/dataset';
 import { getAllNodes, resetProgress } from '../workspace/nodes';
 
-const startProcess = async (
+export const CANCEL_CHECKS_MS = 5000;
+
+export interface StartCalculationOptions {
+  awaitResult?: boolean;
+}
+
+export const startProcess = async (
+  workspaceId: string,
+  reqContext: ApolloContext,
+  options?: StartCalculationOptions
+): Promise<CalculationProcess> => {
+  const coll = getCalculationsCollection(reqContext.db);
+  const newProcess = await coll.insertOne({
+    userId: reqContext.userId,
+    start: new Date(),
+    finish: null,
+    workspaceId,
+    processedOutputs: 0,
+    totalOutputs: 0,
+    state: ProcessState.STARTED
+  });
+
+  if (newProcess.result.ok !== 1 || newProcess.ops.length !== 1) {
+    throw new Error('Process creation failed');
+  }
+
+  const { _id, ...obj } = newProcess.ops[0];
+  const id = _id.toHexString();
+
+  if (options && options.awaitResult) {
+    await doCalculation(id, workspaceId, reqContext);
+  } else {
+    doCalculation(id, workspaceId, reqContext);
+  }
+
+  return {
+    id,
+    ...obj
+  };
+};
+
+const doCalculation = async (
   processId: string,
   workspaceId: string,
   reqContext: ApolloContext
@@ -24,17 +65,15 @@ const startProcess = async (
 
   try {
     const start = new Date().getTime();
-    const nodes = await getAllNodes(workspaceId, reqContext);
-    const outputNodesInstances = nodes.filter(
-      n =>
-        hasNodeType(n.type) ? getNodeType(n.type)!.isOutputNode === true : false
+    const outputNodes = getOutputNodes(
+      await getAllNodes(workspaceId, reqContext)
     );
 
     await processCollection.updateOne(
       { _id: new ObjectID(processId) },
       {
         $set: {
-          totalOutputs: outputNodesInstances.length,
+          totalOutputs: outputNodes.length,
           state: ProcessState.PROCESSING
         }
       }
@@ -42,18 +81,29 @@ const startProcess = async (
 
     Log.info(`Started calculation ${processId}`);
 
+    checkForCanceledProcess(processId, reqContext).catch(() => {
+      updateFinishedProcess(
+        processId,
+        workspaceId,
+        ProcessState.CANCELED,
+        reqContext
+      );
+    });
+
     const results = await Promise.all(
-      outputNodesInstances.map(o => executeOutputNode(o, processId, reqContext))
+      outputNodes.map(o => executeOutputNode(o, processId, reqContext))
     );
+
     await saveResults(results as Array<OutputResult>, reqContext);
+    const durationMs = new Date().getTime() - start;
+
     await updateFinishedProcess(
       processId,
       workspaceId,
       ProcessState.SUCCESSFUL,
-      reqContext
+      reqContext,
+      durationMs
     );
-    const durationMs = new Date().getTime() - start;
-    Log.info(`Finished calculation in ${durationMs / 1000} s`);
   } catch (err) {
     await updateFinishedProcess(
       processId,
@@ -61,12 +111,38 @@ const startProcess = async (
       ProcessState.ERROR,
       reqContext
     );
-    console.error(err);
-    Log.info('Finished calculation with errors', err);
   }
-
-  await clearGeneratedDatasets(workspaceId, reqContext);
 };
+
+const getOutputNodes = (nodes: Array<NodeInstance>) =>
+  nodes.filter(
+    n =>
+      hasNodeType(n.type) ? getNodeType(n.type)!.isOutputNode === true : false
+  );
+
+const checkForCanceledProcess = (
+  processId: string,
+  reqContext: ApolloContext
+) =>
+  new Promise((resolve, reject) => {
+    const timer = setInterval(async () => {
+      const process = await getCalculation(processId, reqContext);
+      if (
+        !process ||
+        process.state === ProcessState.ERROR ||
+        process.state === ProcessState.SUCCESSFUL
+      ) {
+        clearInterval(timer);
+        resolve();
+        return;
+      }
+
+      if (process.state === ProcessState.CANCELED) {
+        clearInterval(timer);
+        reject(new Error('Process canceled'));
+      }
+    }, CANCEL_CHECKS_MS);
+  });
 
 const saveResults = async (
   results: Array<OutputResult | undefined>,
@@ -103,7 +179,8 @@ const updateFinishedProcess = async (
   processId: string,
   workspaceId: string,
   state: ProcessState,
-  reqContext: ApolloContext
+  reqContext: ApolloContext,
+  durationMs?: number
 ) => {
   const processCollection = getCalculationsCollection(reqContext.db);
   await processCollection.updateOne(
@@ -115,53 +192,20 @@ const updateFinishedProcess = async (
       }
     }
   );
+  Log.info(
+    `Finished calculation ${processId} with state ${state}${
+      durationMs ? ` in ${durationMs / 1000}s` : ''
+    }`
+  );
+
   await resetProgress(workspaceId, reqContext);
+  await clearGeneratedDatasets(workspaceId, reqContext);
 };
 
 const getCalculationsCollection = (
   db: Db
-): Collection<CalculationProcess & { _id: ObjectID }> => {
-  return db.collection('Calculations');
-};
-
-export interface StartCalculationOptions {
-  awaitResult?: boolean;
-}
-
-export const startCalculation = async (
-  workspaceId: string,
-  reqContext: ApolloContext,
-  options?: StartCalculationOptions
-): Promise<CalculationProcess> => {
-  const coll = getCalculationsCollection(reqContext.db);
-  const newProcess = await coll.insertOne({
-    userId: reqContext.userId,
-    start: new Date(),
-    finish: null,
-    workspaceId,
-    processedOutputs: 0,
-    totalOutputs: 0,
-    state: ProcessState.STARTED
-  });
-
-  if (newProcess.result.ok !== 1 || newProcess.ops.length !== 1) {
-    throw new Error('Process creation failed');
-  }
-
-  const { _id, ...obj } = newProcess.ops[0];
-  const id = _id.toHexString();
-
-  if (options && options.awaitResult) {
-    await startProcess(id, workspaceId, reqContext);
-  } else {
-    startProcess(id, workspaceId, reqContext);
-  }
-
-  return {
-    id,
-    ...obj
-  };
-};
+): Collection<CalculationProcess & { _id: ObjectID }> =>
+  db.collection('Calculations');
 
 export const stopCalculation = async (
   id: string,
@@ -181,7 +225,7 @@ export const stopCalculation = async (
     throw new Error('Process update failed');
   }
 
-  Log.info(`Stopped Calculation ${id}`);
+  Log.info(`Stop of calculation ${id} initiated`);
 
   return true;
 };

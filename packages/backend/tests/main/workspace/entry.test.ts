@@ -222,6 +222,52 @@ describe('Entry', () => {
     expect(count).toBe(values.length);
   });
 
+  test('should get estimated entries count', async () => {
+    const schema: ValueSchema = {
+      name: 'test',
+      type: DataType.STRING,
+      required: true,
+      unique: false,
+      fallback: ''
+    };
+
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      created: '',
+      description: '',
+      workspaceId: 'ws',
+      valueschemas: [schema]
+    };
+
+    (getDataset as jest.Mock).mockResolvedValue(ds);
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
+
+    const values = ['a', 'b', 'c', 'd', 'e'];
+    await Promise.all(
+      values.map(v =>
+        createEntry(
+          ds.id,
+          { test: v },
+          {
+            db,
+            userId: ''
+          }
+        )
+      )
+    );
+
+    const count = await getEntriesCount(
+      ds.id,
+      {
+        db,
+        userId: ''
+      },
+      { estimate: true }
+    );
+    expect(count).toBe(values.length);
+  });
+
   test('should get latest entries', async () => {
     const schema: ValueSchema = {
       name: 'test',

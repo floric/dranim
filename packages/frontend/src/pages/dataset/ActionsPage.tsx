@@ -130,7 +130,7 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
 
       return (
         <Query query={ALL_UPLOADS} variables={{ datasetId: dataset.id }}>
-          {({ loading, error, data, refetch }) => {
+          {({ loading, error, data }) => {
             if (loading) {
               return <LoadingCard />;
             }
@@ -201,7 +201,7 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
                     style={{ marginBottom: 12 }}
                   >
                     <Card bordered={false}>
-                      <h3>Upload</h3>
+                      <h3>Import</h3>
                       <Mutation mutation={UPLOAD_ENTRIES_CSV}>
                         {uploadEntriesCsv => (
                           <>
@@ -273,9 +273,10 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
                 </Row>
                 <Row>
                   <Card bordered={false}>
-                    <h3>Uploads</h3>
+                    <h3>Last Imports</h3>
                     <Table
                       size="small"
+                      pagination={{ size: 'small', hideOnSinglePage: true }}
                       dataSource={entriesDataSource}
                       columns={entriesColumns}
                     />

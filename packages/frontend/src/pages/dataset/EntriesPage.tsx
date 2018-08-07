@@ -1,9 +1,9 @@
 import * as React from 'react';
 
-import { GQLDataset, Values } from '@masterthesis/shared';
+import { GQLDataset, Values, Entry } from '@masterthesis/shared';
 import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
-import { Mutation } from 'react-apollo';
+import { Mutation, MutationFn } from 'react-apollo';
 
 import { Card, Col, Row, Table } from 'antd';
 import { AsyncButton } from '../../components/AsyncButton';
@@ -63,9 +63,92 @@ export class DataEntriesPage extends React.Component<
     });
   }
 
-  public render() {
-    const { dataset, refetch } = this.props;
-    const entriesDataSource = dataset.latestEntries.map(e => {
+  private handleCreateEntry = (
+    values: any,
+    datasetId: string,
+    refetch: () => Promise<ApolloQueryResult<any>>,
+    addEntry: MutationFn<any, any>
+  ) =>
+    tryOperation({
+      op: () =>
+        addEntry({
+          variables: {
+            datasetId,
+            values: JSON.stringify(values)
+          }
+        }),
+      refetch,
+      successTitle: () => 'Entry created',
+      successMessage: () => `Entry created successfully.`,
+      failedTitle: 'Entry not created.',
+      failedMessage: `Entry creation failed.`
+    });
+
+  private handleDeleteEntry = (
+    entryId: string,
+    datasetId: string,
+    refetch: () => Promise<ApolloQueryResult<any>>,
+    deleteEntry: MutationFn<any, any>
+  ) =>
+    tryOperation({
+      op: () =>
+        deleteEntry({
+          variables: {
+            datasetId,
+            entryId
+          }
+        }),
+      refetch,
+      successTitle: () => 'Entry deleted',
+      successMessage: () => `Entry deleted successfully.`,
+      failedTitle: 'Entry not deleted.',
+      failedMessage: `Entry deletion failed.`
+    });
+
+  private generateEntryColumns = (
+    datasetId: string,
+    refetch: () => Promise<ApolloQueryResult<any>>
+  ) => [
+    {
+      title: 'Index',
+      dataIndex: 'key',
+      key: 'key'
+    },
+    {
+      title: 'Summary',
+      dataIndex: 'summary',
+      key: 'summary'
+    },
+    {
+      title: 'Operations',
+      dataIndex: 'operation',
+      render: (text, record) => (
+        <Mutation mutation={DELETE_ENTRY}>
+          {deleteEntry => (
+            <AsyncButton
+              icon="delete"
+              type="danger"
+              confirmMessage="Delete Entry?"
+              confirmClick
+              onClick={() =>
+                this.handleDeleteEntry(
+                  record.id,
+                  datasetId,
+                  refetch,
+                  deleteEntry
+                )
+              }
+            >
+              Delete
+            </AsyncButton>
+          )}
+        </Mutation>
+      )
+    }
+  ];
+
+  private generateEntriesDatasource = (entries: Array<Entry>) =>
+    entries.map(e => {
       const values = JSON.parse(e.values as any);
       return {
         key: e.id,
@@ -74,98 +157,51 @@ export class DataEntriesPage extends React.Component<
       };
     });
 
-    const entriesColumns = [
-      {
-        title: 'Index',
-        dataIndex: 'key',
-        key: 'key'
-      },
-      {
-        title: 'Summary',
-        dataIndex: 'summary',
-        key: 'summary'
-      },
-      {
-        title: 'Operations',
-        dataIndex: 'operation',
-        render: (text, record) => (
-          <Mutation mutation={DELETE_ENTRY}>
-            {deleteEntry => (
-              <AsyncButton
-                type="danger"
-                confirmMessage="Delete Entry?"
-                confirmClick
-                onClick={() =>
-                  tryOperation({
-                    op: () =>
-                      deleteEntry({
-                        variables: {
-                          datasetId: dataset.id,
-                          entryId: record.key
-                        }
-                      }),
-                    refetch,
-                    successTitle: () => 'Entry deleted',
-                    successMessage: () => `Entry deleted successfully.`,
-                    failedTitle: 'Entry not deleted.',
-                    failedMessage: `Entry deletion failed.`
-                  })
-                }
-              >
-                Delete
-              </AsyncButton>
-            )}
-          </Mutation>
-        )
-      }
-    ];
+  public render() {
+    const { dataset, refetch } = this.props;
+    const entriesDataSource = this.generateEntriesDatasource(
+      dataset.latestEntries
+    );
 
     return (
-      <>
-        <Row style={{ marginBottom: 12 }}>
-          <Col>
-            <Card bordered={false}>
-              <h3>Add Entry</h3>
-              <Mutation mutation={ADD_ENTRY}>
-                {addEntry => (
-                  <CreateEntryForm
-                    handleCreateEntry={values =>
-                      tryOperation({
-                        op: () =>
-                          addEntry({
-                            variables: {
-                              datasetId: dataset.id,
-                              values: JSON.stringify(values)
-                            }
-                          }),
-                        refetch,
-                        successTitle: () => 'Entry created',
-                        successMessage: () => `Entry created successfully.`,
-                        failedTitle: 'Entry not created.',
-                        failedMessage: `Entry creation failed.`
-                      })
-                    }
-                    schema={dataset.valueschemas}
-                  />
-                )}
-              </Mutation>
-            </Card>
-          </Col>
-        </Row>
-        <Row style={{ marginBottom: 12 }}>
-          <Col>
-            <Card bordered={false}>
-              <h3>Last Entries</h3>
-              <Table
-                size="small"
-                expandedRowRender={expandedRowRender}
-                dataSource={entriesDataSource}
-                columns={entriesColumns}
-              />
-            </Card>
-          </Col>
-        </Row>
-      </>
+      <Row style={{ marginBottom: 12 }} gutter={12}>
+        <Col md={24} lg={12} xl={10}>
+          <Card bordered={false}>
+            <h3>Add Entry</h3>
+            <Mutation mutation={ADD_ENTRY}>
+              {addEntry => (
+                <CreateEntryForm
+                  handleCreateEntry={values =>
+                    this.handleCreateEntry(
+                      values,
+                      dataset.id,
+                      refetch,
+                      addEntry
+                    )
+                  }
+                  schema={dataset.valueschemas}
+                />
+              )}
+            </Mutation>
+          </Card>
+        </Col>
+        <Col md={24} lg={12} xl={14}>
+          <Card bordered={false}>
+            <h3>Last Entries</h3>
+            <Table
+              size="small"
+              pagination={{
+                size: 'small',
+                pageSize: 20,
+                hideOnSinglePage: true
+              }}
+              expandedRowRender={expandedRowRender}
+              dataSource={entriesDataSource}
+              columns={this.generateEntryColumns(dataset.id, refetch)}
+            />
+          </Card>
+        </Col>
+      </Row>
     );
   }
 }

@@ -1,6 +1,10 @@
 import * as React from 'react';
 
-import { GQLOutputResult, LinearChartType } from '@masterthesis/shared';
+import {
+  GQLOutputResult,
+  LinearChartType,
+  SoundChartDef
+} from '@masterthesis/shared';
 import { Button, Card, Divider } from 'antd';
 import { v4 } from 'uuid';
 
@@ -8,6 +12,7 @@ import { showNotificationWithIcon } from '../utils/form';
 import { BarChart } from './visualizations/BarChart';
 import { ColumnChart } from './visualizations/ColumnChart';
 import { PieChart } from './visualizations/PieChart';
+import { STRChart } from './visualizations/STRChart';
 
 export interface CustomDataRendererProps {
   value: any;
@@ -51,6 +56,11 @@ export const CustomDataRenderer: React.SFC<CustomDataRendererProps> = ({
       elem: <PieChart value={value} containerId={containerId} />,
       actions: [exportAsSvgAction(containerId, result)]
     };
+  } else if (value.type === SoundChartDef.type) {
+    chart = {
+      elem: <STRChart value={value} containerId={containerId} />,
+      actions: [exportAsSvgAction(containerId, result)]
+    };
   }
 
   if (chart) {
@@ -59,8 +69,7 @@ export const CustomDataRenderer: React.SFC<CustomDataRendererProps> = ({
         title={result.name}
         bordered={false}
         extra={
-          <>
-            {chart.actions.map(a => (
+          chart.actions.map(a => (
               <Button
                 icon="download"
                 key={`${a.name}-${result.name}`}
@@ -69,8 +78,7 @@ export const CustomDataRenderer: React.SFC<CustomDataRendererProps> = ({
               >
                 {a.name}
               </Button>
-            ))}
-          </>
+            ))
         }
       >
         {chart.elem}
@@ -95,7 +103,7 @@ const exportAsSvgAction = (
   icon: 'download',
   onClick: () => {
     try {
-      const svgData = document.getElementById(containerId).outerHTML;
+      const svgData = document.getElementById(containerId).innerHTML;
       const svgBlob = new Blob([svgData], {
         type: 'image/svg+xml;charset=utf-8'
       });

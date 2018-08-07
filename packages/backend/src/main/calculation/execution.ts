@@ -8,14 +8,13 @@ import {
   NodeExecutionResult,
   NodeInstance,
   parseNodeForm,
-  ProcessState,
   ServerNodeDefWithContextFn
 } from '@masterthesis/shared';
 
+import { Log } from '../../logging';
 import { tryGetNodeType } from '../nodes/all-nodes';
 import { tryGetConnection } from '../workspace/connections';
 import { tryGetContextNode, tryGetNode } from '../workspace/nodes';
-import { tryGetCalculation } from './start-process';
 import { areNodeInputsValid } from './validation';
 
 export const executeNodeWithId = async (
@@ -58,6 +57,10 @@ export const executeNode = async (
 
   await validateInputs(node, nodeInputs, reqContext);
 
+  if (node.contextIds.length === 0) {
+    Log.info(`Executing node (type: ${node.type}, id: ${node.id})`);
+  }
+
   const type = tryGetNodeType(node.type);
   if (hasContextFn(type)) {
     return await executeContext(
@@ -70,28 +73,10 @@ export const executeNode = async (
     );
   }
 
-  await checkForCanceledProcess(node, processId, reqContext);
-
   return await type.onNodeExecution(nodeForm, nodeInputs, {
     reqContext,
     node
   });
-};
-
-const checkForCanceledProcess = async (
-  node: NodeInstance,
-  processId: string,
-  reqContext: ApolloContext
-) => {
-  if (node.contextIds.length === 0) {
-    const process = await tryGetCalculation(processId, reqContext);
-    if (
-      process.state !== ProcessState.PROCESSING &&
-      process.state !== ProcessState.STARTED
-    ) {
-      throw new Error('Process canceled or failed');
-    }
-  }
 };
 
 const validateInputs = async (

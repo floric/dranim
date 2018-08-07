@@ -5,7 +5,7 @@ import { getEntriesCount, getLatestEntries } from '../../main/workspace/entry';
 
 export const Dataset: IResolverObject<any, ApolloContext> = {
   entriesCount: ({ id }, __, context): Promise<number> =>
-    getEntriesCount(id, context),
+    getEntriesCount(id, context, { estimate: true }),
   latestEntries: ({ id }, __, context): Promise<Array<Entry>> =>
     getLatestEntries(id, context)
 };

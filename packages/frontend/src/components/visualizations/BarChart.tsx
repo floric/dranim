@@ -32,16 +32,15 @@ export class BarChart extends React.Component<BarChartProps> {
     const chart = d3
       .select(`#${containerId}`)
       .append('svg')
-      .attr('class', 'chart')
       .attr('width', BAR_WIDTH)
       .attr('height', BAR_HEIGHT * values.length);
 
-    const x = d3
+    const scaleX = d3
       .scaleLinear()
       .domain([0, maxVal])
       .range([0, BAR_WIDTH]);
 
-    const y = d3
+    const scaleY = d3
       .scaleLinear()
       .domain([0, 1])
       .rangeRound([0, BAR_HEIGHT]);
@@ -53,9 +52,9 @@ export class BarChart extends React.Component<BarChartProps> {
       .append('rect');
 
     column
-      .attr('x', d => 0)
-      .attr('y', (d, i) => y(i))
-      .attr('width', d => x(d.value))
+      .attr('x', () => 0)
+      .attr('y', (d, i) => scaleY(i))
+      .attr('width', d => scaleX(d.value))
       .attr('height', BAR_HEIGHT * 0.9)
       .attr('fill', Colors.VisDefault);
 
@@ -68,7 +67,7 @@ export class BarChart extends React.Component<BarChartProps> {
     text
       .text(d => d.label)
       .attr('x', d => 5)
-      .attr('y', (d, i) => y(i + 0.5))
+      .attr('y', (d, i) => scaleY(i + 0.5))
       .style('font-family', LABEL_FONT_FAMILY)
       .style('font-size', LABEL_FONT_SIZE)
       .style('font-weight', LABEL_FONT_WEIGHT)

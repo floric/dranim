@@ -118,7 +118,7 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
                 >
                   <DataEntriesPage dataset={dataset} refetch={refetch} />
                 </Tabs.TabPane>
-                <Tabs.TabPane tab="Actions" key="actions">
+                <Tabs.TabPane tab="Import / Export" key="actions">
                   <DataActionsPage dataset={dataset} refetch={refetch} />
                 </Tabs.TabPane>
               </Tabs>

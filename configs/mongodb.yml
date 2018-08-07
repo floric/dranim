@@ -1,0 +1,6 @@
+storage:
+  wiredTiger:
+    engineConfig:
+      cacheSizeGB: 4
+  journal:
+    commitIntervalMs: 500
