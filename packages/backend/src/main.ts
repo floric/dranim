@@ -35,7 +35,7 @@ const CORS = (options: IMainOptions) => ({
 
 export const main = async (options: IMainOptions) => {
   const client = await mongoDbClient();
-  const db = client.db('timeseries_explorer');
+  const db = client.db(process.env.DB_NAME);
   await initDb(db);
 
   const app = express();

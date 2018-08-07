@@ -104,27 +104,28 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
       });
     };
 
+    private getUploadProps = () => ({
+      onRemove: file => {
+        this.setState(({ fileList }) => {
+          const index = fileList.indexOf(file);
+          const newFileList = fileList.slice();
+          newFileList.splice(index, 1);
+          return {
+            fileList: newFileList
+          };
+        });
+      },
+      beforeUpload: file => {
+        this.setState(({ fileList }) => ({
+          fileList: [...fileList, file]
+        }));
+        return false;
+      },
+      fileList: this.state.fileList,
+      multiple: true
+    });
+
     public render() {
-      const uploadProps = {
-        onRemove: file => {
-          this.setState(({ fileList }) => {
-            const index = fileList.indexOf(file);
-            const newFileList = fileList.slice();
-            newFileList.splice(index, 1);
-            return {
-              fileList: newFileList
-            };
-          });
-        },
-        beforeUpload: file => {
-          this.setState(({ fileList }) => ({
-            fileList: [...fileList, file]
-          }));
-          return false;
-        },
-        fileList: this.state.fileList,
-        multiple: true
-      };
       const { dataset } = this.props;
       const { uploading } = this.state;
 
@@ -138,58 +139,6 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
             if (error) {
               return <UnknownErrorCard error={error} />;
             }
-
-            const entriesDataSource = data.uploads.map((u: UploadProcess) => ({
-              key: u.id,
-              time: { start: u.start, finish: u.finish },
-              state:
-                u.state === ProcessState.SUCCESSFUL ? (
-                  <Icon type="check-circle" />
-                ) : u.state === ProcessState.ERROR ? (
-                  <Icon type="exclamation-circle" />
-                ) : (
-                  <Icon type="clock-circle" />
-                ),
-              errors: u.errors.map(e => `${e.message} (${e.count})`),
-              results: {
-                added: u.addedEntries.toLocaleString(),
-                failed: u.failedEntries.toLocaleString(),
-                invalid: u.invalidEntries.toLocaleString()
-              }
-            }));
-
-            const entriesColumns = [
-              {
-                title: 'State',
-                dataIndex: 'state',
-                key: 'state'
-              },
-              {
-                title: 'Time',
-                dataIndex: 'time',
-                key: 'time',
-                render: time => (
-                  <ProcessTime start={time.start} finish={time.finish} />
-                )
-              },
-              {
-                title: 'Results',
-                dataIndex: 'results',
-                key: 'results',
-                render: u => (
-                  <Row>
-                    <Col xs={8}>{`${u.added} Added`}</Col>
-                    <Col xs={8}>{`${u.failed} Failed`}</Col>
-                    <Col xs={8}>{`${u.invalid} Invalid`}</Col>
-                  </Row>
-                )
-              },
-              {
-                title: 'Errors',
-                dataIndex: 'errors',
-                key: 'errors'
-              }
-            ];
 
             return (
               <>
@@ -207,7 +156,7 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
                           <>
                             <Row style={{ marginBottom: 12 }}>
                               <Col>
-                                <Upload {...uploadProps}>
+                                <Upload {...this.getUploadProps()}>
                                   <Button>
                                     <Icon type="upload" /> Select CSV file
                                   </Button>
@@ -277,8 +226,8 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
                     <Table
                       size="small"
                       pagination={{ size: 'small', hideOnSinglePage: true }}
-                      dataSource={entriesDataSource}
-                      columns={entriesColumns}
+                      dataSource={generateDatasource(data.uploads)}
+                      columns={COLUMNS}
                     />
                   </Card>
                 </Row>
@@ -290,3 +239,54 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
     }
   }
 );
+
+const generateDatasource = (uploads: Array<UploadProcess>) =>
+  uploads.map((u: UploadProcess) => ({
+    key: u.id,
+    time: { start: u.start, finish: u.finish },
+    state:
+      u.state === ProcessState.SUCCESSFUL ? (
+        <Icon type="check-circle" />
+      ) : u.state === ProcessState.ERROR ? (
+        <Icon type="exclamation-circle" />
+      ) : (
+        <Icon type="clock-circle" />
+      ),
+    errors: u.errors.map(e => `${e.message} (${e.count})`),
+    results: {
+      added: u.addedEntries.toLocaleString(),
+      failed: u.failedEntries.toLocaleString(),
+      invalid: u.invalidEntries.toLocaleString()
+    }
+  }));
+
+const COLUMNS = [
+  {
+    title: 'State',
+    dataIndex: 'state',
+    key: 'state'
+  },
+  {
+    title: 'Time',
+    dataIndex: 'time',
+    key: 'time',
+    render: time => <ProcessTime start={time.start} finish={time.finish} />
+  },
+  {
+    title: 'Results',
+    dataIndex: 'results',
+    key: 'results',
+    render: u => (
+      <Row>
+        <Col xs={8}>{`${u.added} added`}</Col>
+        <Col xs={8}>{`${u.failed} failed`}</Col>
+        <Col xs={8}>{`${u.invalid} invalid`}</Col>
+      </Row>
+    )
+  },
+  {
+    title: 'Errors',
+    dataIndex: 'errors',
+    key: 'errors'
+  }
+];

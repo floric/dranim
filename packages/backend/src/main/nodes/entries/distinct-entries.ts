@@ -19,6 +19,7 @@ import { createUniqueDatasetName } from '../../calculation/utils';
 import {
   addValueSchema,
   createDataset,
+  deleteDataset,
   tryGetDataset
 } from '../../workspace/dataset';
 import { createEntry, getEntryCollection } from '../../workspace/entry';
@@ -208,5 +209,8 @@ const processDistinctDatasets = async (
     .next();
 
   const { outputs } = await contextFnExecution!(values);
-  await createEntry(newDs.id, outputs, reqContext);
+  await Promise.all([
+    createEntry(newDs.id, outputs, reqContext),
+    deleteDataset(tempDs.id, reqContext)
+  ]);
 };

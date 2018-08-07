@@ -113,9 +113,9 @@ const processQueue = async (queue: PromiseQueue, checkFrequency: number) => {
       const timer = setInterval(() => {
         const currentRemainingJobsCount = queue.getQueueLength();
         Log.info(
-          `${currentRemainingJobsCount} jobs left, done in ${checkFrequency /
-            1000} seconds: ${lastRemainingJobsCount -
-            currentRemainingJobsCount}`
+          `${currentRemainingJobsCount} jobs left, ${lastRemainingJobsCount -
+            currentRemainingJobsCount} done in ${checkFrequency /
+            1000} seconds`
         );
         lastRemainingJobsCount = currentRemainingJobsCount;
         if (currentRemainingJobsCount === 0) {
