@@ -38,6 +38,13 @@ export default class StartPage extends React.Component<{}> {
       },
       {
         type: NewsType.FEATURE,
+        date: new Date(2018, 7, 8),
+        title: 'Added node for numeric comparisons',
+        description:
+          'Dranim now supports numeric comparisons (equals, less then, greater then) with a new node.'
+      },
+      {
+        type: NewsType.FEATURE,
         date: new Date(2018, 7, 7),
         title: 'Added STR Visualization',
         description:
@@ -109,7 +116,8 @@ export default class StartPage extends React.Component<{}> {
                 More information at{' '}
                 <a href="http://www.soundtoll.nl/index.php/en/over-het-project/str-online">
                   STR online
-                </a>.
+                </a>
+                .
               </p>
               <p>
                 This will generate empty Datasets and a sample Workspace. Note
@@ -171,9 +179,11 @@ export default class StartPage extends React.Component<{}> {
                       }
                       title={
                         <>
-                          {item.title} ({distanceInWordsToNow(item.date, {
+                          {item.title} (
+                          {distanceInWordsToNow(item.date, {
                             addSuffix: true
-                          })})
+                          })}
+                          )
                         </>
                       }
                       description={item.description}

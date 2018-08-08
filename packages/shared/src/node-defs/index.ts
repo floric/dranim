@@ -12,7 +12,14 @@ import {
   FilterEntriesNodeDef,
   SelectValuesNodeDef
 } from './entries';
-import * as NumberNodes from './number';
+import {
+  ComparisonNodeDef,
+  FormatNumberNodeDef,
+  MultiplicationNodeDef,
+  NumberInputNodeDef,
+  NumberOutputNodeDef,
+  SumNodeDef
+} from './number';
 import * as StringNodes from './string';
 import * as TimeNodes from './time';
 import { LinearChartDef, SoundChartDef } from './visualizations';
@@ -38,7 +45,14 @@ export const NodesMap = new Map<string, NodeDef>(
       SelectValuesNodeDef
     },
     StringNodes,
-    NumberNodes,
+    {
+      ComparisonNodeDef,
+      FormatNumberNodeDef,
+      MultiplicationNodeDef,
+      NumberInputNodeDef,
+      NumberOutputNodeDef,
+      SumNodeDef
+    },
     DatasetNodes,
     BooleanNodes,
     TimeNodes,

@@ -1,5 +1,5 @@
 import { NodeDef } from '../nodes';
-import { NumberSocket, StringSocket } from '../sockets';
+import { BooleanSocket, NumberSocket, StringSocket } from '../sockets';
 
 export interface FormatNumberNodeInputs {
   number: string;
@@ -82,12 +82,12 @@ export interface NumberOutputNodeInputs {
   value: number;
 }
 
-export interface SumNodeNodeInputs {
+export interface SumNodeInputs {
   a: number;
   b: number;
 }
 
-export interface SumNodeNodeOutputs {
+export interface SumNodeOutputs {
   sum: number;
 }
 
@@ -103,7 +103,7 @@ export const NumberOutputNodeDef: NodeDef<NumberOutputNodeInputs, {}> = {
   path: ['Numbers']
 };
 
-export const SumNodeDef: NodeDef<SumNodeNodeInputs, SumNodeNodeOutputs> = {
+export const SumNodeDef: NodeDef<SumNodeInputs, SumNodeOutputs> = {
   name: 'Sum',
   type: 'Sum',
   inputs: {
@@ -115,4 +115,40 @@ export const SumNodeDef: NodeDef<SumNodeNodeInputs, SumNodeNodeOutputs> = {
   },
   path: ['Numbers', 'Operators'],
   keywords: ['sum', 'add']
+};
+
+export interface ComparisonNodeInputs {
+  a: number;
+  b: number;
+}
+
+export interface ComparisonNodeOutputs {
+  value: boolean;
+}
+
+export enum ComparisonType {
+  LESS_THEN = 'LESS_THEN',
+  GREATER_THEN = 'GREATER_THEN',
+  EQUALS = 'EQUALS'
+}
+
+export interface ComparisonNodeForm {
+  type: ComparisonType;
+}
+
+export const ComparisonNodeDef: NodeDef<
+  ComparisonNodeInputs,
+  ComparisonNodeOutputs
+> = {
+  name: 'Compare Numbers',
+  type: 'CompareNumbers',
+  inputs: {
+    a: NumberSocket('A'),
+    b: NumberSocket('B')
+  },
+  outputs: {
+    value: BooleanSocket('Value')
+  },
+  path: ['Numbers', 'Operators'],
+  keywords: ['less then', 'greater then', 'equals', 'compare']
 };

@@ -107,7 +107,7 @@ export const renderNode = (
     server.onNodeUpdate(n.id, ev.target.x(), ev.target.y());
   });
 
-  nodeGroup.on('click', ev => {
+  nodeGroup.on('click', () => {
     changeState({
       selectedNodeId: n.id
     });

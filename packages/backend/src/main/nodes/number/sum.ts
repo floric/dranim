@@ -2,11 +2,11 @@ import {
   allAreDefinedAndPresent,
   ServerNodeDef,
   SumNodeDef,
-  SumNodeNodeInputs,
-  SumNodeNodeOutputs
+  SumNodeInputs,
+  SumNodeOutputs
 } from '@masterthesis/shared';
 
-export const SumNode: ServerNodeDef<SumNodeNodeInputs, SumNodeNodeOutputs> = {
+export const SumNode: ServerNodeDef<SumNodeInputs, SumNodeOutputs> = {
   type: SumNodeDef.type,
   onMetaExecution: async (form, inputs) => {
     if (!allAreDefinedAndPresent(inputs)) {

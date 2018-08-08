@@ -123,6 +123,7 @@ export const nodeTypes: Map<string, ClientNodeDef & NodeDef> = new Map(
       {
         ...(clientNodeMap.get(n[0])
           ? {
+              renderName: clientNodeMap.get(n[0]).renderName,
               renderFormItems: n[1].isOutputNode
                 ? (createRenderOutputFormItems(
                     clientNodeMap.get(n[0]).renderFormItems

@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import * as React from 'react';
 
-import { Col, Divider, Icon, Input, Row, Slider, Tag, Tooltip } from 'antd';
+import { Col, Divider, Icon, Input, Row, Slider, Tag } from 'antd';
 
 import { SVGChartWithId } from '../CustomDataRenderer';
 import { SliderCol } from '../properties/Slider';
