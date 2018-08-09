@@ -1,22 +1,22 @@
-import * as d3 from 'd3';
 import * as React from 'react';
 
 import { Col, Divider, Icon, Input, Row, Slider, Tag } from 'antd';
 
 import { SVGChartWithId } from '../CustomDataRenderer';
 import { SliderCol } from '../properties/Slider';
-import { LABEL_FONT_FAMILY, LABEL_FONT_SIZE } from './styles';
+import { renderSTRChart } from './str-svg';
 
 export interface STRChartProps extends SVGChartWithId {
   value: any;
 }
 
+export const CANVAS_WIDTH = 800;
+export const CANVAS_HEIGHT = 800;
+export const TEXT_OFFSET = 5;
+export const SOUND_BAR_OFFSET = 15;
 const MINIMUM_OPACITY = 0.15;
 const WEST_PASSAGE_COLOR = '#FAAB43';
 const EAST_PASSAGE_COLOR = '#003E61';
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 800;
-
 const GAP_DIST_DEFAULT = 200;
 const GAP_DIST_MAX = CANVAS_WIDTH;
 const HEIGHT_DEFAULT = 500;
@@ -26,22 +26,7 @@ const CURVE_DEFAULT = 120;
 const CURVE_MAX = 500;
 const OFFSET_MAX = 1000;
 
-interface Passage {
-  source: string;
-  destination: string;
-  isEastPassage: boolean;
-  value: number;
-}
-
-interface CityStat {
-  isWest: boolean;
-  name: string;
-  maxValue: number;
-  importVolume: number;
-  exportVolume: number;
-}
-
-interface STRChartState {
+export interface STRChartState {
   gapDistance: number;
   height: number;
   curveDistance: number;
@@ -53,7 +38,6 @@ interface STRChartState {
   };
   temp: {
     inputVisible: boolean;
-    inputRef: React.Ref<any> | null;
     inputValue: string;
   };
   soundNames: Array<string>;
@@ -74,7 +58,6 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
       soundNames: [],
       temp: {
         inputVisible: false,
-        inputRef: null,
         inputValue: ''
       }
     });
@@ -84,55 +67,23 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
     this.renderChart();
   }
 
-  public componentDidUpdate(
-    prevProps: STRChartProps,
-    prevState: STRChartState
-  ) {
-    if (
-      this.state.temp.inputValue === prevState.temp.inputValue &&
-      this.state.temp.inputVisible === prevState.temp.inputVisible
-    ) {
-      this.renderChart();
-    }
-  }
-
   private renderChart() {
     const { value, containerId } = this.props;
     if (!value.values) {
       throw new Error('Unsupported value');
     }
 
-    d3.select(`#${containerId}`)
-      .selectAll('svg')
-      .remove();
-
-    const cityPositions: Map<string, { x: number; y: number }> = new Map();
-    const chart = d3
-      .select(`#${containerId}`)
-      .append('svg')
-      .attr('width', CANVAS_WIDTH)
-      .attr('height', CANVAS_HEIGHT);
-
-    renderNames(
-      chart,
-      value.values.cities.west,
-      cityPositions,
-      true,
+    renderSTRChart(
+      containerId,
+      value.values.cities,
+      value.values.passages,
       this.state
     );
-    renderNames(
-      chart,
-      value.values.cities.east,
-      cityPositions,
-      false,
-      this.state
-    );
-    renderPassages(chart, value.values.passages, cityPositions, this.state);
   }
 
   private handleClose = removedTag => {
     const soundNames = this.state.soundNames.filter(tag => tag !== removedTag);
-    this.setState({ soundNames });
+    this.setState({ soundNames }, this.renderChart);
   };
 
   private showInput = () =>
@@ -147,18 +98,56 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
       temp: { inputValue }
     } = this.state;
     const newSoundNames = [...soundNames, inputValue];
-    this.setState({
-      soundNames: newSoundNames,
-      temp: {
-        ...this.state.temp,
-        inputVisible: false,
-        inputValue: ''
-      }
-    });
+    this.setState(
+      {
+        soundNames: newSoundNames,
+        temp: {
+          ...this.state.temp,
+          inputVisible: false,
+          inputValue: ''
+        }
+      },
+      this.renderChart
+    );
   };
 
-  private saveInputRef = inputRef =>
-    this.setState({ temp: { ...this.state.temp, inputRef } });
+  private handleChangeWithRerendering = (newState: Pick<STRChartState, any>) =>
+    this.setState(newState, this.renderChart);
+  private handleChangeGap = (val: number) =>
+    this.handleChangeWithRerendering({ gapDistance: val });
+  private handleChangeHeight = (val: number) =>
+    this.handleChangeWithRerendering({ height: val });
+  private handleChangeCurveDistance = (val: number) =>
+    this.handleChangeWithRerendering({ curveDistance: val });
+  private handleChangeOffsetX = (val: number) =>
+    this.handleChangeWithRerendering({ offsets: [this.state.offsets[0], val] });
+  private handleChangeOffsetY = (val: number) =>
+    this.handleChangeWithRerendering({ offsets: [val, this.state.offsets[1]] });
+  private handleChangeMinOpacity = (val: number) =>
+    this.handleChangeWithRerendering({
+      colors: {
+        ...this.state.colors,
+        minTextOpacity: val
+      }
+    });
+  private handleChangePassageColorEast = (
+    ev: React.ChangeEvent<HTMLInputElement>
+  ) =>
+    this.handleChangeWithRerendering({
+      colors: {
+        ...this.state.colors,
+        eastPassage: ev.target.value
+      }
+    });
+  private handleChangePassageColorWest = (
+    ev: React.ChangeEvent<HTMLInputElement>
+  ) =>
+    this.handleChangeWithRerendering({
+      colors: {
+        ...this.state.colors,
+        westPassage: ev.target.value
+      }
+    });
 
   public render() {
     const {
@@ -174,9 +163,7 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
               min={0}
               max={GAP_DIST_MAX}
               defaultValue={this.state.gapDistance}
-              onChange={(val: number) => {
-                this.setState({ gapDistance: val });
-              }}
+              onChange={this.handleChangeGap}
             />
           </Col>
           <SliderCol
@@ -184,11 +171,7 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
             min={HEIGHT_MIN}
             max={HEIGHT_MAX}
             value={this.state.height}
-            onChange={(val: number) => {
-              this.setState({
-                height: val
-              });
-            }}
+            onChange={this.handleChangeHeight}
           />
           <Col xs={24} sm={12} md={6} lg={3}>
             <p>Curviness</p>
@@ -196,9 +179,7 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
               min={0}
               max={CURVE_MAX}
               defaultValue={this.state.curveDistance}
-              onChange={(val: number) => {
-                this.setState({ curveDistance: val });
-              }}
+              onChange={this.handleChangeCurveDistance}
             />
           </Col>
           <Col xs={24} sm={12} md={6} lg={3}>
@@ -207,11 +188,7 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
               min={0}
               max={OFFSET_MAX}
               defaultValue={this.state.offsets[0]}
-              onChange={(val: number) => {
-                this.setState({
-                  offsets: [this.state.offsets[0], val]
-                });
-              }}
+              onChange={this.handleChangeOffsetX}
             />
           </Col>
           <Col xs={24} sm={12} md={6} lg={3}>
@@ -220,11 +197,7 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
               min={0}
               max={OFFSET_MAX}
               defaultValue={this.state.offsets[1]}
-              onChange={(val: number) => {
-                this.setState({
-                  offsets: [val, this.state.offsets[1]]
-                });
-              }}
+              onChange={this.handleChangeOffsetY}
             />
           </Col>
           <Col xs={24} sm={12} md={6} lg={3}>
@@ -234,28 +207,14 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
               max={1}
               step={0.01}
               defaultValue={this.state.colors.minTextOpacity}
-              onChange={(val: number) => {
-                this.setState({
-                  colors: {
-                    ...this.state.colors,
-                    minTextOpacity: val
-                  }
-                });
-              }}
+              onChange={this.handleChangeMinOpacity}
             />
           </Col>
           <Col sm={24} md={12} lg={6}>
             <p>Colors</p>
             <Input.Group compact>
               <Input
-                onChange={ev =>
-                  this.setState({
-                    colors: {
-                      ...this.state.colors,
-                      eastPassage: ev.target.value
-                    }
-                  })
-                }
+                onChange={this.handleChangePassageColorEast}
                 value={this.state.colors.eastPassage}
                 color={this.state.colors.eastPassage}
                 prefix={
@@ -268,14 +227,7 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
               />
               <Input
                 value={this.state.colors.westPassage}
-                onChange={ev =>
-                  this.setState({
-                    colors: {
-                      ...this.state.colors,
-                      westPassage: ev.target.value
-                    }
-                  })
-                }
+                onChange={this.handleChangePassageColorWest}
                 prefix={
                   <Icon
                     style={{ color: this.state.colors.westPassage }}
@@ -303,7 +255,6 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
             ))}
             {inputVisible && (
               <Input
-                ref={this.saveInputRef}
                 type="text"
                 size="small"
                 style={{ width: 120, padding: 0, margin: 0 }}
@@ -323,154 +274,9 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
             )}
           </Col>
         </Row>
-        <Divider />
+        <Divider style={{ marginTop: 8, marginBottom: 8 }} />
         <div id={this.props.containerId} />
       </>
     );
   }
 }
-
-const renderPassages = (
-  chart: d3.Selection<d3.BaseType, {}, HTMLElement, any>,
-  values: Array<Passage>,
-  cityPositions: Map<string, { x: number; y: number }>,
-  state: STRChartState
-) => {
-  const maxEastPassageVal = d3.max(
-    values.filter(n => n.isEastPassage).map(n => n.value)
-  );
-  const maxWestPassageVal = d3.max(
-    values.filter(n => !n.isEastPassage).map(n => n.value)
-  );
-
-  chart
-    .append('svg:g')
-    .attr('fill', 'none')
-    .attr('stroke-width', 2)
-    .selectAll('path.passages')
-    .data(values)
-    .enter()
-    .append('path')
-    .attr('d', d => {
-      const sourcePos = cityPositions.get(d.source);
-      const destPos = cityPositions.get(d.destination);
-
-      return `M ${sourcePos.x} ${
-        d.isEastPassage ? sourcePos.y : sourcePos.y + 2
-      } L ${destPos.x} ${d.isEastPassage ? destPos.y : destPos.y + 2} L ${
-        sourcePos.x
-      } ${d.isEastPassage ? sourcePos.y : sourcePos.y + 2}`;
-    })
-    .attr(
-      'stroke',
-      d =>
-        d.isEastPassage ? state.colors.eastPassage : state.colors.westPassage
-    )
-    .attr(
-      'opacity',
-      d => d.value / (d.isEastPassage ? maxEastPassageVal : maxWestPassageVal)
-    );
-};
-
-const renderNames = (
-  chart: d3.Selection<d3.BaseType, {}, HTMLElement, any>,
-  cities: any,
-  cityPositions: Map<string, { x: number; y: number }>,
-  isWest: boolean,
-  state: STRChartState
-) => {
-  const cityStats: Array<CityStat> = Object.entries(cities)
-    .map(n => ({ name: n[0], ...(n[1] as CityStat) }))
-    .map(n => ({
-      maxValue: Math.max(n.importVolume, n.exportVolume),
-      ...n
-    }));
-
-  setCityPositions(cityStats, isWest, cityPositions, state);
-
-  const svgKey = isWest ? 'westcities' : 'eastcities';
-  const maxVal = d3.max(cityStats.map(n => n.maxValue));
-
-  chart
-    .append('svg:g')
-    .style('font-family', LABEL_FONT_FAMILY)
-    .style('font-size', LABEL_FONT_SIZE)
-    .style('alignment-baseline', 'middle')
-    .style('fill', 'black')
-    .style('text-anchor', isWest ? 'end' : 'start')
-    .selectAll(`text.${svgKey}`)
-    .data(cityStats)
-    .enter()
-    .append('text')
-    .attr('class', svgKey)
-    .text(d => {
-      const ioName = `(↑${d.exportVolume} ↓${d.importVolume})`;
-      return d.isWest ? `${ioName} ${d.name}` : `${d.name} ${ioName}`;
-    })
-    .attr('x', d => cityPositions.get(d.name).x)
-    .attr('y', d => cityPositions.get(d.name).y)
-    .style('opacity', d =>
-      getScaledOpacity(d.maxValue, maxVal, state.colors.minTextOpacity)
-    );
-};
-
-const getScaledOpacity = (value: number, max: number, minimumValue: number) =>
-  (value / max) * (1 - minimumValue) + minimumValue;
-
-const calculateCirclePos = (
-  value: number,
-  radius: number,
-  xOffset: number,
-  yOffset: number
-) => {
-  const x = radius * Math.cos(value) + xOffset;
-  const y = radius * Math.sin(value) + yOffset;
-  return { x, y };
-};
-
-const setCityPositions = (
-  cityStats: Array<CityStat>,
-  isWest: boolean,
-  cityPositions: Map<string, { x: number; y: number }>,
-  state: STRChartState
-) => {
-  if (state.curveDistance === 0) {
-    cityStats.forEach((c, i) => {
-      cityPositions.set(c.name, {
-        x: isWest ? state.offsets[0] : state.offsets[0] + state.gapDistance,
-        y: state.offsets[1] + (i / cityStats.length) * state.height
-      });
-    });
-    return;
-  }
-
-  const beta = Math.atan(state.height / 2 / state.curveDistance);
-  const alpha = Math.PI - 2 * beta;
-  const radius =
-    Math.sqrt(
-      Math.pow(state.curveDistance, 2) + Math.pow(state.height / 2, 2)
-    ) /
-    (Math.sin(alpha / 2) * 2);
-
-  const scaleToCircle = d3
-    .scaleLinear()
-    .domain([0, cityStats.filter(n => n.isWest === isWest).length])
-    .range(isWest ? [Math.PI - alpha, Math.PI + alpha] : [-alpha, alpha]);
-  cityStats.forEach((c, i) => {
-    const value = scaleToCircle(
-      isWest ? cityStats.length - (i + 0.5) : i + 0.5
-    );
-    const pos = calculateCirclePos(
-      value,
-      radius,
-      isWest
-        ? radius + state.offsets[0]
-        : -radius +
-          state.offsets[0] +
-          state.curveDistance * 2 +
-          state.gapDistance,
-      state.height / 2 + state.offsets[1]
-    );
-    cityPositions.set(c.name, pos);
-  });
-};

@@ -19,13 +19,13 @@ export const ComparisonNode: ClientNodeDef<
 > = {
   type: ComparisonNodeDef.type,
   renderName: (context, nodeForm) => {
-    if (nodeForm.type === ComparisonType.EQUALS) {
-      return 'Eqals';
+    if (nodeForm.type === ComparisonType.LESS_THEN) {
+      return 'Less Then';
     } else if (nodeForm.type === ComparisonType.GREATER_THEN) {
       return 'Greater Then';
     }
 
-    return 'Less Then';
+    return 'Equals';
   },
   renderFormItems: ({ form: { getFieldDecorator }, nodeForm }) => (
     <Form.Item label="Type">
