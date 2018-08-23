@@ -5,28 +5,21 @@ import {
   LinearChartType,
   SoundChartDef
 } from '@masterthesis/shared';
-import { Button, Card, Divider } from 'antd';
+import ContainerDimensions from 'react-container-dimensions';
 import { v4 } from 'uuid';
 
-import { showNotificationWithIcon } from '../utils/form';
 import { BarChart } from './visualizations/BarChart';
 import { ColumnChart } from './visualizations/ColumnChart';
 import { PieChart } from './visualizations/PieChart';
 import { STRChart } from './visualizations/STRChart';
+import { Vega } from './visualizations/Vega';
 
 export interface CustomDataRendererProps {
   value: any;
   result: GQLOutputResult;
 }
 
-interface ChartAction {
-  name: string;
-  icon: string;
-  onClick: () => void;
-}
-
 export interface ChartRender {
-  actions: Array<ChartAction>;
   elem: JSX.Element;
 }
 
@@ -43,83 +36,38 @@ export const CustomDataRenderer: React.SFC<CustomDataRendererProps> = ({
   if (value.type === LinearChartType.BAR) {
     const elem = <BarChart value={value} containerId={containerId} />;
     chart = {
-      elem,
-      actions: [exportAsSvgAction(containerId, result)]
+      elem
     };
   } else if (value.type === LinearChartType.COLUMN) {
     chart = {
-      elem: <ColumnChart value={value} containerId={containerId} />,
-      actions: [exportAsSvgAction(containerId, result)]
+      elem: <ColumnChart value={value} containerId={containerId} />
     };
   } else if (value.type === LinearChartType.PIE) {
     chart = {
-      elem: <PieChart value={value} containerId={containerId} />,
-      actions: [exportAsSvgAction(containerId, result)]
+      elem: (
+        <ContainerDimensions>
+          {({ width }) => (
+            <Vega
+              width={width}
+              height={width}
+              result={result}
+              value={value.values}
+              content={PieChart}
+              containerId={containerId}
+            />
+          )}
+        </ContainerDimensions>
+      )
     };
   } else if (value.type === SoundChartDef.type) {
     chart = {
-      elem: <STRChart value={value} containerId={containerId} />,
-      actions: [exportAsSvgAction(containerId, result)]
+      elem: <STRChart value={value} containerId={containerId} />
     };
   }
 
   if (chart) {
-    return (
-      <Card
-        title={result.name}
-        bordered={false}
-        extra={
-          chart.actions.map(a => (
-              <Button
-                icon="download"
-                key={`${a.name}-${result.name}`}
-                size="small"
-                onClick={a.onClick}
-              >
-                {a.name}
-              </Button>
-            ))
-        }
-      >
-        {chart.elem}
-        {!!result.description && (
-          <>
-            <Divider />
-            <Card.Meta description={result.description} />
-          </>
-        )}
-      </Card>
-    );
+    return chart.elem;
   }
 
   return <p>Unsupported custom data: {value.type}</p>;
 };
-
-const exportAsSvgAction = (
-  containerId: string,
-  result: GQLOutputResult
-): ChartAction => ({
-  name: 'SVG',
-  icon: 'download',
-  onClick: () => {
-    try {
-      const svgData = document.getElementById(containerId).innerHTML;
-      const svgBlob = new Blob([svgData], {
-        type: 'image/svg+xml;charset=utf-8'
-      });
-      const svgUrl = URL.createObjectURL(svgBlob);
-      const downloadLink = document.createElement('a');
-      downloadLink.href = svgUrl;
-      downloadLink.download = `${result.name}-${result.id}.svg`;
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-    } catch (err) {
-      showNotificationWithIcon({
-        title: 'SVG Export failed',
-        content: 'The SVG Export has failed because of an unknown reason.',
-        icon: 'error'
-      });
-    }
-  }
-});

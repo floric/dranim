@@ -40,7 +40,7 @@ const WORKSPACE = gql`
   }
 `;
 
-const resultCardSize = { md: 24 };
+const resultCardSize = { md: 12, xl: 8 };
 
 export interface VisDetailPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}

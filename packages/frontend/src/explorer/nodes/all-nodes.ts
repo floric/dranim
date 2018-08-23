@@ -6,7 +6,7 @@ import {
   SocketMetas
 } from '@masterthesis/shared';
 import { FormComponentProps } from 'antd/lib/form';
-import { TreeData } from 'antd/lib/tree-select';
+import { TreeNode } from 'antd/lib/tree-select';
 
 import * as BooleanNodes from './boolean';
 import * as DatasetNodes from './dataset';
@@ -70,7 +70,7 @@ const allNodes = [
 const buildTree = (
   elems: Array<ClientNodeDef & NodeDef>,
   curPath: Array<string>
-): Array<TreeData> => {
+): Array<TreeNode> => {
   const nextPaths = elems
     .filter(
       e =>
