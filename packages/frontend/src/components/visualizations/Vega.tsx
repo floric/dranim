@@ -1,19 +1,33 @@
 import { GQLOutputResult } from '@masterthesis/shared';
-import { Button, Card, Divider } from 'antd';
+import { Button, Card, Col, Divider, Dropdown, Icon, Menu, Row } from 'antd';
 import * as React from 'react';
 import { parse, Spec, View } from 'vega';
 import { showNotificationWithIcon } from '../../utils/form';
+import { LoadingCard } from '../CustomCards';
 import { SVGChartWithId } from '../CustomDataRenderer';
 import { NumericProperty } from '../properties/NumericProperty';
+import { SelectProperty } from '../properties/SelectProperty';
 
 export interface VegaChart {
-  render: (data: any, properties: { [name: string]: number }) => Spec;
+  render: (data: any, properties: { [name: string]: number | string }) => Spec;
   properties: InputProperties;
 }
 
-export type InputProperties = [
-  { name: string; label: string; default: number; unit?: string }
-];
+export enum InputPropertyType {
+  NUMBER = 'Number',
+  STRING = 'String'
+}
+
+export interface InputProperty<T = any> {
+  name: string;
+  label: string;
+  default: T;
+  type: InputPropertyType;
+  options?: Array<T>;
+  unit?: string;
+}
+
+export type InputProperties = Array<InputProperty>;
 
 export interface VegaProps extends SVGChartWithId {
   content: VegaChart;
@@ -39,6 +53,15 @@ const propertiesToObj = (properties: InputProperties) => {
   return res;
 };
 
+const downloadFromUrl = (url: string, fileName: string) => {
+  const downloadLink = document.createElement('a');
+  downloadLink.href = url;
+  downloadLink.download = fileName;
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
+};
+
 export class Vega extends React.Component<VegaProps, VegaState> {
   public state: VegaState = {
     showProperties: false,
@@ -55,14 +78,34 @@ export class Vega extends React.Component<VegaProps, VegaState> {
       .initialize(`#${containerId}`)
       .hover()
       .run();
-    this.setState({ view });
+    await this.setState({ view });
   }
 
-  public componentDidUpdate(newProps: VegaProps) {
-    if (newProps !== this.props) {
-      this.updateView();
-    }
+  public componentDidUpdate() {
+    this.updateView();
   }
+
+  public shouldComponentUpdate(nextProps: VegaProps, nextState: VegaState) {
+    return (
+      nextProps !== this.props ||
+      nextState.properties !== this.state.properties ||
+      nextState.showProperties !== this.state.showProperties ||
+      (this.state.view === null && nextState.view !== null)
+    );
+  }
+
+  private handleDownloadPng = async () => {
+    try {
+      const url = await this.state.view.toImageURL('png', 4);
+      downloadFromUrl(url, 'download.png');
+    } catch (err) {
+      showNotificationWithIcon({
+        title: 'PNG Export failed',
+        content: 'The PNG Export has failed because of an unknown reason.',
+        icon: 'error'
+      });
+    }
+  };
 
   private handleDownloadSvg = async () => {
     try {
@@ -71,12 +114,7 @@ export class Vega extends React.Component<VegaProps, VegaState> {
         type: 'image/svg+xml;charset=utf-8'
       });
       const svgUrl = URL.createObjectURL(svgBlob);
-      const downloadLink = document.createElement('a');
-      downloadLink.href = svgUrl;
-      downloadLink.download = `download.svg`;
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
+      downloadFromUrl(svgUrl, 'download.svg');
     } catch (err) {
       showNotificationWithIcon({
         title: 'SVG Export failed',
@@ -86,52 +124,93 @@ export class Vega extends React.Component<VegaProps, VegaState> {
     }
   };
 
+  private toggleProperties = () =>
+    this.setState({ showProperties: !this.state.showProperties });
+
+  private handleChangedProperties = (val: number | string, n: InputProperty) =>
+    this.setState(
+      { properties: { ...this.state.properties, [n.name]: val } },
+      this.updateView
+    );
+
   public render() {
     const {
       result,
       content: { properties }
     } = this.props;
-    const { showProperties } = this.state;
+    const { showProperties, view } = this.state;
+    if (!view) {
+      return <LoadingCard text={result.name} />;
+    }
+
+    const menu = (
+      <Menu
+        onClick={a => {
+          if (a.key === 'svg') {
+            this.handleDownloadSvg();
+          } else if (a.key === 'png') {
+            this.handleDownloadPng();
+          }
+        }}
+      >
+        <Menu.Item key="svg">
+          <Icon type="picture" />
+          PNG
+        </Menu.Item>
+        <Menu.Item key="png">
+          <Icon type="code" />
+          SVG
+        </Menu.Item>
+      </Menu>
+    );
+
     return (
       <Card
         title={result.name}
         bordered={false}
-        bodyStyle={{ padding: 0 }}
         extra={
-          <>
-            <Button
-              size="small"
-              icon="setting"
-              onClick={() => this.setState({ showProperties: !showProperties })}
-            >
-              {showProperties ? 'Close Properties' : 'Show Properties'}
-            </Button>
-            <Button
-              icon="download"
-              size="small"
-              onClick={this.handleDownloadSvg}
-            >
-              SVG
-            </Button>
-          </>
+          <Button.Group size="small">
+            {properties.length > 0 && (
+              <Button
+                icon={showProperties ? 'up' : 'down'}
+                onClick={this.toggleProperties}
+              >
+                Properties
+              </Button>
+            )}
+            <Dropdown overlay={menu}>
+              <Button>
+                Download <Icon type="download" />
+              </Button>
+            </Dropdown>
+          </Button.Group>
         }
       >
         {showProperties && (
           <>
-            {properties.map(n => (
-              <NumericProperty
-                key={`property-${n.name}`}
-                text={n.label}
-                unit={n.unit}
-                defaultValue={n.default}
-                onChange={val =>
-                  this.setState(
-                    { properties: { [n.name]: val } },
-                    this.updateView
-                  )
-                }
-              />
-            ))}
+            <Row gutter={8}>
+              {properties.map(n => (
+                <Col md={24} lg={12} key={`property-${n.name}`}>
+                  {n.type === InputPropertyType.NUMBER ? (
+                    <NumericProperty
+                      text={n.label}
+                      unit={n.unit}
+                      defaultValue={n.default}
+                      onChange={val => this.handleChangedProperties(val, n)}
+                    />
+                  ) : (
+                    <SelectProperty
+                      options={n.options || []}
+                      defaultValue={n.default}
+                      text={n.label}
+                      onChange={val => {
+                        this.handleChangedProperties(val, n);
+                      }}
+                    />
+                  )}
+                </Col>
+              ))}
+            </Row>
             <Divider style={{ marginTop: 8, marginBottom: 8 }} />
           </>
         )}

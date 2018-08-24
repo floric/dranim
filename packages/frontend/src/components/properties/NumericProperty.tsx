@@ -1,5 +1,6 @@
 import { Input } from 'antd';
 import * as React from 'react';
+import { Property } from './Property';
 
 export interface NumericPropertyProps {
   onChange: (value: number) => void;
@@ -14,16 +15,15 @@ export const NumericProperty: React.SFC<NumericPropertyProps> = ({
   onChange,
   defaultValue = 500
 }) => (
-  <>
+  <Property text={text}>
     <Input
-      addonBefore={text}
       defaultValue={defaultValue.toString()}
       style={{ maxWidth: '200px' }}
       onChange={ev => {
-        const val = Number.parseInt(ev.target.value, 10);
-        onChange(Number.isNaN(val) ? 0 : val);
+        const val = Number.parseFloat(ev.target.value);
+        onChange(Number.isNaN(val) ? defaultValue : val);
       }}
       addonAfter={unit}
     />
-  </>
+  </Property>
 );

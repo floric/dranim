@@ -1,22 +1,41 @@
 import { Colors } from '@masterthesis/shared';
-import { Spec } from 'vega-lib';
-import { VegaChart } from './Vega';
+import { LegendOrient, Spec } from 'vega-lib';
+import { InputPropertyType, VegaChart } from './Vega';
 
 export const PieChart: VegaChart = {
   properties: [
     {
       name: 'innerRadius',
-      label: 'Inner Radius',
-      default: 0
+      label: 'Donut',
+      default: 0,
+      type: InputPropertyType.NUMBER,
+      unit: '%'
+    },
+    {
+      name: 'scale',
+      label: 'Scale',
+      default: 80,
+      type: InputPropertyType.NUMBER,
+      unit: '%'
+    },
+    {
+      name: 'legendPos',
+      label: 'Legend',
+      default: 'bottom-left',
+      options: ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'none'],
+      type: InputPropertyType.STRING
     }
   ],
   render: (
     data: Array<{ label: string; value: number }>,
-    properties: { innerRadius: number }
+    properties: { innerRadius: number; scale: number; legendPos: LegendOrient }
   ): Spec => ({
     $schema: 'https://vega.github.io/schema/vega/v4.json',
     autosize: 'none',
-    signals: [{ name: 'innerRadius', value: properties.innerRadius }],
+    signals: [
+      { name: 'innerRadius', value: properties.innerRadius },
+      { name: 'scale', value: properties.scale }
+    ],
     data: [
       {
         name: 'values',
@@ -33,25 +52,29 @@ export const PieChart: VegaChart = {
         ]
       }
     ],
-    legends: [
-      {
-        fill: 'color',
-        orient: 'top-right',
-        encode: {
-          labels: {
-            enter: {
-              fontSize: { value: 12 },
-              fill: { value: Colors.Black }
+    legends:
+      properties.legendPos !== 'none'
+        ? [
+            {
+              fill: 'color',
+              orient: properties.legendPos,
+              direction: 'horizontal',
+              encode: {
+                labels: {
+                  enter: {
+                    fontSize: { value: 12 },
+                    fill: { value: Colors.Black }
+                  }
+                },
+                symbols: {
+                  enter: {
+                    stroke: { value: 'transparent' }
+                  }
+                }
+              }
             }
-          },
-          symbols: {
-            enter: {
-              stroke: { value: 'transparent' }
-            }
-          }
-        }
-      }
-    ],
+          ]
+        : [],
     scales: [
       {
         name: 'color',
@@ -65,7 +88,7 @@ export const PieChart: VegaChart = {
         from: { data: 'values' },
         encode: {
           enter: {
-            fill: { scale: 'color', field: 'id' },
+            fill: { scale: 'color', field: 'field' },
             x: { field: { group: 'width' }, mult: 0.5 },
             y: { field: { group: 'height' }, mult: 0.5 }
           },
@@ -73,9 +96,9 @@ export const PieChart: VegaChart = {
             startAngle: { field: 'startAngle' },
             endAngle: { field: 'endAngle' },
             padAngle: { field: 'padAngle' },
-            outerRadius: { signal: 'width / 2 * 0.75' },
+            outerRadius: { signal: 'width * scale / 200' },
             cornerRadius: { value: 0 },
-            innerRadius: { signal: 'innerRadius' }
+            innerRadius: { signal: 'width * scale * innerRadius / 20000' }
           }
         }
       },
@@ -86,12 +109,14 @@ export const PieChart: VegaChart = {
           enter: {
             x: { field: { group: 'width' }, mult: 0.5 },
             y: { field: { group: 'height' }, mult: 0.5 },
-            radius: { signal: '(width / 2 * 0.75 + innerRadius) / 2' },
+            radius: {
+              signal: '(width / 2 * (1 + innerRadius / 100)) * scale / 200'
+            },
             theta: { signal: '(datum.startAngle + datum.endAngle)/2' },
             fill: { value: Colors.Black },
             align: { value: 'center' },
             baseline: { value: 'middle' },
-            text: { field: 'field' }
+            text: { field: 'id' }
           }
         }
       }
