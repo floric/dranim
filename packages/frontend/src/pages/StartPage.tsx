@@ -9,14 +9,9 @@ import { AsyncButton } from '../components/AsyncButton';
 import { PageHeaderCard } from '../components/PageHeaderCard';
 import { client } from '../io/apollo-client';
 
-const CREATE_STR_DEMO_DATA = gql`
-  mutation createSTRDemoData {
-    createSTRDemoData
-  }
-`;
-const CREATE_BIRTHDAYS_DEMO_DATA = gql`
-  mutation createBirthdaysDemoData {
-    createBirthdaysDemoData
+const CREATE_DEMO_DATA = gql`
+  mutation createDemoData($type: String!) {
+    createDemoData(type: $type)
   }
 `;
 
@@ -123,12 +118,14 @@ export default class StartPage extends React.Component<{}> {
                 This will generate empty Datasets and a sample Workspace. Note
                 that you will still need to upload data.
               </p>
-              <Mutation mutation={CREATE_STR_DEMO_DATA}>
-                {(createSTRDemoData, b) => (
+              <Mutation mutation={CREATE_DEMO_DATA}>
+                {createDemoData => (
                   <AsyncButton
                     icon="plus"
                     onClick={async () => {
-                      await createSTRDemoData();
+                      await createDemoData({
+                        variables: { type: 'Birthdays' }
+                      });
                       await client.reFetchObservableQueries();
                     }}
                   >
@@ -143,12 +140,28 @@ export default class StartPage extends React.Component<{}> {
                 persons. Each entry consists of a name, a random value as well
                 as a birthday.
               </p>
-              <Mutation mutation={CREATE_BIRTHDAYS_DEMO_DATA}>
-                {(createBirthdaysDemoData, b) => (
+              <Mutation mutation={CREATE_DEMO_DATA}>
+                {createDemoData => (
                   <AsyncButton
                     icon="plus"
                     onClick={async () => {
-                      await createBirthdaysDemoData();
+                      await createDemoData({ variables: { type: 'STR' } });
+                      await client.reFetchObservableQueries();
+                    }}
+                  >
+                    Create
+                  </AsyncButton>
+                )}
+              </Mutation>
+              <Divider />
+              <h3>Car Manufacturers</h3>
+              <p>Demo data for market shares of german car manufacturers.</p>
+              <Mutation mutation={CREATE_DEMO_DATA}>
+                {createDemoData => (
+                  <AsyncButton
+                    icon="plus"
+                    onClick={async () => {
+                      await createDemoData({ variables: { type: 'Cars' } });
                       await client.reFetchObservableQueries();
                     }}
                   >

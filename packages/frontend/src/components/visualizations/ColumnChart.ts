@@ -20,9 +20,7 @@ export const ColumnChart: VegaChart = {
         name: 'yscale',
         type: 'band',
         domain: { data: 'table', field: 'label' },
-        range: {
-          signal: 'innerRadius'
-        },
+        range: 'height',
         padding: 0.05,
         round: true
       },
