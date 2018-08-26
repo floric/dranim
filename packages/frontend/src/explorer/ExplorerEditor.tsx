@@ -8,7 +8,7 @@ import {
   NodeState,
   SocketInstance
 } from '@masterthesis/shared';
-import { Card, Col, Row, TreeSelect } from 'antd';
+import { Card, Cascader, Col, Row } from 'antd';
 import { css } from 'glamor';
 
 import { WrappedFormUtils } from 'antd/lib/form/Form';
@@ -18,12 +18,13 @@ import { NODE_WIDTH } from './editor/nodes';
 import { PropertiesForm } from './editor/PropertiesForm';
 import { nodeTypes, nodeTypesTree } from './nodes/all-nodes';
 
-const filterTreeNode = (inputValue: string, treeNode: any) => {
-  if (!treeNode.props.index) {
+const filterTreeNode = (inputValue: string, path: Array<{ index: string }>) => {
+  const nodeIndex = path[path.length - 1].index;
+  if (!nodeIndex) {
     return false;
   }
 
-  return treeNode.props.index.includes(inputValue.toLocaleLowerCase());
+  return nodeIndex.includes(inputValue.toLocaleLowerCase());
 };
 
 export interface ExplorerEditorProps {
@@ -67,8 +68,6 @@ export class ExplorerEditor extends React.Component<
   ExplorerEditorProps,
   ExplorerEditorState
 > {
-  private selectNodeRef: React.Ref<TreeSelect> = React.createRef<TreeSelect>();
-
   public componentWillMount() {
     this.setState({
       openConnection: null,
@@ -115,7 +114,11 @@ export class ExplorerEditor extends React.Component<
     await this.props.onStartCalculation();
   };
 
-  private handleSelectCreateNode = (type: string) => {
+  private handleSelectCreateNode = (
+    path: Array<string>,
+    selectedOptions: Array<{ value: string }>
+  ) => {
+    const type = selectedOptions[selectedOptions.length - 1].value;
     if (!nodeTypes.has(type)) {
       throw new Error('Unknown node type!');
     }
@@ -222,18 +225,16 @@ export class ExplorerEditor extends React.Component<
           </Col>
           <Col xs={24} md={8} lg={6} xxl={4}>
             <Card bordered={false} title="Editor" style={{ marginBottom: 12 }}>
-              <h4>Properties</h4>
               <Row>
                 <Col>
-                  <TreeSelect
-                    ref={this.selectNodeRef}
+                  <Cascader
                     allowClear
-                    showSearch
-                    filterTreeNode={filterTreeNode}
-                    treeData={nodeTypesTree}
+                    showSearch={{ filter: filterTreeNode }}
+                    expandTrigger="hover"
+                    options={nodeTypesTree}
                     style={{ width: '100%' }}
                     placeholder="Add Node"
-                    onSelect={this.handleSelectCreateNode}
+                    onChange={this.handleSelectCreateNode}
                   />
                 </Col>
                 {contextIds.length > 0 && (

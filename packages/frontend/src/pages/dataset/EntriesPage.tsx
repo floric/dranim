@@ -1,11 +1,11 @@
 import * as React from 'react';
 
-import { GQLDataset, Values, Entry } from '@masterthesis/shared';
+import { Entry, GQLDataset, Values } from '@masterthesis/shared';
 import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
 import { Mutation, MutationFn } from 'react-apollo';
 
-import { Card, Col, Row, Table } from 'antd';
+import { Alert, Card, Col, Row, Table } from 'antd';
 import { AsyncButton } from '../../components/AsyncButton';
 import { tryOperation } from '../../utils/form';
 import { CreateEntryForm } from '../forms/CreateEntryForm';
@@ -168,21 +168,29 @@ export class DataEntriesPage extends React.Component<
         <Col md={24} lg={12} xl={10}>
           <Card bordered={false}>
             <h3>Add Entry</h3>
-            <Mutation mutation={ADD_ENTRY}>
-              {addEntry => (
-                <CreateEntryForm
-                  handleCreateEntry={values =>
-                    this.handleCreateEntry(
-                      values,
-                      dataset.id,
-                      refetch,
-                      addEntry
-                    )
-                  }
-                  schema={dataset.valueschemas}
-                />
-              )}
-            </Mutation>
+            {dataset.valueschemas.length !== 0 ? (
+              <Mutation mutation={ADD_ENTRY}>
+                {addEntry => (
+                  <CreateEntryForm
+                    handleCreateEntry={values =>
+                      this.handleCreateEntry(
+                        values,
+                        dataset.id,
+                        refetch,
+                        addEntry
+                      )
+                    }
+                    schema={dataset.valueschemas}
+                  />
+                )}
+              </Mutation>
+            ) : (
+              <Alert
+                type="info"
+                message="Value Schemas needed"
+                description="Please add value schemas first."
+              />
+            )}
           </Card>
         </Col>
         <Col md={24} lg={12} xl={14}>

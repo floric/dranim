@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { GQLDataset } from '@masterthesis/shared';
-import { Button, Tabs } from 'antd';
+import { Button, Divider, Steps, Tabs } from 'antd';
 import gql from 'graphql-tag';
 import { History } from 'history';
 import { Component, SFC } from 'react';
@@ -98,6 +98,26 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
                       tab or uploaded. Currently only CSV files are supported.
                       But more import types could be supported in the future.
                     </p>
+                  </>
+                }
+                endContent={
+                  <>
+                    <Divider />
+                    <Steps
+                      current={
+                        dataset.valueschemas.length === 0
+                          ? 1
+                          : dataset.entriesCount === 0
+                            ? 2
+                            : 3
+                      }
+                      size="small"
+                    >
+                      <Steps.Step title="Dataset created" />
+                      <Steps.Step title="Specify Schemas" />
+                      <Steps.Step title="Create or Upload Entries" />
+                      <Steps.Step title="Use Data in Workspaces" />
+                    </Steps>
                   </>
                 }
               />

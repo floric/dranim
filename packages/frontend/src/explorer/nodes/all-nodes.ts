@@ -86,15 +86,14 @@ const buildTree = (
   );
 
   return distinctPaths.map(e => ({
-    title: e[e.length - 1],
+    label: e[e.length - 1],
     value: e.join('-'),
     key: e.join('-'),
-    selectable: false,
     children: [
       ...elems
         .filter(elem => JSON.stringify(elem.path) === JSON.stringify(e))
         .map(elem => ({
-          title: elem.name,
+          label: elem.name,
           value: elem.type,
           key: elem.type,
           index: `${elem.name}, ${elem.path.join(' ')}, ${elem.keywords.join(

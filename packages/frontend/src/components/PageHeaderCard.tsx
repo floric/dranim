@@ -11,6 +11,7 @@ export interface IPageHeaderProps {
   typeTitle?: string;
   marginBottom?: 'small' | 'big' | 'none';
   helpContent?: JSX.Element;
+  endContent?: JSX.Element;
 }
 
 const showInfo = (content: JSX.Element) => {
@@ -26,7 +27,8 @@ export const PageHeaderCard: SFC<IPageHeaderProps> = ({
   title,
   typeTitle,
   marginBottom = 'small',
-  helpContent
+  helpContent,
+  endContent
 }) => (
   <Card
     bordered={false}
@@ -75,5 +77,6 @@ export const PageHeaderCard: SFC<IPageHeaderProps> = ({
         <UserInfo />
       </Col>
     </Row>
+    {endContent}
   </Card>
 );
