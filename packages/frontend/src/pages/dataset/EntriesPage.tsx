@@ -125,16 +125,7 @@ const generateEntryColumns = (
   }
 ];
 
-export class DataEntriesPage extends React.Component<
-  DataEntriesPageProps,
-  { saving: boolean }
-> {
-  public componentWillMount() {
-    this.setState({
-      saving: false
-    });
-  }
-
+export class DataEntriesPage extends React.Component<DataEntriesPageProps> {
   private handleCreateEntry = (
     values: any,
     datasetId: string,

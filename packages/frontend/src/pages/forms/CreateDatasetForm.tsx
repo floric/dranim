@@ -9,13 +9,13 @@ export interface CreateDataSetFormProps extends FormComponentProps {
   handleCreateDataset: (name: string) => Promise<boolean | null>;
 }
 
+export type CreateDataSetFormState = { saving: boolean };
+
 class CreateDataSetFormImpl extends React.Component<
   CreateDataSetFormProps,
-  { saving: boolean }
+  CreateDataSetFormState
 > {
-  public componentWillMount() {
-    this.setState({ saving: false });
-  }
+  public state: CreateDataSetFormState = { saving: false };
 
   public componentDidMount() {
     this.props.form.validateFields();

@@ -48,9 +48,7 @@ export class AsyncButton extends React.Component<
 > {
   private mounted = false;
 
-  public componentWillMount() {
-    this.setState({ isLoading: false });
-  }
+  public state: AsyncButtonState = { isLoading: false };
 
   public componentDidMount() {
     this.mounted = true;
@@ -81,9 +79,10 @@ export class AsyncButton extends React.Component<
       disabled = false,
       fullWidth = false,
       confirmClick,
-      confirmMessage = 'Really do this action?'
+      confirmMessage = 'Really do this action?',
+      onClick,
+      ...otherProps
     } = this.props;
-    const { onClick, ...otherProps } = this.props;
 
     if (confirmClick) {
       return (

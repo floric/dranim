@@ -1,20 +1,17 @@
 import * as React from 'react';
 
-import { DataType, GQLOutputResult, GQLWorkspace } from '@masterthesis/shared';
-import { Card, Col, Divider, Row } from 'antd';
+import { GQLOutputResult, GQLWorkspace } from '@masterthesis/shared';
+import { Card, Col, Row } from 'antd';
 import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
 import { NavLink, RouteComponentProps } from 'react-router-dom';
 
-import { BooleanInfo } from '../../components/BooleanInfo';
 import {
   CustomErrorCard,
   LoadingCard,
   UnknownErrorCard
 } from '../../components/CustomCards';
-import { CustomDataRenderer } from '../../components/CustomDataRenderer';
-import { NumberInfo } from '../../components/NumberInfo';
-import { StringInfo } from '../../components/StringInfo';
+import { VisRenderer } from '../../components/VisRenderer';
 
 const WORKSPACE = gql`
   query workspace($id: String!) {
@@ -40,7 +37,7 @@ const WORKSPACE = gql`
   }
 `;
 
-const resultCardSize = { md: 12, xl: 8, xxl: 6 };
+const resultCardSize = (result: GQLOutputResult) => ({ md: 12, xl: 8, xxl: 6 });
 
 export interface VisDetailPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
@@ -82,10 +79,10 @@ const VisDetailPage: React.SFC<VisDetailPageProps> = ({
         }
 
         return (
-          <Row gutter={8}>
+          <Row gutter={8} type="flex">
             {workspace.results.map(r => (
-              <Col {...resultCardSize} key={r.id}>
-                {renderResult(r)}
+              <Col {...resultCardSize(r)} key={r.id}>
+                <VisRenderer result={r} />
               </Col>
             ))}
           </Row>
@@ -93,35 +90,6 @@ const VisDetailPage: React.SFC<VisDetailPageProps> = ({
       }}
     </Query>
   );
-};
-
-const renderResult = (result: GQLOutputResult): JSX.Element => {
-  const value = JSON.parse(result.value);
-  if (result.type !== DataType.VIS) {
-    return (
-      <Card bordered={false} title={result.name}>
-        {(() => {
-          if (result.type === DataType.NUMBER) {
-            return <NumberInfo total={value} />;
-          } else if (result.type === DataType.STRING) {
-            return <StringInfo value={value} />;
-          } else if (result.type === DataType.BOOLEAN) {
-            return <BooleanInfo value={value} />;
-          }
-
-          return <p>Unsupported Datatype!</p>;
-        })()}
-        {!!result.description && (
-          <>
-            <Divider />
-            <Card.Meta description={result.description} />
-          </>
-        )}
-      </Card>
-    );
-  }
-
-  return <CustomDataRenderer result={result} value={value} />;
 };
 
 export default VisDetailPage;

@@ -1,30 +1,31 @@
+import { GQLOutputResult } from '@masterthesis/shared';
+import { Col, Icon, Input, Row, Tag } from 'antd';
 import * as React from 'react';
+import { v4 } from 'uuid';
 
-import { Col, Divider, Icon, Input, Row, Slider, Tag } from 'antd';
-
-import { SVGChartWithId } from '../CustomDataRenderer';
+import { showNotificationWithIcon } from '../../utils/form';
 import { SliderCol } from '../properties/Slider';
 import { renderSTRChart } from './str-svg';
+import { downloadFromUrl } from './Vega';
+import { VisCard } from './VisCard';
 
-export interface STRChartProps extends SVGChartWithId {
-  value: any;
-}
-
-export const CANVAS_WIDTH = 800;
-export const CANVAS_HEIGHT = 800;
 export const TEXT_OFFSET = 5;
 export const SOUND_BAR_OFFSET = 15;
 const MINIMUM_OPACITY = 0.15;
 const WEST_PASSAGE_COLOR = '#FAAB43';
 const EAST_PASSAGE_COLOR = '#003E61';
-const GAP_DIST_DEFAULT = 200;
-const GAP_DIST_MAX = CANVAS_WIDTH;
-const HEIGHT_DEFAULT = 500;
-const HEIGHT_MAX = 1000;
-const HEIGHT_MIN = 100;
+const GAP_DIST_DEFAULT = 0.4;
+const HEIGHT_DEFAULT = 0.8;
 const CURVE_DEFAULT = 120;
 const CURVE_MAX = 500;
 const OFFSET_MAX = 1000;
+
+export interface STRChartProps {
+  value: any;
+  result: GQLOutputResult;
+  width: number;
+  height: number;
+}
 
 export interface STRChartState {
   gapDistance: number;
@@ -40,44 +41,58 @@ export interface STRChartState {
     inputVisible: boolean;
     inputValue: string;
   };
+  container: {
+    width: number;
+    height: number;
+    id: string;
+  };
   soundNames: Array<string>;
 }
 
 export class STRChart extends React.Component<STRChartProps, STRChartState> {
-  public componentWillMount() {
-    this.setState({
-      gapDistance: GAP_DIST_DEFAULT,
-      height: HEIGHT_DEFAULT,
-      curveDistance: CURVE_DEFAULT,
-      offsets: [0, 0],
-      colors: {
-        minTextOpacity: MINIMUM_OPACITY,
-        eastPassage: EAST_PASSAGE_COLOR,
-        westPassage: WEST_PASSAGE_COLOR
-      },
-      soundNames: [],
-      temp: {
-        inputVisible: false,
-        inputValue: ''
-      }
-    });
-  }
+  private canvasContainer: React.RefObject<HTMLDivElement> = React.createRef<
+    HTMLDivElement
+  >();
+
+  public state: STRChartState = {
+    gapDistance: GAP_DIST_DEFAULT,
+    height: HEIGHT_DEFAULT,
+    curveDistance: CURVE_DEFAULT,
+    offsets: [0, 0],
+    colors: {
+      minTextOpacity: MINIMUM_OPACITY,
+      eastPassage: EAST_PASSAGE_COLOR,
+      westPassage: WEST_PASSAGE_COLOR
+    },
+    soundNames: [],
+    container: {
+      width: this.props.width,
+      height: this.props.height,
+      id: `c-${v4()}`
+    },
+    temp: {
+      inputVisible: false,
+      inputValue: ''
+    }
+  };
 
   public componentDidMount() {
     this.renderChart();
   }
 
   private renderChart() {
-    const { value, containerId } = this.props;
+    const { value, width, height } = this.props;
     if (!value.values) {
       throw new Error('Unsupported value');
     }
 
     renderSTRChart(
-      containerId,
+      this.state.container.id,
       value.values.cities,
       value.values.passages,
-      this.state
+      this.state,
+      width,
+      height
     );
   }
 
@@ -149,134 +164,155 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
       }
     });
 
+  private handleDownloadSvg = async () => {
+    try {
+      const svgData = this.canvasContainer.current.innerHTML;
+      const svgBlob = new Blob([svgData], {
+        type: 'image/svg+xml;charset=utf-8'
+      });
+      const svgUrl = URL.createObjectURL(svgBlob);
+      downloadFromUrl(svgUrl, 'download.svg');
+    } catch (err) {
+      showNotificationWithIcon({
+        title: 'SVG Export failed',
+        content: 'The SVG Export has failed because of an unknown reason.',
+        icon: 'error'
+      });
+    }
+  };
   public render() {
     const {
       temp: { inputVisible, inputValue },
-      soundNames
+      soundNames,
+      container: { id },
+      colors,
+      gapDistance,
+      height,
+      curveDistance,
+      offsets
     } = this.state;
+    const { result } = this.props;
     return (
-      <>
-        <Row>
-          <Col xs={24} sm={12} md={6} lg={3}>
-            <p>Gap</p>
-            <Slider
-              min={0}
-              max={GAP_DIST_MAX}
-              defaultValue={this.state.gapDistance}
+      <VisCard
+        result={result}
+        downloadOptions={[
+          { name: 'SVG', icon: 'code', onClick: this.handleDownloadSvg }
+        ]}
+        properties={
+          <Row>
+            <SliderCol
+              label="Gap"
+              min={0.05}
+              max={1}
+              step={0.1}
+              value={gapDistance}
               onChange={this.handleChangeGap}
             />
-          </Col>
-          <SliderCol
-            label="Height"
-            min={HEIGHT_MIN}
-            max={HEIGHT_MAX}
-            value={this.state.height}
-            onChange={this.handleChangeHeight}
-          />
-          <Col xs={24} sm={12} md={6} lg={3}>
-            <p>Curviness</p>
-            <Slider
+            <SliderCol
+              label="Height"
+              min={0.05}
+              max={1}
+              step={0.1}
+              value={height}
+              onChange={this.handleChangeHeight}
+            />
+            <SliderCol
+              label="Curviness"
               min={0}
               max={CURVE_MAX}
-              defaultValue={this.state.curveDistance}
+              value={curveDistance}
               onChange={this.handleChangeCurveDistance}
             />
-          </Col>
-          <Col xs={24} sm={12} md={6} lg={3}>
-            <p>Offset Y</p>
-            <Slider
+            <SliderCol
+              label="Offset Y"
               min={0}
               max={OFFSET_MAX}
-              defaultValue={this.state.offsets[0]}
+              value={offsets[0]}
               onChange={this.handleChangeOffsetX}
             />
-          </Col>
-          <Col xs={24} sm={12} md={6} lg={3}>
-            <p>Offset X</p>
-            <Slider
+            <SliderCol
+              label="Offset X"
               min={0}
               max={OFFSET_MAX}
-              defaultValue={this.state.offsets[1]}
+              value={offsets[1]}
               onChange={this.handleChangeOffsetY}
             />
-          </Col>
-          <Col xs={24} sm={12} md={6} lg={3}>
-            <p>Minimal Opacity</p>
-            <Slider
+            <SliderCol
+              label="Min Opacity"
               min={0}
               max={1}
               step={0.01}
-              defaultValue={this.state.colors.minTextOpacity}
+              value={colors.minTextOpacity}
               onChange={this.handleChangeMinOpacity}
             />
-          </Col>
-          <Col sm={24} md={12} lg={6}>
-            <p>Colors</p>
-            <Input.Group compact>
-              <Input
-                onChange={this.handleChangePassageColorEast}
-                value={this.state.colors.eastPassage}
-                color={this.state.colors.eastPassage}
-                prefix={
-                  <Icon
-                    style={{ color: this.state.colors.eastPassage }}
-                    type="arrow-right"
-                  />
-                }
-                style={{ width: '50%' }}
-              />
-              <Input
-                value={this.state.colors.westPassage}
-                onChange={this.handleChangePassageColorWest}
-                prefix={
-                  <Icon
-                    style={{ color: this.state.colors.westPassage }}
-                    type="arrow-left"
-                  />
-                }
-                style={{
-                  width: '50%',
-                  color: this.state.colors.westPassage,
-                  backgroundColor: this.state.colors.westPassage
-                }}
-              />
-            </Input.Group>
-          </Col>
-          <Col sm={24} md={12} lg={6}>
-            <p>Sound Names</p>
-            {soundNames.map(tag => (
-              <Tag
-                key={tag}
-                closable={true}
-                afterClose={() => this.handleClose(tag)}
-              >
-                {tag}
-              </Tag>
-            ))}
-            {inputVisible && (
-              <Input
-                type="text"
-                size="small"
-                style={{ width: 120, padding: 0, margin: 0 }}
-                value={inputValue}
-                onChange={this.handleInputChange}
-                onBlur={this.handleInputConfirm}
-                onPressEnter={this.handleInputConfirm}
-              />
-            )}
-            {!inputVisible && (
-              <Tag
-                onClick={this.showInput}
-                style={{ background: '#fff', borderStyle: 'dashed' }}
-              >
-                <Icon type="plus" /> New Tag
-              </Tag>
-            )}
-          </Col>
-        </Row>
-        <Divider style={{ marginTop: 8, marginBottom: 8 }} />
-        <div id={this.props.containerId} />
-      </>
+            <Col sm={24} md={12} lg={6}>
+              <p>Colors</p>
+              <Input.Group compact>
+                <Input
+                  onChange={this.handleChangePassageColorEast}
+                  value={colors.eastPassage}
+                  color={colors.eastPassage}
+                  prefix={
+                    <Icon
+                      style={{ color: colors.eastPassage }}
+                      type="arrow-right"
+                    />
+                  }
+                  style={{ width: '50%' }}
+                />
+                <Input
+                  value={colors.westPassage}
+                  onChange={this.handleChangePassageColorWest}
+                  prefix={
+                    <Icon
+                      style={{ color: colors.westPassage }}
+                      type="arrow-left"
+                    />
+                  }
+                  style={{
+                    width: '50%',
+                    color: colors.westPassage,
+                    backgroundColor: colors.westPassage
+                  }}
+                />
+              </Input.Group>
+            </Col>
+            <Col sm={24} md={12} lg={6}>
+              <p>Sound Names</p>
+              {soundNames.map(tag => (
+                <Tag
+                  key={tag}
+                  closable={true}
+                  afterClose={() => this.handleClose(tag)}
+                >
+                  {tag}
+                </Tag>
+              ))}
+              {inputVisible && (
+                <Input
+                  type="text"
+                  size="small"
+                  style={{ width: 120, padding: 0, margin: 0 }}
+                  value={inputValue}
+                  onChange={this.handleInputChange}
+                  onBlur={this.handleInputConfirm}
+                  onPressEnter={this.handleInputConfirm}
+                />
+              )}
+              {!inputVisible && (
+                <Tag
+                  onClick={this.showInput}
+                  style={{ background: '#fff', borderStyle: 'dashed' }}
+                >
+                  <Icon type="plus" /> New Tag
+                </Tag>
+              )}
+            </Col>
+          </Row>
+        }
+      >
+        <div id={id} ref={this.canvasContainer} />
+      </VisCard>
     );
   }
 }

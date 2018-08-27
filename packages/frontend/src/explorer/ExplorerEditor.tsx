@@ -8,7 +8,7 @@ import {
   NodeState,
   SocketInstance
 } from '@masterthesis/shared';
-import { Affix, Button, Card, Cascader, Col, Row } from 'antd';
+import { Alert, Button, Card, Cascader, Col, Row } from 'antd';
 import { css } from 'glamor';
 
 import { WrappedFormUtils } from 'antd/lib/form/Form';
@@ -62,22 +62,17 @@ export interface ExplorerEditorState {
   openConnection: OpenConnection | null;
   selectedNodeId: string | null;
   contextIds: Array<string>;
-  container: any;
 }
 
 export class ExplorerEditor extends React.Component<
   ExplorerEditorProps,
   ExplorerEditorState
 > {
-  private stepInput: React.RefObject<HTMLDivElement> = React.createRef();
-
-  public componentWillMount() {
-    this.setState({
-      openConnection: null,
-      selectedNodeId: null,
-      contextIds: []
-    });
-  }
+  public state: ExplorerEditorState = {
+    openConnection: null,
+    selectedNodeId: null,
+    contextIds: []
+  };
 
   public componentDidMount() {
     this.updateCanvas();
@@ -96,12 +91,15 @@ export class ExplorerEditor extends React.Component<
   }
 
   public updateCanvas() {
-    updateStage(this.props, this.state, this.changeState);
+    updateStage(this.props, this.state, {
+      changeState: this.changeState,
+      enterContext: this.appendContext,
+      leaveContext: this.popContext
+    });
   }
 
-  private changeState = async (newState: ExplorerEditorState) => {
+  private changeState = async (newState: ExplorerEditorState) =>
     this.setState(newState);
-  };
 
   private handleDeleteSelectedNode = async () => {
     const { selectedNodeId } = this.state;
@@ -113,9 +111,7 @@ export class ExplorerEditor extends React.Component<
     await this.setState({ selectedNodeId: null });
   };
 
-  private handleStartCalulcation = async () => {
-    await this.props.onStartCalculation();
-  };
+  private handleStartCalulcation = () => this.props.onStartCalculation();
 
   private handleSelectCreateNode = (
     path: Array<string>,
@@ -138,13 +134,18 @@ export class ExplorerEditor extends React.Component<
       return;
     }
 
-    await this.setState({
-      contextIds: [...this.state.contextIds, this.state.selectedNodeId],
-      selectedNodeId: null
-    });
+    this.appendContext(this.state.selectedNodeId);
   };
 
-  private handleLeaveContext = async () =>
+  private handleLeaveContext = async () => this.popContext();
+
+  private appendContext = async (nodeId: string) =>
+    this.setState({
+      contextIds: [...this.state.contextIds, nodeId],
+      selectedNodeId: null
+    });
+
+  private popContext = () =>
     this.setState({
       contextIds: this.state.contextIds.slice(
         0,
@@ -212,61 +213,30 @@ export class ExplorerEditor extends React.Component<
                       context={{ state: this.props, node }}
                     />
                   )}
-                </Col>
-                <Col>
-                  <Button.Group>
-                    {contextIds.length > 0 && (
-                      <AsyncButton
-                        icon="minus-square"
-                        fullWidth={false}
-                        onClick={this.handleLeaveContext}
-                      >
-                        Leave Context
-                      </AsyncButton>
-                    )}
-                    {!!node &&
-                      node.hasContextFn && (
-                        <AsyncButton
-                          icon="plus-square"
-                          fullWidth={false}
-                          onClick={this.handleEnterContext}
-                        >
-                          Enter Context
-                        </AsyncButton>
-                      )}
-                    {node && (
-                      <AsyncButton
-                        type="danger"
-                        confirmMessage="Delete Node?"
-                        icon="delete"
-                        confirmClick
-                        fullWidth={false}
-                        onClick={this.handleDeleteSelectedNode}
-                      />
-                    )}
-                    {!node && <p>No Node selected.</p>}
-                  </Button.Group>
+                  {!node && (
+                    <Alert
+                      showIcon
+                      message="No Node selected"
+                      description="Select a Node to show properties by clicking on it in the Editor."
+                    />
+                  )}
                 </Col>
               </Row>
             </Card>
           </Col>
-          <Col>
-            <Card bordered={false} title="Editor" style={{ marginBottom: 12 }}>
-              <Button.Group>
-                <AsyncButton
-                  type="primary"
-                  icon="rocket"
-                  onClick={this.handleStartCalulcation}
-                  fullWidth={false}
-                  disabled={workspaceInvalid}
-                >
-                  Calculate
-                </AsyncButton>
-              </Button.Group>
-            </Card>
-          </Col>
         </Row>
-        <Affix ref={this.state.container}>
+        <Button.Group>
+          {contextIds.length > 0 && (
+            <AsyncButton icon="minus-square" onClick={this.handleLeaveContext}>
+              Leave Context
+            </AsyncButton>
+          )}
+          {!!node &&
+            node.hasContextFn && (
+              <AsyncButton icon="plus-square" onClick={this.handleEnterContext}>
+                Enter Context
+              </AsyncButton>
+            )}
           <Cascader
             allowClear
             showSearch={{ filter: filterTreeNode }}
@@ -276,13 +246,30 @@ export class ExplorerEditor extends React.Component<
           >
             <Button icon="plus">Add Node</Button>
           </Cascader>
-        </Affix>
+          <AsyncButton
+            type="danger"
+            confirmMessage="Delete Node?"
+            icon="delete"
+            disabled={!node}
+            confirmClick
+            onClick={this.handleDeleteSelectedNode}
+          />
+          <AsyncButton
+            type="primary"
+            icon="rocket"
+            onClick={this.handleStartCalulcation}
+            fullWidth={false}
+            disabled={workspaceInvalid}
+          >
+            Calculate
+          </AsyncButton>
+        </Button.Group>
         <div
-          ref={this.stepInput}
           id={EXPLORER_CONTAINER}
           {...css({
             flex: 1,
             width: '100%',
+            border: `1px solid ${Colors.GrayLight}`,
             borderBottom: `2px solid ${
               workspaceInvalid ? Colors.Warning : Colors.Success
             }`

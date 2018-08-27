@@ -41,20 +41,14 @@ const MENU_QUERY = gql`
     }
   }
 `;
+export type LoggedInAppState = { collapsed: boolean };
 
-class LoggedInApp extends React.Component<
-  LoggedInAppProps,
-  { collapsed: boolean }
-> {
-  public componentWillMount() {
-    this.setState({
-      collapsed: false
-    });
-  }
-
-  private onCollapse = (collapsed: boolean) => {
-    this.setState({ collapsed });
+class LoggedInApp extends React.Component<LoggedInAppProps, LoggedInAppState> {
+  public state: LoggedInAppState = {
+    collapsed: false
   };
+
+  private onCollapse = (collapsed: boolean) => this.setState({ collapsed });
 
   public render() {
     const { collapsed } = this.state;

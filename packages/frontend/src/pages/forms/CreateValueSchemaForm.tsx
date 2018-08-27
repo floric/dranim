@@ -22,15 +22,13 @@ export interface CreateValueSchemaFormProps extends FormComponentProps {
   handleCreateValueSchema: (value: ValueSchema) => void;
 }
 
+export type CreateValueSchemaFormState = { saving: boolean };
+
 class CreateValueSchemaFormImpl extends React.Component<
   CreateValueSchemaFormProps,
-  { saving: boolean }
+  CreateValueSchemaFormState
 > {
-  public componentWillMount() {
-    this.setState({
-      saving: false
-    });
-  }
+  public state: CreateValueSchemaFormState = { saving: false };
 
   public componentDidMount() {
     this.props.form.validateFields();

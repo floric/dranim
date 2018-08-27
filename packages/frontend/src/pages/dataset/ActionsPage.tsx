@@ -61,12 +61,10 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
     DataActionsPageProps & WithApolloClient<{}>,
     DataActionsState
   > {
-    public componentWillMount() {
-      this.setState({
-        fileList: [],
-        uploading: false
-      });
-    }
+    public state: DataActionsState = {
+      fileList: [],
+      uploading: false
+    };
 
     private handleUpload = async (
       uploadEntriesCsv: MutationFn<
