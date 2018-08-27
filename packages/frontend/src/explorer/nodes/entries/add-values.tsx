@@ -24,10 +24,8 @@ export const AddValuesNode: ClientNodeDef<
 > = {
   type: AddValuesNodeDef.type,
   renderFormItems: ({
-    form,
     form: { getFieldDecorator, setFieldsValue, getFieldValue },
     nodeForm,
-    inputs,
     touchForm,
     setTempState,
     getTempState

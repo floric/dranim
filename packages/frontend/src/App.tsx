@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Redirect, RouteComponentProps, withRouter } from 'react-router';
+import { Redirect, RouteComponentProps, withRouter } from 'react-router-dom';
 import { Route, Switch } from 'react-router-dom';
 
 import { isLoggedIn } from './io/auth';

@@ -4,7 +4,7 @@ import { DataType, GQLOutputResult, GQLWorkspace } from '@masterthesis/shared';
 import { Card, Col, Divider, Row } from 'antd';
 import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
-import { RouteComponentProps } from 'react-router';
+import { NavLink, RouteComponentProps } from 'react-router-dom';
 
 import { BooleanInfo } from '../../components/BooleanInfo';
 import {
@@ -45,47 +45,55 @@ const resultCardSize = { md: 12, xl: 8, xxl: 6 };
 export interface VisDetailPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
-export default class VisDetailPage extends React.Component<VisDetailPageProps> {
-  public render() {
-    return (
-      <Query
-        query={WORKSPACE}
-        variables={{ id: this.props.match.params.workspaceId }}
-      >
-        {({ loading, error, data }) => {
-          if (loading) {
-            return <LoadingCard />;
-          }
-
-          if (error) {
-            return <UnknownErrorCard error={error} />;
-          }
-
-          if (!data.workspace) {
-            return (
-              <CustomErrorCard
-                title="Unknown Workspace"
-                description="Workspace doesn't exist."
-              />
-            );
-          }
-
-          const workspace: GQLWorkspace = data.workspace;
-
-          return (
-            <Row gutter={8}>
-              {workspace.results.map(r => (
-                <Col {...resultCardSize} key={r.id}>
-                  {renderResult(r)}
-                </Col>
-              ))}
-            </Row>
-          );
-        }}
-      </Query>
-    );
+const VisDetailPage: React.SFC<VisDetailPageProps> = ({
+  match: {
+    params: { workspaceId }
   }
-}
+}) => {
+  return (
+    <Query query={WORKSPACE} variables={{ id: workspaceId }}>
+      {({ loading, error, data }) => {
+        if (loading) {
+          return <LoadingCard />;
+        }
+
+        if (error) {
+          return <UnknownErrorCard error={error} />;
+        }
+
+        if (!data.workspace) {
+          return (
+            <CustomErrorCard
+              title="Unknown Workspace"
+              description="Workspace doesn't exist."
+            />
+          );
+        }
+
+        const workspace: GQLWorkspace = data.workspace;
+
+        if (workspace.results.length === 0) {
+          return (
+            <Card bordered={false} title="No results present">
+              <p>You need to start a calculation with Output nodes first.</p>
+              <NavLink to={'/'}>Go to Editor</NavLink>
+            </Card>
+          );
+        }
+
+        return (
+          <Row gutter={8}>
+            {workspace.results.map(r => (
+              <Col {...resultCardSize} key={r.id}>
+                {renderResult(r)}
+              </Col>
+            ))}
+          </Row>
+        );
+      }}
+    </Query>
+  );
+};
 
 const renderResult = (result: GQLOutputResult): JSX.Element => {
   const value = JSON.parse(result.value);
@@ -115,3 +123,5 @@ const renderResult = (result: GQLOutputResult): JSX.Element => {
 
   return <CustomDataRenderer result={result} value={value} />;
 };
+
+export default VisDetailPage;

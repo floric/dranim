@@ -54,7 +54,7 @@ export class AsyncButton extends React.Component<
       disabled,
       type,
       icon,
-      fullWidth = true,
+      fullWidth = false,
       confirmClick,
       confirmMessage = 'Really do this action?'
     } = this.props;
@@ -63,12 +63,21 @@ export class AsyncButton extends React.Component<
       return (
         <Popconfirm
           title={confirmMessage}
-          onConfirm={ev => this.handleClick(ev)}
+          onConfirm={this.handleClick}
           okText="Confirm"
           cancelText="Cancel"
         >
           <Button
-            style={fullWidth ? { width: '100%' } : undefined}
+            style={{
+              ...this.props.style,
+              ...{
+                width: fullWidth
+                  ? '100%'
+                  : this.props.style
+                    ? this.props.style.width
+                    : undefined
+              }
+            }}
             type={type}
             icon={icon}
             disabled={disabled}
@@ -82,12 +91,21 @@ export class AsyncButton extends React.Component<
 
     return (
       <Button
-        style={fullWidth ? { width: '100%' } : undefined}
+        style={{
+          ...this.props.style,
+          ...{
+            width: fullWidth
+              ? '100%'
+              : this.props.style
+                ? this.props.style.width
+                : undefined
+          }
+        }}
         type={type}
         icon={icon}
         disabled={disabled}
         loading={isLoading}
-        onClick={ev => this.handleClick(ev)}
+        onClick={this.handleClick}
       >
         {children}
       </Button>

@@ -15,6 +15,8 @@ export interface DataEntriesPageProps {
   refetch: () => Promise<ApolloQueryResult<any>>;
 }
 
+const MAX_PREVIEW_CHARS = 65;
+
 const ADD_ENTRY = gql`
   mutation addEntry($datasetId: String!, $values: String!) {
     addEntry(datasetId: $datasetId, values: $values) {
@@ -110,9 +112,9 @@ export class DataEntriesPage extends React.Component<
     refetch: () => Promise<ApolloQueryResult<any>>
   ) => [
     {
-      title: 'Index',
-      dataIndex: 'key',
-      key: 'key'
+      title: 'Preview',
+      dataIndex: 'preview',
+      key: 'preview'
     },
     {
       title: 'Summary',
@@ -138,9 +140,7 @@ export class DataEntriesPage extends React.Component<
                   deleteEntry
                 )
               }
-            >
-              Delete
-            </AsyncButton>
+            />
           )}
         </Mutation>
       )
@@ -152,6 +152,10 @@ export class DataEntriesPage extends React.Component<
       const values = JSON.parse(e.values as any);
       return {
         key: e.id,
+        preview:
+          e.values.length > MAX_PREVIEW_CHARS
+            ? `${e.values.slice(0, MAX_PREVIEW_CHARS - 3)}...`
+            : e.values,
         summary: `${Object.keys(values).length} values`,
         values
       };

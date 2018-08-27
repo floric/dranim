@@ -8,7 +8,7 @@ import {
 import { ApolloQueryResult } from 'apollo-client';
 import { distanceInWordsToNow } from 'date-fns';
 import { Mutation, MutationFn, Query } from 'react-apollo';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from 'react-router-dom';
 
 import { AsyncButton } from '../../components/AsyncButton';
 import {

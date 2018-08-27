@@ -4,9 +4,12 @@ import { Colors } from '@masterthesis/shared';
 import { Layout } from 'antd';
 import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
-import { withRouter } from 'react-router';
-import { RouteComponentProps } from 'react-router';
-import { Route, Switch } from 'react-router-dom';
+import {
+  Route,
+  RouteComponentProps,
+  Switch,
+  withRouter
+} from 'react-router-dom';
 
 import { AppMenu } from './components/AppMenu';
 import { LoadingCard } from './components/CustomCards';

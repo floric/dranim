@@ -6,7 +6,7 @@ import gql from 'graphql-tag';
 import { History } from 'history';
 import { Component, SFC } from 'react';
 import { Query } from 'react-apollo';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from 'react-router-dom';
 
 import {
   CustomErrorCard,
@@ -79,6 +79,12 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
           }
 
           const dataset: GQLDataset = data.dataset;
+          const currentStep =
+            dataset.valueschemas.length === 0
+              ? 1
+              : dataset.entriesCount === 0
+                ? 2
+                : 3;
 
           return (
             <>
@@ -101,24 +107,16 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
                   </>
                 }
                 endContent={
-                  <>
-                    <Divider />
-                    <Steps
-                      current={
-                        dataset.valueschemas.length === 0
-                          ? 1
-                          : dataset.entriesCount === 0
-                            ? 2
-                            : 3
-                      }
-                      size="small"
-                    >
-                      <Steps.Step title="Dataset created" />
-                      <Steps.Step title="Specify Schemas" />
-                      <Steps.Step title="Create or Upload Entries" />
-                      <Steps.Step title="Use Data in Workspaces" />
-                    </Steps>
-                  </>
+                  currentStep !== 3 ? (
+                    <>
+                      <Divider />
+                      <Steps current={currentStep} size="small">
+                        <Steps.Step title="Dataset created" />
+                        <Steps.Step title="Schemas specified" />
+                        <Steps.Step title="Entries created or uploaded" />
+                      </Steps>
+                    </>
+                  ) : null
                 }
               />
               <Tabs

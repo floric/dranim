@@ -66,6 +66,13 @@ class PropertiesFormImpl extends React.Component<
     this.props.form.resetFields();
   };
 
+  private setTempState = (s: any) =>
+    this.setState({ temp: { ...this.state.temp, ...s } });
+
+  private getTempState = () => this.state.temp;
+
+  private touchTempState = () => this.setState({ isTouched: true });
+
   public render() {
     const {
       form,
@@ -85,12 +92,11 @@ class PropertiesFormImpl extends React.Component<
           state,
           node,
           nodeForm,
-          touchForm: () => this.setState({ isTouched: true }),
-          getTempState: () => this.state.temp,
-          setTempState: s =>
-            this.setState({ temp: { ...this.state.temp, ...s } })
+          touchForm: this.touchTempState,
+          getTempState: this.getTempState,
+          setTempState: this.setTempState
         })}
-        <Form.Item wrapperCol={{ xs: 24 }}>
+        <Form.Item>
           <Button.Group>
             <Button
               type="primary"
