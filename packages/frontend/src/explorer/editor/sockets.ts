@@ -3,6 +3,7 @@ import {
   ConnectionInstance,
   DataType,
   SocketDef,
+  SocketInstance,
   SocketState,
   SocketType
 } from '@masterthesis/shared';
@@ -51,10 +52,7 @@ const renderSocket = (
     radius: SOCKET_RADIUS
   });
 
-  socket.on('mousedown', () => {
-    onClick();
-  });
-
+  socket.on('mousedown', onClick);
   socketGroup.add(text);
   socketGroup.add(socket);
   return socketGroup;
@@ -136,7 +134,7 @@ const beginEditExistingConnection = async (
   });
 };
 
-export const onClickSocket = (
+export const onClickSocket = async (
   s: SocketDef,
   socketName: string,
   type: SocketType,
@@ -196,30 +194,45 @@ export const onClickSocket = (
     return;
   }
 
-  (openConnection.destinations
-    ? openConnection.destinations.map(c => ({
-        to: { nodeId: c.nodeId, name: c.name },
-        from: { nodeId, name: socketName }
-      }))
-    : []
-  )
-    .concat(
-      openConnection.sources
-        ? openConnection.sources.map(c => ({
-            to: { nodeId, name: socketName },
-            from: { nodeId: c.nodeId, name: c.name }
-          }))
-        : []
-    )
-    .filter(c => c.to !== null && c.from !== null)
-    .forEach(c => {
-      server.onConnectionCreate(c.from!, c.to!);
-    });
+  await Promise.all(
+    mapToDestinationConnections(openConnection.destinations, nodeId, socketName)
+      .concat(
+        mapToSourceConnections(openConnection.sources, nodeId, socketName)
+      )
+      .filter(c => c.to !== null && c.from !== null)
+      .map(c => {
+        server.onConnectionCreate(c.from!, c.to!);
+      })
+  );
 
   changeState({
     openConnection: null
   });
 };
+
+const mapToDestinationConnections = (
+  destinations: Array<SocketInstance> | null,
+  nodeId: string,
+  socketName: string
+) =>
+  destinations
+    ? destinations.map(c => ({
+        to: { nodeId: c.nodeId, name: c.name },
+        from: { nodeId, name: socketName }
+      }))
+    : [];
+
+const mapToSourceConnections = (
+  sources: Array<SocketInstance> | null,
+  nodeId: string,
+  socketName: string
+) =>
+  sources
+    ? sources.map(c => ({
+        to: { nodeId, name: socketName },
+        from: { nodeId: c.nodeId, name: c.name }
+      }))
+    : [];
 
 const handleMultipleInputs = () => {
   showNotificationWithIcon({

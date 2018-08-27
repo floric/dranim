@@ -1,16 +1,10 @@
 import * as React from 'react';
 
-import {
-  CalculationProcess,
-  ProcessState,
-  SocketInstance
-} from '@masterthesis/shared';
+import { ProcessState, SocketInstance } from '@masterthesis/shared';
 import { ApolloQueryResult } from 'apollo-client';
-import { distanceInWordsToNow } from 'date-fns';
 import { Mutation, MutationFn, Query } from 'react-apollo';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { AsyncButton } from '../../components/AsyncButton';
 import {
   CustomErrorCard,
   LoadingCard,
@@ -25,15 +19,11 @@ import {
   DELETE_CONNECTION,
   DELETE_NODE,
   START_CALCULATION,
-  STOP_CALCULATION,
   UPDATE_NODE,
   WORKSPACE_NODE_SELECTION
 } from '../../graphql/editor-page';
-import {
-  deepCopyResponse,
-  showNotificationWithIcon,
-  tryOperation
-} from '../../utils/form';
+import { deepCopyResponse, tryOperation } from '../../utils/form';
+import { ProcessRunningCard } from './components/ProcessRunningCard';
 
 const POLLING_FREQUENCY = 5000;
 
@@ -160,42 +150,6 @@ export class WorkspaceEditorPage extends React.Component<
       failedTitle: 'Process start has failed'
     });
 
-  private renderCalculationProcessCard = (
-    currentCalculation: CalculationProcess
-  ) => (
-    <Mutation mutation={STOP_CALCULATION}>
-      {stopCalculation => (
-        <LoadingCard text="Calculation in progress...">
-          <p>
-            {`Processed ${currentCalculation.processedOutputs} of ${
-              currentCalculation.totalOutputs
-            } nodes | Started ${distanceInWordsToNow(currentCalculation.start, {
-              includeSeconds: true,
-              addSuffix: true
-            })}`}
-          </p>
-          <AsyncButton
-            type="danger"
-            icon="close"
-            fullWidth={false}
-            onClick={async () => {
-              await stopCalculation({
-                variables: { id: currentCalculation.id }
-              });
-              showNotificationWithIcon({
-                icon: 'info',
-                title: 'Calculation will be stopped',
-                content: 'Please wait until the calculation has been stopped'
-              });
-            }}
-          >
-            Stop Calculation
-          </AsyncButton>
-        </LoadingCard>
-      )}
-    </Mutation>
-  );
-
   public render() {
     const {
       match: {
@@ -247,8 +201,10 @@ export class WorkspaceEditorPage extends React.Component<
 
                 if (inprocessCalculations.length > 0) {
                   startPolling(POLLING_FREQUENCY);
-                  return this.renderCalculationProcessCard(
-                    inprocessCalculations[0]
+                  return (
+                    <ProcessRunningCard
+                      currentCalculation={inprocessCalculations[0]}
+                    />
                   );
                 }
 

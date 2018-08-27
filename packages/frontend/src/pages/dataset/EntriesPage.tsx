@@ -55,6 +55,76 @@ const expandedRowRender = (e: { values: Values; key: string }) => {
   );
 };
 
+const generateEntriesDatasource = (entries: Array<Entry>) =>
+  entries.map(e => {
+    const values = JSON.parse(e.values as any);
+    return {
+      key: e.id,
+      preview:
+        e.values.length > MAX_PREVIEW_CHARS
+          ? `${e.values.slice(0, MAX_PREVIEW_CHARS - 3)}...`
+          : e.values,
+      summary: `${Object.keys(values).length} values`,
+      values
+    };
+  });
+
+const handleDeleteEntry = (
+  entryId: string,
+  datasetId: string,
+  refetch: () => Promise<ApolloQueryResult<any>>,
+  deleteEntry: MutationFn<any, any>
+) =>
+  tryOperation({
+    op: () =>
+      deleteEntry({
+        variables: {
+          datasetId,
+          entryId
+        }
+      }),
+    refetch,
+    successTitle: () => 'Entry deleted',
+    successMessage: () => `Entry deleted successfully.`,
+    failedTitle: 'Entry not deleted.',
+    failedMessage: `Entry deletion failed.`
+  });
+
+const generateEntryColumns = (
+  datasetId: string,
+  refetch: () => Promise<ApolloQueryResult<any>>
+) => [
+  {
+    title: 'Preview',
+    dataIndex: 'preview',
+    key: 'preview'
+  },
+  {
+    title: 'Summary',
+    dataIndex: 'summary',
+    key: 'summary'
+  },
+  {
+    title: 'Operations',
+    dataIndex: 'operation',
+    render: (text, record) => (
+      <Mutation mutation={DELETE_ENTRY}>
+        {deleteEntry => (
+          <AsyncButton
+            icon="delete"
+            type="danger"
+            confirmMessage="Delete Entry?"
+            confirmClick
+            onClick={() =>
+              handleDeleteEntry(record.id, datasetId, refetch, deleteEntry)
+            }
+          />
+        )}
+      </Mutation>
+    )
+  }
+];
+
 export class DataEntriesPage extends React.Component<
   DataEntriesPageProps,
   { saving: boolean }
@@ -86,87 +156,8 @@ export class DataEntriesPage extends React.Component<
       failedMessage: `Entry creation failed.`
     });
 
-  private handleDeleteEntry = (
-    entryId: string,
-    datasetId: string,
-    refetch: () => Promise<ApolloQueryResult<any>>,
-    deleteEntry: MutationFn<any, any>
-  ) =>
-    tryOperation({
-      op: () =>
-        deleteEntry({
-          variables: {
-            datasetId,
-            entryId
-          }
-        }),
-      refetch,
-      successTitle: () => 'Entry deleted',
-      successMessage: () => `Entry deleted successfully.`,
-      failedTitle: 'Entry not deleted.',
-      failedMessage: `Entry deletion failed.`
-    });
-
-  private generateEntryColumns = (
-    datasetId: string,
-    refetch: () => Promise<ApolloQueryResult<any>>
-  ) => [
-    {
-      title: 'Preview',
-      dataIndex: 'preview',
-      key: 'preview'
-    },
-    {
-      title: 'Summary',
-      dataIndex: 'summary',
-      key: 'summary'
-    },
-    {
-      title: 'Operations',
-      dataIndex: 'operation',
-      render: (text, record) => (
-        <Mutation mutation={DELETE_ENTRY}>
-          {deleteEntry => (
-            <AsyncButton
-              icon="delete"
-              type="danger"
-              confirmMessage="Delete Entry?"
-              confirmClick
-              onClick={() =>
-                this.handleDeleteEntry(
-                  record.id,
-                  datasetId,
-                  refetch,
-                  deleteEntry
-                )
-              }
-            />
-          )}
-        </Mutation>
-      )
-    }
-  ];
-
-  private generateEntriesDatasource = (entries: Array<Entry>) =>
-    entries.map(e => {
-      const values = JSON.parse(e.values as any);
-      return {
-        key: e.id,
-        preview:
-          e.values.length > MAX_PREVIEW_CHARS
-            ? `${e.values.slice(0, MAX_PREVIEW_CHARS - 3)}...`
-            : e.values,
-        summary: `${Object.keys(values).length} values`,
-        values
-      };
-    });
-
   public render() {
     const { dataset, refetch } = this.props;
-    const entriesDataSource = this.generateEntriesDatasource(
-      dataset.latestEntries
-    );
-
     return (
       <Row style={{ marginBottom: 12 }} gutter={12}>
         <Col md={24} lg={12} xl={10}>
@@ -208,8 +199,8 @@ export class DataEntriesPage extends React.Component<
                 hideOnSinglePage: true
               }}
               expandedRowRender={expandedRowRender}
-              dataSource={entriesDataSource}
-              columns={this.generateEntryColumns(dataset.id, refetch)}
+              dataSource={generateEntriesDatasource(dataset.latestEntries)}
+              columns={generateEntryColumns(dataset.id, refetch)}
             />
           </Card>
         </Col>
