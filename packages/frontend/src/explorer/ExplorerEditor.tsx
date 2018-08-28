@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import {
   Colors,
   ConnectionInstance,
@@ -8,8 +6,9 @@ import {
   NodeState,
   SocketInstance
 } from '@masterthesis/shared';
-import { Alert, Button, Card, Cascader, Col, Row } from 'antd';
+import { Button, Card, Cascader, Col, Row } from 'antd';
 import { css } from 'glamor';
+import * as React from 'react';
 
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { AsyncButton } from '../components/AsyncButton';
@@ -62,16 +61,22 @@ export interface ExplorerEditorState {
   openConnection: OpenConnection | null;
   selectedNodeId: string | null;
   contextIds: Array<string>;
+  addNodeOpen: boolean;
 }
 
 export class ExplorerEditor extends React.Component<
   ExplorerEditorProps,
   ExplorerEditorState
 > {
+  private addNodeSearch: React.RefObject<Cascader> = React.createRef<
+    Cascader
+  >();
+
   public state: ExplorerEditorState = {
     openConnection: null,
     selectedNodeId: null,
-    contextIds: []
+    contextIds: [],
+    addNodeOpen: false
   };
 
   public componentDidMount() {
@@ -127,6 +132,7 @@ export class ExplorerEditor extends React.Component<
     const y = canvas ? canvas.clientHeight / 2 : 50;
 
     this.props.onNodeCreate(type, x, y, this.state.contextIds);
+    this.setState({ addNodeOpen: false });
   };
 
   private handleEnterContext = async () => {
@@ -167,8 +173,13 @@ export class ExplorerEditor extends React.Component<
     );
   };
 
+  private openAddNodeSearch = () =>
+    this.setState({ addNodeOpen: true }, () => {
+      this.addNodeSearch.current.focus();
+    });
+
   public render() {
-    const { selectedNodeId, contextIds } = this.state;
+    const { selectedNodeId, contextIds, addNodeOpen } = this.state;
     const { nodes } = this.props;
 
     const node = selectedNodeId
@@ -199,77 +210,99 @@ export class ExplorerEditor extends React.Component<
       <>
         <Row gutter={12} type="flex" justify="space-between">
           <Col>
-            <Card
-              bordered={false}
-              title={nodeType ? nodeType.name : undefined}
-              style={{ marginBottom: 12 }}
-            >
-              <Row gutter={12} type="flex" justify="space-between">
-                <Col>
-                  {renderFormItems && (
-                    <PropertiesForm
-                      renderFormItems={renderFormItems}
-                      handleSubmit={this.handleSave}
-                      context={{ state: this.props, node }}
-                    />
-                  )}
-                  {!node && (
-                    <Alert
-                      showIcon
-                      message="No Node selected"
-                      description="Select a Node to show properties by clicking on it in the Editor."
-                    />
-                  )}
-                </Col>
-              </Row>
-            </Card>
+            {node && (
+              <Card
+                bordered={false}
+                title={nodeType ? nodeType.name : undefined}
+                style={{ marginBottom: 12 }}
+              >
+                <Row gutter={12} type="flex" justify="space-between">
+                  <Col>
+                    {renderFormItems && (
+                      <PropertiesForm
+                        renderFormItems={renderFormItems}
+                        handleSubmit={this.handleSave}
+                        context={{ state: this.props, node }}
+                      />
+                    )}
+                  </Col>
+                </Row>
+              </Card>
+            )}
           </Col>
         </Row>
-        <Button.Group>
-          {contextIds.length > 0 && (
-            <AsyncButton icon="minus-square" onClick={this.handleLeaveContext}>
-              Leave Context
-            </AsyncButton>
-          )}
-          {!!node &&
-            node.hasContextFn && (
-              <AsyncButton icon="plus-square" onClick={this.handleEnterContext}>
-                Enter Context
-              </AsyncButton>
-            )}
-          <Cascader
-            allowClear
-            showSearch={{ filter: filterTreeNode }}
-            expandTrigger="hover"
-            options={nodeTypesTree}
-            onChange={this.handleSelectCreateNode}
-          >
-            <Button icon="plus">Add Node</Button>
-          </Cascader>
-          <AsyncButton
-            type="danger"
-            confirmMessage="Delete Node?"
-            icon="delete"
-            disabled={!node}
-            confirmClick
-            onClick={this.handleDeleteSelectedNode}
-          />
-          <AsyncButton
-            type="primary"
-            icon="rocket"
-            onClick={this.handleStartCalulcation}
-            fullWidth={false}
-            disabled={workspaceInvalid}
-          >
-            Calculate
-          </AsyncButton>
-        </Button.Group>
+        <Card bordered={false} bodyStyle={{ padding: 8 }}>
+          <Row type="flex" justify="space-between">
+            <Col>
+              <Button.Group>
+                <Cascader
+                  ref={this.addNodeSearch}
+                  allowClear
+                  showSearch={{ filter: filterTreeNode }}
+                  expandTrigger="hover"
+                  options={nodeTypesTree}
+                  onChange={this.handleSelectCreateNode}
+                >
+                  {!addNodeOpen ? (
+                    <Button onClick={this.openAddNodeSearch} icon="plus-square">
+                      Add Node
+                    </Button>
+                  ) : null}
+                </Cascader>
+              </Button.Group>
+            </Col>
+            <Col>
+              <Button.Group>
+                {contextIds.length > 0 && (
+                  <AsyncButton
+                    tooltip="Leave Context"
+                    icon="logout"
+                    onClick={this.handleLeaveContext}
+                  />
+                )}
+                {!!node &&
+                  node.hasContextFn && (
+                    <AsyncButton
+                      tooltip="Enter Context"
+                      icon="login"
+                      onClick={this.handleEnterContext}
+                    />
+                  )}
+                {node ? (
+                  <AsyncButton
+                    type="danger"
+                    tooltip="Delete selected Node"
+                    confirmMessage="Delete Node?"
+                    icon="delete"
+                    disabled={!node}
+                    confirmClick
+                    onClick={this.handleDeleteSelectedNode}
+                  />
+                ) : null}
+              </Button.Group>
+            </Col>
+            <Col>
+              <Button.Group>
+                <AsyncButton
+                  type="primary"
+                  icon="rocket"
+                  onClick={this.handleStartCalulcation}
+                  fullWidth={false}
+                  disabled={workspaceInvalid}
+                >
+                  Calculate
+                </AsyncButton>
+              </Button.Group>
+            </Col>
+          </Row>
+        </Card>
         <div
           id={EXPLORER_CONTAINER}
           {...css({
             flex: 1,
             width: '100%',
             border: `1px solid ${Colors.GrayLight}`,
+            borderTop: 0,
             borderBottom: `2px solid ${
               workspaceInvalid ? Colors.Warning : Colors.Success
             }`

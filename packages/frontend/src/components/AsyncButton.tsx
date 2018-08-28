@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Button, Popconfirm } from 'antd';
+import { Button, Popconfirm, Tooltip } from 'antd';
 import { ButtonProps } from 'antd/lib/button';
 
 interface AsyncButtonState {
@@ -13,12 +13,13 @@ export type AsyncButtonProps = {
   confirmMessage?: string;
   fullWidth?: boolean;
   disabled?: boolean;
+  tooltip?: string;
 } & ButtonProps;
 
 type FullWidthButtonProps = {
   handleClick?: () => any;
-  isLoading: boolean;
   disabled: boolean;
+  tooltip?: string;
 } & AsyncButtonProps;
 
 const FullWidthButton: React.SFC<FullWidthButtonProps> = ({
@@ -26,20 +27,23 @@ const FullWidthButton: React.SFC<FullWidthButtonProps> = ({
   style,
   handleClick,
   fullWidth,
+  tooltip,
   ...props
 }) => (
-  <Button
-    style={{
-      ...style,
-      ...{
-        width: fullWidth ? '100%' : style ? style.width : undefined
-      }
-    }}
-    onClick={handleClick}
-    {...props}
-  >
-    {children}
-  </Button>
+  <Tooltip title={tooltip} mouseEnterDelay={1} defaultVisible={false}>
+    <Button
+      style={{
+        ...style,
+        ...{
+          width: fullWidth ? '100%' : style ? style.width : undefined
+        }
+      }}
+      onClick={handleClick}
+      {...props}
+    >
+      {children}
+    </Button>
+  </Tooltip>
 );
 
 export class AsyncButton extends React.Component<
@@ -81,6 +85,7 @@ export class AsyncButton extends React.Component<
       confirmClick,
       confirmMessage = 'Really do this action?',
       onClick,
+      loading,
       ...otherProps
     } = this.props;
 
@@ -93,7 +98,7 @@ export class AsyncButton extends React.Component<
           cancelText="Cancel"
         >
           <FullWidthButton
-            isLoading={isLoading}
+            loading={isLoading}
             fullWidth={fullWidth}
             disabled={disabled}
             {...otherProps}
@@ -105,7 +110,7 @@ export class AsyncButton extends React.Component<
     return (
       <FullWidthButton
         handleClick={this.handleClick}
-        isLoading={isLoading}
+        loading={isLoading}
         fullWidth={fullWidth}
         disabled={disabled}
         {...otherProps}
