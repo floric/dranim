@@ -8,16 +8,20 @@ import { register } from '../../io/auth';
 
 const FormItem = Form.Item;
 
+export type RegistrationFormProps = {
+  form: WrappedFormUtils;
+  history: History;
+};
+export type RegistrationState = { confirmDirty: boolean; isLoading: boolean };
+
 class RegistrationFormImpl extends React.Component<
-  { form: WrappedFormUtils; history: History },
-  { confirmDirty: boolean; isLoading: boolean }
+  RegistrationFormProps,
+  RegistrationState
 > {
-  public componentWillMount() {
-    this.setState({
-      confirmDirty: false,
-      isLoading: false
-    });
-  }
+  public state: RegistrationState = {
+    confirmDirty: false,
+    isLoading: false
+  };
 
   private handleSubmit = e => {
     e.preventDefault();

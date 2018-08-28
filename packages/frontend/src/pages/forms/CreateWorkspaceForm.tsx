@@ -11,14 +11,13 @@ export interface CreateWorkspaceFormProps extends FormComponentProps {
     description: string
   ) => Promise<boolean | null>;
 }
+export type CreateWorkspaceFormState = { saving: boolean };
 
 class CreateWorkspaceFormImpl extends React.Component<
   CreateWorkspaceFormProps,
-  { saving: boolean }
+  CreateWorkspaceFormState
 > {
-  public componentWillMount() {
-    this.setState({ saving: false });
-  }
+  public state: CreateWorkspaceFormState = { saving: false };
 
   public componentDidMount() {
     this.props.form.validateFields();

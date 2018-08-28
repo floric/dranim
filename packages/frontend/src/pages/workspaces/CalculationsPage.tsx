@@ -1,13 +1,14 @@
-import * as React from 'react';
-
-import { CalculationProcess, ProcessState } from '@masterthesis/shared';
+import {
+  CalculationProcess,
+  GQLCalculationProcess,
+  ProcessState
+} from '@masterthesis/shared';
 import { Card, Col, Icon, Row, Table, Tooltip } from 'antd';
 import gql from 'graphql-tag';
-import { Component } from 'react';
-import { Query } from 'react-apollo';
-import { RouteComponentProps } from 'react-router';
+import * as React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 
-import { LoadingCard, UnknownErrorCard } from '../../components/CustomCards';
+import { HandledQuery } from '../../components/HandledQuery';
 import { ProcessTime } from '../../components/ProcessTime';
 
 const CALCULATIONS = gql`
@@ -23,102 +24,91 @@ const CALCULATIONS = gql`
   }
 `;
 
+const calculationsToDatasource = (calculations: Array<CalculationProcess>) =>
+  calculations
+    .sort((a, b) => new Date(b.start).getTime() - new Date(a.start).getTime())
+    .map(e => ({
+      key: e.id,
+      time: { start: e.start, finish: e.finish },
+      state: (
+        <Tooltip title={e.state.toLowerCase()}>
+          {e.state === ProcessState.SUCCESSFUL ? (
+            <Icon type="check-circle" />
+          ) : e.state === ProcessState.PROCESSING ? (
+            <Icon type="clock-circle" />
+          ) : (
+            <Icon type="exclamation-circle" />
+          )}
+        </Tooltip>
+      ),
+      results: {
+        processed: e.processedOutputs.toLocaleString(),
+        total: e.totalOutputs.toLocaleString()
+      }
+    }));
+
+const schemasColumns = [
+  {
+    title: 'State',
+    dataIndex: 'state',
+    key: 'state'
+  },
+  {
+    title: 'Time',
+    dataIndex: 'time',
+    key: 'time',
+    render: time => <ProcessTime start={time.start} finish={time.finish} />
+  },
+  {
+    title: 'Results',
+    dataIndex: 'results',
+    key: 'results',
+    render: u => (
+      <Row>
+        <Col xs={8}>{`${u.processed} Processed`}</Col>
+        <Col xs={8}>{`${u.total} Total`}</Col>
+      </Row>
+    )
+  }
+];
+
 export interface WorkspaceCalculationsPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
-export class WorkspaceCalculationsPage extends Component<
+export const WorkspaceCalculationsPage: React.SFC<
   WorkspaceCalculationsPageProps
-> {
-  public render() {
-    const {
-      match: {
-        params: { workspaceId }
-      }
-    } = this.props;
-    return (
-      <Query query={CALCULATIONS} variables={{ workspaceId }}>
-        {({ loading, error, data }) => {
-          if (loading) {
-            return <LoadingCard />;
-          }
-
-          if (error) {
-            return <UnknownErrorCard error={error} />;
-          }
-
-          const calculations: Array<CalculationProcess> = Array.from(
-            data.calculations
-          );
-
-          const schemasDataSource = calculations
-            .sort(
-              (a, b) =>
-                new Date(b.start).getTime() - new Date(a.start).getTime()
-            )
-            .map(e => ({
-              key: e.id,
-              time: { start: e.start, finish: e.finish },
-              state: (
-                <Tooltip title={e.state.toLowerCase()}>
-                  {e.state === ProcessState.SUCCESSFUL ? (
-                    <Icon type="check-circle" />
-                  ) : e.state === ProcessState.PROCESSING ? (
-                    <Icon type="clock-circle" />
-                  ) : (
-                    <Icon type="exclamation-circle" />
-                  )}
-                </Tooltip>
-              ),
-              results: {
-                processed: e.processedOutputs.toLocaleString(),
-                total: e.totalOutputs.toLocaleString()
-              }
-            }));
-
-          const schemasColumns = [
-            {
-              title: 'State',
-              dataIndex: 'state',
-              key: 'state'
-            },
-            {
-              title: 'Time',
-              dataIndex: 'time',
-              key: 'time',
-              render: time => (
-                <ProcessTime start={time.start} finish={time.finish} />
-              )
-            },
-            {
-              title: 'Results',
-              dataIndex: 'results',
-              key: 'results',
-              render: u => (
-                <Row>
-                  <Col xs={8}>{`${u.processed} Processed`}</Col>
-                  <Col xs={8}>{`${u.total} Total`}</Col>
-                </Row>
-              )
-            }
-          ];
-
-          return (
-            <Row>
-              <Col>
-                <Card bordered={false}>
-                  <Table
-                    bordered={false}
-                    size="small"
-                    pagination={false}
-                    dataSource={schemasDataSource}
-                    columns={schemasColumns}
-                  />
-                </Card>
-              </Col>
-            </Row>
-          );
-        }}
-      </Query>
-    );
+> = ({
+  match: {
+    params: { workspaceId }
   }
-}
+}) => (
+  <HandledQuery<
+    { calculations: Array<GQLCalculationProcess> },
+    { workspaceId: string }
+  >
+    query={CALCULATIONS}
+    variables={{ workspaceId }}
+  >
+    {({ data: { calculations } }) => {
+      const schemasDataSource = calculationsToDatasource(
+        Array.from(calculations)
+      );
+
+      return (
+        <Row>
+          <Col>
+            <Card bordered={false}>
+              <Table
+                bordered={false}
+                size="small"
+                pagination={false}
+                dataSource={schemasDataSource}
+                columns={schemasColumns}
+              />
+            </Card>
+          </Col>
+        </Row>
+      );
+    }}
+  </HandledQuery>
+);

@@ -1,18 +1,13 @@
-import * as React from 'react';
-
 import { GQLDataset } from '@masterthesis/shared';
-import { Button, Tabs } from 'antd';
+import { Button, Divider, Steps, Tabs } from 'antd';
 import gql from 'graphql-tag';
 import { History } from 'history';
+import * as React from 'react';
 import { Component, SFC } from 'react';
-import { Query } from 'react-apollo';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from 'react-router-dom';
 
-import {
-  CustomErrorCard,
-  LoadingCard,
-  UnknownErrorCard
-} from '../../components/CustomCards';
+import { CustomErrorCard } from '../../components/CustomCards';
+import { HandledQuery } from '../../components/HandledQuery';
 import { PageHeaderCard } from '../../components/PageHeaderCard';
 import { DataActionsPage } from './ActionsPage';
 import { DataEntriesPage } from './EntriesPage';
@@ -58,17 +53,12 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
     } = this.props;
 
     return (
-      <Query query={DATASET} variables={{ id }}>
-        {({ loading, error, data, refetch }) => {
-          if (loading) {
-            return <LoadingCard />;
-          }
-
-          if (error) {
-            return <UnknownErrorCard error={error} />;
-          }
-
-          if (!data.dataset) {
+      <HandledQuery<{ dataset: GQLDataset | null }, { id: string }>
+        query={DATASET}
+        variables={{ id }}
+      >
+        {({ data: { dataset }, refetch }) => {
+          if (!dataset) {
             return (
               <CustomErrorCard
                 title="Unknown dataset"
@@ -78,7 +68,12 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
             );
           }
 
-          const dataset: GQLDataset = data.dataset;
+          const currentStep =
+            dataset.valueschemas.length === 0
+              ? 1
+              : dataset.entriesCount === 0
+                ? 2
+                : 3;
 
           return (
             <>
@@ -99,6 +94,18 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
                       But more import types could be supported in the future.
                     </p>
                   </>
+                }
+                endContent={
+                  currentStep !== 3 ? (
+                    <>
+                      <Divider />
+                      <Steps current={currentStep} size="small">
+                        <Steps.Step title="Dataset created" />
+                        <Steps.Step title="Schemas specified" />
+                        <Steps.Step title="Entries created or uploaded" />
+                      </Steps>
+                    </>
+                  ) : null
                 }
               />
               <Tabs
@@ -125,7 +132,7 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
             </>
           );
         }}
-      </Query>
+      </HandledQuery>
     );
   }
 }

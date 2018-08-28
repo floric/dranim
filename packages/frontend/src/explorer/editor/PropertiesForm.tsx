@@ -14,17 +14,21 @@ export interface PropertiesFormProps {
   context: EditorContext;
 }
 
+export type PropertiesFormState = {
+  saving: boolean;
+  isTouched: boolean;
+  temp: any;
+};
+
 class PropertiesFormImpl extends React.Component<
   PropertiesFormProps & FormComponentProps,
-  { saving: boolean; isTouched: boolean; temp: any }
+  PropertiesFormState
 > {
-  public componentWillMount() {
-    this.setState({
-      saving: false,
-      isTouched: false,
-      temp: {}
-    });
-  }
+  public state: PropertiesFormState = {
+    saving: false,
+    isTouched: false,
+    temp: {}
+  };
 
   public componentDidMount() {
     this.props.form.validateFields();
@@ -62,9 +66,14 @@ class PropertiesFormImpl extends React.Component<
     });
   };
 
-  private resetFields = () => {
-    this.props.form.resetFields();
-  };
+  private resetFields = () => this.props.form.resetFields();
+
+  private setTempState = (s: any) =>
+    this.setState({ temp: { ...this.state.temp, ...s } });
+
+  private getTempState = () => this.state.temp;
+
+  private touchTempState = () => this.setState({ isTouched: true });
 
   public render() {
     const {
@@ -85,12 +94,11 @@ class PropertiesFormImpl extends React.Component<
           state,
           node,
           nodeForm,
-          touchForm: () => this.setState({ isTouched: true }),
-          getTempState: () => this.state.temp,
-          setTempState: s =>
-            this.setState({ temp: { ...this.state.temp, ...s } })
+          touchForm: this.touchTempState,
+          getTempState: this.getTempState,
+          setTempState: this.setTempState
         })}
-        <Form.Item wrapperCol={{ xs: 24 }}>
+        <Form.Item>
           <Button.Group>
             <Button
               type="primary"

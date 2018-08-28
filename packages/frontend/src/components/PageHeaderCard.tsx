@@ -6,11 +6,12 @@ import { Button, Card, Col, Divider, Modal, Row, Tooltip } from 'antd';
 import { css } from 'glamor';
 import { UserInfo } from './UserInfo';
 
-export interface IPageHeaderProps {
+export interface PageHeaderProps {
   title: string;
   typeTitle?: string;
   marginBottom?: 'small' | 'big' | 'none';
   helpContent?: JSX.Element;
+  endContent?: JSX.Element;
 }
 
 const showInfo = (content: JSX.Element) => {
@@ -22,11 +23,12 @@ const showInfo = (content: JSX.Element) => {
   });
 };
 
-export const PageHeaderCard: SFC<IPageHeaderProps> = ({
+export const PageHeaderCard: SFC<PageHeaderProps> = ({
   title,
   typeTitle,
   marginBottom = 'small',
-  helpContent
+  helpContent,
+  endContent
 }) => (
   <Card
     bordered={false}
@@ -75,5 +77,6 @@ export const PageHeaderCard: SFC<IPageHeaderProps> = ({
         <UserInfo />
       </Col>
     </Row>
+    {endContent}
   </Card>
 );

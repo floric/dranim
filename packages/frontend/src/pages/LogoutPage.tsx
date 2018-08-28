@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Colors } from '@masterthesis/shared';
 import { Col, Layout, Row } from 'antd';
 import { History } from 'history';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from 'react-router-dom';
 
 import { LoadingCard } from '../components/CustomCards';
 import { logout } from '../io/auth';

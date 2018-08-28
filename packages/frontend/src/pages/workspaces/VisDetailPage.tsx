@@ -1,20 +1,13 @@
 import * as React from 'react';
 
 import { DataType, GQLOutputResult, GQLWorkspace } from '@masterthesis/shared';
-import { Card, Col, Divider, Row } from 'antd';
+import { Card, Col, Row } from 'antd';
 import gql from 'graphql-tag';
-import { Query } from 'react-apollo';
-import { RouteComponentProps } from 'react-router';
+import { NavLink, RouteComponentProps } from 'react-router-dom';
 
-import { BooleanInfo } from '../../components/BooleanInfo';
-import {
-  CustomErrorCard,
-  LoadingCard,
-  UnknownErrorCard
-} from '../../components/CustomCards';
-import { CustomDataRenderer } from '../../components/CustomDataRenderer';
-import { NumberInfo } from '../../components/NumberInfo';
-import { StringInfo } from '../../components/StringInfo';
+import { CustomErrorCard } from '../../components/CustomCards';
+import { HandledQuery } from '../../components/HandledQuery';
+import { VisRenderer } from '../../components/VisRenderer';
 
 const WORKSPACE = gql`
   query workspace($id: String!) {
@@ -40,78 +33,53 @@ const WORKSPACE = gql`
   }
 `;
 
-const resultCardSize = { md: 24 };
+const resultCardSize = (result: GQLOutputResult) =>
+  result.type === DataType.VIS
+    ? { xs: 24, sm: 24, lg: 12, xxl: 8 }
+    : { xs: 24, sm: 12, lg: 6, xxl: 4 };
 
 export interface VisDetailPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
-export default class VisDetailPage extends React.Component<VisDetailPageProps> {
-  public render() {
-    return (
-      <Query
-        query={WORKSPACE}
-        variables={{ id: this.props.match.params.workspaceId }}
-      >
-        {({ loading, error, data }) => {
-          if (loading) {
-            return <LoadingCard />;
-          }
-
-          if (error) {
-            return <UnknownErrorCard error={error} />;
-          }
-
-          if (!data.workspace) {
-            return (
-              <CustomErrorCard
-                title="Unknown Workspace"
-                description="Workspace doesn't exist."
-              />
-            );
-          }
-
-          const workspace: GQLWorkspace = data.workspace;
-
-          return (
-            <Row gutter={8}>
-              {workspace.results.map(r => (
-                <Col {...resultCardSize} key={r.id}>
-                  {renderResult(r)}
-                </Col>
-              ))}
-            </Row>
-          );
-        }}
-      </Query>
-    );
+const VisDetailPage: React.SFC<VisDetailPageProps> = ({
+  match: {
+    params: { workspaceId }
   }
-}
+}) => (
+  <HandledQuery<{ workspace: null | GQLWorkspace }, { id: string }>
+    query={WORKSPACE}
+    variables={{ id: workspaceId }}
+  >
+    {({ data: { workspace } }) => {
+      if (!workspace) {
+        return (
+          <CustomErrorCard
+            title="Unknown Workspace"
+            description="Workspace doesn't exist."
+          />
+        );
+      }
 
-const renderResult = (result: GQLOutputResult): JSX.Element => {
-  const value = JSON.parse(result.value);
-  if (result.type !== DataType.VIS) {
-    return (
-      <Card bordered={false} title={result.name}>
-        {(() => {
-          if (result.type === DataType.NUMBER) {
-            return <NumberInfo total={value} />;
-          } else if (result.type === DataType.STRING) {
-            return <StringInfo value={value} />;
-          } else if (result.type === DataType.BOOLEAN) {
-            return <BooleanInfo value={value} />;
-          }
+      if (workspace.results.length === 0) {
+        return (
+          <Card bordered={false} title="No results present">
+            <p>You need to start a calculation with Output nodes first.</p>
+            <NavLink to={'/'}>Go to Editor</NavLink>
+          </Card>
+        );
+      }
 
-          return <p>Unsupported Datatype!</p>;
-        })()}
-        {!!result.description && (
-          <>
-            <Divider />
-            <Card.Meta description={result.description} />
-          </>
-        )}
-      </Card>
-    );
-  }
+      return (
+        <Row gutter={8} type="flex">
+          {workspace.results.map(r => (
+            <Col {...resultCardSize(r)} key={r.id}>
+              <VisRenderer result={r} />
+            </Col>
+          ))}
+        </Row>
+      );
+    }}
+  </HandledQuery>
+);
 
-  return <CustomDataRenderer result={result} value={value} />;
-};
+export default VisDetailPage;

@@ -1,11 +1,5 @@
 import * as d3 from 'd3';
-import {
-  CANVAS_HEIGHT,
-  CANVAS_WIDTH,
-  SOUND_BAR_OFFSET,
-  STRChartState,
-  TEXT_OFFSET
-} from './STRChart';
+import { SOUND_BAR_OFFSET, STRChartState, TEXT_OFFSET } from './STRChart';
 import { LABEL_FONT_FAMILY, LABEL_FONT_SIZE } from './styles';
 
 interface Passage {
@@ -32,7 +26,9 @@ export const renderSTRChart = (
   containerId: string,
   cities: Cities,
   passages: Array<Passage>,
-  state: STRChartState
+  state: STRChartState,
+  width: number,
+  height: number
 ) => {
   d3.select(`#${containerId}`)
     .selectAll('svg')
@@ -42,8 +38,8 @@ export const renderSTRChart = (
   const chart = d3
     .select(`#${containerId}`)
     .append('svg')
-    .attr('width', CANVAS_WIDTH)
-    .attr('height', CANVAS_HEIGHT);
+    .attr('width', width)
+    .attr('height', height);
 
   renderSound(chart, passages, cityPositions, state);
   renderNames(chart, cities.west, cityPositions, true, state);
@@ -87,13 +83,16 @@ const renderSound = (
     .append('path')
     .attr('d', () => {
       const topPos = { x, y };
-      const bottomPos = { x, y: y + state.height + SOUND_BAR_OFFSET * 2 };
+      const bottomPos = {
+        x,
+        y: y + state.height * state.container.height + SOUND_BAR_OFFSET * 2
+      };
       return `M ${topPos.x} ${topPos.y} L ${bottomPos.x} ${bottomPos.y} L ${
         topPos.x
       } ${topPos.y}`;
     })
-    .attr('stroke', () => '#000')
-    .attr('opacity', () => 0.2);
+    .attr('stroke', '#000')
+    .attr('opacity', 0.2);
   soundWrapper
     .append('text')
     .text(renderName('Sound', exportsFromSound, importsToSound))
@@ -104,11 +103,12 @@ const renderSound = (
     .style('text-anchor', 'middle');
 };
 
-const getSoundPos = (state: STRChartState) => {
-  const x = state.offsets[0] + state.gapDistance / 2 + state.curveDistance;
-  const y = state.offsets[1] - SOUND_BAR_OFFSET;
-  return { x, y };
-};
+const getSoundPos = (state: STRChartState) => ({
+  x: state.offsets[0] * state.container.width,
+  y:
+    (state.container.height - state.height) * (state.offsets[1] - 0.5) -
+    SOUND_BAR_OFFSET
+});
 
 const renderName = (
   name: string,
@@ -231,18 +231,26 @@ const setCityPositions = (
   if (state.curveDistance === 0) {
     cityNames.forEach((c, i) => {
       cityPositions.set(c, {
-        x: isWest ? state.offsets[0] : state.offsets[0] + state.gapDistance,
-        y: state.offsets[1] + (i / cityStats.length) * state.height
+        x: isWest
+          ? (state.offsets[0] - state.gapDistance / 2) * state.container.width
+          : (state.offsets[0] + state.gapDistance / 2) * state.container.width,
+        y:
+          (state.offsets[1] - 0.5 + (i / cityStats.length) * state.height) *
+          state.container.height
       });
     });
     return;
   }
 
-  const beta = Math.atan(state.height / 2 / state.curveDistance);
+  const beta = Math.atan(
+    (state.height / 2 / (state.curveDistance * state.container.width)) *
+      state.container.height
+  );
   const alpha = Math.PI - 2 * beta;
   const radius =
     Math.sqrt(
-      Math.pow(state.curveDistance, 2) + Math.pow(state.height / 2, 2)
+      Math.pow(state.curveDistance * state.container.width, 2) +
+        Math.pow((state.height * state.container.height) / 2, 2)
     ) /
     (Math.sin(alpha / 2) * 2);
 
@@ -258,12 +266,11 @@ const setCityPositions = (
       value,
       radius,
       isWest
-        ? radius + state.offsets[0]
+        ? radius +
+          (state.offsets[0] - state.gapDistance / 2) * state.container.width
         : -radius +
-          state.offsets[0] +
-          state.curveDistance * 2 +
-          state.gapDistance,
-      state.height / 2 + state.offsets[1]
+          (state.offsets[0] + state.gapDistance / 2) * state.container.width,
+      (state.offsets[1] - 0.5 + state.height * 0.5) * state.container.height
     );
     cityPositions.set(c, pos);
   });

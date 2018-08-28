@@ -6,16 +6,14 @@ import { History } from 'history';
 
 import { login } from '../../io/auth';
 
-class LoginFormImpl extends React.Component<
-  {
-    form: WrappedFormUtils;
-    history: History;
-  },
-  { isLoading: boolean }
-> {
-  public componentWillMount() {
-    this.setState({ isLoading: false });
-  }
+export type LoginFormProps = {
+  form: WrappedFormUtils;
+  history: History;
+};
+export type LoginFormState = { isLoading: boolean };
+
+class LoginFormImpl extends React.Component<LoginFormProps, LoginFormState> {
+  public state: LoginFormState = { isLoading: false };
 
   private handleSubmit = e => {
     e.preventDefault();

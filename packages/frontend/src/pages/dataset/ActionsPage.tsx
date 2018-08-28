@@ -1,20 +1,18 @@
-import * as React from 'react';
-
-import { GQLDataset, ProcessState, UploadProcess } from '@masterthesis/shared';
+import { GQLDataset, GQLUploadProcess, ProcessState, UploadProcess } from '@masterthesis/shared';
 import { Button, Card, Col, Form, Icon, Row, Table, Upload } from 'antd';
 import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
+import * as React from 'react';
 import {
   Mutation,
   MutationFn,
-  Query,
   withApollo,
   WithApolloClient
 } from 'react-apollo';
 
 import { UploadFile } from 'antd/lib/upload/interface';
 import { AsyncButton } from '../../components/AsyncButton';
-import { LoadingCard, UnknownErrorCard } from '../../components/CustomCards';
+import { HandledQuery } from '../../components/HandledQuery';
 import { ProcessTime } from '../../components/ProcessTime';
 import { tryOperation } from '../../utils/form';
 
@@ -61,12 +59,10 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
     DataActionsPageProps & WithApolloClient<{}>,
     DataActionsState
   > {
-    public componentWillMount() {
-      this.setState({
-        fileList: [],
-        uploading: false
-      });
-    }
+    public state: DataActionsState = {
+      fileList: [],
+      uploading: false
+    };
 
     private handleUpload = async (
       uploadEntriesCsv: MutationFn<
@@ -100,7 +96,7 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
         failedTitle: 'Upload failed',
         successTitle: () => 'Upload successful',
         failedMessage: 'Upload has failed.',
-        successMessage: res => 'Upload succesful. Processing is in progress.'
+        successMessage: () => 'Upload succesful. Processing is in progress.'
       });
     };
 
@@ -130,111 +126,102 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
       const { uploading } = this.state;
 
       return (
-        <Query query={ALL_UPLOADS} variables={{ datasetId: dataset.id }}>
-          {({ loading, error, data }) => {
-            if (loading) {
-              return <LoadingCard />;
-            }
-
-            if (error) {
-              return <UnknownErrorCard error={error} />;
-            }
-
-            return (
-              <>
-                <Row gutter={12}>
-                  <Col
-                    xs={{ span: 24 }}
-                    md={{ span: 12 }}
-                    xl={{ span: 8 }}
-                    style={{ marginBottom: 12 }}
-                  >
-                    <Card bordered={false}>
-                      <h3>Import</h3>
-                      <Mutation mutation={UPLOAD_ENTRIES_CSV}>
-                        {uploadEntriesCsv => (
-                          <>
-                            <Row style={{ marginBottom: 12 }}>
-                              <Col>
-                                <Upload {...this.getUploadProps()}>
-                                  <Button>
-                                    <Icon type="upload" /> Select CSV file
-                                  </Button>
-                                </Upload>
-                              </Col>
-                            </Row>
-                            <Row>
-                              <Col>
+        <HandledQuery<{ uploads: Array<GQLUploadProcess> }, { datasetId: string }>
+          query={ALL_UPLOADS}
+          variables={{ datasetId: dataset.id }}
+        >
+          {({ data: { uploads } }) => (
+            <>
+              <Row gutter={12}>
+                <Col
+                  xs={{ span: 24 }}
+                  md={{ span: 12 }}
+                  xl={{ span: 8 }}
+                  style={{ marginBottom: 12 }}
+                >
+                  <Card bordered={false}>
+                    <h3>Import</h3>
+                    <Mutation mutation={UPLOAD_ENTRIES_CSV}>
+                      {uploadEntriesCsv => (
+                        <>
+                          <Row style={{ marginBottom: 12 }}>
+                            <Col>
+                              <Upload {...this.getUploadProps()}>
+                                <Button>
+                                  <Icon type="upload" /> Select CSV file
+                                </Button>
+                              </Upload>
+                            </Col>
+                            <Col>
+                              <AsyncButton
+                                type="primary"
+                                onClick={() =>
+                                  this.handleUpload(uploadEntriesCsv)
+                                }
+                                disabled={this.state.fileList.length === 0}
+                              >
+                                {uploading ? 'Uploading...' : 'Start Upload'}
+                              </AsyncButton>
+                            </Col>
+                          </Row>
+                        </>
+                      )}
+                    </Mutation>
+                  </Card>
+                </Col>
+                <Col
+                  xs={{ span: 24 }}
+                  md={{ span: 12 }}
+                  xl={{ span: 8 }}
+                  style={{ marginBottom: 12 }}
+                >
+                  <Card bordered={false}>
+                    <h3>Export</h3>
+                    <Row>
+                      <Col>
+                        <Form layout="inline">
+                          <Form.Item label="Export entries">
+                            <Row gutter={12}>
+                              <Col span={12}>
                                 <AsyncButton
                                   type="primary"
-                                  onClick={() =>
-                                    this.handleUpload(uploadEntriesCsv)
-                                  }
-                                  disabled={this.state.fileList.length === 0}
+                                  disabled
+                                  onClick={async () => 0}
                                 >
-                                  {uploading ? 'Uploading...' : 'Start Upload'}
+                                  as CSV
+                                </AsyncButton>
+                              </Col>
+                              <Col span={12}>
+                                <AsyncButton
+                                  type="primary"
+                                  disabled
+                                  onClick={async () => 0}
+                                >
+                                  as ZIP
                                 </AsyncButton>
                               </Col>
                             </Row>
-                          </>
-                        )}
-                      </Mutation>
-                    </Card>
-                  </Col>
-                  <Col
-                    xs={{ span: 24 }}
-                    md={{ span: 12 }}
-                    xl={{ span: 8 }}
-                    style={{ marginBottom: 12 }}
-                  >
-                    <Card bordered={false}>
-                      <h3>Export</h3>
-                      <Row>
-                        <Col>
-                          <Form layout="inline">
-                            <Form.Item label="Export entries">
-                              <Row gutter={12}>
-                                <Col span={12}>
-                                  <AsyncButton
-                                    type="primary"
-                                    disabled
-                                    onClick={async () => 0}
-                                  >
-                                    as CSV
-                                  </AsyncButton>
-                                </Col>
-                                <Col span={12}>
-                                  <AsyncButton
-                                    type="primary"
-                                    disabled
-                                    onClick={async () => 0}
-                                  >
-                                    as ZIP
-                                  </AsyncButton>
-                                </Col>
-                              </Row>
-                            </Form.Item>
-                          </Form>
-                        </Col>
-                      </Row>
-                    </Card>
-                  </Col>
-                </Row>
-                <Row>
-                  <Card bordered={false}>
-                    <h3>Last Imports</h3>
-                    <Table
-                      size="small"
-                      pagination={{ size: 'small', hideOnSinglePage: true }}
-                      dataSource={generateDatasource(data.uploads)}
-                      columns={COLUMNS}
-                    />
+                          </Form.Item>
+                        </Form>
+                      </Col>
+                    </Row>
                   </Card>
-                </Row>
-              </>
-            );
-          }}
-        </Query>
+                </Col>
+              </Row>
+              <Row>
+                <Card bordered={false}>
+                  <h3>Last Imports</h3>
+                  <Table
+                    size="small"
+                    pagination={{ size: 'small', hideOnSinglePage: true }}
+                    dataSource={generateDatasource(uploads)}
+                    columns={COLUMNS}
+                  />
+                </Card>
+              </Row>
+            </>
+          )}
+        </HandledQuery>
       );
     }
   }

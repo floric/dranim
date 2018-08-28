@@ -22,7 +22,6 @@ export const createRenderOutputFormItems = (
   } = props;
   return (
     <>
-      <h4>Output</h4>
       <Form.Item label="Name">
         {getFieldDecorator('name', {
           initialValue: getValueOrDefault(nodeForm, 'name', ''),

@@ -21,15 +21,13 @@ export interface CreateEntryFormProps extends FormComponentProps {
   schema: Array<ValueSchema>;
 }
 
+export type CreateEntryFormState = { saving: boolean };
+
 class CreateEntryFormImpl extends React.Component<
   CreateEntryFormProps,
-  { saving: boolean }
+  CreateEntryFormState
 > {
-  public componentWillMount() {
-    this.setState({
-      saving: false
-    });
-  }
+  public state: CreateEntryFormState = { saving: false };
 
   public componentDidMount() {
     this.props.form.validateFields();
@@ -69,6 +67,7 @@ class CreateEntryFormImpl extends React.Component<
         message: `Please specify ${s.name}`
       }
     ];
+
     return (
       <Form.Item
         key={s.name}

@@ -6,7 +6,7 @@ import {
 } from '@masterthesis/shared';
 import * as Konva from 'konva';
 
-import { ExplorerEditorState } from '../ExplorerEditor';
+import { EditorFunctions } from './editor-stage';
 import { getSocketId } from './sockets';
 
 const CONNECTION_STIFFNESS = 0.7;
@@ -28,7 +28,7 @@ export const renderConnection = (
   connsLayer: Konva.Layer,
   socketsMap: Map<string, Konva.Group>,
   nodeMap: Map<string, Konva.Group>,
-  changeState: (newState: Partial<ExplorerEditorState>) => void
+  editorFunctions: EditorFunctions
 ) => {
   const fromSocket = c.from;
   const toSocket = c.to;
@@ -70,7 +70,7 @@ export const renderConnection = (
     });
 
     stage.on('mousedown', () => {
-      changeState({
+      editorFunctions.changeState({
         openConnection: null
       });
     });

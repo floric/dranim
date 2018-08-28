@@ -3,8 +3,7 @@ import { SFC } from 'react';
 
 import { Button, Card, Icon, List, Spin } from 'antd';
 import { SpinProps } from 'antd/lib/spin';
-import { History } from 'history';
-import { withRouter } from 'react-router';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { ApolloError, isApolloError } from 'apollo-client/errors/ApolloError';
 
@@ -12,7 +11,7 @@ export const LoadingIcon = (
   <Icon type="loading" style={{ fontSize: 24 }} spin />
 );
 
-const DefaultErrorActionsImpl: SFC<{ history: History }> = ({ history }) => (
+const DefaultErrorActionsImpl: SFC<RouteComponentProps<{}>> = ({ history }) => (
   <Button type="primary" onClick={() => history.push('/')}>
     Return to Start
   </Button>

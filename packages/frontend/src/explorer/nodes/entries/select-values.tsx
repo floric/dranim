@@ -17,12 +17,7 @@ export const SelectValuesNode: ClientNodeDef<
   SelectValuesNodeForm
 > = {
   type: SelectValuesNodeDef.type,
-  renderFormItems: ({
-    form,
-    form: { getFieldDecorator },
-    nodeForm,
-    inputs
-  }) => {
+  renderFormItems: ({ form: { getFieldDecorator }, nodeForm, inputs }) => {
     const dsInput = inputs.dataset;
     if (!dsInput) {
       return <p>Error</p>;

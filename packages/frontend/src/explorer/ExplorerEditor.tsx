@@ -8,7 +8,7 @@ import {
   NodeState,
   SocketInstance
 } from '@masterthesis/shared';
-import { Card, Col, Row, TreeSelect } from 'antd';
+import { Alert, Button, Card, Cascader, Col, Row } from 'antd';
 import { css } from 'glamor';
 
 import { WrappedFormUtils } from 'antd/lib/form/Form';
@@ -18,12 +18,13 @@ import { NODE_WIDTH } from './editor/nodes';
 import { PropertiesForm } from './editor/PropertiesForm';
 import { nodeTypes, nodeTypesTree } from './nodes/all-nodes';
 
-const filterTreeNode = (inputValue: string, treeNode: any) => {
-  if (!treeNode.props.index) {
+const filterTreeNode = (inputValue: string, path: Array<{ index: string }>) => {
+  const nodeIndex = path[path.length - 1].index;
+  if (!nodeIndex) {
     return false;
   }
 
-  return treeNode.props.index.includes(inputValue.toLocaleLowerCase());
+  return nodeIndex.includes(inputValue.toLocaleLowerCase());
 };
 
 export interface ExplorerEditorProps {
@@ -67,15 +68,11 @@ export class ExplorerEditor extends React.Component<
   ExplorerEditorProps,
   ExplorerEditorState
 > {
-  private selectNodeRef: React.Ref<TreeSelect> = React.createRef<TreeSelect>();
-
-  public componentWillMount() {
-    this.setState({
-      openConnection: null,
-      selectedNodeId: null,
-      contextIds: []
-    });
-  }
+  public state: ExplorerEditorState = {
+    openConnection: null,
+    selectedNodeId: null,
+    contextIds: []
+  };
 
   public componentDidMount() {
     this.updateCanvas();
@@ -94,12 +91,15 @@ export class ExplorerEditor extends React.Component<
   }
 
   public updateCanvas() {
-    updateStage(this.props, this.state, this.changeState);
+    updateStage(this.props, this.state, {
+      changeState: this.changeState,
+      enterContext: this.appendContext,
+      leaveContext: this.popContext
+    });
   }
 
-  private changeState = async (newState: ExplorerEditorState) => {
+  private changeState = async (newState: ExplorerEditorState) =>
     this.setState(newState);
-  };
 
   private handleDeleteSelectedNode = async () => {
     const { selectedNodeId } = this.state;
@@ -111,11 +111,13 @@ export class ExplorerEditor extends React.Component<
     await this.setState({ selectedNodeId: null });
   };
 
-  private handleStartCalulcation = async () => {
-    await this.props.onStartCalculation();
-  };
+  private handleStartCalulcation = () => this.props.onStartCalculation();
 
-  private handleSelectCreateNode = (type: string) => {
+  private handleSelectCreateNode = (
+    path: Array<string>,
+    selectedOptions: Array<{ value: string }>
+  ) => {
+    const type = selectedOptions[selectedOptions.length - 1].value;
     if (!nodeTypes.has(type)) {
       throw new Error('Unknown node type!');
     }
@@ -132,13 +134,18 @@ export class ExplorerEditor extends React.Component<
       return;
     }
 
-    await this.setState({
-      contextIds: [...this.state.contextIds, this.state.selectedNodeId],
-      selectedNodeId: null
-    });
+    this.appendContext(this.state.selectedNodeId);
   };
 
-  private handleLeaveContext = async () =>
+  private handleLeaveContext = async () => this.popContext();
+
+  private appendContext = async (nodeId: string) =>
+    this.setState({
+      contextIds: [...this.state.contextIds, nodeId],
+      selectedNodeId: null
+    });
+
+  private popContext = () =>
     this.setState({
       contextIds: this.state.contextIds.slice(
         0,
@@ -183,107 +190,89 @@ export class ExplorerEditor extends React.Component<
       document.onkeypress = null;
     }
 
+    const workspaceInvalid =
+      nodes.length > 0
+        ? !nodes.map(n => n.state === NodeState.VALID).reduce((a, b) => a && b)
+        : true;
+
     return (
       <>
-        <Row gutter={12}>
-          <Col xs={24} md={16} lg={18} xxl={20}>
+        <Row gutter={12} type="flex" justify="space-between">
+          <Col>
             <Card
               bordered={false}
-              title={nodeType ? nodeType.name : 'Nothing selected'}
+              title={nodeType ? nodeType.name : undefined}
               style={{ marginBottom: 12 }}
             >
-              <Row gutter={12}>
-                <Col xs={24} md={16} xl={20}>
-                  {node &&
-                    renderFormItems && (
-                      <PropertiesForm
-                        renderFormItems={renderFormItems}
-                        handleSubmit={this.handleSave}
-                        context={{ state: this.props, node }}
-                      />
-                    )}
-                </Col>
-                <Col xs={24} md={8} xl={4}>
-                  <h4>Actions</h4>
-                  {node && (
-                    <AsyncButton
-                      type="danger"
-                      confirmMessage="Delete Node?"
-                      icon="delete"
-                      confirmClick
-                      onClick={this.handleDeleteSelectedNode}
-                    >
-                      Delete
-                    </AsyncButton>
-                  )}
-                </Col>
-              </Row>
-            </Card>
-          </Col>
-          <Col xs={24} md={8} lg={6} xxl={4}>
-            <Card bordered={false} title="Editor" style={{ marginBottom: 12 }}>
-              <h4>Properties</h4>
-              <Row>
+              <Row gutter={12} type="flex" justify="space-between">
                 <Col>
-                  <TreeSelect
-                    ref={this.selectNodeRef}
-                    allowClear
-                    showSearch
-                    filterTreeNode={filterTreeNode}
-                    treeData={nodeTypesTree}
-                    style={{ width: '100%' }}
-                    placeholder="Add Node"
-                    onSelect={this.handleSelectCreateNode}
-                  />
-                </Col>
-                {contextIds.length > 0 && (
-                  <Col>
-                    <AsyncButton
-                      icon="minus-square"
-                      onClick={this.handleLeaveContext}
-                    >
-                      Leave Node
-                    </AsyncButton>
-                  </Col>
-                )}
-                {!!node &&
-                  node.hasContextFn && (
-                    <Col>
-                      <AsyncButton
-                        icon="plus-square"
-                        onClick={this.handleEnterContext}
-                      >
-                        Enter Node
-                      </AsyncButton>
-                    </Col>
+                  {renderFormItems && (
+                    <PropertiesForm
+                      renderFormItems={renderFormItems}
+                      handleSubmit={this.handleSave}
+                      context={{ state: this.props, node }}
+                    />
                   )}
-                <Col>
-                  <AsyncButton
-                    type="primary"
-                    icon="rocket"
-                    onClick={this.handleStartCalulcation}
-                    disabled={
-                      nodes.length > 0
-                        ? !nodes
-                            .map(n => n.state === NodeState.VALID)
-                            .reduce((a, b) => a && b)
-                        : true
-                    }
-                  >
-                    Calculate
-                  </AsyncButton>
+                  {!node && (
+                    <Alert
+                      showIcon
+                      message="No Node selected"
+                      description="Select a Node to show properties by clicking on it in the Editor."
+                    />
+                  )}
                 </Col>
               </Row>
             </Card>
           </Col>
         </Row>
+        <Button.Group>
+          {contextIds.length > 0 && (
+            <AsyncButton icon="minus-square" onClick={this.handleLeaveContext}>
+              Leave Context
+            </AsyncButton>
+          )}
+          {!!node &&
+            node.hasContextFn && (
+              <AsyncButton icon="plus-square" onClick={this.handleEnterContext}>
+                Enter Context
+              </AsyncButton>
+            )}
+          <Cascader
+            allowClear
+            showSearch={{ filter: filterTreeNode }}
+            expandTrigger="hover"
+            options={nodeTypesTree}
+            onChange={this.handleSelectCreateNode}
+          >
+            <Button icon="plus">Add Node</Button>
+          </Cascader>
+          <AsyncButton
+            type="danger"
+            confirmMessage="Delete Node?"
+            icon="delete"
+            disabled={!node}
+            confirmClick
+            onClick={this.handleDeleteSelectedNode}
+          />
+          <AsyncButton
+            type="primary"
+            icon="rocket"
+            onClick={this.handleStartCalulcation}
+            fullWidth={false}
+            disabled={workspaceInvalid}
+          >
+            Calculate
+          </AsyncButton>
+        </Button.Group>
         <div
           id={EXPLORER_CONTAINER}
           {...css({
+            flex: 1,
             width: '100%',
-            height: '800px',
             border: `1px solid ${Colors.GrayLight}`,
-            marginBottom: 12
+            borderBottom: `2px solid ${
+              workspaceInvalid ? Colors.Warning : Colors.Success
+            }`
           })}
         />
       </>

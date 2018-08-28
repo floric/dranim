@@ -1,5 +1,5 @@
 import { ApolloContext, SocketDefs, SocketMetas } from '@masterthesis/shared';
-import { GraphQLUpload } from 'apollo-upload-server';
+import { GraphQLUpload } from 'apollo-server-express';
 import { GraphQLScalarType } from 'graphql';
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 

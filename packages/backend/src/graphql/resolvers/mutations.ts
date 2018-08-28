@@ -11,6 +11,7 @@ import {
 import { IResolverObject } from 'graphql-tools';
 
 import { createBirthdaysDemoData } from '../../examples/birthdays';
+import { createCarsDemoData } from '../../examples/cars';
 import { createSTRDemoData } from '../../examples/str';
 import {
   startProcess,
@@ -69,10 +70,15 @@ export const Mutation: IResolverObject<any, ApolloContext> = {
     { files, datasetId },
     context
   ): Promise<UploadProcess> => uploadEntriesCsv(files, datasetId, context),
-  createSTRDemoData: (_, {}, context): Promise<boolean> =>
-    createSTRDemoData(context),
-  createBirthdaysDemoData: (_, {}, context): Promise<boolean> =>
-    createBirthdaysDemoData(context),
+  createDemoData: async (_, { type }, context): Promise<boolean> => {
+    if (type === 'Birthdays') {
+      return createBirthdaysDemoData(context);
+    } else if (type === 'STR') {
+      return createSTRDemoData(context);
+    }
+
+    return createCarsDemoData(context);
+  },
   createNode: (
     _,
     { type, x, y, workspaceId, contextIds },

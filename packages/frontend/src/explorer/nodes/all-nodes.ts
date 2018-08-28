@@ -6,7 +6,7 @@ import {
   SocketMetas
 } from '@masterthesis/shared';
 import { FormComponentProps } from 'antd/lib/form';
-import { TreeData } from 'antd/lib/tree-select';
+import { TreeNode } from 'antd/lib/tree-select';
 
 import * as BooleanNodes from './boolean';
 import * as DatasetNodes from './dataset';
@@ -70,7 +70,7 @@ const allNodes = [
 const buildTree = (
   elems: Array<ClientNodeDef & NodeDef>,
   curPath: Array<string>
-): Array<TreeData> => {
+): Array<TreeNode> => {
   const nextPaths = elems
     .filter(
       e =>
@@ -86,15 +86,14 @@ const buildTree = (
   );
 
   return distinctPaths.map(e => ({
-    title: e[e.length - 1],
+    label: e[e.length - 1],
     value: e.join('-'),
     key: e.join('-'),
-    selectable: false,
     children: [
       ...elems
         .filter(elem => JSON.stringify(elem.path) === JSON.stringify(e))
         .map(elem => ({
-          title: elem.name,
+          label: elem.name,
           value: elem.type,
           key: elem.type,
           index: `${elem.name}, ${elem.path.join(' ')}, ${elem.keywords.join(

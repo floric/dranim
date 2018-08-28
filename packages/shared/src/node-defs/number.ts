@@ -150,5 +150,5 @@ export const ComparisonNodeDef: NodeDef<
     value: BooleanSocket('Value')
   },
   path: ['Numbers', 'Operators'],
-  keywords: ['less then', 'greater then', 'equals', 'compare']
+  keywords: ['less than', 'greater than', 'equals', 'compare']
 };

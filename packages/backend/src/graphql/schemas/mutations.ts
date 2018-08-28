@@ -60,8 +60,7 @@ export const MutationDef = `
       nodes: [NodeInput!]!
       connections: [ConnectionInput!]!
     ): Boolean!
-    createSTRDemoData: Boolean!
-    createBirthdaysDemoData: Boolean!
+    createDemoData(type: String!): Boolean!
     uploadEntriesCsv (files: [Upload!]!, datasetId: String!): UploadProcess!
     startCalculation (workspaceId: String!): CalculationProcess!
     stopCalculation (id: String!): Boolean!

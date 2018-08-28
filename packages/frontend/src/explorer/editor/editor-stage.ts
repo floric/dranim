@@ -6,11 +6,16 @@ import { renderConnection } from './connections';
 import { renderContextNode, renderNode } from './nodes';
 
 export const EXPLORER_CONTAINER = 'explcontainer';
+export type EditorFunctions = {
+  changeState: (newState: Partial<ExplorerEditorState>) => void;
+  enterContext: (nodeId: string) => void;
+  leaveContext: () => void;
+};
 
 export const updateStage = (
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
-  changeState: (newState: Partial<ExplorerEditorState>) => void
+  editorFunctions: EditorFunctions
 ) => {
   const canvasContainer = document.getElementById(EXPLORER_CONTAINER);
   if (!canvasContainer) {
@@ -34,7 +39,7 @@ export const updateStage = (
     state,
     socketsMap,
     nodeMap,
-    changeState,
+    editorFunctions,
     stage
   );
 
@@ -44,7 +49,7 @@ export const updateStage = (
     stage,
     socketsMap,
     nodeMap,
-    changeState
+    editorFunctions
   );
 
   stage.add(connsLayer);
@@ -56,7 +61,7 @@ const createNodesLayer = (
   state: ExplorerEditorState,
   socketsMap: Map<string, Konva.Group>,
   nodeMap: Map<string, Konva.Group>,
-  changeState: (newState: Partial<ExplorerEditorState>) => void,
+  editorFunctions: EditorFunctions,
   stage: Konva.Stage
 ) => {
   const nodesLayer = new Konva.Layer();
@@ -75,7 +80,7 @@ const createNodesLayer = (
         n,
         server,
         state,
-        changeState,
+        editorFunctions,
         socketsMap,
         stage
       );
@@ -94,7 +99,7 @@ const createNodesLayer = (
         n,
         server,
         state,
-        changeState,
+        editorFunctions,
         socketsMap,
         stage
       );
@@ -111,7 +116,7 @@ const createConnectionsLayer = (
   stage: Konva.Stage,
   socketsMap: Map<string, Konva.Group>,
   nodeMap: Map<string, Konva.Group>,
-  changeState: (newState: Partial<ExplorerEditorState>) => void
+  editorFunctions: EditorFunctions
 ) => {
   const connsLayer = new Konva.Layer();
 
@@ -129,7 +134,7 @@ const createConnectionsLayer = (
         connsLayer,
         socketsMap,
         nodeMap,
-        changeState
+        editorFunctions
       );
       connsLayer.add(line);
     });
@@ -142,7 +147,7 @@ const createConnectionsLayer = (
         connsLayer,
         socketsMap,
         nodeMap,
-        changeState
+        editorFunctions
       );
       connsLayer.add(line);
     });
@@ -154,7 +159,7 @@ const createConnectionsLayer = (
         connsLayer,
         socketsMap,
         nodeMap,
-        changeState
+        editorFunctions
       );
       connsLayer.add(line);
     });

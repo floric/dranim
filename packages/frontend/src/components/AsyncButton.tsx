@@ -7,22 +7,48 @@ interface AsyncButtonState {
   isLoading: boolean;
 }
 
-export interface AsyncButtonProps {
-  onClick: () => Promise<any>;
+export type AsyncButtonProps = {
+  onClick?: () => Promise<any>;
   confirmClick?: boolean;
   confirmMessage?: string;
   fullWidth?: boolean;
-}
+  disabled?: boolean;
+} & ButtonProps;
+
+type FullWidthButtonProps = {
+  handleClick?: () => any;
+  isLoading: boolean;
+  disabled: boolean;
+} & AsyncButtonProps;
+
+const FullWidthButton: React.SFC<FullWidthButtonProps> = ({
+  children,
+  style,
+  handleClick,
+  fullWidth,
+  ...props
+}) => (
+  <Button
+    style={{
+      ...style,
+      ...{
+        width: fullWidth ? '100%' : style ? style.width : undefined
+      }
+    }}
+    onClick={handleClick}
+    {...props}
+  >
+    {children}
+  </Button>
+);
 
 export class AsyncButton extends React.Component<
-  AsyncButtonProps & ButtonProps,
+  AsyncButtonProps,
   AsyncButtonState
 > {
   private mounted = false;
 
-  public componentWillMount() {
-    this.setState({ isLoading: false });
-  }
+  public state: AsyncButtonState = { isLoading: false };
 
   public componentDidMount() {
     this.mounted = true;
@@ -32,7 +58,7 @@ export class AsyncButton extends React.Component<
     this.mounted = false;
   }
 
-  private handleClick = async (ev: React.MouseEvent<HTMLButtonElement>) => {
+  private handleClick = async () => {
     await this.setState({ isLoading: true });
 
     try {
@@ -50,47 +76,40 @@ export class AsyncButton extends React.Component<
   public render() {
     const { isLoading } = this.state;
     const {
-      children,
-      disabled,
-      type,
-      icon,
-      fullWidth = true,
+      disabled = false,
+      fullWidth = false,
       confirmClick,
-      confirmMessage = 'Really do this action?'
+      confirmMessage = 'Really do this action?',
+      onClick,
+      ...otherProps
     } = this.props;
 
     if (confirmClick) {
       return (
         <Popconfirm
           title={confirmMessage}
-          onConfirm={ev => this.handleClick(ev)}
+          onConfirm={this.handleClick}
           okText="Confirm"
           cancelText="Cancel"
         >
-          <Button
-            style={fullWidth ? { width: '100%' } : undefined}
-            type={type}
-            icon={icon}
+          <FullWidthButton
+            isLoading={isLoading}
+            fullWidth={fullWidth}
             disabled={disabled}
-            loading={isLoading}
-          >
-            {children}
-          </Button>
+            {...otherProps}
+          />
         </Popconfirm>
       );
     }
 
     return (
-      <Button
-        style={fullWidth ? { width: '100%' } : undefined}
-        type={type}
-        icon={icon}
+      <FullWidthButton
+        handleClick={this.handleClick}
+        isLoading={isLoading}
+        fullWidth={fullWidth}
         disabled={disabled}
-        loading={isLoading}
-        onClick={ev => this.handleClick(ev)}
-      >
-        {children}
-      </Button>
+        {...otherProps}
+      />
     );
   }
 }

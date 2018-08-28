@@ -15,7 +15,8 @@
     "no-unused-variable": true,
     "interface-name": false,
     "max-classes-per-file": false,
-    "ordered-imports": true
+    "ordered-imports": true,
+    "interface-over-type-literal": false
   },
   "linterOptions": {
     "exclude": [

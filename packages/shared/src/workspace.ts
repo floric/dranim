@@ -64,6 +64,8 @@ export interface CalculationProcess {
   state: ProcessState;
 }
 
+export type GQLCalculationProcess = CalculationProcess;
+
 export interface UploadProcess {
   id: string;
   start: string;
@@ -74,3 +76,5 @@ export interface UploadProcess {
   failedEntries: number;
   invalidEntries: number;
 }
+
+export type GQLUploadProcess = UploadProcess;

@@ -19,6 +19,7 @@ import {
   OpenConnection
 } from '../ExplorerEditor';
 import { nodeTypes } from '../nodes/all-nodes';
+import { EditorFunctions } from './editor-stage';
 import {
   getSocketId,
   onClickSocket,
@@ -34,7 +35,7 @@ export const renderContextNode = (
   n: GQLNodeInstance,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
-  changeState: (newState: Partial<ExplorerEditorState>) => void,
+  editorFunctions: EditorFunctions,
   socketsMap: Map<string, Konva.Group>,
   stage: Konva.Stage
 ) => {
@@ -61,7 +62,7 @@ export const renderContextNode = (
     { defs: inputs, type: SocketType.INPUT },
     { defs: outputs, type: SocketType.OUTPUT }
   ].map(p =>
-    renderSockets(p.defs, n, server, state, p.type, socketsMap, changeState)
+    renderSockets(p.defs, n, server, state, p.type, socketsMap, editorFunctions)
   );
   const stateRect = getStateRect(height, n.progress, n.state);
 
@@ -78,7 +79,7 @@ export const renderNode = (
   n: GQLNodeInstance,
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
-  changeState: (newState: Partial<ExplorerEditorState>) => void,
+  editorFunctions: EditorFunctions,
   socketsMap: Map<string, Konva.Group>,
   stage: Konva.Stage
 ) => {
@@ -94,6 +95,17 @@ export const renderNode = (
   nodeGroup.on('mouseleave', () => {
     stage.container().style.cursor = 'default';
   });
+  nodeGroup.on('dragend', ev => {
+    server.onNodeUpdate(n.id, ev.target.x(), ev.target.y());
+  });
+  nodeGroup.on('dblclick', () => {
+    editorFunctions.enterContext(n.id);
+  });
+  nodeGroup.on('click', () => {
+    editorFunctions.changeState({
+      selectedNodeId: n.id
+    });
+  });
 
   const { name, renderName } = nodeType;
   const inputs = JSON.parse(n.inputSockets);
@@ -102,17 +114,6 @@ export const renderNode = (
   const height = getHeight(n, inputs, outputs, state.openConnection);
   const isSelected =
     state.selectedNodeId !== null && state.selectedNodeId === n.id;
-
-  nodeGroup.on('dragend', ev => {
-    server.onNodeUpdate(n.id, ev.target.x(), ev.target.y());
-  });
-
-  nodeGroup.on('click', () => {
-    changeState({
-      selectedNodeId: n.id
-    });
-  });
-
   const bgRect = getBackgroundRect(height);
   const nodeTitle = getHeaderText(
     isSelected,
@@ -125,21 +126,18 @@ export const renderNode = (
     { defs: inputs, type: SocketType.INPUT },
     { defs: outputs, type: SocketType.OUTPUT }
   ].map(p =>
-    renderSockets(p.defs, n, server, state, p.type, socketsMap, changeState)
+    renderSockets(p.defs, n, server, state, p.type, socketsMap, editorFunctions)
   );
   const stateRect = getStateRect(height, n.progress, n.state);
 
   nodeGroup.add(bgRect);
   nodeGroup.add(nodeTitle);
-
   if (n.hasContextFn) {
     nodeGroup.add(getContextFunctionNote());
   }
-
   nodeGroup.add(inputsGroup);
   nodeGroup.add(outputsGroup);
   nodeGroup.add(stateRect);
-
   return nodeGroup;
 };
 
@@ -220,7 +218,7 @@ const renderSockets = (
   state: ExplorerEditorState,
   type: SocketType,
   socketsMap: Map<string, Konva.Group>,
-  changeState: (newState: Partial<ExplorerEditorState>) => void
+  editorFunctions: EditorFunctions
 ) => {
   const group = new Konva.Group({
     x: type === SocketType.INPUT ? 0 : NODE_WIDTH,
@@ -245,7 +243,7 @@ const renderSockets = (
           node.id,
           server,
           state,
-          changeState
+          editorFunctions.changeState
         )
     );
     group.add(socket);
@@ -279,7 +277,7 @@ const renderSockets = (
           node.id,
           server,
           state,
-          changeState
+          editorFunctions.changeState
         )
     );
     group.add(addVarSocket);
