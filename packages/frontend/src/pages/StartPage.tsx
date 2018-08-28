@@ -24,10 +24,17 @@ enum NewsType {
 const news = [
   {
     type: NewsType.NOTIFICATION,
-    date: new Date(2018, 7, 15),
-    title: 'Next Milestones',
+    date: new Date(2018, 8, 15),
+    title: 'Next Milestone',
     description:
       'Add more neded nodes and improve calculation progress reporting.'
+  },
+  {
+    type: NewsType.FEATURE,
+    date: new Date(2018, 7, 28),
+    title: 'Improved Dashboard and Visualization types',
+    description:
+      'The linear visualization types are now rendered with Vega. Additionally this allows PNG export. More visualization related fixes and improvements were done.'
   },
   {
     type: NewsType.FEATURE,

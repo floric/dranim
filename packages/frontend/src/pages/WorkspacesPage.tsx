@@ -42,9 +42,9 @@ const DELETE_WORKSPACE = gql`
   }
 `;
 
-export interface IWorkspacesOverviewPageProps extends RouteComponentProps<{}> {}
+export interface WorkspacesOverviewPageProps extends RouteComponentProps<{}> {}
 
-const WorkspacesOverviewPage: React.SFC<IWorkspacesOverviewPageProps> = () => (
+const WorkspacesOverviewPage: React.SFC<WorkspacesOverviewPageProps> = () => (
   <>
     <PageHeaderCard
       title="Workspaces"

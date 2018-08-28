@@ -6,7 +6,7 @@ import { Button, Card, Col, Divider, Modal, Row, Tooltip } from 'antd';
 import { css } from 'glamor';
 import { UserInfo } from './UserInfo';
 
-export interface IPageHeaderProps {
+export interface PageHeaderProps {
   title: string;
   typeTitle?: string;
   marginBottom?: 'small' | 'big' | 'none';
@@ -23,7 +23,7 @@ const showInfo = (content: JSX.Element) => {
   });
 };
 
-export const PageHeaderCard: SFC<IPageHeaderProps> = ({
+export const PageHeaderCard: SFC<PageHeaderProps> = ({
   title,
   typeTitle,
   marginBottom = 'small',

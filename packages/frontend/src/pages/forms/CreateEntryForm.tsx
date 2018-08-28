@@ -67,6 +67,7 @@ class CreateEntryFormImpl extends React.Component<
         message: `Please specify ${s.name}`
       }
     ];
+
     return (
       <Form.Item
         key={s.name}

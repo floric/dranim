@@ -21,13 +21,21 @@ const WORKSPACE = gql`
   }
 `;
 
-export interface IWorkspacesPageProps
+export interface WorkspacesPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
-const WorkspacesPage: React.SFC<IWorkspacesPageProps> = props => (
+const WorkspacesPage: React.SFC<WorkspacesPageProps> = ({
+  match: {
+    url,
+    path,
+    params: { workspaceId }
+  },
+  history,
+  location: { pathname }
+}) => (
   <HandledQuery<{ workspace: GQLWorkspace | null }, { id: string }>
     query={WORKSPACE}
-    variables={{ id: props.match.params.workspaceId }}
+    variables={{ id: workspaceId }}
   >
     {({ data: { workspace } }) => {
       if (!workspace) {
@@ -38,12 +46,6 @@ const WorkspacesPage: React.SFC<IWorkspacesPageProps> = props => (
           />
         );
       }
-
-      const {
-        match: { url, path },
-        history,
-        location: { pathname }
-      } = props;
 
       let activeKey = 'editor';
       const pathSegments = pathname.split('/');

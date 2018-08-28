@@ -45,43 +45,41 @@ const VisDetailPage: React.SFC<VisDetailPageProps> = ({
   match: {
     params: { workspaceId }
   }
-}) => {
-  return (
-    <HandledQuery<{ workspace: null | GQLWorkspace }, { id: string }>
-      query={WORKSPACE}
-      variables={{ id: workspaceId }}
-    >
-      {({ data: { workspace } }) => {
-        if (!workspace) {
-          return (
-            <CustomErrorCard
-              title="Unknown Workspace"
-              description="Workspace doesn't exist."
-            />
-          );
-        }
-
-        if (workspace.results.length === 0) {
-          return (
-            <Card bordered={false} title="No results present">
-              <p>You need to start a calculation with Output nodes first.</p>
-              <NavLink to={'/'}>Go to Editor</NavLink>
-            </Card>
-          );
-        }
-
+}) => (
+  <HandledQuery<{ workspace: null | GQLWorkspace }, { id: string }>
+    query={WORKSPACE}
+    variables={{ id: workspaceId }}
+  >
+    {({ data: { workspace } }) => {
+      if (!workspace) {
         return (
-          <Row gutter={8} type="flex">
-            {workspace.results.map(r => (
-              <Col {...resultCardSize(r)} key={r.id}>
-                <VisRenderer result={r} />
-              </Col>
-            ))}
-          </Row>
+          <CustomErrorCard
+            title="Unknown Workspace"
+            description="Workspace doesn't exist."
+          />
         );
-      }}
-    </HandledQuery>
-  );
-};
+      }
+
+      if (workspace.results.length === 0) {
+        return (
+          <Card bordered={false} title="No results present">
+            <p>You need to start a calculation with Output nodes first.</p>
+            <NavLink to={'/'}>Go to Editor</NavLink>
+          </Card>
+        );
+      }
+
+      return (
+        <Row gutter={8} type="flex">
+          {workspace.results.map(r => (
+            <Col {...resultCardSize(r)} key={r.id}>
+              <VisRenderer result={r} />
+            </Col>
+          ))}
+        </Row>
+      );
+    }}
+  </HandledQuery>
+);
 
 export default VisDetailPage;

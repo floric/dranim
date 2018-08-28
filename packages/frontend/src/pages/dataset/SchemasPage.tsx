@@ -34,8 +34,10 @@ export interface DataSchemasProps {
   refetch: () => Promise<ApolloQueryResult<any>>;
 }
 
-export const DataSchemas: React.SFC<DataSchemasProps> = props => {
-  const { refetch, dataset } = props;
+export const DataSchemas: React.SFC<DataSchemasProps> = ({
+  refetch,
+  dataset
+}) => {
   const schemasDataSource = dataset.valueschemas.map(e => ({
     key: e.name,
     type: e.type,

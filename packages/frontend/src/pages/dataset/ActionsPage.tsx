@@ -152,8 +152,6 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
                                 </Button>
                               </Upload>
                             </Col>
-                          </Row>
-                          <Row>
                             <Col>
                               <AsyncButton
                                 type="primary"

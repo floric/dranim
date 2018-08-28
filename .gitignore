@@ -11,3 +11,4 @@ lib/
 .cache/
 data/
 tmp/
+.vscode/launch.json
