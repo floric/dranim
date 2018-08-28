@@ -103,14 +103,12 @@ const renderSound = (
     .style('text-anchor', 'middle');
 };
 
-const getSoundPos = (state: STRChartState) => {
-  const x =
-    state.offsets[0] +
-    (state.gapDistance / 2) * state.container.width +
-    state.curveDistance;
-  const y = state.offsets[1] - SOUND_BAR_OFFSET;
-  return { x, y };
-};
+const getSoundPos = (state: STRChartState) => ({
+  x: state.offsets[0] * state.container.width,
+  y:
+    (state.container.height - state.height) * (state.offsets[1] - 0.5) -
+    SOUND_BAR_OFFSET
+});
 
 const renderName = (
   name: string,
@@ -234,23 +232,24 @@ const setCityPositions = (
     cityNames.forEach((c, i) => {
       cityPositions.set(c, {
         x: isWest
-          ? state.offsets[0]
-          : state.offsets[0] + state.gapDistance * state.container.width,
+          ? (state.offsets[0] - state.gapDistance / 2) * state.container.width
+          : (state.offsets[0] + state.gapDistance / 2) * state.container.width,
         y:
-          state.offsets[1] +
-          (i / cityStats.length) * state.height * state.container.height
+          (state.offsets[1] - 0.5 + (i / cityStats.length) * state.height) *
+          state.container.height
       });
     });
     return;
   }
 
   const beta = Math.atan(
-    (state.height / 2 / state.curveDistance) * state.container.height
+    (state.height / 2 / (state.curveDistance * state.container.width)) *
+      state.container.height
   );
   const alpha = Math.PI - 2 * beta;
   const radius =
     Math.sqrt(
-      Math.pow(state.curveDistance, 2) +
+      Math.pow(state.curveDistance * state.container.width, 2) +
         Math.pow((state.height * state.container.height) / 2, 2)
     ) /
     (Math.sin(alpha / 2) * 2);
@@ -267,12 +266,11 @@ const setCityPositions = (
       value,
       radius,
       isWest
-        ? radius + state.offsets[0]
+        ? radius +
+          (state.offsets[0] - state.gapDistance / 2) * state.container.width
         : -radius +
-          state.offsets[0] +
-          state.curveDistance * 2 +
-          state.gapDistance * state.container.width,
-      (state.height * state.container.height) / 2 + state.offsets[1]
+          (state.offsets[0] + state.gapDistance / 2) * state.container.width,
+      (state.offsets[1] - 0.5 + state.height * 0.5) * state.container.height
     );
     cityPositions.set(c, pos);
   });

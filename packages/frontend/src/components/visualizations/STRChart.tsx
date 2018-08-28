@@ -4,6 +4,7 @@ import * as React from 'react';
 import { v4 } from 'uuid';
 
 import { showNotificationWithIcon } from '../../utils/form';
+import { NumericProperty } from '../properties/NumericProperty';
 import { SliderCol } from '../properties/Slider';
 import { renderSTRChart } from './str-svg';
 import { downloadFromUrl } from './Vega';
@@ -14,11 +15,10 @@ export const SOUND_BAR_OFFSET = 15;
 const MINIMUM_OPACITY = 0.15;
 const WEST_PASSAGE_COLOR = '#FAAB43';
 const EAST_PASSAGE_COLOR = '#003E61';
-const GAP_DIST_DEFAULT = 0.4;
+const GAP_DIST_DEFAULT = 0.7;
 const HEIGHT_DEFAULT = 0.8;
-const CURVE_DEFAULT = 120;
-const CURVE_MAX = 500;
-const OFFSET_MAX = 1000;
+const CURVE_DEFAULT = 0.2;
+const OFFSETS_DEFAULT: [number, number] = [0.5, 0.6];
 
 export interface STRChartProps {
   value: any;
@@ -58,7 +58,7 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
     gapDistance: GAP_DIST_DEFAULT,
     height: HEIGHT_DEFAULT,
     curveDistance: CURVE_DEFAULT,
-    offsets: [0, 0],
+    offsets: OFFSETS_DEFAULT,
     colors: {
       minTextOpacity: MINIMUM_OPACITY,
       eastPassage: EAST_PASSAGE_COLOR,
@@ -199,59 +199,53 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
           { name: 'SVG', icon: 'code', onClick: this.handleDownloadSvg }
         ]}
         properties={
-          <Row>
-            <SliderCol
-              label="Gap"
-              min={0.05}
-              max={1}
-              step={0.1}
-              value={gapDistance}
-              onChange={this.handleChangeGap}
-            />
-            <SliderCol
-              label="Height"
-              min={0.05}
-              max={1}
-              step={0.1}
-              value={height}
-              onChange={this.handleChangeHeight}
-            />
-            <SliderCol
-              label="Curviness"
-              min={0}
-              max={CURVE_MAX}
-              value={curveDistance}
-              onChange={this.handleChangeCurveDistance}
-            />
-            <SliderCol
-              label="Offset Y"
-              min={0}
-              max={OFFSET_MAX}
-              value={offsets[0]}
-              onChange={this.handleChangeOffsetX}
-            />
-            <SliderCol
-              label="Offset X"
-              min={0}
-              max={OFFSET_MAX}
-              value={offsets[1]}
-              onChange={this.handleChangeOffsetY}
-            />
-            <SliderCol
-              label="Min Opacity"
-              min={0}
-              max={1}
-              step={0.01}
-              value={colors.minTextOpacity}
-              onChange={this.handleChangeMinOpacity}
-            />
-            <Col sm={24} md={12} lg={6}>
+          <Row gutter={8}>
+            {[
+              {
+                text: 'Width',
+                onChange: this.handleChangeGap,
+                defaultValue: gapDistance
+              },
+              {
+                text: 'Height',
+                onChange: this.handleChangeHeight,
+                defaultValue: height
+              },
+              {
+                text: 'Curviness',
+                onChange: this.handleChangeCurveDistance,
+                defaultValue: curveDistance
+              },
+              {
+                text: 'X Offset',
+                onChange: this.handleChangeOffsetX,
+                defaultValue: offsets[0]
+              },
+              {
+                text: 'Y Offset',
+                onChange: this.handleChangeOffsetY,
+                defaultValue: offsets[1]
+              },
+              {
+                text: 'Min Opacity',
+                onChange: this.handleChangeMinOpacity,
+                defaultValue: colors.minTextOpacity
+              }
+            ].map(({ defaultValue, onChange, text }) => (
+              <Col md={24} lg={12} key={`prop-${text}`}>
+                <NumericProperty
+                  text={text}
+                  onChange={onChange}
+                  defaultValue={defaultValue}
+                />
+              </Col>
+            ))}
+            <Col sm={24} lg={12}>
               <p>Colors</p>
               <Input.Group compact>
                 <Input
                   onChange={this.handleChangePassageColorEast}
                   value={colors.eastPassage}
-                  color={colors.eastPassage}
                   prefix={
                     <Icon
                       style={{ color: colors.eastPassage }}
@@ -277,7 +271,7 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
                 />
               </Input.Group>
             </Col>
-            <Col sm={24} md={12} lg={6}>
+            <Col sm={24} lg={12}>
               <p>Sound Names</p>
               {soundNames.map(tag => (
                 <Tag
