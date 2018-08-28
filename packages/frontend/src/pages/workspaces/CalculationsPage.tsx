@@ -1,12 +1,14 @@
-import * as React from 'react';
-
-import { CalculationProcess, ProcessState } from '@masterthesis/shared';
+import {
+  CalculationProcess,
+  GQLCalculationProcess,
+  ProcessState
+} from '@masterthesis/shared';
 import { Card, Col, Icon, Row, Table, Tooltip } from 'antd';
 import gql from 'graphql-tag';
-import { Query } from 'react-apollo';
+import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { LoadingCard, UnknownErrorCard } from '../../components/CustomCards';
+import { HandledQuery } from '../../components/HandledQuery';
 import { ProcessTime } from '../../components/ProcessTime';
 
 const CALCULATIONS = gql`
@@ -80,18 +82,16 @@ export const WorkspaceCalculationsPage: React.SFC<
     params: { workspaceId }
   }
 }) => (
-  <Query query={CALCULATIONS} variables={{ workspaceId }}>
-    {({ loading, error, data }) => {
-      if (loading) {
-        return <LoadingCard />;
-      }
-
-      if (error) {
-        return <UnknownErrorCard error={error} />;
-      }
-
+  <HandledQuery<
+    { calculations: Array<GQLCalculationProcess> },
+    { workspaceId: string }
+  >
+    query={CALCULATIONS}
+    variables={{ workspaceId }}
+  >
+    {({ data: { calculations } }) => {
       const schemasDataSource = calculationsToDatasource(
-        Array.from(data.calculations)
+        Array.from(calculations)
       );
 
       return (
@@ -110,5 +110,5 @@ export const WorkspaceCalculationsPage: React.SFC<
         </Row>
       );
     }}
-  </Query>
+  </HandledQuery>
 );

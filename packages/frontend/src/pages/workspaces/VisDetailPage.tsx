@@ -1,16 +1,12 @@
 import * as React from 'react';
 
-import { GQLOutputResult, GQLWorkspace } from '@masterthesis/shared';
+import { DataType, GQLOutputResult, GQLWorkspace } from '@masterthesis/shared';
 import { Card, Col, Row } from 'antd';
 import gql from 'graphql-tag';
-import { Query } from 'react-apollo';
 import { NavLink, RouteComponentProps } from 'react-router-dom';
 
-import {
-  CustomErrorCard,
-  LoadingCard,
-  UnknownErrorCard
-} from '../../components/CustomCards';
+import { CustomErrorCard } from '../../components/CustomCards';
+import { HandledQuery } from '../../components/HandledQuery';
 import { VisRenderer } from '../../components/VisRenderer';
 
 const WORKSPACE = gql`
@@ -37,7 +33,10 @@ const WORKSPACE = gql`
   }
 `;
 
-const resultCardSize = (result: GQLOutputResult) => ({ md: 12, xl: 8, xxl: 6 });
+const resultCardSize = (result: GQLOutputResult) =>
+  result.type === DataType.VIS
+    ? { xs: 24, sm: 24, lg: 12, xxl: 8 }
+    : { xs: 24, sm: 12, lg: 6, xxl: 4 };
 
 export interface VisDetailPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
@@ -48,17 +47,12 @@ const VisDetailPage: React.SFC<VisDetailPageProps> = ({
   }
 }) => {
   return (
-    <Query query={WORKSPACE} variables={{ id: workspaceId }}>
-      {({ loading, error, data }) => {
-        if (loading) {
-          return <LoadingCard />;
-        }
-
-        if (error) {
-          return <UnknownErrorCard error={error} />;
-        }
-
-        if (!data.workspace) {
+    <HandledQuery<{ workspace: null | GQLWorkspace }, { id: string }>
+      query={WORKSPACE}
+      variables={{ id: workspaceId }}
+    >
+      {({ data: { workspace } }) => {
+        if (!workspace) {
           return (
             <CustomErrorCard
               title="Unknown Workspace"
@@ -66,8 +60,6 @@ const VisDetailPage: React.SFC<VisDetailPageProps> = ({
             />
           );
         }
-
-        const workspace: GQLWorkspace = data.workspace;
 
         if (workspace.results.length === 0) {
           return (
@@ -88,7 +80,7 @@ const VisDetailPage: React.SFC<VisDetailPageProps> = ({
           </Row>
         );
       }}
-    </Query>
+    </HandledQuery>
   );
 };
 

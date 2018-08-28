@@ -49,7 +49,11 @@ export const VisRenderer: React.SFC<VisRenderer> = ({ result }) => {
     );
   }
 
-  if (value.type === LinearChartType.BAR) {
+  if (
+    value.type === LinearChartType.BAR ||
+    value.type === LinearChartType.COLUMN ||
+    value.type === LinearChartType.PIE
+  ) {
     return (
       <ContainerDimensions>
         {({ width }) => (
@@ -58,35 +62,13 @@ export const VisRenderer: React.SFC<VisRenderer> = ({ result }) => {
             height={width - 2 * CARD_PADDING}
             result={result}
             value={value.values}
-            content={BarChart}
-          />
-        )}
-      </ContainerDimensions>
-    );
-  } else if (value.type === LinearChartType.COLUMN) {
-    return (
-      <ContainerDimensions>
-        {({ width }) => (
-          <Vega
-            width={width - 2 * CARD_PADDING}
-            height={width - 2 * CARD_PADDING}
-            result={result}
-            value={value.values}
-            content={ColumnChart}
-          />
-        )}
-      </ContainerDimensions>
-    );
-  } else if (value.type === LinearChartType.PIE) {
-    return (
-      <ContainerDimensions>
-        {({ width }) => (
-          <Vega
-            width={width - 2 * CARD_PADDING}
-            height={width - 2 * CARD_PADDING}
-            result={result}
-            value={value.values}
-            content={PieChart}
+            content={
+              value.type === LinearChartType.PIE
+                ? PieChart
+                : value.type === LinearChartType.COLUMN
+                  ? ColumnChart
+                  : BarChart
+            }
           />
         )}
       </ContainerDimensions>

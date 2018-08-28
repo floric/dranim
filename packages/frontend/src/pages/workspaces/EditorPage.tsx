@@ -1,15 +1,17 @@
-import * as React from 'react';
-
-import { ProcessState, SocketInstance } from '@masterthesis/shared';
+import {
+  GQLCalculationProcess,
+  GQLDataset,
+  GQLWorkspace,
+  ProcessState,
+  SocketInstance
+} from '@masterthesis/shared';
 import { ApolloQueryResult } from 'apollo-client';
-import { Mutation, MutationFn, Query } from 'react-apollo';
+import * as React from 'react';
+import { Mutation, MutationFn } from 'react-apollo';
 import { RouteComponentProps } from 'react-router-dom';
 
-import {
-  CustomErrorCard,
-  LoadingCard,
-  UnknownErrorCard
-} from '../../components/CustomCards';
+import { CustomErrorCard } from '../../components/CustomCards';
+import { HandledQuery } from '../../components/HandledQuery';
 import { ExplorerEditor } from '../../explorer/ExplorerEditor';
 import {
   ADD_OR_UPDATE_FORM_VALUE,
@@ -158,134 +160,127 @@ export class WorkspaceEditorPage extends React.Component<
     } = this.props;
 
     return (
-      <Query query={DATASETS}>
-        {dsData => {
-          if (dsData.loading) {
-            return <LoadingCard />;
-          }
-
-          if (dsData.error) {
-            return <UnknownErrorCard error={dsData.error} />;
-          }
-
-          return (
-            <Query query={WORKSPACE_NODE_SELECTION} variables={{ workspaceId }}>
-              {({
-                loading,
-                error,
-                data,
-                refetch,
-                startPolling,
-                stopPolling
-              }) => {
-                if (loading) {
-                  return <LoadingCard />;
-                }
-
-                if (error) {
-                  return <UnknownErrorCard error={error} />;
-                }
-
-                if (!data.workspace) {
-                  return (
-                    <CustomErrorCard
-                      title="Unknown workspace"
-                      description="Workspace doesn't exist."
-                    />
-                  );
-                }
-
-                const inprocessCalculations = data.calculations.filter(
-                  n => n.state === ProcessState.PROCESSING
-                );
-
-                if (inprocessCalculations.length > 0) {
-                  startPolling(POLLING_FREQUENCY);
-                  return (
-                    <ProcessRunningCard
-                      currentCalculation={inprocessCalculations[0]}
-                    />
-                  );
-                }
-
-                if (inprocessCalculations.length === 0) {
-                  stopPolling();
-                }
-
+      <HandledQuery<{
+        datasets: Array<GQLDataset>;
+      }>
+        query={DATASETS}
+      >
+        {dsData => (
+          <HandledQuery<
+            {
+              workspace: GQLWorkspace | null;
+              calculations: Array<GQLCalculationProcess>;
+            },
+            { workspaceId: string }
+          >
+            query={WORKSPACE_NODE_SELECTION}
+            variables={{ workspaceId }}
+          >
+            {({
+              data: { workspace, calculations },
+              refetch,
+              startPolling,
+              stopPolling
+            }) => {
+              if (!workspace) {
                 return (
-                  <Mutation mutation={START_CALCULATION}>
-                    {startCalculation => (
-                      <Mutation mutation={ADD_OR_UPDATE_FORM_VALUE}>
-                        {addOrUpdateFormValue => (
-                          <Mutation mutation={DELETE_CONNECTION}>
-                            {deleteConnection => (
-                              <Mutation mutation={CREATE_CONNECTION}>
-                                {createConnection => (
-                                  <Mutation mutation={DELETE_NODE}>
-                                    {deleteNode => (
-                                      <Mutation mutation={CREATE_NODE}>
-                                        {createNode => (
-                                          <Mutation mutation={UPDATE_NODE}>
-                                            {updateNodePosition => (
-                                              <ExplorerEditor
-                                                datasets={dsData.data.datasets}
-                                                connections={deepCopyResponse(
-                                                  data.workspace.connections
-                                                )}
-                                                nodes={deepCopyResponse(
-                                                  data.workspace.nodes
-                                                )}
-                                                onNodeCreate={this.handleNodeCreate(
-                                                  createNode,
-                                                  workspaceId,
-                                                  refetch
-                                                )}
-                                                onNodeDelete={this.handleNodeDelete(
-                                                  deleteNode,
-                                                  refetch
-                                                )}
-                                                onNodeUpdate={this.handleNodeUpdate(
-                                                  updateNodePosition,
-                                                  refetch
-                                                )}
-                                                onConnectionCreate={this.handleConnectionCreate(
-                                                  createConnection,
-                                                  refetch
-                                                )}
-                                                onConnectionDelete={this.handleConnectionDelete(
-                                                  deleteConnection,
-                                                  refetch
-                                                )}
-                                                onAddOrUpdateFormValue={this.handleAddOrUpdateFormValue(
-                                                  addOrUpdateFormValue,
-                                                  refetch
-                                                )}
-                                                onStartCalculation={this.handleStartCalculation(
-                                                  startCalculation,
-                                                  refetch,
-                                                  workspaceId
-                                                )}
-                                              />
-                                            )}
-                                          </Mutation>
-                                        )}
-                                      </Mutation>
-                                    )}
-                                  </Mutation>
-                                )}
-                              </Mutation>
-                            )}
-                          </Mutation>
-                        )}
-                      </Mutation>
-                    )}
-                  </Mutation>
+                  <CustomErrorCard
+                    title="Unknown workspace"
+                    description="Workspace doesn't exist."
+                  />
                 );
-              }}
-            </Query>
-          );
-        }}
-      </Query>
+              }
+
+              const inprocessCalculations = calculations.filter(
+                n => n.state === ProcessState.PROCESSING
+              );
+
+              if (inprocessCalculations.length > 0) {
+                startPolling(POLLING_FREQUENCY);
+                return (
+                  <ProcessRunningCard
+                    currentCalculation={inprocessCalculations[0]}
+                  />
+                );
+              }
+
+              if (inprocessCalculations.length === 0) {
+                stopPolling();
+              }
+
+              return (
+                <Mutation mutation={START_CALCULATION}>
+                  {startCalculation => (
+                    <Mutation mutation={ADD_OR_UPDATE_FORM_VALUE}>
+                      {addOrUpdateFormValue => (
+                        <Mutation mutation={DELETE_CONNECTION}>
+                          {deleteConnection => (
+                            <Mutation mutation={CREATE_CONNECTION}>
+                              {createConnection => (
+                                <Mutation mutation={DELETE_NODE}>
+                                  {deleteNode => (
+                                    <Mutation mutation={CREATE_NODE}>
+                                      {createNode => (
+                                        <Mutation mutation={UPDATE_NODE}>
+                                          {updateNodePosition => (
+                                            <ExplorerEditor
+                                              datasets={dsData.data.datasets}
+                                              connections={deepCopyResponse(
+                                                workspace.connections
+                                              )}
+                                              nodes={deepCopyResponse(
+                                                workspace.nodes
+                                              )}
+                                              onNodeCreate={this.handleNodeCreate(
+                                                createNode,
+                                                workspaceId,
+                                                refetch
+                                              )}
+                                              onNodeDelete={this.handleNodeDelete(
+                                                deleteNode,
+                                                refetch
+                                              )}
+                                              onNodeUpdate={this.handleNodeUpdate(
+                                                updateNodePosition,
+                                                refetch
+                                              )}
+                                              onConnectionCreate={this.handleConnectionCreate(
+                                                createConnection,
+                                                refetch
+                                              )}
+                                              onConnectionDelete={this.handleConnectionDelete(
+                                                deleteConnection,
+                                                refetch
+                                              )}
+                                              onAddOrUpdateFormValue={this.handleAddOrUpdateFormValue(
+                                                addOrUpdateFormValue,
+                                                refetch
+                                              )}
+                                              onStartCalculation={this.handleStartCalculation(
+                                                startCalculation,
+                                                refetch,
+                                                workspaceId
+                                              )}
+                                            />
+                                          )}
+                                        </Mutation>
+                                      )}
+                                    </Mutation>
+                                  )}
+                                </Mutation>
+                              )}
+                            </Mutation>
+                          )}
+                        </Mutation>
+                      )}
+                    </Mutation>
+                  )}
+                </Mutation>
+              );
+            }}
+          </HandledQuery>
+        )}
+      </HandledQuery>
     );
   }
 }

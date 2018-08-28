@@ -3,10 +3,9 @@ import * as React from 'react';
 import { User } from '@masterthesis/shared';
 import { Button, Icon, Tooltip } from 'antd';
 import gql from 'graphql-tag';
-import { Query } from 'react-apollo';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { LoadingCard } from '../components/CustomCards';
+import { HandledQuery } from './HandledQuery';
 
 export const USER = gql`
   {
@@ -25,32 +24,24 @@ class UserInfoImpl extends React.Component<RouteComponentProps<{}>, {}> {
 
   public render() {
     return (
-      <Query query={USER}>
-        {({ loading, error, data }) => {
-          if (loading) {
-            return <LoadingCard />;
+      <HandledQuery<{ user: User }> query={USER}>
+        {({
+          data: {
+            user: { firstName, lastName }
           }
-
-          if (error) {
-            return null;
-          }
-
-          const user: User = data.user;
-
-          return (
-            <>
-              <Icon type="user" /> {user.firstName} {user.lastName}
-              <Tooltip title="Logout" mouseEnterDelay={1}>
-                <Button
-                  style={{ border: 'none' }}
-                  icon="logout"
-                  onClick={this.handleLogout}
-                />
-              </Tooltip>
-            </>
-          );
-        }}
-      </Query>
+        }) => (
+          <>
+            <Icon type="user" /> {firstName} {lastName}
+            <Tooltip title="Logout" mouseEnterDelay={1}>
+              <Button
+                style={{ border: 'none' }}
+                icon="logout"
+                onClick={this.handleLogout}
+              />
+            </Tooltip>
+          </>
+        )}
+      </HandledQuery>
     );
   }
 }

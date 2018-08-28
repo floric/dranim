@@ -114,7 +114,6 @@ export const renderNode = (
   const height = getHeight(n, inputs, outputs, state.openConnection);
   const isSelected =
     state.selectedNodeId !== null && state.selectedNodeId === n.id;
-
   const bgRect = getBackgroundRect(height);
   const nodeTitle = getHeaderText(
     isSelected,
@@ -133,15 +132,12 @@ export const renderNode = (
 
   nodeGroup.add(bgRect);
   nodeGroup.add(nodeTitle);
-
   if (n.hasContextFn) {
     nodeGroup.add(getContextFunctionNote());
   }
-
   nodeGroup.add(inputsGroup);
   nodeGroup.add(outputsGroup);
   nodeGroup.add(stateRect);
-
   return nodeGroup;
 };
 

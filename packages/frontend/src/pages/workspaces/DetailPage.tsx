@@ -1,16 +1,12 @@
-import * as React from 'react';
-
+import { GQLWorkspace } from '@masterthesis/shared';
 import { Tabs } from 'antd';
 import { css } from 'glamor';
 import gql from 'graphql-tag';
-import { Query } from 'react-apollo';
+import * as React from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
-import {
-  CustomErrorCard,
-  LoadingCard,
-  UnknownErrorCard
-} from '../../components/CustomCards';
+import { CustomErrorCard } from '../../components/CustomCards';
+import { HandledQuery } from '../../components/HandledQuery';
 import { PageHeaderCard } from '../../components/PageHeaderCard';
 import { WorkspaceCalculationsPage } from './CalculationsPage';
 import { WorkspaceEditorPage } from './EditorPage';
@@ -29,17 +25,12 @@ export interface IWorkspacesPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
 const WorkspacesPage: React.SFC<IWorkspacesPageProps> = props => (
-  <Query query={WORKSPACE} variables={{ id: props.match.params.workspaceId }}>
-    {({ loading, error, data }) => {
-      if (loading) {
-        return <LoadingCard />;
-      }
-
-      if (error) {
-        return <UnknownErrorCard error={error} />;
-      }
-
-      if (!data.workspace) {
+  <HandledQuery<{ workspace: GQLWorkspace | null }, { id: string }>
+    query={WORKSPACE}
+    variables={{ id: props.match.params.workspaceId }}
+  >
+    {({ data: { workspace } }) => {
+      if (!workspace) {
         return (
           <CustomErrorCard
             title="Unknown workspace"
@@ -72,7 +63,7 @@ const WorkspacesPage: React.SFC<IWorkspacesPageProps> = props => (
           })}
         >
           <PageHeaderCard
-            title={data.workspace.name}
+            title={workspace.name}
             typeTitle="Workspace"
             helpContent={
               <p>
@@ -113,7 +104,7 @@ const WorkspacesPage: React.SFC<IWorkspacesPageProps> = props => (
         </div>
       );
     }}
-  </Query>
+  </HandledQuery>
 );
 
 export default WorkspacesPage;
