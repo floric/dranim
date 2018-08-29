@@ -31,16 +31,7 @@ const FullWidthButton: React.SFC<FullWidthButtonProps> = ({
   ...props
 }) => (
   <Tooltip title={tooltip} mouseEnterDelay={1} defaultVisible={false}>
-    <Button
-      style={{
-        ...style,
-        ...{
-          width: fullWidth ? '100%' : style ? style.width : undefined
-        }
-      }}
-      onClick={handleClick}
-      {...props}
-    >
+    <Button style={style} block={fullWidth} onClick={handleClick} {...props}>
       {children}
     </Button>
   </Tooltip>

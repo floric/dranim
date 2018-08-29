@@ -21,7 +21,7 @@ const StartPage = getAsyncPage(() => import('./pages/StartPage'));
 const DatasetDetailPage = getAsyncPage(() =>
   import('./pages/dataset/DetailPage')
 );
-const DataPage = getAsyncPage(() => import('./pages/DataPage'));
+const DatasetsPage = getAsyncPage(() => import('./pages/DatasetsPage'));
 
 const { Content, Sider } = Layout;
 
@@ -79,7 +79,7 @@ class LoggedInApp extends React.Component<LoggedInAppProps, LoggedInAppState> {
             >
               <Switch>
                 <Route exact path="/" component={StartPage} />
-                <Route exact path="/data" component={DataPage} />
+                <Route exact path="/data" component={DatasetsPage} />
                 <Route path="/data/:id" component={DatasetDetailPage} />
                 <Route exact path="/workspaces" component={WorkspacesPage} />
                 <Route

@@ -33,7 +33,7 @@ export const createWorkspace = async (
   }
 
   const res = await wsCollection.insertOne({
-    name,
+    name: name.trim(),
     userId: reqContext.userId,
     description: description || '',
     lastChange: new Date(),
@@ -82,6 +82,29 @@ export const deleteWorkspace = async (
   return true;
 };
 
+export const renameWorkspace = async (
+  id: string,
+  name: string,
+  reqContext: ApolloContext
+) => {
+  if (name.length === 0) {
+    throw new Error('The name can not be empty.');
+  }
+
+  const ws = await tryGetWorkspace(id, reqContext);
+  const collection = getWorkspacesCollection(reqContext.db);
+  const res = await collection.updateOne(
+    { _id: new ObjectID(ws.id) },
+    { $set: { name: name.trim() } }
+  );
+
+  if (res.modifiedCount !== 1) {
+    throw new Error('Updating the name has failed.');
+  }
+
+  return true;
+};
+
 export const updateWorkspace = async (
   id: string,
   nodes: Array<NodeInstance>,
@@ -122,7 +145,7 @@ export const updateLastChange = async (
   reqContext: ApolloContext
 ) => {
   const wsCollection = getWorkspacesCollection(reqContext.db);
-  await wsCollection.findOneAndUpdate(
+  await wsCollection.updateOne(
     { _id: new ObjectID(wsId) },
     { $set: { lastChange: new Date() } }
   );

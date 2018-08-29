@@ -1,4 +1,9 @@
-import { GQLDataset, GQLUploadProcess, ProcessState, UploadProcess } from '@masterthesis/shared';
+import {
+  GQLDataset,
+  GQLUploadProcess,
+  ProcessState,
+  UploadProcess
+} from '@masterthesis/shared';
 import { Button, Card, Col, Form, Icon, Row, Table, Upload } from 'antd';
 import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
@@ -126,7 +131,10 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
       const { uploading } = this.state;
 
       return (
-        <HandledQuery<{ uploads: Array<GQLUploadProcess> }, { datasetId: string }>
+        <HandledQuery<
+          { uploads: Array<GQLUploadProcess> },
+          { datasetId: string }
+        >
           query={ALL_UPLOADS}
           variables={{ datasetId: dataset.id }}
         >
@@ -141,15 +149,16 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
                 >
                   <Card bordered={false}>
                     <h3>Import</h3>
-                    <Mutation mutation={UPLOAD_ENTRIES_CSV}>
+                    <Mutation
+                      mutation={UPLOAD_ENTRIES_CSV}
+                      context={{ hasUpload: true }}
+                    >
                       {uploadEntriesCsv => (
                         <>
                           <Row style={{ marginBottom: 12 }}>
                             <Col>
                               <Upload {...this.getUploadProps()}>
-                                <Button>
-                                  <Icon type="upload" /> Select CSV file
-                                </Button>
+                                <Button icon="upload">Select CSV file</Button>
                               </Upload>
                             </Col>
                             <Col>

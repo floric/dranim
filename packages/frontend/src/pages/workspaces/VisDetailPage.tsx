@@ -1,13 +1,13 @@
-import * as React from 'react';
-
 import { DataType, GQLOutputResult, GQLWorkspace } from '@masterthesis/shared';
 import { Card, Col, Row } from 'antd';
 import gql from 'graphql-tag';
+import * as React from 'react';
 import { NavLink, RouteComponentProps } from 'react-router-dom';
 
 import { CustomErrorCard } from '../../components/CustomCards';
 import { HandledQuery } from '../../components/HandledQuery';
 import { VisRenderer } from '../../components/VisRenderer';
+import { goUp } from '../../utils/navigation';
 
 const WORKSPACE = gql`
   query workspace($id: String!) {
@@ -43,6 +43,7 @@ export interface VisDetailPageProps
 
 const VisDetailPage: React.SFC<VisDetailPageProps> = ({
   match: {
+    url,
     params: { workspaceId }
   }
 }) => (
@@ -64,7 +65,7 @@ const VisDetailPage: React.SFC<VisDetailPageProps> = ({
         return (
           <Card bordered={false} title="No results present">
             <p>You need to start a calculation with Output nodes first.</p>
-            <NavLink to={'/'}>Go to Editor</NavLink>
+            <NavLink to={goUp(url)}>Go to Editor</NavLink>
           </Card>
         );
       }

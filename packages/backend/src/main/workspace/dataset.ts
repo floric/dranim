@@ -32,7 +32,7 @@ export const createDataset = async (
   }
 
   const res = await collection.insertOne({
-    name,
+    name: name.trim(),
     userId: reqContext.userId,
     valueschemas: [],
     workspaceId,
@@ -111,6 +111,29 @@ export const tryGetDataset = async (id: string, reqContext: ApolloContext) => {
   }
 
   return ds;
+};
+
+export const renameDataset = async (
+  id: string,
+  name: string,
+  reqContext: ApolloContext
+) => {
+  if (name.length === 0) {
+    throw new Error('The name can not be empty.');
+  }
+
+  const ds = await tryGetDataset(id, reqContext);
+  const collection = getDatasetsCollection(reqContext.db);
+  const res = await collection.updateOne(
+    { _id: new ObjectID(ds.id) },
+    { $set: { name: name.trim() } }
+  );
+
+  if (res.modifiedCount !== 1) {
+    throw new Error('Updating the name has failed.');
+  }
+
+  return true;
 };
 
 export const addValueSchema = async (

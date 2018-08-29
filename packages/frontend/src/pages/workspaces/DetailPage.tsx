@@ -3,11 +3,14 @@ import { Tabs } from 'antd';
 import { css } from 'glamor';
 import gql from 'graphql-tag';
 import * as React from 'react';
+import { Mutation } from 'react-apollo';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { CustomErrorCard } from '../../components/CustomCards';
+import { EditableText } from '../../components/EditableText';
 import { HandledQuery } from '../../components/HandledQuery';
 import { PageHeaderCard } from '../../components/PageHeaderCard';
+import { tryOperation } from '../../utils/form';
 import { WorkspaceCalculationsPage } from './CalculationsPage';
 import { WorkspaceEditorPage } from './EditorPage';
 import VisDetailPage from './VisDetailPage';
@@ -18,6 +21,12 @@ const WORKSPACE = gql`
       id
       name
     }
+  }
+`;
+
+const RENAME_WORKSPACE = gql`
+  mutation renameWorkspace($id: String!, $name: String!) {
+    renameWorkspace(id: $id, name: $name)
   }
 `;
 
@@ -37,7 +46,7 @@ const WorkspacesPage: React.SFC<WorkspacesPageProps> = ({
     query={WORKSPACE}
     variables={{ id: workspaceId }}
   >
-    {({ data: { workspace } }) => {
+    {({ data: { workspace }, refetch }) => {
       if (!workspace) {
         return (
           <CustomErrorCard
@@ -64,17 +73,38 @@ const WorkspacesPage: React.SFC<WorkspacesPageProps> = ({
             flexDirection: 'column'
           })}
         >
-          <PageHeaderCard
-            title={workspace.name}
-            typeTitle="Workspace"
-            helpContent={
-              <p>
-                Each Workspace contains an <strong>Explorer</strong> for data
-                manipulation and creating outputs from the given data. Outputs
-                are shown in the Results tab.
-              </p>
-            }
-          />
+          <Mutation mutation={RENAME_WORKSPACE}>
+            {renameWorkspace => (
+              <PageHeaderCard
+                title={
+                  <EditableText
+                    text={workspace.name}
+                    onChange={name => {
+                      tryOperation({
+                        op: () =>
+                          renameWorkspace({
+                            variables: { id: workspace.id, name }
+                          }),
+                        refetch,
+                        successTitle: () => 'Name updated',
+                        successMessage: () => `Name updated successfully.`,
+                        failedTitle: 'Name update failed',
+                        failedMessage: `Name not updated.`
+                      });
+                    }}
+                  />
+                }
+                typeTitle="Workspace"
+                helpContent={
+                  <p>
+                    Each Workspace contains an <strong>Explorer</strong> for
+                    data manipulation and creating outputs from the given data.
+                    Outputs are shown in the Results tab.
+                  </p>
+                }
+              />
+            )}
+          </Mutation>
           <Tabs
             activeKey={activeKey}
             onChange={name => {

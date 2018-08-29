@@ -8,6 +8,7 @@ import { CardItem } from '../components/CardItem';
 import { cardItemProps, CardsLayout } from '../components/CardsLayout';
 import { HandledQuery } from '../components/HandledQuery';
 import { PageHeaderCard } from '../components/PageHeaderCard';
+import { compareByName } from '../utils/data';
 import { tryOperation } from '../utils/form';
 import { CreateDataSetForm } from './forms/CreateDatasetForm';
 
@@ -40,7 +41,7 @@ const DELETE_DATASET = gql`
   }
 `;
 
-const DataPage: React.SFC = () => (
+const DatasetsPage: React.SFC = () => (
   <>
     <PageHeaderCard
       title="Datasets"
@@ -60,44 +61,46 @@ const DataPage: React.SFC = () => (
     <HandledQuery<{ datasets: Array<GQLDataset> }> query={ALL_DATASETS}>
       {({ data: { datasets }, refetch }) => (
         <CardsLayout>
-          {datasets.map(ds => (
-            <Col {...cardItemProps} key={ds.id}>
-              <Mutation mutation={DELETE_DATASET}>
-                {deleteDataset => (
-                  <CardItem
-                    description={ds.description}
-                    id={ds.id}
-                    name={ds.name}
-                    path="/data"
-                    confirmDeleteMessage="Delete Dataset?"
-                    handleDelete={() =>
-                      tryOperation({
-                        op: () =>
-                          deleteDataset({
-                            variables: {
-                              id: ds.id
-                            }
-                          }),
-                        refetch,
-                        successTitle: () => 'Dataset deleted',
-                        successMessage: () =>
-                          `Dataset "${ds.name}" deleted successfully.`,
-                        failedTitle: 'Dataset not deleted.',
-                        failedMessage: `Dataset "${ds.name}" deletion failed.`
-                      })
-                    }
-                  >
-                    <Col xs={{ span: 24 }} md={{ span: 12 }}>
-                      {`${ds.valueschemas.length} Schemas`}
-                    </Col>
-                    <Col xs={{ span: 24 }} md={{ span: 12 }}>
-                      {`${ds.entriesCount} Entries`}
-                    </Col>
-                  </CardItem>
-                )}
-              </Mutation>
-            </Col>
-          ))}
+          {Array.from(datasets)
+            .sort(compareByName)
+            .map(ds => (
+              <Col {...cardItemProps} key={ds.id}>
+                <Mutation mutation={DELETE_DATASET}>
+                  {deleteDataset => (
+                    <CardItem
+                      description={ds.description}
+                      id={ds.id}
+                      name={ds.name}
+                      path="/data"
+                      confirmDeleteMessage="Delete Dataset?"
+                      handleDelete={() =>
+                        tryOperation({
+                          op: () =>
+                            deleteDataset({
+                              variables: {
+                                id: ds.id
+                              }
+                            }),
+                          refetch,
+                          successTitle: () => 'Dataset deleted',
+                          successMessage: () =>
+                            `Dataset "${ds.name}" deleted successfully.`,
+                          failedTitle: 'Dataset not deleted.',
+                          failedMessage: `Dataset "${ds.name}" deletion failed.`
+                        })
+                      }
+                    >
+                      <Col xs={{ span: 24 }} md={{ span: 12 }}>
+                        {`${ds.valueschemas.length} Schemas`}
+                      </Col>
+                      <Col xs={{ span: 24 }} md={{ span: 12 }}>
+                        {`${ds.entriesCount} Entries`}
+                      </Col>
+                    </CardItem>
+                  )}
+                </Mutation>
+              </Col>
+            ))}
           <Col
             xs={{ span: 24 }}
             md={{ span: 12 }}
@@ -110,11 +113,8 @@ const DataPage: React.SFC = () => (
                 {createDataset => (
                   <CreateDataSetForm
                     handleCreateDataset={name =>
-                      tryOperation({
-                        op: async () => {
-                          await createDataset({ variables: { name } });
-                          return true;
-                        },
+                      tryOperation<any>({
+                        op: () => createDataset({ variables: { name } }),
                         refetch,
                         successTitle: () => 'Dataset created',
                         successMessage: () =>
@@ -134,4 +134,4 @@ const DataPage: React.SFC = () => (
   </>
 );
 
-export default DataPage;
+export default DatasetsPage;

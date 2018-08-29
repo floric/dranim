@@ -6,6 +6,10 @@ export const MutationDef = `
     deleteDataset (
       id: String!
     ): Boolean!
+    renameDataset (
+      id: String!
+      name: String!
+    ): Boolean!
     addValueSchema (
       datasetId: String!
       name: String!
@@ -59,6 +63,10 @@ export const MutationDef = `
       id: String!
       nodes: [NodeInput!]!
       connections: [ConnectionInput!]!
+    ): Boolean!
+    renameWorkspace (
+      id: String!
+      name: String!
     ): Boolean!
     createDemoData(type: String!): Boolean!
     uploadEntriesCsv (files: [Upload!]!, datasetId: String!): UploadProcess!

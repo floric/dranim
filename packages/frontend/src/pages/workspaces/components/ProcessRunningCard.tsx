@@ -1,7 +1,6 @@
-import * as React from 'react';
-
 import { CalculationProcess } from '@masterthesis/shared';
 import { distanceInWordsToNow } from 'date-fns';
+import * as React from 'react';
 import { Mutation } from 'react-apollo';
 
 import { AsyncButton } from '../../../components/AsyncButton';

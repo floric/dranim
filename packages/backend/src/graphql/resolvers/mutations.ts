@@ -24,7 +24,8 @@ import {
 import {
   addValueSchema,
   createDataset,
-  deleteDataset
+  deleteDataset,
+  renameDataset
 } from '../../main/workspace/dataset';
 import { createEntryFromJSON, deleteEntry } from '../../main/workspace/entry';
 import {
@@ -37,6 +38,7 @@ import { uploadEntriesCsv } from '../../main/workspace/upload';
 import {
   createWorkspace,
   deleteWorkspace,
+  renameWorkspace,
   updateWorkspace
 } from '../../main/workspace/workspace';
 
@@ -61,12 +63,14 @@ export const Mutation: IResolverObject<any, ApolloContext> = {
     ),
   addEntry: (_, { datasetId, values }, context): Promise<Entry> =>
     createEntryFromJSON(datasetId, values, context),
+  renameDataset: (_, { id, name }, context): Promise<boolean> =>
+    renameDataset(id, name, context),
   deleteDataset: (_, { id }, context): Promise<boolean> =>
     deleteDataset(id, context),
   deleteEntry: (_, { entryId, datasetId }, context): Promise<boolean> =>
     deleteEntry(datasetId, entryId, context),
   uploadEntriesCsv: (
-    obj,
+    _,
     { files, datasetId },
     context
   ): Promise<UploadProcess> => uploadEntriesCsv(files, datasetId, context),
@@ -103,6 +107,8 @@ export const Mutation: IResolverObject<any, ApolloContext> = {
     createWorkspace(name, context, description),
   deleteWorkspace: (_, { id }, context): Promise<boolean> =>
     deleteWorkspace(id, context),
+  renameWorkspace: (_, { id, name }, context): Promise<boolean> =>
+    renameWorkspace(id, name, context),
   startCalculation: (
     _,
     { workspaceId },

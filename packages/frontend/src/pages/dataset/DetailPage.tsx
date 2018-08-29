@@ -4,11 +4,14 @@ import gql from 'graphql-tag';
 import { History } from 'history';
 import * as React from 'react';
 import { Component, SFC } from 'react';
+import { Mutation } from 'react-apollo';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { CustomErrorCard } from '../../components/CustomCards';
+import { EditableText } from '../../components/EditableText';
 import { HandledQuery } from '../../components/HandledQuery';
 import { PageHeaderCard } from '../../components/PageHeaderCard';
+import { tryOperation } from '../../utils/form';
 import { DataActionsPage } from './ActionsPage';
 import { DataEntriesPage } from './EntriesPage';
 import { DataSchemas } from './SchemasPage';
@@ -43,6 +46,15 @@ const DATASET = gql`
   }
 `;
 
+const RENAME_DATASET = gql`
+  mutation renameDataset($id: String!, $name: String!) {
+    renameDataset(id: $id, name: $name)
+  }
+`;
+
+const getCurrentStep = (dataset: GQLDataset) =>
+  dataset.valueschemas.length === 0 ? 1 : dataset.entriesCount === 0 ? 2 : 3;
+
 export default class DataDetailPage extends Component<DataDetailPageProps> {
   public render() {
     const {
@@ -68,46 +80,59 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
             );
           }
 
-          const currentStep =
-            dataset.valueschemas.length === 0
-              ? 1
-              : dataset.entriesCount === 0
-                ? 2
-                : 3;
-
           return (
             <>
-              <PageHeaderCard
-                title={dataset.name}
-                typeTitle="Dataset"
-                helpContent={
-                  <>
-                    <p>
-                      A <strong>Dataset</strong> is defined using{' '}
-                      <strong>Valueschemas</strong>. Each Valueschema represents
-                      one column of values.
-                    </p>
-                    <p>
-                      <strong>Entries</strong> need to fit to the defined
-                      Valueschema. They can be manually defined in the Entries
-                      tab or uploaded. Currently only CSV files are supported.
-                      But more import types could be supported in the future.
-                    </p>
-                  </>
-                }
-                endContent={
-                  currentStep !== 3 ? (
-                    <>
-                      <Divider />
-                      <Steps current={currentStep} size="small">
-                        <Steps.Step title="Dataset created" />
-                        <Steps.Step title="Schemas specified" />
-                        <Steps.Step title="Entries created or uploaded" />
-                      </Steps>
-                    </>
-                  ) : null
-                }
-              />
+              <Mutation mutation={RENAME_DATASET}>
+                {renameDataset => (
+                  <PageHeaderCard
+                    title={
+                      <EditableText
+                        text={dataset.name}
+                        onChange={name => {
+                          tryOperation({
+                            op: () =>
+                              renameDataset({ variables: { id, name } }),
+                            refetch,
+                            successTitle: () => 'Name updated',
+                            successMessage: () => `Name updated successfully.`,
+                            failedTitle: 'Name update failed',
+                            failedMessage: `Name not updated.`
+                          });
+                        }}
+                      />
+                    }
+                    typeTitle="Dataset"
+                    helpContent={
+                      <>
+                        <p>
+                          A <strong>Dataset</strong> is defined using{' '}
+                          <strong>Valueschemas</strong>. Each Valueschema
+                          represents one column of values.
+                        </p>
+                        <p>
+                          <strong>Entries</strong> need to fit to the defined
+                          Valueschema. They can be manually defined in the
+                          Entries tab or uploaded. Currently only CSV files are
+                          supported. But more import types could be supported in
+                          the future.
+                        </p>
+                      </>
+                    }
+                    endContent={
+                      getCurrentStep(dataset) !== 3 ? (
+                        <>
+                          <Divider />
+                          <Steps current={getCurrentStep(dataset)} size="small">
+                            <Steps.Step title="Dataset created" />
+                            <Steps.Step title="Schemas specified" />
+                            <Steps.Step title="Entries created or uploaded" />
+                          </Steps>
+                        </>
+                      ) : null
+                    }
+                  />
+                )}
+              </Mutation>
               <Tabs
                 type="card"
                 animated={{ inkBar: true, tabPane: false }}

@@ -5,7 +5,6 @@ import { v4 } from 'uuid';
 
 import { showNotificationWithIcon } from '../../utils/form';
 import { NumericProperty } from '../properties/NumericProperty';
-import { SliderCol } from '../properties/Slider';
 import { renderSTRChart } from './str-svg';
 import { downloadFromUrl } from './Vega';
 import { VisCard } from './VisCard';
