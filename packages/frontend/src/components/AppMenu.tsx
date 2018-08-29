@@ -21,7 +21,11 @@ export const AppMenu: SFC<{
     <NavLink to="/">
       <img src={logo} width="100%" alt="dranim" />
     </NavLink>
-    <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
+    <Menu theme="dark" defaultSelectedKeys={['start']} mode="inline">
+      <Menu.Item key="start">
+        <Icon type="home" />
+        Start
+      </Menu.Item>
       <Menu.SubMenu
         key="sub1"
         title={

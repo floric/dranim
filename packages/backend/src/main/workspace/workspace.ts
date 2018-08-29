@@ -25,7 +25,7 @@ export const getWorkspacesCollection = (
 export const createWorkspace = async (
   name: string,
   reqContext: ApolloContext,
-  description: string | null
+  description?: string
 ): Promise<Workspace> => {
   const wsCollection = getWorkspacesCollection(reqContext.db);
   if (!name.length) {
@@ -88,7 +88,7 @@ export const renameWorkspace = async (
   reqContext: ApolloContext
 ) => {
   if (name.length === 0) {
-    throw new Error('The name can not be empty.');
+    throw new Error('Name must not be empty.');
   }
 
   const ws = await tryGetWorkspace(id, reqContext);

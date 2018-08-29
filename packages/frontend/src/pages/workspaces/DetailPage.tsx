@@ -79,7 +79,7 @@ const WorkspacesPage: React.SFC<WorkspacesPageProps> = ({
                 title={
                   <EditableText
                     text={workspace.name}
-                    onChange={name => {
+                    onChange={name =>
                       tryOperation({
                         op: () =>
                           renameWorkspace({
@@ -90,8 +90,8 @@ const WorkspacesPage: React.SFC<WorkspacesPageProps> = ({
                         successMessage: () => `Name updated successfully.`,
                         failedTitle: 'Name update failed',
                         failedMessage: `Name not updated.`
-                      });
-                    }}
+                      })
+                    }
                   />
                 }
                 typeTitle="Workspace"

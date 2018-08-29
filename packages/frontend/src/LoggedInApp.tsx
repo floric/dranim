@@ -75,7 +75,7 @@ class LoggedInApp extends React.Component<LoggedInAppProps, LoggedInAppState> {
               />
             </Sider>
             <Content
-              style={{ backgroundColor: Colors.Background, padding: '16px' }}
+              style={{ backgroundColor: Colors.Background, padding: '1rem' }}
             >
               <Switch>
                 <Route exact path="/" component={StartPage} />

@@ -88,7 +88,7 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
                     title={
                       <EditableText
                         text={dataset.name}
-                        onChange={name => {
+                        onChange={name =>
                           tryOperation({
                             op: () =>
                               renameDataset({ variables: { id, name } }),
@@ -97,8 +97,8 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
                             successMessage: () => `Name updated successfully.`,
                             failedTitle: 'Name update failed',
                             failedMessage: `Name not updated.`
-                          });
-                        }}
+                          })
+                        }
                       />
                     }
                     typeTitle="Dataset"
@@ -121,7 +121,9 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
                     endContent={
                       getCurrentStep(dataset) !== 3 ? (
                         <>
-                          <Divider />
+                          <Divider
+                            style={{ marginTop: '1rem', marginBottom: '1rem' }}
+                          />
                           <Steps current={getCurrentStep(dataset)} size="small">
                             <Steps.Step title="Dataset created" />
                             <Steps.Step title="Schemas specified" />

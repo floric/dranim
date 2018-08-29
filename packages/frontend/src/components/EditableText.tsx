@@ -1,13 +1,15 @@
-import { Button, Col, Input, Row } from 'antd';
+import { Button, Col, Input, Row, Spin } from 'antd';
 import * as React from 'react';
+import { LoadingCard, LoadingIcon } from './CustomCards';
 
 export interface EditableTextProps {
   text: string;
-  onChange: (newValue: string) => any;
+  onChange: (newValue: string) => Promise<any>;
 }
 
 interface EditableTextState {
   isOpen: boolean;
+  isSaving: boolean;
   currentValue: string;
 }
 
@@ -17,6 +19,7 @@ export class EditableText extends React.Component<
 > {
   public state: EditableTextState = {
     isOpen: false,
+    isSaving: false,
     currentValue: this.props.text
   };
 
@@ -26,9 +29,10 @@ export class EditableText extends React.Component<
   private handleToggleEditing = () =>
     this.setState({ isOpen: !this.state.isOpen });
 
-  private handleSaveEdit = () => {
-    this.props.onChange(this.state.currentValue);
-    this.setState({ isOpen: false });
+  private handleSaveEdit = async () => {
+    await this.setState({ isSaving: true, isOpen: false });
+    await this.props.onChange(this.state.currentValue);
+    await this.setState({ isSaving: false });
   };
 
   private handleKeyUp = (a: React.KeyboardEvent<HTMLInputElement>) => {
@@ -41,7 +45,11 @@ export class EditableText extends React.Component<
 
   public render() {
     const { text } = this.props;
-    const { isOpen, currentValue } = this.state;
+    const { isOpen, isSaving, currentValue } = this.state;
+
+    if (isSaving) {
+      return <Spin indicator={LoadingIcon} />;
+    }
 
     return (
       <>

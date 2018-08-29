@@ -23,14 +23,6 @@ export const createDataset = async (
     throw new Error('Name must not be empty');
   }
 
-  const existingDatasetsWithSameName = await collection.findOne({
-    name,
-    userId: reqContext.userId
-  });
-  if (existingDatasetsWithSameName) {
-    throw new Error('Names must be unique');
-  }
-
   const res = await collection.insertOne({
     name: name.trim(),
     userId: reqContext.userId,
@@ -119,7 +111,7 @@ export const renameDataset = async (
   reqContext: ApolloContext
 ) => {
   if (name.length === 0) {
-    throw new Error('The name can not be empty.');
+    throw new Error('Name must not be empty.');
   }
 
   const ds = await tryGetDataset(id, reqContext);

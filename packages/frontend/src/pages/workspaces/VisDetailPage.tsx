@@ -1,5 +1,5 @@
 import { DataType, GQLOutputResult, GQLWorkspace } from '@masterthesis/shared';
-import { Card, Col, Row } from 'antd';
+import { Card, Col, Icon, Row } from 'antd';
 import gql from 'graphql-tag';
 import * as React from 'react';
 import { NavLink, RouteComponentProps } from 'react-router-dom';
@@ -65,7 +65,9 @@ const VisDetailPage: React.SFC<VisDetailPageProps> = ({
         return (
           <Card bordered={false} title="No results present">
             <p>You need to start a calculation with Output nodes first.</p>
-            <NavLink to={goUp(url)}>Go to Editor</NavLink>
+            <NavLink to={goUp(url)}>
+              Go to Editor <Icon type="arrow-right" />
+            </NavLink>
           </Card>
         );
       }

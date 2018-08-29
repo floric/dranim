@@ -13,7 +13,7 @@ export const API_URL =
     ? `https://${process.env.BACKEND_DOMAIN}`
     : 'http://localhost:3000';
 
-const stateCache = new InMemoryCache();
+const cache = new InMemoryCache();
 const linkOptions = {
   uri: `${API_URL}/graphql`,
   credentials: 'include'
@@ -65,5 +65,5 @@ export const client = new ApolloClient({
       ApolloLink.from([errorLink, batchLink])
     )
   ),
-  cache: stateCache
+  cache
 });

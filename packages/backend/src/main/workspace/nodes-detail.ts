@@ -253,26 +253,6 @@ export const removeConnection = async (
   }
 };
 
-export const setProgress = async (
-  nodeId: string,
-  value: number | null,
-  reqContext: ApolloContext
-) => {
-  if (value != null && (value < 0 || value > 1)) {
-    throw new Error('Invalid progress value');
-  }
-
-  const coll = getNodesCollection(reqContext.db);
-  await coll.updateOne(
-    { _id: new ObjectID(nodeId) },
-    {
-      $set: { progress: value }
-    }
-  );
-
-  return true;
-};
-
 export const addOrUpdateVariable = async (
   varId: string,
   displayName: string,

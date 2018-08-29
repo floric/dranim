@@ -18,7 +18,7 @@ export const NumericProperty: React.SFC<NumericPropertyProps> = ({
   <Property text={text}>
     <Input
       defaultValue={defaultValue.toString()}
-      style={{ maxWidth: '200px' }}
+      style={{ maxWidth: '20rem' }}
       onChange={ev => {
         const val = Number.parseFloat(ev.target.value);
         onChange(Number.isNaN(val) ? defaultValue : val);

@@ -85,7 +85,7 @@ export class VisCard extends React.Component<VisCardProps, VisCardState> {
 
         {!!result.description && (
           <>
-            <Divider style={{ marginTop: 8, marginBottom: 8 }} />
+            <Divider style={{ marginTop: '1rem', marginBottom: '1rem' }} />
             <Card.Meta description={result.description} />
           </>
         )}
