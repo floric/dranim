@@ -1,8 +1,10 @@
 import React, { SFC } from 'react';
 
 import { GQLWorkspace } from '@masterthesis/shared';
+import { Button } from 'antd';
 import { css } from 'glamor';
 import gql from 'graphql-tag';
+import { History } from 'history';
 import { Mutation } from 'react-apollo';
 import { RouteComponentProps } from 'react-router-dom';
 
@@ -31,6 +33,24 @@ const RENAME_WORKSPACE = gql`
   }
 `;
 
+export const UnknownWorkspaceCard: SFC<{ history: History }> = ({
+  history
+}) => (
+  <CustomErrorCard
+    title="Unknown Workspace"
+    description="Workspace doesn't exist."
+    actions={
+      <Button
+        type="primary"
+        icon="plus"
+        onClick={() => history.push('/workspaces')}
+      >
+        Create Workspace
+      </Button>
+    }
+  />
+);
+
 export interface WorkspacesPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
@@ -48,12 +68,7 @@ const WorkspacesPage: SFC<WorkspacesPageProps> = ({
   >
     {({ data: { workspace }, refetch }) => {
       if (!workspace) {
-        return (
-          <CustomErrorCard
-            title="Unknown workspace"
-            description="Workspace doesn't exist."
-          />
-        );
+        return <UnknownWorkspaceCard history={history} />;
       }
 
       return (

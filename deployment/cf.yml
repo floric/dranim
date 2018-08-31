@@ -1,9 +1,9 @@
-Description: Timeseries Explorer
+Description: Dranim
 
-Parameters: 
-  DatabaseUser: 
+Parameters:
+  DatabaseUser:
     Type: String
-  DatabasePW: 
+  DatabasePW:
     Type: String
   MlabUrl:
     Type: String
@@ -19,10 +19,10 @@ Parameters:
     Type: String
   EuWestCertArn:
     Type: String
-    AllowedPattern: "arn:aws:acm:.*"
+    AllowedPattern: 'arn:aws:acm:.*'
   GlobalCertArn:
     Type: String
-    AllowedPattern: "arn:aws:acm:.*"
+    AllowedPattern: 'arn:aws:acm:.*'
 
 Resources:
   # Backend
@@ -38,7 +38,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
           - Effect: Allow
             Principal:
@@ -46,17 +46,17 @@ Resources:
                 - ec2.amazonaws.com
             Action:
               - sts:AssumeRole
-      Policies: 
+      Policies:
         - PolicyName: root
-          PolicyDocument: 
-            Version: "2012-10-17"
-            Statement: 
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
               - Effect: Allow
                 Action:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: "*"
-       
+                Resource: '*'
+
   ProdInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
@@ -75,7 +75,7 @@ Resources:
       OptionSettings:
         - Namespace: aws:autoscaling:launchconfiguration
           OptionName: InstanceType
-          Value: t2.micro
+          Value: t3.micro
         - Namespace: aws:elb:healthcheck
           OptionName: HealthyThreshold
           Value: 2
@@ -142,7 +142,7 @@ Resources:
         - Namespace: aws:elasticbeanstalk:environment:proxy
           OptionName: ProxyServer
           Value: none
-      SolutionStackName: 64bit Amazon Linux 2018.03 v2.11.0 running Docker 18.03.1-ce
+      SolutionStackName: 64bit Amazon Linux 2018.03 v2.12.2 running Docker 18.03.1-ce
 
   EBEnvironment:
     Type: AWS::ElasticBeanstalk::Environment
@@ -166,14 +166,14 @@ Resources:
     Properties:
       DistributionConfig:
         Aliases:
-        - !Ref FrontendDomain
+          - !Ref FrontendDomain
         Origins:
-        - Id: frontend
-          DomainName:
-            Fn::GetAtt: [ FrontendBucket , 'DomainName' ]
-          S3OriginConfig:
-            OriginAccessIdentity:
-              Ref: AWS::NoValue
+          - Id: frontend
+            DomainName:
+              Fn::GetAtt: [FrontendBucket, 'DomainName']
+            S3OriginConfig:
+              OriginAccessIdentity:
+                Ref: AWS::NoValue
         Enabled: true
         HttpVersion: http2
         DefaultRootObject: index.html
@@ -187,13 +187,13 @@ Resources:
           ViewerProtocolPolicy: redirect-to-https
         PriceClass: PriceClass_100
         CustomErrorResponses:
-        - ErrorCode: 404
-          ResponsePagePath: /index.html
-          ResponseCode: 200
+          - ErrorCode: 404
+            ResponsePagePath: /index.html
+            ResponseCode: 200
         ViewerCertificate:
           AcmCertificateArn: !Ref GlobalCertArn
           SslSupportMethod: sni-only
-            
+
   FrontendBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -218,4 +218,3 @@ Resources:
                 - !Ref FrontendBucket
                 - /*
       Bucket: !Ref FrontendBucket
-      

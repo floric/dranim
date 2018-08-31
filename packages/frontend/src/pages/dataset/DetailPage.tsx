@@ -21,8 +21,8 @@ export interface DataDetailPageProps
   extends RouteComponentProps<{ id: string }, {}> {}
 
 const NoDatasetExceptionActions: SFC<{ history: History }> = ({ history }) => (
-  <Button type="primary" onClick={() => history.push('/data')}>
-    Create new Dataset
+  <Button type="primary" icon="plus" onClick={() => history.push('/data')}>
+    Create Dataset
   </Button>
 );
 
@@ -76,8 +76,8 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
           if (!dataset) {
             return (
               <CustomErrorCard
-                title="Unknown dataset"
-                description="Dataset doesn't exist."
+                title="Unknown Dataset"
+                description={`The Dataset with ID ${id} doesn't exist.`}
                 actions={<NoDatasetExceptionActions history={history} />}
               />
             );

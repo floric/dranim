@@ -6,7 +6,7 @@ import {
   ProcessState,
   UploadProcess
 } from '@masterthesis/shared';
-import { Button, Card, Col, Form, Icon, Row, Table, Upload } from 'antd';
+import { Button, Card, Col, Icon, Row, Table, Upload } from 'antd';
 import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
 import {

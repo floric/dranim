@@ -3,6 +3,8 @@ import React, { Component, SFC } from 'react';
 import { Tabs } from 'antd';
 import { Route, RouteComponentProps, Switch } from 'react-router';
 
+import { CustomErrorCard } from './layout/CustomCards';
+
 type Panes = Array<{
   name: string;
   key: string;
@@ -31,7 +33,12 @@ const RenderProps: SFC<RenderPropsProps> = props => {
     return matchingPane.content;
   }
 
-  return <p>404</p>;
+  return (
+    <CustomErrorCard
+      title="Page not found"
+      description="This tab doesn't exist. Please choose another one."
+    />
+  );
 };
 
 export class RoutedTabs extends Component<RoutedTabsProps> {

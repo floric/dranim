@@ -12,7 +12,6 @@ import { Mutation, MutationFn } from 'react-apollo';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { HandledQuery } from '../../components/HandledQuery';
-import { CustomErrorCard } from '../../components/layout/CustomCards';
 import { ExplorerEditor } from '../../explorer/ExplorerEditor';
 import {
   ADD_OR_UPDATE_FORM_VALUE,
@@ -27,6 +26,7 @@ import {
 } from '../../graphql/editor-page';
 import { deepCopyResponse, tryOperation } from '../../utils/form';
 import { ProcessRunningCard } from './components/ProcessRunningCard';
+import { UnknownWorkspaceCard } from './DetailPage';
 
 const POLLING_FREQUENCY = 5000;
 
@@ -155,6 +155,7 @@ export default class WorkspaceEditorPage extends Component<
 
   public render() {
     const {
+      history,
       match: {
         params: { workspaceId }
       }
@@ -184,12 +185,7 @@ export default class WorkspaceEditorPage extends Component<
               stopPolling
             }) => {
               if (!workspace) {
-                return (
-                  <CustomErrorCard
-                    title="Unknown workspace"
-                    description="Workspace doesn't exist."
-                  />
-                );
+                return <UnknownWorkspaceCard history={history} />;
               }
 
               const inprocessCalculations = calculations.filter(

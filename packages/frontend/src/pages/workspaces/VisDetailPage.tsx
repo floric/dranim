@@ -6,9 +6,8 @@ import gql from 'graphql-tag';
 import { NavLink, RouteComponentProps } from 'react-router-dom';
 
 import { HandledQuery } from '../../components/HandledQuery';
-import { CustomErrorCard } from '../../components/layout/CustomCards';
 import { VisRenderer } from '../../components/VisRenderer';
-import { goUp } from '../../utils/navigation';
+import { UnknownWorkspaceCard } from './DetailPage';
 
 const WORKSPACE = gql`
   query workspace($id: String!) {
@@ -43,8 +42,8 @@ export interface VisDetailPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
 const VisDetailPage: SFC<VisDetailPageProps> = ({
+  history,
   match: {
-    url,
     params: { workspaceId }
   }
 }) => (
@@ -54,19 +53,14 @@ const VisDetailPage: SFC<VisDetailPageProps> = ({
   >
     {({ data: { workspace } }) => {
       if (!workspace) {
-        return (
-          <CustomErrorCard
-            title="Unknown Workspace"
-            description="Workspace doesn't exist."
-          />
-        );
+        return <UnknownWorkspaceCard history={history} />;
       }
 
       if (workspace.results.length === 0) {
         return (
           <Card bordered={false} title="No results present">
             <p>You need to start a calculation with Output nodes first.</p>
-            <NavLink to={goUp(url)}>
+            <NavLink to="./">
               Go to Editor <Icon type="arrow-right" />
             </NavLink>
           </Card>
