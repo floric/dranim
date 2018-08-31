@@ -47,11 +47,12 @@ export class RoutedTabs extends Component<RoutedTabsProps> {
 
   public render() {
     const {
+      defaultKey,
       panes,
       location: { pathname },
-      match: { path, url }
+      match: { path, url, isExact }
     } = this.props;
-    const activeKey = pathname.substr(url.length + 1);
+    const activeKey = isExact ? defaultKey : pathname.substr(url.length + 1);
     return (
       <>
         <Tabs
@@ -70,6 +71,7 @@ export class RoutedTabs extends Component<RoutedTabsProps> {
             path={`${path}/:pageKey`}
             render={props => <RenderProps {...this.props} {...props} />}
           />
+          {isExact ? panes[0].content : null}
         </Switch>
       </>
     );

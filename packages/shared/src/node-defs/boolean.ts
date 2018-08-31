@@ -59,7 +59,7 @@ export const EqualsStringNodeDef: NodeDef<
     equals: BooleanSocket('Equals')
   },
   keywords: [],
-  path: ['String', 'Comparisons']
+  path: ['String', 'Operators']
 };
 
 export interface BooleanOperatorInputs {

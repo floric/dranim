@@ -79,7 +79,7 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
       const { fileList } = this.state;
       const { dataset, client } = this.props;
 
-      tryOperation({
+      await tryOperation({
         op: async () => {
           await this.setState({
             uploading: true,
@@ -187,32 +187,24 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
                 >
                   <Card bordered={false}>
                     <h3>Export</h3>
-                    <Row>
+                    <Row gutter={12} type="flex">
                       <Col>
-                        <Form layout="inline">
-                          <Form.Item label="Export entries">
-                            <Row gutter={12}>
-                              <Col span={12}>
-                                <AsyncButton
-                                  type="primary"
-                                  disabled
-                                  onClick={async () => 0}
-                                >
-                                  as CSV
-                                </AsyncButton>
-                              </Col>
-                              <Col span={12}>
-                                <AsyncButton
-                                  type="primary"
-                                  disabled
-                                  onClick={async () => 0}
-                                >
-                                  as ZIP
-                                </AsyncButton>
-                              </Col>
-                            </Row>
-                          </Form.Item>
-                        </Form>
+                        <AsyncButton
+                          type="primary"
+                          disabled
+                          onClick={async () => 0}
+                        >
+                          as CSV
+                        </AsyncButton>
+                      </Col>
+                      <Col>
+                        <AsyncButton
+                          type="primary"
+                          disabled
+                          onClick={async () => 0}
+                        >
+                          as ZIP
+                        </AsyncButton>
                       </Col>
                     </Row>
                   </Card>

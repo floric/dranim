@@ -27,7 +27,7 @@ export const EditEntriesNodeDef: NodeDef<
   outputs: {
     dataset: DatasetSocket('Dataset')
   },
-  path: ['Entries'],
+  path: ['Dataset', 'Modification'],
   keywords: []
 };
 
@@ -43,7 +43,7 @@ export const FilterEntriesNodeDef: NodeDef<
   outputs: {
     dataset: DatasetSocket('Dataset')
   },
-  path: ['Entries'],
+  path: ['Dataset'],
   keywords: []
 };
 
@@ -64,7 +64,7 @@ export const DistinctEntriesNodeDef: NodeDef<
   outputs: {
     dataset: DatasetSocket('Dataset')
   },
-  path: ['Entries'],
+  path: ['Dataset', 'Aggregation'],
   keywords: []
 };
 
@@ -84,7 +84,7 @@ export const AddValuesNodeDef: NodeDef<
   outputs: {
     dataset: DatasetSocket('Dataset')
   },
-  path: ['Entries'],
+  path: ['Dataset', 'Modification'],
   keywords: []
 };
 
@@ -112,7 +112,7 @@ export const SelectValuesNodeDef: NodeDef<
   outputs: {
     dataset: DatasetSocket('Dataset')
   },
-  path: ['Dataset', 'Operators'],
+  path: ['Dataset', 'Modification'],
   keywords: []
 };
 
@@ -136,7 +136,7 @@ export const CountEntriesNodeDef: NodeDef<
   outputs: {
     count: NumberSocket('Count')
   },
-  path: ['Entries'],
+  path: ['Dataset', 'Aggregation'],
   keywords: []
 };
 
@@ -173,6 +173,6 @@ export const AggregateEntriesNodeDef: NodeDef<
   outputs: {
     value: NumberSocket('Aggregated value')
   },
-  path: ['Entries'],
+  path: ['Dataset', 'Aggregation'],
   keywords: []
 };
