@@ -246,14 +246,6 @@ export const tryGetNode = async (nodeId: string, reqContext: ApolloContext) => {
   return node;
 };
 
-export const resetProgress = async (
-  workspaceId: string,
-  reqContext: ApolloContext
-) => {
-  const coll = getNodesCollection(reqContext.db);
-  await coll.updateMany({ workspaceId }, { $set: { progress: null } });
-};
-
 export const getContextNode = async (
   node: NodeInstance,
   type: ContextNodeType,

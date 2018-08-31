@@ -1,7 +1,8 @@
+import React, { Component } from 'react';
+
 import { Colors, GQLDataset, GQLWorkspace } from '@masterthesis/shared';
 import { Layout } from 'antd';
 import gql from 'graphql-tag';
-import * as React from 'react';
 import {
   Route,
   RouteComponentProps,
@@ -9,8 +10,8 @@ import {
   withRouter
 } from 'react-router-dom';
 
-import { AppMenu } from './components/AppMenu';
 import { HandledQuery } from './components/HandledQuery';
+import { AppMenu } from './components/layout/AppMenu';
 import { getAsyncPage } from './utils/async';
 
 const WorkspacesPage = getAsyncPage(() => import('./pages/WorkspacesPage'));
@@ -21,9 +22,7 @@ const StartPage = getAsyncPage(() => import('./pages/StartPage'));
 const DatasetDetailPage = getAsyncPage(() =>
   import('./pages/dataset/DetailPage')
 );
-const DataPage = getAsyncPage(() => import('./pages/DataPage'));
-
-const { Content, Sider } = Layout;
+const DatasetsPage = getAsyncPage(() => import('./pages/DatasetsPage'));
 
 export interface LoggedInAppProps extends RouteComponentProps<{}, {}> {}
 
@@ -41,7 +40,7 @@ const MENU_QUERY = gql`
 `;
 export type LoggedInAppState = { collapsed: boolean };
 
-class LoggedInApp extends React.Component<LoggedInAppProps, LoggedInAppState> {
+class LoggedInApp extends Component<LoggedInAppProps, LoggedInAppState> {
   public state: LoggedInAppState = {
     collapsed: false
   };
@@ -60,7 +59,7 @@ class LoggedInApp extends React.Component<LoggedInAppProps, LoggedInAppState> {
       >
         {({ data: { workspaces, datasets } }) => (
           <Layout style={{ minHeight: '100vh' }}>
-            <Sider
+            <Layout.Sider
               collapsible
               collapsed={collapsed}
               onCollapse={this.onCollapse}
@@ -73,13 +72,13 @@ class LoggedInApp extends React.Component<LoggedInAppProps, LoggedInAppState> {
                 workspaces={workspaces}
                 collapsed={collapsed}
               />
-            </Sider>
-            <Content
-              style={{ backgroundColor: Colors.Background, padding: '16px' }}
+            </Layout.Sider>
+            <Layout.Content
+              style={{ backgroundColor: Colors.Background, padding: '1rem' }}
             >
               <Switch>
                 <Route exact path="/" component={StartPage} />
-                <Route exact path="/data" component={DataPage} />
+                <Route exact path="/data" component={DatasetsPage} />
                 <Route path="/data/:id" component={DatasetDetailPage} />
                 <Route exact path="/workspaces" component={WorkspacesPage} />
                 <Route
@@ -87,7 +86,7 @@ class LoggedInApp extends React.Component<LoggedInAppProps, LoggedInAppState> {
                   component={WorkspaceDetailPage}
                 />
               </Switch>
-            </Content>
+            </Layout.Content>
           </Layout>
         )}
       </HandledQuery>

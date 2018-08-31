@@ -1,11 +1,10 @@
-import * as React from 'react';
-import { SFC } from 'react';
+import React, { SFC } from 'react';
 
 import { Workspace } from '@masterthesis/shared';
 import { Icon, Menu } from 'antd';
 import { NavLink } from 'react-router-dom';
 
-const logo = require('../../public/icons/logo_short.jpg');
+const logo = require('../../../public/icons/logo_short.jpg');
 
 import { MenuItemContent } from './MenuItemContent';
 
@@ -21,7 +20,13 @@ export const AppMenu: SFC<{
     <NavLink to="/">
       <img src={logo} width="100%" alt="dranim" />
     </NavLink>
-    <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
+    <Menu theme="dark" defaultSelectedKeys={['start']} mode="inline">
+      <Menu.Item key="start">
+        <NavLink to="/">
+          <Icon type="home" />
+          Start
+        </NavLink>
+      </Menu.Item>
       <Menu.SubMenu
         key="sub1"
         title={

@@ -1,13 +1,13 @@
-import * as React from 'react';
+import React, { SFC } from 'react';
 
 import { DataType, GQLOutputResult, GQLWorkspace } from '@masterthesis/shared';
-import { Card, Col, Row } from 'antd';
+import { Card, Col, Icon, Row } from 'antd';
 import gql from 'graphql-tag';
 import { NavLink, RouteComponentProps } from 'react-router-dom';
 
-import { CustomErrorCard } from '../../components/CustomCards';
 import { HandledQuery } from '../../components/HandledQuery';
 import { VisRenderer } from '../../components/VisRenderer';
+import { UnknownWorkspaceCard } from './DetailPage';
 
 const WORKSPACE = gql`
   query workspace($id: String!) {
@@ -41,7 +41,8 @@ const resultCardSize = (result: GQLOutputResult) =>
 export interface VisDetailPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
-const VisDetailPage: React.SFC<VisDetailPageProps> = ({
+const VisDetailPage: SFC<VisDetailPageProps> = ({
+  history,
   match: {
     params: { workspaceId }
   }
@@ -52,19 +53,16 @@ const VisDetailPage: React.SFC<VisDetailPageProps> = ({
   >
     {({ data: { workspace } }) => {
       if (!workspace) {
-        return (
-          <CustomErrorCard
-            title="Unknown Workspace"
-            description="Workspace doesn't exist."
-          />
-        );
+        return <UnknownWorkspaceCard history={history} />;
       }
 
       if (workspace.results.length === 0) {
         return (
           <Card bordered={false} title="No results present">
             <p>You need to start a calculation with Output nodes first.</p>
-            <NavLink to={'/'}>Go to Editor</NavLink>
+            <NavLink to="./">
+              Go to Editor <Icon type="arrow-right" />
+            </NavLink>
           </Card>
         );
       }

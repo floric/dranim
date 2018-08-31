@@ -1,9 +1,8 @@
-import * as React from 'react';
+import React, { SFC } from 'react';
 
 import { Colors } from '@masterthesis/shared';
 import { Card, Col, Layout, Row } from 'antd';
-import { RouteComponentProps } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 
 import { RegistrationForm } from './forms/RegistrationForm';
 
@@ -20,7 +19,7 @@ const FLEX_SIZE = {
 
 export interface RegistrationPageProps extends RouteComponentProps<{}> {}
 
-const RegistrationPage: React.SFC<RegistrationPageProps> = ({ history }) => (
+const RegistrationPage: SFC<RegistrationPageProps> = ({ history }) => (
   <Layout style={{ minHeight: '100vh' }}>
     <Layout.Content style={{ background: Colors.Background }}>
       <Row>

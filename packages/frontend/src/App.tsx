@@ -1,5 +1,4 @@
-import * as React from 'react';
-
+import React, { Component } from 'react';
 import { Redirect, RouteComponentProps, withRouter } from 'react-router-dom';
 import { Route, Switch } from 'react-router-dom';
 
@@ -13,7 +12,7 @@ const LoggedInApp = getAsyncPage(() => import('./LoggedInApp'));
 
 export interface AppProps extends RouteComponentProps<{}, {}> {}
 
-class App extends React.Component<AppProps> {
+class App extends Component<AppProps> {
   public render() {
     const loggedIn = isLoggedIn();
     return (

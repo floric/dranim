@@ -17,14 +17,14 @@ import { generateErrorResponse, registerRoutes } from './routes';
 
 export const GRAPHQL_ROUTE = '/graphql';
 
-export interface IMainOptions {
+export interface MainOptions {
   env: string;
   port: number;
   frontendDomain: string;
 }
 
 const MAX_UPLOAD_LIMIT = 100 * 1024 * 1024 * 1024;
-const CORS = (options: IMainOptions) => ({
+const CORS = (options: MainOptions) => ({
   maxAge: 600,
   credentials: true,
   origin:
@@ -33,7 +33,7 @@ const CORS = (options: IMainOptions) => ({
       : 'http://localhost:1234'
 });
 
-export const main = async (options: IMainOptions) => {
+export const main = async (options: MainOptions) => {
   const client = await mongoDbClient();
   const db = client.db(process.env.DB_NAME || 'dranim');
   await initDb(db);

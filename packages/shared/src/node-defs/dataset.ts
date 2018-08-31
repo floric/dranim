@@ -49,7 +49,7 @@ export const JoinDatasetsNodeDef: NodeDef<
   outputs: {
     joined: DatasetSocket('Joined')
   },
-  path: ['Dataset', 'Operators'],
+  path: ['Dataset', 'Aggregation'],
   keywords: []
 };
 

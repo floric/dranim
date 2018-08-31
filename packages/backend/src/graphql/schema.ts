@@ -39,35 +39,17 @@ const resolvers: IResolvers<any, ApolloContext> = {
   Upload: GraphQLUpload,
   SocketDefs: new GraphQLScalarType({
     name: 'SocketDefs',
-    parseValue(value: string) {
-      return JSON.parse(value);
-    },
-    serialize(value: SocketDefs<any>) {
-      return JSON.stringify(value);
-    },
-    parseLiteral(ast) {
-      if (ast.kind === 'StringValue') {
-        return JSON.parse(ast.value);
-      }
-
-      return null;
-    }
+    parseValue: (value: string) => JSON.parse(value),
+    serialize: (value: SocketDefs<any>) => JSON.stringify(value),
+    parseLiteral: ast =>
+      ast.kind === 'StringValue' ? JSON.parse(ast.value) : null
   }),
   Meta: new GraphQLScalarType({
     name: 'Meta',
-    parseValue(value: string) {
-      return JSON.parse(value);
-    },
-    serialize(value: SocketMetas<any>) {
-      return JSON.stringify(value);
-    },
-    parseLiteral(ast) {
-      if (ast.kind === 'StringValue') {
-        return JSON.parse(ast.value);
-      }
-
-      return null;
-    }
+    parseValue: (value: string) => JSON.parse(value),
+    serialize: (value: SocketMetas<any>) => JSON.stringify(value),
+    parseLiteral: ast =>
+      ast.kind === 'StringValue' ? JSON.parse(ast.value) : null
   })
 };
 

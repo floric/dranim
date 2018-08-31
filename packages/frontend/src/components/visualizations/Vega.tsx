@@ -1,11 +1,12 @@
+import React, { Component } from 'react';
+
 import { GQLOutputResult } from '@masterthesis/shared';
 import { Col, Row } from 'antd';
-import * as React from 'react';
 import { v4 } from 'uuid';
 import { parse, Spec, View } from 'vega';
 
 import { showNotificationWithIcon } from '../../utils/form';
-import { LoadingCard } from '../CustomCards';
+import { LoadingCard } from '../layout/CustomCards';
 import { NumericProperty } from '../properties/NumericProperty';
 import { SelectProperty } from '../properties/SelectProperty';
 import { VisCard } from './VisCard';
@@ -64,7 +65,7 @@ export const downloadFromUrl = (url: string, fileName: string) => {
   document.body.removeChild(downloadLink);
 };
 
-export class Vega extends React.Component<VegaProps, VegaState> {
+export class Vega extends Component<VegaProps, VegaState> {
   public state: VegaState = {
     properties: propertiesToObj(this.props.content.properties),
     containerId: `c-${v4()}`,

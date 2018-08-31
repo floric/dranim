@@ -200,7 +200,7 @@ const parseCsvFile = async (
 };
 
 const processUpload = async (
-  upload,
+  upload: any,
   ds: Dataset,
   processId: ObjectID,
   reqContext: ApolloContext
@@ -220,45 +220,7 @@ const processUpload = async (
   }
 };
 
-export const uploadEntriesCsv = async (
-  files: Array<any>,
-  datasetId: string,
-  reqContext: ApolloContext
-): Promise<UploadProcess> => {
-  try {
-    const uploadsCollection = getUploadsCollection(reqContext.db);
-    const ds = await tryGetDataset(datasetId, reqContext);
-    const newProcess = {
-      addedEntries: 0,
-      failedEntries: 0,
-      invalidEntries: 0,
-      start: new Date(),
-      state: ProcessState.STARTED,
-      datasetId,
-      fileNames: [],
-      errors: {}
-    };
-    const res = await uploadsCollection.insertOne(newProcess);
-    if (res.result.ok !== 1 || res.insertedCount !== 1) {
-      throw new Error('Creating Upload process failed.');
-    }
-
-    const process: UploadProcess = {
-      id: res.ops[0]._id.toHexString(),
-      ...res.ops[0]
-    };
-    const processId = new ObjectID(process.id);
-
-    await doUploadAsync(ds, processId, files, reqContext);
-
-    return process;
-  } catch (err) {
-    Log.error(err);
-    throw new Error('Upload failed');
-  }
-};
-
-export const doUploadAsync = async (
+const doUploadAsync = async (
   ds: Dataset,
   processId: ObjectID,
   files: Array<any>,
@@ -282,5 +244,46 @@ export const doUploadAsync = async (
       { _id: processId },
       { $set: { state: ProcessState.SUCCESSFUL, finish: new Date() } }
     );
+  }
+};
+
+export const uploadEntriesCsv = async (
+  files: Array<any>,
+  datasetId: string,
+  reqContext: ApolloContext
+): Promise<UploadProcess> => {
+  try {
+    const uploadsCollection = getUploadsCollection(reqContext.db);
+    const ds = await tryGetDataset(datasetId, reqContext);
+    const newProcess = {
+      addedEntries: 0,
+      failedEntries: 0,
+      invalidEntries: 0,
+      start: new Date(),
+      state: ProcessState.STARTED,
+      datasetId,
+      fileNames: [],
+      errors: []
+    };
+    const res = await uploadsCollection.insertOne(newProcess);
+    if (res.result.ok !== 1 || res.insertedCount !== 1) {
+      throw new Error('Creating Upload process failed.');
+    }
+
+    const { _id, ...rest } = res.ops[0];
+
+    const process: UploadProcess = {
+      id: _id.toHexString(),
+      ...rest
+    };
+    const processId = new ObjectID(process.id);
+
+    await doUploadAsync(ds, processId, files, reqContext);
+
+    return process;
+  } catch (err) {
+    console.error(err);
+    Log.error(err);
+    throw new Error('Upload failed');
   }
 };

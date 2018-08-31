@@ -1,4 +1,5 @@
 import { ContextNodeType } from '@masterthesis/shared';
+import deepEqual from 'deep-equal';
 import * as Konva from 'konva';
 
 import { ExplorerEditorProps, ExplorerEditorState } from '../ExplorerEditor';
@@ -71,7 +72,7 @@ const createNodesLayer = (
   nodes
     .filter(
       n =>
-        JSON.stringify(n.contextIds) === JSON.stringify(state.contextIds) &&
+        deepEqual(n.contextIds, state.contextIds) &&
         n.type !== ContextNodeType.INPUT &&
         n.type !== ContextNodeType.OUTPUT
     )
@@ -91,7 +92,7 @@ const createNodesLayer = (
   nodes
     .filter(
       n =>
-        JSON.stringify(n.contextIds) === JSON.stringify(state.contextIds) &&
+        deepEqual(n.contextIds, state.contextIds) &&
         (n.type === ContextNodeType.INPUT || n.type === ContextNodeType.OUTPUT)
     )
     .forEach(n => {
@@ -124,9 +125,7 @@ const createConnectionsLayer = (
   const { openConnection } = state;
 
   connections
-    .filter(
-      c => JSON.stringify(c.contextIds) === JSON.stringify(state.contextIds)
-    )
+    .filter(c => deepEqual(c.contextIds, state.contextIds))
     .forEach(c => {
       const line = renderConnection(
         c,

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 
 import {
   AddValuesNodeDef,
@@ -36,7 +36,7 @@ export const AddValuesNode: ClientNodeDef<
     const values = getFieldValue('values');
     return (
       <>
-        <Row style={{ marginBottom: 8 }} gutter={8}>
+        <Row style={{ marginBottom: '1rem' }} gutter={8}>
           <Col xs={24} lg={6} xxl={6}>
             <Input
               defaultValue={defaultName}

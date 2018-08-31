@@ -9,6 +9,7 @@ import {
   getAllWorkspaces,
   getWorkspace,
   initWorkspaceDb,
+  renameWorkspace,
   tryGetWorkspace,
   updateLastChange,
   updateWorkspace
@@ -97,6 +98,35 @@ describe('Workspaces', () => {
     expect(getConnectionsCollection(db).deleteMany).toHaveBeenCalledTimes(1);
   });
 
+  test('should rename workspace with trimmed name', async () => {
+    const ds = await createWorkspace('test   ', { db, userId: '' });
+
+    const res = await renameWorkspace(ds.id, 'new', { db, userId: '' });
+
+    const dsNew = await tryGetWorkspace(ds.id, { db, userId: '' });
+    expect(res).toBe(true);
+    expect(ds.name).toBe('test');
+    expect(dsNew.name).toBe('new');
+  });
+
+  test('should throw exception when trying to rename workspace with empty name', async () => {
+    const ds = await createWorkspace('test', { db, userId: '' });
+
+    try {
+      await renameWorkspace(ds.id, '', { db, userId: '' });
+    } catch (err) {
+      expect(err.message).toBe('Name must not be empty.');
+    }
+  });
+
+  test('should throw exception for unknown workspace', async () => {
+    try {
+      await renameWorkspace(VALID_OBJECT_ID, 'test', { db, userId: '' });
+    } catch (err) {
+      expect(err.message).toBe('Unknown workspace');
+    }
+  });
+
   test('should throw error when trying to get unknown workspace', async () => {
     try {
       await tryGetWorkspace('test', { db, userId: '123' });
@@ -107,14 +137,10 @@ describe('Workspaces', () => {
   });
 
   test('should try to get unknown workspace', async () => {
-    const ws = await createWorkspace(
-      'test',
-      {
-        db,
-        userId: ''
-      },
-      ''
-    );
+    const ws = await createWorkspace('test', {
+      db,
+      userId: ''
+    });
 
     const res = await tryGetWorkspace(ws.id, { db, userId: '123' });
     expect(res).toEqual(ws);

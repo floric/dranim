@@ -1,15 +1,17 @@
+import React, { SFC } from 'react';
+
 import { GQLWorkspace } from '@masterthesis/shared';
 import { Card, Col } from 'antd';
 import gql from 'graphql-tag';
-import * as React from 'react';
 import { Mutation } from 'react-apollo';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { CardItem } from '../components/CardItem';
-import { cardItemProps, CardsLayout } from '../components/CardsLayout';
 import { HandledQuery } from '../components/HandledQuery';
-import { PageHeaderCard } from '../components/PageHeaderCard';
-import { TimeInfo } from '../components/TimeInfo';
+import { TimeInfo } from '../components/infos/TimeInfo';
+import { CardItem } from '../components/layout/CardItem';
+import { cardItemProps, CardsLayout } from '../components/layout/CardsLayout';
+import { PageHeaderCard } from '../components/layout/PageHeaderCard';
+import { compareByName } from '../utils/data';
 import { tryOperation } from './../utils/form';
 import { CreateWorkspaceForm } from './forms/CreateWorkspaceForm';
 
@@ -44,7 +46,7 @@ const DELETE_WORKSPACE = gql`
 
 export interface WorkspacesOverviewPageProps extends RouteComponentProps<{}> {}
 
-const WorkspacesOverviewPage: React.SFC<WorkspacesOverviewPageProps> = () => (
+const WorkspacesOverviewPage: SFC<WorkspacesOverviewPageProps> = () => (
   <>
     <PageHeaderCard
       title="Workspaces"
@@ -65,45 +67,49 @@ const WorkspacesOverviewPage: React.SFC<WorkspacesOverviewPageProps> = () => (
     <HandledQuery<{ workspaces: Array<GQLWorkspace> }> query={ALL_WORKSPACES}>
       {({ refetch, data: { workspaces } }) => (
         <CardsLayout>
-          {workspaces.map(ws => (
-            <Col {...cardItemProps} key={ws.id}>
-              <Mutation mutation={DELETE_WORKSPACE}>
-                {deleteWorkspace => (
-                  <CardItem
-                    path="/workspaces"
-                    id={ws.id}
-                    name={ws.name}
-                    description={ws.description}
-                    confirmDeleteMessage="Delete Workspace?"
-                    handleDelete={() =>
-                      tryOperation({
-                        op: () =>
-                          deleteWorkspace({
-                            variables: {
-                              id: ws.id
-                            }
-                          }),
-                        refetch,
-                        successTitle: () => 'Workspace deleted',
-                        successMessage: () =>
-                          `Workspace "${ws.name}" deleted successfully.`,
-                        failedTitle: 'Workspace not deleted.',
-                        failedMessage: `Workspace "${ws.name}" deletion failed.`
-                      })
-                    }
-                  >
-                    <TimeInfo text="Created" time={ws.created} />
-                    <TimeInfo text="Last change" time={ws.lastChange} />
-                  </CardItem>
-                )}
-              </Mutation>
-            </Col>
-          ))}
+          {Array.from(workspaces)
+            .sort(compareByName)
+            .map(ws => (
+              <Col {...cardItemProps} key={ws.id}>
+                <Mutation mutation={DELETE_WORKSPACE}>
+                  {deleteWorkspace => (
+                    <CardItem
+                      path="/workspaces"
+                      id={ws.id}
+                      name={ws.name}
+                      description={ws.description}
+                      confirmDeleteMessage="Delete Workspace?"
+                      handleDelete={() =>
+                        tryOperation({
+                          op: () =>
+                            deleteWorkspace({
+                              variables: {
+                                id: ws.id
+                              }
+                            }),
+                          refetch,
+                          successTitle: () => 'Workspace deleted',
+                          successMessage: () =>
+                            `Workspace "${ws.name}" deleted successfully.`,
+                          failedTitle: 'Workspace not deleted.',
+                          failedMessage: `Workspace "${
+                            ws.name
+                          }" deletion failed.`
+                        })
+                      }
+                    >
+                      <TimeInfo text="Created" time={ws.created} />
+                      <TimeInfo text="Last change" time={ws.lastChange} />
+                    </CardItem>
+                  )}
+                </Mutation>
+              </Col>
+            ))}
           <Col
             xs={{ span: 24 }}
             md={{ span: 12 }}
             xl={{ span: 8 }}
-            style={{ marginBottom: 12 }}
+            style={{ marginBottom: '1rem' }}
           >
             <Card bordered={false}>
               <h2>New Workspace</h2>
@@ -111,13 +117,11 @@ const WorkspacesOverviewPage: React.SFC<WorkspacesOverviewPageProps> = () => (
                 {createWorkspace => (
                   <CreateWorkspaceForm
                     handleCreateWorkspace={(name, description) =>
-                      tryOperation({
-                        op: async () => {
-                          await createWorkspace({
+                      tryOperation<any>({
+                        op: () =>
+                          createWorkspace({
                             variables: { name, description }
-                          });
-                          return true;
-                        },
+                          }),
                         refetch,
                         successTitle: () => 'Workspace created',
                         successMessage: () =>

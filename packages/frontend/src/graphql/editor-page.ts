@@ -16,7 +16,7 @@ export const DATASETS = gql`
 `;
 
 export const WORKSPACE_NODE_SELECTION = gql`
-  query dataset($workspaceId: String!) {
+  query workspace($workspaceId: String!) {
     calculations(workspaceId: $workspaceId) {
       id
       start

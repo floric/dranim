@@ -1,3 +1,5 @@
+import React, { SFC } from 'react';
+
 import {
   CalculationProcess,
   GQLCalculationProcess,
@@ -5,7 +7,6 @@ import {
 } from '@masterthesis/shared';
 import { Card, Col, Icon, Row, Table, Tooltip } from 'antd';
 import gql from 'graphql-tag';
-import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { HandledQuery } from '../../components/HandledQuery';
@@ -75,9 +76,7 @@ const schemasColumns = [
 export interface WorkspaceCalculationsPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
-export const WorkspaceCalculationsPage: React.SFC<
-  WorkspaceCalculationsPageProps
-> = ({
+const WorkspaceCalculationsPage: SFC<WorkspaceCalculationsPageProps> = ({
   match: {
     params: { workspaceId }
   }
@@ -112,3 +111,5 @@ export const WorkspaceCalculationsPage: React.SFC<
     }}
   </HandledQuery>
 );
+
+export default WorkspaceCalculationsPage;

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { Component } from 'react';
 
 import { parseNodeForm } from '@masterthesis/shared';
 import { Button, Form } from 'antd';
@@ -20,7 +20,7 @@ export type PropertiesFormState = {
   temp: any;
 };
 
-class PropertiesFormImpl extends React.Component<
+class PropertiesFormImpl extends Component<
   PropertiesFormProps & FormComponentProps,
   PropertiesFormState
 > {

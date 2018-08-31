@@ -23,16 +23,8 @@ export const createDataset = async (
     throw new Error('Name must not be empty');
   }
 
-  const existingDatasetsWithSameName = await collection.findOne({
-    name,
-    userId: reqContext.userId
-  });
-  if (existingDatasetsWithSameName) {
-    throw new Error('Names must be unique');
-  }
-
   const res = await collection.insertOne({
-    name,
+    name: name.trim(),
     userId: reqContext.userId,
     valueschemas: [],
     workspaceId,
@@ -111,6 +103,29 @@ export const tryGetDataset = async (id: string, reqContext: ApolloContext) => {
   }
 
   return ds;
+};
+
+export const renameDataset = async (
+  id: string,
+  name: string,
+  reqContext: ApolloContext
+) => {
+  if (name.length === 0) {
+    throw new Error('Name must not be empty.');
+  }
+
+  const ds = await tryGetDataset(id, reqContext);
+  const collection = getDatasetsCollection(reqContext.db);
+  const res = await collection.updateOne(
+    { _id: new ObjectID(ds.id) },
+    { $set: { name: name.trim() } }
+  );
+
+  if (res.modifiedCount !== 1) {
+    throw new Error('Updating the name has failed.');
+  }
+
+  return true;
 };
 
 export const addValueSchema = async (

@@ -1,9 +1,8 @@
-import * as React from 'react';
+import React, { SFC } from 'react';
 
 import { Colors } from '@masterthesis/shared';
 import { Card, Col, Layout, Row } from 'antd';
-import { RouteComponentProps } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps } from 'react-router-dom';
 
 import { LoginForm } from './forms/LoginForm';
 
@@ -20,7 +19,7 @@ const FLEX_SIZE = {
 
 export interface LoginPageProps extends RouteComponentProps<{}> {}
 
-const LoginPage: React.SFC<LoginPageProps> = ({ history }) => (
+const LoginPage: SFC<LoginPageProps> = ({ history }) => (
   <Layout style={{ minHeight: '100vh' }}>
     <Layout.Content style={{ background: Colors.Background }}>
       <Row>

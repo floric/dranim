@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { Component } from 'react';
 
 import { GQLOutputResult } from '@masterthesis/shared';
 import { Button, Card, Divider, Dropdown, Icon, Menu } from 'antd';
@@ -39,7 +39,7 @@ const generateDownloadMenu = (options: DownloadOptions) => (
   </Menu>
 );
 
-export class VisCard extends React.Component<VisCardProps, VisCardState> {
+export class VisCard extends Component<VisCardProps, VisCardState> {
   public state: VisCardState = {
     showProperties: false
   };
@@ -55,7 +55,7 @@ export class VisCard extends React.Component<VisCardProps, VisCardState> {
       <Card
         title={result.name}
         bordered={false}
-        style={{ marginBottom: 8 }}
+        style={{ marginBottom: '1rem' }}
         extra={
           <Button.Group size="small">
             {properties && (
@@ -85,7 +85,7 @@ export class VisCard extends React.Component<VisCardProps, VisCardState> {
 
         {!!result.description && (
           <>
-            <Divider style={{ marginTop: 8, marginBottom: 8 }} />
+            <Divider style={{ marginTop: '1rem', marginBottom: '1rem' }} />
             <Card.Meta description={result.description} />
           </>
         )}

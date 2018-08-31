@@ -1,3 +1,5 @@
+import React, { Component } from 'react';
+
 import {
   GQLCalculationProcess,
   GQLDataset,
@@ -6,11 +8,9 @@ import {
   SocketInstance
 } from '@masterthesis/shared';
 import { ApolloQueryResult } from 'apollo-client';
-import * as React from 'react';
 import { Mutation, MutationFn } from 'react-apollo';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { CustomErrorCard } from '../../components/CustomCards';
 import { HandledQuery } from '../../components/HandledQuery';
 import { ExplorerEditor } from '../../explorer/ExplorerEditor';
 import {
@@ -26,13 +26,14 @@ import {
 } from '../../graphql/editor-page';
 import { deepCopyResponse, tryOperation } from '../../utils/form';
 import { ProcessRunningCard } from './components/ProcessRunningCard';
+import { UnknownWorkspaceCard } from './DetailPage';
 
 const POLLING_FREQUENCY = 5000;
 
 export interface WorkspaceEditorPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
-export class WorkspaceEditorPage extends React.Component<
+export default class WorkspaceEditorPage extends Component<
   WorkspaceEditorPageProps
 > {
   private handleNodeCreate = (
@@ -154,6 +155,7 @@ export class WorkspaceEditorPage extends React.Component<
 
   public render() {
     const {
+      history,
       match: {
         params: { workspaceId }
       }
@@ -183,12 +185,7 @@ export class WorkspaceEditorPage extends React.Component<
               stopPolling
             }) => {
               if (!workspace) {
-                return (
-                  <CustomErrorCard
-                    title="Unknown workspace"
-                    description="Workspace doesn't exist."
-                  />
-                );
+                return <UnknownWorkspaceCard history={history} />;
               }
 
               const inprocessCalculations = calculations.filter(

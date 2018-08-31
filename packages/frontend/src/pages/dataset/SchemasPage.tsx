@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { SFC } from 'react';
 
 import { Colors, GQLDataset } from '@masterthesis/shared';
 import { Card, Col, Row, Table, Tag } from 'antd';
@@ -34,10 +34,7 @@ export interface DataSchemasProps {
   refetch: () => Promise<ApolloQueryResult<any>>;
 }
 
-export const DataSchemas: React.SFC<DataSchemasProps> = ({
-  refetch,
-  dataset
-}) => {
+export const DataSchemas: SFC<DataSchemasProps> = ({ refetch, dataset }) => {
   const schemasDataSource = dataset.valueschemas.map(e => ({
     key: e.name,
     type: e.type,
@@ -82,7 +79,7 @@ export const DataSchemas: React.SFC<DataSchemasProps> = ({
 
   return (
     <>
-      <Row style={{ marginBottom: 12 }}>
+      <Row style={{ marginBottom: '1rem' }}>
         <Col>
           <Card bordered={false}>
             <h3>Add Value Schema</h3>
@@ -118,21 +115,24 @@ export const DataSchemas: React.SFC<DataSchemasProps> = ({
           </Card>
         </Col>
       </Row>
+
       <Row>
-        <Col style={{ marginBottom: 12 }}>
-          <Card bordered={false}>
-            <Row style={{ marginBottom: 12 }}>
-              <Col>
-                <h3>Value Schemas</h3>
-                <Table
-                  size="small"
-                  pagination={false}
-                  dataSource={schemasDataSource}
-                  columns={schemasColumns}
-                />
-              </Col>
-            </Row>
-          </Card>
+        <Col style={{ marginBottom: '1rem' }}>
+          {schemasDataSource.length > 0 ? (
+            <Card bordered={false}>
+              <h3>Value Schemas</h3>
+              <Table
+                size="small"
+                pagination={false}
+                dataSource={schemasDataSource}
+                columns={schemasColumns}
+              />
+            </Card>
+          ) : (
+            <Card bordered={false} title="No Value Schemas present">
+              You need to add Value Schemas first.
+            </Card>
+          )}
         </Col>
       </Row>
     </>

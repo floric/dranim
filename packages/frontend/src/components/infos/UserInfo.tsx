@@ -1,11 +1,11 @@
-import * as React from 'react';
+import React, { Component } from 'react';
 
 import { User } from '@masterthesis/shared';
 import { Button, Icon, Tooltip } from 'antd';
 import gql from 'graphql-tag';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { HandledQuery } from './HandledQuery';
+import { HandledQuery } from '../HandledQuery';
 
 export const USER = gql`
   {
@@ -17,10 +17,8 @@ export const USER = gql`
   }
 `;
 
-class UserInfoImpl extends React.Component<RouteComponentProps<{}>, {}> {
-  private handleLogout = () => {
-    this.props.history.push('/logout');
-  };
+class UserInfoImpl extends Component<RouteComponentProps<{}>, {}> {
+  private handleLogout = () => this.props.history.push('/logout');
 
   public render() {
     return (

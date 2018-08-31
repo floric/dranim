@@ -9,6 +9,7 @@ import {
   deleteDataset,
   getAllDatasets,
   getDataset,
+  renameDataset,
   saveTemporaryDataset,
   tryGetDataset
 } from '../../../src/main/workspace/dataset';
@@ -223,23 +224,6 @@ describe('Dataset', () => {
     }
   });
 
-  test('should not create dataset with already used name', async () => {
-    await createDataset('test', {
-      db,
-      userId: ''
-    });
-
-    try {
-      await createDataset('test', {
-        db,
-        userId: ''
-      });
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Names must be unique');
-    }
-  });
-
   test('should return all datasets', async () => {
     const [dsA, dsB, dsC] = await Promise.all([
       createDataset('test', {
@@ -273,6 +257,37 @@ describe('Dataset', () => {
   test('should throw error for unknown dataset', async () => {
     try {
       await tryGetDataset(VALID_OBJECT_ID, { db, userId: '' });
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Unknown dataset');
+    }
+  });
+
+  test('should rename dataset with trimmed name', async () => {
+    const ds = await createDataset('test   ', { db, userId: '' });
+
+    const res = await renameDataset(ds.id, 'new', { db, userId: '' });
+
+    const dsNew = await tryGetDataset(ds.id, { db, userId: '' });
+    expect(res).toBe(true);
+    expect(ds.name).toBe('test');
+    expect(dsNew.name).toBe('new');
+  });
+
+  test('should throw exception when trying to rename dataset with empty name', async () => {
+    const ds = await createDataset('test', { db, userId: '' });
+
+    try {
+      await renameDataset(ds.id, '', { db, userId: '' });
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Name must not be empty.');
+    }
+  });
+
+  test('should throw exception for unknown dataset', async () => {
+    try {
+      await renameDataset(VALID_OBJECT_ID, 'test', { db, userId: '' });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unknown dataset');

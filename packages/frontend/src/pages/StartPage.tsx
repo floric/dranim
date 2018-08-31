@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { SFC } from 'react';
 
 import { Card, Col, Divider, Icon, List, Row } from 'antd';
 import { distanceInWordsToNow } from 'date-fns';
@@ -6,7 +6,7 @@ import gql from 'graphql-tag';
 import { Mutation } from 'react-apollo';
 
 import { AsyncButton } from '../components/AsyncButton';
-import { PageHeaderCard } from '../components/PageHeaderCard';
+import { PageHeaderCard } from '../components/layout/PageHeaderCard';
 import { client } from '../io/apollo-client';
 
 const CREATE_DEMO_DATA = gql`
@@ -28,6 +28,13 @@ const news = [
     title: 'Next Milestone',
     description:
       'Add more neded nodes and improve calculation progress reporting.'
+  },
+  {
+    type: NewsType.FEATURE,
+    date: new Date(2018, 7, 31),
+    title: 'Added support for CSV download of Entries',
+    description:
+      'Entries of Datasets can now be downloaded as CSV streams to process them in Excel or other applications with support for CSV files.'
   },
   {
     type: NewsType.FEATURE,
@@ -104,7 +111,7 @@ const renderCreateExampleButton = (type: string) => (
   </Mutation>
 );
 
-const StartPage: React.SFC = () => (
+const StartPage: SFC = () => (
   <>
     <PageHeaderCard
       title="Start"

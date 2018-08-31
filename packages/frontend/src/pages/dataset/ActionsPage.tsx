@@ -1,8 +1,14 @@
-import { GQLDataset, GQLUploadProcess, ProcessState, UploadProcess } from '@masterthesis/shared';
-import { Button, Card, Col, Form, Icon, Row, Table, Upload } from 'antd';
+import React, { Component } from 'react';
+
+import {
+  GQLDataset,
+  GQLUploadProcess,
+  ProcessState,
+  UploadProcess
+} from '@masterthesis/shared';
+import { Button, Card, Col, Icon, Row, Table, Upload } from 'antd';
 import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
-import * as React from 'react';
 import {
   Mutation,
   MutationFn,
@@ -14,6 +20,7 @@ import { UploadFile } from 'antd/lib/upload/interface';
 import { AsyncButton } from '../../components/AsyncButton';
 import { HandledQuery } from '../../components/HandledQuery';
 import { ProcessTime } from '../../components/ProcessTime';
+import { API_URL } from '../../io/apollo-client';
 import { tryOperation } from '../../utils/form';
 
 const UPLOAD_ENTRIES_CSV = gql`
@@ -41,6 +48,10 @@ export const ALL_UPLOADS = gql`
       failedEntries
       invalidEntries
     }
+    dataset(id: $datasetId) {
+      id
+      entriesCount
+    }
   }
 `;
 
@@ -55,7 +66,7 @@ export interface DataActionsState {
 }
 
 export const DataActionsPage = withApollo<DataActionsPageProps>(
-  class DatasetActionsImpl extends React.Component<
+  class DatasetActionsImpl extends Component<
     DataActionsPageProps & WithApolloClient<{}>,
     DataActionsState
   > {
@@ -73,7 +84,7 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
       const { fileList } = this.state;
       const { dataset, client } = this.props;
 
-      tryOperation({
+      await tryOperation({
         op: async () => {
           await this.setState({
             uploading: true,
@@ -121,35 +132,53 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
       multiple: true
     });
 
+    private downloadCsv = (id: string) => {
+      const a = document.createElement('a');
+      a.href = `${API_URL}/downloads?dsId=${id}`;
+      a.download = 'download.csv';
+      a.click();
+    };
+
     public render() {
-      const { dataset } = this.props;
+      const {
+        dataset: { id }
+      } = this.props;
       const { uploading } = this.state;
 
       return (
-        <HandledQuery<{ uploads: Array<GQLUploadProcess> }, { datasetId: string }>
-          query={ALL_UPLOADS}
-          variables={{ datasetId: dataset.id }}
+        <HandledQuery<
+          { uploads: Array<GQLUploadProcess>; dataset: GQLDataset },
+          { datasetId: string }
         >
-          {({ data: { uploads } }) => (
+          query={ALL_UPLOADS}
+          variables={{ datasetId: id }}
+        >
+          {({
+            data: {
+              uploads,
+              dataset: { entriesCount }
+            }
+          }) => (
             <>
               <Row gutter={12}>
                 <Col
                   xs={{ span: 24 }}
                   md={{ span: 12 }}
                   xl={{ span: 8 }}
-                  style={{ marginBottom: 12 }}
+                  style={{ marginBottom: '1rem' }}
                 >
                   <Card bordered={false}>
                     <h3>Import</h3>
-                    <Mutation mutation={UPLOAD_ENTRIES_CSV}>
+                    <Mutation
+                      mutation={UPLOAD_ENTRIES_CSV}
+                      context={{ hasUpload: true }}
+                    >
                       {uploadEntriesCsv => (
                         <>
-                          <Row style={{ marginBottom: 12 }}>
+                          <Row style={{ marginBottom: '1rem' }}>
                             <Col>
                               <Upload {...this.getUploadProps()}>
-                                <Button>
-                                  <Icon type="upload" /> Select CSV file
-                                </Button>
+                                <Button icon="upload">Select CSV file</Button>
                               </Upload>
                             </Col>
                             <Col>
@@ -173,38 +202,21 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
                   xs={{ span: 24 }}
                   md={{ span: 12 }}
                   xl={{ span: 8 }}
-                  style={{ marginBottom: 12 }}
+                  style={{ marginBottom: '1rem' }}
                 >
                   <Card bordered={false}>
                     <h3>Export</h3>
-                    <Row>
-                      <Col>
-                        <Form layout="inline">
-                          <Form.Item label="Export entries">
-                            <Row gutter={12}>
-                              <Col span={12}>
-                                <AsyncButton
-                                  type="primary"
-                                  disabled
-                                  onClick={async () => 0}
-                                >
-                                  as CSV
-                                </AsyncButton>
-                              </Col>
-                              <Col span={12}>
-                                <AsyncButton
-                                  type="primary"
-                                  disabled
-                                  onClick={async () => 0}
-                                >
-                                  as ZIP
-                                </AsyncButton>
-                              </Col>
-                            </Row>
-                          </Form.Item>
-                        </Form>
-                      </Col>
-                    </Row>
+                    {entriesCount > 0 ? (
+                      <Button
+                        type="primary"
+                        icon="download"
+                        onClick={() => this.downloadCsv(id)}
+                      >
+                        CSV
+                      </Button>
+                    ) : (
+                      'No Entries present.'
+                    )}
                   </Card>
                 </Col>
               </Row>

@@ -1,13 +1,13 @@
-import * as React from 'react';
-import { SFC } from 'react';
+import React, { SFC } from 'react';
 
 import { Colors } from '@masterthesis/shared';
 import { Button, Card, Col, Divider, Modal, Row, Tooltip } from 'antd';
 import { css } from 'glamor';
-import { UserInfo } from './UserInfo';
+
+import { UserInfo } from '../infos/UserInfo';
 
 export interface PageHeaderProps {
-  title: string;
+  title: JSX.Element | string;
   typeTitle?: string;
   marginBottom?: 'small' | 'big' | 'none';
   helpContent?: JSX.Element;
@@ -45,17 +45,24 @@ export const PageHeaderCard: SFC<PageHeaderProps> = ({
     <Row type="flex" justify="space-around" align="middle">
       <Col xs={24} sm={12} md={16} xl={18}>
         <h1 {...css({ marginBottom: 0 })}>
-          {title}
-          {typeTitle ? (
-            <>
-              <Divider type="vertical" />
-              <span
-                {...css({ color: Colors.GrayMedium, fontWeight: 'initial' })}
-              >
-                {typeTitle}
-              </span>
-            </>
-          ) : null}
+          <Row type="flex" align="middle">
+            <Col>{title}</Col>
+            <Col>
+              {typeTitle ? (
+                <Col>
+                  <Divider type="vertical" />
+                  <span
+                    {...css({
+                      color: Colors.GrayMedium,
+                      fontWeight: 'initial'
+                    })}
+                  >
+                    {typeTitle}
+                  </span>
+                </Col>
+              ) : null}
+            </Col>
+          </Row>
         </h1>
       </Col>
 

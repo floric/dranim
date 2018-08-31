@@ -25,14 +25,11 @@ import {
 import {
   addConnection,
   addOrUpdateFormValue,
-  addOrUpdateVariable,
-  deleteVariable,
   getContextInputDefs,
   getContextOutputDefs,
   getInputDefs,
   getOutputDefs,
-  removeConnection,
-  setProgress
+  removeConnection
 } from '../../../src/main/workspace/nodes-detail';
 import { updateStates } from '../../../src/main/workspace/nodes-state';
 import {
@@ -595,66 +592,6 @@ describe('Node Details', () => {
       null
     );
     expect(res).toEqual({});
-  });
-
-  test('should set progress', async () => {
-    (getNodesCollection as jest.Mock).mockReturnValue({
-      updateOne: jest.fn()
-    });
-
-    let res = await setProgress(VALID_OBJECT_ID, 0.5, {
-      db,
-      userId: ''
-    });
-    expect(res).toBe(true);
-
-    res = await setProgress(VALID_OBJECT_ID, 0, {
-      db,
-      userId: ''
-    });
-    expect(res).toBe(true);
-
-    res = await setProgress(VALID_OBJECT_ID, 1, {
-      db,
-      userId: ''
-    });
-    expect(res).toBe(true);
-
-    res = await setProgress(null, 1, {
-      db,
-      userId: ''
-    });
-    expect(res).toBe(true);
-
-    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(4);
-  });
-
-  test('should throw for invalid progress value', async () => {
-    (getNodesCollection as jest.Mock).mockReturnValue({
-      updateOne: jest.fn()
-    });
-
-    try {
-      await setProgress(VALID_OBJECT_ID, 1.2, {
-        db,
-        userId: ''
-      });
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Invalid progress value');
-    }
-
-    try {
-      await setProgress(VALID_OBJECT_ID, -0.2, {
-        db,
-        userId: ''
-      });
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Invalid progress value');
-    }
-
-    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(0);
   });
 
   test('should add and remove connection from  node', async () => {

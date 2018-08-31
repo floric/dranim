@@ -1,7 +1,10 @@
-import * as React from 'react';
+import React from 'react';
 
 import { asyncComponent } from 'react-async-component';
-import { LoadingCard, UnknownErrorCard } from '../components/CustomCards';
+import {
+  LoadingCard,
+  UnknownErrorCard
+} from '../components/layout/CustomCards';
 
 export const getAsyncPage = (importFn: () => any) =>
   asyncComponent({

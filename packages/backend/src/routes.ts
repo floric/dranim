@@ -3,6 +3,8 @@ import { Db } from 'mongodb';
 
 import { Log } from './logging';
 import { login, register } from './main/users/management';
+import { getDataset } from './main/workspace/dataset';
+import { getEntryCollection } from './main/workspace/entry';
 
 export const generateErrorResponse = (message: string) =>
   JSON.stringify({ error: { message } });
@@ -12,6 +14,7 @@ export const registerRoutes = (app: Express, db: Db) => {
   registerLogin(app, db);
   registerLogout(app);
   registerRegistration(app, db);
+  registerDatasetDownloads(app, db);
 };
 
 const registerHealthEndpoint = (app: Express) => {
@@ -67,7 +70,7 @@ const registerLogout = (app: Express) => {
 };
 
 const registerLogin = (app: Express, db: Db) => {
-  app.post('/login', async (req, res, next) => {
+  app.post('/login', async (req, res) => {
     if (!req.body || !req.body.mail || !req.body.pw) {
       res.status(301).send(generateErrorResponse('Invalid request'));
     }
@@ -78,6 +81,41 @@ const registerLogin = (app: Express, db: Db) => {
     if (result) {
       (req.session as any).userId = result.id;
       res.status(200).send(JSON.stringify(result));
+    } else {
+      res
+        .status(401)
+        .send(generateErrorResponse('Login to access this resource'));
+    }
+  });
+};
+
+const registerDatasetDownloads = (app: Express, db: Db) => {
+  app.get('/downloads', async (req, res, next) => {
+    if (req.session) {
+      const dsId = req.query.dsId;
+      const ds = await getDataset(dsId, { db, userId: req.session.userId });
+      if (!ds) {
+        res.status(404).send();
+        return;
+      }
+
+      res.setHeader('content-type', 'text/csv');
+      res.setHeader(
+        'Content-disposition',
+        `attachment;filename=${ds.name}.csv`
+      );
+
+      const coll = getEntryCollection(dsId, db);
+      const cursor = coll.find();
+      cursor.on('data', elem => {
+        const valuesArr = Object.keys(elem.values)
+          .map(n => JSON.stringify(elem.values[n]))
+          .join(',');
+        res.write(`${valuesArr}\n`);
+      });
+      cursor.on('end', () => {
+        res.end();
+      });
     } else {
       res
         .status(401)

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { Component, SFC } from 'react';
 
 import { Button, Popconfirm, Tooltip } from 'antd';
 import { ButtonProps } from 'antd/lib/button';
@@ -22,7 +22,7 @@ type FullWidthButtonProps = {
   tooltip?: string;
 } & AsyncButtonProps;
 
-const FullWidthButton: React.SFC<FullWidthButtonProps> = ({
+const FullWidthButton: SFC<FullWidthButtonProps> = ({
   children,
   style,
   handleClick,
@@ -31,25 +31,13 @@ const FullWidthButton: React.SFC<FullWidthButtonProps> = ({
   ...props
 }) => (
   <Tooltip title={tooltip} mouseEnterDelay={1} defaultVisible={false}>
-    <Button
-      style={{
-        ...style,
-        ...{
-          width: fullWidth ? '100%' : style ? style.width : undefined
-        }
-      }}
-      onClick={handleClick}
-      {...props}
-    >
+    <Button style={style} block={fullWidth} onClick={handleClick} {...props}>
       {children}
     </Button>
   </Tooltip>
 );
 
-export class AsyncButton extends React.Component<
-  AsyncButtonProps,
-  AsyncButtonState
-> {
+export class AsyncButton extends Component<AsyncButtonProps, AsyncButtonState> {
   private mounted = false;
 
   public state: AsyncButtonState = { isLoading: false };

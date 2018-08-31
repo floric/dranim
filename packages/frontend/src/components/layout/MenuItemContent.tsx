@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { SFC } from 'react';
+import React, { SFC } from 'react';
 
 import { Icon } from 'antd';
 import { NavLink } from 'react-router-dom';

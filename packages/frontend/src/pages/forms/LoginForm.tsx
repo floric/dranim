@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { Component } from 'react';
 
 import { Button, Form, Icon, Input } from 'antd';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
@@ -12,7 +12,7 @@ export type LoginFormProps = {
 };
 export type LoginFormState = { isLoading: boolean };
 
-class LoginFormImpl extends React.Component<LoginFormProps, LoginFormState> {
+class LoginFormImpl extends Component<LoginFormProps, LoginFormState> {
   public state: LoginFormState = { isLoading: false };
 
   private handleSubmit = e => {

@@ -1,15 +1,21 @@
+import React, { SFC } from 'react';
+
 import { GQLWorkspace } from '@masterthesis/shared';
-import { Tabs } from 'antd';
+import { Button } from 'antd';
 import { css } from 'glamor';
 import gql from 'graphql-tag';
-import * as React from 'react';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { History } from 'history';
+import { Mutation } from 'react-apollo';
+import { RouteComponentProps } from 'react-router-dom';
 
-import { CustomErrorCard } from '../../components/CustomCards';
 import { HandledQuery } from '../../components/HandledQuery';
-import { PageHeaderCard } from '../../components/PageHeaderCard';
-import { WorkspaceCalculationsPage } from './CalculationsPage';
-import { WorkspaceEditorPage } from './EditorPage';
+import { CustomErrorCard } from '../../components/layout/CustomCards';
+import { PageHeaderCard } from '../../components/layout/PageHeaderCard';
+import { EditableText } from '../../components/properties/EditableText';
+import { RoutedTabs } from '../../components/RoutedTabs';
+import { tryOperation } from '../../utils/form';
+import WorkspaceCalculationsPage from './CalculationsPage';
+import WorkspaceEditorPage from './EditorPage';
 import VisDetailPage from './VisDetailPage';
 
 const WORKSPACE = gql`
@@ -21,39 +27,48 @@ const WORKSPACE = gql`
   }
 `;
 
+const RENAME_WORKSPACE = gql`
+  mutation renameWorkspace($id: String!, $name: String!) {
+    renameWorkspace(id: $id, name: $name)
+  }
+`;
+
+export const UnknownWorkspaceCard: SFC<{ history: History }> = ({
+  history
+}) => (
+  <CustomErrorCard
+    title="Unknown Workspace"
+    description="Workspace doesn't exist."
+    actions={
+      <Button
+        type="primary"
+        icon="plus"
+        onClick={() => history.push('/workspaces')}
+      >
+        Create Workspace
+      </Button>
+    }
+  />
+);
+
 export interface WorkspacesPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
-const WorkspacesPage: React.SFC<WorkspacesPageProps> = ({
+const WorkspacesPage: SFC<WorkspacesPageProps> = ({
   match: {
-    url,
-    path,
     params: { workspaceId }
   },
-  history,
-  location: { pathname }
+  match,
+  location,
+  history
 }) => (
   <HandledQuery<{ workspace: GQLWorkspace | null }, { id: string }>
     query={WORKSPACE}
     variables={{ id: workspaceId }}
   >
-    {({ data: { workspace } }) => {
+    {({ data: { workspace }, refetch }) => {
       if (!workspace) {
-        return (
-          <CustomErrorCard
-            title="Unknown workspace"
-            description="Workspace doesn't exist."
-          />
-        );
-      }
-
-      let activeKey = 'editor';
-      const pathSegments = pathname.split('/');
-      const lastSegment = pathSegments[pathSegments.length - 1];
-      if (lastSegment === 'calculations') {
-        activeKey = 'calculations';
-      } else if (lastSegment === 'results') {
-        activeKey = 'results';
+        return <UnknownWorkspaceCard history={history} />;
       }
 
       return (
@@ -64,45 +79,67 @@ const WorkspacesPage: React.SFC<WorkspacesPageProps> = ({
             flexDirection: 'column'
           })}
         >
-          <PageHeaderCard
-            title={workspace.name}
-            typeTitle="Workspace"
-            helpContent={
-              <p>
-                Each Workspace contains an <strong>Explorer</strong> for data
-                manipulation and creating outputs from the given data. Outputs
-                are shown in the Results tab.
-              </p>
-            }
-          />
-          <Tabs
-            activeKey={activeKey}
-            onChange={name => {
-              if (name === 'editor') {
-                history.push(`${url}`);
-              } else if (name === 'calculations') {
-                history.push(`${url}/calculations`);
-              } else if (name === 'results') {
-                history.push(`${url}/results`);
+          <Mutation mutation={RENAME_WORKSPACE}>
+            {renameWorkspace => (
+              <PageHeaderCard
+                title={
+                  <EditableText
+                    text={workspace.name}
+                    onChange={name =>
+                      tryOperation({
+                        op: () =>
+                          renameWorkspace({
+                            variables: { id: workspace.id, name }
+                          }),
+                        refetch,
+                        successTitle: () => 'Name updated',
+                        successMessage: () => `Name updated successfully.`,
+                        failedTitle: 'Name update failed',
+                        failedMessage: `Name not updated.`
+                      })
+                    }
+                  />
+                }
+                typeTitle="Workspace"
+                helpContent={
+                  <p>
+                    Each Workspace contains an <strong>Explorer</strong> for
+                    data manipulation and creating outputs from the given data.
+                    Outputs are shown in the Results tab.
+                  </p>
+                }
+              />
+            )}
+          </Mutation>
+          <RoutedTabs
+            match={match}
+            history={history}
+            location={location}
+            panes={[
+              {
+                name: 'Editor',
+                key: 'editor',
+                content: (
+                  <WorkspaceEditorPage {...{ match, location, history }} />
+                )
+              },
+              {
+                name: 'Calculations',
+                key: 'calculations',
+                content: (
+                  <WorkspaceCalculationsPage
+                    {...{ match, location, history }}
+                  />
+                )
+              },
+              {
+                name: 'Results',
+                key: 'results',
+                content: <VisDetailPage {...{ match, location, history }} />
               }
-            }}
-            type="card"
-            animated={{ inkBar: true, tabPane: false }}
-            tabBarStyle={{ marginBottom: 0 }}
-          >
-            <Tabs.TabPane forceRender tab="Editor" key="editor" />
-            <Tabs.TabPane forceRender tab="Calculations" key="calculations" />
-            <Tabs.TabPane forceRender tab="Results" key="results" />
-          </Tabs>
-          <Switch>
-            <Route exact path={`${path}`} component={WorkspaceEditorPage} />
-            <Route
-              exact
-              path={`${path}/calculations`}
-              component={WorkspaceCalculationsPage}
-            />
-            <Route exact path={`${path}/results`} component={VisDetailPage} />
-          </Switch>
+            ]}
+            defaultKey="editor"
+          />
         </div>
       );
     }}

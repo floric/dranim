@@ -13,7 +13,7 @@ import { executeNode } from '../calculation/execution';
 import { addOrUpdateResult } from '../dashboards/results';
 import { getNodeType, hasNodeType } from '../nodes/all-nodes';
 import { clearGeneratedDatasets } from '../workspace/dataset';
-import { getAllNodes, resetProgress } from '../workspace/nodes';
+import { getAllNodes } from '../workspace/nodes';
 
 export const CANCEL_CHECKS_MS = 5000;
 
@@ -198,7 +198,6 @@ const updateFinishedProcess = async (
     }`
   );
 
-  await resetProgress(workspaceId, reqContext);
   await clearGeneratedDatasets(workspaceId, reqContext);
 };
 
