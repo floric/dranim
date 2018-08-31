@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { Component } from 'react';
 
 import { DataType, Values, ValueSchema } from '@masterthesis/shared';
 import {
@@ -23,7 +23,7 @@ export interface CreateEntryFormProps extends FormComponentProps {
 
 export type CreateEntryFormState = { saving: boolean };
 
-class CreateEntryFormImpl extends React.Component<
+class CreateEntryFormImpl extends Component<
   CreateEntryFormProps,
   CreateEntryFormState
 > {

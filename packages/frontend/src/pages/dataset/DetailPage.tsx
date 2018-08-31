@@ -1,16 +1,17 @@
+import React, { Component, SFC } from 'react';
+
 import { GQLDataset } from '@masterthesis/shared';
-import { Button, Divider, Steps, Tabs } from 'antd';
+import { Button, Divider, Steps } from 'antd';
 import gql from 'graphql-tag';
 import { History } from 'history';
-import * as React from 'react';
-import { Component, SFC } from 'react';
 import { Mutation } from 'react-apollo';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { CustomErrorCard } from '../../components/CustomCards';
-import { EditableText } from '../../components/EditableText';
 import { HandledQuery } from '../../components/HandledQuery';
-import { PageHeaderCard } from '../../components/PageHeaderCard';
+import { CustomErrorCard } from '../../components/layout/CustomCards';
+import { PageHeaderCard } from '../../components/layout/PageHeaderCard';
+import { EditableText } from '../../components/properties/EditableText';
+import { RoutedTabs } from '../../components/RoutedTabs';
 import { tryOperation } from '../../utils/form';
 import { DataActionsPage } from './ActionsPage';
 import { DataEntriesPage } from './EntriesPage';
@@ -59,6 +60,8 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
   public render() {
     const {
       history,
+      match,
+      location,
       match: {
         params: { id }
       }
@@ -79,6 +82,8 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
               />
             );
           }
+
+          const step = getCurrentStep(dataset);
 
           return (
             <>
@@ -119,15 +124,21 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
                       </>
                     }
                     endContent={
-                      getCurrentStep(dataset) !== 3 ? (
+                      step !== 3 ? (
                         <>
                           <Divider
                             style={{ marginTop: '1rem', marginBottom: '1rem' }}
                           />
-                          <Steps current={getCurrentStep(dataset)} size="small">
+                          <Steps current={step} size="small">
                             <Steps.Step title="Dataset created" />
-                            <Steps.Step title="Schemas specified" />
-                            <Steps.Step title="Entries created or uploaded" />
+                            <Steps.Step
+                              title={
+                                step < 2
+                                  ? 'Specify Schemas'
+                                  : 'Schemas specified'
+                              }
+                            />
+                            <Steps.Step title="Create or upload entries" />
                           </Steps>
                         </>
                       ) : null
@@ -135,27 +146,33 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
                   />
                 )}
               </Mutation>
-              <Tabs
-                type="card"
-                animated={{ inkBar: true, tabPane: false }}
-                tabBarStyle={{ marginBottom: 0 }}
-              >
-                <Tabs.TabPane
-                  tab={`${dataset.valueschemas.length} Schemas`}
-                  key="schemas"
-                >
-                  <DataSchemas dataset={dataset} refetch={refetch} />
-                </Tabs.TabPane>
-                <Tabs.TabPane
-                  tab={`${dataset.entriesCount} Entries`}
-                  key="entries"
-                >
-                  <DataEntriesPage dataset={dataset} refetch={refetch} />
-                </Tabs.TabPane>
-                <Tabs.TabPane tab="Import / Export" key="actions">
-                  <DataActionsPage dataset={dataset} refetch={refetch} />
-                </Tabs.TabPane>
-              </Tabs>
+              <RoutedTabs
+                match={match}
+                history={history}
+                location={location}
+                panes={[
+                  {
+                    name: `${dataset.valueschemas.length} Schemas`,
+                    key: 'schemas',
+                    content: <DataSchemas dataset={dataset} refetch={refetch} />
+                  },
+                  {
+                    name: `${dataset.entriesCount} Entries`,
+                    key: 'entries',
+                    content: (
+                      <DataEntriesPage dataset={dataset} refetch={refetch} />
+                    )
+                  },
+                  {
+                    name: 'Import / Export',
+                    key: 'actions',
+                    content: (
+                      <DataActionsPage dataset={dataset} refetch={refetch} />
+                    )
+                  }
+                ]}
+                defaultKey="schemas"
+              />
             </>
           );
         }}

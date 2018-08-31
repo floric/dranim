@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { Component } from 'react';
 
 import { Button, Form, Icon, Input } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
@@ -11,7 +11,7 @@ export interface CreateDataSetFormProps extends FormComponentProps {
 
 export type CreateDataSetFormState = { saving: boolean };
 
-class CreateDataSetFormImpl extends React.Component<
+class CreateDataSetFormImpl extends Component<
   CreateDataSetFormProps,
   CreateDataSetFormState
 > {

@@ -1,11 +1,12 @@
+import React, { SFC } from 'react';
+
 import { DataType, GQLOutputResult, GQLWorkspace } from '@masterthesis/shared';
 import { Card, Col, Icon, Row } from 'antd';
 import gql from 'graphql-tag';
-import * as React from 'react';
 import { NavLink, RouteComponentProps } from 'react-router-dom';
 
-import { CustomErrorCard } from '../../components/CustomCards';
 import { HandledQuery } from '../../components/HandledQuery';
+import { CustomErrorCard } from '../../components/layout/CustomCards';
 import { VisRenderer } from '../../components/VisRenderer';
 import { goUp } from '../../utils/navigation';
 
@@ -41,7 +42,7 @@ const resultCardSize = (result: GQLOutputResult) =>
 export interface VisDetailPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
-const VisDetailPage: React.SFC<VisDetailPageProps> = ({
+const VisDetailPage: SFC<VisDetailPageProps> = ({
   match: {
     url,
     params: { workspaceId }

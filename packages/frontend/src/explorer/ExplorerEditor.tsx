@@ -1,3 +1,5 @@
+import React, { Component, createRef, RefObject } from 'react';
+
 import {
   Colors,
   ConnectionInstance,
@@ -7,8 +9,8 @@ import {
   SocketInstance
 } from '@masterthesis/shared';
 import { Button, Card, Cascader, Col, Row } from 'antd';
+import deepEqual from 'deep-equal';
 import { css } from 'glamor';
-import * as React from 'react';
 
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { AsyncButton } from '../components/AsyncButton';
@@ -64,13 +66,11 @@ export interface ExplorerEditorState {
   addNodeOpen: boolean;
 }
 
-export class ExplorerEditor extends React.Component<
+export class ExplorerEditor extends Component<
   ExplorerEditorProps,
   ExplorerEditorState
 > {
-  private addNodeSearch: React.RefObject<Cascader> = React.createRef<
-    Cascader
-  >();
+  private addNodeSearch: RefObject<Cascader> = createRef<Cascader>();
 
   public state: ExplorerEditorState = {
     openConnection: null,
@@ -88,8 +88,8 @@ export class ExplorerEditor extends React.Component<
     prevState: ExplorerEditorState
   ) {
     if (
-      JSON.stringify(prevProps) !== JSON.stringify(this.props) ||
-      JSON.stringify(prevState) !== JSON.stringify(this.state)
+      !deepEqual(prevProps, this.props) ||
+      !deepEqual(prevState, this.state)
     ) {
       this.updateCanvas();
     }
@@ -214,7 +214,7 @@ export class ExplorerEditor extends React.Component<
               <Card
                 bordered={false}
                 title={nodeType ? nodeType.name : undefined}
-                style={{ marginBottom: 12 }}
+                style={{ marginBottom: '1rem' }}
               >
                 <Row gutter={12} type="flex" justify="space-between">
                   <Col>

@@ -1,3 +1,5 @@
+import React, { Component } from 'react';
+
 import {
   GQLCalculationProcess,
   GQLDataset,
@@ -6,12 +8,11 @@ import {
   SocketInstance
 } from '@masterthesis/shared';
 import { ApolloQueryResult } from 'apollo-client';
-import * as React from 'react';
 import { Mutation, MutationFn } from 'react-apollo';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { CustomErrorCard } from '../../components/CustomCards';
 import { HandledQuery } from '../../components/HandledQuery';
+import { CustomErrorCard } from '../../components/layout/CustomCards';
 import { ExplorerEditor } from '../../explorer/ExplorerEditor';
 import {
   ADD_OR_UPDATE_FORM_VALUE,
@@ -32,7 +33,7 @@ const POLLING_FREQUENCY = 5000;
 export interface WorkspaceEditorPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
-export class WorkspaceEditorPage extends React.Component<
+export default class WorkspaceEditorPage extends Component<
   WorkspaceEditorPageProps
 > {
   private handleNodeCreate = (

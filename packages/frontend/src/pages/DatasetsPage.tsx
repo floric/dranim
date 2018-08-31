@@ -1,13 +1,14 @@
+import React, { SFC } from 'react';
+
 import { GQLDataset } from '@masterthesis/shared';
 import { Card, Col } from 'antd';
 import gql from 'graphql-tag';
-import * as React from 'react';
 import { Mutation } from 'react-apollo';
 
-import { CardItem } from '../components/CardItem';
-import { cardItemProps, CardsLayout } from '../components/CardsLayout';
 import { HandledQuery } from '../components/HandledQuery';
-import { PageHeaderCard } from '../components/PageHeaderCard';
+import { CardItem } from '../components/layout/CardItem';
+import { cardItemProps, CardsLayout } from '../components/layout/CardsLayout';
+import { PageHeaderCard } from '../components/layout/PageHeaderCard';
 import { compareByName } from '../utils/data';
 import { tryOperation } from '../utils/form';
 import { CreateDataSetForm } from './forms/CreateDatasetForm';
@@ -41,7 +42,7 @@ const DELETE_DATASET = gql`
   }
 `;
 
-const DatasetsPage: React.SFC = () => (
+const DatasetsPage: SFC = () => (
   <>
     <PageHeaderCard
       title="Datasets"
@@ -105,7 +106,7 @@ const DatasetsPage: React.SFC = () => (
             xs={{ span: 24 }}
             md={{ span: 12 }}
             xl={{ span: 8 }}
-            style={{ marginBottom: 12 }}
+            style={{ marginBottom: '1rem' }}
           >
             <Card bordered={false}>
               <h2>New Dataset</h2>

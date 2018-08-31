@@ -1,5 +1,6 @@
+import React, { SFC } from 'react';
+
 import { Input } from 'antd';
-import * as React from 'react';
 import { Property } from './Property';
 
 export interface NumericPropertyProps {
@@ -9,7 +10,7 @@ export interface NumericPropertyProps {
   unit?: string;
 }
 
-export const NumericProperty: React.SFC<NumericPropertyProps> = ({
+export const NumericProperty: SFC<NumericPropertyProps> = ({
   text,
   unit = 'px',
   onChange,

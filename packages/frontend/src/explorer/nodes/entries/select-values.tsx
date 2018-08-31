@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 
 import {
   SelectValuesNodeDef,
@@ -6,7 +6,7 @@ import {
   SelectValuesNodeInputs,
   SelectValuesNodeOutputs
 } from '@masterthesis/shared';
-import { Form, Select } from 'antd';
+import { Alert, Form, Select } from 'antd';
 
 import { ClientNodeDef } from '../all-nodes';
 import { getValueOrDefault } from '../utils';
@@ -17,13 +17,23 @@ export const SelectValuesNode: ClientNodeDef<
   SelectValuesNodeForm
 > = {
   type: SelectValuesNodeDef.type,
-  renderFormItems: ({ form: { getFieldDecorator }, nodeForm, inputs }) => {
-    const dsInput = inputs.dataset;
-    if (!dsInput) {
-      return <p>Error</p>;
+  renderFormItems: ({
+    form: { getFieldDecorator },
+    nodeForm,
+    inputs: { dataset }
+  }) => {
+    if (!dataset || !dataset.isPresent) {
+      return (
+        <Alert
+          message="Dataset required"
+          description="Please input a valid Dataset."
+          type="warning"
+          showIcon
+        />
+      );
     }
 
-    const options = dsInput.isPresent ? dsInput.content.schema : [];
+    const options = dataset.isPresent ? dataset.content.schema : [];
     return (
       <Form.Item label="Input">
         {getFieldDecorator('values', {

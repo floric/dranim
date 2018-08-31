@@ -1,9 +1,9 @@
-import * as React from 'react';
+import React, { SFC } from 'react';
 
 import { Card, Col, Row } from 'antd';
 import { Link } from 'react-router-dom';
 
-import { AsyncButton } from './AsyncButton';
+import { AsyncButton } from '../AsyncButton';
 
 export interface CardItemProps {
   id: string;
@@ -14,7 +14,7 @@ export interface CardItemProps {
   handleDelete: () => Promise<any>;
 }
 
-export const CardItem: React.SFC<CardItemProps> = ({
+export const CardItem: SFC<CardItemProps> = ({
   id,
   name,
   handleDelete,
@@ -33,7 +33,7 @@ export const CardItem: React.SFC<CardItemProps> = ({
     bordered={false}
   >
     <Row>{children}</Row>
-    <Row type="flex" justify="end" style={{ marginTop: 12 }} gutter={12}>
+    <Row type="flex" justify="end" style={{ marginTop: '1rem' }} gutter={12}>
       <Col>
         <AsyncButton
           type="danger"

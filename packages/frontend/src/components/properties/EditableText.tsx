@@ -1,6 +1,8 @@
+import React, { ChangeEvent, Component, KeyboardEvent } from 'react';
+
 import { Button, Col, Input, Row, Spin } from 'antd';
-import * as React from 'react';
-import { LoadingCard, LoadingIcon } from './CustomCards';
+
+import { LoadingIcon } from '../layout/CustomCards';
 
 export interface EditableTextProps {
   text: string;
@@ -13,7 +15,7 @@ interface EditableTextState {
   currentValue: string;
 }
 
-export class EditableText extends React.Component<
+export class EditableText extends Component<
   EditableTextProps,
   EditableTextState
 > {
@@ -23,7 +25,7 @@ export class EditableText extends React.Component<
     currentValue: this.props.text
   };
 
-  private handleOnChange = (ev: React.ChangeEvent<HTMLInputElement>) =>
+  private handleOnChange = (ev: ChangeEvent<HTMLInputElement>) =>
     this.setState({ currentValue: ev.target.value });
 
   private handleToggleEditing = () =>
@@ -35,7 +37,7 @@ export class EditableText extends React.Component<
     await this.setState({ isSaving: false });
   };
 
-  private handleKeyUp = (a: React.KeyboardEvent<HTMLInputElement>) => {
+  private handleKeyUp = (a: KeyboardEvent<HTMLInputElement>) => {
     if (a.key === 'Enter') {
       this.handleSaveEdit();
     } else if (a.key === 'Escape') {

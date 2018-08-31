@@ -1,18 +1,19 @@
+import React, { SFC } from 'react';
+
 import { GQLWorkspace } from '@masterthesis/shared';
-import { Tabs } from 'antd';
 import { css } from 'glamor';
 import gql from 'graphql-tag';
-import * as React from 'react';
 import { Mutation } from 'react-apollo';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 
-import { CustomErrorCard } from '../../components/CustomCards';
-import { EditableText } from '../../components/EditableText';
 import { HandledQuery } from '../../components/HandledQuery';
-import { PageHeaderCard } from '../../components/PageHeaderCard';
+import { CustomErrorCard } from '../../components/layout/CustomCards';
+import { PageHeaderCard } from '../../components/layout/PageHeaderCard';
+import { EditableText } from '../../components/properties/EditableText';
+import { RoutedTabs } from '../../components/RoutedTabs';
 import { tryOperation } from '../../utils/form';
-import { WorkspaceCalculationsPage } from './CalculationsPage';
-import { WorkspaceEditorPage } from './EditorPage';
+import WorkspaceCalculationsPage from './CalculationsPage';
+import WorkspaceEditorPage from './EditorPage';
 import VisDetailPage from './VisDetailPage';
 
 const WORKSPACE = gql`
@@ -33,14 +34,13 @@ const RENAME_WORKSPACE = gql`
 export interface WorkspacesPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
-const WorkspacesPage: React.SFC<WorkspacesPageProps> = ({
+const WorkspacesPage: SFC<WorkspacesPageProps> = ({
   match: {
-    url,
-    path,
     params: { workspaceId }
   },
-  history,
-  location: { pathname }
+  match,
+  location,
+  history
 }) => (
   <HandledQuery<{ workspace: GQLWorkspace | null }, { id: string }>
     query={WORKSPACE}
@@ -54,15 +54,6 @@ const WorkspacesPage: React.SFC<WorkspacesPageProps> = ({
             description="Workspace doesn't exist."
           />
         );
-      }
-
-      let activeKey = 'editor';
-      const pathSegments = pathname.split('/');
-      const lastSegment = pathSegments[pathSegments.length - 1];
-      if (lastSegment === 'calculations') {
-        activeKey = 'calculations';
-      } else if (lastSegment === 'results') {
-        activeKey = 'results';
       }
 
       return (
@@ -105,34 +96,35 @@ const WorkspacesPage: React.SFC<WorkspacesPageProps> = ({
               />
             )}
           </Mutation>
-          <Tabs
-            activeKey={activeKey}
-            onChange={name => {
-              if (name === 'editor') {
-                history.push(`${url}`);
-              } else if (name === 'calculations') {
-                history.push(`${url}/calculations`);
-              } else if (name === 'results') {
-                history.push(`${url}/results`);
+          <RoutedTabs
+            match={match}
+            history={history}
+            location={location}
+            panes={[
+              {
+                name: 'Editor',
+                key: 'editor',
+                content: (
+                  <WorkspaceEditorPage {...{ match, location, history }} />
+                )
+              },
+              {
+                name: 'Calculations',
+                key: 'calculations',
+                content: (
+                  <WorkspaceCalculationsPage
+                    {...{ match, location, history }}
+                  />
+                )
+              },
+              {
+                name: 'Results',
+                key: 'results',
+                content: <VisDetailPage {...{ match, location, history }} />
               }
-            }}
-            type="card"
-            animated={{ inkBar: true, tabPane: false }}
-            tabBarStyle={{ marginBottom: 0 }}
-          >
-            <Tabs.TabPane forceRender tab="Editor" key="editor" />
-            <Tabs.TabPane forceRender tab="Calculations" key="calculations" />
-            <Tabs.TabPane forceRender tab="Results" key="results" />
-          </Tabs>
-          <Switch>
-            <Route exact path={`${path}`} component={WorkspaceEditorPage} />
-            <Route
-              exact
-              path={`${path}/calculations`}
-              component={WorkspaceCalculationsPage}
-            />
-            <Route exact path={`${path}/results`} component={VisDetailPage} />
-          </Switch>
+            ]}
+            defaultKey="editor"
+          />
         </div>
       );
     }}

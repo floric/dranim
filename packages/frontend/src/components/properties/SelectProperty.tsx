@@ -1,5 +1,6 @@
+import React, { SFC } from 'react';
+
 import { Select } from 'antd';
-import * as React from 'react';
 import { Property } from './Property';
 
 export interface SelectPropertyProps {
@@ -9,7 +10,7 @@ export interface SelectPropertyProps {
   options: Array<string>;
 }
 
-export const SelectProperty: React.SFC<SelectPropertyProps> = ({
+export const SelectProperty: SFC<SelectPropertyProps> = ({
   text,
   onChange,
   options,

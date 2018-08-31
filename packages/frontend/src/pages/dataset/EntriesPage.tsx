@@ -1,9 +1,10 @@
-import * as React from 'react';
+import React, { Component } from 'react';
 
 import { Entry, GQLDataset, Values } from '@masterthesis/shared';
 import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
 import { Mutation, MutationFn } from 'react-apollo';
+import { NavLink } from 'react-router-dom';
 
 import { Alert, Card, Col, Row, Table } from 'antd';
 import { AsyncButton } from '../../components/AsyncButton';
@@ -125,7 +126,7 @@ const generateEntryColumns = (
   }
 ];
 
-export class DataEntriesPage extends React.Component<DataEntriesPageProps> {
+export class DataEntriesPage extends Component<DataEntriesPageProps> {
   private handleCreateEntry = (
     values: any,
     datasetId: string,
@@ -150,7 +151,7 @@ export class DataEntriesPage extends React.Component<DataEntriesPageProps> {
   public render() {
     const { dataset, refetch } = this.props;
     return (
-      <Row style={{ marginBottom: 12 }} gutter={12}>
+      <Row style={{ marginBottom: '1rem' }} gutter={12}>
         <Col md={24} lg={12} xl={10}>
           <Card bordered={false}>
             <h3>Add Entry</h3>
@@ -180,20 +181,27 @@ export class DataEntriesPage extends React.Component<DataEntriesPageProps> {
           </Card>
         </Col>
         <Col md={24} lg={12} xl={14}>
-          <Card bordered={false}>
-            <h3>Last Entries</h3>
-            <Table
-              size="small"
-              pagination={{
-                size: 'small',
-                pageSize: 20,
-                hideOnSinglePage: true
-              }}
-              expandedRowRender={expandedRowRender}
-              dataSource={generateEntriesDatasource(dataset.latestEntries)}
-              columns={generateEntryColumns(dataset.id, refetch)}
-            />
-          </Card>
+          {dataset.entriesCount > 0 ? (
+            <Card bordered={false}>
+              <h3>Last Entries</h3>
+              <Table
+                size="small"
+                pagination={{
+                  size: 'small',
+                  pageSize: 20,
+                  hideOnSinglePage: true
+                }}
+                expandedRowRender={expandedRowRender}
+                dataSource={generateEntriesDatasource(dataset.latestEntries)}
+                columns={generateEntryColumns(dataset.id, refetch)}
+              />
+            </Card>
+          ) : (
+            <Card bordered={false} title="No Entries added yet">
+              Create Entries manually here or{' '}
+              <NavLink to="./">upload them</NavLink>.
+            </Card>
+          )}
         </Col>
       </Row>
     );

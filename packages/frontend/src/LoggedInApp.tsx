@@ -1,7 +1,8 @@
+import React, { Component } from 'react';
+
 import { Colors, GQLDataset, GQLWorkspace } from '@masterthesis/shared';
 import { Layout } from 'antd';
 import gql from 'graphql-tag';
-import * as React from 'react';
 import {
   Route,
   RouteComponentProps,
@@ -9,8 +10,8 @@ import {
   withRouter
 } from 'react-router-dom';
 
-import { AppMenu } from './components/AppMenu';
 import { HandledQuery } from './components/HandledQuery';
+import { AppMenu } from './components/layout/AppMenu';
 import { getAsyncPage } from './utils/async';
 
 const WorkspacesPage = getAsyncPage(() => import('./pages/WorkspacesPage'));
@@ -22,8 +23,6 @@ const DatasetDetailPage = getAsyncPage(() =>
   import('./pages/dataset/DetailPage')
 );
 const DatasetsPage = getAsyncPage(() => import('./pages/DatasetsPage'));
-
-const { Content, Sider } = Layout;
 
 export interface LoggedInAppProps extends RouteComponentProps<{}, {}> {}
 
@@ -41,7 +40,7 @@ const MENU_QUERY = gql`
 `;
 export type LoggedInAppState = { collapsed: boolean };
 
-class LoggedInApp extends React.Component<LoggedInAppProps, LoggedInAppState> {
+class LoggedInApp extends Component<LoggedInAppProps, LoggedInAppState> {
   public state: LoggedInAppState = {
     collapsed: false
   };
@@ -60,7 +59,7 @@ class LoggedInApp extends React.Component<LoggedInAppProps, LoggedInAppState> {
       >
         {({ data: { workspaces, datasets } }) => (
           <Layout style={{ minHeight: '100vh' }}>
-            <Sider
+            <Layout.Sider
               collapsible
               collapsed={collapsed}
               onCollapse={this.onCollapse}
@@ -73,8 +72,8 @@ class LoggedInApp extends React.Component<LoggedInAppProps, LoggedInAppState> {
                 workspaces={workspaces}
                 collapsed={collapsed}
               />
-            </Sider>
-            <Content
+            </Layout.Sider>
+            <Layout.Content
               style={{ backgroundColor: Colors.Background, padding: '1rem' }}
             >
               <Switch>
@@ -87,7 +86,7 @@ class LoggedInApp extends React.Component<LoggedInAppProps, LoggedInAppState> {
                   component={WorkspaceDetailPage}
                 />
               </Switch>
-            </Content>
+            </Layout.Content>
           </Layout>
         )}
       </HandledQuery>

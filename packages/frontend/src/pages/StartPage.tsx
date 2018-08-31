@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { SFC } from 'react';
 
 import { Card, Col, Divider, Icon, List, Row } from 'antd';
 import { distanceInWordsToNow } from 'date-fns';
@@ -6,7 +6,7 @@ import gql from 'graphql-tag';
 import { Mutation } from 'react-apollo';
 
 import { AsyncButton } from '../components/AsyncButton';
-import { PageHeaderCard } from '../components/PageHeaderCard';
+import { PageHeaderCard } from '../components/layout/PageHeaderCard';
 import { client } from '../io/apollo-client';
 
 const CREATE_DEMO_DATA = gql`
@@ -104,7 +104,7 @@ const renderCreateExampleButton = (type: string) => (
   </Mutation>
 );
 
-const StartPage: React.SFC = () => (
+const StartPage: SFC = () => (
   <>
     <PageHeaderCard
       title="Start"

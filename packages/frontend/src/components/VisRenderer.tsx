@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { SFC } from 'react';
 
 import {
   DataType,
@@ -8,9 +8,9 @@ import {
 } from '@masterthesis/shared';
 import ContainerDimensions from 'react-container-dimensions';
 
-import { BooleanInfo } from './BooleanInfo';
-import { NumberInfo } from './NumberInfo';
-import { StringInfo } from './StringInfo';
+import { BooleanInfo } from './infos/BooleanInfo';
+import { NumberInfo } from './infos/NumberInfo';
+import { StringInfo } from './infos/StringInfo';
 import { BarChart } from './visualizations/BarChart';
 import { ColumnChart } from './visualizations/ColumnChart';
 import { PieChart } from './visualizations/PieChart';
@@ -28,7 +28,7 @@ export interface ChartRender {
 
 const CARD_PADDING = 24;
 
-export const VisRenderer: React.SFC<VisRenderer> = ({ result }) => {
+export const VisRenderer: SFC<VisRenderer> = ({ result }) => {
   const value = JSON.parse(result.value);
 
   if (result.type !== DataType.VIS) {

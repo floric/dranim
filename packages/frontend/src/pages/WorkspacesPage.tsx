@@ -1,15 +1,16 @@
+import React, { SFC } from 'react';
+
 import { GQLWorkspace } from '@masterthesis/shared';
 import { Card, Col } from 'antd';
 import gql from 'graphql-tag';
-import * as React from 'react';
 import { Mutation } from 'react-apollo';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { CardItem } from '../components/CardItem';
-import { cardItemProps, CardsLayout } from '../components/CardsLayout';
 import { HandledQuery } from '../components/HandledQuery';
-import { PageHeaderCard } from '../components/PageHeaderCard';
-import { TimeInfo } from '../components/TimeInfo';
+import { TimeInfo } from '../components/infos/TimeInfo';
+import { CardItem } from '../components/layout/CardItem';
+import { cardItemProps, CardsLayout } from '../components/layout/CardsLayout';
+import { PageHeaderCard } from '../components/layout/PageHeaderCard';
 import { compareByName } from '../utils/data';
 import { tryOperation } from './../utils/form';
 import { CreateWorkspaceForm } from './forms/CreateWorkspaceForm';
@@ -45,7 +46,7 @@ const DELETE_WORKSPACE = gql`
 
 export interface WorkspacesOverviewPageProps extends RouteComponentProps<{}> {}
 
-const WorkspacesOverviewPage: React.SFC<WorkspacesOverviewPageProps> = () => (
+const WorkspacesOverviewPage: SFC<WorkspacesOverviewPageProps> = () => (
   <>
     <PageHeaderCard
       title="Workspaces"
@@ -108,7 +109,7 @@ const WorkspacesOverviewPage: React.SFC<WorkspacesOverviewPageProps> = () => (
             xs={{ span: 24 }}
             md={{ span: 12 }}
             xl={{ span: 8 }}
-            style={{ marginBottom: 12 }}
+            style={{ marginBottom: '1rem' }}
           >
             <Card bordered={false}>
               <h2>New Workspace</h2>

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { Component } from 'react';
 
 import { Button, Col, Form, Icon, Input, Row } from 'antd';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
@@ -14,7 +14,7 @@ export type RegistrationFormProps = {
 };
 export type RegistrationState = { confirmDirty: boolean; isLoading: boolean };
 
-class RegistrationFormImpl extends React.Component<
+class RegistrationFormImpl extends Component<
   RegistrationFormProps,
   RegistrationState
 > {

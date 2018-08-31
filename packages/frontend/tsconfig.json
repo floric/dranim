@@ -15,6 +15,7 @@
     "emitDecoratorMetadata": true,
     "declaration": false,
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "noUnusedLocals": true
   },
   "exclude": ["node_modules", "build", "scripts", "dist"],

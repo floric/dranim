@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { Component } from 'react';
 
 import { Button, Form, Icon, Input } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
@@ -13,7 +13,7 @@ export interface CreateWorkspaceFormProps extends FormComponentProps {
 }
 export type CreateWorkspaceFormState = { saving: boolean };
 
-class CreateWorkspaceFormImpl extends React.Component<
+class CreateWorkspaceFormImpl extends Component<
   CreateWorkspaceFormProps,
   CreateWorkspaceFormState
 > {

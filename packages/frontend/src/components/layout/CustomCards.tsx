@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { SFC } from 'react';
+import React, { SFC } from 'react';
 
 import { Button, Card, Icon, List, Spin } from 'antd';
 import { SpinProps } from 'antd/lib/spin';

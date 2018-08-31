@@ -7,6 +7,7 @@ import {
 } from '@masterthesis/shared';
 import { FormComponentProps } from 'antd/lib/form';
 import { TreeNode } from 'antd/lib/tree-select';
+import deepEqual from 'deep-equal';
 
 import * as BooleanNodes from './boolean';
 import * as DatasetNodes from './dataset';
@@ -74,8 +75,8 @@ const buildTree = (
   const nextPaths = elems
     .filter(
       e =>
-        JSON.stringify(e.path.slice(0, curPath.length)) ===
-          JSON.stringify(curPath) && e.path.length === curPath.length + 1
+        deepEqual(e.path.slice(0, curPath.length), curPath) &&
+        e.path.length === curPath.length + 1
     )
     .map(e => e.path);
   const distinctPaths = nextPaths.filter(
@@ -90,17 +91,15 @@ const buildTree = (
     value: e.join('-'),
     key: e.join('-'),
     children: [
-      ...elems
-        .filter(elem => JSON.stringify(elem.path) === JSON.stringify(e))
-        .map(elem => ({
-          label: elem.name,
-          value: elem.type,
-          key: elem.type,
-          index: `${elem.name}, ${elem.path.join(' ')}, ${elem.keywords.join(
-            ' '
-          )}`.toLocaleLowerCase(),
-          children: []
-        })),
+      ...elems.filter(elem => deepEqual(elem.path, e)).map(elem => ({
+        label: elem.name,
+        value: elem.type,
+        key: elem.type,
+        index: `${elem.name}, ${elem.path.join(' ')}, ${elem.keywords.join(
+          ' '
+        )}`.toLocaleLowerCase(),
+        children: []
+      })),
       ...buildTree(elems, e)
     ]
   }));

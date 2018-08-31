@@ -1,3 +1,5 @@
+import React, { Component } from 'react';
+
 import {
   GQLDataset,
   GQLUploadProcess,
@@ -7,7 +9,6 @@ import {
 import { Button, Card, Col, Form, Icon, Row, Table, Upload } from 'antd';
 import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
-import * as React from 'react';
 import {
   Mutation,
   MutationFn,
@@ -60,7 +61,7 @@ export interface DataActionsState {
 }
 
 export const DataActionsPage = withApollo<DataActionsPageProps>(
-  class DatasetActionsImpl extends React.Component<
+  class DatasetActionsImpl extends Component<
     DataActionsPageProps & WithApolloClient<{}>,
     DataActionsState
   > {
@@ -145,7 +146,7 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
                   xs={{ span: 24 }}
                   md={{ span: 12 }}
                   xl={{ span: 8 }}
-                  style={{ marginBottom: 12 }}
+                  style={{ marginBottom: '1rem' }}
                 >
                   <Card bordered={false}>
                     <h3>Import</h3>
@@ -155,7 +156,7 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
                     >
                       {uploadEntriesCsv => (
                         <>
-                          <Row style={{ marginBottom: 12 }}>
+                          <Row style={{ marginBottom: '1rem' }}>
                             <Col>
                               <Upload {...this.getUploadProps()}>
                                 <Button icon="upload">Select CSV file</Button>
@@ -182,7 +183,7 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
                   xs={{ span: 24 }}
                   md={{ span: 12 }}
                   xl={{ span: 8 }}
-                  style={{ marginBottom: 12 }}
+                  style={{ marginBottom: '1rem' }}
                 >
                   <Card bordered={false}>
                     <h3>Export</h3>

@@ -1,6 +1,7 @@
+import React, { ChangeEvent, Component, createRef, RefObject } from 'react';
+
 import { GQLOutputResult } from '@masterthesis/shared';
 import { Col, Icon, Input, Row, Tag } from 'antd';
-import * as React from 'react';
 import { v4 } from 'uuid';
 
 import { showNotificationWithIcon } from '../../utils/form';
@@ -48,8 +49,8 @@ export interface STRChartState {
   soundNames: Array<string>;
 }
 
-export class STRChart extends React.Component<STRChartProps, STRChartState> {
-  private canvasContainer: React.RefObject<HTMLDivElement> = React.createRef<
+export class STRChart extends Component<STRChartProps, STRChartState> {
+  private canvasContainer: RefObject<HTMLDivElement> = createRef<
     HTMLDivElement
   >();
 
@@ -144,18 +145,14 @@ export class STRChart extends React.Component<STRChartProps, STRChartState> {
         minTextOpacity: val
       }
     });
-  private handleChangePassageColorEast = (
-    ev: React.ChangeEvent<HTMLInputElement>
-  ) =>
+  private handleChangePassageColorEast = (ev: ChangeEvent<HTMLInputElement>) =>
     this.handleChangeWithRerendering({
       colors: {
         ...this.state.colors,
         eastPassage: ev.target.value
       }
     });
-  private handleChangePassageColorWest = (
-    ev: React.ChangeEvent<HTMLInputElement>
-  ) =>
+  private handleChangePassageColorWest = (ev: ChangeEvent<HTMLInputElement>) =>
     this.handleChangeWithRerendering({
       colors: {
         ...this.state.colors,

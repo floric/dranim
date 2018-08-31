@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { SFC } from 'react';
+import React, { SFC } from 'react';
 
 import { Col, Row, Tooltip } from 'antd';
 import { distanceInWords, distanceInWordsToNow } from 'date-fns';

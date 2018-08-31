@@ -1,14 +1,15 @@
-import * as React from 'react';
+import React, { Component, ReactNode } from 'react';
+
 import { Query, QueryResult } from 'react-apollo';
-import { LoadingCard, UnknownErrorCard } from './CustomCards';
+import { LoadingCard, UnknownErrorCard } from './layout/CustomCards';
 
 export interface HandledQueryProps<Data, Variables> {
   query: string;
   variables?: Variables;
-  children: (data: QueryResult<Data, Variables>) => React.ReactNode;
+  children: (data: QueryResult<Data, Variables>) => ReactNode;
 }
 
-export class HandledQuery<Data, Variables = null> extends React.Component<
+export class HandledQuery<Data, Variables = null> extends Component<
   HandledQueryProps<Data, Variables>
 > {
   public render() {

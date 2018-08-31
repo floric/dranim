@@ -1,14 +1,15 @@
+import React, { SFC } from 'react';
+
 import { CalculationProcess } from '@masterthesis/shared';
 import { distanceInWordsToNow } from 'date-fns';
-import * as React from 'react';
 import { Mutation } from 'react-apollo';
 
 import { AsyncButton } from '../../../components/AsyncButton';
-import { LoadingCard } from '../../../components/CustomCards';
+import { LoadingCard } from '../../../components/layout/CustomCards';
 import { STOP_CALCULATION } from '../../../graphql/editor-page';
 import { showNotificationWithIcon } from '../../../utils/form';
 
-export const ProcessRunningCard: React.SFC<{
+export const ProcessRunningCard: SFC<{
   currentCalculation: CalculationProcess;
 }> = ({ currentCalculation }) => (
   <Mutation mutation={STOP_CALCULATION}>

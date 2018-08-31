@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { SFC } from 'react';
 
 import { Col, Row, Tooltip } from 'antd';
 import { distanceInWordsToNow } from 'date-fns';
@@ -8,7 +8,7 @@ export interface TimeInfoProps {
   time: string;
 }
 
-export const TimeInfo: React.SFC<TimeInfoProps> = ({ text, time }) => (
+export const TimeInfo: SFC<TimeInfoProps> = ({ text, time }) => (
   <Row>
     <Col xs={6}>{text}:</Col>
     <Col xs={18}>

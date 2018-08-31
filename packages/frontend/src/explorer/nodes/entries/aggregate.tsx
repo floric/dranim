@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 
 import {
   AggregateEntriesNodeDef,
@@ -18,12 +18,7 @@ export const AggregateEntriesNode: ClientNodeDef<
   AggregateEntriesNodeForm
 > = {
   type: AggregateEntriesNodeDef.type,
-  renderFormItems: ({
-    form,
-    form: { getFieldDecorator },
-    nodeForm,
-    inputs
-  }) => {
+  renderFormItems: ({ form: { getFieldDecorator }, nodeForm, inputs }) => {
     const dsInput = inputs.dataset;
     if (!dsInput || !dsInput.isPresent) {
       return (
