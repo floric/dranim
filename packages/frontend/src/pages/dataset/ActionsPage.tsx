@@ -20,6 +20,7 @@ import { UploadFile } from 'antd/lib/upload/interface';
 import { AsyncButton } from '../../components/AsyncButton';
 import { HandledQuery } from '../../components/HandledQuery';
 import { ProcessTime } from '../../components/ProcessTime';
+import { API_URL } from '../../io/apollo-client';
 import { tryOperation } from '../../utils/form';
 
 const UPLOAD_ENTRIES_CSV = gql`
@@ -46,6 +47,10 @@ export const ALL_UPLOADS = gql`
       addedEntries
       failedEntries
       invalidEntries
+    }
+    dataset(id: $datasetId) {
+      id
+      entriesCount
     }
   }
 `;
@@ -127,19 +132,33 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
       multiple: true
     });
 
+    private downloadCsv = (id: string) => {
+      const a = document.createElement('a');
+      a.href = `${API_URL}/downloads?dsId=${id}`;
+      a.download = 'download.csv';
+      a.click();
+    };
+
     public render() {
-      const { dataset } = this.props;
+      const {
+        dataset: { id }
+      } = this.props;
       const { uploading } = this.state;
 
       return (
         <HandledQuery<
-          { uploads: Array<GQLUploadProcess> },
+          { uploads: Array<GQLUploadProcess>; dataset: GQLDataset },
           { datasetId: string }
         >
           query={ALL_UPLOADS}
-          variables={{ datasetId: dataset.id }}
+          variables={{ datasetId: id }}
         >
-          {({ data: { uploads } }) => (
+          {({
+            data: {
+              uploads,
+              dataset: { entriesCount }
+            }
+          }) => (
             <>
               <Row gutter={12}>
                 <Col
@@ -187,26 +206,17 @@ export const DataActionsPage = withApollo<DataActionsPageProps>(
                 >
                   <Card bordered={false}>
                     <h3>Export</h3>
-                    <Row gutter={12} type="flex">
-                      <Col>
-                        <AsyncButton
-                          type="primary"
-                          disabled
-                          onClick={async () => 0}
-                        >
-                          as CSV
-                        </AsyncButton>
-                      </Col>
-                      <Col>
-                        <AsyncButton
-                          type="primary"
-                          disabled
-                          onClick={async () => 0}
-                        >
-                          as ZIP
-                        </AsyncButton>
-                      </Col>
-                    </Row>
+                    {entriesCount > 0 ? (
+                      <Button
+                        type="primary"
+                        icon="download"
+                        onClick={() => this.downloadCsv(id)}
+                      >
+                        CSV
+                      </Button>
+                    ) : (
+                      'No Entries present.'
+                    )}
                   </Card>
                 </Col>
               </Row>
