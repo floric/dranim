@@ -1,9 +1,8 @@
 import React, { SFC } from 'react';
 
 import { Colors } from '@masterthesis/shared';
-import { Card, Col, Divider, Icon, List, Row, Spin } from 'antd';
+import { Card, Col, Collapse, Divider, Icon, Row, Spin } from 'antd';
 import { SpinProps } from 'antd/lib/spin';
-
 import { ApolloError, isApolloError } from 'apollo-client/errors/ApolloError';
 
 export const LoadingIcon = (
@@ -23,30 +22,50 @@ export const LoadingCard: SFC<SpinProps & { text?: string }> = ({
 );
 
 export interface UnknownErrorCardProps {
-  error: Error;
+  error: Error | ApolloError;
 }
 
-export const UnknownErrorCard: SFC<UnknownErrorCardProps> = ({ error }) => {
-  const apolloError = isApolloError(error);
-  const description = (
-    <div>
-      <p>{error.message}</p>
-      {apolloError && (
-        <List
-          size="small"
-          header={<strong>Path:</strong>}
-          itemLayout="horizontal"
-          dataSource={(error as ApolloError).graphQLErrors.map(
-            e => `${e.path} - ${e.message}`
-          )}
-          renderItem={item => <List.Item>{item}</List.Item>}
-        />
-      )}
-    </div>
-  );
-
-  return <CustomErrorCard title={error.name} description={description} />;
-};
+export const UnknownErrorCard: SFC<UnknownErrorCardProps> = ({ error }) => (
+  <CustomErrorCard
+    title={error.name}
+    description={
+      isApolloError(error) ? (
+        <>
+          {error.networkError ? (
+            <p>We're sorry. There seems to be a networking issue...</p>
+          ) : null}
+          {error.graphQLErrors.map((e, id) => (
+            <Collapse key={`error-${id}`} bordered={false}>
+              <Collapse.Panel
+                header={
+                  <>
+                    <strong>{e.message}</strong> {`[${e.path.join(', ')}]`}
+                  </>
+                }
+                key="1"
+              >
+                <p>
+                  {e.extensions &&
+                  e.extensions.exception &&
+                  e.extensions.exception.stacktrace
+                    ? e.extensions.exception.stacktrace.map(n => (
+                        <>
+                          {n}
+                          <br />
+                        </>
+                      ))
+                    : JSON.stringify(e.extensions.exception.stacktrace)}
+                </p>
+              </Collapse.Panel>
+            </Collapse>
+          ))}
+        </>
+      ) : (
+        <p>{error.message}</p>
+      )
+    }
+  />
+);
 
 export interface CustomErrorCardProps {
   title: string;

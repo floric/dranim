@@ -6,7 +6,6 @@ import {
   JoinDatasetsNodeDef,
   NodeState,
   NumberInputNodeDef,
-  SelectValuesNodeDef,
   StringInputNodeDef,
   StringOutputNodeDef,
   SumNodeDef,
@@ -577,7 +576,7 @@ describe('Nodes', () => {
         db,
         userId: ''
       }),
-      createNode(SelectValuesNodeDef.type, ws.id, [], 0, 0, {
+      createNode(EditEntriesNodeDef.type, ws.id, [], 0, 0, {
         db,
         userId: ''
       }),

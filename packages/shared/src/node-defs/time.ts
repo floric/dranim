@@ -40,6 +40,24 @@ export const TimeConstructNodeDef: NodeDef<
   outputs: {
     value: TimeSocket('Time')
   },
-  path: ['Time'],
+  path: ['Time', 'Converters'],
+  keywords: []
+};
+
+export const TimeSplitNodeDef: NodeDef<
+  TimeInputNodeOutputs,
+  TimeConstructNodeInputs
+> = {
+  name: 'Split',
+  type: 'SplitTime',
+  inputs: {
+    value: TimeSocket('Time')
+  },
+  outputs: {
+    hours: NumberSocket('Hours'),
+    minutes: NumberSocket('Minutes'),
+    seconds: NumberSocket('Seconds')
+  },
+  path: ['Time', 'Converters'],
   keywords: []
 };

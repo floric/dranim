@@ -37,7 +37,7 @@ const news = [
       'Entries of Datasets can now be downloaded as CSV streams to process them in Excel or other applications with support for CSV files.'
   },
   {
-    type: NewsType.FEATURE,
+    type: NewsType.IMPROVEMENT,
     date: new Date(2018, 7, 28),
     title: 'Improved Dashboard and Visualization types',
     description:

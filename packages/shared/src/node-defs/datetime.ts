@@ -42,6 +42,25 @@ export const DatetimeConstructNodeDef: NodeDef<
   outputs: {
     value: DatetimeSocket('Datetime')
   },
-  path: ['Datetime'],
+  path: ['Datetime', 'Converters'],
+  keywords: []
+};
+
+export const DatetimeSplitNodeDef: NodeDef<
+  DatetimeInputNodeOutputs,
+  DatetimeConstructNodeInputs
+> = {
+  name: 'Split',
+  type: 'DatetimeSplit',
+  outputs: {
+    day: NumberSocket('Day'),
+    month: NumberSocket('Month'),
+    year: NumberSocket('Year'),
+    time: TimeSocket('Time')
+  },
+  inputs: {
+    value: DatetimeSocket('Datetime')
+  },
+  path: ['Datetime', 'Converters'],
   keywords: []
 };

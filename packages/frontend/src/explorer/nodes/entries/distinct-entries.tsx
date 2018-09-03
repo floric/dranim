@@ -9,8 +9,9 @@ import {
   ForEachEntryNodeOutputs,
   ValueSchema
 } from '@masterthesis/shared';
-import { Alert, Button, Checkbox, Col, Input, Row, Select, Tag } from 'antd';
+import { Button, Checkbox, Col, Input, Row, Select, Tag } from 'antd';
 
+import { NoDatasetInputWarning } from '../../../components/Warnings';
 import { showNotificationWithIcon } from '../../../utils/form';
 import { ClientNodeDef } from '../all-nodes';
 
@@ -45,12 +46,7 @@ export const DistinctEntriesNode: ClientNodeDef<
 
     if (!inputs.dataset || !inputs.dataset.isPresent) {
       return (
-        <Alert
-          message="Dataset required"
-          description="Please input a valid Dataset."
-          type="warning"
-          showIcon
-        />
+        <NoDatasetInputWarning />
       );
     }
 

@@ -7,6 +7,8 @@ interface AsyncButtonState {
   isLoading: boolean;
 }
 
+const MOUSE_ENTER_DELAY = 0.5;
+
 export type AsyncButtonProps = {
   onClick?: () => Promise<any>;
   confirmClick?: boolean;
@@ -30,7 +32,11 @@ const FullWidthButton: SFC<FullWidthButtonProps> = ({
   tooltip,
   ...props
 }) => (
-  <Tooltip title={tooltip} mouseEnterDelay={1} defaultVisible={false}>
+  <Tooltip
+    title={tooltip}
+    mouseEnterDelay={MOUSE_ENTER_DELAY}
+    defaultVisible={false}
+  >
     <Button style={style} block={fullWidth} onClick={handleClick} {...props}>
       {children}
     </Button>
