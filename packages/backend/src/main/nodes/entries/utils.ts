@@ -10,7 +10,7 @@ import {
   ValueSchema
 } from '@masterthesis/shared';
 
-import * as PromiseQueue from 'promise-queue';
+import PromiseQueue from 'promise-queue';
 import { Log } from '../../../logging';
 import { addValueSchema } from '../../workspace/dataset';
 import { getEntryCollection } from '../../workspace/entry';
@@ -52,7 +52,6 @@ export const getDynamicEntryContextInputs = async (
 
 export interface ProcessOptions {
   concurrency?: number;
-  checkFrequency?: number;
 }
 
 export const processEntries = async (
@@ -64,13 +63,7 @@ export const processEntries = async (
 ): Promise<void> => {
   const coll = getEntryCollection(dsId, reqContext.db);
   const cursor = coll.find();
-  await processDocumentsWithCursor(
-    cursor,
-    nodeId,
-    processFn,
-    reqContext,
-    options
-  );
+  await processDocumentsWithCursor(cursor, processFn, options);
 };
 
 export const processDocumentsWithCursor = async <T = any>(
@@ -79,53 +72,22 @@ export const processDocumentsWithCursor = async <T = any>(
     hasNext?: () => Promise<boolean>;
     close: () => Promise<any>;
   },
-  nodeId: string,
   processFn: (entry: T) => Promise<void>,
-  reqContext: ApolloContext,
   options?: ProcessOptions
 ): Promise<void> => {
   const queue = new PromiseQueue(
     options && options.concurrency ? options.concurrency : CONCURRENT_JOBS_COUNT
   );
-  const checkFrequency =
-    options && options.checkFrequency
-      ? options.checkFrequency
-      : CHECK_FREQUENCY;
 
-  while (await cursor.hasNext!()) {
-    const doc = await cursor.next();
-    queue.add(() => processFn(doc!));
+  try {
+    while (await cursor.hasNext!()) {
+      const doc = await cursor.next();
+      await queue.add(() => processFn(doc!));
+    }
+  } catch (err) {
+    Log.error(`Queue failed with error: ${err.message}`);
+    throw new Error('Process in queue has failed');
   }
 
   await cursor.close();
-  await processQueue(queue, checkFrequency);
-};
-
-const processQueue = async (queue: PromiseQueue, checkFrequency: number) => {
-  let lastRemainingJobsCount = queue.getQueueLength();
-
-  Log.info(
-    `Processing queue with ${lastRemainingJobsCount} jobs with maximum ${queue.getPendingLength()} concurrently`
-  );
-
-  await new Promise((resolve, reject) => {
-    try {
-      const timer = setInterval(() => {
-        const currentRemainingJobsCount = queue.getQueueLength();
-        Log.info(
-          `${currentRemainingJobsCount} jobs left, ${lastRemainingJobsCount -
-            currentRemainingJobsCount} done in ${checkFrequency /
-            1000} seconds`
-        );
-        lastRemainingJobsCount = currentRemainingJobsCount;
-        if (currentRemainingJobsCount === 0) {
-          clearInterval(timer);
-          resolve();
-        }
-      }, checkFrequency);
-    } catch (err) {
-      Log.error(`Queue failed with error: ${err.message}`);
-      reject();
-    }
-  });
 };

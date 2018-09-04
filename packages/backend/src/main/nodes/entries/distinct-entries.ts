@@ -143,23 +143,16 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
     });
 
     const cursor = entryColl.aggregate([{ $group: { _id: aggregateNames } }]);
-    await processDocumentsWithCursor(
-      cursor,
-      node.id,
-      async doc => {
-        const distinctValues = doc!._id;
-
-        await processDistinctDatasets(
-          distinctValues,
-          form.distinctSchemas!,
-          existingDs,
-          newDs,
-          node,
-          contextFnExecution!,
-          reqContext
-        );
-      },
-      reqContext
+    await processDocumentsWithCursor(cursor, doc =>
+      processDistinctDatasets(
+        doc!._id,
+        form.distinctSchemas!,
+        existingDs,
+        newDs,
+        node,
+        contextFnExecution!,
+        reqContext
+      )
     );
 
     return {

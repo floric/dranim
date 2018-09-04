@@ -1,12 +1,14 @@
 import {
   DataType,
   Entry,
+  sleep,
   SocketState,
   ValueSchema
 } from '@masterthesis/shared';
 import {
   copySchemas,
   getDynamicEntryContextInputs,
+  processDocumentsWithCursor,
   processEntries
 } from '../../../../src/main/nodes/entries/utils';
 import { addValueSchema } from '../../../../src/main/workspace/dataset';
@@ -14,7 +16,7 @@ import {
   getEntriesCount,
   getEntryCollection
 } from '../../../../src/main/workspace/entry';
-import { VALID_OBJECT_ID } from '../../../test-utils';
+import { NeverGoHereError, VALID_OBJECT_ID } from '../../../test-utils';
 
 jest.mock('mongodb');
 jest.mock('../../../../src/main/workspace/entry');
@@ -146,11 +148,57 @@ describe.only('Entries Utils', () => {
       VALID_OBJECT_ID,
       VALID_OBJECT_ID,
       processFn,
-      { db: null, userId: '' },
-      { checkFrequency: 50 }
+      { db: null, userId: '' }
     );
     expect(processFn).toHaveBeenCalledTimes(250);
     expect(res).toBeUndefined();
+  });
+
+  class Counter {
+    constructor(private i: number) {}
+    public decrement() {
+      this.i = this.i > 0 ? this.i - 1 : 0;
+    }
+    public value = () => this.i;
+  }
+
+  test('should be called five times', async () => {
+    const counter = new Counter(100);
+    const fn = jest.fn();
+    await processDocumentsWithCursor(
+      {
+        close: () => Promise.resolve(),
+        hasNext: () => Promise.resolve(counter.value() > 0),
+        next: async () => {
+          counter.decrement();
+          await sleep(10);
+          return 123;
+        }
+      },
+      fn
+    );
+    expect(fn).toHaveBeenCalledTimes(100);
+    expect(fn).toHaveBeenCalledWith(123);
+  });
+
+  test('should throw error', async () => {
+    const counter = new Counter(5);
+    try {
+      await processDocumentsWithCursor(
+        {
+          close: () => Promise.resolve(),
+          hasNext: () => Promise.resolve(counter.value() > 0),
+          next: () => {
+            counter.decrement();
+            return Promise.resolve(9);
+          }
+        },
+        () => Promise.reject('test')
+      );
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Process in queue has failed');
+    }
   });
 
   test('should copy schemas', async () => {

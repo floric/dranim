@@ -9,6 +9,7 @@
     "outDir": "dist",
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "strictNullChecks": true,

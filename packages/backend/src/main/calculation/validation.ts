@@ -6,6 +6,7 @@ import {
   NodeInstance,
   parseNodeForm
 } from '@masterthesis/shared';
+import { isMoment } from 'moment';
 
 import { Log } from '../../logging';
 import { getMetaInputs } from '../calculation/meta-execution';
@@ -75,11 +76,11 @@ const validateBoolean = (value: any) => {
 };
 
 const validateDatetime = (value: any) => {
-  return Promise.resolve(value instanceof Date);
+  return Promise.resolve(isMoment(value));
 };
 
 const validateTime = (value: any) => {
-  return Promise.resolve(value instanceof Date);
+  return Promise.resolve(isMoment(value));
 };
 
 const validationMethods: Map<

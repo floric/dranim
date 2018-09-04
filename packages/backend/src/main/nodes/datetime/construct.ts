@@ -5,6 +5,7 @@ import {
   DatetimeInputNodeOutputs,
   ServerNodeDef
 } from '@masterthesis/shared';
+import moment from 'moment';
 
 export const DatetimeConstructNode: ServerNodeDef<
   DatetimeConstructNodeInputs,
@@ -15,7 +16,10 @@ export const DatetimeConstructNode: ServerNodeDef<
     if (
       !Number.isInteger(inputs.day) ||
       !Number.isInteger(inputs.month) ||
-      !Number.isInteger(inputs.year)
+      !Number.isInteger(inputs.year) ||
+      !Number.isInteger(inputs.hours) ||
+      !Number.isInteger(inputs.minutes) ||
+      !Number.isInteger(inputs.seconds)
     ) {
       return false;
     }
@@ -36,14 +40,14 @@ export const DatetimeConstructNode: ServerNodeDef<
   onNodeExecution: (form, values) =>
     Promise.resolve({
       outputs: {
-        value: new Date(
-          values.year,
-          values.month,
-          values.day,
-          values.time.getHours(),
-          values.time.getMinutes(),
-          values.time.getSeconds()
-        )
+        value: moment({
+          date: values.day,
+          month: values.month,
+          year: values.year,
+          hour: values.hours,
+          minute: values.minutes,
+          second: values.seconds
+        })
       }
     })
 };

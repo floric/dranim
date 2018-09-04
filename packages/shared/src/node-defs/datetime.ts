@@ -1,12 +1,14 @@
+import { Moment } from 'moment';
+
 import { NodeDef } from '../nodes';
-import { DatetimeSocket, NumberSocket, TimeSocket } from '../sockets';
+import { DatetimeSocket, NumberSocket } from '../sockets';
 
 export interface DatetimeInputNodeOutputs {
-  value: Date;
+  value: Moment;
 }
 
 export interface DatetimeInputNodeForm {
-  value: Date;
+  value: Moment;
 }
 
 export const DatetimeInputNodeDef: NodeDef<{}, DatetimeInputNodeOutputs> = {
@@ -24,7 +26,9 @@ export interface DatetimeConstructNodeInputs {
   day: number;
   month: number;
   year: number;
-  time: Date;
+  hours: number;
+  minutes: number;
+  seconds: number;
 }
 
 export const DatetimeConstructNodeDef: NodeDef<
@@ -37,7 +41,9 @@ export const DatetimeConstructNodeDef: NodeDef<
     day: NumberSocket('Day'),
     month: NumberSocket('Month'),
     year: NumberSocket('Year'),
-    time: TimeSocket('Time')
+    hours: NumberSocket('Hours'),
+    minutes: NumberSocket('Minutes'),
+    seconds: NumberSocket('Seconds')
   },
   outputs: {
     value: DatetimeSocket('Datetime')
@@ -56,7 +62,9 @@ export const DatetimeSplitNodeDef: NodeDef<
     day: NumberSocket('Day'),
     month: NumberSocket('Month'),
     year: NumberSocket('Year'),
-    time: TimeSocket('Time')
+    hours: NumberSocket('Hours'),
+    minutes: NumberSocket('Minutes'),
+    seconds: NumberSocket('Seconds')
   },
   inputs: {
     value: DatetimeSocket('Datetime')

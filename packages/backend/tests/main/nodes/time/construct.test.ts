@@ -1,4 +1,5 @@
 import { TimeConstructNodeDef } from '@masterthesis/shared';
+import moment from 'moment';
 
 import { TimeConstructNode } from '../../../../src/main/nodes/time/construct';
 
@@ -63,16 +64,10 @@ describe(TimeConstructNode.type, () => {
   });
 
   test('should get output value from input', async () => {
-    const date = new Date(Date.UTC(1, 1, 1, 12, 34, 56));
-    const res = await TimeConstructNode.onNodeExecution(
-      {},
-      { hours: 12, minutes: 34, seconds: 56 },
-      null
-    );
+    const time = { hours: 12, minutes: 34, seconds: 56 };
+    const res = await TimeConstructNode.onNodeExecution({}, time, null);
 
-    expect(res.outputs.value.getHours()).toBe(date.getHours());
-    expect(res.outputs.value.getMinutes()).toBe(date.getMinutes());
-    expect(res.outputs.value.getSeconds()).toBe(date.getSeconds());
+    expect(res.outputs.value.toISOString()).toBe(moment(time).toISOString());
   });
 
   test('should return empty object for onMetaExecution', async () => {
@@ -112,7 +107,7 @@ describe(TimeConstructNode.type, () => {
 
   test('should valid empty object for onMetaExecution', async () => {
     const res = await TimeConstructNode.onMetaExecution(
-      { value: new Date() },
+      { value: moment() },
       {
         hours: { content: {}, isPresent: true },
         minutes: { content: {}, isPresent: true },

@@ -13,7 +13,9 @@ export const DatetimeSplitNode: ServerNodeDef<
   onMetaExecution: async (form, inputs) => {
     if (inputs.value == null || !inputs.value.isPresent) {
       return {
-        time: { content: {}, isPresent: false },
+        hours: { content: {}, isPresent: false },
+        minutes: { content: {}, isPresent: false },
+        seconds: { content: {}, isPresent: false },
         day: { content: {}, isPresent: false },
         month: { content: {}, isPresent: false },
         year: { content: {}, isPresent: false }
@@ -21,7 +23,9 @@ export const DatetimeSplitNode: ServerNodeDef<
     }
 
     return {
-      time: { content: {}, isPresent: true },
+      hours: { content: {}, isPresent: true },
+      minutes: { content: {}, isPresent: true },
+      seconds: { content: {}, isPresent: true },
       day: { content: {}, isPresent: true },
       month: { content: {}, isPresent: true },
       year: { content: {}, isPresent: true }
@@ -30,19 +34,12 @@ export const DatetimeSplitNode: ServerNodeDef<
   onNodeExecution: (form, inputs) =>
     Promise.resolve({
       outputs: {
-        time: new Date(
-          Date.UTC(
-            0,
-            0,
-            0,
-            inputs.value.getUTCHours(),
-            inputs.value.getUTCMinutes(),
-            inputs.value.getUTCSeconds()
-          )
-        ),
-        day: inputs.value.getUTCDay(),
-        month: inputs.value.getUTCMonth(),
-        year: inputs.value.getUTCFullYear()
+        hours: inputs.value.hour(),
+        minutes: inputs.value.minute(),
+        seconds: inputs.value.second(),
+        day: inputs.value.date(),
+        month: inputs.value.month(),
+        year: inputs.value.year()
       }
     })
 };

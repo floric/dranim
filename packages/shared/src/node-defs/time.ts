@@ -1,12 +1,14 @@
+import { Moment } from 'moment';
+
 import { NodeDef } from '../nodes';
 import { NumberSocket, TimeSocket } from '../sockets';
 
 export interface TimeInputNodeOutputs {
-  value: Date;
+  value: Moment;
 }
 
 export interface TimeInputNodeForm {
-  value: Date;
+  value: Moment;
 }
 
 export const TimeInputNodeDef: NodeDef<{}, TimeInputNodeOutputs> = {

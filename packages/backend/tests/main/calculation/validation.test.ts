@@ -9,6 +9,7 @@ import {
   ServerNodeDef,
   SocketState
 } from '@masterthesis/shared';
+import moment from 'moment';
 
 import { getMetaInputs } from '../../../src/main/calculation/meta-execution';
 import {
@@ -521,7 +522,7 @@ describe('Validation', () => {
   });
 
   test('should have valid time input', async () => {
-    const res = await isInputValid(new Date(), DataType.TIME, {
+    const res = await isInputValid(moment(), DataType.TIME, {
       db: null,
       userId: ''
     });
@@ -534,7 +535,7 @@ describe('Validation', () => {
   });
 
   test('should have valid datetime input', async () => {
-    const res = await isInputValid(new Date(), DataType.DATETIME, {
+    const res = await isInputValid(moment(), DataType.DATETIME, {
       db: null,
       userId: ''
     });

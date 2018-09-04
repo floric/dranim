@@ -1,4 +1,5 @@
 import { TimeInputNodeDef } from '@masterthesis/shared';
+import moment from 'moment';
 
 import { TimeInputNode } from '../../../../src/main/nodes/time/input';
 
@@ -18,12 +19,12 @@ describe(TimeInputNode.type, () => {
   });
 
   test('should have valid form', async () => {
-    const res = await TimeInputNode.isFormValid({ value: new Date() });
+    const res = await TimeInputNode.isFormValid({ value: moment() });
     expect(res).toBe(true);
   });
 
   test('should get output value from form', async () => {
-    const date = new Date();
+    const date = moment();
     const res = await TimeInputNode.onNodeExecution({ value: date }, {}, null);
     expect(res.outputs.value).toBe(date);
   });
@@ -38,7 +39,7 @@ describe(TimeInputNode.type, () => {
 
   test('should valid empty object for onMetaExecution', async () => {
     const res = await TimeInputNode.onMetaExecution(
-      { value: new Date() },
+      { value: moment() },
       {},
       null
     );

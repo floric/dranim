@@ -1,15 +1,13 @@
 import {
   ServerNodeDef,
   TimeConstructNodeInputs,
-  TimeInputNodeForm,
   TimeInputNodeOutputs,
   TimeSplitNodeDef
 } from '@masterthesis/shared';
 
 export const TimeSplitNode: ServerNodeDef<
   TimeInputNodeOutputs,
-  TimeConstructNodeInputs,
-  TimeInputNodeForm
+  TimeConstructNodeInputs
 > = {
   type: TimeSplitNodeDef.type,
   onMetaExecution: async (form, inputs) => {
@@ -30,9 +28,9 @@ export const TimeSplitNode: ServerNodeDef<
   onNodeExecution: (form, inputs) =>
     Promise.resolve({
       outputs: {
-        hours: inputs.value.getUTCHours(),
-        minutes: inputs.value.getUTCMinutes(),
-        seconds: inputs.value.getUTCSeconds()
+        hours: inputs.value.hours(),
+        minutes: inputs.value.minutes(),
+        seconds: inputs.value.seconds()
       }
     })
 };

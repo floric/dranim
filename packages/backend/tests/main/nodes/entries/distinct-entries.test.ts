@@ -408,7 +408,7 @@ describe('DistinctEntriesNode', () => {
       })
     });
     (processDocumentsWithCursor as jest.Mock).mockImplementation(
-      async (cursor, nodeId, processFn, reqContext) =>
+      async (cursor, processFn) =>
         processFn({
           _id: {
             test: 'distinct-value'

@@ -6,9 +6,9 @@ import {
   UploadProcess,
   ValueSchema
 } from '@masterthesis/shared';
-import * as fastCsv from 'fast-csv';
+import fastCsv from 'fast-csv';
 import { Collection, Db, ObjectID } from 'mongodb';
-import * as promisesAll from 'promises-all';
+import promisesAll from 'promises-all';
 import { Readable } from 'stream';
 
 import { Log } from '../../logging';
