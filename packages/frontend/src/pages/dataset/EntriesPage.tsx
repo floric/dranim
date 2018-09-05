@@ -118,7 +118,7 @@ const generateEntryColumns = (
             confirmMessage="Delete Entry?"
             confirmClick
             onClick={() =>
-              handleDeleteEntry(record.id, datasetId, refetch, deleteEntry)
+              handleDeleteEntry(record.key, datasetId, refetch, deleteEntry)
             }
           />
         )}

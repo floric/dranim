@@ -1,5 +1,4 @@
 import { DatetimeSplitNodeDef } from '@masterthesis/shared';
-import moment from 'moment';
 
 import { DatetimeSplitNode } from '../../../../src/main/nodes/datetime/split';
 import { NODE } from '../../../test-utils';
@@ -47,21 +46,14 @@ describe(DatetimeSplitNode.type, () => {
     const res = await DatetimeSplitNode.onNodeExecution(
       {},
       {
-        value: moment({
-          year: 2018,
-          month: 3,
-          day: 17,
-          hour: 8,
-          minute: 37,
-          second: 5
-        })
+        value: new Date(Date.UTC(2018, 11, 17, 8, 37, 5))
       },
       { node: NODE, reqContext: { userId: '', db: null } }
     );
     const { outputs } = res;
     expect(outputs).toEqual({
       day: 17,
-      month: 3,
+      month: 12,
       year: 2018,
       seconds: 5,
       minutes: 37,

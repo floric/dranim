@@ -34,12 +34,12 @@ export const DatetimeSplitNode: ServerNodeDef<
   onNodeExecution: (form, inputs) =>
     Promise.resolve({
       outputs: {
-        hours: inputs.value.hour(),
-        minutes: inputs.value.minute(),
-        seconds: inputs.value.second(),
-        day: inputs.value.date(),
-        month: inputs.value.month(),
-        year: inputs.value.year()
+        hours: inputs.value.getUTCHours(),
+        minutes: inputs.value.getUTCMinutes(),
+        seconds: inputs.value.getUTCSeconds(),
+        day: inputs.value.getUTCDate(),
+        month: inputs.value.getUTCMonth() + 1,
+        year: inputs.value.getUTCFullYear()
       }
     })
 };

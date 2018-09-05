@@ -5,7 +5,6 @@ import {
   TimeConstructNodeInputs,
   TimeInputNodeOutputs
 } from '@masterthesis/shared';
-import moment from 'moment';
 
 export const TimeConstructNode: ServerNodeDef<
   TimeConstructNodeInputs,
@@ -46,11 +45,9 @@ export const TimeConstructNode: ServerNodeDef<
   onNodeExecution: (form, values) =>
     Promise.resolve({
       outputs: {
-        value: moment({
-          hours: values.hours,
-          minutes: values.minutes,
-          seconds: values.seconds
-        })
+        value: new Date(
+          Date.UTC(0, 0, 0, values.hours, values.minutes, values.seconds)
+        )
       }
     })
 };

@@ -1,5 +1,4 @@
 import { TimeSplitNodeDef } from '@masterthesis/shared';
-import moment from 'moment';
 
 import { TimeSplitNode } from '../../../../src/main/nodes/time/split';
 import { NODE } from '../../../test-utils';
@@ -40,7 +39,7 @@ describe(TimeSplitNode.type, () => {
   test('should split time', async () => {
     const res = await TimeSplitNode.onNodeExecution(
       {},
-      { value: moment({ hours: 8, minutes: 37, seconds: 56 }) },
+      { value: new Date(Date.UTC(0, 0, 0, 8, 37, 56)) },
       { node: NODE, reqContext: { userId: '', db: null } }
     );
     expect(res).toEqual({

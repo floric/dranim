@@ -1,5 +1,4 @@
 import { TimeInputNodeDef } from '@masterthesis/shared';
-import moment from 'moment';
 
 import { TimeInputNode } from '../../../../src/main/nodes/time/input';
 
@@ -16,17 +15,29 @@ describe(TimeInputNode.type, () => {
 
     res = await TimeInputNode.isFormValid({ value: undefined });
     expect(res).toBe(false);
+
+    res = await TimeInputNode.isFormValid({ value: 'test' });
+    expect(res).toBe(false);
+
+    res = await TimeInputNode.isFormValid({ value: '' });
+    expect(res).toBe(false);
   });
 
   test('should have valid form', async () => {
-    const res = await TimeInputNode.isFormValid({ value: moment() });
+    const res = await TimeInputNode.isFormValid({
+      value: new Date().toISOString()
+    });
     expect(res).toBe(true);
   });
 
   test('should get output value from form', async () => {
-    const date = moment();
-    const res = await TimeInputNode.onNodeExecution({ value: date }, {}, null);
-    expect(res.outputs.value).toBe(date);
+    const date = new Date(Date.UTC(2018, 11, 3, 16, 23, 2));
+    const res = await TimeInputNode.onNodeExecution(
+      { value: date.toISOString() },
+      {},
+      null
+    );
+    expect(res.outputs.value.getTime()).toBe(date.getTime());
   });
 
   test('should return empty object for onMetaExecution', async () => {
@@ -39,7 +50,7 @@ describe(TimeInputNode.type, () => {
 
   test('should valid empty object for onMetaExecution', async () => {
     const res = await TimeInputNode.onMetaExecution(
-      { value: moment() },
+      { value: new Date().toISOString() },
       {},
       null
     );

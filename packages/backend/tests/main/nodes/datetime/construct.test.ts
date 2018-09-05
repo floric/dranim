@@ -1,5 +1,4 @@
 import { DatetimeConstructNodeDef } from '@masterthesis/shared';
-import moment from 'moment';
 
 import { DatetimeConstructNode } from '../../../../src/main/nodes/datetime/construct';
 
@@ -67,7 +66,7 @@ describe(DatetimeConstructNode.type, () => {
   test('should get output value from input', async () => {
     const date = {
       day: 1,
-      month: 1,
+      month: 12,
       year: 2018,
       hours: 20,
       minutes: 30,
@@ -75,7 +74,10 @@ describe(DatetimeConstructNode.type, () => {
     };
     const res = await DatetimeConstructNode.onNodeExecution({}, date, null);
 
-    expect(res.outputs.value.toISOString()).toEqual(moment(date).toISOString());
+    expect(res.outputs.value.toISOString()).toEqual(
+      new Date(Date.UTC(2018, 11, 1, 20, 30, 2)).toISOString()
+    );
+    expect(res.outputs.value.getUTCMonth() + 1).toBe(12);
   });
 
   test('should return empty object for onMetaExecution', async () => {
@@ -138,7 +140,7 @@ describe(DatetimeConstructNode.type, () => {
 
   test('should have valid empty object for onMetaExecution', async () => {
     const res = await DatetimeConstructNode.onMetaExecution(
-      { value: moment() },
+      {},
       {
         day: { content: {}, isPresent: true },
         month: { content: {}, isPresent: true },

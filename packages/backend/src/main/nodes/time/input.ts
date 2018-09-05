@@ -11,7 +11,19 @@ export const TimeInputNode: ServerNodeDef<
   TimeInputNodeForm
 > = {
   type: TimeInputNodeDef.type,
-  isFormValid: form => Promise.resolve(form.value != null),
+  isFormValid: async form => {
+    const { value } = form;
+    if (!value) {
+      return false;
+    }
+
+    const date = new Date(value);
+    if (isNaN(date.getTime())) {
+      return false;
+    }
+
+    return true;
+  },
   onMetaExecution: async form => {
     if (form.value == null) {
       return {
@@ -26,7 +38,7 @@ export const TimeInputNode: ServerNodeDef<
   onNodeExecution: form =>
     Promise.resolve({
       outputs: {
-        value: form.value!
+        value: new Date(form.value!)
       }
     })
 };

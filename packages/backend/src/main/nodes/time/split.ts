@@ -28,9 +28,9 @@ export const TimeSplitNode: ServerNodeDef<
   onNodeExecution: (form, inputs) =>
     Promise.resolve({
       outputs: {
-        hours: inputs.value.hours(),
-        minutes: inputs.value.minutes(),
-        seconds: inputs.value.seconds()
+        hours: inputs.value.getUTCHours(),
+        minutes: inputs.value.getUTCMinutes(),
+        seconds: inputs.value.getUTCSeconds()
       }
     })
 };
