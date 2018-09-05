@@ -81,7 +81,7 @@ export const EditEntriesNode: ClientNodeDef<
           </Col>
           <Col xs={24} lg={6} xxl={3}>
             <Button
-              icon="plus"
+              icon="plus-square"
               style={{ width: '100%' }}
               onClick={() =>
                 addValue(

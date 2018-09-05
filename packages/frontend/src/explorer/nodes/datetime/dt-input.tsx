@@ -11,7 +11,7 @@ import moment from 'moment';
 import { ClientNodeDef } from '../all-nodes';
 import { getValueOrDefault } from '../utils';
 
-export const TimeInputNode: ClientNodeDef<
+export const DatetimeInputNode: ClientNodeDef<
   {},
   DatetimeInputNodeOutputs,
   DatetimeInputNodeForm

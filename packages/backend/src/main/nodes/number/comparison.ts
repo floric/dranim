@@ -34,7 +34,7 @@ export const ComparisonNode: ServerNodeDef<
           value: inputs.a === inputs.b
         }
       };
-    } else if (type === ComparisonType.GREATER_THEN) {
+    } else if (type === ComparisonType.GREATER_THAN) {
       return {
         outputs: {
           value: inputs.a > inputs.b

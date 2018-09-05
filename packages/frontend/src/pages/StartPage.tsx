@@ -27,7 +27,13 @@ const news = [
     date: new Date(2018, 8, 15),
     title: 'Next Milestone',
     description:
-      'Add more neded nodes and improve calculation progress reporting.'
+      'Add more neded nodes and improve calculation speed and progress reporting.'
+  },
+  {
+    type: NewsType.FEATURE,
+    date: new Date(2018, 8, 5),
+    title: 'Added more time related nodes',
+    description: 'Comparisons of times and dates are now supported.'
   },
   {
     type: NewsType.FEATURE,
@@ -97,7 +103,7 @@ const renderCreateExampleButton = (type: string) => (
   <Mutation mutation={CREATE_DEMO_DATA}>
     {createDemoData => (
       <AsyncButton
-        icon="plus"
+        icon="plus-square"
         onClick={async () => {
           await createDemoData({
             variables: { type }

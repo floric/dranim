@@ -19,9 +19,9 @@ export const ComparisonNode: ClientNodeDef<
 > = {
   type: ComparisonNodeDef.type,
   renderName: (context, nodeForm) => {
-    if (nodeForm.type === ComparisonType.LESS_THEN) {
+    if (nodeForm.type === ComparisonType.LESS_THAN) {
       return 'Less Than';
-    } else if (nodeForm.type === ComparisonType.GREATER_THEN) {
+    } else if (nodeForm.type === ComparisonType.GREATER_THAN) {
       return 'Greater Than';
     }
 
@@ -35,8 +35,8 @@ export const ComparisonNode: ClientNodeDef<
         <Select style={{ width: 200 }} placeholder="Value">
           {[
             { type: ComparisonType.EQUALS, display: 'Equals' },
-            { type: ComparisonType.GREATER_THEN, display: 'Greater Than' },
-            { type: ComparisonType.LESS_THEN, display: 'Less Than' }
+            { type: ComparisonType.GREATER_THAN, display: 'Greater Than' },
+            { type: ComparisonType.LESS_THAN, display: 'Less Than' }
           ].map(o => (
             <Select.Option value={o.type} key={o.type}>
               {o.display}

@@ -3,6 +3,7 @@ import { NodeDef } from '../nodes';
 import * as BooleanNodes from './boolean';
 import * as DatasetNodes from './dataset';
 import {
+  DatetimeCompareNodeDef,
   DatetimeConstructNodeDef,
   DatetimeInputNodeDef,
   DatetimeSplitNodeDef
@@ -24,6 +25,7 @@ import {
 } from './number';
 import * as StringNodes from './string';
 import {
+  TimeCompareNodeDef,
   TimeConstructNodeDef,
   TimeInputNodeDef,
   TimeSplitNodeDef
@@ -59,8 +61,18 @@ export const NodesMap = new Map<string, NodeDef>(
     },
     DatasetNodes,
     BooleanNodes,
-    { TimeConstructNodeDef, TimeInputNodeDef, TimeSplitNodeDef },
-    { DatetimeConstructNodeDef, DatetimeInputNodeDef, DatetimeSplitNodeDef },
+    {
+      TimeCompareNodeDef,
+      TimeConstructNodeDef,
+      TimeInputNodeDef,
+      TimeSplitNodeDef
+    },
+    {
+      DatetimeCompareNodeDef,
+      DatetimeConstructNodeDef,
+      DatetimeInputNodeDef,
+      DatetimeSplitNodeDef
+    },
     { LinearChartDef, SoundChartDef }
   ]
     .map(n => Object.values(n))

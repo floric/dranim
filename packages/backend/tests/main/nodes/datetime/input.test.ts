@@ -1,5 +1,4 @@
 import { DatetimeInputNodeDef } from '@masterthesis/shared';
-import moment from 'moment';
 
 import { DatetimeInputNode } from '../../../../src/main/nodes/datetime/input';
 

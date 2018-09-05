@@ -1,5 +1,5 @@
 import { NodeDef } from '../nodes';
-import { DatetimeSocket, NumberSocket } from '../sockets';
+import { BooleanSocket, DatetimeSocket, NumberSocket } from '../sockets';
 
 export interface DatetimeInputNodeOutputs {
   value: Date;
@@ -14,9 +14,9 @@ export const DatetimeInputNodeDef: NodeDef<{}, DatetimeInputNodeOutputs> = {
   type: 'DatetimeInput',
   inputs: {},
   outputs: {
-    value: DatetimeSocket('Datetime')
+    value: DatetimeSocket('Date')
   },
-  path: ['Datetime'],
+  path: ['Date'],
   keywords: []
 };
 
@@ -44,9 +44,9 @@ export const DatetimeConstructNodeDef: NodeDef<
     seconds: NumberSocket('Seconds')
   },
   outputs: {
-    value: DatetimeSocket('Datetime')
+    value: DatetimeSocket('Date')
   },
-  path: ['Datetime', 'Converters'],
+  path: ['Date', 'Converters'],
   keywords: []
 };
 
@@ -65,8 +65,44 @@ export const DatetimeSplitNodeDef: NodeDef<
     seconds: NumberSocket('Seconds')
   },
   inputs: {
-    value: DatetimeSocket('Datetime')
+    value: DatetimeSocket('Date')
   },
-  path: ['Datetime', 'Converters'],
+  path: ['Date', 'Converters'],
   keywords: []
+};
+
+export interface DatetimeCompareNodeInputs {
+  a: Date;
+  b: Date;
+}
+
+export interface DatetimeCompareNodeOutputs {
+  value: boolean;
+}
+
+export enum TimeComparisonType {
+  EARLIER_THAN = 'EARLIER_THAN',
+  LATER_THAN = 'LATER_THAN',
+  EQUALS = 'EQUALS'
+}
+
+export interface TimeComparisonNodeForm {
+  type: TimeComparisonType;
+}
+
+export const DatetimeCompareNodeDef: NodeDef<
+  DatetimeCompareNodeInputs,
+  DatetimeCompareNodeOutputs
+> = {
+  name: 'Compare Dates',
+  type: 'DatetimeCompare',
+  inputs: {
+    a: DatetimeSocket('Date A'),
+    b: DatetimeSocket('Date B')
+  },
+  outputs: {
+    value: BooleanSocket('A compared to B')
+  },
+  path: ['Date', 'Operators'],
+  keywords: ['time compare', 'earlier', 'later']
 };

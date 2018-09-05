@@ -35,7 +35,6 @@
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
     "uuid": "^3.2.1",
-    "vega": "^4.2.0",
     "vega-lib": "^4.2.0",
     "whatwg-fetch": "2.0.4"
   },

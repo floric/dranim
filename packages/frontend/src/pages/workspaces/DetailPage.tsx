@@ -42,7 +42,7 @@ export const UnknownWorkspaceCard: SFC<{ history: History }> = ({
     actions={
       <Button
         type="primary"
-        icon="plus"
+        icon="plus-square"
         onClick={() => history.push('/workspaces')}
       >
         Create Workspace

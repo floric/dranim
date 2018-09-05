@@ -45,9 +45,7 @@ export const DistinctEntriesNode: ClientNodeDef<
     const values = getFieldValue(DISTINCT_SCHEMAS);
 
     if (!inputs.dataset || !inputs.dataset.isPresent) {
-      return (
-        <NoDatasetInputWarning />
-      );
+      return <NoDatasetInputWarning />;
     }
 
     return (
@@ -80,7 +78,7 @@ export const DistinctEntriesNode: ClientNodeDef<
           </Col>
           <Col xs={24} lg={6} xxl={4}>
             <Button
-              icon="plus"
+              icon="plus-square"
               style={{ width: '100%' }}
               onClick={() =>
                 addValue(
@@ -135,7 +133,7 @@ export const DistinctEntriesNode: ClientNodeDef<
           </Col>
           <Col xs={24} lg={6} xxl={4}>
             <Button
-              icon="plus"
+              icon="plus-square"
               style={{ width: '100%' }}
               onClick={() =>
                 addSchema(

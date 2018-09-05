@@ -19,6 +19,12 @@ import { NODE_WIDTH } from './editor/nodes';
 import { PropertiesForm } from './editor/PropertiesForm';
 import { nodeTypes, nodeTypesTree } from './nodes/all-nodes';
 
+const CANVAS_STYLE = css({
+  flex: 1,
+  width: '100%',
+  border: `1px solid ${Colors.GrayLight}`
+});
+
 const filterTreeNode = (inputValue: string, path: Array<{ index: string }>) => {
   const nodeIndex = path[path.length - 1].index;
   if (!nodeIndex) {
@@ -116,8 +122,6 @@ export class ExplorerEditor extends Component<
     await this.setState({ selectedNodeId: null });
   };
 
-  private handleStartCalulcation = () => this.props.onStartCalculation();
-
   private handleSelectCreateNode = (
     path: Array<string>,
     selectedOptions: Array<{ value: string }>
@@ -131,8 +135,8 @@ export class ExplorerEditor extends Component<
     const x = canvas ? canvas.clientWidth / 2 - NODE_WIDTH / 2 : 50;
     const y = canvas ? canvas.clientHeight / 2 : 50;
 
-    this.props.onNodeCreate(type, x, y, this.state.contextIds);
     this.setState({ addNodeOpen: false });
+    this.props.onNodeCreate(type, x, y, this.state.contextIds);
   };
 
   private handleEnterContext = async () => {
@@ -178,6 +182,12 @@ export class ExplorerEditor extends Component<
       this.addNodeSearch.current.focus();
     });
 
+  private handleOpenCascaderPopup = (value: boolean) => {
+    if (!value) {
+      this.setState({ addNodeOpen: false });
+    }
+  };
+
   public render() {
     const { selectedNodeId, contextIds, addNodeOpen } = this.state;
     const { nodes } = this.props;
@@ -215,18 +225,27 @@ export class ExplorerEditor extends Component<
                 bordered={false}
                 title={nodeType ? nodeType.name : undefined}
                 style={{ marginBottom: '1rem' }}
+                extra={
+                  <AsyncButton
+                    type="danger"
+                    tooltip="Delete selected Node"
+                    confirmMessage="Delete Node?"
+                    icon="delete"
+                    disabled={!node}
+                    confirmClick
+                    onClick={this.handleDeleteSelectedNode}
+                  />
+                }
               >
-                <Row gutter={12} type="flex" justify="space-between">
-                  <Col>
-                    {renderFormItems && (
-                      <PropertiesForm
-                        renderFormItems={renderFormItems}
-                        handleSubmit={this.handleSave}
-                        context={{ state: this.props, node }}
-                      />
-                    )}
-                  </Col>
-                </Row>
+                {renderFormItems ? (
+                  <PropertiesForm
+                    renderFormItems={renderFormItems}
+                    handleSubmit={this.handleSave}
+                    context={{ state: this.props, node }}
+                  />
+                ) : (
+                  `This node doesn't have any custom values.`
+                )}
               </Card>
             )}
           </Col>
@@ -242,6 +261,7 @@ export class ExplorerEditor extends Component<
                   expandTrigger="hover"
                   options={nodeTypesTree}
                   onChange={this.handleSelectCreateNode}
+                  onPopupVisibleChange={this.handleOpenCascaderPopup}
                 >
                   {!addNodeOpen ? (
                     <Button onClick={this.openAddNodeSearch} icon="plus-square">
@@ -256,29 +276,22 @@ export class ExplorerEditor extends Component<
                 {contextIds.length > 0 && (
                   <AsyncButton
                     tooltip="Leave Context"
-                    icon="logout"
+                    icon="fullscreen"
                     onClick={this.handleLeaveContext}
-                  />
+                  >
+                    Leave
+                  </AsyncButton>
                 )}
-                {!!node &&
+                {node &&
                   node.hasContextFn && (
                     <AsyncButton
                       tooltip="Enter Context"
-                      icon="login"
+                      icon="fullscreen-exit"
                       onClick={this.handleEnterContext}
-                    />
+                    >
+                      Enter
+                    </AsyncButton>
                   )}
-                {node ? (
-                  <AsyncButton
-                    type="danger"
-                    tooltip="Delete selected Node"
-                    confirmMessage="Delete Node?"
-                    icon="delete"
-                    disabled={!node}
-                    confirmClick
-                    onClick={this.handleDeleteSelectedNode}
-                  />
-                ) : null}
               </Button.Group>
             </Col>
             <Col>
@@ -286,7 +299,7 @@ export class ExplorerEditor extends Component<
                 <AsyncButton
                   type="primary"
                   icon="rocket"
-                  onClick={this.handleStartCalulcation}
+                  onClick={this.props.onStartCalculation}
                   fullWidth={false}
                   disabled={workspaceInvalid}
                 >
@@ -296,18 +309,7 @@ export class ExplorerEditor extends Component<
             </Col>
           </Row>
         </Card>
-        <div
-          id={EXPLORER_CONTAINER}
-          {...css({
-            flex: 1,
-            width: '100%',
-            border: `1px solid ${Colors.GrayLight}`,
-            borderTop: 0,
-            borderBottom: `2px solid ${
-              workspaceInvalid ? Colors.Warning : Colors.Success
-            }`
-          })}
-        />
+        <div id={EXPLORER_CONTAINER} {...CANVAS_STYLE} />
       </>
     );
   }
