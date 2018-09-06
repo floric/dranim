@@ -111,7 +111,7 @@ describe('ComparisonNode', () => {
 
   test('should do gt comparison', async () => {
     let res = await ComparisonNode.onNodeExecution(
-      { type: ComparisonType.GREATER_THEN },
+      { type: ComparisonType.GREATER_THAN },
       { a: 12, b: 9 },
       null
     );
@@ -119,7 +119,7 @@ describe('ComparisonNode', () => {
     expect(res).toEqual({ outputs: { value: true } });
 
     res = await ComparisonNode.onNodeExecution(
-      { type: ComparisonType.GREATER_THEN },
+      { type: ComparisonType.GREATER_THAN },
       { a: 9, b: 12 },
       null
     );
@@ -129,7 +129,7 @@ describe('ComparisonNode', () => {
 
   test('should do lt comparison', async () => {
     let res = await ComparisonNode.onNodeExecution(
-      { type: ComparisonType.LESS_THEN },
+      { type: ComparisonType.LESS_THAN },
       { a: 1, b: 9 },
       null
     );
@@ -137,7 +137,7 @@ describe('ComparisonNode', () => {
     expect(res).toEqual({ outputs: { value: true } });
 
     res = await ComparisonNode.onNodeExecution(
-      { type: ComparisonType.LESS_THEN },
+      { type: ComparisonType.LESS_THAN },
       { a: 12, b: 9 },
       null
     );
