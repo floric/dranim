@@ -9,10 +9,10 @@ import {
   SocketInstance
 } from '@masterthesis/shared';
 import { Button, Card, Cascader, Col, Row } from 'antd';
+import { WrappedFormUtils } from 'antd/lib/form/Form';
 import deepEqual from 'deep-equal';
 import { css } from 'glamor';
 
-import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { AsyncButton } from '../components/AsyncButton';
 import { EXPLORER_CONTAINER, updateStage } from './editor/editor-stage';
 import { NODE_WIDTH } from './editor/nodes';
@@ -93,8 +93,17 @@ export class ExplorerEditor extends Component<
     prevProps: ExplorerEditorProps,
     prevState: ExplorerEditorState
   ) {
+    const { nodes, datasets, connections } = this.props;
+    const {
+      nodes: prevNodes,
+      datasets: prevDatasets,
+      connections: prevConnections
+    } = prevProps;
+
     if (
-      !deepEqual(prevProps, this.props) ||
+      !deepEqual(nodes, prevNodes) ||
+      !deepEqual(datasets, prevDatasets) ||
+      !deepEqual(connections, prevConnections) ||
       !deepEqual(prevState, this.state)
     ) {
       this.updateCanvas();
@@ -109,17 +118,18 @@ export class ExplorerEditor extends Component<
     });
   }
 
-  private changeState = async (newState: ExplorerEditorState) =>
+  private changeState = (newState: ExplorerEditorState) =>
     this.setState(newState);
 
-  private handleDeleteSelectedNode = async () => {
+  private handleDeleteSelectedNode = () => {
     const { selectedNodeId } = this.state;
     if (selectedNodeId === null) {
-      return;
+      return Promise.resolve();
     }
 
-    await this.props.onNodeDelete(selectedNodeId);
-    await this.setState({ selectedNodeId: null });
+    this.setState({ selectedNodeId: null });
+
+    return this.props.onNodeDelete(selectedNodeId);
   };
 
   private handleSelectCreateNode = (
@@ -139,7 +149,7 @@ export class ExplorerEditor extends Component<
     this.props.onNodeCreate(type, x, y, this.state.contextIds);
   };
 
-  private handleEnterContext = async () => {
+  private handleEnterContext = () => {
     if (!this.state.selectedNodeId) {
       return;
     }
@@ -147,9 +157,7 @@ export class ExplorerEditor extends Component<
     this.appendContext(this.state.selectedNodeId);
   };
 
-  private handleLeaveContext = async () => this.popContext();
-
-  private appendContext = async (nodeId: string) =>
+  private appendContext = (nodeId: string) =>
     this.setState({
       contextIds: [...this.state.contextIds, nodeId],
       selectedNodeId: null
@@ -166,21 +174,18 @@ export class ExplorerEditor extends Component<
   private handleSave = (form: WrappedFormUtils, nodeId: string) => {
     const changedNames = Object.keys(form.getFieldsValue());
     return Promise.all(
-      changedNames.map(fieldName => {
-        const serializedVal = JSON.stringify(form.getFieldsValue()[fieldName]);
-        return this.props.onAddOrUpdateFormValue(
+      changedNames.map(fieldName =>
+        this.props.onAddOrUpdateFormValue(
           nodeId,
           fieldName,
-          serializedVal
-        );
-      })
+          JSON.stringify(form.getFieldsValue()[fieldName])
+        )
+      )
     );
   };
 
   private openAddNodeSearch = () =>
-    this.setState({ addNodeOpen: true }, () => {
-      this.addNodeSearch.current.focus();
-    });
+    this.setState({ addNodeOpen: true }, this.addNodeSearch.current.focus);
 
   private handleOpenCascaderPopup = (value: boolean) => {
     if (!value) {
@@ -277,7 +282,7 @@ export class ExplorerEditor extends Component<
                   <AsyncButton
                     tooltip="Leave Context"
                     icon="fullscreen"
-                    onClick={this.handleLeaveContext}
+                    onClick={this.popContext}
                   >
                     Leave
                   </AsyncButton>

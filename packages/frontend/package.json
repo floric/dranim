@@ -25,6 +25,7 @@
     "konva": "^2.1.6",
     "moment": "^2.22.2",
     "react": "^16.4.1",
+    "react-adopt": "^0.6.0",
     "react-apollo": "^2.1.6",
     "react-async-component": "^2.0.0",
     "react-container-dimensions": "^1.4.1",

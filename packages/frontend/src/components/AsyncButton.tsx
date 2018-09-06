@@ -10,7 +10,7 @@ interface AsyncButtonState {
 const MOUSE_ENTER_DELAY = 0.5;
 
 export type AsyncButtonProps = {
-  onClick?: () => Promise<any>;
+  onClick?: () => Promise<any> | any;
   confirmClick?: boolean;
   confirmMessage?: string;
   fullWidth?: boolean;
