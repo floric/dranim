@@ -21,7 +21,7 @@ export interface DataDetailPageProps
   extends RouteComponentProps<{ id: string }, {}> {}
 
 const NoDatasetExceptionActions: SFC<{ history: History }> = ({ history }) => (
-  <Button type="primary" icon="plus" onClick={() => history.push('/data')}>
+  <Button type="primary" icon="plus-square" onClick={() => history.push('/data')}>
     Create Dataset
   </Button>
 );

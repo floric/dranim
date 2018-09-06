@@ -11,7 +11,7 @@ import moment from 'moment';
 import { ClientNodeDef } from '../all-nodes';
 import { getValueOrDefault } from '../utils';
 
-export const TimeInputNode: ClientNodeDef<
+export const DatetimeInputNode: ClientNodeDef<
   {},
   DatetimeInputNodeOutputs,
   DatetimeInputNodeForm
@@ -20,7 +20,9 @@ export const TimeInputNode: ClientNodeDef<
   renderFormItems: ({ form: { getFieldDecorator }, nodeForm }) => (
     <Form.Item label="Value">
       {getFieldDecorator('value', {
-        initialValue: moment(getValueOrDefault(nodeForm, 'value', new Date()))
+        initialValue: moment(
+          getValueOrDefault(nodeForm, 'value', new Date().toISOString())
+        )
       })(<DatePicker showTime={true} />)}
     </Form.Item>
   )

@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 
 import { Entry, GQLDataset, Values } from '@masterthesis/shared';
+import { Card, Col, Row, Table } from 'antd';
 import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
 import { Mutation, MutationFn } from 'react-apollo';
 import { NavLink } from 'react-router-dom';
 
-import { Alert, Card, Col, Row, Table } from 'antd';
 import { AsyncButton } from '../../components/AsyncButton';
+import { Warning } from '../../components/Warnings';
 import { tryOperation } from '../../utils/form';
 import { CreateEntryForm } from '../forms/CreateEntryForm';
 
@@ -117,7 +118,7 @@ const generateEntryColumns = (
             confirmMessage="Delete Entry?"
             confirmClick
             onClick={() =>
-              handleDeleteEntry(record.id, datasetId, refetch, deleteEntry)
+              handleDeleteEntry(record.key, datasetId, refetch, deleteEntry)
             }
           />
         )}
@@ -172,10 +173,9 @@ export class DataEntriesPage extends Component<DataEntriesPageProps> {
                 )}
               </Mutation>
             ) : (
-              <Alert
-                type="info"
-                message="Value Schemas needed"
-                description="Please add value schemas first."
+              <Warning
+                title="Value Schemas needed"
+                message="Please add Value Schemas first."
               />
             )}
           </Card>

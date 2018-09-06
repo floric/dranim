@@ -7,8 +7,9 @@ import {
   AggregateEntriesNodeOutputs,
   AggregationEntriesType
 } from '@masterthesis/shared';
-import { Alert, Form, Select } from 'antd';
+import { Form, Select } from 'antd';
 
+import { NoDatasetInputWarning } from '../../../components/Warnings';
 import { ClientNodeDef } from '../all-nodes';
 import { getValueOrDefault } from '../utils';
 
@@ -21,14 +22,7 @@ export const AggregateEntriesNode: ClientNodeDef<
   renderFormItems: ({ form: { getFieldDecorator }, nodeForm, inputs }) => {
     const dsInput = inputs.dataset;
     if (!dsInput || !dsInput.isPresent) {
-      return (
-        <Alert
-          message="Dataset required"
-          description="Please input a valid Dataset."
-          type="warning"
-          showIcon
-        />
-      );
+      return <NoDatasetInputWarning />;
     }
 
     const options = dsInput.isPresent

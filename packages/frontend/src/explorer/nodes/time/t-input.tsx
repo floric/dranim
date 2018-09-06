@@ -20,7 +20,9 @@ export const TimeInputNode: ClientNodeDef<
   renderFormItems: ({ form: { getFieldDecorator }, nodeForm }) => (
     <Form.Item label="Value">
       {getFieldDecorator('value', {
-        initialValue: moment(getValueOrDefault(nodeForm, 'value', new Date()))
+        initialValue: moment(
+          getValueOrDefault(nodeForm, 'value', new Date().toISOString())
+        )
       })(<TimePicker />)}
     </Form.Item>
   )

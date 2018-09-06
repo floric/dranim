@@ -87,22 +87,13 @@ export const createEntry = async (
   reqContext: ApolloContext,
   options?: CreateEntryOptions
 ): Promise<Entry> => {
-  const valuesArr = Array.from(Object.entries(values));
-
-  if (valuesArr.length === 0) {
-    throw new UploadEntryError('No values specified for entry.', 'no-values');
-  }
-
-  valuesArr.forEach(v => {
-    if (!v || v[0] == null || v[1] == null) {
-      throw new Error('Value malformed');
-    }
-  });
+  checkForInvalidOrEmptyValues(values);
 
   const ds = await tryGetDataset(datasetId, reqContext);
   if (!options || !options.skipSchemaValidation) {
-    await checkForMissingValues(ds, valuesArr.map(v => v[0]));
-    await checkForUnsupportedValues(ds, valuesArr.map(v => v[0]));
+    const keys = Object.keys(values);
+    checkForMissingValues(ds, keys);
+    checkForUnsupportedValues(ds, keys);
   }
 
   try {
@@ -133,10 +124,20 @@ export const createEntry = async (
   }
 };
 
-const checkForMissingValues = async (
-  ds: Dataset,
-  valueNames: Array<string>
-) => {
+const checkForInvalidOrEmptyValues = (values: Values) => {
+  const valuesArr = Object.entries(values);
+  if (valuesArr.length === 0) {
+    throw new UploadEntryError('No values specified for entry.', 'no-values');
+  }
+
+  valuesArr.forEach(v => {
+    if (!v || v[0] == null || v[1] == null) {
+      throw new Error('Value malformed');
+    }
+  });
+};
+
+const checkForMissingValues = (ds: Dataset, valueNames: Array<string>) => {
   const missedSchemas = ds.valueschemas
     .filter(s => s.required)
     .filter(s => !valueNames.includes(s.name));
@@ -148,10 +149,7 @@ const checkForMissingValues = async (
   }
 };
 
-const checkForUnsupportedValues = async (
-  ds: Dataset,
-  valueNames: Array<string>
-) => {
+const checkForUnsupportedValues = (ds: Dataset, valueNames: Array<string>) => {
   const allValueNames = ds.valueschemas.map(v => v.name);
   const unsupportedValues = valueNames.filter(v => !allValueNames.includes(v));
   if (unsupportedValues.length > 0) {
@@ -162,14 +160,14 @@ const checkForUnsupportedValues = async (
   }
 };
 
-export const createEntryFromJSON = async (
+export const createEntryFromJSON = (
   datasetId: string,
   values: string,
   reqContext: ApolloContext,
   options?: CreateEntryOptions
 ): Promise<Entry> => {
   const parsedValues: Values = JSON.parse(values);
-  return await createEntry(datasetId, parsedValues, reqContext, options);
+  return createEntry(datasetId, parsedValues, reqContext, options);
 };
 
 export const deleteEntry = async (

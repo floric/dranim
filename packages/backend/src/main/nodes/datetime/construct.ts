@@ -15,7 +15,10 @@ export const DatetimeConstructNode: ServerNodeDef<
     if (
       !Number.isInteger(inputs.day) ||
       !Number.isInteger(inputs.month) ||
-      !Number.isInteger(inputs.year)
+      !Number.isInteger(inputs.year) ||
+      !Number.isInteger(inputs.hours) ||
+      !Number.isInteger(inputs.minutes) ||
+      !Number.isInteger(inputs.seconds)
     ) {
       return false;
     }
@@ -37,12 +40,14 @@ export const DatetimeConstructNode: ServerNodeDef<
     Promise.resolve({
       outputs: {
         value: new Date(
-          values.year,
-          values.month,
-          values.day,
-          values.time.getHours(),
-          values.time.getMinutes(),
-          values.time.getSeconds()
+          Date.UTC(
+            values.year,
+            values.month - 1,
+            values.day,
+            values.hours,
+            values.minutes,
+            values.seconds
+          )
         )
       }
     })

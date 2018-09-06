@@ -4,7 +4,7 @@ import { DatetimeConstructNode } from '../../../../src/main/nodes/datetime/const
 
 describe(DatetimeConstructNode.type, () => {
   test('should have correct properties', () => {
-    expect(DatetimeConstructNode.type).toBe(DatetimeConstructNode.type);
+    expect(DatetimeConstructNode.type).toBe(DatetimeConstructNodeDef.type);
     expect(DatetimeConstructNode.isFormValid).toBeUndefined();
     expect(DatetimeConstructNode.isInputValid).toBeDefined();
   });
@@ -14,7 +14,9 @@ describe(DatetimeConstructNode.type, () => {
       day: 1.5,
       month: 1,
       year: 1,
-      time: new Date()
+      hours: 0,
+      minutes: 0,
+      seconds: 0
     });
     expect(res).toBe(false);
 
@@ -22,7 +24,9 @@ describe(DatetimeConstructNode.type, () => {
       day: 1,
       month: 1.5,
       year: 1,
-      time: new Date()
+      hours: 0,
+      minutes: 0,
+      seconds: 0
     });
     expect(res).toBe(false);
 
@@ -30,7 +34,9 @@ describe(DatetimeConstructNode.type, () => {
       day: 1,
       month: 1,
       year: 1.5,
-      time: new Date()
+      hours: 0,
+      minutes: 0,
+      seconds: 0
     });
     expect(res).toBe(false);
   });
@@ -40,7 +46,9 @@ describe(DatetimeConstructNode.type, () => {
       day: 1,
       month: 1,
       year: 0,
-      time: new Date()
+      hours: 0,
+      minutes: 0,
+      seconds: 0
     });
     expect(res).toBe(true);
 
@@ -48,20 +56,28 @@ describe(DatetimeConstructNode.type, () => {
       day: 31,
       month: 12,
       year: 2018,
-      time: new Date()
+      hours: 0,
+      minutes: 0,
+      seconds: 0
     });
     expect(res).toBe(true);
   });
 
   test('should get output value from input', async () => {
-    const date = new Date(Date.UTC(2018, 1, 1, 12, 34, 56));
-    const res = await DatetimeConstructNode.onNodeExecution(
-      {},
-      { day: 1, month: 1, year: 2018, time: date },
-      null
-    );
+    const date = {
+      day: 1,
+      month: 12,
+      year: 2018,
+      hours: 20,
+      minutes: 30,
+      seconds: 2
+    };
+    const res = await DatetimeConstructNode.onNodeExecution({}, date, null);
 
-    expect(res.outputs.value).toEqual(date);
+    expect(res.outputs.value.toISOString()).toEqual(
+      new Date(Date.UTC(2018, 11, 1, 20, 30, 2)).toISOString()
+    );
+    expect(res.outputs.value.getUTCMonth() + 1).toBe(12);
   });
 
   test('should return empty object for onMetaExecution', async () => {
@@ -71,7 +87,9 @@ describe(DatetimeConstructNode.type, () => {
         day: { content: {}, isPresent: false },
         month: { content: {}, isPresent: false },
         year: { content: {}, isPresent: false },
-        time: { content: {}, isPresent: false }
+        hours: { content: {}, isPresent: false },
+        minutes: { content: {}, isPresent: false },
+        seconds: { content: {}, isPresent: false }
       },
       null
     );
@@ -83,7 +101,9 @@ describe(DatetimeConstructNode.type, () => {
         day: { content: {}, isPresent: true },
         month: { content: {}, isPresent: false },
         year: { content: {}, isPresent: false },
-        time: { content: {}, isPresent: false }
+        hours: { content: {}, isPresent: false },
+        minutes: { content: {}, isPresent: false },
+        seconds: { content: {}, isPresent: false }
       },
       null
     );
@@ -95,7 +115,9 @@ describe(DatetimeConstructNode.type, () => {
         day: { content: {}, isPresent: true },
         month: { content: {}, isPresent: true },
         year: { content: {}, isPresent: false },
-        time: { content: {}, isPresent: false }
+        hours: { content: {}, isPresent: false },
+        minutes: { content: {}, isPresent: false },
+        seconds: { content: {}, isPresent: false }
       },
       null
     );
@@ -107,21 +129,25 @@ describe(DatetimeConstructNode.type, () => {
         day: { content: {}, isPresent: true },
         month: { content: {}, isPresent: true },
         year: { content: {}, isPresent: true },
-        time: { content: {}, isPresent: false }
+        hours: { content: {}, isPresent: false },
+        minutes: { content: {}, isPresent: false },
+        seconds: { content: {}, isPresent: false }
       },
       null
     );
     expect(res).toEqual({ value: { content: {}, isPresent: false } });
   });
 
-  test('should valid empty object for onMetaExecution', async () => {
+  test('should have valid empty object for onMetaExecution', async () => {
     const res = await DatetimeConstructNode.onMetaExecution(
-      { value: new Date() },
+      {},
       {
         day: { content: {}, isPresent: true },
         month: { content: {}, isPresent: true },
         year: { content: {}, isPresent: true },
-        time: { content: {}, isPresent: true }
+        hours: { content: {}, isPresent: true },
+        minutes: { content: {}, isPresent: true },
+        seconds: { content: {}, isPresent: true }
       },
       null
     );

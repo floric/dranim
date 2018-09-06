@@ -2,15 +2,18 @@ import { NodeDef } from '../nodes';
 
 import * as BooleanNodes from './boolean';
 import * as DatasetNodes from './dataset';
-import * as DatetimeNodes from './datetime';
 import {
-  AddValuesNodeDef,
+  DatetimeCompareNodeDef,
+  DatetimeConstructNodeDef,
+  DatetimeInputNodeDef,
+  DatetimeSplitNodeDef
+} from './datetime';
+import {
   AggregateEntriesNodeDef,
   CountEntriesNodeDef,
   DistinctEntriesNodeDef,
   EditEntriesNodeDef,
-  FilterEntriesNodeDef,
-  SelectValuesNodeDef
+  FilterEntriesNodeDef
 } from './entries';
 import {
   ComparisonNodeDef,
@@ -21,7 +24,12 @@ import {
   SumNodeDef
 } from './number';
 import * as StringNodes from './string';
-import * as TimeNodes from './time';
+import {
+  TimeCompareNodeDef,
+  TimeConstructNodeDef,
+  TimeInputNodeDef,
+  TimeSplitNodeDef
+} from './time';
 import { LinearChartDef, SoundChartDef } from './visualizations';
 
 export * from './dataset';
@@ -37,12 +45,10 @@ export const NodesMap = new Map<string, NodeDef>(
   [
     {
       DistinctEntriesNodeDef,
-      AddValuesNodeDef,
+      EditEntriesNodeDef,
       AggregateEntriesNodeDef,
       CountEntriesNodeDef,
-      EditEntriesNodeDef,
-      FilterEntriesNodeDef,
-      SelectValuesNodeDef
+      FilterEntriesNodeDef
     },
     StringNodes,
     {
@@ -55,8 +61,18 @@ export const NodesMap = new Map<string, NodeDef>(
     },
     DatasetNodes,
     BooleanNodes,
-    TimeNodes,
-    DatetimeNodes,
+    {
+      TimeCompareNodeDef,
+      TimeConstructNodeDef,
+      TimeInputNodeDef,
+      TimeSplitNodeDef
+    },
+    {
+      DatetimeCompareNodeDef,
+      DatetimeConstructNodeDef,
+      DatetimeInputNodeDef,
+      DatetimeSplitNodeDef
+    },
     { LinearChartDef, SoundChartDef }
   ]
     .map(n => Object.values(n))

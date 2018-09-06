@@ -15,21 +15,28 @@ describe(DatetimeInputNode.type, () => {
 
     res = await DatetimeInputNode.isFormValid({ value: undefined });
     expect(res).toBe(false);
+
+    res = await DatetimeInputNode.isFormValid({ value: 'test' });
+    expect(res).toBe(false);
+
+    res = await DatetimeInputNode.isFormValid({ value: '' });
+    expect(res).toBe(false);
   });
 
   test('should have valid form', async () => {
-    const res = await DatetimeInputNode.isFormValid({ value: new Date() });
+    const date = new Date().toISOString();
+    const res = await DatetimeInputNode.isFormValid({ value: date });
     expect(res).toBe(true);
   });
 
   test('should get output value from form', async () => {
     const date = new Date();
     const res = await DatetimeInputNode.onNodeExecution(
-      { value: date },
+      { value: date.toISOString() },
       {},
       null
     );
-    expect(res.outputs.value).toBe(date);
+    expect(res.outputs.value.toISOString()).toBe(date.toISOString());
   });
 
   test('should return empty object for onMetaExecution', async () => {
@@ -50,7 +57,7 @@ describe(DatetimeInputNode.type, () => {
 
   test('should valid empty object for onMetaExecution', async () => {
     const res = await DatetimeInputNode.onMetaExecution(
-      { value: new Date() },
+      { value: new Date().toISOString() },
       {},
       null
     );

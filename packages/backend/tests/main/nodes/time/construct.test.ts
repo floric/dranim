@@ -63,16 +63,18 @@ describe(TimeConstructNode.type, () => {
   });
 
   test('should get output value from input', async () => {
-    const date = new Date(Date.UTC(1, 1, 1, 12, 34, 56));
+    const time = new Date(Date.UTC(0, 0, 0, 11, 34, 56));
     const res = await TimeConstructNode.onNodeExecution(
       {},
-      { hours: 12, minutes: 34, seconds: 56 },
+      {
+        hours: time.getUTCHours(),
+        minutes: time.getUTCMinutes(),
+        seconds: time.getUTCSeconds()
+      },
       null
     );
 
-    expect(res.outputs.value.getHours()).toBe(date.getHours());
-    expect(res.outputs.value.getMinutes()).toBe(date.getMinutes());
-    expect(res.outputs.value.getSeconds()).toBe(date.getSeconds());
+    expect(res.outputs.value.getTime()).toBe(time.getTime());
   });
 
   test('should return empty object for onMetaExecution', async () => {
@@ -112,7 +114,7 @@ describe(TimeConstructNode.type, () => {
 
   test('should valid empty object for onMetaExecution', async () => {
     const res = await TimeConstructNode.onMetaExecution(
-      { value: new Date() },
+      {},
       {
         hours: { content: {}, isPresent: true },
         minutes: { content: {}, isPresent: true },

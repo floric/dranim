@@ -9,8 +9,9 @@ import {
   ForEachEntryNodeOutputs,
   ValueSchema
 } from '@masterthesis/shared';
-import { Alert, Button, Checkbox, Col, Input, Row, Select, Tag } from 'antd';
+import { Button, Checkbox, Col, Input, Row, Select, Tag } from 'antd';
 
+import { NoDatasetInputWarning } from '../../../components/Warnings';
 import { showNotificationWithIcon } from '../../../utils/form';
 import { ClientNodeDef } from '../all-nodes';
 
@@ -44,14 +45,7 @@ export const DistinctEntriesNode: ClientNodeDef<
     const values = getFieldValue(DISTINCT_SCHEMAS);
 
     if (!inputs.dataset || !inputs.dataset.isPresent) {
-      return (
-        <Alert
-          message="Dataset required"
-          description="Please input a valid Dataset."
-          type="warning"
-          showIcon
-        />
-      );
+      return <NoDatasetInputWarning />;
     }
 
     return (
@@ -84,7 +78,7 @@ export const DistinctEntriesNode: ClientNodeDef<
           </Col>
           <Col xs={24} lg={6} xxl={4}>
             <Button
-              icon="plus"
+              icon="plus-square"
               style={{ width: '100%' }}
               onClick={() =>
                 addValue(
@@ -139,7 +133,7 @@ export const DistinctEntriesNode: ClientNodeDef<
           </Col>
           <Col xs={24} lg={6} xxl={4}>
             <Button
-              icon="plus"
+              icon="plus-square"
               style={{ width: '100%' }}
               onClick={() =>
                 addSchema(

@@ -4,7 +4,7 @@ import {
   Values,
   ValueSchema
 } from '@masterthesis/shared';
-import * as casual from 'casual';
+import casual from 'casual';
 
 import { addValueSchema, createDataset } from '../main/workspace/dataset';
 import { createEntry } from '../main/workspace/entry';
@@ -34,7 +34,7 @@ const birthdaysEntries: Array<Values> = Array(ENTRIES_COUNT)
     lastName: casual.last_name,
     gender: casual.boolean ? 'm' : 'w',
     value: casual.random,
-    birthday: casual.date('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
+    birthday: new Date(casual.date('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'))
   }));
 
 const birthdaysSchema: Array<ValueSchema> = [

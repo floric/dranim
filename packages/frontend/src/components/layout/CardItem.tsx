@@ -1,6 +1,6 @@
 import React, { SFC } from 'react';
 
-import { Card, Col, Row } from 'antd';
+import { Card, Row } from 'antd';
 import { Link } from 'react-router-dom';
 
 import { AsyncButton } from '../AsyncButton';
@@ -31,20 +31,17 @@ export const CardItem: SFC<CardItemProps> = ({
       />
     }
     bordered={false}
+    extra={
+      <AsyncButton
+        type="danger"
+        confirmClick={!!confirmDeleteMessage}
+        confirmMessage={confirmDeleteMessage}
+        icon="delete"
+        tooltip="Delete"
+        onClick={handleDelete}
+      />
+    }
   >
     <Row>{children}</Row>
-    <Row type="flex" justify="end" style={{ marginTop: '1rem' }} gutter={12}>
-      <Col>
-        <AsyncButton
-          type="danger"
-          confirmClick={!!confirmDeleteMessage}
-          confirmMessage={confirmDeleteMessage}
-          icon="delete"
-          onClick={handleDelete}
-        >
-          Delete
-        </AsyncButton>
-      </Col>
-    </Row>
   </Card>
 );

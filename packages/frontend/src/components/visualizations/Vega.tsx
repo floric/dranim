@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { GQLOutputResult } from '@masterthesis/shared';
 import { Col, Row } from 'antd';
 import { v4 } from 'uuid';
-import { parse, Spec, View } from 'vega';
+import { parse, Spec, View } from 'vega-lib';
 
 import { showNotificationWithIcon } from '../../utils/form';
 import { LoadingCard } from '../layout/CustomCards';

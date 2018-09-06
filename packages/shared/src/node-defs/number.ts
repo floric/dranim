@@ -68,8 +68,8 @@ export const MultiplicationNodeDef: NodeDef<
   name: 'Multiplication',
   type: 'Multiplication',
   inputs: {
-    a: NumberSocket('A'),
-    b: NumberSocket('B')
+    a: NumberSocket('Number A'),
+    b: NumberSocket('Number B')
   },
   outputs: {
     product: NumberSocket('Product')
@@ -107,8 +107,8 @@ export const SumNodeDef: NodeDef<SumNodeInputs, SumNodeOutputs> = {
   name: 'Sum',
   type: 'Sum',
   inputs: {
-    a: NumberSocket('A'),
-    b: NumberSocket('B')
+    a: NumberSocket('Number A'),
+    b: NumberSocket('Number B')
   },
   outputs: {
     sum: NumberSocket('Sum')
@@ -127,8 +127,8 @@ export interface ComparisonNodeOutputs {
 }
 
 export enum ComparisonType {
-  LESS_THEN = 'LESS_THEN',
-  GREATER_THEN = 'GREATER_THEN',
+  LESS_THAN = 'LESS_THAN',
+  GREATER_THAN = 'GREATER_THAN',
   EQUALS = 'EQUALS'
 }
 
@@ -143,11 +143,11 @@ export const ComparisonNodeDef: NodeDef<
   name: 'Compare Numbers',
   type: 'CompareNumbers',
   inputs: {
-    a: NumberSocket('A'),
-    b: NumberSocket('B')
+    a: NumberSocket('Number A'),
+    b: NumberSocket('Number B')
   },
   outputs: {
-    value: BooleanSocket('Value')
+    value: BooleanSocket('A compared to B')
   },
   path: ['Numbers', 'Operators'],
   keywords: ['less than', 'greater than', 'equals', 'compare']

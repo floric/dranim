@@ -1,19 +1,17 @@
 import {
   allAreDefinedAndPresent,
   Dataset,
-  DatasetSocket,
   DataType,
   EditEntriesNodeDef,
   Entry,
-  SocketState
+  NodeState,
+  SocketState,
+  ValueSchema
 } from '@masterthesis/shared';
 
 import { createUniqueDatasetName } from '../../../../src/main/calculation/utils';
 import { EditEntriesNode } from '../../../../src/main/nodes/entries/edit-entries';
-import {
-  getDynamicEntryContextInputs,
-  processEntries
-} from '../../../../src/main/nodes/entries/utils';
+import { processEntries } from '../../../../src/main/nodes/entries/utils';
 import {
   createDataset,
   tryGetDataset
@@ -34,7 +32,7 @@ describe('EditEntriesNode', () => {
 
   test('should have correct properties', () => {
     expect(EditEntriesNode.type).toBe(EditEntriesNodeDef.type);
-    expect(EditEntriesNode.isFormValid).toBeUndefined();
+    expect(EditEntriesNode.isFormValid).toBeDefined();
     expect(EditEntriesNode.isInputValid).toBeUndefined();
     expect(
       EditEntriesNode.transformContextInputDefsToContextOutputDefs
@@ -42,12 +40,246 @@ describe('EditEntriesNode', () => {
     expect(EditEntriesNode.transformInputDefsToContextInputDefs).toBeDefined();
   });
 
-  test('should create new DS and do changes on this one', async () => {
+  test('should have invalid form', async () => {
+    let res = await EditEntriesNode.isFormValid({ values: [] });
+    expect(res).toBe(false);
+
+    res = await EditEntriesNode.isFormValid({ values: undefined });
+    expect(res).toBe(false);
+
+    res = await EditEntriesNode.isFormValid({ values: null });
+    expect(res).toBe(false);
+  });
+
+  test('should have valid form', async () => {
+    const res = await EditEntriesNode.isFormValid({
+      values: [
+        {
+          type: DataType.STRING,
+          name: 'test',
+          required: true,
+          unique: false,
+          fallback: ''
+        }
+      ]
+    });
+    expect(res).toBe(true);
+  });
+
+  test('should have absent meta', async () => {
+    let res = await EditEntriesNode.onMetaExecution(
+      { values: [] },
+      { dataset: null },
+      null
+    );
+    expect(res).toEqual({
+      dataset: { content: { schema: [] }, isPresent: false }
+    });
+
+    res = await EditEntriesNode.onMetaExecution(
+      { values: [] },
+      { dataset: { content: { schema: [] }, isPresent: false } },
+      null
+    );
+    expect(res).toEqual({
+      dataset: { content: { schema: [] }, isPresent: false }
+    });
+  });
+
+  test('should have present meta', async () => {
+    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(true);
+
+    let res = await EditEntriesNode.onMetaExecution(
+      { values: undefined },
+      {
+        dataset: {
+          content: {
+            schema: [
+              {
+                type: DataType.STRING,
+                fallback: '',
+                name: 'test',
+                required: true,
+                unique: true
+              }
+            ]
+          },
+          isPresent: true
+        }
+      },
+      null
+    );
+    expect(res).toEqual({
+      dataset: {
+        content: {
+          schema: [
+            {
+              type: DataType.STRING,
+              fallback: '',
+              name: 'test',
+              required: true,
+              unique: true
+            }
+          ]
+        },
+        isPresent: true
+      }
+    });
+
+    res = await EditEntriesNode.onMetaExecution(
+      { values: [] },
+      {
+        dataset: {
+          content: {
+            schema: [
+              {
+                type: DataType.STRING,
+                fallback: '',
+                name: 'test',
+                required: true,
+                unique: true
+              }
+            ]
+          },
+          isPresent: true
+        }
+      },
+      null
+    );
+    expect(res).toEqual({
+      dataset: {
+        content: {
+          schema: []
+        },
+        isPresent: true
+      }
+    });
+  });
+
+  test('should add dynamic context outputs from context inputs without form', async () => {
+    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(true);
+
+    const res = await EditEntriesNode.transformContextInputDefsToContextOutputDefs(
+      {
+        dataset: {
+          dataType: DataType.DATASET,
+          state: SocketState.STATIC,
+          displayName: 'Dataset'
+        }
+      },
+      { dataset: { isPresent: true, content: { schema: [] } } },
+      {
+        test: {
+          dataType: DataType.NUMBER,
+          state: SocketState.DYNAMIC,
+          displayName: 'Test'
+        }
+      },
+      {},
+      { values: undefined },
+      null
+    );
+
+    expect(res).toEqual({
+      test: {
+        dataType: DataType.NUMBER,
+        state: SocketState.DYNAMIC,
+        displayName: 'Test'
+      }
+    });
+  });
+
+  test('should add dynamic context outputs from form if present and skip context inputs', async () => {
+    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(true);
+
+    const res = await EditEntriesNode.transformContextInputDefsToContextOutputDefs(
+      {
+        dataset: {
+          dataType: DataType.DATASET,
+          state: SocketState.STATIC,
+          displayName: 'Dataset'
+        }
+      },
+      { dataset: { isPresent: true, content: { schema: [] } } },
+      {
+        test: {
+          dataType: DataType.NUMBER,
+          state: SocketState.DYNAMIC,
+          displayName: 'Test'
+        }
+      },
+      {},
+      {
+        values: [
+          {
+            name: 'test2',
+            fallback: '',
+            required: true,
+            type: DataType.STRING,
+            unique: false
+          }
+        ]
+      },
+      null
+    );
+    expect(res).toEqual({
+      test2: {
+        dataType: DataType.STRING,
+        state: SocketState.DYNAMIC,
+        displayName: 'test2'
+      }
+    });
+  });
+
+  test('should return context inputs as well as dynamic inputs from form even with missing dataset input', async () => {
+    const res = await EditEntriesNode.transformContextInputDefsToContextOutputDefs(
+      {
+        dataset: {
+          dataType: DataType.DATASET,
+          state: SocketState.STATIC,
+          displayName: 'Dataset'
+        }
+      },
+      { dataset: { isPresent: false, content: { schema: [] } } },
+      {
+        test: {
+          dataType: DataType.NUMBER,
+          state: SocketState.DYNAMIC,
+          displayName: 'Test'
+        }
+      },
+      {},
+      {
+        values: [
+          {
+            name: 'test2',
+            fallback: '',
+            required: true,
+            type: DataType.STRING,
+            unique: false
+          }
+        ]
+      },
+      null
+    );
+    expect(res).toEqual({
+      test2: { dataType: 'String', displayName: 'test2', state: 'Dynamic' }
+    });
+  });
+
+  test('should add new value to dataset', async () => {
+    const oldVS: ValueSchema = {
+      name: 'test',
+      type: DataType.STRING,
+      fallback: '',
+      unique: false,
+      required: true
+    };
     const oldDs: Dataset = {
       id: VALID_OBJECT_ID,
       created: '',
       description: '',
-      valueschemas: [],
+      valueschemas: [oldVS],
       name: 'Old DS',
       workspaceId: 'CDE'
     };
@@ -59,242 +291,71 @@ describe('EditEntriesNode', () => {
       name: 'New DS',
       workspaceId: 'CDE'
     };
-    (createUniqueDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
-    (processEntries as jest.Mock).mockImplementation(n => Promise.resolve());
+    const entryA: Entry = {
+      id: 'eA',
+      values: { [oldVS.name]: 'foo' }
+    };
+    (createUniqueDatasetName as jest.Mock).mockReturnValue('AddEntries');
+    (processEntries as jest.Mock).mockImplementation(async (a, b, processFn) =>
+      processFn(entryA)
+    );
     (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
+    (createEntry as jest.Mock).mockResolvedValue({});
 
     const res = await EditEntriesNode.onNodeExecution(
-      {},
+      {
+        values: [
+          {
+            name: 'new',
+            required: true,
+            unique: true,
+            fallback: '',
+            type: DataType.STRING
+          }
+        ]
+      },
       { dataset: { datasetId: oldDs.id } },
       {
         reqContext: { db: null, userId: '' },
-        node: NODE,
-        contextFnExecution: () => Promise.resolve({ outputs: {} })
+        node: {
+          id: VALID_OBJECT_ID,
+          contextIds: [],
+          inputs: [],
+          outputs: [],
+          type: EditEntriesNode.type,
+          workspaceId: VALID_OBJECT_ID,
+          form: [],
+          x: 0,
+          y: 0,
+          state: NodeState.VALID,
+          variables: {}
+        },
+        contextFnExecution: async inputs => ({
+          outputs: { ...inputs, new: 'super' }
+        })
       }
     );
 
     expect(res.outputs.dataset.datasetId).toBe(newDs.id);
-    expect(res.results).toBeUndefined();
-  });
-
-  test('should passthrough defs on onMetaExecution', async () => {
-    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(true);
-    const validDs = {
-      content: {
-        schema: [
-          {
-            type: DataType.BOOLEAN,
-            name: 'super',
-            required: false,
-            unique: false,
-            fallback: ''
-          }
-        ]
-      },
-      isPresent: true
-    };
-    const res = await EditEntriesNode.onMetaExecution(
-      {},
-      { dataset: validDs },
-      { db: null, userId: '' }
-    );
-
-    expect(res.dataset).toEqual(validDs);
-  });
-
-  test('should return empty object on onMetaExecution', async () => {
-    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(false);
-
-    let res = await EditEntriesNode.onMetaExecution(
-      {},
-      { dataset: null },
-      { db: null, userId: '' }
-    );
-    expect(res.dataset.isPresent).toBe(false);
-    expect(res.dataset.content.schema).toEqual([]);
-
-    res = await EditEntriesNode.onMetaExecution(
-      {},
-      { dataset: undefined },
-      { db: null, userId: '' }
-    );
-    expect(res.dataset.isPresent).toBe(false);
-    expect(res.dataset.content.schema).toEqual([]);
-  });
-
-  test('should use dataset schemas as dynamic inputs of context fn', async () => {
-    (getDynamicEntryContextInputs as jest.Mock).mockReturnValue({
-      super: {
-        dataType: DataType.BOOLEAN,
-        displayName: 'super',
-        state: SocketState.DYNAMIC
-      }
-    });
-    const validDs = {
-      content: {
-        schema: [
-          {
-            type: DataType.BOOLEAN,
-            name: 'super',
-            required: false,
-            unique: false,
-            fallback: ''
-          }
-        ]
-      },
-      isPresent: true
-    };
-
-    const res = await EditEntriesNode.transformInputDefsToContextInputDefs(
-      { dataset: DatasetSocket('Ds') },
-      { dataset: validDs },
-      {},
-      { db: null, userId: '' }
-    );
-
-    expect(res).toEqual({
-      super: {
-        dataType: DataType.BOOLEAN,
-        displayName: 'super',
-        state: SocketState.DYNAMIC
-      }
-    });
-  });
-
-  test('should return context inputs for missing inputs', async () => {
-    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(false);
-
-    const validDs = {
-      content: {
-        schema: [
-          {
-            type: DataType.BOOLEAN,
-            name: 'super',
-            required: false,
-            unique: false,
-            fallback: ''
-          }
-        ]
-      },
-      isPresent: true
-    };
-
-    const res = await EditEntriesNode.transformContextInputDefsToContextOutputDefs(
-      { dataset: DatasetSocket('Ds') },
-      { dataset: validDs },
+    expect(createEntry as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(createEntry as jest.Mock).toHaveBeenCalledWith(
+      newDs.id,
       {
-        super: {
-          dataType: DataType.BOOLEAN,
-          displayName: 'super',
-          state: SocketState.DYNAMIC
-        }
+        [oldVS.name]: 'foo',
+        new: 'super'
       },
-      {},
-      [],
       { db: null, userId: '' }
     );
-
-    expect(res).toEqual({
-      super: {
-        dataType: DataType.BOOLEAN,
-        displayName: 'super',
-        state: SocketState.DYNAMIC
-      }
-    });
   });
 
-  test('should passthrough dynamic inputs of context input node', async () => {
-    (allAreDefinedAndPresent as jest.Mock).mockReturnValue(true);
-
-    const validDs = {
-      content: {
-        schema: [
-          {
-            type: DataType.BOOLEAN,
-            name: 'super',
-            required: false,
-            unique: false,
-            fallback: ''
-          }
-        ]
-      },
-      isPresent: true
-    };
-
-    const res = await EditEntriesNode.transformContextInputDefsToContextOutputDefs(
-      { dataset: DatasetSocket('Ds') },
-      { dataset: validDs },
-      {
-        super: {
-          dataType: DataType.BOOLEAN,
-          displayName: 'super',
-          state: SocketState.DYNAMIC
-        }
-      },
-      {},
-      [],
-      { db: null, userId: '' }
-    );
-
-    expect(res).toEqual({
-      super: {
-        dataType: DataType.BOOLEAN,
-        displayName: 'super',
-        state: SocketState.DYNAMIC
-      }
-    });
-  });
-
-  test('should edit entries', async () => {
-    const oldDs: Dataset = {
-      id: VALID_OBJECT_ID,
-      created: '',
-      description: '',
-      valueschemas: [],
-      name: 'Old DS',
-      workspaceId: 'CDE'
-    };
-    const newDs: Dataset = {
-      id: 'ABC',
-      created: '',
-      description: '',
-      valueschemas: [],
-      name: 'New DS',
-      workspaceId: 'CDE'
-    };
-    const entry: Entry = {
-      id: 'eA',
-      values: {}
-    };
-    (createUniqueDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
-    (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
-    (createDataset as jest.Mock).mockResolvedValue(newDs);
-    (processEntries as jest.Mock).mockImplementation(async (a, b, processFn) =>
-      processFn(entry)
-    );
-
-    const res = await EditEntriesNode.onNodeExecution(
-      {},
-      { dataset: { datasetId: oldDs.id } },
-      {
-        reqContext: { db: null, userId: '' },
-        node: NODE,
-        contextFnExecution: input => Promise.resolve({ outputs: { val: ':)' } })
-      }
-    );
-    expect(res.outputs.dataset).toBeDefined();
-    expect(newDs.valueschemas).toEqual(oldDs.valueschemas);
-    expect(createEntry).toHaveBeenCalledTimes(1);
-  });
-
-  test('should throw error for invalid dataset', async () => {
+  test('should throw error for invalid dataset input', async () => {
     (tryGetDataset as jest.Mock).mockImplementation(() => {
       throw new Error('Unknown dataset source');
     });
     try {
       await EditEntriesNode.onNodeExecution(
-        {},
+        { values: [] },
         { dataset: { datasetId: VALID_OBJECT_ID } },
         {
           reqContext: { db: null, userId: '' },

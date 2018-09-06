@@ -1,10 +1,12 @@
 import React, { Component, ReactNode } from 'react';
 
+import { DocumentNode } from 'graphql';
 import { Query, QueryResult } from 'react-apollo';
+
 import { LoadingCard, UnknownErrorCard } from './layout/CustomCards';
 
 export interface HandledQueryProps<Data, Variables> {
-  query: string;
+  query: DocumentNode;
   variables?: Variables;
   children: (data: QueryResult<Data, Variables>) => ReactNode;
 }

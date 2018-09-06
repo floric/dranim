@@ -1,8 +1,8 @@
-import * as bodyParser from 'body-parser';
-import * as cors from 'cors';
-import * as express from 'express';
-import * as helmet from 'helmet';
-import * as morgan from 'morgan';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import express from 'express';
+import helmet from 'helmet';
+import morgan from 'morgan';
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 

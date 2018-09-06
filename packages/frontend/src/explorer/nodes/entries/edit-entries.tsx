@@ -1,37 +1,43 @@
 import React from 'react';
 
 import {
-  AddValuesNodeDef,
-  AddValuesNodeForm,
   Colors,
   DataType,
+  EditEntriesNodeDef,
+  EditEntriesNodeForm,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
   ValueSchema
 } from '@masterthesis/shared';
 import { Button, Checkbox, Col, Input, Row, Select, Tag } from 'antd';
 
+import { NoDatasetInputWarning } from '../../../components/Warnings';
 import { showNotificationWithIcon } from '../../../utils/form';
 import { ClientNodeDef } from '../all-nodes';
 
 const UNIQUE = 'unique';
 const REQUIRED = 'required';
 
-export const AddValuesNode: ClientNodeDef<
+export const EditEntriesNode: ClientNodeDef<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
-  AddValuesNodeForm
+  EditEntriesNodeForm
 > = {
-  type: AddValuesNodeDef.type,
+  type: EditEntriesNodeDef.type,
   renderFormItems: ({
     form: { getFieldDecorator, setFieldsValue, getFieldValue },
+    inputs,
     nodeForm,
     touchForm,
     setTempState,
     getTempState
   }) => {
+    if (!inputs.dataset || !inputs.dataset.isPresent) {
+      return <NoDatasetInputWarning />;
+    }
+
     getFieldDecorator('values', {
-      initialValue: nodeForm.values || []
+      initialValue: nodeForm.values || inputs.dataset.content.schema || []
     });
     const values = getFieldValue('values');
     return (
@@ -75,7 +81,7 @@ export const AddValuesNode: ClientNodeDef<
           </Col>
           <Col xs={24} lg={6} xxl={3}>
             <Button
-              icon="plus"
+              icon="plus-square"
               style={{ width: '100%' }}
               onClick={() =>
                 addValue(
