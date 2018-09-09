@@ -68,45 +68,25 @@ const createNodesLayer = (
   const nodesLayer = new Konva.Layer();
 
   const { nodes } = server;
+  const nodesInContext = nodes.filter(n =>
+    deepEqual(n.contextIds, state.contextIds)
+  );
 
-  nodes
-    .filter(
-      n =>
-        deepEqual(n.contextIds, state.contextIds) &&
-        n.type !== ContextNodeType.INPUT &&
-        n.type !== ContextNodeType.OUTPUT
-    )
-    .forEach(n => {
-      const nodeGroup = renderNode(
-        n,
-        server,
-        state,
-        editorFunctions,
-        socketsMap,
-        stage
-      );
-      nodesLayer.add(nodeGroup);
-      nodeMap.set(n.id, nodeGroup);
-    });
-
-  nodes
-    .filter(
-      n =>
-        deepEqual(n.contextIds, state.contextIds) &&
-        (n.type === ContextNodeType.INPUT || n.type === ContextNodeType.OUTPUT)
-    )
-    .forEach(n => {
-      const nodeGroup = renderContextNode(
-        n,
-        server,
-        state,
-        editorFunctions,
-        socketsMap,
-        stage
-      );
-      nodesLayer.add(nodeGroup);
-      nodeMap.set(n.id, nodeGroup);
-    });
+  for (const n of nodesInContext) {
+    const nodeGroup =
+      n.type !== ContextNodeType.INPUT && n.type !== ContextNodeType.OUTPUT
+        ? renderNode(n, server, state, editorFunctions, socketsMap, stage)
+        : renderContextNode(
+            n,
+            server,
+            state,
+            editorFunctions,
+            socketsMap,
+            stage
+          );
+    nodesLayer.add(nodeGroup);
+    nodeMap.set(n.id, nodeGroup);
+  }
 
   return nodesLayer;
 };
@@ -124,22 +104,24 @@ const createConnectionsLayer = (
   const { connections } = server;
   const { openConnection } = state;
 
-  connections
-    .filter(c => deepEqual(c.contextIds, state.contextIds))
-    .forEach(c => {
-      const line = renderConnection(
-        c,
-        stage,
-        connsLayer,
-        socketsMap,
-        nodeMap,
-        editorFunctions
-      );
-      connsLayer.add(line);
-    });
+  const contextConnections = connections.filter(c =>
+    deepEqual(c.contextIds, state.contextIds)
+  );
+
+  for (const c of contextConnections) {
+    const line = renderConnection(
+      c,
+      stage,
+      connsLayer,
+      socketsMap,
+      nodeMap,
+      editorFunctions
+    );
+    connsLayer.add(line);
+  }
 
   if (openConnection && openConnection.sources) {
-    openConnection.sources.forEach(c => {
+    for (const c of openConnection.sources) {
       const line = renderConnection(
         { from: { name: c.name, nodeId: c.nodeId }, to: null },
         stage,
@@ -149,9 +131,9 @@ const createConnectionsLayer = (
         editorFunctions
       );
       connsLayer.add(line);
-    });
+    }
   } else if (openConnection && openConnection.destinations) {
-    openConnection.destinations.forEach(c => {
+    for (const c of openConnection.destinations) {
       const line = renderConnection(
         { from: null, to: { name: c.name, nodeId: c.nodeId } },
         stage,
@@ -161,7 +143,7 @@ const createConnectionsLayer = (
         editorFunctions
       );
       connsLayer.add(line);
-    });
+    }
   }
 
   return connsLayer;

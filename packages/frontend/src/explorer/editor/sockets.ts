@@ -234,29 +234,26 @@ const mapToSourceConnections = (
       }))
     : [];
 
-const handleMultipleInputs = () => {
+const handleMultipleInputs = () =>
   showNotificationWithIcon({
     title: 'Connection not allowed',
     icon: 'warning',
     content: 'Multiple inputs are not possible.'
   });
-};
 
-const handleDifferentDataTypes = () => {
+const handleDifferentDataTypes = () =>
   showNotificationWithIcon({
     title: 'Connection not allowed',
     icon: 'warning',
     content: 'Connections between different data types are not supported.'
   });
-};
 
-const handleNotAllowedConnection = () => {
+const handleNotAllowedConnection = () =>
   showNotificationWithIcon({
     title: 'Connection not allowed',
     icon: 'warning',
     content: 'Connections only between inputs or outputs are not possible.'
   });
-};
 
 const getConnectionsInSocket = (
   connections: Array<ConnectionInstance>,

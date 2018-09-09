@@ -59,21 +59,21 @@ export const renderConnection = (
     nodeMap.get(toSocket.nodeId)!.on('dragmove', adjustPoint);
   }
   if (!toSocket || !fromSocket) {
-    stage.on('mousemove', () => {
-      connectionLine.points(
-        getConnectionPoints(
-          getSocketPositionOrPointer(outputSocket, stage),
-          getSocketPositionOrPointer(inputSocket, stage)
-        )
-      );
-      connsLayer.draw();
-    });
-
-    stage.on('mousedown', () => {
-      editorFunctions.changeState({
-        openConnection: null
+    stage
+      .on('mousemove', () => {
+        connectionLine.points(
+          getConnectionPoints(
+            getSocketPositionOrPointer(outputSocket, stage),
+            getSocketPositionOrPointer(inputSocket, stage)
+          )
+        );
+        connsLayer.draw();
+      })
+      .on('mousedown', () => {
+        editorFunctions.changeState({
+          openConnection: null
+        });
       });
-    });
   }
 
   return connectionLine;

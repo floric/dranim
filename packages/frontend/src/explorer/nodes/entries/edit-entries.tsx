@@ -122,7 +122,7 @@ const renderValue = (
       <Button
         type="dashed"
         shape="circle"
-        icon="cross"
+        icon="close"
         onClick={() => removeValue(v, setFieldsValue, touchForm, values)}
       />
     </Col>

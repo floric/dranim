@@ -49,13 +49,6 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
     return dynOutputs;
   },
   transformInputDefsToContextInputDefs: getDynamicEntryContextInputs,
-  isFormValid: async form => {
-    if (!form.values || form.values.length === 0) {
-      return false;
-    }
-
-    return true;
-  },
   onMetaExecution: async (form, inputs, db) => {
     if (!allAreDefinedAndPresent(inputs)) {
       return { dataset: { content: { schema: [] }, isPresent: false } };
@@ -110,7 +103,7 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
   }
 };
 
-const addDynamicSchemas = async (
+const addDynamicSchemas = (
   dsId: string,
   formValues: Array<ValueSchema>,
   reqContext: ApolloContext

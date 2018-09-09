@@ -1,6 +1,6 @@
 import { ApolloContext, SocketDefs, SocketMetas } from '@masterthesis/shared';
 import { GraphQLUpload } from 'apollo-server-express';
-import { GraphQLScalarType } from 'graphql';
+import { GraphQLScalarType, Kind } from 'graphql';
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 
 import { Dataset } from './resolvers/dataset';
@@ -37,19 +37,25 @@ const resolvers: IResolvers<any, ApolloContext> = {
   Workspace,
   Mutation,
   Upload: GraphQLUpload,
+  Date: new GraphQLScalarType({
+    name: 'Date',
+    parseValue: (value: string) => new Date(value),
+    serialize: (value: Date) => value.getTime(),
+    parseLiteral: ast => (ast.kind === Kind.INT ? new Date(ast.value) : null)
+  }),
   SocketDefs: new GraphQLScalarType({
     name: 'SocketDefs',
     parseValue: (value: string) => JSON.parse(value),
     serialize: (value: SocketDefs<any>) => JSON.stringify(value),
     parseLiteral: ast =>
-      ast.kind === 'StringValue' ? JSON.parse(ast.value) : null
+      ast.kind === Kind.STRING ? JSON.parse(ast.value) : null
   }),
   Meta: new GraphQLScalarType({
     name: 'Meta',
     parseValue: (value: string) => JSON.parse(value),
     serialize: (value: SocketMetas<any>) => JSON.stringify(value),
     parseLiteral: ast =>
-      ast.kind === 'StringValue' ? JSON.parse(ast.value) : null
+      ast.kind === Kind.STRING ? JSON.parse(ast.value) : null
   })
 };
 

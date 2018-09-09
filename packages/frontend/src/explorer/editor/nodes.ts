@@ -89,23 +89,24 @@ export const renderNode = (
   }
 
   const nodeGroup = new Konva.Group({ draggable: true, x: n.x, y: n.y });
-  nodeGroup.on('mouseenter', () => {
-    stage.container().style.cursor = 'move';
-  });
-  nodeGroup.on('mouseleave', () => {
-    stage.container().style.cursor = 'default';
-  });
-  nodeGroup.on('dragend', ev => {
-    server.onNodeUpdate(n.id, ev.target.x(), ev.target.y());
-  });
-  nodeGroup.on('dblclick', () => {
-    editorFunctions.enterContext(n.id);
-  });
-  nodeGroup.on('click', () => {
-    editorFunctions.changeState({
-      selectedNodeId: n.id
+  nodeGroup
+    .on('mouseenter', () => {
+      stage.container().style.cursor = 'move';
+    })
+    .on('mouseleave', () => {
+      stage.container().style.cursor = 'default';
+    })
+    .on('dragend', ev => {
+      server.onNodeUpdate(n.id, ev.target.x(), ev.target.y());
+    })
+    .on('dblclick', () => {
+      editorFunctions.enterContext(n.id);
+    })
+    .on('click', () => {
+      editorFunctions.changeState({
+        selectedNodeId: n.id
+      });
     });
-  });
 
   const { name, renderName } = nodeType;
   const inputs = JSON.parse(n.inputSockets);

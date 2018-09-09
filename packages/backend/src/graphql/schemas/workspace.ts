@@ -89,8 +89,8 @@ const WorkspaceDef = `
   type Workspace {
     id: String!
     name: String!
-    lastChange: String!
-    created: String!
+    lastChange: Date!
+    created: Date!
     description: String!
     nodes: [Node!]!
     connections: [Connection!]!
@@ -106,8 +106,11 @@ const SocketDefsDef = `
   scalar SocketDefs
 `;
 
+const DateDef = `scalar Date`;
+
 export default () => [
   OutputResultDef,
+  DateDef,
   MetaDef,
   SocketDefsDef,
   FormValueDef,

@@ -185,7 +185,7 @@ export class ExplorerEditor extends Component<
   };
 
   private openAddNodeSearch = () =>
-    this.setState({ addNodeOpen: true }, this.addNodeSearch.current.focus);
+    this.setState({ addNodeOpen: true }, ()  => this.addNodeSearch.current.focus());
 
   private handleOpenCascaderPopup = (value: boolean) => {
     if (!value) {

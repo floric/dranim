@@ -271,8 +271,8 @@ export const getAllCalculations = async (
   const all = await collection
     .find({ workspaceId, userId: reqContext.userId })
     .toArray();
-  return all.map(ds => ({
-    id: ds._id.toHexString(),
-    ...ds
+  return all.map(c => ({
+    id: c._id.toHexString(),
+    ...c
   }));
 };

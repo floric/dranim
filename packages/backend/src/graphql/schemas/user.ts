@@ -3,7 +3,7 @@ const UserDef = `
     firstName: String!
     lastName: String!
     mail: String!
-    lastLogin: String
+    lastLogin: Date
     id: String!
   }
 `;

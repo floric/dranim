@@ -32,38 +32,12 @@ describe('EditEntriesNode', () => {
 
   test('should have correct properties', () => {
     expect(EditEntriesNode.type).toBe(EditEntriesNodeDef.type);
-    expect(EditEntriesNode.isFormValid).toBeDefined();
+    expect(EditEntriesNode.isFormValid).toBeUndefined();
     expect(EditEntriesNode.isInputValid).toBeUndefined();
     expect(
       EditEntriesNode.transformContextInputDefsToContextOutputDefs
     ).toBeDefined();
     expect(EditEntriesNode.transformInputDefsToContextInputDefs).toBeDefined();
-  });
-
-  test('should have invalid form', async () => {
-    let res = await EditEntriesNode.isFormValid({ values: [] });
-    expect(res).toBe(false);
-
-    res = await EditEntriesNode.isFormValid({ values: undefined });
-    expect(res).toBe(false);
-
-    res = await EditEntriesNode.isFormValid({ values: null });
-    expect(res).toBe(false);
-  });
-
-  test('should have valid form', async () => {
-    const res = await EditEntriesNode.isFormValid({
-      values: [
-        {
-          type: DataType.STRING,
-          name: 'test',
-          required: true,
-          unique: false,
-          fallback: ''
-        }
-      ]
-    });
-    expect(res).toBe(true);
   });
 
   test('should have absent meta', async () => {

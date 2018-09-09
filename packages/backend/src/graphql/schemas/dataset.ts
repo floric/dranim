@@ -8,7 +8,7 @@ const DatasetDef = `
     valueschemas: [Valueschema!]!
     entriesCount: Int!
     latestEntries: [Entry!]!
-    created: String!
+    created: Date!
     description: String!
   }
 `;

@@ -11,8 +11,8 @@ const UploadErrorDef = `
 const UploadProcessDef = `
   type UploadProcess {
     id: String!
-    start: String!
-    finish: String
+    start: Date!
+    finish: Date
     datasetId: String!
     errors: [UploadError!]!
     state: String!
