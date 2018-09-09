@@ -63,7 +63,7 @@ const validateDataset = async (
 };
 
 const validateNumber = (value: any) => {
-  return Promise.resolve(typeof value === 'number' && !Number.isNaN(value));
+  return Promise.resolve(typeof value === 'number' && !isNaN(value));
 };
 
 const validateString = (value: any) => {

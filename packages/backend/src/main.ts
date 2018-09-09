@@ -48,7 +48,6 @@ export const main = async (options: MainOptions) => {
             apiKey: process.env.APOLLO_ENGINE_KEY
           }
         : undefined,
-    tracing: options.env === 'production' ? true : undefined,
     uploads: {
       maxFieldSize: MAX_UPLOAD_LIMIT,
       maxFiles: 10,

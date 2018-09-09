@@ -95,27 +95,27 @@ const isValidEntry = (transformedInput: {
     return false;
   }
 
-  schema.forEach(s => {
-    const correspondingVal = parsedObj[s.name];
-    if (correspondingVal === undefined) {
-      return false;
-    }
+  return schema
+    .map(s => {
+      const correspondingVal = parsedObj[s.name];
+      if (correspondingVal === undefined) {
+        return false;
+      }
 
-    if (s.type === DataType.NUMBER && Number.isNaN(correspondingVal)) {
-      return false;
-    } else if (
-      s.type === DataType.BOOLEAN &&
-      (correspondingVal !== 'true' && correspondingVal !== 'false')
-    ) {
-      return false;
-    } else if (s.type === DataType.DATETIME) {
-      // TODO validate date
-    }
+      if (s.type === DataType.NUMBER && isNaN(correspondingVal)) {
+        return false;
+      } else if (
+        s.type === DataType.BOOLEAN &&
+        (correspondingVal !== true && correspondingVal !== false)
+      ) {
+        return false;
+      } else if (s.type === DataType.DATETIME) {
+        // TODO validate date
+      }
 
-    return true;
-  });
-
-  return true;
+      return true;
+    })
+    .reduce((a, b) => a && b, true);
 };
 
 const processValidEntry = async (

@@ -185,7 +185,9 @@ export class ExplorerEditor extends Component<
   };
 
   private openAddNodeSearch = () =>
-    this.setState({ addNodeOpen: true }, ()  => this.addNodeSearch.current.focus());
+    this.setState({ addNodeOpen: true }, () =>
+      this.addNodeSearch.current.focus()
+    );
 
   private handleOpenCascaderPopup = (value: boolean) => {
     if (!value) {
@@ -269,7 +271,11 @@ export class ExplorerEditor extends Component<
                   onPopupVisibleChange={this.handleOpenCascaderPopup}
                 >
                   {!addNodeOpen ? (
-                    <Button onClick={this.openAddNodeSearch} icon="plus-square">
+                    <Button
+                      onClick={this.openAddNodeSearch}
+                      type="primary"
+                      icon="plus-square"
+                    >
                       Add Node
                     </Button>
                   ) : null}

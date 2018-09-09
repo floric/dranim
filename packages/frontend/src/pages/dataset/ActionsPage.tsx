@@ -9,12 +9,7 @@ import {
 import { Button, Card, Col, Icon, Row, Table, Upload } from 'antd';
 import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
-import {
-  Mutation,
-  MutationFn,
-  withApollo,
-  WithApolloClient
-} from 'react-apollo';
+import { Mutation, MutationFn } from 'react-apollo';
 
 import { UploadFile } from 'antd/lib/upload/interface';
 import { AsyncButton } from '../../components/AsyncButton';
@@ -65,181 +60,181 @@ export interface DataActionsState {
   uploading: boolean;
 }
 
-export const DataActionsPage = withApollo<DataActionsPageProps>(
-  class DatasetActionsImpl extends Component<
-    DataActionsPageProps & WithApolloClient<{}>,
-    DataActionsState
-  > {
-    public state: DataActionsState = {
-      fileList: [],
-      uploading: false
-    };
+export class DataActionsPage extends Component<
+  DataActionsPageProps,
+  DataActionsState
+> {
+  public state: DataActionsState = {
+    fileList: [],
+    uploading: false
+  };
 
-    private handleUpload = async (
-      uploadEntriesCsv: MutationFn<
-        {},
-        { files: Array<UploadFile>; datasetId: string }
-      >
-    ) => {
-      const { fileList } = this.state;
-      const { dataset, client } = this.props;
+  private handleUpload = async (
+    uploadEntriesCsv: MutationFn<
+      {},
+      { files: Array<UploadFile>; datasetId: string }
+    >,
+    refetch: () => Promise<any>
+  ) => {
+    const { fileList } = this.state;
+    const { dataset } = this.props;
 
-      await tryOperation({
-        op: async () => {
-          await this.setState({
-            uploading: true,
-            fileList: []
-          });
+    await tryOperation({
+      op: async () => {
+        await this.setState({
+          uploading: true,
+          fileList: []
+        });
 
-          await uploadEntriesCsv({
-            variables: {
-              files: fileList,
-              datasetId: dataset.id
-            }
-          });
+        await uploadEntriesCsv({
+          variables: {
+            files: fileList,
+            datasetId: dataset.id
+          }
+        });
 
-          await this.setState({
-            uploading: false
-          });
-        },
-        refetch: client.reFetchObservableQueries,
-        onFail: () => this.setState({ uploading: false }),
-        failedTitle: 'Upload failed',
-        successTitle: () => 'Upload successful',
-        failedMessage: 'Upload has failed.',
-        successMessage: () => 'Upload succesful. Processing is in progress.'
-      });
-    };
-
-    private getUploadProps = () => ({
-      onRemove: file => {
-        this.setState(({ fileList }) => {
-          const index = fileList.indexOf(file);
-          const newFileList = fileList.slice();
-          newFileList.splice(index, 1);
-          return {
-            fileList: newFileList
-          };
+        await this.setState({
+          uploading: false
         });
       },
-      beforeUpload: file => {
-        this.setState(({ fileList }) => ({
-          fileList: [...fileList, file]
-        }));
-        return false;
-      },
-      fileList: this.state.fileList,
-      multiple: true
+      refetch,
+      onFail: () => this.setState({ uploading: false }),
+      failedTitle: 'Upload failed',
+      successTitle: () => 'Upload successful',
+      failedMessage: 'Upload has failed.',
+      successMessage: () => 'Upload succesful. Processing is in progress.'
     });
+  };
 
-    private downloadCsv = (id: string) => {
-      const a = document.createElement('a');
-      a.href = `${API_URL}/downloads?dsId=${id}`;
-      a.download = 'download.csv';
-      a.click();
-    };
+  private getUploadProps = () => ({
+    onRemove: file => {
+      this.setState(({ fileList }) => {
+        const index = fileList.indexOf(file);
+        const newFileList = fileList.slice();
+        newFileList.splice(index, 1);
+        return {
+          fileList: newFileList
+        };
+      });
+    },
+    beforeUpload: file => {
+      this.setState(({ fileList }) => ({
+        fileList: [...fileList, file]
+      }));
+      return false;
+    },
+    fileList: this.state.fileList,
+    multiple: true
+  });
 
-    public render() {
-      const {
-        dataset: { id }
-      } = this.props;
-      const { uploading } = this.state;
+  private downloadCsv = (id: string) => {
+    const a = document.createElement('a');
+    a.href = `${API_URL}/downloads?dsId=${id}`;
+    a.download = 'download.csv';
+    a.click();
+  };
 
-      return (
-        <HandledQuery<
-          { uploads: Array<GQLUploadProcess>; dataset: GQLDataset },
-          { datasetId: string }
-        >
-          query={ALL_UPLOADS}
-          variables={{ datasetId: id }}
-        >
-          {({
-            data: {
-              uploads,
-              dataset: { entriesCount }
-            }
-          }) => (
-            <>
-              <Row gutter={12}>
-                <Col
-                  xs={{ span: 24 }}
-                  md={{ span: 12 }}
-                  xl={{ span: 8 }}
-                  style={{ marginBottom: '1rem' }}
-                >
-                  <Card bordered={false}>
-                    <h3>Import</h3>
-                    <Mutation
-                      mutation={UPLOAD_ENTRIES_CSV}
-                      context={{ hasUpload: true }}
-                    >
-                      {uploadEntriesCsv => (
-                        <>
-                          <Row style={{ marginBottom: '1rem' }}>
-                            <Col>
-                              <Upload {...this.getUploadProps()}>
-                                <Button icon="upload">Select CSV file</Button>
-                              </Upload>
-                            </Col>
-                            <Col>
-                              <AsyncButton
-                                type="primary"
-                                onClick={() =>
-                                  this.handleUpload(uploadEntriesCsv)
-                                }
-                                disabled={this.state.fileList.length === 0}
-                              >
-                                {uploading ? 'Uploading...' : 'Start Upload'}
-                              </AsyncButton>
-                            </Col>
-                          </Row>
-                        </>
-                      )}
-                    </Mutation>
-                  </Card>
-                </Col>
-                <Col
-                  xs={{ span: 24 }}
-                  md={{ span: 12 }}
-                  xl={{ span: 8 }}
-                  style={{ marginBottom: '1rem' }}
-                >
-                  <Card bordered={false}>
-                    <h3>Export</h3>
-                    {entriesCount > 0 ? (
-                      <Button
-                        type="primary"
-                        icon="download"
-                        onClick={() => this.downloadCsv(id)}
-                      >
-                        CSV
-                      </Button>
-                    ) : (
-                      'No Entries present.'
-                    )}
-                  </Card>
-                </Col>
-              </Row>
-              <Row>
+  public render() {
+    const {
+      dataset: { id }
+    } = this.props;
+    const { uploading } = this.state;
+
+    return (
+      <HandledQuery<
+        { uploads: Array<GQLUploadProcess>; dataset: GQLDataset },
+        { datasetId: string }
+      >
+        query={ALL_UPLOADS}
+        variables={{ datasetId: id }}
+      >
+        {({
+          data: {
+            uploads,
+            dataset: { entriesCount }
+          },
+          refetch
+        }) => (
+          <>
+            <Row gutter={12}>
+              <Col
+                xs={{ span: 24 }}
+                md={{ span: 12 }}
+                xl={{ span: 8 }}
+                style={{ marginBottom: '1rem' }}
+              >
                 <Card bordered={false}>
-                  <h3>Last Imports</h3>
-                  <Table
-                    size="small"
-                    pagination={{ size: 'small', hideOnSinglePage: true }}
-                    dataSource={generateDatasource(uploads)}
-                    columns={COLUMNS}
-                  />
+                  <h3>Import</h3>
+                  <Mutation
+                    mutation={UPLOAD_ENTRIES_CSV}
+                    context={{ hasUpload: true }}
+                  >
+                    {uploadEntriesCsv => (
+                      <>
+                        <Row style={{ marginBottom: '1rem' }}>
+                          <Col>
+                            <Upload {...this.getUploadProps()}>
+                              <Button icon="upload">Select CSV file</Button>
+                            </Upload>
+                          </Col>
+                          <Col>
+                            <AsyncButton
+                              type="primary"
+                              onClick={() =>
+                                this.handleUpload(uploadEntriesCsv, refetch)
+                              }
+                              disabled={this.state.fileList.length === 0}
+                            >
+                              {uploading ? 'Uploading...' : 'Start Upload'}
+                            </AsyncButton>
+                          </Col>
+                        </Row>
+                      </>
+                    )}
+                  </Mutation>
                 </Card>
-              </Row>
-            </>
-          )}
-        </HandledQuery>
-      );
-    }
+              </Col>
+              <Col
+                xs={{ span: 24 }}
+                md={{ span: 12 }}
+                xl={{ span: 8 }}
+                style={{ marginBottom: '1rem' }}
+              >
+                <Card bordered={false}>
+                  <h3>Export</h3>
+                  {entriesCount > 0 ? (
+                    <Button
+                      type="primary"
+                      icon="download"
+                      onClick={() => this.downloadCsv(id)}
+                    >
+                      CSV
+                    </Button>
+                  ) : (
+                    'No Entries present.'
+                  )}
+                </Card>
+              </Col>
+            </Row>
+            <Row>
+              <Card bordered={false}>
+                <h3>Last Imports</h3>
+                <Table
+                  size="small"
+                  pagination={{ size: 'small', hideOnSinglePage: true }}
+                  dataSource={getUploadsData(uploads)}
+                  columns={COLUMNS}
+                />
+              </Card>
+            </Row>
+          </>
+        )}
+      </HandledQuery>
+    );
   }
-);
+}
 
-const generateDatasource = (uploads: Array<UploadProcess>) =>
+const getUploadsData = (uploads: Array<UploadProcess>) =>
   uploads.map((u: UploadProcess) => ({
     key: u.id,
     time: { start: u.start, finish: u.finish },

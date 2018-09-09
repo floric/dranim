@@ -94,6 +94,7 @@ export const DistinctEntriesNode: ClientNodeDef<
             </Button>
           </Col>
         </Row>
+        {values.map(v => renderValue(v, setFieldsValue, touchForm, values))}
         <Row style={{ marginBottom: '1rem' }} gutter={8}>
           <Col xs={24} lg={6} xxl={6}>
             <Input
@@ -150,7 +151,6 @@ export const DistinctEntriesNode: ClientNodeDef<
           </Col>
         </Row>
         {schemas.map(v => renderSchema(v, setFieldsValue, touchForm, schemas))}
-        {values.map(v => renderValue(v, setFieldsValue, touchForm, values))}
       </>
     );
   }
@@ -175,7 +175,7 @@ const renderSchema = (
       <Button
         type="dashed"
         shape="circle"
-        icon="cross"
+        icon="close"
         onClick={() => removeSchema(v, setFieldsValue, touchForm, values)}
       />
     </Col>
@@ -196,7 +196,7 @@ const renderValue = (
       <Button
         type="dashed"
         shape="circle"
-        icon="cross"
+        icon="close"
         onClick={() => removeValue(v, setFieldsValue, touchForm, values)}
       />
     </Col>

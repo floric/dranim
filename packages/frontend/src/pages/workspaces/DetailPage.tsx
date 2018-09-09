@@ -1,7 +1,7 @@
 import React, { SFC } from 'react';
 
-import { GQLWorkspace } from '@masterthesis/shared';
-import { Button } from 'antd';
+import { GQLCalculationProcess, GQLWorkspace } from '@masterthesis/shared';
+import { Button, Divider, Steps } from 'antd';
 import { css } from 'glamor';
 import gql from 'graphql-tag';
 import { History } from 'history';
@@ -23,6 +23,12 @@ const WORKSPACE = gql`
     workspace(id: $id) {
       id
       name
+      nodes {
+        id
+      }
+    }
+    calculations(workspaceId: $id) {
+      id
     }
   }
 `;
@@ -62,14 +68,23 @@ const WorkspacesPage: SFC<WorkspacesPageProps> = ({
   location,
   history
 }) => (
-  <HandledQuery<{ workspace: GQLWorkspace | null }, { id: string }>
+  <HandledQuery<
+    {
+      workspace: GQLWorkspace | null;
+      calculations: Array<GQLCalculationProcess>;
+    },
+    { id: string }
+  >
     query={WORKSPACE}
     variables={{ id: workspaceId }}
   >
-    {({ data: { workspace }, refetch }) => {
+    {({ data: { workspace, calculations }, refetch }) => {
       if (!workspace) {
         return <UnknownWorkspaceCard history={history} />;
       }
+
+      const step =
+        workspace.nodes.length === 0 ? 1 : calculations.length === 0 ? 2 : 3;
 
       return (
         <div
@@ -107,6 +122,24 @@ const WorkspacesPage: SFC<WorkspacesPageProps> = ({
                     data manipulation and creating outputs from the given data.
                     Outputs are shown in the Results tab.
                   </p>
+                }
+                endContent={
+                  step < 3 ? (
+                    <>
+                      <Divider
+                        style={{ marginTop: '1rem', marginBottom: '1rem' }}
+                      />
+                      <Steps current={step} size="small">
+                        <Steps.Step title="Workspace created" />
+                        <Steps.Step
+                          title={step === 1 ? 'Add Nodes' : 'Nodes added'}
+                        />
+                        <Steps.Step title="Start Calculation" />
+                      </Steps>
+                    </>
+                  ) : (
+                    undefined
+                  )
                 }
               />
             )}
