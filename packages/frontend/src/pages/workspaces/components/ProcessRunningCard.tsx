@@ -7,7 +7,6 @@ import { Mutation } from 'react-apollo';
 import { AsyncButton } from '../../../components/AsyncButton';
 import { LoadingCard } from '../../../components/layout/CustomCards';
 import { STOP_CALCULATION } from '../../../graphql/editor-page';
-import { showNotificationWithIcon } from '../../../utils/form';
 
 export const ProcessRunningCard: SFC<{
   currentCalculation: CalculationProcess;
@@ -27,16 +26,11 @@ export const ProcessRunningCard: SFC<{
           type="danger"
           icon="close"
           fullWidth={false}
-          onClick={async () => {
-            await stopCalculation({
+          onClick={() =>
+            stopCalculation({
               variables: { id: currentCalculation.id }
-            });
-            showNotificationWithIcon({
-              icon: 'info',
-              title: 'Calculation will be stopped',
-              content: 'Please wait until the calculation has been stopped'
-            });
-          }}
+            })
+          }
         >
           Stop Calculation
         </AsyncButton>

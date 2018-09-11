@@ -5,6 +5,8 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/11ca2c9099496836609c/maintainability)](https://codeclimate.com/github/floric/Masterthesis_Prototype/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/11ca2c9099496836609c/test_coverage)](https://codeclimate.com/github/floric/Masterthesis_Prototype/test_coverage)
 
+Backend: [![Known Vulnerabilities](https://snyk.io/test/github/floric/Masterthesis_Prototype/badge.svg?targetFile=packages/backend/package.json)](https://snyk.io/test/github/floric/Masterthesis_Prototype) Frontend: [![Known Vulnerabilities](https://snyk.io/test/github/floric/Masterthesis_Prototype/badge.svg?targetFile=packages/frontend/package.json)](https://snyk.io/test/github/floric/Masterthesis_Prototype) Shared: [![Known Vulnerabilities](https://snyk.io/test/github/floric/Masterthesis_Prototype/badge.svg?targetFile=packages/shared/package.json)](https://snyk.io/test/github/floric/Masterthesis_Prototype)
+
 ## Requirements
 
 - Node 9

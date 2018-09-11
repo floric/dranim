@@ -7,7 +7,7 @@ import {
   NodeState,
   SocketInstance
 } from '@masterthesis/shared';
-import { Breadcrumb, Button, Card, Cascader, Col, Row } from 'antd';
+import { Breadcrumb, Button, Card, Cascader, Col, Row, Tooltip } from 'antd';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import deepEqual from 'deep-equal';
 import { css } from 'glamor';
@@ -291,16 +291,18 @@ export class ExplorerEditor extends Component<
                   deepEqual(contextIds, fullPath) ? (
                     <span>{breadcrumbName}</span>
                   ) : (
-                    <Button
-                      size="small"
-                      onClick={() => this.handleChangeContext(fullPath)}
-                    >
-                      {breadcrumbName}
-                    </Button>
+                    <Tooltip title="Enter Context" mouseEnterDelay={1}>
+                      <Button
+                        size="small"
+                        onClick={() => this.handleChangeContext(fullPath)}
+                      >
+                        {breadcrumbName}
+                      </Button>
+                    </Tooltip>
                   )
                 }
                 routes={[
-                  { breadcrumbName: 'Root', path: null, fullPath: [] },
+                  { breadcrumbName: 'Editor', path: null, fullPath: [] },
                   ...contextIds
                     .map(cId => nodes.find(n => n.id === cId))
                     .map(n => ({ ...nodeTypes.get(n.type), ...n }))
