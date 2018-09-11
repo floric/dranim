@@ -1,9 +1,8 @@
 import {
   ConnectionInstance,
+  GQLNodeInstance,
   GQLOutputResult,
-  NodeInstance,
-  NodeState,
-  GQLNodeInstance
+  NodeState
 } from './nodes';
 import { DataType } from './sockets';
 
