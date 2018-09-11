@@ -34,16 +34,6 @@ export interface TryOperationArgs<T> {
   refetch?: () => Promise<any>;
 }
 
-export const deepCopyResponse = (data: Array<any>) =>
-  JSON.parse(
-    JSON.stringify(
-      data.map(n => {
-        const { __typename, ...other } = n;
-        return other;
-      })
-    )
-  );
-
 export const tryOperation = async <T>(
   args: TryOperationArgs<T>
 ): Promise<T | null> => {

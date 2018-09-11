@@ -27,6 +27,7 @@ export const WORKSPACE_NODE_SELECTION = gql`
     workspace(id: $workspaceId) {
       id
       name
+      state
       nodes {
         id
         type

@@ -7,7 +7,7 @@ import {
   SocketState,
   SocketType
 } from '@masterthesis/shared';
-import * as Konva from 'konva';
+import { Circle, Group, Text } from 'konva';
 
 import { showNotificationWithIcon } from '../../utils/form';
 import { ExplorerEditorProps, ExplorerEditorState } from '../ExplorerEditor';
@@ -27,11 +27,11 @@ const renderSocket = (
   isConnected: boolean,
   onClick: () => void
 ) => {
-  const socketGroup = new Konva.Group({
+  const socketGroup = new Group({
     x: 0,
     y: i * SOCKET_DISTANCE
   });
-  const text = new Konva.Text({
+  const text = new Text({
     fill: Colors.GrayDark,
     text: s.displayName,
     fontStyle: s.state === SocketState.DYNAMIC ? 'italic' : undefined,
@@ -44,7 +44,7 @@ const renderSocket = (
     y: -SOCKET_RADIUS / 2
   });
   const col = socketColors.get(s.dataType);
-  const socket = new Konva.Circle({
+  const socket = new Circle({
     fill: isConnected ? col : Colors.White,
     stroke: col,
     strokeEnabled: !isConnected,
@@ -67,7 +67,9 @@ export const renderSocketWithUsages = (
   nodeId: string,
   onClick: () => void
 ) => {
-  const { connections } = server;
+  const {
+    workspace: { connections }
+  } = server;
   const isUsed =
     connections.find(
       c =>
@@ -105,7 +107,9 @@ const beginEditExistingConnection = async (
   server: ExplorerEditorProps,
   changeState: (newState: Partial<ExplorerEditorState>) => void
 ) => {
-  const { connections } = server;
+  const {
+    workspace: { connections }
+  } = server;
   const existingConnections = connections.filter(
     c =>
       type === SocketType.INPUT
@@ -144,7 +148,9 @@ export const onClickSocket = async (
   changeState: (newState: Partial<ExplorerEditorState>) => void
 ) => {
   const { openConnection } = state;
-  const { connections } = server;
+  const {
+    workspace: { connections }
+  } = server;
 
   if (openConnection === null) {
     const connectionsInSocket = getConnectionsInSocket(
@@ -195,10 +201,16 @@ export const onClickSocket = async (
   }
 
   await Promise.all(
-    mapToDestinationConnections(openConnection.destinations, nodeId, socketName)
-      .concat(
-        mapToSourceConnections(openConnection.sources, nodeId, socketName)
-      )
+    [
+      ...mapToDestinationConnections(
+        openConnection.destinations,
+        nodeId,
+        socketName
+      ),
+
+      ...mapToSourceConnections(openConnection.sources, nodeId, socketName)
+    ]
+
       .filter(c => c.to !== null && c.from !== null)
       .map(c => {
         server.onConnectionCreate(c.from!, c.to!);

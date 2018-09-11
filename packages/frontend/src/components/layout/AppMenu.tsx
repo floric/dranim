@@ -22,10 +22,12 @@ export const AppMenu: SFC<{
     </NavLink>
     <Menu theme="dark" defaultSelectedKeys={['start']} mode="inline">
       <Menu.Item key="start">
-        <NavLink to="/">
-          <Icon type="home" />
-          Start
-        </NavLink>
+        <MenuItemContent
+          collapsed={collapsed}
+          href="/"
+          title="Start"
+          iconName="home"
+        />
       </Menu.Item>
       <Menu.SubMenu
         key="sub1"

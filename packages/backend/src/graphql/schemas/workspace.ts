@@ -95,6 +95,7 @@ const WorkspaceDef = `
     nodes: [Node!]!
     connections: [Connection!]!
     results: [OutputResult!]!
+    state: String!
   }
 `;
 

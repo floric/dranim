@@ -1,4 +1,10 @@
-import { ConnectionInstance, GQLOutputResult, NodeInstance } from './nodes';
+import {
+  ConnectionInstance,
+  GQLOutputResult,
+  NodeInstance,
+  NodeState,
+  GQLNodeInstance
+} from './nodes';
 import { DataType } from './sockets';
 
 export interface Values {
@@ -43,8 +49,9 @@ export interface Workspace {
 
 export interface GQLWorkspace extends Workspace {
   results: Array<GQLOutputResult>;
-  nodes: Array<NodeInstance>;
+  nodes: Array<GQLNodeInstance>;
   connections: Array<ConnectionInstance>;
+  state: NodeState;
 }
 
 export enum ProcessState {

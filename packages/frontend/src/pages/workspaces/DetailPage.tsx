@@ -1,6 +1,10 @@
 import React, { SFC } from 'react';
 
-import { GQLCalculationProcess, GQLWorkspace } from '@masterthesis/shared';
+import {
+  GQLCalculationProcess,
+  GQLWorkspace,
+  NodeState
+} from '@masterthesis/shared';
 import { Button, Divider, Steps } from 'antd';
 import { css } from 'glamor';
 import gql from 'graphql-tag';
@@ -23,6 +27,7 @@ const WORKSPACE = gql`
     workspace(id: $id) {
       id
       name
+      state
       nodes {
         id
       }
@@ -60,6 +65,23 @@ export const UnknownWorkspaceCard: SFC<{ history: History }> = ({
 export interface WorkspacesPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
+const getCurrentStep = (
+  calculations: Array<GQLCalculationProcess>,
+  workspace: GQLWorkspace
+) => {
+  if (calculations.length > 0) {
+    return 4;
+  }
+
+  if (workspace.nodes.length === 0) {
+    return 1;
+  } else if (workspace.state === NodeState.INVALID) {
+    return 2;
+  }
+
+  return 3;
+};
+
 const WorkspacesPage: SFC<WorkspacesPageProps> = ({
   match: {
     params: { workspaceId }
@@ -83,8 +105,7 @@ const WorkspacesPage: SFC<WorkspacesPageProps> = ({
         return <UnknownWorkspaceCard history={history} />;
       }
 
-      const step =
-        workspace.nodes.length === 0 ? 1 : calculations.length === 0 ? 2 : 3;
+      const step = getCurrentStep(calculations, workspace);
 
       return (
         <div
@@ -124,7 +145,7 @@ const WorkspacesPage: SFC<WorkspacesPageProps> = ({
                   </p>
                 }
                 endContent={
-                  step < 3 ? (
+                  step < 4 ? (
                     <>
                       <Divider
                         style={{ marginTop: '1rem', marginBottom: '1rem' }}
@@ -132,7 +153,14 @@ const WorkspacesPage: SFC<WorkspacesPageProps> = ({
                       <Steps current={step} size="small">
                         <Steps.Step title="Workspace created" />
                         <Steps.Step
-                          title={step === 1 ? 'Add Nodes' : 'Nodes added'}
+                          title={step < 2 ? 'Add Nodes' : 'Nodes added'}
+                        />
+                        <Steps.Step
+                          title={
+                            step < 3
+                              ? 'Connect and configure Nodes'
+                              : 'Nodes connected'
+                          }
                         />
                         <Steps.Step title="Start Calculation" />
                       </Steps>

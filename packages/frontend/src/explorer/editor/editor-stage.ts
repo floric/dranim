@@ -1,6 +1,6 @@
 import { ContextNodeType } from '@masterthesis/shared';
 import deepEqual from 'deep-equal';
-import * as Konva from 'konva';
+import { Group, Layer, Stage } from 'konva';
 
 import { ExplorerEditorProps, ExplorerEditorState } from '../ExplorerEditor';
 import { renderConnection } from './connections';
@@ -26,14 +26,14 @@ export const updateStage = (
   const width = canvasContainer.clientWidth;
   const height = canvasContainer.clientHeight;
 
-  const stage = new Konva.Stage({
+  const stage = new Stage({
     container: EXPLORER_CONTAINER,
     width,
     height
   });
 
-  const nodeMap: Map<string, Konva.Group> = new Map();
-  const socketsMap: Map<string, Konva.Group> = new Map();
+  const nodeMap: Map<string, Group> = new Map();
+  const socketsMap: Map<string, Group> = new Map();
 
   const nodesLayer = createNodesLayer(
     server,
@@ -60,14 +60,16 @@ export const updateStage = (
 const createNodesLayer = (
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
-  socketsMap: Map<string, Konva.Group>,
-  nodeMap: Map<string, Konva.Group>,
+  socketsMap: Map<string, Group>,
+  nodeMap: Map<string, Group>,
   editorFunctions: EditorFunctions,
-  stage: Konva.Stage
+  stage: Stage
 ) => {
-  const nodesLayer = new Konva.Layer();
+  const nodesLayer = new Layer();
 
-  const { nodes } = server;
+  const {
+    workspace: { nodes }
+  } = server;
   const nodesInContext = nodes.filter(n =>
     deepEqual(n.contextIds, state.contextIds)
   );
@@ -94,14 +96,16 @@ const createNodesLayer = (
 const createConnectionsLayer = (
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
-  stage: Konva.Stage,
-  socketsMap: Map<string, Konva.Group>,
-  nodeMap: Map<string, Konva.Group>,
+  stage: Stage,
+  socketsMap: Map<string, Group>,
+  nodeMap: Map<string, Group>,
   editorFunctions: EditorFunctions
 ) => {
-  const connsLayer = new Konva.Layer();
+  const connsLayer = new Layer();
 
-  const { connections } = server;
+  const {
+    workspace: { connections }
+  } = server;
   const { openConnection } = state;
 
   const contextConnections = connections.filter(c =>

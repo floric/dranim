@@ -60,7 +60,7 @@ export const EditEntriesNodeDef: NodeDef<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs
 > = {
-  name: 'Edit Entries',
+  name: 'Edit',
   type: 'EditEntries',
   inputs: {
     dataset: DatasetSocket('Dataset')

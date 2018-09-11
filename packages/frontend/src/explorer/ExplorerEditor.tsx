@@ -2,13 +2,12 @@ import React, { Component, createRef, RefObject } from 'react';
 
 import {
   Colors,
-  ConnectionInstance,
   Dataset,
-  GQLNodeInstance,
+  GQLWorkspace,
   NodeState,
   SocketInstance
 } from '@masterthesis/shared';
-import { Button, Card, Cascader, Col, Row } from 'antd';
+import { Breadcrumb, Button, Card, Cascader, Col, Row } from 'antd';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import deepEqual from 'deep-equal';
 import { css } from 'glamor';
@@ -35,8 +34,7 @@ const filterTreeNode = (inputValue: string, path: Array<{ index: string }>) => {
 };
 
 export interface ExplorerEditorProps {
-  connections: Array<ConnectionInstance>;
-  nodes: Array<GQLNodeInstance>;
+  workspace: GQLWorkspace;
   datasets: Array<Dataset>;
   onNodeCreate: (
     type: string,
@@ -93,11 +91,13 @@ export class ExplorerEditor extends Component<
     prevProps: ExplorerEditorProps,
     prevState: ExplorerEditorState
   ) {
-    const { nodes, datasets, connections } = this.props;
     const {
-      nodes: prevNodes,
-      datasets: prevDatasets,
-      connections: prevConnections
+      workspace: { nodes, connections },
+      datasets
+    } = this.props;
+    const {
+      workspace: { nodes: prevNodes, connections: prevConnections },
+      datasets: prevDatasets
     } = prevProps;
 
     if (
@@ -149,13 +149,11 @@ export class ExplorerEditor extends Component<
     this.props.onNodeCreate(type, x, y, this.state.contextIds);
   };
 
-  private handleEnterContext = () => {
-    if (!this.state.selectedNodeId) {
-      return;
-    }
-
-    this.appendContext(this.state.selectedNodeId);
-  };
+  private handleChangeContext = (newContext: Array<string>) =>
+    this.setState({
+      contextIds: newContext,
+      selectedNodeId: null
+    });
 
   private appendContext = (nodeId: string) =>
     this.setState({
@@ -197,7 +195,10 @@ export class ExplorerEditor extends Component<
 
   public render() {
     const { selectedNodeId, contextIds, addNodeOpen } = this.state;
-    const { nodes } = this.props;
+    const {
+      workspace: { nodes, state },
+      onStartCalculation
+    } = this.props;
 
     const node = selectedNodeId
       ? nodes.find(n => n.id === selectedNodeId)
@@ -205,7 +206,7 @@ export class ExplorerEditor extends Component<
     const nodeType = node ? nodeTypes.get(node.type) || null : null;
 
     const renderFormItems = node
-      ? nodeTypes.get(node.type)!.renderFormItems || null
+      ? nodeTypes.get(node.type).renderFormItems || null
       : null;
 
     if (selectedNodeId) {
@@ -218,10 +219,12 @@ export class ExplorerEditor extends Component<
       document.onkeypress = null;
     }
 
-    const workspaceInvalid =
-      nodes.length > 0
-        ? !nodes.map(n => n.state === NodeState.VALID).reduce((a, b) => a && b)
-        : true;
+    const calculationAllowed =
+      state === NodeState.VALID &&
+      nodes.filter(
+        n =>
+          nodeTypes.get(n.type) ? nodeTypes.get(n.type).isOutputNode : false
+      ).length > 0;
 
     return (
       <>
@@ -258,7 +261,7 @@ export class ExplorerEditor extends Component<
           </Col>
         </Row>
         <Card bordered={false} bodyStyle={{ padding: 8 }}>
-          <Row type="flex" justify="space-between">
+          <Row type="flex" justify="space-between" align="middle">
             <Col>
               <Button.Group>
                 <Cascader
@@ -283,36 +286,49 @@ export class ExplorerEditor extends Component<
               </Button.Group>
             </Col>
             <Col>
-              <Button.Group>
-                {contextIds.length > 0 && (
-                  <AsyncButton
-                    tooltip="Leave Context"
-                    icon="fullscreen"
-                    onClick={this.popContext}
-                  >
-                    Leave
-                  </AsyncButton>
-                )}
-                {node &&
-                  node.hasContextFn && (
-                    <AsyncButton
-                      tooltip="Enter Context"
-                      icon="fullscreen-exit"
-                      onClick={this.handleEnterContext}
+              <Breadcrumb
+                itemRender={({ breadcrumbName, fullPath }) =>
+                  deepEqual(contextIds, fullPath) ? (
+                    <span>{breadcrumbName}</span>
+                  ) : (
+                    <Button
+                      size="small"
+                      onClick={() => this.handleChangeContext(fullPath)}
                     >
-                      Enter
-                    </AsyncButton>
-                  )}
-              </Button.Group>
+                      {breadcrumbName}
+                    </Button>
+                  )
+                }
+                routes={[
+                  { breadcrumbName: 'Root', path: null, fullPath: [] },
+                  ...contextIds
+                    .map(cId => nodes.find(n => n.id === cId))
+                    .map(n => ({ ...nodeTypes.get(n.type), ...n }))
+                    .map(n => ({
+                      breadcrumbName: n.name,
+                      path: n.id,
+                      fullPath: [...n.contextIds, n.id]
+                    })),
+                  ...(node && node.hasContextFn
+                    ? [
+                        {
+                          breadcrumbName: nodeType.name,
+                          path: node.id,
+                          fullPath: [...node.contextIds, node.id]
+                        }
+                      ]
+                    : [])
+                ]}
+              />
             </Col>
             <Col>
               <Button.Group>
                 <AsyncButton
                   type="primary"
                   icon="rocket"
-                  onClick={this.props.onStartCalculation}
+                  onClick={onStartCalculation}
                   fullWidth={false}
-                  disabled={workspaceInvalid}
+                  disabled={!calculationAllowed}
                 >
                   Calculate
                 </AsyncButton>

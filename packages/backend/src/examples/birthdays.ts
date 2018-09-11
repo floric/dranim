@@ -29,22 +29,13 @@ export const createBirthdaysDemoData = async (reqContext: ApolloContext) => {
 const birthdaysEntries: Array<Values> = Array(ENTRIES_COUNT)
   .fill(0)
   .map((_, i) => ({
-    id: i.toString(),
     firstName: casual.first_name,
     lastName: casual.last_name,
-    gender: casual.boolean ? 'm' : 'w',
-    value: casual.random,
+    gender: casual.boolean ? 'm' : 'f',
     birthday: new Date(casual.date('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'))
   }));
 
 const birthdaysSchema: Array<ValueSchema> = [
-  {
-    name: 'id',
-    type: DataType.STRING,
-    required: true,
-    fallback: '',
-    unique: true
-  },
   {
     name: 'lastName',
     type: DataType.STRING,
@@ -64,13 +55,6 @@ const birthdaysSchema: Array<ValueSchema> = [
     type: DataType.STRING,
     required: true,
     fallback: '',
-    unique: false
-  },
-  {
-    name: 'value',
-    type: DataType.NUMBER,
-    required: true,
-    fallback: '0',
     unique: false
   },
   {

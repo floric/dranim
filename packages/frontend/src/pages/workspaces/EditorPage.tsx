@@ -25,7 +25,7 @@ import {
   UPDATE_NODE,
   WORKSPACE_NODE_SELECTION
 } from '../../graphql/editor-page';
-import { deepCopyResponse, tryOperation } from '../../utils/form';
+import { tryOperation } from '../../utils/form';
 import { ProcessRunningCard } from './components/ProcessRunningCard';
 import { UnknownWorkspaceCard } from './DetailPage';
 
@@ -70,16 +70,14 @@ const ComposedQueries = adopt<
   { workspaceId: string }
 >({
   datasets: ({ render }) => (
-    <HandledQuery<DatasetsResult> query={DATASETS}>
-      {dsData => render(dsData)}
-    </HandledQuery>
+    <HandledQuery<DatasetsResult> query={DATASETS}>{render}</HandledQuery>
   ),
   selectedNode: ({ render, workspaceId }) => (
     <HandledQuery<SelectedNodeResult, { workspaceId: string }>
       query={WORKSPACE_NODE_SELECTION}
       variables={{ workspaceId }}
     >
-      {query => render(query)}
+      {render}
     </HandledQuery>
   )
 });
@@ -255,9 +253,8 @@ const WorkspaceEditorPage: SFC<WorkspaceEditorPageProps> = ({
             updateNodePosition
           }) => (
             <ExplorerEditor
+              workspace={workspace}
               datasets={datasets}
-              connections={deepCopyResponse(workspace.connections)}
-              nodes={deepCopyResponse(workspace.nodes)}
               onNodeCreate={handleNodeCreate(createNode, workspaceId, refetch)}
               onNodeDelete={handleNodeDelete(deleteNode, refetch)}
               onNodeUpdate={handleNodeUpdate(updateNodePosition, refetch)}

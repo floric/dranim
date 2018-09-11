@@ -30,11 +30,13 @@ const FullWidthButton: SFC<FullWidthButtonProps> = ({
   handleClick,
   fullWidth,
   tooltip,
+  confirmClick,
   ...props
 }) => (
   <Tooltip
     title={tooltip}
     mouseEnterDelay={MOUSE_ENTER_DELAY}
+    mouseLeaveDelay={0}
     defaultVisible={false}
   >
     <Button style={style} block={fullWidth} onClick={handleClick} {...props}>
@@ -80,6 +82,7 @@ export class AsyncButton extends Component<AsyncButtonProps, AsyncButtonState> {
       confirmMessage = 'Really do this action?',
       onClick,
       loading,
+      tooltip,
       ...otherProps
     } = this.props;
 
@@ -95,6 +98,8 @@ export class AsyncButton extends Component<AsyncButtonProps, AsyncButtonState> {
             loading={isLoading}
             fullWidth={fullWidth}
             disabled={disabled}
+            confirmClick={confirmClick}
+            tooltip={confirmClick ? undefined : tooltip}
             {...otherProps}
           />
         </Popconfirm>
@@ -107,6 +112,7 @@ export class AsyncButton extends Component<AsyncButtonProps, AsyncButtonState> {
         loading={isLoading}
         fullWidth={fullWidth}
         disabled={disabled}
+        tooltip={confirmClick ? undefined : tooltip}
         {...otherProps}
       />
     );

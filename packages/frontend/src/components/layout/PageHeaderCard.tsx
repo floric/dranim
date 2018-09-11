@@ -72,9 +72,7 @@ export const PageHeaderCard: SFC<PageHeaderProps> = ({
             <Tooltip title="Help" mouseEnterDelay={1}>
               <Button
                 style={{ border: 'none' }}
-                onClick={() => {
-                  showInfo(helpContent);
-                }}
+                onClick={() => showInfo(helpContent)}
                 icon="question-circle"
               />
             </Tooltip>

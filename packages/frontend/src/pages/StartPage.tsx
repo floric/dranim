@@ -8,6 +8,7 @@ import { Mutation } from 'react-apollo';
 import { AsyncButton } from '../components/AsyncButton';
 import { PageHeaderCard } from '../components/layout/PageHeaderCard';
 import { client } from '../io/apollo-client';
+import { tryOperation } from '../utils/form';
 import { news, NewsType } from './news';
 
 const CREATE_DEMO_DATA = gql`
@@ -21,12 +22,20 @@ const renderCreateExampleButton = (type: string) => (
     {createDemoData => (
       <AsyncButton
         icon="plus-square"
-        onClick={async () => {
-          await createDemoData({
-            variables: { type }
-          });
-          await client.reFetchObservableQueries();
-        }}
+        onClick={() =>
+          tryOperation({
+            op: () =>
+              createDemoData({
+                variables: { type }
+              }),
+            refetch: client.reFetchObservableQueries,
+            successTitle: () => 'Example created',
+            successMessage: () => 'Example data successfully created',
+            failedMessage:
+              'Example creation failed. Some part might have been created nontheless',
+            failedTitle: 'Example creation failed'
+          })
+        }
       >
         Create
       </AsyncButton>

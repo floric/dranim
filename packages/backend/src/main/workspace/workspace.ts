@@ -2,13 +2,14 @@ import {
   ApolloContext,
   ConnectionInstance,
   NodeInstance,
+  NodeState,
   Workspace
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { Log } from '../../logging';
 import { getConnectionsCollection } from './connections';
-import { getNodesCollection } from './nodes';
+import { getAllNodes, getNodesCollection } from './nodes';
 
 export const initWorkspaceDb = async (db: Db) => {
   const connCollection = getConnectionsCollection(db);
@@ -194,4 +195,14 @@ export const tryGetWorkspace = async (
   }
 
   return ws;
+};
+
+export const getWorkspaceState = async (
+  id: string,
+  reqContext: ApolloContext
+): Promise<NodeState> => {
+  const nodes = await getAllNodes(id, reqContext);
+  return nodes.every(n => n.state === NodeState.VALID)
+    ? NodeState.VALID
+    : NodeState.INVALID;
 };

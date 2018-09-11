@@ -10,7 +10,7 @@ import {
   SocketState,
   SocketType
 } from '@masterthesis/shared';
-import * as Konva from 'konva';
+import { Group, Rect, Stage, Text } from 'konva';
 import { v4 } from 'uuid';
 
 import {
@@ -36,10 +36,10 @@ export const renderContextNode = (
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   editorFunctions: EditorFunctions,
-  socketsMap: Map<string, Konva.Group>,
-  stage: Konva.Stage
+  socketsMap: Map<string, Group>,
+  stage: Stage
 ) => {
-  const nodeGroup = new Konva.Group({ draggable: true, x: n.x, y: n.y });
+  const nodeGroup = new Group({ draggable: true, x: n.x, y: n.y });
   nodeGroup.on('mouseenter', () => {
     stage.container().style.cursor = 'move';
   });
@@ -80,33 +80,31 @@ export const renderNode = (
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   editorFunctions: EditorFunctions,
-  socketsMap: Map<string, Konva.Group>,
-  stage: Konva.Stage
+  socketsMap: Map<string, Group>,
+  stage: Stage
 ) => {
   const nodeType = nodeTypes.get(n.type);
   if (!nodeType) {
     throw new Error('Unknown node type');
   }
 
-  const nodeGroup = new Konva.Group({ draggable: true, x: n.x, y: n.y });
+  const nodeGroup = new Group({ draggable: true, x: n.x, y: n.y });
   nodeGroup
-    .on('mouseenter', () => {
-      stage.container().style.cursor = 'move';
-    })
-    .on('mouseleave', () => {
-      stage.container().style.cursor = 'default';
-    })
-    .on('dragend', ev => {
-      server.onNodeUpdate(n.id, ev.target.x(), ev.target.y());
-    })
+    .on('mouseenter', () => (stage.container().style.cursor = 'move'))
+    .on('mouseleave', () => (stage.container().style.cursor = 'default'))
+    .on('dragend', ev =>
+      server.onNodeUpdate(n.id, ev.target.x(), ev.target.y())
+    )
     .on('dblclick', () => {
-      editorFunctions.enterContext(n.id);
+      if (n.hasContextFn) {
+        editorFunctions.enterContext(n.id);
+      }
     })
-    .on('click', () => {
+    .on('click', () =>
       editorFunctions.changeState({
         selectedNodeId: n.id
-      });
-    });
+      })
+    );
 
   const { name, renderName } = nodeType;
   const inputs = JSON.parse(n.inputSockets);
@@ -143,7 +141,7 @@ export const renderNode = (
 };
 
 const getContextFunctionNote = () =>
-  new Konva.Text({
+  new Text({
     fill: Colors.Black,
     align: 'right',
     text: 'f(n)',
@@ -158,7 +156,7 @@ const getStateRect = (
   progress: number | null,
   state: NodeState
 ) =>
-  new Konva.Rect({
+  new Rect({
     width: progress !== null ? progress * NODE_WIDTH : NODE_WIDTH,
     height: STATE_LINE_HEIGHT,
     x: 0,
@@ -172,7 +170,7 @@ const getStateRect = (
   });
 
 const getBackgroundRect = (height: number) =>
-  new Konva.Rect({
+  new Rect({
     width: NODE_WIDTH,
     height,
     shadowColor: Colors.Black,
@@ -182,7 +180,7 @@ const getBackgroundRect = (height: number) =>
   });
 
 const getHeaderText = (isSelected: boolean, text: string) =>
-  new Konva.Text({
+  new Text({
     fill: isSelected ? Colors.Selection : Colors.Black,
     align: 'center',
     text,
@@ -218,10 +216,10 @@ const renderSockets = (
   server: ExplorerEditorProps,
   state: ExplorerEditorState,
   type: SocketType,
-  socketsMap: Map<string, Konva.Group>,
+  socketsMap: Map<string, Group>,
   editorFunctions: EditorFunctions
 ) => {
-  const group = new Konva.Group({
+  const group = new Group({
     x: type === SocketType.INPUT ? 0 : NODE_WIDTH,
     y: SOCKET_DISTANCE + TEXT_HEIGHT
   });

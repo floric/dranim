@@ -4,14 +4,14 @@ import {
   SocketInstance,
   SocketType
 } from '@masterthesis/shared';
-import * as Konva from 'konva';
+import { Group, Layer, Line, Stage, Vector2d } from 'konva';
 
 import { EditorFunctions } from './editor-stage';
 import { getSocketId } from './sockets';
 
 const CONNECTION_STIFFNESS = 0.7;
 
-const getConnectionPoints = (output: Konva.Vector2d, input: Konva.Vector2d) => [
+const getConnectionPoints = (output: Vector2d, input: Vector2d) => [
   output.x,
   output.y,
   output.x + Math.abs(input.x - output.x) * CONNECTION_STIFFNESS,
@@ -24,10 +24,10 @@ const getConnectionPoints = (output: Konva.Vector2d, input: Konva.Vector2d) => [
 
 export const renderConnection = (
   c: ConnectionWithoutId,
-  stage: Konva.Stage,
-  connsLayer: Konva.Layer,
-  socketsMap: Map<string, Konva.Group>,
-  nodeMap: Map<string, Konva.Group>,
+  stage: Stage,
+  connsLayer: Layer,
+  socketsMap: Map<string, Group>,
+  nodeMap: Map<string, Group>,
   editorFunctions: EditorFunctions
 ) => {
   const fromSocket = c.from;
@@ -79,25 +79,23 @@ export const renderConnection = (
   return connectionLine;
 };
 
-const getSocketPositionOrPointer = (
-  socket: Konva.Group | null,
-  stage: Konva.Stage
-) => (socket ? socket.getAbsolutePosition() : stage.getPointerPosition());
+const getSocketPositionOrPointer = (socket: Group | null, stage: Stage) =>
+  socket ? socket.getAbsolutePosition() : stage.getPointerPosition();
 
 const getSocket = (
   socket: SocketInstance,
   type: SocketType,
-  socketsMap: Map<string, Konva.Group>
-): Konva.Group | null =>
+  socketsMap: Map<string, Group>
+): Group | null =>
   socket ? socketsMap.get(getSocketId(type, socket.nodeId, socket.name)) : null;
 
 const renderLine = (
-  inputSocket: Konva.Group | null,
-  outputSocket: Konva.Group | null,
-  stage: Konva.Stage
+  inputSocket: Group | null,
+  outputSocket: Group | null,
+  stage: Stage
 ) => {
   const isCurrentlyChanged = !inputSocket || !outputSocket;
-  const line = new Konva.Line({
+  const line = new Line({
     strokeWidth: isCurrentlyChanged ? 4 : 2,
     strokeEnabled: true,
     stroke: isCurrentlyChanged ? Colors.GrayDark : Colors.GrayMedium,

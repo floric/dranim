@@ -69,7 +69,7 @@ export const getLatestEntries = async (
   // TODO Introduce pagination later
   const entries = await collection
     .find()
-    .limit(options && options.count ? options.count : 100)
+    .limit(options && options.count ? options.count : 50)
     .toArray();
   return entries.map(e => ({
     id: e._id.toHexString(),
