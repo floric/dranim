@@ -31,6 +31,9 @@ const WORKSPACE = gql`
       nodes {
         id
       }
+      connections {
+        id
+      }
     }
     calculations(workspaceId: $id) {
       id
@@ -43,6 +46,46 @@ const RENAME_WORKSPACE = gql`
     renameWorkspace(id: $id, name: $name)
   }
 `;
+
+const getCurrentStep = (
+  calculations: Array<GQLCalculationProcess>,
+  workspace: GQLWorkspace
+) => {
+  if (calculations.length > 0) {
+    return 4;
+  }
+
+  if (workspace.nodes.length === 0) {
+    return 1;
+  } else if (
+    workspace.state === NodeState.INVALID ||
+    workspace.connections.length === 0
+  ) {
+    return 2;
+  }
+
+  return 3;
+};
+
+const HelpSteps: SFC<{
+  calculations: Array<GQLCalculationProcess>;
+  workspace: GQLWorkspace;
+}> = ({ calculations, workspace }) => {
+  const step = getCurrentStep(calculations, workspace);
+  return step < 4 ? (
+    <>
+      <Divider style={{ marginTop: '1rem', marginBottom: '1rem' }} />
+      <Steps current={step} size="small">
+        <Steps.Step title="Workspace created" />
+        <Steps.Step title={step < 2 ? 'Add Nodes' : 'Nodes added'} />
+        <Steps.Step
+          title={step < 3 ? 'Connect and configure Nodes' : 'Nodes connected'}
+        />
+        <Steps.Step title="Start Calculation" />
+      </Steps>
+    </>
+  ) : null;
+};
 
 export const UnknownWorkspaceCard: SFC<{ history: History }> = ({
   history
@@ -65,23 +108,6 @@ export const UnknownWorkspaceCard: SFC<{ history: History }> = ({
 export interface WorkspacesPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
-const getCurrentStep = (
-  calculations: Array<GQLCalculationProcess>,
-  workspace: GQLWorkspace
-) => {
-  if (calculations.length > 0) {
-    return 4;
-  }
-
-  if (workspace.nodes.length === 0) {
-    return 1;
-  } else if (workspace.state === NodeState.INVALID) {
-    return 2;
-  }
-
-  return 3;
-};
-
 const WorkspacesPage: SFC<WorkspacesPageProps> = ({
   match: {
     params: { workspaceId }
@@ -100,12 +126,10 @@ const WorkspacesPage: SFC<WorkspacesPageProps> = ({
     query={WORKSPACE}
     variables={{ id: workspaceId }}
   >
-    {({ data: { workspace, calculations }, refetch }) => {
+    {({ data: { workspace, calculations } }) => {
       if (!workspace) {
         return <UnknownWorkspaceCard history={history} />;
       }
-
-      const step = getCurrentStep(calculations, workspace);
 
       return (
         <div
@@ -125,9 +149,15 @@ const WorkspacesPage: SFC<WorkspacesPageProps> = ({
                       tryOperation({
                         op: () =>
                           renameWorkspace({
-                            variables: { id: workspace.id, name }
+                            variables: { id: workspace.id, name },
+                            awaitRefetchQueries: true,
+                            refetchQueries: [
+                              {
+                                query: WORKSPACE,
+                                variables: { id: workspaceId }
+                              }
+                            ]
                           }),
-                        refetch,
                         successTitle: () => 'Name updated',
                         successMessage: () => `Name updated successfully.`,
                         failedTitle: 'Name update failed',
@@ -145,29 +175,10 @@ const WorkspacesPage: SFC<WorkspacesPageProps> = ({
                   </p>
                 }
                 endContent={
-                  step < 4 ? (
-                    <>
-                      <Divider
-                        style={{ marginTop: '1rem', marginBottom: '1rem' }}
-                      />
-                      <Steps current={step} size="small">
-                        <Steps.Step title="Workspace created" />
-                        <Steps.Step
-                          title={step < 2 ? 'Add Nodes' : 'Nodes added'}
-                        />
-                        <Steps.Step
-                          title={
-                            step < 3
-                              ? 'Connect and configure Nodes'
-                              : 'Nodes connected'
-                          }
-                        />
-                        <Steps.Step title="Start Calculation" />
-                      </Steps>
-                    </>
-                  ) : (
-                    undefined
-                  )
+                  <HelpSteps
+                    calculations={calculations}
+                    workspace={workspace}
+                  />
                 }
               />
             )}

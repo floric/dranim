@@ -60,7 +60,7 @@ const DatasetsPage: SFC = () => (
       }
     />
     <HandledQuery<{ datasets: Array<GQLDataset> }> query={ALL_DATASETS}>
-      {({ data: { datasets }, refetch }) => (
+      {({ data: { datasets } }) => (
         <CardsLayout>
           {Array.from(datasets)
             .sort(compareByName)
@@ -80,9 +80,10 @@ const DatasetsPage: SFC = () => (
                             deleteDataset({
                               variables: {
                                 id: ds.id
-                              }
+                              },
+                              awaitRefetchQueries: true,
+                              refetchQueries: [{ query: ALL_DATASETS }]
                             }),
-                          refetch,
                           successTitle: () => 'Dataset deleted',
                           successMessage: () =>
                             `Dataset "${ds.name}" deleted successfully.`,
@@ -115,8 +116,12 @@ const DatasetsPage: SFC = () => (
                   <CreateDataSetForm
                     handleCreateDataset={name =>
                       tryOperation<any>({
-                        op: () => createDataset({ variables: { name } }),
-                        refetch,
+                        op: () =>
+                          createDataset({
+                            variables: { name },
+                            awaitRefetchQueries: true,
+                            refetchQueries: [{ query: ALL_DATASETS }]
+                          }),
                         successTitle: () => 'Dataset created',
                         successMessage: () =>
                           `Dataset "${name}" created successfully.`,

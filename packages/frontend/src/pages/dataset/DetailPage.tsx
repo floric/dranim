@@ -21,12 +21,16 @@ export interface DataDetailPageProps
   extends RouteComponentProps<{ id: string }, {}> {}
 
 const NoDatasetExceptionActions: SFC<{ history: History }> = ({ history }) => (
-  <Button type="primary" icon="plus-square" onClick={() => history.push('/data')}>
+  <Button
+    type="primary"
+    icon="plus-square"
+    onClick={() => history.push('/data')}
+  >
     Create Dataset
   </Button>
 );
 
-const DATASET = gql`
+export const DATASET = gql`
   query dataset($id: String!) {
     dataset(id: $id) {
       id
@@ -72,7 +76,7 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
         query={DATASET}
         variables={{ id }}
       >
-        {({ data: { dataset }, refetch }) => {
+        {({ data: { dataset } }) => {
           if (!dataset) {
             return (
               <CustomErrorCard
@@ -96,8 +100,13 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
                         onChange={name =>
                           tryOperation({
                             op: () =>
-                              renameDataset({ variables: { id, name } }),
-                            refetch,
+                              renameDataset({
+                                variables: { id, name },
+                                refetchQueries: [
+                                  { query: DATASET, variables: { id } }
+                                ],
+                                awaitRefetchQueries: true
+                              }),
                             successTitle: () => 'Name updated',
                             successMessage: () => `Name updated successfully.`,
                             failedTitle: 'Name update failed',
@@ -154,21 +163,17 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
                   {
                     name: `${dataset.valueschemas.length} Schemas`,
                     key: 'schemas',
-                    content: <DataSchemas dataset={dataset} refetch={refetch} />
+                    content: <DataSchemas dataset={dataset} />
                   },
                   {
                     name: `${dataset.entriesCount} Entries`,
                     key: 'entries',
-                    content: (
-                      <DataEntriesPage dataset={dataset} refetch={refetch} />
-                    )
+                    content: <DataEntriesPage dataset={dataset} />
                   },
                   {
                     name: 'Import / Export',
                     key: 'actions',
-                    content: (
-                      <DataActionsPage dataset={dataset} refetch={refetch} />
-                    )
+                    content: <DataActionsPage dataset={dataset} />
                   }
                 ]}
                 defaultKey="schemas"

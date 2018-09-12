@@ -31,7 +31,6 @@ export interface TryOperationArgs<T> {
   successMessage?: SuccessContentFunc<T>;
   failedTitle?: string | null;
   failedMessage?: string;
-  refetch?: () => Promise<any>;
 }
 
 export const tryOperation = async <T>(
@@ -39,7 +38,6 @@ export const tryOperation = async <T>(
 ): Promise<T | null> => {
   const {
     op,
-    refetch,
     onFail,
     successTitle = () => 'Operation successful',
     successMessage = () => 'Operation done successfully.',
@@ -48,10 +46,6 @@ export const tryOperation = async <T>(
   } = args;
   try {
     const res = await op();
-
-    if (refetch) {
-      await refetch();
-    }
 
     if (successTitle !== null) {
       showNotificationWithIcon({

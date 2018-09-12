@@ -1,12 +1,14 @@
 import React, { SFC } from 'react';
 
 import {
+  Dataset,
   DataType,
   GQLOutputResult,
   LinearChartType,
   SoundChartDef
 } from '@masterthesis/shared';
 import ContainerDimensions from 'react-container-dimensions';
+import { Link } from 'react-router-dom';
 
 import { BooleanInfo } from './infos/BooleanInfo';
 import { NumberInfo } from './infos/NumberInfo';
@@ -41,6 +43,16 @@ export const VisRenderer: SFC<VisRenderer> = ({ result }) => {
             return <StringInfo value={value} />;
           } else if (result.type === DataType.BOOLEAN) {
             return <BooleanInfo value={value} />;
+          } else if (result.type === DataType.DATASET) {
+            const ds: Dataset = JSON.parse(result.value);
+            return (
+              <p>
+                <Link to={`/data/${ds.id}`}>
+                  Dataset <strong>{ds.name}</strong>
+                </Link>{' '}
+                created successfully
+              </p>
+            );
           }
 
           return <p>Unsupported Datatype!</p>;

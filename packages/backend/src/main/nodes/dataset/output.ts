@@ -1,7 +1,7 @@
 import {
+  Dataset,
   DatasetOutputNodeDef,
   DatasetOutputNodeInputs,
-  DatasetRef,
   DataType,
   OutputNodeForm,
   OutputResult,
@@ -15,21 +15,25 @@ export const DatasetOutputNode: ServerNodeDef<
   DatasetOutputNodeInputs,
   {},
   OutputNodeForm,
-  OutputResult<DatasetRef>
+  OutputResult<Dataset>
 > = {
   type: DatasetOutputNodeDef.type,
   isFormValid: isOutputFormValid,
   onMetaExecution: () => Promise.resolve({}),
-  onNodeExecution: async (form, inputs, { reqContext }) => {
+  onNodeExecution: async (
+    form,
+    inputs,
+    { reqContext, node: { workspaceId } }
+  ) => {
     const ds = await tryGetDataset(inputs.dataset.datasetId, reqContext);
     await saveTemporaryDataset(ds.id, form.name!, reqContext);
     return {
       outputs: {},
       results: {
         name: form.name!,
-        value: inputs.dataset,
+        value: { ...ds, name: form.name! },
         type: DataType.DATASET,
-        workspaceId: '',
+        workspaceId,
         description: form.description || ''
       }
     };

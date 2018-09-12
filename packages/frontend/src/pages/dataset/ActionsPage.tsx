@@ -7,7 +7,6 @@ import {
   UploadProcess
 } from '@masterthesis/shared';
 import { Button, Card, Col, Icon, Row, Table, Upload } from 'antd';
-import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
 import { Mutation, MutationFn } from 'react-apollo';
 
@@ -17,6 +16,7 @@ import { HandledQuery } from '../../components/HandledQuery';
 import { ProcessTime } from '../../components/ProcessTime';
 import { API_URL } from '../../io/apollo-client';
 import { tryOperation } from '../../utils/form';
+import { DATASET } from './DetailPage';
 
 const UPLOAD_ENTRIES_CSV = gql`
   mutation($files: [Upload!]!, $datasetId: String!) {
@@ -52,7 +52,6 @@ export const ALL_UPLOADS = gql`
 
 export interface DataActionsPageProps {
   dataset: GQLDataset;
-  refetch: () => Promise<ApolloQueryResult<any>>;
 }
 
 export interface DataActionsState {
@@ -73,8 +72,7 @@ export class DataActionsPage extends Component<
     uploadEntriesCsv: MutationFn<
       {},
       { files: Array<UploadFile>; datasetId: string }
-    >,
-    refetch: () => Promise<any>
+    >
   ) => {
     const { fileList } = this.state;
     const { dataset } = this.props;
@@ -90,14 +88,15 @@ export class DataActionsPage extends Component<
           variables: {
             files: fileList,
             datasetId: dataset.id
-          }
+          },
+          awaitRefetchQueries: true,
+          refetchQueries: [{ query: DATASET, variables: { id: dataset.id } }]
         });
 
         await this.setState({
           uploading: false
         });
       },
-      refetch,
       onFail: () => this.setState({ uploading: false }),
       failedTitle: 'Upload failed',
       successTitle: () => 'Upload successful',
@@ -152,8 +151,7 @@ export class DataActionsPage extends Component<
           data: {
             uploads,
             dataset: { entriesCount }
-          },
-          refetch
+          }
         }) => (
           <>
             <Row gutter={12}>
@@ -181,7 +179,7 @@ export class DataActionsPage extends Component<
                             <AsyncButton
                               type="primary"
                               onClick={() =>
-                                this.handleUpload(uploadEntriesCsv, refetch)
+                                this.handleUpload(uploadEntriesCsv)
                               }
                               disabled={this.state.fileList.length === 0}
                             >

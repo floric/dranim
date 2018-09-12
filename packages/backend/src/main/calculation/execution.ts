@@ -32,7 +32,7 @@ export const executeNode = async (
   processId: string,
   reqContext: ApolloContext,
   contextInputs?: IOValues<any>
-): Promise<NodeExecutionResult<{}>> => {
+): Promise<NodeExecutionResult<{}, any>> => {
   if (node.type === ContextNodeType.INPUT) {
     if (!contextInputs) {
       throw new Error('Context needs context inputs');

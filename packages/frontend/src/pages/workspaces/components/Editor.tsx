@@ -7,7 +7,6 @@ import {
   ProcessState,
   SocketInstance
 } from '@masterthesis/shared';
-import { ApolloQueryResult } from 'apollo-client';
 import { adopt } from 'react-adopt';
 import { Mutation, MutationFn } from 'react-apollo';
 
@@ -19,7 +18,8 @@ import {
   DELETE_CONNECTION,
   DELETE_NODE,
   START_CALCULATION,
-  UPDATE_NODE
+  UPDATE_NODE,
+  WORKSPACE_NODE_SELECTION
 } from '../../../graphql/editor-page';
 import { showNotificationWithIcon, tryOperation } from '../../../utils/form';
 import { ProcessRunningCard } from './ProcessRunningCard';
@@ -53,15 +53,17 @@ const ComposedMutations = adopt({
 const handleStartCalculation = (
   startCalculation: MutationFn<any, any>,
   startPolling: (msFreq: number) => any,
-  refetch: () => Promise<any>,
   workspaceId: string
 ) => () =>
   tryOperation({
     op: async () => {
       await startCalculation({
-        variables: { workspaceId }
+        variables: { workspaceId },
+        awaitRefetchQueries: true,
+        refetchQueries: [
+          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
+        ]
       });
-      await refetch();
       startPolling(POLLING_FREQUENCY);
     },
     successTitle: () => 'Process started',
@@ -71,8 +73,7 @@ const handleStartCalculation = (
 
 const handleNodeCreate = (
   createNode: MutationFn<any, any>,
-  workspaceId: string,
-  refetch: () => Promise<ApolloQueryResult<any>>
+  workspaceId: string
 ) => (type: string, x: number, y: number, contextIds: Array<string>) =>
   tryOperation({
     op: () =>
@@ -83,30 +84,36 @@ const handleNodeCreate = (
           y,
           contextIds,
           workspaceId
-        }
+        },
+        awaitRefetchQueries: true,
+        refetchQueries: [
+          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
+        ]
       }),
-    refetch,
     successTitle: null,
     failedTitle: 'Node not created'
   });
 
 const handleNodeDelete = (
   deleteNode: MutationFn<any, any>,
-  refetch: () => Promise<ApolloQueryResult<any>>
+  workspaceId: string
 ) => (nodeId: string) =>
   tryOperation({
     op: () =>
       deleteNode({
-        variables: { id: nodeId }
+        variables: { id: nodeId },
+        awaitRefetchQueries: true,
+        refetchQueries: [
+          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
+        ]
       }),
-    refetch,
     successTitle: null,
     failedTitle: 'Node not deleted'
   });
 
 const handleNodeUpdate = (
   updateNodePosition: MutationFn<any, any>,
-  refetch: () => Promise<ApolloQueryResult<any>>
+  workspaceId: string
 ) => (nodeId: string, x: number, y: number) =>
   tryOperation({
     op: () =>
@@ -115,46 +122,55 @@ const handleNodeUpdate = (
           id: nodeId,
           x,
           y
-        }
+        },
+        awaitRefetchQueries: true,
+        refetchQueries: [
+          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
+        ]
       }),
-    refetch,
     successTitle: null,
     failedTitle: 'Node not updated'
   });
 
 const handleConnectionCreate = (
   createConnection: MutationFn<any, any>,
-  refetch: () => Promise<ApolloQueryResult<any>>
+  workspaceId: string
 ) => (from: SocketInstance, to: SocketInstance) =>
   tryOperation({
     op: () =>
       createConnection({
         variables: {
           input: { from, to }
-        }
+        },
+        awaitRefetchQueries: true,
+        refetchQueries: [
+          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
+        ]
       }),
-    refetch,
     successTitle: null,
     failedTitle: 'Connection not created'
   });
 
 const handleConnectionDelete = (
   deleteConnection: MutationFn<any, any>,
-  refetch: () => Promise<ApolloQueryResult<any>>
+  workspaceId: string
 ) => (connId: string) =>
   tryOperation({
     op: () =>
       deleteConnection({
-        variables: { id: connId }
+        variables: { id: connId },
+        awaitRefetchQueries: true,
+        refetchQueries: [
+          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
+        ]
       }),
-    refetch,
     successTitle: null,
     failedTitle: 'Connection not deleted'
   });
 
 const handleAddOrUpdateFormValue = (
   addOrUpdateFormValue: MutationFn<any, any>,
-  refetch: () => Promise<ApolloQueryResult<any>>
+  workspaceId: string
 ) => (nodeId: string, name: string, value: string) =>
   tryOperation({
     op: () =>
@@ -163,9 +179,12 @@ const handleAddOrUpdateFormValue = (
           nodeId,
           name,
           value
-        }
+        },
+        awaitRefetchQueries: true,
+        refetchQueries: [
+          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
+        ]
       }),
-    refetch,
     successTitle: null,
     failedTitle: 'Value not changed'
   });
@@ -177,7 +196,6 @@ export type EditorProps = {
   workspaceId: string;
   startPolling: (msFrequency: number) => void;
   stopPolling: () => void;
-  refetch: () => Promise<any>;
 };
 
 type EditorState = {
@@ -237,13 +255,7 @@ export class Editor extends Component<EditorProps, EditorState> {
   }
 
   public render() {
-    const {
-      datasets,
-      workspace,
-      workspaceId,
-      refetch,
-      startPolling
-    } = this.props;
+    const { datasets, workspace, workspaceId, startPolling } = this.props;
 
     if (this.runningCalculations.length > 0) {
       return (
@@ -265,25 +277,24 @@ export class Editor extends Component<EditorProps, EditorState> {
           <ExplorerEditor
             workspace={workspace}
             datasets={datasets}
-            onNodeCreate={handleNodeCreate(createNode, workspaceId, refetch)}
-            onNodeDelete={handleNodeDelete(deleteNode, refetch)}
-            onNodeUpdate={handleNodeUpdate(updateNodePosition, refetch)}
+            onNodeCreate={handleNodeCreate(createNode, workspaceId)}
+            onNodeDelete={handleNodeDelete(deleteNode, workspaceId)}
+            onNodeUpdate={handleNodeUpdate(updateNodePosition, workspaceId)}
             onConnectionCreate={handleConnectionCreate(
               createConnection,
-              refetch
+              workspaceId
             )}
             onConnectionDelete={handleConnectionDelete(
               deleteConnection,
-              refetch
+              workspaceId
             )}
             onAddOrUpdateFormValue={handleAddOrUpdateFormValue(
               addOrUpdateFormValue,
-              refetch
+              workspaceId
             )}
             onStartCalculation={handleStartCalculation(
               startCalculation,
               startPolling,
-              refetch,
               workspaceId
             )}
           />
