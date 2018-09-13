@@ -17,6 +17,8 @@ export const TimeInputNode: ClientNodeDef<
   TimeInputNodeForm
 > = {
   type: TimeInputNodeDef.type,
+  renderName: (context, nodeForm) =>
+    moment(nodeForm.value != null ? nodeForm.value : new Date()).format('LTS'),
   renderFormItems: ({ form: { getFieldDecorator }, nodeForm }) => (
     <Form.Item label="Value">
       {getFieldDecorator('value', {

@@ -16,7 +16,7 @@ export const DATASETS = gql`
 `;
 
 export const WORKSPACE_NODE_SELECTION = gql`
-  query workspace($workspaceId: String!) {
+  query workspace($workspaceId: ID!) {
     calculations(workspaceId: $workspaceId) {
       id
       start
@@ -72,7 +72,7 @@ export const WORKSPACE_NODE_SELECTION = gql`
 export const CREATE_NODE = gql`
   mutation createNode(
     $type: String!
-    $workspaceId: String!
+    $workspaceId: ID!
     $contextIds: [String!]!
     $x: Float!
     $y: Float!
@@ -96,13 +96,13 @@ export const CREATE_NODE = gql`
 `;
 
 export const DELETE_NODE = gql`
-  mutation deleteNode($id: String!) {
+  mutation deleteNode($id: ID!) {
     deleteNode(id: $id)
   }
 `;
 
 export const UPDATE_NODE = gql`
-  mutation updateNodePosition($id: String!, $x: Float!, $y: Float!) {
+  mutation updateNodePosition($id: ID!, $x: Float!, $y: Float!) {
     updateNodePosition(id: $id, x: $x, y: $y)
   }
 `;
@@ -124,23 +124,19 @@ export const CREATE_CONNECTION = gql`
 `;
 
 export const DELETE_CONNECTION = gql`
-  mutation deleteConnection($id: String!) {
+  mutation deleteConnection($id: ID!) {
     deleteConnection(id: $id)
   }
 `;
 
 export const ADD_OR_UPDATE_FORM_VALUE = gql`
-  mutation addOrUpdateFormValue(
-    $nodeId: String!
-    $name: String!
-    $value: String!
-  ) {
+  mutation addOrUpdateFormValue($nodeId: ID!, $name: String!, $value: String!) {
     addOrUpdateFormValue(nodeId: $nodeId, name: $name, value: $value)
   }
 `;
 
 export const START_CALCULATION = gql`
-  mutation startCalculation($workspaceId: String!) {
+  mutation startCalculation($workspaceId: ID!) {
     startCalculation(workspaceId: $workspaceId) {
       id
       start
@@ -150,7 +146,7 @@ export const START_CALCULATION = gql`
 `;
 
 export const STOP_CALCULATION = gql`
-  mutation stopCalculation($id: String!) {
+  mutation stopCalculation($id: ID!) {
     stopCalculation(id: $id)
   }
 `;

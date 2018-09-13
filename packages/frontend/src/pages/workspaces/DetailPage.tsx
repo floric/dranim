@@ -23,7 +23,7 @@ import WorkspaceEditorPage from './EditorPage';
 import VisDetailPage from './VisDetailPage';
 
 const WORKSPACE = gql`
-  query workspace($id: String!) {
+  query workspace($id: ID!) {
     workspace(id: $id) {
       id
       name
@@ -42,7 +42,7 @@ const WORKSPACE = gql`
 `;
 
 const RENAME_WORKSPACE = gql`
-  mutation renameWorkspace($id: String!, $name: String!) {
+  mutation renameWorkspace($id: ID!, $name: String!) {
     renameWorkspace(id: $id, name: $name)
   }
 `;

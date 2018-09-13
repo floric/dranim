@@ -39,7 +39,7 @@ const CREATE_WORKSPACE = gql`
 `;
 
 const DELETE_WORKSPACE = gql`
-  mutation deleteWorkspace($id: String!) {
+  mutation deleteWorkspace($id: ID!) {
     deleteWorkspace(id: $id)
   }
 `;

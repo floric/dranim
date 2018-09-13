@@ -13,7 +13,7 @@ import { HandledQuery } from '../../components/HandledQuery';
 import { ProcessTime } from '../../components/ProcessTime';
 
 const CALCULATIONS = gql`
-  query calculations($workspaceId: String!) {
+  query calculations($workspaceId: ID!) {
     calculations(workspaceId: $workspaceId) {
       id
       start

@@ -10,7 +10,7 @@ export interface DatetimeInputNodeForm {
 }
 
 export const DatetimeInputNodeDef: NodeDef<{}, DatetimeInputNodeOutputs> = {
-  name: 'Input',
+  name: 'Input Date',
   type: 'DatetimeInput',
   inputs: {},
   outputs: {
@@ -33,7 +33,7 @@ export const DatetimeConstructNodeDef: NodeDef<
   DatetimeConstructNodeInputs,
   DatetimeInputNodeOutputs
 > = {
-  name: 'Construct',
+  name: 'Construct Date',
   type: 'DatetimeConstruct',
   inputs: {
     day: NumberSocket('Day'),
@@ -54,7 +54,7 @@ export const DatetimeSplitNodeDef: NodeDef<
   DatetimeInputNodeOutputs,
   DatetimeConstructNodeInputs
 > = {
-  name: 'Split',
+  name: 'Split Date',
   type: 'DatetimeSplit',
   outputs: {
     day: NumberSocket('Day'),

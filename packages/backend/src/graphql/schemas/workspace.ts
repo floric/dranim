@@ -8,13 +8,13 @@ const FormValueDef = `
 const SocketValueDef = `
   type SocketValue {
     name: String!
-    connectionId: String!
+    connectionId: ID!
   }
 `;
 
 const NodeDef = `
   type Node {
-    id: String!
+    id: ID!
     type: String!
     x: Float!
     y: Float!
@@ -37,7 +37,7 @@ const NodeDef = `
 
 const NodeInputDef = `
   input NodeInput {
-    id: String!
+    id: ID!
     type: String!
     x: Float!
     y: Float!
@@ -46,21 +46,21 @@ const NodeInputDef = `
 
 const SocketDef = `
   type Socket {
-    nodeId: String!
+    nodeId: ID!
     name: String!
   }
 `;
 
 const SocketInputDef = `
   input SocketInput {
-    nodeId: String!
+    nodeId: ID!
     name: String!
   }
 `;
 
 const ConnectionDef = `
   type Connection {
-    id: String!
+    id: ID!
     from: Socket
     to: Socket
     contextIds: [String!]!
@@ -77,7 +77,7 @@ const ConnectionInputDef = `
 
 const OutputResultDef = `
   type OutputResult {
-    id: String!
+    id: ID!
     value: String!
     type: String!
     name: String!
@@ -87,7 +87,7 @@ const OutputResultDef = `
 
 const WorkspaceDef = `
   type Workspace {
-    id: String!
+    id: ID!
     name: String!
     lastChange: Date!
     created: Date!

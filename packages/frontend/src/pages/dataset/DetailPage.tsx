@@ -31,7 +31,7 @@ const NoDatasetExceptionActions: SFC<{ history: History }> = ({ history }) => (
 );
 
 export const DATASET = gql`
-  query dataset($id: String!) {
+  query dataset($id: ID!) {
     dataset(id: $id) {
       id
       name
@@ -52,7 +52,7 @@ export const DATASET = gql`
 `;
 
 const RENAME_DATASET = gql`
-  mutation renameDataset($id: String!, $name: String!) {
+  mutation renameDataset($id: ID!, $name: String!) {
     renameDataset(id: $id, name: $name)
   }
 `;

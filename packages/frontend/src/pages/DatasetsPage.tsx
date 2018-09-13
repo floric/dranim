@@ -37,7 +37,7 @@ const CREATE_DATASET = gql`
 `;
 
 const DELETE_DATASET = gql`
-  mutation deleteDataset($id: String!) {
+  mutation deleteDataset($id: ID!) {
     deleteDataset(id: $id)
   }
 `;

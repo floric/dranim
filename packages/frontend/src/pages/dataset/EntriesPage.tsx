@@ -19,7 +19,7 @@ export interface DataEntriesPageProps {
 const MAX_PREVIEW_CHARS = 65;
 
 const ADD_ENTRY = gql`
-  mutation addEntry($datasetId: String!, $values: String!) {
+  mutation addEntry($datasetId: ID!, $values: String!) {
     addEntry(datasetId: $datasetId, values: $values) {
       id
     }
@@ -27,7 +27,7 @@ const ADD_ENTRY = gql`
 `;
 
 const DELETE_ENTRY = gql`
-  mutation deleteEntry($datasetId: String!, $entryId: String!) {
+  mutation deleteEntry($datasetId: ID!, $entryId: ID!) {
     deleteEntry(datasetId: $datasetId, entryId: $entryId)
   }
 `;

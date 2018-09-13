@@ -10,7 +10,7 @@ export interface TimeInputNodeForm {
 }
 
 export const TimeInputNodeDef: NodeDef<{}, TimeInputNodeOutputs> = {
-  name: 'Input',
+  name: 'Input Time',
   type: 'TimeInput',
   inputs: {},
   outputs: {
@@ -30,7 +30,7 @@ export const TimeConstructNodeDef: NodeDef<
   TimeConstructNodeInputs,
   TimeInputNodeOutputs
 > = {
-  name: 'Construct',
+  name: 'Construct Time',
   type: 'ConstructTime',
   inputs: {
     hours: NumberSocket('Hours'),
@@ -48,7 +48,7 @@ export const TimeSplitNodeDef: NodeDef<
   TimeInputNodeOutputs,
   TimeConstructNodeInputs
 > = {
-  name: 'Split',
+  name: 'Split Time',
   type: 'SplitTime',
   inputs: {
     value: TimeSocket('Time')

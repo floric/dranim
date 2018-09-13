@@ -14,7 +14,7 @@ export interface DatasetInputNodeForm {
 }
 
 export const DatasetInputNodeDef: NodeDef<{}, DatasetInputNodeOutputs> = {
-  name: 'Input',
+  name: 'Input Dataset',
   type: 'DatasetInput',
   inputs: {},
   outputs: { dataset: DatasetSocket('Dataset') },
@@ -40,7 +40,7 @@ export const JoinDatasetsNodeDef: NodeDef<
   JoinDatasetsNodeInputs,
   JoinDatasetsNodeOutputs
 > = {
-  name: 'Join',
+  name: 'Join Datasets',
   type: 'JoinDatasets',
   inputs: {
     datasetA: DatasetSocket('Dataset A'),
@@ -58,7 +58,7 @@ export interface DatasetOutputNodeInputs {
 }
 
 export const DatasetOutputNodeDef: NodeDef<DatasetOutputNodeInputs, {}> = {
-  name: 'Output',
+  name: 'Output Dataset',
   type: 'DatasetOutput',
   inputs: {
     dataset: DatasetSocket('Dataset')

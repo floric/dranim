@@ -1,6 +1,7 @@
 import {
   Colors,
   ConditionalMetaTypes,
+  ContextNodeType,
   DataType,
   GQLNodeInstance,
   NodeState,
@@ -27,53 +28,9 @@ import {
   SOCKET_DISTANCE
 } from './sockets';
 
-export const NODE_WIDTH = 180;
+export const NODE_WIDTH = 220;
 const TEXT_HEIGHT = 20;
 const STATE_LINE_HEIGHT = 2;
-
-export const renderContextNode = (
-  n: GQLNodeInstance,
-  server: ExplorerEditorProps,
-  state: ExplorerEditorState,
-  editorFunctions: EditorFunctions,
-  socketsMap: Map<string, Group>,
-  stage: Stage
-) => {
-  const nodeGroup = new Group({ draggable: true, x: n.x, y: n.y });
-  nodeGroup.on('mouseenter', () => {
-    stage.container().style.cursor = 'move';
-  });
-  nodeGroup.on('mouseleave', () => {
-    stage.container().style.cursor = 'default';
-  });
-
-  const inputs = JSON.parse(n.inputSockets);
-  const outputs = JSON.parse(n.outputSockets);
-
-  const height = getHeight(n, inputs, outputs, state.openConnection);
-
-  nodeGroup.on('dragend', ev => {
-    server.onNodeUpdate(n.id, ev.target.x(), ev.target.y());
-  });
-
-  const bgRect = getBackgroundRect(height);
-  const nodeTitle = getHeaderText(false, n.type);
-  const [inputsGroup, outputsGroup] = [
-    { defs: inputs, type: SocketType.INPUT },
-    { defs: outputs, type: SocketType.OUTPUT }
-  ].map(p =>
-    renderSockets(p.defs, n, server, state, p.type, socketsMap, editorFunctions)
-  );
-  const stateRect = getStateRect(height, n.progress, n.state);
-
-  nodeGroup.add(bgRect);
-  nodeGroup.add(nodeTitle);
-  nodeGroup.add(inputsGroup);
-  nodeGroup.add(outputsGroup);
-  nodeGroup.add(stateRect);
-
-  return nodeGroup;
-};
 
 export const renderNode = (
   n: GQLNodeInstance,
@@ -84,41 +41,19 @@ export const renderNode = (
   stage: Stage
 ) => {
   const nodeType = nodeTypes.get(n.type);
-  if (!nodeType) {
-    throw new Error('Unknown node type');
-  }
-
-  const nodeGroup = new Group({ draggable: true, x: n.x, y: n.y });
-  nodeGroup
-    .on('mouseenter', () => (stage.container().style.cursor = 'move'))
-    .on('mouseleave', () => (stage.container().style.cursor = 'default'))
-    .on('dragend', ev =>
-      server.onNodeUpdate(n.id, ev.target.x(), ev.target.y())
-    )
-    .on('dblclick', () => {
-      if (n.hasContextFn) {
-        editorFunctions.enterContext(n.id);
-      }
-    })
-    .on('click', () =>
-      editorFunctions.changeState({
-        selectedNodeId: n.id
-      })
-    );
-
-  const { name, renderName } = nodeType;
-  const inputs = JSON.parse(n.inputSockets);
-  const outputs = JSON.parse(n.outputSockets);
-
-  const height = getHeight(n, inputs, outputs, state.openConnection);
   const isSelected =
     state.selectedNodeId !== null && state.selectedNodeId === n.id;
+
+  const nodeGroup = new Group({ draggable: true, x: n.x, y: n.y });
+  addEventHandlers(nodeGroup, stage, n, server, editorFunctions);
+
+  const inputs = JSON.parse(n.inputSockets);
+  const outputs = JSON.parse(n.outputSockets);
+  const height = getHeight(n, inputs, outputs, state.openConnection);
   const bgRect = getBackgroundRect(height);
   const nodeTitle = getHeaderText(
     isSelected,
-    renderName
-      ? renderName({ node: n, state: server }, parseNodeForm(n.form))
-      : name
+    nodeType ? nodeType.name : n.type
   );
 
   const [inputsGroup, outputsGroup] = [
@@ -134,11 +69,55 @@ export const renderNode = (
   if (n.hasContextFn) {
     nodeGroup.add(getContextFunctionNote());
   }
+  if (nodeType && nodeType.renderName) {
+    nodeGroup.add(
+      new Text({
+        fill: Colors.GrayMedium,
+        align: 'center',
+        fontSize: 18,
+        text: nodeType.renderName(
+          { node: n, state: server },
+          parseNodeForm(n.form)
+        ),
+        y: TEXT_HEIGHT * 1.25,
+        width: NODE_WIDTH
+      })
+    );
+  }
   nodeGroup.add(inputsGroup);
   nodeGroup.add(outputsGroup);
   nodeGroup.add(stateRect);
   return nodeGroup;
 };
+
+const addEventHandlers = (
+  nodeGroup: Group,
+  stage: Stage,
+  n: GQLNodeInstance,
+  server: ExplorerEditorProps,
+  editorFunctions: EditorFunctions
+) =>
+  nodeGroup
+    .on('mouseenter', () => (stage.container().style.cursor = 'move'))
+    .on('mouseleave', () => (stage.container().style.cursor = 'default'))
+    .on('dragend', ev =>
+      server.onNodeUpdate(n.id, ev.target.x(), ev.target.y())
+    )
+    .on('dblclick', () => {
+      if (n.hasContextFn) {
+        editorFunctions.enterContext(n.id);
+      }
+    })
+    .on('click', () => {
+      if (
+        n.type !== ContextNodeType.INPUT &&
+        n.type !== ContextNodeType.OUTPUT
+      ) {
+        editorFunctions.changeState({
+          selectedNodeId: n.id
+        });
+      }
+    });
 
 const getContextFunctionNote = () =>
   new Text({

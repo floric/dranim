@@ -19,7 +19,7 @@ import { tryOperation } from '../../utils/form';
 import { DATASET } from './DetailPage';
 
 const UPLOAD_ENTRIES_CSV = gql`
-  mutation($files: [Upload!]!, $datasetId: String!) {
+  mutation($files: [Upload!]!, $datasetId: ID!) {
     uploadEntriesCsv(files: $files, datasetId: $datasetId) {
       id
     }
@@ -27,7 +27,7 @@ const UPLOAD_ENTRIES_CSV = gql`
 `;
 
 export const ALL_UPLOADS = gql`
-  query dataset($datasetId: String!) {
+  query dataset($datasetId: ID!) {
     uploads(datasetId: $datasetId) {
       id
       state

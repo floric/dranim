@@ -11,7 +11,7 @@ import { DATASET } from './DetailPage';
 
 const ADD_VALUE_SCHEMA = gql`
   mutation addValueSchema(
-    $datasetId: String!
+    $datasetId: ID!
     $name: String!
     $type: String!
     $required: Boolean!

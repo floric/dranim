@@ -2,7 +2,7 @@ import DatasetDef from './dataset';
 
 const EntryDef = `
   type Entry {
-    id: String!
+    id: ID!
     values: String!
   }
 `;

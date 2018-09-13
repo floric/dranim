@@ -1,6 +1,6 @@
 const CalculationProcessDef = `
   type CalculationProcess {
-    id: String!
+    id: ID!
     start: Date!
     finish: Date
     state: String!

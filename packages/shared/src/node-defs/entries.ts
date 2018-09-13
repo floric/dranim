@@ -19,7 +19,7 @@ export const FilterEntriesNodeDef: NodeDef<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs
 > = {
-  name: 'Filter',
+  name: 'Filter Dataset',
   type: 'FilterEntries',
   inputs: {
     dataset: DatasetSocket('Dataset')
@@ -40,7 +40,7 @@ export const DistinctEntriesNodeDef: NodeDef<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs
 > = {
-  name: 'Distinct',
+  name: 'Distinct Entries',
   type: 'DistinctEntries',
   inputs: {
     dataset: DatasetSocket('Dataset')
@@ -60,7 +60,7 @@ export const EditEntriesNodeDef: NodeDef<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs
 > = {
-  name: 'Edit',
+  name: 'Edit Entries',
   type: 'EditEntries',
   inputs: {
     dataset: DatasetSocket('Dataset')
@@ -84,7 +84,7 @@ export const CountEntriesNodeDef: NodeDef<
   CountEntriesNodeInputs,
   CountEntriesNodeOutputs
 > = {
-  name: 'Count',
+  name: 'Count Entries',
   type: 'CountEntries',
   inputs: {
     dataset: DatasetSocket('Dataset')
@@ -121,7 +121,7 @@ export const AggregateEntriesNodeDef: NodeDef<
   AggregateEntriesNodeInputs,
   AggregateEntriesNodeOutputs
 > = {
-  name: 'Aggregate',
+  name: 'Aggregate Entries',
   type: 'AggregateEntries',
   inputs: {
     dataset: DatasetSocket('Dataset')
