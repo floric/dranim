@@ -49,6 +49,9 @@ class LoggedInApp extends Component<LoggedInAppProps, LoggedInAppState> {
 
   public render() {
     const { collapsed } = this.state;
+    const {
+      location: { pathname }
+    } = this.props;
 
     return (
       <HandledQuery<{
@@ -68,6 +71,7 @@ class LoggedInApp extends Component<LoggedInAppProps, LoggedInAppState> {
               style={{ color: Colors.GrayLight }}
             >
               <AppMenu
+                pathname={pathname}
                 datasets={datasets}
                 workspaces={workspaces}
                 collapsed={collapsed}

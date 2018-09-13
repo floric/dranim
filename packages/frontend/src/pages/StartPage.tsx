@@ -1,8 +1,8 @@
 import React, { SFC } from 'react';
 
 import { Card, Col, Divider, Icon, List, Row } from 'antd';
-import { distanceInWordsToNow } from 'date-fns';
 import gql from 'graphql-tag';
+import moment from 'moment';
 import { Mutation } from 'react-apollo';
 
 import { AsyncButton } from '../components/AsyncButton';
@@ -123,11 +123,7 @@ const StartPage: SFC = () => (
                   }
                   title={
                     <>
-                      {item.title} (
-                      {distanceInWordsToNow(item.date, {
-                        addSuffix: true
-                      })}
-                      )
+                      {item.title} ({moment(item.date).toNow()})
                     </>
                   }
                   description={item.description}

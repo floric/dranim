@@ -77,7 +77,7 @@ class CreateWorkspaceFormImpl extends Component<
             />
           )}
         </Form.Item>
-        <Form.Item>
+        <Form.Item style={{ marginBottom: 0 }}>
           <Button
             type="primary"
             htmlType="submit"

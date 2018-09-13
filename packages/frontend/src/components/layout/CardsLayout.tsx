@@ -2,7 +2,7 @@ import React, { SFC } from 'react';
 
 import { Row } from 'antd';
 
-export const CardsLayout: SFC<{}> = ({ children }) => (
+export const CardsLayout: SFC = ({ children }) => (
   <Row gutter={12} style={{ marginBottom: '1rem' }}>
     {children}
   </Row>

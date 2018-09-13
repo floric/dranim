@@ -1,7 +1,7 @@
 import React, { SFC } from 'react';
 
 import { CalculationProcess } from '@masterthesis/shared';
-import { distanceInWordsToNow } from 'date-fns';
+import moment from 'moment';
 import { Mutation } from 'react-apollo';
 
 import { AsyncButton } from '../../../components/AsyncButton';
@@ -17,10 +17,7 @@ export const ProcessRunningCard: SFC<{
         <p>
           {`Processed ${currentCalculation.processedOutputs} of ${
             currentCalculation.totalOutputs
-          } nodes | Started ${distanceInWordsToNow(currentCalculation.start, {
-            includeSeconds: true,
-            addSuffix: true
-          })}`}
+          } nodes | Started ${moment(currentCalculation.start).toNow()}`}
         </p>
         <AsyncButton
           type="danger"

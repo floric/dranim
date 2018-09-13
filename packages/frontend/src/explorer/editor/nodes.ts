@@ -87,6 +87,7 @@ export const renderNode = (
   nodeGroup.add(inputsGroup);
   nodeGroup.add(outputsGroup);
   nodeGroup.add(stateRect);
+
   return nodeGroup;
 };
 

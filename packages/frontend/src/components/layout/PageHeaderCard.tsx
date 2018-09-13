@@ -14,11 +14,11 @@ export interface PageHeaderProps {
   endContent?: JSX.Element;
 }
 
-const showInfo = (content: JSX.Element) => {
+export const showHelp = (content: JSX.Element) => {
   Modal.info({
     title: 'Help',
     iconType: 'question-circle',
-    width: '80%',
+    width: '50%',
     content
   });
 };
@@ -72,7 +72,7 @@ export const PageHeaderCard: SFC<PageHeaderProps> = ({
             <Tooltip title="Help" mouseEnterDelay={1}>
               <Button
                 style={{ border: 'none' }}
-                onClick={() => showInfo(helpContent)}
+                onClick={() => showHelp(helpContent)}
                 icon="question-circle"
               />
             </Tooltip>

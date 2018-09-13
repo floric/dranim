@@ -17,6 +17,7 @@ import { EXPLORER_CONTAINER, updateStage } from './editor/editor-stage';
 import { NODE_WIDTH } from './editor/nodes';
 import { PropertiesForm } from './editor/PropertiesForm';
 import { nodeTypes, nodeTypesTree } from './nodes/all-nodes';
+import { showHelp } from '../components/layout/PageHeaderCard';
 
 const CANVAS_STYLE = css({
   flex: 1,
@@ -286,42 +287,71 @@ export class ExplorerEditor extends Component<
               </Button.Group>
             </Col>
             <Col>
-              <Breadcrumb
-                itemRender={({ breadcrumbName, fullPath }) =>
-                  deepEqual(contextIds, fullPath) ? (
-                    <span>{breadcrumbName}</span>
-                  ) : (
-                    <Tooltip title="Enter Context" mouseEnterDelay={1}>
-                      <Button
-                        size="small"
-                        onClick={() => this.handleChangeContext(fullPath)}
-                      >
-                        {breadcrumbName}
-                      </Button>
-                    </Tooltip>
-                  )
-                }
-                routes={[
-                  { breadcrumbName: 'Editor', path: null, fullPath: [] },
-                  ...contextIds
-                    .map(cId => nodes.find(n => n.id === cId))
-                    .map(n => ({ ...nodeTypes.get(n.type), ...n }))
-                    .map(n => ({
-                      breadcrumbName: n.name,
-                      path: n.id,
-                      fullPath: [...n.contextIds, n.id]
-                    })),
-                  ...(node && node.hasContextFn
-                    ? [
-                        {
-                          breadcrumbName: nodeType.name,
-                          path: node.id,
-                          fullPath: [...node.contextIds, node.id]
-                        }
-                      ]
-                    : [])
-                ]}
-              />
+              <Row type="flex" align="middle">
+                <Col>
+                  <Breadcrumb
+                    itemRender={({ breadcrumbName, fullPath }) =>
+                      deepEqual(contextIds, fullPath) ? (
+                        <span>{breadcrumbName}</span>
+                      ) : (
+                        <Tooltip title="Enter Context" mouseEnterDelay={1}>
+                          <Button
+                            size="small"
+                            onClick={() => this.handleChangeContext(fullPath)}
+                          >
+                            {breadcrumbName}
+                          </Button>
+                        </Tooltip>
+                      )
+                    }
+                    routes={[
+                      { breadcrumbName: 'Editor', path: null, fullPath: [] },
+                      ...contextIds
+                        .map(cId => nodes.find(n => n.id === cId))
+                        .map(n => ({ ...nodeTypes.get(n.type), ...n }))
+                        .map(n => ({
+                          breadcrumbName: n.name,
+                          path: n.id,
+                          fullPath: [...n.contextIds, n.id]
+                        })),
+                      ...(node && node.hasContextFn
+                        ? [
+                            {
+                              breadcrumbName: nodeType.name,
+                              path: node.id,
+                              fullPath: [...node.contextIds, node.id]
+                            }
+                          ]
+                        : [])
+                    ]}
+                  />
+                </Col>
+                <Col>
+                  <Tooltip title="Help" mouseEnterDelay={1}>
+                    <Button
+                      style={{ border: 'none' }}
+                      onClick={() =>
+                        showHelp(
+                          <>
+                            <p>
+                              Nodes with the <i>f(n)</i> symbol have{' '}
+                              <b>context functions</b>. Context functions are
+                              functions which are executed during its node
+                              execution multiple times.
+                            </p>
+                            <p>
+                              Double click on a node or select the level with
+                              the path breadcrumbs to enter their context
+                              functions.
+                            </p>
+                          </>
+                        )
+                      }
+                      icon="question-circle"
+                    />
+                  </Tooltip>
+                </Col>
+              </Row>
             </Col>
             <Col>
               <Button.Group>
