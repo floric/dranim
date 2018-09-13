@@ -41,7 +41,7 @@ describe('DatasetOutputNode', () => {
     const ds = await createDataset('test', { db, userId: '' });
 
     const res = await DatasetOutputNode.onNodeExecution(
-      { name: '', description: '' },
+      { name: 'DS Name', description: '' },
       { dataset: { datasetId: ds.id } },
       {
         reqContext: { db, userId: '' },
@@ -50,7 +50,8 @@ describe('DatasetOutputNode', () => {
     );
 
     expect(res.outputs).toBeDefined();
-    expect(res.results.value.datasetId).toBe(ds.id);
+    expect(res.results.value.id).toBe(ds.id);
+    expect(res.results.value.name).toBe('DS Name');
   });
 
   test('should return empty meta for dataset', async () => {
