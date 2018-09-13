@@ -2,16 +2,16 @@ import React, { SFC } from 'react';
 
 import { Colors, GQLDataset } from '@masterthesis/shared';
 import { Card, Col, Row, Table, Tag } from 'antd';
-import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
 import { Mutation } from 'react-apollo';
 
 import { tryOperation } from '../../utils/form';
 import { CreateValueSchemaForm } from '../forms/CreateValueSchemaForm';
+import { DATASET } from './DetailPage';
 
 const ADD_VALUE_SCHEMA = gql`
   mutation addValueSchema(
-    $datasetId: String!
+    $datasetId: ID!
     $name: String!
     $type: String!
     $required: Boolean!
@@ -31,10 +31,9 @@ const ADD_VALUE_SCHEMA = gql`
 
 export interface DataSchemasProps {
   dataset: GQLDataset;
-  refetch: () => Promise<ApolloQueryResult<any>>;
 }
 
-export const DataSchemas: SFC<DataSchemasProps> = ({ refetch, dataset }) => {
+export const DataSchemas: SFC<DataSchemasProps> = ({ dataset }) => {
   const schemasDataSource = dataset.valueschemas.map(e => ({
     key: e.name,
     type: e.type,
@@ -97,9 +96,12 @@ export const DataSchemas: SFC<DataSchemasProps> = ({ refetch, dataset }) => {
                             type: schema.type,
                             fallback: schema.fallback,
                             unique: schema.unique
-                          }
+                          },
+                          awaitRefetchQueries: true,
+                          refetchQueries: [
+                            { query: DATASET, variables: { id: dataset.id } }
+                          ]
                         }),
-                      refetch,
                       successTitle: () => 'Valueschema created',
                       successMessage: () =>
                         `Valueschema "${schema.name}" created successfully.`,

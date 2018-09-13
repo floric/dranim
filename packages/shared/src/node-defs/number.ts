@@ -21,7 +21,7 @@ export const FormatNumberNodeDef: NodeDef<
   FormatNumberNodeInputs,
   FormatNumberNodeOutputs
 > = {
-  name: 'Format',
+  name: 'Format Number',
   type: 'FormatNumber',
   inputs: {
     number: NumberSocket('Number')
@@ -42,7 +42,7 @@ export interface NumberInputNodeForm {
 }
 
 export const NumberInputNodeDef: NodeDef<{}, NumberInputNodeOutputs> = {
-  name: 'Input',
+  name: 'Input Number',
   type: 'NumberInput',
   inputs: {},
   outputs: {
@@ -92,7 +92,7 @@ export interface SumNodeOutputs {
 }
 
 export const NumberOutputNodeDef: NodeDef<NumberOutputNodeInputs, {}> = {
-  name: 'Output',
+  name: 'Output Number',
   type: 'NumberOutput',
   inputs: {
     value: NumberSocket('Number')

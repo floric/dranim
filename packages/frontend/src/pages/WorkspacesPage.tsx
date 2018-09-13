@@ -39,7 +39,7 @@ const CREATE_WORKSPACE = gql`
 `;
 
 const DELETE_WORKSPACE = gql`
-  mutation deleteWorkspace($id: String!) {
+  mutation deleteWorkspace($id: ID!) {
     deleteWorkspace(id: $id)
   }
 `;
@@ -65,7 +65,7 @@ const WorkspacesOverviewPage: SFC<WorkspacesOverviewPageProps> = () => (
       }
     />
     <HandledQuery<{ workspaces: Array<GQLWorkspace> }> query={ALL_WORKSPACES}>
-      {({ refetch, data: { workspaces } }) => (
+      {({ data: { workspaces } }) => (
         <CardsLayout>
           {Array.from(workspaces)
             .sort(compareByName)
@@ -85,9 +85,10 @@ const WorkspacesOverviewPage: SFC<WorkspacesOverviewPageProps> = () => (
                             deleteWorkspace({
                               variables: {
                                 id: ws.id
-                              }
+                              },
+                              awaitRefetchQueries: true,
+                              refetchQueries: [{ query: ALL_WORKSPACES }]
                             }),
-                          refetch,
                           successTitle: () => 'Workspace deleted',
                           successMessage: () =>
                             `Workspace "${ws.name}" deleted successfully.`,
@@ -120,9 +121,10 @@ const WorkspacesOverviewPage: SFC<WorkspacesOverviewPageProps> = () => (
                       tryOperation<any>({
                         op: () =>
                           createWorkspace({
-                            variables: { name, description }
+                            variables: { name, description },
+                            awaitRefetchQueries: true,
+                            refetchQueries: [{ query: ALL_WORKSPACES }]
                           }),
-                        refetch,
                         successTitle: () => 'Workspace created',
                         successMessage: () =>
                           `Workspace "${name}" created successfully.`,

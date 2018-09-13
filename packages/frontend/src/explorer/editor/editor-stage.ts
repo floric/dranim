@@ -1,10 +1,9 @@
-import { ContextNodeType } from '@masterthesis/shared';
 import deepEqual from 'deep-equal';
 import { Group, Layer, Stage } from 'konva';
 
 import { ExplorerEditorProps, ExplorerEditorState } from '../ExplorerEditor';
 import { renderConnection } from './connections';
-import { renderContextNode, renderNode } from './nodes';
+import { renderNode } from './nodes';
 
 export const EXPLORER_CONTAINER = 'explcontainer';
 export type EditorFunctions = {
@@ -75,17 +74,14 @@ const createNodesLayer = (
   );
 
   for (const n of nodesInContext) {
-    const nodeGroup =
-      n.type !== ContextNodeType.INPUT && n.type !== ContextNodeType.OUTPUT
-        ? renderNode(n, server, state, editorFunctions, socketsMap, stage)
-        : renderContextNode(
-            n,
-            server,
-            state,
-            editorFunctions,
-            socketsMap,
-            stage
-          );
+    const nodeGroup = renderNode(
+      n,
+      server,
+      state,
+      editorFunctions,
+      socketsMap,
+      stage
+    );
     nodesLayer.add(nodeGroup);
     nodeMap.set(n.id, nodeGroup);
   }

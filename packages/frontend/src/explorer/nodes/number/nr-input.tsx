@@ -17,9 +17,7 @@ export const NumberInputNode: ClientNodeDef<
 > = {
   type: NumberInputNodeDef.type,
   renderName: (context, nodeForm) =>
-    nodeForm.value == null
-      ? NumberInputNodeDef.name
-      : nodeForm.value.toString(),
+    nodeForm.value == null ? '0' : nodeForm.value.toString(),
   renderFormItems: ({ form: { getFieldDecorator }, nodeForm }) => (
     <Form.Item label="Value">
       {getFieldDecorator('value', {

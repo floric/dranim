@@ -10,7 +10,7 @@ export interface BooleanInputNodeForm {
 }
 
 export const BooleanInputNodeDef: NodeDef<{}, BooleanInputNodeOutputs> = {
-  name: 'Input',
+  name: 'Input Boolean',
   type: 'BooleanInput',
   inputs: {},
   outputs: {
@@ -25,7 +25,7 @@ export interface BooleanOutputNodeInputs {
 }
 
 export const BooleanOutputNodeDef: NodeDef<BooleanOutputNodeInputs, {}> = {
-  name: 'Output',
+  name: 'Output Boolean',
   type: 'BooleanOutput',
   inputs: {
     value: BooleanSocket('Boolean')
@@ -75,7 +75,7 @@ export const AndNodeDef: NodeDef<
   BooleanOperatorInputs,
   BooleanOperatorOutputs
 > = {
-  name: 'And',
+  name: 'and',
   type: 'And',
   inputs: {
     valueA: BooleanSocket('Value A'),
@@ -92,7 +92,7 @@ export const OrNodeDef: NodeDef<
   BooleanOperatorInputs,
   BooleanOperatorOutputs
 > = {
-  name: 'Or',
+  name: 'or',
   type: 'Or',
   inputs: {
     valueA: BooleanSocket('Value A'),
@@ -109,7 +109,7 @@ export const XorNodeDef: NodeDef<
   BooleanOperatorInputs,
   BooleanOperatorOutputs
 > = {
-  name: 'Xor',
+  name: 'exclusive or',
   type: 'Xor',
   inputs: {
     valueA: BooleanSocket('Value A'),

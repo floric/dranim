@@ -2,12 +2,16 @@ import { NodeInstance, NodeState, sleep } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import { getConnectionsCollection } from '../../../src/main/workspace/connections';
-import { getNodesCollection } from '../../../src/main/workspace/nodes';
+import {
+  getAllNodes,
+  getNodesCollection
+} from '../../../src/main/workspace/nodes';
 import {
   createWorkspace,
   deleteWorkspace,
   getAllWorkspaces,
   getWorkspace,
+  getWorkspaceState,
   initWorkspaceDb,
   renameWorkspace,
   tryGetWorkspace,
@@ -365,5 +369,33 @@ describe('Workspaces', () => {
     expect(new Date(newWs.lastChange).getTime()).toBeGreaterThan(
       new Date(ws.lastChange).getTime()
     );
+  });
+
+  test('should have valid workspace state without nodes', async () => {
+    (getAllNodes as jest.Mock).mockResolvedValue([]);
+
+    const res = await getWorkspaceState('dsID', { userId: '', db });
+    expect(res).toBe(NodeState.VALID);
+  });
+
+  test('should have invalid workspace state with valid and invalid nodes', async () => {
+    (getAllNodes as jest.Mock).mockResolvedValue([
+      { state: NodeState.VALID },
+      { state: NodeState.INVALID },
+      { state: NodeState.VALID }
+    ]);
+
+    const res = await getWorkspaceState('dsID', { userId: '', db });
+    expect(res).toBe(NodeState.INVALID);
+  });
+
+  test('should have valid workspace state with valid and invalid nodes', async () => {
+    (getAllNodes as jest.Mock).mockResolvedValue([
+      { state: NodeState.VALID },
+      { state: NodeState.VALID }
+    ]);
+
+    const res = await getWorkspaceState('dsID', { userId: '', db });
+    expect(res).toBe(NodeState.VALID);
   });
 });

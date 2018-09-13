@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 
 import { Entry, GQLDataset, Values } from '@masterthesis/shared';
 import { Card, Col, Row, Table } from 'antd';
-import { ApolloQueryResult } from 'apollo-client';
 import gql from 'graphql-tag';
 import { Mutation, MutationFn } from 'react-apollo';
 import { NavLink } from 'react-router-dom';
@@ -11,16 +10,16 @@ import { AsyncButton } from '../../components/AsyncButton';
 import { Warning } from '../../components/Warnings';
 import { tryOperation } from '../../utils/form';
 import { CreateEntryForm } from '../forms/CreateEntryForm';
+import { DATASET } from './DetailPage';
 
 export interface DataEntriesPageProps {
   dataset: GQLDataset;
-  refetch: () => Promise<ApolloQueryResult<any>>;
 }
 
 const MAX_PREVIEW_CHARS = 65;
 
 const ADD_ENTRY = gql`
-  mutation addEntry($datasetId: String!, $values: String!) {
+  mutation addEntry($datasetId: ID!, $values: String!) {
     addEntry(datasetId: $datasetId, values: $values) {
       id
     }
@@ -28,7 +27,7 @@ const ADD_ENTRY = gql`
 `;
 
 const DELETE_ENTRY = gql`
-  mutation deleteEntry($datasetId: String!, $entryId: String!) {
+  mutation deleteEntry($datasetId: ID!, $entryId: ID!) {
     deleteEntry(datasetId: $datasetId, entryId: $entryId)
   }
 `;
@@ -74,7 +73,6 @@ const generateEntriesDatasource = (entries: Array<Entry>) =>
 const handleDeleteEntry = (
   entryId: string,
   datasetId: string,
-  refetch: () => Promise<ApolloQueryResult<any>>,
   deleteEntry: MutationFn<any, any>
 ) =>
   tryOperation({
@@ -83,19 +81,17 @@ const handleDeleteEntry = (
         variables: {
           datasetId,
           entryId
-        }
+        },
+        awaitRefetchQueries: true,
+        refetchQueries: [{ query: DATASET, variables: { id: datasetId } }]
       }),
-    refetch,
     successTitle: () => 'Entry deleted',
     successMessage: () => `Entry deleted successfully.`,
     failedTitle: 'Entry not deleted.',
     failedMessage: `Entry deletion failed.`
   });
 
-const generateEntryColumns = (
-  datasetId: string,
-  refetch: () => Promise<ApolloQueryResult<any>>
-) => [
+const generateEntryColumns = (datasetId: string) => [
   {
     title: 'Preview',
     dataIndex: 'preview',
@@ -118,7 +114,7 @@ const generateEntryColumns = (
             confirmMessage="Delete Entry?"
             confirmClick
             onClick={() =>
-              handleDeleteEntry(record.key, datasetId, refetch, deleteEntry)
+              handleDeleteEntry(record.key, datasetId, deleteEntry)
             }
           />
         )}
@@ -131,7 +127,6 @@ export class DataEntriesPage extends Component<DataEntriesPageProps> {
   private handleCreateEntry = (
     values: any,
     datasetId: string,
-    refetch: () => Promise<ApolloQueryResult<any>>,
     addEntry: MutationFn<any, any>
   ) =>
     tryOperation({
@@ -140,9 +135,12 @@ export class DataEntriesPage extends Component<DataEntriesPageProps> {
           variables: {
             datasetId,
             values: JSON.stringify(values)
-          }
+          },
+          awaitRefetchQueries: true,
+          refetchQueries: [
+            { query: DATASET, variables: { id: this.props.dataset.id } }
+          ]
         }),
-      refetch,
       successTitle: () => 'Entry created',
       successMessage: () => `Entry created successfully.`,
       failedTitle: 'Entry not created.',
@@ -150,7 +148,7 @@ export class DataEntriesPage extends Component<DataEntriesPageProps> {
     });
 
   public render() {
-    const { dataset, refetch } = this.props;
+    const { dataset } = this.props;
     return (
       <Row style={{ marginBottom: '1rem' }} gutter={12}>
         <Col md={24} lg={12} xl={10}>
@@ -161,12 +159,7 @@ export class DataEntriesPage extends Component<DataEntriesPageProps> {
                 {addEntry => (
                   <CreateEntryForm
                     handleCreateEntry={values =>
-                      this.handleCreateEntry(
-                        values,
-                        dataset.id,
-                        refetch,
-                        addEntry
-                      )
+                      this.handleCreateEntry(values, dataset.id, addEntry)
                     }
                     schema={dataset.valueschemas}
                   />
@@ -193,7 +186,7 @@ export class DataEntriesPage extends Component<DataEntriesPageProps> {
                 }}
                 expandedRowRender={expandedRowRender}
                 dataSource={generateEntriesDatasource(dataset.latestEntries)}
-                columns={generateEntryColumns(dataset.id, refetch)}
+                columns={generateEntryColumns(dataset.id)}
               />
             </Card>
           ) : (

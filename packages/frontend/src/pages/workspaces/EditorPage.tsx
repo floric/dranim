@@ -59,7 +59,6 @@ const WorkspaceEditorPage: SFC<WorkspaceEditorPageProps> = ({
       },
       selectedNode: {
         data: { workspace, calculations },
-        refetch,
         startPolling,
         stopPolling
       }
@@ -74,7 +73,6 @@ const WorkspaceEditorPage: SFC<WorkspaceEditorPageProps> = ({
           stopPolling={stopPolling}
           calculations={calculations}
           datasets={datasets}
-          refetch={refetch}
           workspace={workspace}
           workspaceId={workspaceId}
         />

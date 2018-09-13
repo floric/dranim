@@ -3,7 +3,7 @@ import ValueschemaDef from './valueschema';
 
 const DatasetDef = `
   type Dataset {
-    id: String!
+    id: ID!
     name: String!
     valueschemas: [Valueschema!]!
     entriesCount: Int!

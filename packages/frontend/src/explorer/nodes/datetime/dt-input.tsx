@@ -17,6 +17,8 @@ export const DatetimeInputNode: ClientNodeDef<
   DatetimeInputNodeForm
 > = {
   type: DatetimeInputNodeDef.type,
+  renderName: (context, nodeForm) =>
+    moment(nodeForm.value != null ? nodeForm.value : new Date()).format('LLL'),
   renderFormItems: ({ form: { getFieldDecorator }, nodeForm }) => (
     <Form.Item label="Value">
       {getFieldDecorator('value', {

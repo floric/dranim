@@ -1,12 +1,12 @@
 export const QueryDef = `
   type Query {
     datasets: [Dataset!]!
-    workspace(id: String!): Workspace
+    workspace(id: ID!): Workspace
     workspaces: [Workspace!]!
-    dataset(id: String!): Dataset
-    entry(datasetId: String!, entryId: String!): Entry
-    uploads(datasetId: String): [UploadProcess!]!
-    calculations(workspaceId: String!): [CalculationProcess!]!
+    dataset(id: ID!): Dataset
+    entry(datasetId: ID!, entryId: ID!): Entry
+    uploads(datasetId: ID!): [UploadProcess!]!
+    calculations(workspaceId: ID!): [CalculationProcess!]!
     user: User!
   }
 `;

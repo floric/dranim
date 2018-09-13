@@ -1,12 +1,14 @@
 import React, { SFC } from 'react';
 
 import {
+  Dataset,
   DataType,
   GQLOutputResult,
   LinearChartType,
   SoundChartDef
 } from '@masterthesis/shared';
 import ContainerDimensions from 'react-container-dimensions';
+import { Link } from 'react-router-dom';
 
 import { BooleanInfo } from './infos/BooleanInfo';
 import { NumberInfo } from './infos/NumberInfo';
@@ -31,24 +33,40 @@ const CARD_PADDING = 24;
 export const VisRenderer: SFC<VisRenderer> = ({ result }) => {
   const value = JSON.parse(result.value);
 
-  if (result.type !== DataType.VIS) {
-    return (
-      <VisCard result={result}>
-        {(() => {
-          if (result.type === DataType.NUMBER) {
-            return <NumberInfo total={value} />;
-          } else if (result.type === DataType.STRING) {
-            return <StringInfo value={value} />;
-          } else if (result.type === DataType.BOOLEAN) {
-            return <BooleanInfo value={value} />;
-          }
-
-          return <p>Unsupported Datatype!</p>;
-        })()}
-      </VisCard>
-    );
+  if (result.type === DataType.VIS) {
+    return renderVisualizations(result, value);
   }
 
+  return renderInfos(result, value);
+};
+
+const renderInfos = (result: GQLOutputResult, value: any) => (
+  <VisCard result={result}>
+    {(() => {
+      if (result.type === DataType.NUMBER) {
+        return <NumberInfo total={value} />;
+      } else if (result.type === DataType.STRING) {
+        return <StringInfo value={value} />;
+      } else if (result.type === DataType.BOOLEAN) {
+        return <BooleanInfo value={value} />;
+      } else if (result.type === DataType.DATASET) {
+        const ds: Dataset = value;
+        return (
+          <p>
+            <Link to={`/data/${ds.id}`}>
+              Dataset <strong>{ds.name}</strong>
+            </Link>{' '}
+            created successfully
+          </p>
+        );
+      }
+
+      return <p>Unsupported Datatype!</p>;
+    })()}
+  </VisCard>
+);
+
+const renderVisualizations = (result: GQLOutputResult, value: any) => {
   if (
     value.type === LinearChartType.BAR ||
     value.type === LinearChartType.COLUMN ||
@@ -88,5 +106,5 @@ export const VisRenderer: SFC<VisRenderer> = ({ result }) => {
     );
   }
 
-  return <p>Unsupported custom data: {value.type}</p>;
+  return <p>Unsupported visualization type</p>;
 };

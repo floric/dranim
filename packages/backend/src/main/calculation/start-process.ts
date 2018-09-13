@@ -1,12 +1,12 @@
 import {
   ApolloContext,
   CalculationProcess,
-  DataType,
   NodeInstance,
   OutputResult,
   ProcessState
 } from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
+import Raven from 'raven';
 
 import { Log } from '../../logging';
 import { executeNode } from '../calculation/execution';
@@ -81,22 +81,22 @@ const doCalculation = async (
 
     Log.info(`Started calculation ${processId}`);
 
-    checkForCanceledProcess(processId, reqContext).catch(() => {
+    checkForCanceledProcess(processId, reqContext).catch(() =>
       updateFinishedProcess(
         processId,
         workspaceId,
         ProcessState.CANCELED,
         reqContext
-      );
-    });
+      )
+    );
 
     const results = await Promise.all(
       outputNodes.map(o => executeOutputNode(o, processId, reqContext))
     );
 
-    await saveResults(results as Array<OutputResult>, reqContext);
     const durationMs = new Date().getTime() - start;
 
+    await saveResults(results, reqContext);
     await updateFinishedProcess(
       processId,
       workspaceId,
@@ -105,6 +105,7 @@ const doCalculation = async (
       durationMs
     );
   } catch (err) {
+    Raven.captureException(err);
     await updateFinishedProcess(
       processId,
       workspaceId,
@@ -145,13 +146,12 @@ const checkForCanceledProcess = (
   });
 
 const saveResults = async (
-  results: Array<OutputResult | undefined>,
+  results: Array<OutputResult | null>,
   reqContext: ApolloContext
 ) =>
   Promise.all(
     results
       .filter(r => r != null && Object.keys(r).length > 0)
-      .filter(r => r!.type !== DataType.DATASET)
       .map(r => addOrUpdateResult(r!, reqContext))
   );
 
@@ -159,7 +159,7 @@ const executeOutputNode = async (
   o: NodeInstance,
   processId: string,
   reqContext: ApolloContext
-) => {
+): Promise<OutputResult<any> | null> => {
   const processCollection = getCalculationsCollection(reqContext.db);
 
   const res = await executeNode(o, processId, reqContext);
@@ -172,7 +172,7 @@ const executeOutputNode = async (
     }
   );
 
-  return res.results;
+  return res.results || null;
 };
 
 const updateFinishedProcess = async (

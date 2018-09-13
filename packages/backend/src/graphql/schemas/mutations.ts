@@ -4,14 +4,14 @@ export const MutationDef = `
       name: String!
     ): Dataset!
     deleteDataset (
-      id: String!
+      id: ID!
     ): Boolean!
     renameDataset (
-      id: String!
+      id: ID!
       name: String!
     ): Boolean!
     addValueSchema (
-      datasetId: String!
+      datasetId: ID!
       name: String!
       type: String!
       required: Boolean!
@@ -19,36 +19,36 @@ export const MutationDef = `
       unique: Boolean!
     ): Boolean!
     addEntry (
-      datasetId: String!
+      datasetId: ID!
       values: String!
     ): Entry!
     deleteEntry (
-      datasetId: String!
-      entryId: String!
+      datasetId: ID!
+      entryId: ID!
     ): Boolean!
     createConnection (
       input: ConnectionInput!
     ): Connection!
     createNode (
       type: String!
-      workspaceId: String!
+      workspaceId: ID!
       contextIds: [String!]!
       x: Float!
       y: Float!
     ): Node!
     deleteConnection (
-      id: String!
+      id: ID!
     ): Boolean!
     deleteNode (
-      id: String!
+      id: ID!
     ): Boolean!
     updateNodePosition (
-      id: String!
+      id: ID!
       x: Float!
       y: Float!
     ): Boolean!
     addOrUpdateFormValue (
-      nodeId: String!
+      nodeId: ID!
       name: String!
       value: String!
     ): Boolean!
@@ -57,20 +57,20 @@ export const MutationDef = `
       description: String
     ): Workspace!
     deleteWorkspace (
-      id: String!
+      id: ID!
     ): Boolean!
     updateWorkspace (
-      id: String!
+      id: ID!
       nodes: [NodeInput!]!
       connections: [ConnectionInput!]!
     ): Boolean!
     renameWorkspace (
-      id: String!
+      id: ID!
       name: String!
     ): Boolean!
     createDemoData(type: String!): Boolean!
-    uploadEntriesCsv (files: [Upload!]!, datasetId: String!): UploadProcess!
-    startCalculation (workspaceId: String!): CalculationProcess!
-    stopCalculation (id: String!): Boolean!
+    uploadEntriesCsv (files: [Upload!]!, datasetId: ID!): UploadProcess!
+    startCalculation (workspaceId: ID!): CalculationProcess!
+    stopCalculation (id: ID!): Boolean!
   }
 `;

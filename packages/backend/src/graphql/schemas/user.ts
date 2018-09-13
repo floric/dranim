@@ -4,7 +4,7 @@ const UserDef = `
     lastName: String!
     mail: String!
     lastLogin: Date
-    id: String!
+    id: ID!
   }
 `;
 

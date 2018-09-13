@@ -10,7 +10,7 @@ import { VisRenderer } from '../../components/VisRenderer';
 import { UnknownWorkspaceCard } from './DetailPage';
 
 const WORKSPACE = gql`
-  query workspace($id: String!) {
+  query workspace($id: ID!) {
     workspace(id: $id) {
       id
       name

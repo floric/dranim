@@ -28,9 +28,11 @@ export const createNode = async (
 ): Promise<NodeInstance> => {
   const nodeType = tryGetNodeType(type);
 
-  await checkNoOutputNodeInContexts(type, contextNodeIds);
-  await checkValidContextNode(contextNodeIds, reqContext);
-  await checkValidWorkspace(workspaceId, reqContext);
+  await Promise.all([
+    checkNoOutputNodeInContexts(type, contextNodeIds),
+    checkValidContextNode(contextNodeIds, reqContext),
+    checkValidWorkspace(workspaceId, reqContext)
+  ]);
 
   const collection = getNodesCollection(reqContext.db);
   const res = await collection.insertOne({
@@ -51,14 +53,16 @@ export const createNode = async (
 
   const newNodeId = res.ops[0]._id.toHexString();
 
-  await addContextNodesIfNecessary(
-    nodeType,
-    newNodeId,
-    contextNodeIds,
-    workspaceId,
-    reqContext
-  );
-  await updateStates(workspaceId, reqContext);
+  await Promise.all([
+    addContextNodesIfNecessary(
+      nodeType,
+      newNodeId,
+      contextNodeIds,
+      workspaceId,
+      reqContext
+    ),
+    updateStates(workspaceId, reqContext)
+  ]);
 
   const { _id, ...other } = res.ops[0];
 
