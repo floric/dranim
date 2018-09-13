@@ -1,29 +1,15 @@
 import {
   allAreDefinedAndPresent,
-  ApolloContext,
-  Dataset,
   DataType,
   DistinctEntriesNodeDef,
   DistinctEntriesNodeForm,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
-  IOValues,
-  NodeInstance,
   ServerNodeDefWithContextFn,
   SocketDefs,
   SocketState,
   ValueSchema
 } from '@masterthesis/shared';
-
-import { createUniqueDatasetName } from '../../calculation/utils';
-import {
-  addValueSchema,
-  createDataset,
-  deleteDataset,
-  tryGetDataset
-} from '../../workspace/dataset';
-import { createEntry, getEntryCollection } from '../../workspace/entry';
-import { processDocumentsWithCursor } from './utils';
 
 const getDistinctValueName = (vs: ValueSchema) => `${vs.name}-distinct`;
 
@@ -112,98 +98,14 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
       }
     };
   },
-  onNodeExecution: async (
-    form,
-    inputs,
-    { reqContext, contextFnExecution, node }
-  ) => {
-    const [existingDs, newDs] = await Promise.all([
-      tryGetDataset(inputs.dataset.datasetId, reqContext),
-      createDataset(
-        createUniqueDatasetName(DistinctEntriesNodeDef.type, node.id),
-        reqContext,
-        node.workspaceId
-      )
-    ]);
-
-    await Promise.all(
-      [
-        ...form.distinctSchemas!.map(s => ({
-          ...s,
-          name: getDistinctValueName(s)
-        })),
-        ...form.addedSchemas!
-      ].map(s => addValueSchema(newDs.id, s, reqContext))
-    );
-
-    const entryColl = getEntryCollection(existingDs.id, reqContext.db);
-    const aggregateNames = {};
-    form.distinctSchemas!.map(s => s.name).forEach(s => {
-      aggregateNames[s] = `$values.${s}`;
-    });
-
-    const cursor = entryColl.aggregate([{ $group: { _id: aggregateNames } }]);
-    await processDocumentsWithCursor(cursor, doc =>
-      processDistinctDatasets(
-        doc!._id,
-        form.distinctSchemas!,
-        existingDs,
-        newDs,
-        node,
-        contextFnExecution!,
-        reqContext
-      )
-    );
-
+  onNodeExecution: async (form, inputs) => {
     return {
       outputs: {
         dataset: {
-          datasetId: newDs.id
+          entries: [],
+          schema: inputs.dataset.schema
         }
       }
     };
   }
-};
-
-const processDistinctDatasets = async (
-  distinctValues: { [name: string]: any },
-  distinctSchemas: Array<ValueSchema>,
-  existingDs: Dataset,
-  newDs: Dataset,
-  node: NodeInstance,
-  contextFnExecution: (input: IOValues<any>) => any,
-  reqContext: ApolloContext
-) => {
-  const tempDs = await createDataset(
-    createUniqueDatasetName(DistinctEntriesNodeDef.name, node.id),
-    reqContext,
-    node.workspaceId
-  );
-
-  const query = {};
-  const values: IOValues<any> = {};
-  distinctSchemas!.forEach(s => {
-    query[`values.${s.name}`] = distinctValues[s.name];
-    values[getDistinctValueName(s)] = distinctValues[s.name];
-  });
-  values.filteredDataset = {
-    datasetId: tempDs.id
-  };
-
-  const entryColl = getEntryCollection(existingDs.id, reqContext.db);
-  await entryColl
-    .aggregate(
-      [
-        { $match: query },
-        { $out: getEntryCollection(tempDs.id, reqContext.db).collectionName }
-      ],
-      { bypassDocumentValidation: true }
-    )
-    .next();
-
-  const { outputs } = await contextFnExecution!(values);
-  await Promise.all([
-    createEntry(newDs.id, outputs, reqContext),
-    deleteDataset(tempDs.id, reqContext)
-  ]);
 };

@@ -10,7 +10,6 @@ import {
 import { Log } from '../../logging';
 import { getMetaInputs } from '../calculation/meta-execution';
 import { tryGetNodeType } from '../nodes/all-nodes';
-import { getDataset } from '../workspace/dataset';
 import { getInputDefs } from '../workspace/nodes-detail';
 
 export const isNodeInMetaValid = async (
@@ -54,11 +53,6 @@ const validateDataset = async (
   datasetRef: any,
   reqContext: ApolloContext
 ): Promise<boolean> => {
-  const ds = await getDataset(datasetRef.datasetId, reqContext);
-  if (!ds) {
-    return false;
-  }
-
   return true;
 };
 

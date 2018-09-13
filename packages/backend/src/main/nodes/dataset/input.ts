@@ -2,10 +2,12 @@ import {
   DatasetInputNodeDef,
   DatasetInputNodeForm,
   DatasetInputNodeOutputs,
+  Entry,
   ServerNodeDef
 } from '@masterthesis/shared';
 
-import { getDataset } from '../../workspace/dataset';
+import { getDataset, tryGetDataset } from '../../workspace/dataset';
+import { processEntries } from '../entries/utils';
 
 export const DatasetInputNode: ServerNodeDef<
   {},
@@ -37,11 +39,22 @@ export const DatasetInputNode: ServerNodeDef<
       }
     };
   },
-  onNodeExecution: async form => {
+  onNodeExecution: async (form, inputs, { reqContext, node }) => {
+    const entries: Array<Entry> = [];
+    await processEntries(
+      form.dataset!,
+      node.id,
+      async e => {
+        entries.push(e);
+      },
+      reqContext
+    );
+    const ds = await tryGetDataset(form.dataset!, reqContext);
     return {
       outputs: {
         dataset: {
-          datasetId: form.dataset!
+          entries,
+          schema: ds.valueschemas
         }
       }
     };

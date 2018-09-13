@@ -13,11 +13,11 @@ import deepEqual from 'deep-equal';
 import { css } from 'glamor';
 
 import { AsyncButton } from '../components/AsyncButton';
+import { showHelp } from '../components/layout/PageHeaderCard';
 import { EXPLORER_CONTAINER, updateStage } from './editor/editor-stage';
 import { NODE_WIDTH } from './editor/nodes';
 import { PropertiesForm } from './editor/PropertiesForm';
 import { nodeTypes, nodeTypesTree } from './nodes/all-nodes';
-import { showHelp } from '../components/layout/PageHeaderCard';
 
 const CANVAS_STYLE = css({
   flex: 1,

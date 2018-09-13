@@ -7,9 +7,11 @@ import {
   OutputResult,
   ServerNodeDef
 } from '@masterthesis/shared';
+import PromiseQueue from 'promise-queue';
 
 import { isOutputFormValid } from '../../calculation/utils';
-import { saveTemporaryDataset, tryGetDataset } from '../../workspace/dataset';
+import { addValueSchema, createDataset } from '../../workspace/dataset';
+import { createEntry } from '../../workspace/entry';
 
 export const DatasetOutputNode: ServerNodeDef<
   DatasetOutputNodeInputs,
@@ -25,8 +27,19 @@ export const DatasetOutputNode: ServerNodeDef<
     inputs,
     { reqContext, node: { workspaceId } }
   ) => {
-    const ds = await tryGetDataset(inputs.dataset.datasetId, reqContext);
-    await saveTemporaryDataset(ds.id, form.name!, reqContext);
+    const ds = await createDataset(form.name!, reqContext);
+    await Promise.all(
+      inputs.dataset.schema.map(async n => {
+        await addValueSchema(ds.id, n, reqContext);
+      })
+    );
+
+    const queue = new PromiseQueue(4);
+
+    for (const n of inputs.dataset.entries) {
+      await queue.add(() => createEntry(ds.id, n.values, reqContext));
+    }
+
     return {
       outputs: {},
       results: {

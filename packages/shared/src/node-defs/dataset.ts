@@ -1,8 +1,10 @@
 import { NodeDef } from '../nodes';
 import { DatasetSocket } from '../sockets';
+import { Entry, ValueSchema } from '../workspace';
 
 export interface DatasetRef {
-  datasetId: string;
+  entries: Array<Entry>;
+  schema: Array<ValueSchema>;
 }
 
 export interface DatasetInputNodeOutputs {
