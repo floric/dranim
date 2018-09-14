@@ -134,6 +134,7 @@ class CreateEntryFormImpl extends Component<
             xs: 24,
             sm: 16
           }}
+          style={{ marginBottom: 0 }}
         >
           <Button
             loading={this.state.saving}

@@ -1,12 +1,12 @@
 import {
   allAreDefinedAndPresent,
   DataType,
-  Entry,
   FilterEntriesNodeDef,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
   ServerNodeDefWithContextFn,
-  SocketState
+  SocketState,
+  Values
 } from '@masterthesis/shared';
 
 import { getDynamicEntryContextInputs } from './utils';
@@ -35,11 +35,11 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
     return inputs;
   },
   onNodeExecution: async (form, inputs, { contextFnExecution }) => {
-    const entries: Array<Entry> = [];
+    const entries: Array<Values> = [];
     for (const e of inputs.dataset.entries) {
       const {
         outputs: { keepEntry }
-      } = await contextFnExecution!(e.values);
+      } = await contextFnExecution!(e);
       if (keepEntry) {
         entries.push(e);
       }

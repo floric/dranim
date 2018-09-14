@@ -11,7 +11,7 @@ import { addValueSchema, createDataset } from '../main/workspace/dataset';
 import { createManyEntries } from '../main/workspace/entry';
 import { createWorkspace } from '../main/workspace/workspace';
 
-const ENTRIES_COUNT = 1000000;
+const ENTRIES_COUNT = 2500;
 
 export const createBirthdaysDemoData = async (reqContext: ApolloContext) => {
   const ds = await createDataset('Birthdays', reqContext);
@@ -19,7 +19,7 @@ export const createBirthdaysDemoData = async (reqContext: ApolloContext) => {
     await addValueSchema(ds.id, s, reqContext);
   }
 
-  const entries = createBirthdaysEntries();
+  const entries = generateBirthdaysEntries();
   Log.info('Generated birthdays entries');
 
   await createManyEntries(ds.id, entries, reqContext);
@@ -28,7 +28,7 @@ export const createBirthdaysDemoData = async (reqContext: ApolloContext) => {
   return true;
 };
 
-const createBirthdaysEntries: () => Array<Values> = () =>
+const generateBirthdaysEntries: () => Array<Values> = () =>
   Array(ENTRIES_COUNT)
     .fill(0)
     .map((_, i) => ({

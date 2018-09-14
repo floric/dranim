@@ -1,9 +1,9 @@
 import { NodeDef } from '../nodes';
 import { DatasetSocket } from '../sockets';
-import { Entry, ValueSchema } from '../workspace';
+import { Values, ValueSchema } from '../workspace';
 
 export interface DatasetRef {
-  entries: Array<Entry>;
+  entries: Array<Values>;
   schema: Array<ValueSchema>;
 }
 

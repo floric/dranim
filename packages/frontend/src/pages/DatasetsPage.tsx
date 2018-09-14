@@ -6,6 +6,7 @@ import gql from 'graphql-tag';
 import { Mutation } from 'react-apollo';
 
 import { HandledQuery } from '../components/HandledQuery';
+import { TimeInfo } from '../components/infos/TimeInfo';
 import { CardItem } from '../components/layout/CardItem';
 import { cardItemProps, CardsLayout } from '../components/layout/CardsLayout';
 import { PageHeaderCard } from '../components/layout/PageHeaderCard';
@@ -97,6 +98,9 @@ const DatasetsPage: SFC = () => (
                       </Col>
                       <Col xs={{ span: 24 }} md={{ span: 12 }}>
                         {`${ds.entriesCount} Entries`}
+                      </Col>
+                      <Col>
+                        <TimeInfo text="Created" time={ds.created} />
                       </Col>
                     </CardItem>
                   )}

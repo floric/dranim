@@ -123,7 +123,7 @@ const StartPage: SFC = () => (
                   }
                   title={
                     <>
-                      {item.title} ({moment(item.date).toNow()})
+                      {item.title} ({moment(item.date).fromNow()})
                     </>
                   }
                   description={item.description}

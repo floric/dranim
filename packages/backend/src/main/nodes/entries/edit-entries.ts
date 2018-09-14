@@ -2,12 +2,12 @@ import {
   allAreDefinedAndPresent,
   EditEntriesNodeDef,
   EditEntriesNodeForm,
-  Entry,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
   ServerNodeDefWithContextFn,
   SocketDef,
-  SocketState
+  SocketState,
+  Values
 } from '@masterthesis/shared';
 
 import { getDynamicEntryContextInputs } from './utils';
@@ -56,10 +56,10 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
     };
   },
   onNodeExecution: async (form, inputs, { contextFnExecution }) => {
-    const entries: Array<Entry> = [];
+    const entries: Array<Values> = [];
     for (const e of inputs.dataset.entries) {
-      const res = await contextFnExecution!(e.values);
-      entries.push({ id: '', values: res.outputs });
+      const res = await contextFnExecution!(e);
+      entries.push(res.outputs);
     }
 
     return {

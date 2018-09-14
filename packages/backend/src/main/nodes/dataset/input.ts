@@ -2,8 +2,8 @@ import {
   DatasetInputNodeDef,
   DatasetInputNodeForm,
   DatasetInputNodeOutputs,
-  Entry,
-  ServerNodeDef
+  ServerNodeDef,
+  Values
 } from '@masterthesis/shared';
 
 import { getDataset, tryGetDataset } from '../../workspace/dataset';
@@ -42,12 +42,12 @@ export const DatasetInputNode: ServerNodeDef<
   onNodeExecution: async (form, inputs, { reqContext, node }) => {
     const ds = await tryGetDataset(form.dataset!, reqContext);
 
-    const entries: Array<Entry> = [];
+    const entries: Array<Values> = [];
     await processEntries(
       form.dataset!,
       node.id,
       async e => {
-        entries.push(e);
+        entries.push(e.values);
       },
       reqContext
     );

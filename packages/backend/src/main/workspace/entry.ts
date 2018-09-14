@@ -130,7 +130,9 @@ export const createManyEntries = async (
   reqContext: ApolloContext,
   options?: CreateEntryOptions
 ): Promise<boolean> => {
-  checkForInvalidOrEmptyValues(values);
+  if (values.length === 0) {
+    return true;
+  }
 
   const ds = await tryGetDataset(datasetId, reqContext);
 
@@ -146,6 +148,7 @@ export const createManyEntries = async (
 
     return true;
   } catch (err) {
+    console.log(err);
     if (err.code === 11000) {
       throw new UploadEntryError('Key already used', 'key-already-used');
     } else {
@@ -165,7 +168,7 @@ const checkForInvalidOrEmptyValues = (values: Values) => {
 
   valuesArr.forEach(v => {
     if (!v || v[0] == null || v[1] == null) {
-      throw new Error('Value malformed');
+      throw new Error('Value malformed:' + JSON.stringify(values));
     }
   });
 };
