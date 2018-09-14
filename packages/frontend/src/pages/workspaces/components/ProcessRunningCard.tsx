@@ -17,7 +17,7 @@ export const ProcessRunningCard: SFC<{
         <p>
           {`Processed ${currentCalculation.processedOutputs} of ${
             currentCalculation.totalOutputs
-          } nodes | Started ${moment(currentCalculation.start).toNow()}`}
+          } nodes | Started ${moment(currentCalculation.start).fromNow()}`}
         </p>
         <AsyncButton
           type="danger"

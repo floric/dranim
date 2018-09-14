@@ -124,6 +124,39 @@ export const createEntry = async (
   }
 };
 
+export const createManyEntries = async (
+  datasetId: string,
+  values: Array<Values>,
+  reqContext: ApolloContext,
+  options?: CreateEntryOptions
+): Promise<boolean> => {
+  checkForInvalidOrEmptyValues(values);
+
+  const ds = await tryGetDataset(datasetId, reqContext);
+
+  try {
+    const collection = getEntryCollection(ds.id, reqContext.db);
+    const res = await collection.insertMany(values.map(n => ({ values: n })), {
+      ordered: false
+    });
+
+    if (res.insertedCount !== values.length) {
+      throw new Error('Writing dataset failed');
+    }
+
+    return true;
+  } catch (err) {
+    if (err.code === 11000) {
+      throw new UploadEntryError('Key already used', 'key-already-used');
+    } else {
+      throw new UploadEntryError(
+        'Writing entry failed.',
+        'internal-write-error'
+      );
+    }
+  }
+};
+
 const checkForInvalidOrEmptyValues = (values: Values) => {
   const valuesArr = Object.entries(values);
   if (valuesArr.length === 0) {

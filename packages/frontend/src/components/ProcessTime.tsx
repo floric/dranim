@@ -8,23 +8,29 @@ export interface ProcessTimeProps {
   finish?: string;
 }
 
-export const ProcessTime: SFC<ProcessTimeProps> = ({ start, finish }) => (
-  <>
-    <Row>
-      <Col xs={6}>Started:</Col>
-      <Col xs={18}>
-        <Tooltip title={start}>{moment(start).toNow()}</Tooltip>
-      </Col>
-    </Row>
-    {finish ? (
+export const ProcessTime: SFC<ProcessTimeProps> = ({ start, finish }) => {
+  const startTime = moment(start);
+  const duration = moment.duration(moment(finish).diff(moment(start)));
+  return (
+    <>
       <Row>
-        <Col xs={6}>Duration:</Col>
+        <Col xs={6}>Started:</Col>
         <Col xs={18}>
-          <Tooltip title={finish}>
-            {moment(finish).to(moment(start), false)}
+          <Tooltip title={startTime.toISOString()}>
+            {startTime.fromNow()}
           </Tooltip>
         </Col>
       </Row>
-    ) : null}
-  </>
-);
+      {finish ? (
+        <Row>
+          <Col xs={6}>Duration:</Col>
+          <Col xs={18}>
+            <Tooltip title={`${duration.asSeconds()}s`}>
+              {duration.humanize()}
+            </Tooltip>
+          </Col>
+        </Row>
+      ) : null}
+    </>
+  );
+};

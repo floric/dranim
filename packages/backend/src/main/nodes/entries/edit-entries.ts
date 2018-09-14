@@ -2,6 +2,7 @@ import {
   allAreDefinedAndPresent,
   EditEntriesNodeDef,
   EditEntriesNodeForm,
+  Entry,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
   ServerNodeDefWithContextFn,
@@ -54,12 +55,18 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
       }
     };
   },
-  onNodeExecution: async (form, inputs, {}) => {
+  onNodeExecution: async (form, inputs, { contextFnExecution }) => {
+    const entries: Array<Entry> = [];
+    for (const e of inputs.dataset.entries) {
+      const res = await contextFnExecution!(e.values);
+      entries.push({ id: '', values: res.outputs });
+    }
+
     return {
       outputs: {
         dataset: {
-          entries: inputs.dataset.entries,
-          schema: inputs.dataset.schema
+          entries,
+          schema: form.values || inputs.dataset.schema
         }
       }
     };

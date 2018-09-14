@@ -40,6 +40,8 @@ export const DatasetInputNode: ServerNodeDef<
     };
   },
   onNodeExecution: async (form, inputs, { reqContext, node }) => {
+    const ds = await tryGetDataset(form.dataset!, reqContext);
+
     const entries: Array<Entry> = [];
     await processEntries(
       form.dataset!,
@@ -49,7 +51,6 @@ export const DatasetInputNode: ServerNodeDef<
       },
       reqContext
     );
-    const ds = await tryGetDataset(form.dataset!, reqContext);
     return {
       outputs: {
         dataset: {

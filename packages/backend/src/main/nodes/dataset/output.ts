@@ -7,11 +7,10 @@ import {
   OutputResult,
   ServerNodeDef
 } from '@masterthesis/shared';
-import PromiseQueue from 'promise-queue';
 
 import { isOutputFormValid } from '../../calculation/utils';
 import { addValueSchema, createDataset } from '../../workspace/dataset';
-import { createEntry } from '../../workspace/entry';
+import { createManyEntries } from '../../workspace/entry';
 
 export const DatasetOutputNode: ServerNodeDef<
   DatasetOutputNodeInputs,
@@ -28,17 +27,23 @@ export const DatasetOutputNode: ServerNodeDef<
     { reqContext, node: { workspaceId } }
   ) => {
     const ds = await createDataset(form.name!, reqContext);
-    await Promise.all(
-      inputs.dataset.schema.map(async n => {
-        await addValueSchema(ds.id, n, reqContext);
-      })
-    );
-
-    const queue = new PromiseQueue(4);
-
-    for (const n of inputs.dataset.entries) {
-      await queue.add(() => createEntry(ds.id, n.values, reqContext));
+    for (const s of inputs.dataset.schema) {
+      await addValueSchema(ds.id, s, reqContext);
     }
+
+    /*await new Promise(resolve => {
+      const queue = new PromiseQueue(8, undefined, { onEmpty: resolve });
+
+      for (const n of inputs.dataset.entries) {
+        queue.add(() => createEntry(ds.id, n.values, reqContext));
+      }
+    });*/
+
+    await createManyEntries(
+      ds.id,
+      inputs.dataset.entries.map(n => n.values),
+      reqContext
+    );
 
     return {
       outputs: {},

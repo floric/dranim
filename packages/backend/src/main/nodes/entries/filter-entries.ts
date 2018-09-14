@@ -1,6 +1,7 @@
 import {
   allAreDefinedAndPresent,
   DataType,
+  Entry,
   FilterEntriesNodeDef,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
@@ -33,11 +34,21 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
 
     return inputs;
   },
-  onNodeExecution: async (form, inputs, {}) => {
+  onNodeExecution: async (form, inputs, { contextFnExecution }) => {
+    const entries: Array<Entry> = [];
+    for (const e of inputs.dataset.entries) {
+      const {
+        outputs: { keepEntry }
+      } = await contextFnExecution!(e.values);
+      if (keepEntry) {
+        entries.push(e);
+      }
+    }
+
     return {
       outputs: {
         dataset: {
-          entries: [],
+          entries,
           schema: inputs.dataset.schema
         }
       }
