@@ -9,8 +9,7 @@ import {
 } from '@masterthesis/shared';
 
 import { isOutputFormValid } from '../../calculation/utils';
-import { tryGetDataset } from '../../workspace/dataset';
-import { getDynamicEntryContextInputs, processEntries } from '../entries/utils';
+import { getDynamicEntryContextInputs } from '../entries/utils';
 
 interface ContextResult {
   source: string;
@@ -64,8 +63,6 @@ export const SoundChartNode: ServerNodeDefWithContextFn<
     inputs,
     { node: { workspaceId, id }, reqContext, contextFnExecution }
   ) => {
-    const ds = await tryGetDataset(inputs.dataset.datasetId, reqContext);
-
     const cities: Map<string, CityStat> = new Map();
 
     const passages: Array<{
@@ -75,23 +72,18 @@ export const SoundChartNode: ServerNodeDefWithContextFn<
       isEastPassage: boolean;
     }> = [];
 
-    await processEntries(
-      ds.id,
-      id,
-      async doc => {
-        const result = await contextFnExecution!(doc.values);
+    for(const e of inputs.dataset.entries) {
+      const result = await contextFnExecution!(e);
 
-        aggregateCities(cities, result.outputs);
+      aggregateCities(cities, result.outputs);
 
-        passages.push({
-          source: result.outputs.source,
-          destination: result.outputs.destination,
-          value: result.outputs.value,
-          isEastPassage: result.outputs.fromWestToEast
-        });
-      },
-      reqContext
-    );
+      passages.push({
+        source: result.outputs.source,
+        destination: result.outputs.destination,
+        value: result.outputs.value,
+        isEastPassage: result.outputs.fromWestToEast
+      });
+    }
 
     const east = {};
     Array.from(cities.entries())

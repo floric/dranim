@@ -115,7 +115,7 @@ describe('SoundChart', () => {
     (getDatasetsCollection as jest.Mock).mockReturnValue({});
     (tryGetDataset as jest.Mock).mockResolvedValue(ds);
     (processEntries as jest.Mock).mockImplementation(
-      async (dsId, nodeId, processFn, reqContext) => {
+      async (dsId, processFn) => {
         await processFn({});
         await processFn({});
         await processFn({});

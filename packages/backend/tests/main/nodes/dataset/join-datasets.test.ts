@@ -515,7 +515,7 @@ describe('JoinDatasetsNode', () => {
         };
       }
     });
-    (processEntries as jest.Mock).mockImplementation(async (a, b, processFn) =>
+    (processEntries as jest.Mock).mockImplementation(async (a, processFn) =>
       processFn(entryA)
     );
 

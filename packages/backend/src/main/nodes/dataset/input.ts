@@ -45,7 +45,6 @@ export const DatasetInputNode: ServerNodeDef<
     const entries: Array<Values> = [];
     await processEntries(
       form.dataset!,
-      node.id,
       async e => {
         entries.push(e.values);
       },

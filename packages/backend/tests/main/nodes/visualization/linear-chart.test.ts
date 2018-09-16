@@ -127,13 +127,11 @@ describe('LinearChart', () => {
       id: 'eC',
       values: { [vs.name]: 2 }
     };
-    (processEntries as jest.Mock).mockImplementation(
-      async (a, b, processFn) => {
-        await processFn(entryA);
-        await processFn(entryB);
-        await processFn(entryC);
-      }
-    );
+    (processEntries as jest.Mock).mockImplementation(async (a, processFn) => {
+      await processFn(entryA);
+      await processFn(entryB);
+      await processFn(entryC);
+    });
 
     const res = await LinearChartNode.onNodeExecution(
       { name: 'a', type: LinearChartType.BAR, description: '' },

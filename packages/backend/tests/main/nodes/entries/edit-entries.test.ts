@@ -270,7 +270,7 @@ describe('EditEntriesNode', () => {
       values: { [oldVS.name]: 'foo' }
     };
     (createUniqueDatasetName as jest.Mock).mockReturnValue('AddEntries');
-    (processEntries as jest.Mock).mockImplementation(async (a, b, processFn) =>
+    (processEntries as jest.Mock).mockImplementation(async (a, processFn) =>
       processFn(entryA)
     );
     (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);

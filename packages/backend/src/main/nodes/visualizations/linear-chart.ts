@@ -11,7 +11,7 @@ import {
 } from '@masterthesis/shared';
 
 import { isOutputFormValid } from '../../calculation/utils';
-import { getDynamicEntryContextInputs, processEntries } from '../entries/utils';
+import { getDynamicEntryContextInputs } from '../entries/utils';
 
 interface ValueLabelAssignment {
   value: number;
@@ -54,15 +54,10 @@ export const LinearChartNode: ServerNodeDefWithContextFn<
   ) => {
     const values: Array<ValueLabelAssignment> = [];
 
-    await processEntries(
-      inputs.dataset.datasetId,
-      id,
-      async entry => {
-        const res = await contextFnExecution!(entry.values);
-        values.push(res.outputs);
-      },
-      reqContext
-    );
+    for (const e of inputs.dataset.entries) {
+      const res = await contextFnExecution!(e);
+      values.push(res.outputs);
+    }
 
     return {
       outputs: {},

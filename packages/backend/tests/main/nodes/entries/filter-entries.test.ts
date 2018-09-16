@@ -217,13 +217,11 @@ describe('FilterEntriesNode', () => {
     (createUniqueDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
     (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
     (createDataset as jest.Mock).mockResolvedValue(newDs);
-    (processEntries as jest.Mock).mockImplementation(
-      async (a, b, processFn) => {
-        await processFn(entryA);
-        await processFn(entryB);
-        await processFn(entryC);
-      }
-    );
+    (processEntries as jest.Mock).mockImplementation(async (a, processFn) => {
+      await processFn(entryA);
+      await processFn(entryB);
+      await processFn(entryC);
+    });
 
     const res = await FilterEntriesNode.onNodeExecution(
       {},
