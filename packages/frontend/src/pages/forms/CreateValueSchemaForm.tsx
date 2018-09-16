@@ -210,7 +210,7 @@ const renderStringInput = ({ getFieldDecorator }: WrappedFormUtils) => (
 const renderDatetimeInput = ({ getFieldDecorator }: WrappedFormUtils) => (
   <Form.Item label="Fallback">
     {getFieldDecorator('fallbackDatetime', {
-      initialValue: moment(),
+      initialValue: moment.utc(),
       rules: [{ required: true, message: 'Please specify a value.' }]
     })(
       <DatePicker
@@ -225,7 +225,7 @@ const renderDatetimeInput = ({ getFieldDecorator }: WrappedFormUtils) => (
 const renderTimeInput = ({ getFieldDecorator }: WrappedFormUtils) => (
   <Form.Item label="Fallback">
     {getFieldDecorator('fallbackTime', {
-      initialValue: moment(),
+      initialValue: moment.utc(),
       rules: [{ required: true, message: 'Please specify a value.' }]
     })(<TimePicker placeholder="Select Time" />)}
   </Form.Item>

@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 
-export const DATASETS = gql`
-  {
+export const DASETS_AND_WORKSPACES = gql`
+  query workspace($workspaceId: ID!) {
     datasets {
       id
       name
@@ -11,18 +11,6 @@ export const DATASETS = gql`
         unique
         type
       }
-    }
-  }
-`;
-
-export const WORKSPACE_NODE_SELECTION = gql`
-  query workspace($workspaceId: ID!) {
-    calculations(workspaceId: $workspaceId) {
-      id
-      start
-      state
-      processedOutputs
-      totalOutputs
     }
     workspace(id: $workspaceId) {
       id
@@ -65,6 +53,18 @@ export const WORKSPACE_NODE_SELECTION = gql`
         }
         contextIds
       }
+    }
+  }
+`;
+
+export const CALCULATIONS = gql`
+  query workspace($workspaceId: ID!) {
+    calculations(workspaceId: $workspaceId) {
+      id
+      start
+      state
+      processedOutputs
+      totalOutputs
     }
   }
 `;

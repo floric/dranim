@@ -11,7 +11,7 @@ import { addValueSchema, createDataset } from '../main/workspace/dataset';
 import { createManyEntries } from '../main/workspace/entry';
 import { createWorkspace } from '../main/workspace/workspace';
 
-const ENTRIES_COUNT = 2500;
+const ENTRIES_COUNT = 250000;
 
 export const createBirthdaysDemoData = async (reqContext: ApolloContext) => {
   const ds = await createDataset('Birthdays', reqContext);

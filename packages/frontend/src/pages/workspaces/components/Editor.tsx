@@ -7,6 +7,7 @@ import {
   ProcessState,
   SocketInstance
 } from '@masterthesis/shared';
+import gql from 'graphql-tag';
 import { adopt } from 'react-adopt';
 import { Mutation, MutationFn } from 'react-apollo';
 
@@ -18,13 +19,12 @@ import {
   DELETE_CONNECTION,
   DELETE_NODE,
   START_CALCULATION,
-  UPDATE_NODE,
-  WORKSPACE_NODE_SELECTION
+  UPDATE_NODE
 } from '../../../graphql/editor-page';
 import { showNotificationWithIcon, tryOperation } from '../../../utils/form';
 import { ProcessRunningCard } from './ProcessRunningCard';
 
-const POLLING_FREQUENCY = 2000;
+const POLLING_FREQUENCY = 5000;
 
 const ComposedMutations = adopt({
   startCalculation: ({ render }) => (
@@ -61,7 +61,20 @@ const handleStartCalculation = (
         variables: { workspaceId },
         awaitRefetchQueries: true,
         refetchQueries: [
-          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
+          {
+            query: gql`
+              query workspace($workspaceId: ID!) {
+                calculations(workspaceId: $workspaceId) {
+                  id
+                  start
+                  state
+                  processedOutputs
+                  totalOutputs
+                }
+              }
+            `,
+            variables: { workspaceId }
+          }
         ]
       });
       startPolling(POLLING_FREQUENCY);
@@ -87,7 +100,42 @@ const handleNodeCreate = (
         },
         awaitRefetchQueries: true,
         refetchQueries: [
-          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
+          {
+            query: gql`
+              query workspace($workspaceId: ID!) {
+                workspace(id: $workspaceId) {
+                  id
+                  state
+                  nodes {
+                    id
+                    type
+                    x
+                    y
+                    state
+                    contextIds
+                    inputs {
+                      name
+                      connectionId
+                    }
+                    outputs {
+                      name
+                      connectionId
+                    }
+                    form {
+                      name
+                      value
+                    }
+                    metaInputs
+                    hasContextFn
+                    progress
+                    inputSockets
+                    outputSockets
+                  }
+                }
+              }
+            `,
+            variables: { workspaceId }
+          }
         ]
       }),
     successTitle: null,
@@ -104,7 +152,40 @@ const handleNodeDelete = (
         variables: { id: nodeId },
         awaitRefetchQueries: true,
         refetchQueries: [
-          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
+          {
+            query: gql`
+              query workspace($workspaceId: ID!) {
+                workspace(id: $workspaceId) {
+                  id
+                  state
+                  nodes {
+                    id
+                    state
+                    inputs {
+                      name
+                      connectionId
+                    }
+                    outputs {
+                      name
+                      connectionId
+                    }
+                    form {
+                      name
+                      value
+                    }
+                    metaInputs
+                    progress
+                    inputSockets
+                    outputSockets
+                  }
+                  connections {
+                    id
+                  }
+                }
+              }
+            `,
+            variables: { workspaceId }
+          }
         ]
       }),
     successTitle: null,
@@ -125,7 +206,21 @@ const handleNodeUpdate = (
         },
         awaitRefetchQueries: true,
         refetchQueries: [
-          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
+          {
+            query: gql`
+              query workspace($workspaceId: ID!) {
+                workspace(id: $workspaceId) {
+                  id
+                  nodes {
+                    id
+                    x
+                    y
+                  }
+                }
+              }
+            `,
+            variables: { workspaceId }
+          }
         ]
       }),
     successTitle: null,
@@ -144,7 +239,49 @@ const handleConnectionCreate = (
         },
         awaitRefetchQueries: true,
         refetchQueries: [
-          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
+          {
+            query: gql`
+              query workspace($workspaceId: ID!) {
+                workspace(id: $workspaceId) {
+                  id
+                  state
+                  nodes {
+                    id
+                    state
+                    inputs {
+                      name
+                      connectionId
+                    }
+                    outputs {
+                      name
+                      connectionId
+                    }
+                    form {
+                      name
+                      value
+                    }
+                    metaInputs
+                    progress
+                    inputSockets
+                    outputSockets
+                  }
+                  connections {
+                    id
+                    from {
+                      nodeId
+                      name
+                    }
+                    to {
+                      nodeId
+                      name
+                    }
+                    contextIds
+                  }
+                }
+              }
+            `,
+            variables: { workspaceId }
+          }
         ]
       }),
     successTitle: null,
@@ -161,7 +298,45 @@ const handleConnectionDelete = (
         variables: { id: connId },
         awaitRefetchQueries: true,
         refetchQueries: [
-          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
+          {
+            query: gql`
+              query workspace($workspaceId: ID!) {
+                workspace(id: $workspaceId) {
+                  id
+                  state
+                  nodes {
+                    id
+                    state
+                    inputs {
+                      name
+                      connectionId
+                    }
+                    outputs {
+                      name
+                      connectionId
+                    }
+                    metaInputs
+                    progress
+                    inputSockets
+                    outputSockets
+                  }
+                  connections {
+                    id
+                    from {
+                      nodeId
+                      name
+                    }
+                    to {
+                      nodeId
+                      name
+                    }
+                    contextIds
+                  }
+                }
+              }
+            `,
+            variables: { workspaceId }
+          }
         ]
       }),
     successTitle: null,
@@ -182,7 +357,29 @@ const handleAddOrUpdateFormValue = (
         },
         awaitRefetchQueries: true,
         refetchQueries: [
-          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
+          {
+            query: gql`
+              query workspace($workspaceId: ID!) {
+                workspace(id: $workspaceId) {
+                  id
+                  state
+                  nodes {
+                    id
+                    state
+                    form {
+                      name
+                      value
+                    }
+                    metaInputs
+                    progress
+                    inputSockets
+                    outputSockets
+                  }
+                }
+              }
+            `,
+            variables: { workspaceId }
+          }
         ]
       }),
     successTitle: null,
@@ -194,8 +391,9 @@ export type EditorProps = {
   calculations: Array<GQLCalculationProcess>;
   datasets: Array<GQLDataset>;
   workspaceId: string;
-  startPolling: (msFrequency: number) => void;
-  stopPolling: () => void;
+  startCalculationPolling: (msFrequency: number) => void;
+  stopCalculationPolling: () => void;
+  refreshAll: () => Promise<any>;
 };
 
 type EditorState = {
@@ -233,29 +431,38 @@ export class Editor extends Component<EditorProps, EditorState> {
   }
 
   private startOrStopPolling(props: EditorProps) {
-    const { stopPolling, startPolling, calculations } = props;
+    const {
+      stopCalculationPolling,
+      startCalculationPolling,
+      refreshAll,
+      calculations
+    } = props;
     const { isPolling } = this.state;
-    if (this.runningCalculations.length === 0) {
-      if (isPolling) {
-        this.setState({ isPolling: false });
-        const state = calculations[calculations.length - 1].state;
-        showNotificationWithIcon({
-          title: 'Calculation finished',
-          content: getNotificationContent(state),
-          icon: getNotificationIcon(state)
-        });
-        stopPolling();
-      }
-    } else {
+    if (this.runningCalculations.length === 0 && isPolling) {
+      this.setState({ isPolling: false });
+      const state = calculations[calculations.length - 1].state;
+      showNotificationWithIcon({
+        title: 'Calculation finished',
+        content: getNotificationContent(state),
+        icon: getNotificationIcon(state)
+      });
+      stopCalculationPolling();
+      refreshAll();
+    } else if (this.runningCalculations.length > 0 && !isPolling) {
       this.setState({
         isPolling: true
       });
-      startPolling(POLLING_FREQUENCY);
+      startCalculationPolling(POLLING_FREQUENCY);
     }
   }
 
   public render() {
-    const { datasets, workspace, workspaceId, startPolling } = this.props;
+    const {
+      datasets,
+      workspace,
+      workspaceId,
+      startCalculationPolling
+    } = this.props;
 
     if (this.runningCalculations.length > 0) {
       return (
@@ -294,7 +501,7 @@ export class Editor extends Component<EditorProps, EditorState> {
             )}
             onStartCalculation={handleStartCalculation(
               startCalculation,
-              startPolling,
+              startCalculationPolling,
               workspaceId
             )}
           />

@@ -31,19 +31,7 @@ export const DatasetOutputNode: ServerNodeDef<
       await addValueSchema(ds.id, s, reqContext);
     }
 
-    /*await new Promise(resolve => {
-      const queue = new PromiseQueue(8, undefined, { onEmpty: resolve });
-
-      for (const n of inputs.dataset.entries) {
-        queue.add(() => createEntry(ds.id, n.values, reqContext));
-      }
-    });*/
-
-    await createManyEntries(
-      ds.id,
-      inputs.dataset.entries.map(n => n.values),
-      reqContext
-    );
+    await createManyEntries(ds.id, inputs.dataset.entries, reqContext);
 
     return {
       outputs: {},

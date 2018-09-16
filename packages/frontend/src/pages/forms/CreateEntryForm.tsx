@@ -96,7 +96,7 @@ class CreateEntryFormImpl extends Component<
           })(<Input placeholder="Fallback" />)}
         {valueType === DataType.DATETIME &&
           getFieldDecorator(s.name, {
-            initialValue: moment(),
+            initialValue: moment.utc(),
             rules
           })(
             <DatePicker
@@ -107,7 +107,7 @@ class CreateEntryFormImpl extends Component<
           )}
         {valueType === DataType.TIME &&
           getFieldDecorator(s.name, {
-            initialValue: moment(),
+            initialValue: moment.utc(),
             rules
           })(<TimePicker placeholder="Select Time" />)}
         {valueType === DataType.NUMBER &&

@@ -1,4 +1,10 @@
-import { ApolloContext, Dataset, Entry, Values } from '@masterthesis/shared';
+import {
+  ApolloContext,
+  Dataset,
+  DataType,
+  Entry,
+  Values
+} from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { tryGetDataset } from './dataset';
@@ -96,6 +102,12 @@ export const createEntry = async (
     checkForUnsupportedValues(ds, keys);
   }
 
+  ds.valueschemas
+    .filter(v => v.type === DataType.TIME || v.type === DataType.DATETIME)
+    .forEach(c => {
+      values[c.name] = new Date(values[c.name]);
+    });
+
   try {
     const collection = getEntryCollection(ds.id, reqContext.db);
     const res = await collection.insertOne({
@@ -127,11 +139,10 @@ export const createEntry = async (
 export const createManyEntries = async (
   datasetId: string,
   values: Array<Values>,
-  reqContext: ApolloContext,
-  options?: CreateEntryOptions
+  reqContext: ApolloContext
 ): Promise<boolean> => {
   if (values.length === 0) {
-    return true;
+    throw new Error('No values provided');
   }
 
   const ds = await tryGetDataset(datasetId, reqContext);

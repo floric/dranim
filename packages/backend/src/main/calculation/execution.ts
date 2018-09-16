@@ -101,11 +101,11 @@ const executeContext = async (
   reqContext: ApolloContext,
   cache: Map<string, any>
 ) => {
-  const outputNode = cache.has('contextOutputNode')
-    ? cache.get('contextOutputNode')
+  const outputNode = cache.has(`con-op-${node.id}`)
+    ? cache.get(`con-op-${node.id}`)
     : await tryGetContextNode(node, ContextNodeType.OUTPUT, reqContext);
-  if (!cache.has('contextOutputNode')) {
-    cache.set('contextOutputNode', outputNode);
+  if (!cache.has(`con-op-${node.id}`)) {
+    cache.set(`con-op-${node.id}`, outputNode);
   }
 
   return await type.onNodeExecution(nodeForm, nodeInputs, {

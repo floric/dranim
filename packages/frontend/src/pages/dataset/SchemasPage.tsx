@@ -122,7 +122,13 @@ export const DataSchemas: SFC<DataSchemasProps> = ({ dataset }) => {
           {schemasDataSource.length > 0 ? (
             <Card bordered={false}>
               <h3>Value Schemas</h3>
-              <Table
+              <Table<{
+                key: string;
+                type: string;
+                unique: boolean;
+                required: boolean;
+                fallback: string;
+              }>
                 size="small"
                 pagination={false}
                 dataSource={schemasDataSource}
