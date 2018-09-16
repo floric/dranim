@@ -35,9 +35,6 @@ export const executeNode = async (
   cache: Map<string, any> = new Map()
 ): Promise<NodeExecutionResult<{}, any>> => {
   if (node.type === ContextNodeType.INPUT) {
-    if (!contextInputs) {
-      throw new Error('Context needs context inputs');
-    }
     return {
       outputs: contextInputs
     };

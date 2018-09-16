@@ -249,37 +249,13 @@ describe('EditEntriesNode', () => {
       unique: false,
       required: true
     };
-    const oldDs: Dataset = {
-      id: VALID_OBJECT_ID,
-      created: '',
-      description: '',
-      valueschemas: [oldVS],
-      name: 'Old DS',
-      workspaceId: 'CDE'
-    };
-    const newDs: Dataset = {
-      id: 'ABC',
-      created: '',
-      description: '',
-      valueschemas: [],
-      name: 'New DS',
-      workspaceId: 'CDE'
-    };
-    const entryA: Entry = {
-      id: 'eA',
-      values: { [oldVS.name]: 'foo' }
-    };
-    (createUniqueDatasetName as jest.Mock).mockReturnValue('AddEntries');
-    (processEntries as jest.Mock).mockImplementation(async (a, processFn) =>
-      processFn(entryA)
-    );
-    (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
-    (createDataset as jest.Mock).mockResolvedValue(newDs);
-    (createEntry as jest.Mock).mockResolvedValue({});
+    const entryA = { [oldVS.name]: 'foo' };
+    const entryB = { [oldVS.name]: 'bar' };
 
     const res = await EditEntriesNode.onNodeExecution(
       {
         values: [
+          oldVS,
           {
             name: 'new',
             required: true,
@@ -289,7 +265,7 @@ describe('EditEntriesNode', () => {
           }
         ]
       },
-      { dataset: { datasetId: oldDs.id } },
+      { dataset: { entries: [entryA, entryB], schema: [oldVS] } },
       {
         reqContext: { db: null, userId: '' },
         node: {
@@ -311,34 +287,81 @@ describe('EditEntriesNode', () => {
       }
     );
 
-    expect(res.outputs.dataset.datasetId).toBe(newDs.id);
-    expect(createEntry as jest.Mock).toHaveBeenCalledTimes(1);
-    expect(createEntry as jest.Mock).toHaveBeenCalledWith(
-      newDs.id,
+    expect(res.outputs.dataset.entries).toEqual([
+      { new: 'super', test: 'foo' },
+      { new: 'super', test: 'bar' }
+    ]);
+    expect(res.outputs.dataset.schema).toEqual([
+      oldVS,
       {
-        [oldVS.name]: 'foo',
-        new: 'super'
-      },
-      { db: null, userId: '' }
-    );
+        fallback: '',
+        name: 'new',
+        required: true,
+        type: 'String',
+        unique: true
+      }
+    ]);
+    expect(res.results).toBeUndefined();
   });
 
-  test('should throw error for invalid dataset input', async () => {
-    (tryGetDataset as jest.Mock).mockImplementation(() => {
-      throw new Error('Unknown dataset source');
-    });
-    try {
-      await EditEntriesNode.onNodeExecution(
-        { values: [] },
-        { dataset: { datasetId: VALID_OBJECT_ID } },
-        {
-          reqContext: { db: null, userId: '' },
-          node: NODE
-        }
-      );
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Unknown dataset source');
-    }
+  test('should replace value to dataset', async () => {
+    const oldVS: ValueSchema = {
+      name: 'test',
+      type: DataType.STRING,
+      fallback: '',
+      unique: false,
+      required: true
+    };
+    const entryA = { [oldVS.name]: 'foo' };
+    const entryB = { [oldVS.name]: 'bar' };
+
+    const res = await EditEntriesNode.onNodeExecution(
+      {
+        values: [
+          {
+            name: 'new',
+            required: true,
+            unique: true,
+            fallback: '',
+            type: DataType.STRING
+          }
+        ]
+      },
+      { dataset: { entries: [entryA, entryB], schema: [oldVS] } },
+      {
+        reqContext: { db: null, userId: '' },
+        node: {
+          id: VALID_OBJECT_ID,
+          contextIds: [],
+          inputs: [],
+          outputs: [],
+          type: EditEntriesNode.type,
+          workspaceId: VALID_OBJECT_ID,
+          form: [],
+          x: 0,
+          y: 0,
+          state: NodeState.VALID,
+          variables: {}
+        },
+        contextFnExecution: async inputs => ({
+          outputs: { new: 'super' }
+        })
+      }
+    );
+
+    expect(res.outputs.dataset.entries).toEqual([
+      { new: 'super' },
+      { new: 'super' }
+    ]);
+    expect(res.outputs.dataset.schema).toEqual([
+      {
+        fallback: '',
+        name: 'new',
+        required: true,
+        type: 'String',
+        unique: true
+      }
+    ]);
+    expect(res.results).toBeUndefined();
   });
 });

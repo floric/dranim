@@ -1,9 +1,9 @@
 import {
+  Dataset,
   DatasetSocket,
   DataType,
   SocketState,
-  SoundChartDef,
-  Dataset
+  SoundChartDef
 } from '@masterthesis/shared';
 
 import {
@@ -104,28 +104,44 @@ describe('SoundChart', () => {
   });
 
   test('should get parameters for sound visualization', async () => {
-    const ds: Dataset = {
-      created: '',
-      description: '',
-      name: '',
-      id: VALID_OBJECT_ID,
-      valueschemas: [],
-      workspaceId: ''
-    };
-    (getDatasetsCollection as jest.Mock).mockReturnValue({});
-    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
-    (processEntries as jest.Mock).mockImplementation(
-      async (dsId, processFn) => {
-        await processFn({});
-        await processFn({});
-        await processFn({});
-      }
-    );
-
     let call = 0;
     const res = await SoundChartNode.onNodeExecution(
       { name: 'a', description: '' },
-      { dataset: { datasetId: VALID_OBJECT_ID } },
+      {
+        dataset: {
+          entries: [{}, {}, {}],
+          schema: [
+            {
+              name: 'source',
+              type: DataType.STRING,
+              fallback: '',
+              required: true,
+              unique: false
+            },
+            {
+              name: 'destination',
+              type: DataType.STRING,
+              fallback: '',
+              required: true,
+              unique: false
+            },
+            {
+              name: 'fromWestToEast',
+              type: DataType.BOOLEAN,
+              fallback: 'true',
+              required: true,
+              unique: false
+            },
+            {
+              name: 'value',
+              type: DataType.NUMBER,
+              fallback: '0',
+              required: true,
+              unique: false
+            }
+          ]
+        }
+      },
       {
         reqContext: { db: null, userId: '' },
         node: NODE,

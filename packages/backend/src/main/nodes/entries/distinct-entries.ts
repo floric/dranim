@@ -74,11 +74,12 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
     return { ...other, ...contextOutputDefs };
   },
   onMetaExecution: async (form, inputs) => {
+    const { addedSchemas, distinctSchemas } = form;
     if (
       !allAreDefinedAndPresent(inputs) ||
-      !form.distinctSchemas ||
-      form.distinctSchemas.length === 0 ||
-      !form.addedSchemas
+      !distinctSchemas ||
+      distinctSchemas.length === 0 ||
+      !addedSchemas
     ) {
       return { dataset: { content: { schema: [] }, isPresent: false } };
     }
@@ -87,11 +88,11 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
       dataset: {
         content: {
           schema: [
-            ...form.distinctSchemas.map(s => ({
+            ...distinctSchemas.map(s => ({
               ...s,
               name: getDistinctValueName(s)
             })),
-            ...form.addedSchemas!
+            ...addedSchemas!
           ]
         },
         isPresent: true
@@ -99,11 +100,37 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
     };
   },
   onNodeExecution: async (form, inputs) => {
+    const { distinctSchemas, addedSchemas } = form;
+    const distinctValues: Map<string, Set<string>> = new Map();
+    for (const s of distinctSchemas!) {
+      distinctValues.set(s.name, new Set());
+    }
+
+    for (const e of inputs.dataset.entries) {
+      for (const s of distinctSchemas!) {
+        const valueSet = distinctValues.get(s.name)!;
+        valueSet.add(e[s.name]);
+      }
+    }
+
+    const iterators: Array<number> = [];
+    for (const s of distinctSchemas!) {
+      iterators.push(0);
+    }
+
+    // TODO FInd lib for aggregation
+
     return {
       outputs: {
         dataset: {
           entries: [],
-          schema: inputs.dataset.schema
+          schema: [
+            ...distinctSchemas!.map(s => ({
+              ...s,
+              name: getDistinctValueName(s)
+            })),
+            ...addedSchemas!
+          ]
         }
       }
     };

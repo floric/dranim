@@ -4,7 +4,8 @@ import {
   DataType,
   IOValues,
   NodeInstance,
-  parseNodeForm
+  parseNodeForm,
+  DatasetRef
 } from '@masterthesis/shared';
 
 import { Log } from '../../logging';
@@ -50,10 +51,14 @@ export const areNodeInputsValid = async (
 };
 
 const validateDataset = async (
-  datasetRef: any,
+  datasetRef: DatasetRef,
   reqContext: ApolloContext
 ): Promise<boolean> => {
-  return true;
+  if (!datasetRef.entries || !datasetRef.schema) {
+    return false;
+  }
+
+  return datasetRef.schema.length > 0;
 };
 
 const validateNumber = (value: any) => {

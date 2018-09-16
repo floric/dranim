@@ -370,52 +370,6 @@ describe('DistinctEntriesNode', () => {
   });
 
   test('should call context function for distinct values', async () => {
-    const oldDs: Dataset = {
-      id: VALID_OBJECT_ID,
-      created: '',
-      description: '',
-      valueschemas: [],
-      name: 'Old DS',
-      workspaceId: 'CDE'
-    };
-    const newDs: Dataset = {
-      id: 'ABC',
-      created: '',
-      description: '',
-      valueschemas: [],
-      name: 'New DS',
-      workspaceId: 'CDE'
-    };
-    (createUniqueDatasetName as jest.Mock).mockReturnValue('123');
-    (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
-    (createDataset as jest.Mock).mockResolvedValue(newDs);
-    (createEntry as jest.Mock).mockImplementation(jest.fn);
-    (getEntryCollection as jest.Mock).mockReturnValue({
-      aggregate: jest.fn(() => {
-        let entriesToProcess = 1;
-        return {
-          close: async () => true,
-          next: async () => ({ _id: { test: 'distinct-value' } }),
-          hasNext: async () => {
-            if (entriesToProcess === 0) {
-              return false;
-            }
-
-            entriesToProcess -= 1;
-            return true;
-          }
-        };
-      })
-    });
-    (processDocumentsWithCursor as jest.Mock).mockImplementation(
-      async (cursor, processFn) =>
-        processFn({
-          _id: {
-            test: 'distinct-value'
-          }
-        })
-    );
-
     const contextFnExecution = jest.fn(() => ({
       outputs: { test: 'abc', 'other-test': 2 }
     }));
@@ -441,67 +395,12 @@ describe('DistinctEntriesNode', () => {
           }
         ]
       },
-      { dataset: { datasetId: '123' } },
+      { dataset: { entries: [], schema: [] } },
       {
         node: NODE,
         reqContext: { db: null, userId: '' },
         contextFnExecution
       }
     );
-
-    expect(getEntryCollection(oldDs.id, null).aggregate).toHaveBeenCalledTimes(
-      2
-    );
-    expect(contextFnExecution).toHaveBeenCalledWith({
-      filteredDataset: { datasetId: 'ABC' },
-      'test-distinct': 'distinct-value'
-    });
-    expect(createEntry as jest.Mock).toHaveBeenCalledTimes(1);
-    expect(createEntry as jest.Mock).toHaveBeenCalledWith(
-      newDs.id,
-      { 'other-test': 2, test: 'abc' },
-      {
-        db: null,
-        userId: ''
-      }
-    );
-    expect(res).toEqual({
-      outputs: {
-        dataset: {
-          datasetId: 'ABC'
-        }
-      }
-    });
-  });
-
-  test('should throw error for invalid dataset', async () => {
-    (tryGetDataset as jest.Mock).mockImplementation(() => {
-      throw new Error('Unknown dataset source');
-    });
-
-    try {
-      await DistinctEntriesNode.onNodeExecution(
-        {
-          distinctSchemas: [
-            {
-              name: 'test',
-              type: DataType.STRING,
-              fallback: '',
-              required: true,
-              unique: false
-            }
-          ],
-          addedSchemas: []
-        },
-        { dataset: { datasetId: VALID_OBJECT_ID } },
-        {
-          reqContext: { db: null, userId: '' },
-          node: NODE
-        }
-      );
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Unknown dataset source');
-    }
   });
 });

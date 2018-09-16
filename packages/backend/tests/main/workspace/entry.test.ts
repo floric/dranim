@@ -6,6 +6,7 @@ import {
   clearEntries,
   createEntry,
   createEntryFromJSON,
+  createManyEntries,
   deleteEntry,
   getEntriesCount,
   getEntry,
@@ -407,7 +408,7 @@ describe('Entry', () => {
       );
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Value malformed');
+      expect(err.message).toBe('Value malformed: {}');
     }
   });
 
@@ -771,5 +772,48 @@ describe('Entry', () => {
       userId: ''
     });
     expect(entriesCount).toBe(0);
+  });
+
+  test('should create many entries', async () => {
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'ds',
+      created: '',
+      description: '',
+      workspaceId: 'ws',
+      valueschemas: [
+        {
+          name: 'value',
+          type: DataType.STRING,
+          unique: false,
+          fallback: '',
+          required: true
+        }
+      ]
+    };
+
+    (getDataset as jest.Mock).mockResolvedValue(ds);
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
+
+    const res = await createManyEntries(
+      VALID_OBJECT_ID,
+      [{ test: 1 }, { test: 2 }],
+      { db, userId: '' }
+    );
+    expect(res).toBe(true);
+
+    const entriesCount = await getEntriesCount(VALID_OBJECT_ID, {
+      db,
+      userId: ''
+    });
+    expect(entriesCount).toBe(2);
+  });
+
+  test('should do nothing when calling createManyEntries with empty list', async () => {
+    const res = await createManyEntries(VALID_OBJECT_ID, [], {
+      db,
+      userId: ''
+    });
+    expect(res).toBe(true);
   });
 });

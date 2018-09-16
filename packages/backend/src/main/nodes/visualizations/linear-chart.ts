@@ -50,7 +50,7 @@ export const LinearChartNode: ServerNodeDefWithContextFn<
   onNodeExecution: async (
     form,
     inputs,
-    { node: { workspaceId, id }, contextFnExecution, reqContext }
+    { node: { workspaceId }, contextFnExecution }
   ) => {
     const values: Array<ValueLabelAssignment> = [];
 

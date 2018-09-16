@@ -2,7 +2,8 @@ import {
   AggregateEntriesNodeDef,
   AggregationEntriesType,
   Dataset,
-  DataType
+  DataType,
+  ValueSchema
 } from '@masterthesis/shared';
 
 import { AggregateEntriesNode } from '../../../../src/main/nodes/entries/aggregate';
@@ -12,6 +13,16 @@ import { NeverGoHereError } from '../../../test-utils';
 
 jest.mock('../../../../src/main/workspace/dataset');
 jest.mock('../../../../src/main/workspace/entry');
+
+const schema: Array<ValueSchema> = [
+  {
+    name: 'abc',
+    type: DataType.NUMBER,
+    unique: false,
+    required: true,
+    fallback: '9'
+  }
+];
 
 describe('AggregateEntriesNode', () => {
   beforeEach(() => {
@@ -25,177 +36,39 @@ describe('AggregateEntriesNode', () => {
   });
 
   test('should get average', async () => {
-    const ds: Dataset = {
-      id: '1',
-      created: '',
-      description: '',
-      name: 'name',
-      workspaceId: '1',
-      valueschemas: [
-        {
-          name: 'abc',
-          type: DataType.NUMBER,
-          required: true,
-          unique: false,
-          fallback: '0'
-        }
-      ]
-    };
-    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
-    (getEntryCollection as jest.Mock).mockReturnValue({
-      aggregate: () => ({
-        next: () => ({
-          value: 1
-        })
-      })
-    });
-
     const res = await AggregateEntriesNode.onNodeExecution(
       { type: AggregationEntriesType.AVG, valueName: 'abc' },
-      { dataset: { datasetId: '1' } },
+      { dataset: { entries: [{ abc: 1 }, { abc: 2 }, { abc: 3 }], schema } },
       { node: null, reqContext: { db: null, userId: '' } }
     );
-    expect(res).toEqual({ outputs: { value: 1 } });
+    expect(res).toEqual({ outputs: { value: 2 } });
   });
 
   test('should get minimum', async () => {
-    const ds: Dataset = {
-      id: '1',
-      created: '',
-      description: '',
-      name: 'name',
-      workspaceId: '1',
-      valueschemas: [
-        {
-          name: 'abc',
-          type: DataType.NUMBER,
-          required: true,
-          unique: false,
-          fallback: '0'
-        }
-      ]
-    };
-    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
-    (getEntryCollection as jest.Mock).mockReturnValue({
-      aggregate: () => ({
-        next: () => ({
-          value: 1
-        })
-      })
-    });
-
     const res = await AggregateEntriesNode.onNodeExecution(
       { type: AggregationEntriesType.MIN, valueName: 'abc' },
-      { dataset: { datasetId: '1' } },
+      { dataset: { entries: [{ abc: 1 }, { abc: -2 }, { abc: 9 }], schema } },
       { node: null, reqContext: { db: null, userId: '' } }
     );
-    expect(res).toEqual({ outputs: { value: 1 } });
+    expect(res).toEqual({ outputs: { value: -2 } });
   });
 
   test('should get maximum', async () => {
-    const ds: Dataset = {
-      id: '1',
-      name: 'name',
-      created: '',
-      description: '',
-      workspaceId: '1',
-      valueschemas: [
-        {
-          name: 'abc',
-          type: DataType.NUMBER,
-          required: true,
-          unique: false,
-          fallback: '0'
-        }
-      ]
-    };
-    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
-    (getEntryCollection as jest.Mock).mockReturnValue({
-      aggregate: () => ({
-        next: () => ({
-          value: 1
-        })
-      })
-    });
-
     const res = await AggregateEntriesNode.onNodeExecution(
       { type: AggregationEntriesType.MAX, valueName: 'abc' },
-      { dataset: { datasetId: '1' } },
+      { dataset: { entries: [{ abc: 1 }, { abc: -2 }, { abc: 9 }], schema } },
       { node: null, reqContext: { db: null, userId: '' } }
     );
-    expect(res).toEqual({ outputs: { value: 1 } });
-  });
-
-  test('should get median', async () => {
-    const ds: Dataset = {
-      id: '1',
-      created: '',
-      description: '',
-      name: 'name',
-      workspaceId: '1',
-      valueschemas: [
-        {
-          name: 'abc',
-          type: DataType.NUMBER,
-          required: true,
-          unique: false,
-          fallback: '0'
-        }
-      ]
-    };
-    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
-    (getEntryCollection as jest.Mock).mockReturnValue({
-      aggregate: () => ({
-        next: () => ({
-          value: 1
-        })
-      })
-    });
-
-    try {
-      await AggregateEntriesNode.onNodeExecution(
-        { type: AggregationEntriesType.MED, valueName: 'abc' },
-        { dataset: { datasetId: '1' } },
-        { node: null, reqContext: { db: null, userId: '' } }
-      );
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Median not supported yet');
-    }
+    expect(res).toEqual({ outputs: { value: 9 } });
   });
 
   test('should get sum', async () => {
-    const ds: Dataset = {
-      id: '1',
-      created: '',
-      description: '',
-      name: 'name',
-      workspaceId: '1',
-      valueschemas: [
-        {
-          name: 'abc',
-          type: DataType.NUMBER,
-          required: true,
-          unique: false,
-          fallback: '0'
-        }
-      ]
-    };
-    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
-    (getEntryCollection as jest.Mock).mockReturnValue({
-      aggregate: () => ({
-        next: () => ({
-          value: 1
-        })
-      })
-    });
-
     const res = await AggregateEntriesNode.onNodeExecution(
       { type: AggregationEntriesType.SUM, valueName: 'abc' },
-      { dataset: { datasetId: '1' } },
+      { dataset: { entries: [{ abc: 1 }, { abc: -2 }, { abc: 9 }], schema } },
       { node: null, reqContext: { db: null, userId: '' } }
     );
-    expect(res).toEqual({ outputs: { value: 1 } });
+    expect(res).toEqual({ outputs: { value: 8 } });
   });
 
   test('should throw error for missing schema', async () => {
@@ -219,48 +92,38 @@ describe('AggregateEntriesNode', () => {
     try {
       await AggregateEntriesNode.onNodeExecution(
         { type: AggregationEntriesType.SUM, valueName: 'abc' },
-        { dataset: { datasetId: '1' } },
+        { dataset: { schema: [], entries: [{ abc: 9 }] } },
         { node: null, reqContext: { db: null, userId: '' } }
       );
     } catch (err) {
-      expect(err.message).toBe('Schema not found');
+      expect(err.message).toBe('Schema missing in Entries');
     }
   });
 
   test('should throw error for wrong datatype', async () => {
-    const ds: Dataset = {
-      id: '1',
-      created: '',
-      description: '',
-      name: 'name',
-      workspaceId: '1',
-      valueschemas: [
-        {
-          name: 'abc',
-          type: DataType.STRING,
-          required: true,
-          unique: false,
-          fallback: '0'
-        }
-      ]
-    };
-    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
-    (getEntryCollection as jest.Mock).mockReturnValue({
-      aggregate: () => ({
-        next: () => ({
-          value: 1
-        })
-      })
-    });
-
     try {
       await AggregateEntriesNode.onNodeExecution(
         { type: AggregationEntriesType.SUM, valueName: 'abc' },
-        { dataset: { datasetId: '1' } },
+        {
+          dataset: {
+            entries: [{ abc: 9 }],
+            schema: [
+              {
+                name: 'abc',
+                fallback: '',
+                required: false,
+                unique: false,
+                type: DataType.STRING
+              }
+            ]
+          }
+        },
         { node: null, reqContext: { db: null, userId: '' } }
       );
     } catch (err) {
-      expect(err.message).toBe('Datatype not supported');
+      expect(err.message).toBe(
+        'Aggregation methods only supported for numeric fields'
+      );
     }
   });
 

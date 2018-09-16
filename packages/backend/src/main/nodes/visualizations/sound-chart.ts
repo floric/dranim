@@ -61,7 +61,7 @@ export const SoundChartNode: ServerNodeDefWithContextFn<
   onNodeExecution: async (
     form,
     inputs,
-    { node: { workspaceId, id }, reqContext, contextFnExecution }
+    { node: { workspaceId }, contextFnExecution }
   ) => {
     const cities: Map<string, CityStat> = new Map();
 
@@ -72,7 +72,7 @@ export const SoundChartNode: ServerNodeDefWithContextFn<
       isEastPassage: boolean;
     }> = [];
 
-    for(const e of inputs.dataset.entries) {
+    for (const e of inputs.dataset.entries) {
       const result = await contextFnExecution!(e);
 
       aggregateCities(cities, result.outputs);

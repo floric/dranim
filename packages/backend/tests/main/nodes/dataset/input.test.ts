@@ -1,13 +1,37 @@
-import { DatasetInputNodeDef } from '@masterthesis/shared';
+import { Dataset, DatasetInputNodeDef, DataType } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import { DatasetInputNode } from '../../../../src/main/nodes/dataset/input';
-import { createDataset } from '../../../../src/main/workspace/dataset';
+import { processEntries } from '../../../../src/main/nodes/entries/utils';
+import {
+  getDataset,
+  tryGetDataset
+} from '../../../../src/main/workspace/dataset';
 import { getTestMongoDb, NODE, VALID_OBJECT_ID } from '../../../test-utils';
 
 let conn;
 let db: Db;
 let server;
+
+jest.mock('../../../../src/main/workspace/dataset');
+jest.mock('../../../../src/main/nodes/entries/utils');
+
+const ds: Dataset = {
+  id: VALID_OBJECT_ID,
+  name: 'test',
+  valueschemas: [
+    {
+      name: 'test',
+      type: DataType.STRING,
+      fallback: '',
+      required: true,
+      unique: false
+    }
+  ],
+  workspaceId: VALID_OBJECT_ID,
+  created: new Date().toISOString(),
+  description: ''
+};
 
 describe('DatasetInputNode', () => {
   beforeAll(async () => {
@@ -37,17 +61,30 @@ describe('DatasetInputNode', () => {
   });
 
   test('should get output value from form with valid dataset', async () => {
-    const newDs = await createDataset('testA', { db, userId: '' });
-
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
+    (processEntries as jest.Mock).mockImplementation(async (a, processFn) =>
+      processFn({ values: { test: 'abc' }, id: 'test' })
+    );
     const res = await DatasetInputNode.onNodeExecution(
-      { dataset: newDs.id },
+      { dataset: VALID_OBJECT_ID },
       {},
       {
         reqContext: { db, userId: '' },
         node: NODE
       }
     );
-    expect(res.outputs.dataset).toEqual({ datasetId: newDs.id });
+    expect(res.outputs.dataset).toEqual({
+      entries: [{ test: 'abc' }],
+      schema: [
+        {
+          name: 'test',
+          type: DataType.STRING,
+          fallback: '',
+          required: true,
+          unique: false
+        }
+      ]
+    });
   });
 
   test('should accept form', async () => {
@@ -101,15 +138,28 @@ describe('DatasetInputNode', () => {
   });
 
   test('should have valid meta for dataset', async () => {
-    const ds = await createDataset('test', { db, userId: '' });
+    (getDataset as jest.Mock).mockResolvedValue(ds);
 
     const res = await DatasetInputNode.onMetaExecution(
-      { dataset: ds.id },
+      { dataset: VALID_OBJECT_ID },
       {},
       { db, userId: '' }
     );
     expect(res).toEqual({
-      dataset: { isPresent: true, content: { schema: [] } }
+      dataset: {
+        isPresent: true,
+        content: {
+          schema: [
+            {
+              fallback: '',
+              name: 'test',
+              required: true,
+              type: 'String',
+              unique: false
+            }
+          ]
+        }
+      }
     });
   });
 });

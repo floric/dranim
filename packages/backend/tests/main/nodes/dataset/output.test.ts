@@ -1,13 +1,18 @@
-import { DatasetOutputNodeDef, DataType } from '@masterthesis/shared';
+import { Dataset, DatasetOutputNodeDef, DataType } from '@masterthesis/shared';
 import { Db } from 'mongodb';
 
 import { DatasetOutputNode } from '../../../../src/main/nodes/dataset/output';
 import { createDataset } from '../../../../src/main/workspace/dataset';
-import { getTestMongoDb, NODE } from '../../../test-utils';
+import { createManyEntries } from '../../../../src/main/workspace/entry';
+import { getTestMongoDb, NODE, VALID_OBJECT_ID } from '../../../test-utils';
 
 let conn;
 let db: Db;
 let server;
+
+jest.mock('../../../../src/main/workspace/dataset');
+jest.mock('../../../../src/main/workspace/entry');
+jest.mock('../../../../src/main/workspace/entry');
 
 describe('DatasetOutputNode', () => {
   beforeAll(async () => {
@@ -38,11 +43,32 @@ describe('DatasetOutputNode', () => {
   });
 
   test('should have valid dataset', async () => {
-    const ds = await createDataset('test', { db, userId: '' });
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      name: 'tes',
+      description: '',
+      created: new Date().toISOString(),
+      workspaceId: VALID_OBJECT_ID,
+      valueschemas: []
+    };
+    (createDataset as jest.Mock).mockResolvedValue(ds);
 
     const res = await DatasetOutputNode.onNodeExecution(
       { name: 'DS Name', description: '' },
-      { dataset: { datasetId: ds.id } },
+      {
+        dataset: {
+          entries: [{ test: 'yes' }],
+          schema: [
+            {
+              name: 'test',
+              type: DataType.STRING,
+              fallback: '',
+              required: true,
+              unique: false
+            }
+          ]
+        }
+      },
       {
         reqContext: { db, userId: '' },
         node: NODE
@@ -50,31 +76,34 @@ describe('DatasetOutputNode', () => {
     );
 
     expect(res.outputs).toBeDefined();
-    expect(res.results.value.id).toBe(ds.id);
+    expect(res.results.value.id).toBe(VALID_OBJECT_ID);
     expect(res.results.value.name).toBe('DS Name');
+    expect(createManyEntries).toHaveBeenCalledWith(
+      VALID_OBJECT_ID,
+      [{ test: 'yes' }],
+      expect.anything()
+    );
   });
 
   test('should return empty meta for dataset', async () => {
-    const inputDef = {
-      dataset: {
-        isPresent: true,
-        content: {
-          schema: [
-            {
-              name: 'test',
-              fallback: '',
-              required: false,
-              unique: true,
-              type: DataType.STRING
-            }
-          ]
-        }
-      }
-    };
-
     const res = await DatasetOutputNode.onMetaExecution(
       { description: '', name: '' },
-      inputDef,
+      {
+        dataset: {
+          isPresent: true,
+          content: {
+            schema: [
+              {
+                name: 'test',
+                fallback: '',
+                required: false,
+                unique: true,
+                type: DataType.STRING
+              }
+            ]
+          }
+        }
+      },
       {
         db,
         userId: ''

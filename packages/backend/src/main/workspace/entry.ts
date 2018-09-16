@@ -142,7 +142,7 @@ export const createManyEntries = async (
   reqContext: ApolloContext
 ): Promise<boolean> => {
   if (values.length === 0) {
-    throw new Error('No values provided');
+    return true;
   }
 
   const ds = await tryGetDataset(datasetId, reqContext);
@@ -179,7 +179,7 @@ const checkForInvalidOrEmptyValues = (values: Values) => {
 
   valuesArr.forEach(v => {
     if (!v || v[0] == null || v[1] == null) {
-      throw new Error('Value malformed:' + JSON.stringify(values));
+      throw new Error(`Value malformed: ${JSON.stringify(values)}`);
     }
   });
 };
