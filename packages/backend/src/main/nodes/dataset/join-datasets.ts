@@ -45,53 +45,78 @@ export const JoinDatasetsNode: ServerNodeDef<
     };
   },
   onNodeExecution: async (form, inputs) => {
-    const schemaFromA = inputs.datasetA.schema.find(
-      n => form.valueA === n.name
+    checkSchemas(
+      inputs.datasetA.schema,
+      inputs.datasetB.schema,
+      form.valueA!,
+      form.valueB!
     );
-    const schemaFromB = inputs.datasetB.schema.find(
-      n => form.valueB === n.name
+
+    const entries = await combineEntries(
+      inputs.datasetA.entries,
+      inputs.datasetB.entries,
+      form.valueA!,
+      form.valueB!
     );
-    if (!schemaFromA || !schemaFromB) {
-      throw new Error('Schema not found in Dataset');
-    }
-
-    if (schemaFromA.type !== schemaFromB.type) {
-      throw new Error('Schema types do not match');
-    }
-
-    const entries: Array<Values> = [];
-    for (const eA of inputs.datasetA.entries) {
-      const valueFromA = eA[form.valueA!];
-      for (const eB of inputs.datasetB.entries) {
-        const valueFromB = eB[form.valueB!];
-        if (valueFromA === valueFromB) {
-          entries.push(merge(eA, eB));
-        }
-      }
-    }
+    const schema = getJoinedSchemas(
+      inputs.datasetA.schema,
+      inputs.datasetB.schema
+    );
 
     return {
       outputs: {
         joined: {
           entries,
-          schema: getJoinedSchemas(
-            inputs.datasetA.schema,
-            inputs.datasetB.schema
-          )
+          schema
         }
       }
     };
   }
 };
 
+const combineEntries = (
+  entriesA: Array<Values>,
+  entriesB: Array<Values>,
+  valueA: string,
+  valueB: string
+) =>
+  new Promise<Array<Values>>(resolve => {
+    const entries: Array<Values> = [];
+
+    for (const eA of entriesA) {
+      const valueFromA = eA[valueA!];
+      for (const eB of entriesB) {
+        const valueFromB = eB[valueB!];
+        if (valueFromA === valueFromB) {
+          entries.push(merge(eA, eB));
+        }
+      }
+    }
+
+    resolve(entries);
+  });
+
+const checkSchemas = (
+  schemasA: Array<ValueSchema>,
+  schemasB: Array<ValueSchema>,
+  valueA: string,
+  valueB: string
+) => {
+  const schemaFromA = schemasA.find(n => valueA === n.name);
+  const schemaFromB = schemasB.find(n => valueB === n.name);
+  if (!schemaFromA || !schemaFromB) {
+    throw new Error('Schema not found in Dataset');
+  }
+
+  if (schemaFromA.type !== schemaFromB.type) {
+    throw new Error('Schema types do not match');
+  }
+};
+
 const merge = (eA: Values, eB: Values) => {
   const res = {};
-  Object.entries(eA).forEach(([name, content]) => {
-    res[`A_${name}`] = content;
-  });
-  Object.entries(eB).forEach(([name, content]) => {
-    res[`B_${name}`] = content;
-  });
+  Object.entries(eA).forEach(([name, content]) => (res[`A_${name}`] = content));
+  Object.entries(eB).forEach(([name, content]) => (res[`B_${name}`] = content));
   return res;
 };
 

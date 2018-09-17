@@ -4,12 +4,10 @@ import {
   GQLCalculationProcess,
   GQLDataset,
   GQLWorkspace,
-  ProcessState,
-  SocketInstance
+  ProcessState
 } from '@masterthesis/shared';
-import gql from 'graphql-tag';
 import { adopt } from 'react-adopt';
-import { Mutation, MutationFn } from 'react-apollo';
+import { Mutation } from 'react-apollo';
 
 import { ExplorerEditor } from '../../../explorer/ExplorerEditor';
 import {
@@ -21,10 +19,17 @@ import {
   START_CALCULATION,
   UPDATE_NODE
 } from '../../../graphql/editor-page';
-import { showNotificationWithIcon, tryOperation } from '../../../utils/form';
+import { showNotificationWithIcon } from '../../../utils/form';
+import {
+  handleAddOrUpdateFormValue,
+  handleConnectionCreate,
+  handleConnectionDelete,
+  handleNodeCreate,
+  handleNodeDelete,
+  handleNodeUpdate,
+  handleStartCalculation
+} from '../utils/editor-mutations';
 import { ProcessRunningCard } from './ProcessRunningCard';
-
-const POLLING_FREQUENCY = 5000;
 
 const ComposedMutations = adopt({
   startCalculation: ({ render }) => (
@@ -50,341 +55,7 @@ const ComposedMutations = adopt({
   )
 });
 
-const handleStartCalculation = (
-  startCalculation: MutationFn<any, any>,
-  startPolling: (msFreq: number) => any,
-  workspaceId: string
-) => () =>
-  tryOperation({
-    op: async () => {
-      await startCalculation({
-        variables: { workspaceId },
-        awaitRefetchQueries: true,
-        refetchQueries: [
-          {
-            query: gql`
-              query workspace($workspaceId: ID!) {
-                calculations(workspaceId: $workspaceId) {
-                  id
-                  start
-                  state
-                  processedOutputs
-                  totalOutputs
-                }
-              }
-            `,
-            variables: { workspaceId }
-          }
-        ]
-      });
-      startPolling(POLLING_FREQUENCY);
-    },
-    successTitle: () => 'Process started',
-    successMessage: () => 'This might take several minutes',
-    failedTitle: 'Process start has failed'
-  });
-
-const handleNodeCreate = (
-  createNode: MutationFn<any, any>,
-  workspaceId: string
-) => (type: string, x: number, y: number, contextIds: Array<string>) =>
-  tryOperation({
-    op: () =>
-      createNode({
-        variables: {
-          type,
-          x,
-          y,
-          contextIds,
-          workspaceId
-        },
-        awaitRefetchQueries: true,
-        refetchQueries: [
-          {
-            query: gql`
-              query workspace($workspaceId: ID!) {
-                workspace(id: $workspaceId) {
-                  id
-                  state
-                  nodes {
-                    id
-                    type
-                    x
-                    y
-                    state
-                    contextIds
-                    inputs {
-                      name
-                      connectionId
-                    }
-                    outputs {
-                      name
-                      connectionId
-                    }
-                    form {
-                      name
-                      value
-                    }
-                    metaInputs
-                    hasContextFn
-                    progress
-                    inputSockets
-                    outputSockets
-                  }
-                }
-              }
-            `,
-            variables: { workspaceId }
-          }
-        ]
-      }),
-    successTitle: null,
-    failedTitle: 'Node not created'
-  });
-
-const handleNodeDelete = (
-  deleteNode: MutationFn<any, any>,
-  workspaceId: string
-) => (nodeId: string) =>
-  tryOperation({
-    op: () =>
-      deleteNode({
-        variables: { id: nodeId },
-        awaitRefetchQueries: true,
-        refetchQueries: [
-          {
-            query: gql`
-              query workspace($workspaceId: ID!) {
-                workspace(id: $workspaceId) {
-                  id
-                  state
-                  nodes {
-                    id
-                    state
-                    inputs {
-                      name
-                      connectionId
-                    }
-                    outputs {
-                      name
-                      connectionId
-                    }
-                    form {
-                      name
-                      value
-                    }
-                    metaInputs
-                    progress
-                    inputSockets
-                    outputSockets
-                  }
-                  connections {
-                    id
-                  }
-                }
-              }
-            `,
-            variables: { workspaceId }
-          }
-        ]
-      }),
-    successTitle: null,
-    failedTitle: 'Node not deleted'
-  });
-
-const handleNodeUpdate = (
-  updateNodePosition: MutationFn<any, any>,
-  workspaceId: string
-) => (nodeId: string, x: number, y: number) =>
-  tryOperation({
-    op: () =>
-      updateNodePosition({
-        variables: {
-          id: nodeId,
-          x,
-          y
-        },
-        awaitRefetchQueries: true,
-        refetchQueries: [
-          {
-            query: gql`
-              query workspace($workspaceId: ID!) {
-                workspace(id: $workspaceId) {
-                  id
-                  nodes {
-                    id
-                    x
-                    y
-                  }
-                }
-              }
-            `,
-            variables: { workspaceId }
-          }
-        ]
-      }),
-    successTitle: null,
-    failedTitle: 'Node not updated'
-  });
-
-const handleConnectionCreate = (
-  createConnection: MutationFn<any, any>,
-  workspaceId: string
-) => (from: SocketInstance, to: SocketInstance) =>
-  tryOperation({
-    op: () =>
-      createConnection({
-        variables: {
-          input: { from, to }
-        },
-        awaitRefetchQueries: true,
-        refetchQueries: [
-          {
-            query: gql`
-              query workspace($workspaceId: ID!) {
-                workspace(id: $workspaceId) {
-                  id
-                  state
-                  nodes {
-                    id
-                    state
-                    inputs {
-                      name
-                      connectionId
-                    }
-                    outputs {
-                      name
-                      connectionId
-                    }
-                    form {
-                      name
-                      value
-                    }
-                    metaInputs
-                    progress
-                    inputSockets
-                    outputSockets
-                  }
-                  connections {
-                    id
-                    from {
-                      nodeId
-                      name
-                    }
-                    to {
-                      nodeId
-                      name
-                    }
-                    contextIds
-                  }
-                }
-              }
-            `,
-            variables: { workspaceId }
-          }
-        ]
-      }),
-    successTitle: null,
-    failedTitle: 'Connection not created'
-  });
-
-const handleConnectionDelete = (
-  deleteConnection: MutationFn<any, any>,
-  workspaceId: string
-) => (connId: string) =>
-  tryOperation({
-    op: () =>
-      deleteConnection({
-        variables: { id: connId },
-        awaitRefetchQueries: true,
-        refetchQueries: [
-          {
-            query: gql`
-              query workspace($workspaceId: ID!) {
-                workspace(id: $workspaceId) {
-                  id
-                  state
-                  nodes {
-                    id
-                    state
-                    inputs {
-                      name
-                      connectionId
-                    }
-                    outputs {
-                      name
-                      connectionId
-                    }
-                    metaInputs
-                    progress
-                    inputSockets
-                    outputSockets
-                  }
-                  connections {
-                    id
-                    from {
-                      nodeId
-                      name
-                    }
-                    to {
-                      nodeId
-                      name
-                    }
-                    contextIds
-                  }
-                }
-              }
-            `,
-            variables: { workspaceId }
-          }
-        ]
-      }),
-    successTitle: null,
-    failedTitle: 'Connection not deleted'
-  });
-
-const handleAddOrUpdateFormValue = (
-  addOrUpdateFormValue: MutationFn<any, any>,
-  workspaceId: string
-) => (nodeId: string, name: string, value: string) =>
-  tryOperation({
-    op: () =>
-      addOrUpdateFormValue({
-        variables: {
-          nodeId,
-          name,
-          value
-        },
-        awaitRefetchQueries: true,
-        refetchQueries: [
-          {
-            query: gql`
-              query workspace($workspaceId: ID!) {
-                workspace(id: $workspaceId) {
-                  id
-                  state
-                  nodes {
-                    id
-                    state
-                    form {
-                      name
-                      value
-                    }
-                    metaInputs
-                    progress
-                    inputSockets
-                    outputSockets
-                  }
-                }
-              }
-            `,
-            variables: { workspaceId }
-          }
-        ]
-      }),
-    successTitle: null,
-    failedTitle: 'Value not changed'
-  });
+const POLLING_FREQUENCY = 5000;
 
 export type EditorProps = {
   workspace: GQLWorkspace;
@@ -502,7 +173,8 @@ export class Editor extends Component<EditorProps, EditorState> {
             onStartCalculation={handleStartCalculation(
               startCalculation,
               startCalculationPolling,
-              workspaceId
+              workspaceId,
+              POLLING_FREQUENCY
             )}
           />
         )}

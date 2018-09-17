@@ -108,13 +108,14 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
       distinctSchemas!,
       inputs.dataset.entries
     );
-    const generator = Combinatorics.cartesianProduct(
-      ...distinctValuesArr.map(n => Array.from(n[1].values()))
-    );
     const names = distinctValuesArr.map(n => n[0]);
     const entries: Array<Values> = [];
-    for (const distinctE of generator.toArray()) {
-      const filteredDataset = getFilteredDataset(
+    const permutations = await getPermutations(
+      distinctValuesArr.map(n => Array.from(n[1].values()))
+    );
+
+    for (const distinctE of permutations) {
+      const filteredDataset = await getFilteredDataset(
         inputs.dataset.entries,
         distinctE,
         names
@@ -144,6 +145,11 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
   }
 };
 
+const getPermutations = (args: Array<Array<string>>) =>
+  new Promise<Array<Array<string>>>(resolve => {
+    resolve(Combinatorics.cartesianProduct(...args).toArray());
+  });
+
 const getContextArguments = (
   distinctE: Values,
   filteredDataset: Array<Values>,
@@ -161,13 +167,17 @@ const getFilteredDataset = (
   entries: Array<Values>,
   distinctE: Values,
   names: Array<string>
-) =>
-  entries.filter(
-    e =>
-      distinctE
-        .map((n, i) => e[names[i]] === n)
-        .reduce((a, b) => a && b, true) === true
-  );
+): Promise<Array<Values>> =>
+  new Promise(resolve => {
+    resolve(
+      entries.filter(
+        e =>
+          distinctE
+            .map((n, i) => e[names[i]] === n)
+            .reduce((a, b) => a && b, true) === true
+      )
+    );
+  });
 
 const getDistinctValuesArr = (
   distinctSchemas: Array<ValueSchema>,
