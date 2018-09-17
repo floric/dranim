@@ -304,6 +304,51 @@ describe('EditEntriesNode', () => {
     expect(res.results).toBeUndefined();
   });
 
+  test('should use default schema', async () => {
+    const oldVS: ValueSchema = {
+      name: 'test',
+      type: DataType.STRING,
+      fallback: '',
+      unique: false,
+      required: true
+    };
+    const entryA = { [oldVS.name]: 'foo' };
+    const entryB = { [oldVS.name]: 'bar' };
+
+    const res = await EditEntriesNode.onNodeExecution(
+      {
+        values: null
+      },
+      { dataset: { entries: [entryA, entryB], schema: [oldVS] } },
+      {
+        reqContext: { db: null, userId: '' },
+        node: {
+          id: VALID_OBJECT_ID,
+          contextIds: [],
+          inputs: [],
+          outputs: [],
+          type: EditEntriesNode.type,
+          workspaceId: VALID_OBJECT_ID,
+          form: [],
+          x: 0,
+          y: 0,
+          state: NodeState.VALID,
+          variables: {}
+        },
+        contextFnExecution: async inputs => ({
+          outputs: inputs
+        })
+      }
+    );
+
+    expect(res.outputs.dataset.entries).toEqual([
+      { test: 'foo' },
+      { test: 'bar' }
+    ]);
+    expect(res.outputs.dataset.schema).toEqual([oldVS]);
+    expect(res.results).toBeUndefined();
+  });
+
   test('should replace value to dataset', async () => {
     const oldVS: ValueSchema = {
       name: 'test',

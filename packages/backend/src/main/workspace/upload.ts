@@ -15,6 +15,11 @@ import { Log } from '../../logging';
 import { tryGetDataset } from '../../main/workspace/dataset';
 import { createEntry } from '../../main/workspace/entry';
 
+interface ApolloFile {
+  stream: Readable;
+  filename: string;
+}
+
 export class UploadEntryError extends Error {
   constructor(customMessage: string, errorName: string) {
     super(customMessage);
@@ -28,17 +33,40 @@ export const getUploadsCollection = (
 export const getAllUploads = async (
   datasetId: string,
   reqContext: ApolloContext
-): Promise<Array<UploadProcess & { _id: ObjectID }>> => {
+): Promise<Array<UploadProcess>> => {
   const collection = getUploadsCollection(reqContext.db);
   const all = await collection
     .find({ datasetId })
     .sort({ start: -1 })
     .toArray();
-  return all.map(ds => ({
-    id: ds._id.toHexString(),
+  return all.map(({ _id, ...ds }) => ({
+    id: _id.toHexString(),
     finish: ds.finish ? ds.finish : null,
     ...ds
   }));
+};
+
+export const getUpload = async (
+  id: string,
+  reqContext: ApolloContext
+): Promise<UploadProcess | null> => {
+  if (!ObjectID.isValid(id)) {
+    return null;
+  }
+
+  const collection = getUploadsCollection(reqContext.db);
+  const res = await collection.findOne({ _id: new ObjectID(id) });
+
+  if (!res) {
+    return null;
+  }
+
+  const { _id, ...upload } = res;
+
+  return {
+    id: res._id.toHexString(),
+    ...upload
+  };
 };
 
 const cleanData = (transformedInput: {
@@ -155,10 +183,18 @@ const processValidEntry = async (
 
 const processInvalidEntry = async (
   processId: ObjectID,
-  reqContext: ApolloContext
+  reqContext: ApolloContext,
+  invalidEntry: Array<string> | null
 ) => {
+  if (invalidEntry === null) {
+    return;
+  }
+
   const collection = getUploadsCollection(reqContext.db);
-  collection.updateOne({ _id: processId }, { $inc: { invalidEntries: 1 } });
+  await collection.updateOne(
+    { _id: processId },
+    { $inc: { invalidEntries: 1 } }
+  );
 };
 
 const parseCsvFile = async (
@@ -168,30 +204,34 @@ const parseCsvFile = async (
   processId: ObjectID,
   reqContext: ApolloContext
 ): Promise<boolean> => {
-  const csvStream = fastCsv({
-    ignoreEmpty: true,
-    objectMode: true,
-    strictColumnHandling: true,
-    trim: true,
-    headers: ds.valueschemas.map(s => s.name)
-  })
-    .transform(obj => cleanData({ obj, schema: ds.valueschemas }))
-    .validate(obj => isValidEntry(obj))
-    .on('data', values => processValidEntry(values, ds, processId, reqContext))
-    .on('data-invalid', () => processInvalidEntry(processId, reqContext))
-    .on('end', () => {
-      Log.info(`Finished import of ${filename}.`);
-    });
-
   Log.info(`Started import of ${filename}.`);
 
   try {
-    await new Promise(resolve =>
+    await new Promise((resolve, reject) => {
+      const csvStream = fastCsv({
+        ignoreEmpty: true,
+        objectMode: true,
+        strictColumnHandling: true,
+        trim: true,
+        headers: ds.valueschemas.map(s => s.name)
+      })
+        .transform(obj => cleanData({ obj, schema: ds.valueschemas }))
+        .validate(isValidEntry)
+        .on('data', values =>
+          processValidEntry(values, ds, processId, reqContext)
+        )
+        .on('data-invalid', invalidEntry =>
+          processInvalidEntry(processId, reqContext, invalidEntry)
+        )
+        .on('error', reject)
+        .on('end', resolve);
+
       stream
         .pipe(csvStream)
-        .on('error', err => Log.error(err))
-        .on('finish', () => resolve())
-    );
+        .on('error', reject)
+        .on('finish', resolve);
+    });
+    Log.info(`Finished import of ${filename}.`);
   } catch (err) {
     Log.error(err);
   }
@@ -200,7 +240,7 @@ const parseCsvFile = async (
 };
 
 const processUpload = async (
-  upload: any,
+  file: ApolloFile,
   ds: Dataset,
   processId: ObjectID,
   reqContext: ApolloContext
@@ -208,7 +248,7 @@ const processUpload = async (
   const uploadsCollection = getUploadsCollection(reqContext.db);
 
   try {
-    const { stream, filename } = await upload;
+    const { stream, filename } = await file;
     await parseCsvFile(stream, filename, ds, processId, reqContext);
     await uploadsCollection.updateOne(
       { _id: processId },
@@ -223,7 +263,7 @@ const processUpload = async (
 const doUploadAsync = async (
   ds: Dataset,
   processId: ObjectID,
-  files: Array<any>,
+  files: Array<ApolloFile>,
   reqContext: ApolloContext
 ) => {
   const uploadsCollection = getUploadsCollection(reqContext.db);
@@ -248,7 +288,7 @@ const doUploadAsync = async (
 };
 
 export const uploadEntriesCsv = async (
-  files: Array<any>,
+  files: Array<ApolloFile>,
   datasetId: string,
   reqContext: ApolloContext
 ): Promise<UploadProcess> => {

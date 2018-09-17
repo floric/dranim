@@ -182,21 +182,21 @@ describe('Entry', () => {
   });
 
   test('should get entries count', async () => {
-    const schema: ValueSchema = {
-      name: 'test',
-      type: DataType.STRING,
-      required: true,
-      unique: false,
-      fallback: ''
-    };
-
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
       name: 'ds',
       created: '',
       description: '',
       workspaceId: 'ws',
-      valueschemas: [schema]
+      valueschemas: [
+        {
+          name: 'test',
+          type: DataType.STRING,
+          required: true,
+          unique: false,
+          fallback: ''
+        }
+      ]
     };
 
     (getDataset as jest.Mock).mockResolvedValue(ds);
@@ -807,6 +807,18 @@ describe('Entry', () => {
       userId: ''
     });
     expect(entriesCount).toBe(2);
+  });
+
+  test('should catch error when calling createManyEntries throws error', async () => {
+    try {
+      await createManyEntries(VALID_OBJECT_ID, [null], {
+        db,
+        userId: ''
+      });
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Writing entry failed.');
+    }
   });
 
   test('should do nothing when calling createManyEntries with empty list', async () => {

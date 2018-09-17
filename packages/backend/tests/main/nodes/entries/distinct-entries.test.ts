@@ -369,16 +369,29 @@ describe('DistinctEntriesNode', () => {
     });
   });
 
-  test('should call context function for distinct values', async () => {
-    const contextFnExecution = jest.fn(() => ({
-      outputs: { test: 'abc', 'other-test': 2 }
+  test('should call context function for distinct values but only for existing datasets', async () => {
+    const contextFnExecution = jest.fn(e => ({
+      outputs: {
+        value: e.filteredDataset
+          .map(n => n.otherVal)
+          .reduce((a, b) => a + b, 0),
+        'source-distinct': e['source-distinct'],
+        'destination-distinct': e['destination-distinct']
+      }
     }));
 
     const res = await DistinctEntriesNode.onNodeExecution(
       {
         distinctSchemas: [
           {
-            name: 'test',
+            name: 'source',
+            type: DataType.STRING,
+            fallback: '',
+            required: true,
+            unique: false
+          },
+          {
+            name: 'destination',
             type: DataType.STRING,
             fallback: '',
             required: true,
@@ -387,20 +400,136 @@ describe('DistinctEntriesNode', () => {
         ],
         addedSchemas: [
           {
-            name: 'other-test',
+            name: 'count',
             type: DataType.NUMBER,
-            fallback: '9',
+            fallback: '0',
             required: true,
             unique: false
           }
         ]
       },
-      { dataset: { entries: [], schema: [] } },
+      {
+        dataset: {
+          entries: [
+            { source: 'a', destination: 'b', otherVal: 1 },
+            { source: 'a', destination: 'b', otherVal: 4 },
+            { source: 'a', destination: 'a', otherVal: 6 },
+            { source: 'b', destination: 'a', otherVal: 3 },
+            { source: 'b', destination: 'c', otherVal: 7 },
+            { source: 'b', destination: 'c', otherVal: 3 },
+            { source: 'c', destination: 'a', otherVal: 2 }
+          ],
+          schema: [
+            {
+              name: 'source',
+              type: DataType.STRING,
+              fallback: '',
+              required: true,
+              unique: false
+            },
+            {
+              name: 'destination',
+              type: DataType.STRING,
+              fallback: '',
+              required: true,
+              unique: false
+            },
+            {
+              name: 'otherVal',
+              type: DataType.NUMBER,
+              fallback: '0',
+              required: true,
+              unique: false
+            }
+          ]
+        }
+      },
       {
         node: NODE,
         reqContext: { db: null, userId: '' },
         contextFnExecution
       }
     );
+
+    expect(contextFnExecution).toHaveBeenCalledWith({
+      'destination-distinct': 'c',
+      filteredDataset: [
+        { destination: 'c', otherVal: 7, source: 'b' },
+        { destination: 'c', otherVal: 3, source: 'b' }
+      ],
+      'source-distinct': 'b'
+    });
+    expect(contextFnExecution).not.toHaveBeenCalledWith({
+      'destination-distinct': 'c',
+      filteredDataset: [],
+      'source-distinct': 'a'
+    });
+
+    expect(res).toEqual({
+      outputs: {
+        dataset: {
+          entries: [
+            {
+              outputs: {
+                'destination-distinct': 'b',
+                'source-distinct': 'a',
+                value: 5
+              }
+            },
+            {
+              outputs: {
+                'destination-distinct': 'a',
+                'source-distinct': 'a',
+                value: 6
+              }
+            },
+            {
+              outputs: {
+                'destination-distinct': 'a',
+                'source-distinct': 'b',
+                value: 3
+              }
+            },
+            {
+              outputs: {
+                'destination-distinct': 'a',
+                'source-distinct': 'c',
+                value: 2
+              }
+            },
+            {
+              outputs: {
+                'destination-distinct': 'c',
+                'source-distinct': 'b',
+                value: 10
+              }
+            }
+          ],
+          schema: [
+            {
+              fallback: '',
+              name: 'source-distinct',
+              required: true,
+              type: 'String',
+              unique: false
+            },
+            {
+              fallback: '',
+              name: 'destination-distinct',
+              required: true,
+              type: 'String',
+              unique: false
+            },
+            {
+              fallback: '0',
+              name: 'count',
+              required: true,
+              type: 'Number',
+              unique: false
+            }
+          ]
+        }
+      }
+    });
   });
 });

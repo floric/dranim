@@ -1,6 +1,7 @@
 import {
   ApolloContext,
   ConnectionDescription,
+  ConnectionInstance,
   ContextNodeType,
   FormValues,
   hasContextFn,
@@ -21,18 +22,40 @@ export const executeNodeWithId = async (
   nodeId: string,
   processId: string,
   reqContext: ApolloContext,
-  contextInputs?: IOValues<any>
+  contextInputs: IOValues<any> = {}
 ) => {
   const node = await tryGetNode(nodeId, reqContext);
   return await executeNode(node, processId, reqContext, contextInputs);
 };
 
-export const executeNode = async (
+const tryGetFromCache = async <T>(
+  key: string,
+  cache: Map<string, any>,
+  fetchElementFn: () => Promise<T>
+): Promise<T> => {
+  if (cache.has(key)) {
+    return cache.get(key);
+  }
+
+  const res = await fetchElementFn();
+  cache.set(key, res);
+  return res;
+};
+
+export const executeNode = (
   node: NodeInstance,
   processId: string,
   reqContext: ApolloContext,
-  contextInputs: IOValues<any> = {},
-  cache: Map<string, any> = new Map()
+  contextInputs: IOValues<any> = {}
+): Promise<NodeExecutionResult<{}, any>> =>
+  executeNodeWithCache(node, processId, reqContext, contextInputs, new Map());
+
+export const executeNodeWithCache = async (
+  node: NodeInstance,
+  processId: string,
+  reqContext: ApolloContext,
+  contextInputs: IOValues<any>,
+  cache: Map<string, any>
 ): Promise<NodeExecutionResult<{}, any>> => {
   if (node.type === ContextNodeType.INPUT) {
     return {
@@ -98,18 +121,17 @@ const executeContext = async (
   reqContext: ApolloContext,
   cache: Map<string, any>
 ) => {
-  const outputNode = cache.has(`con-op-${node.id}`)
-    ? cache.get(`con-op-${node.id}`)
-    : await tryGetContextNode(node, ContextNodeType.OUTPUT, reqContext);
-  if (!cache.has(`con-op-${node.id}`)) {
-    cache.set(`con-op-${node.id}`, outputNode);
-  }
+  const outputNode = await tryGetFromCache<NodeInstance>(
+    `con-op-${node.id}`,
+    cache,
+    () => tryGetContextNode(node, ContextNodeType.OUTPUT, reqContext)
+  );
 
   return await type.onNodeExecution(nodeForm, nodeInputs, {
     reqContext,
     node,
     contextFnExecution: inputs =>
-      executeNode(
+      executeNodeWithCache(
         outputNode,
         processId,
         reqContext,
@@ -144,19 +166,18 @@ const getConnectionResult = async (
   contextInputs: IOValues<any> = {},
   cache: Map<string, any>
 ) => {
-  const conn = cache.has(i.connectionId)
-    ? cache.get(i.connectionId)
-    : await tryGetConnection(i.connectionId, reqContext);
-  if (!cache.has(i.connectionId)) {
-    cache.set(i.connectionId, conn);
-  }
-  const inputNode = cache.has(conn.from.nodeId)
-    ? cache.get(conn.from.nodeId)
-    : await tryGetNode(conn.from.nodeId, reqContext);
-  if (!cache.has(conn.from.nodeId)) {
-    cache.set(conn.from.nodeId, inputNode);
-  }
-  const nodeRes = await executeNode(
+  const conn = await tryGetFromCache<ConnectionInstance>(
+    i.connectionId,
+    cache,
+    () => tryGetConnection(i.connectionId, reqContext)
+  );
+  const inputNode = await tryGetFromCache<NodeInstance>(
+    conn.from.nodeId,
+    cache,
+    () => tryGetNode(conn.from.nodeId, reqContext)
+  );
+
+  const nodeRes = await executeNodeWithCache(
     inputNode,
     processId,
     reqContext,
@@ -171,8 +192,6 @@ const inputValuesToObject = (
   inputValues: Array<{ socketName: string; value: string }>
 ): IOValues<{}> => {
   const inputs = {};
-  inputValues.forEach(i => {
-    inputs[i.socketName] = i.value;
-  });
+  inputValues.forEach(i => (inputs[i.socketName] = i.value));
   return inputs;
 };

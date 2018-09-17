@@ -159,15 +159,7 @@ export const createManyEntries = async (
 
     return true;
   } catch (err) {
-    console.log(err);
-    if (err.code === 11000) {
-      throw new UploadEntryError('Key already used', 'key-already-used');
-    } else {
-      throw new UploadEntryError(
-        'Writing entry failed.',
-        'internal-write-error'
-      );
-    }
+    throw new UploadEntryError('Writing entry failed.', 'internal-write-error');
   }
 };
 
