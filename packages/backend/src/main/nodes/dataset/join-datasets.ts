@@ -1,9 +1,5 @@
 import {
   allAreDefinedAndPresent,
-  ApolloContext,
-  Dataset,
-  Entry,
-  FormValues,
   JoinDatasetsNodeDef,
   JoinDatasetsNodeForm,
   JoinDatasetsNodeInputs,
@@ -13,14 +9,6 @@ import {
   ValueSchema
 } from '@masterthesis/shared';
 
-import { createUniqueDatasetName } from '../../calculation/utils';
-import {
-  addValueSchema,
-  createDataset,
-  tryGetDataset
-} from '../../workspace/dataset';
-import { createEntry, getEntryCollection } from '../../workspace/entry';
-import { processEntries } from '../entries/utils';
 import { validateNonEmptyString } from '../string/utils';
 
 export const JoinDatasetsNode: ServerNodeDef<
@@ -33,10 +21,11 @@ export const JoinDatasetsNode: ServerNodeDef<
     Promise.resolve(
       validateNonEmptyString(form.valueA) && validateNonEmptyString(form.valueB)
     ),
-  onMetaExecution: async (form, inputs, db) => {
+  onMetaExecution: async (form, inputs) => {
     if (!form.valueA || !form.valueB) {
       return { joined: { isPresent: false, content: { schema: [] } } };
     }
+
     if (!allAreDefinedAndPresent(inputs)) {
       return {
         joined: { isPresent: false, content: { schema: [] } }
@@ -46,141 +35,101 @@ export const JoinDatasetsNode: ServerNodeDef<
     return {
       joined: {
         content: {
-          schema: [
-            ...inputs.datasetA.content.schema.map(s => ({
-              ...s,
-              name: `A_${s.name}`
-            })),
-            ...inputs.datasetB.content.schema.map(s => ({
-              ...s,
-              name: `B_${s.name}`
-            }))
-          ]
+          schema: getJoinedSchemas(
+            inputs.datasetA.content.schema,
+            inputs.datasetB.content.schema
+          )
         },
         isPresent: true
       }
     };
   },
-  onNodeExecution: async (form, inputs, { node, reqContext }) => {
-    const [dsA, dsB] = await Promise.all([
-      tryGetDataset(inputs.datasetA.datasetId, reqContext),
-      tryGetDataset(inputs.datasetB.datasetId, reqContext)
-    ]);
-
-    validateSchemas(form, dsA, dsB);
-
-    const newDs = await createDataset(
-      createUniqueDatasetName(JoinDatasetsNodeDef.type, node.id),
-      reqContext,
-      node.workspaceId
+  onNodeExecution: async (form, inputs) => {
+    checkSchemas(
+      inputs.datasetA.schema,
+      inputs.datasetB.schema,
+      form.valueA!,
+      form.valueB!
     );
 
-    await addSchemasFromBothDatasets(newDs, dsA, dsB, reqContext);
-    await processEntries(
-      dsA!.id,
-      node.id,
-      entry =>
-        getMatchesAndCreateEntries(
-          entry,
-          form.valueA!,
-          form.valueB!,
-          newDs.id,
-          dsB.id,
-          reqContext
-        ),
-      reqContext,
-      { concurrency: 16 }
+    const entries = await combineEntries(
+      inputs.datasetA.entries,
+      inputs.datasetB.entries,
+      form.valueA!,
+      form.valueB!
+    );
+    const schema = getJoinedSchemas(
+      inputs.datasetA.schema,
+      inputs.datasetB.schema
     );
 
-    return { outputs: { joined: { datasetId: newDs.id } } };
+    return {
+      outputs: {
+        joined: {
+          entries,
+          schema
+        }
+      }
+    };
   }
 };
 
-const getMatchesAndCreateEntries = async (
-  docA: Entry,
-  valNameA: string,
-  valNameB: string,
-  newDsId: string,
-  dsBId: string,
-  reqContext: ApolloContext
+const combineEntries = (
+  entriesA: Array<Values>,
+  entriesB: Array<Values>,
+  valueA: string,
+  valueB: string
+) =>
+  new Promise<Array<Values>>(resolve => {
+    const entries: Array<Values> = [];
+
+    for (const eA of entriesA) {
+      const valueFromA = eA[valueA!];
+      for (const eB of entriesB) {
+        const valueFromB = eB[valueB!];
+        if (valueFromA === valueFromB) {
+          entries.push(merge(eA, eB));
+        }
+      }
+    }
+
+    resolve(entries);
+  });
+
+const checkSchemas = (
+  schemasA: Array<ValueSchema>,
+  schemasB: Array<ValueSchema>,
+  valueA: string,
+  valueB: string
 ) => {
-  const col = getEntryCollection(dsBId, reqContext.db);
-  const valFromA = docA.values[valNameA];
-  const cursor = col.find({ [`values.${valNameB}`]: valFromA });
-  while (await cursor.hasNext()) {
-    const docB = await cursor.next();
-    await createEntry(
-      newDsId,
-      joinEntry(docA.values, docB!.values),
-      reqContext
-    );
+  const schemaFromA = schemasA.find(n => valueA === n.name);
+  const schemaFromB = schemasB.find(n => valueB === n.name);
+  if (!schemaFromA || !schemaFromB) {
+    throw new Error('Schema not found in Dataset');
   }
-  await cursor.close();
+
+  if (schemaFromA.type !== schemaFromB.type) {
+    throw new Error('Schema types do not match');
+  }
 };
 
-const joinEntry = (valuesA: Values, valuesB: Values) => {
+const merge = (eA: Values, eB: Values) => {
   const res = {};
-
-  Object.entries(valuesA).map(val => {
-    res[`A_${val[0]}`] = val[1];
-  });
-  Object.entries(valuesB).map(val => {
-    res[`B_${val[0]}`] = val[1];
-  });
-
+  Object.entries(eA).forEach(([name, content]) => (res[`A_${name}`] = content));
+  Object.entries(eB).forEach(([name, content]) => (res[`B_${name}`] = content));
   return res;
 };
 
-const addSchemasFromBothDatasets = async (
-  newDs: Dataset,
-  dsA: Dataset,
-  dsB: Dataset,
-  reqContext: ApolloContext
-) => {
-  await Promise.all(
-    Object.entries(dsA.valueschemas).map(val =>
-      addValueSchema(
-        newDs.id,
-        {
-          ...val[1],
-          unique: false,
-          name: `A_${val[1].name}`
-        },
-        reqContext
-      )
-    )
-  );
-  await Promise.all(
-    Object.entries(dsB.valueschemas).map(val =>
-      addValueSchema(
-        newDs.id,
-        {
-          ...val[1],
-          unique: false,
-          name: `B_${val[1].name}`
-        },
-        reqContext
-      )
-    )
-  );
-};
-
-const validateSchemas = (
-  form: FormValues<JoinDatasetsNodeForm>,
-  dsA: Dataset,
-  dsB: Dataset
-) => {
-  const schemaA = getMatchSchema(form.valueA!, dsA.valueschemas);
-  const schemaB = getMatchSchema(form.valueB!, dsB.valueschemas);
-
-  if (!schemaA || !schemaB) {
-    throw new Error('Schema not found');
-  }
-
-  if (schemaA.type !== schemaB.type) {
-    throw new Error('Schemas should have same type');
-  }
-};
-
-const getMatchSchema = (name: string, schemas: Array<ValueSchema>) =>
-  schemas.find(n => n.name === name) || null;
+const getJoinedSchemas = (
+  schemaA: Array<ValueSchema>,
+  schemaB: Array<ValueSchema>
+) => [
+  ...schemaA.map(s => ({
+    ...s,
+    name: `A_${s.name}`
+  })),
+  ...schemaB.map(s => ({
+    ...s,
+    name: `B_${s.name}`
+  }))
+];

@@ -56,7 +56,6 @@ export interface ProcessOptions {
 
 export const processEntries = async (
   dsId: string,
-  nodeId: string,
   processFn: (entry: Entry) => Promise<void>,
   reqContext: ApolloContext,
   options?: ProcessOptions

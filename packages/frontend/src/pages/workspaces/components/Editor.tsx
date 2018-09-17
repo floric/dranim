@@ -4,11 +4,10 @@ import {
   GQLCalculationProcess,
   GQLDataset,
   GQLWorkspace,
-  ProcessState,
-  SocketInstance
+  ProcessState
 } from '@masterthesis/shared';
 import { adopt } from 'react-adopt';
-import { Mutation, MutationFn } from 'react-apollo';
+import { Mutation } from 'react-apollo';
 
 import { ExplorerEditor } from '../../../explorer/ExplorerEditor';
 import {
@@ -18,13 +17,19 @@ import {
   DELETE_CONNECTION,
   DELETE_NODE,
   START_CALCULATION,
-  UPDATE_NODE,
-  WORKSPACE_NODE_SELECTION
+  UPDATE_NODE
 } from '../../../graphql/editor-page';
-import { showNotificationWithIcon, tryOperation } from '../../../utils/form';
+import { showNotificationWithIcon } from '../../../utils/form';
+import {
+  handleAddOrUpdateFormValue,
+  handleConnectionCreate,
+  handleConnectionDelete,
+  handleNodeCreate,
+  handleNodeDelete,
+  handleNodeUpdate,
+  handleStartCalculation
+} from '../utils/editor-mutations';
 import { ProcessRunningCard } from './ProcessRunningCard';
-
-const POLLING_FREQUENCY = 2000;
 
 const ComposedMutations = adopt({
   startCalculation: ({ render }) => (
@@ -50,152 +55,16 @@ const ComposedMutations = adopt({
   )
 });
 
-const handleStartCalculation = (
-  startCalculation: MutationFn<any, any>,
-  startPolling: (msFreq: number) => any,
-  workspaceId: string
-) => () =>
-  tryOperation({
-    op: async () => {
-      await startCalculation({
-        variables: { workspaceId },
-        awaitRefetchQueries: true,
-        refetchQueries: [
-          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
-        ]
-      });
-      startPolling(POLLING_FREQUENCY);
-    },
-    successTitle: () => 'Process started',
-    successMessage: () => 'This might take several minutes',
-    failedTitle: 'Process start has failed'
-  });
-
-const handleNodeCreate = (
-  createNode: MutationFn<any, any>,
-  workspaceId: string
-) => (type: string, x: number, y: number, contextIds: Array<string>) =>
-  tryOperation({
-    op: () =>
-      createNode({
-        variables: {
-          type,
-          x,
-          y,
-          contextIds,
-          workspaceId
-        },
-        awaitRefetchQueries: true,
-        refetchQueries: [
-          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
-        ]
-      }),
-    successTitle: null,
-    failedTitle: 'Node not created'
-  });
-
-const handleNodeDelete = (
-  deleteNode: MutationFn<any, any>,
-  workspaceId: string
-) => (nodeId: string) =>
-  tryOperation({
-    op: () =>
-      deleteNode({
-        variables: { id: nodeId },
-        awaitRefetchQueries: true,
-        refetchQueries: [
-          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
-        ]
-      }),
-    successTitle: null,
-    failedTitle: 'Node not deleted'
-  });
-
-const handleNodeUpdate = (
-  updateNodePosition: MutationFn<any, any>,
-  workspaceId: string
-) => (nodeId: string, x: number, y: number) =>
-  tryOperation({
-    op: () =>
-      updateNodePosition({
-        variables: {
-          id: nodeId,
-          x,
-          y
-        },
-        awaitRefetchQueries: true,
-        refetchQueries: [
-          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
-        ]
-      }),
-    successTitle: null,
-    failedTitle: 'Node not updated'
-  });
-
-const handleConnectionCreate = (
-  createConnection: MutationFn<any, any>,
-  workspaceId: string
-) => (from: SocketInstance, to: SocketInstance) =>
-  tryOperation({
-    op: () =>
-      createConnection({
-        variables: {
-          input: { from, to }
-        },
-        awaitRefetchQueries: true,
-        refetchQueries: [
-          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
-        ]
-      }),
-    successTitle: null,
-    failedTitle: 'Connection not created'
-  });
-
-const handleConnectionDelete = (
-  deleteConnection: MutationFn<any, any>,
-  workspaceId: string
-) => (connId: string) =>
-  tryOperation({
-    op: () =>
-      deleteConnection({
-        variables: { id: connId },
-        awaitRefetchQueries: true,
-        refetchQueries: [
-          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
-        ]
-      }),
-    successTitle: null,
-    failedTitle: 'Connection not deleted'
-  });
-
-const handleAddOrUpdateFormValue = (
-  addOrUpdateFormValue: MutationFn<any, any>,
-  workspaceId: string
-) => (nodeId: string, name: string, value: string) =>
-  tryOperation({
-    op: () =>
-      addOrUpdateFormValue({
-        variables: {
-          nodeId,
-          name,
-          value
-        },
-        awaitRefetchQueries: true,
-        refetchQueries: [
-          { query: WORKSPACE_NODE_SELECTION, variables: { workspaceId } }
-        ]
-      }),
-    successTitle: null,
-    failedTitle: 'Value not changed'
-  });
+const POLLING_FREQUENCY = 5000;
 
 export type EditorProps = {
   workspace: GQLWorkspace;
   calculations: Array<GQLCalculationProcess>;
   datasets: Array<GQLDataset>;
   workspaceId: string;
-  startPolling: (msFrequency: number) => void;
-  stopPolling: () => void;
+  startCalculationPolling: (msFrequency: number) => void;
+  stopCalculationPolling: () => void;
+  refreshAll: () => Promise<any>;
 };
 
 type EditorState = {
@@ -233,29 +102,38 @@ export class Editor extends Component<EditorProps, EditorState> {
   }
 
   private startOrStopPolling(props: EditorProps) {
-    const { stopPolling, startPolling, calculations } = props;
+    const {
+      stopCalculationPolling,
+      startCalculationPolling,
+      refreshAll,
+      calculations
+    } = props;
     const { isPolling } = this.state;
-    if (this.runningCalculations.length === 0) {
-      if (isPolling) {
-        this.setState({ isPolling: false });
-        const state = calculations[calculations.length - 1].state;
-        showNotificationWithIcon({
-          title: 'Calculation finished',
-          content: getNotificationContent(state),
-          icon: getNotificationIcon(state)
-        });
-        stopPolling();
-      }
-    } else {
+    if (this.runningCalculations.length === 0 && isPolling) {
+      this.setState({ isPolling: false });
+      const state = calculations[calculations.length - 1].state;
+      showNotificationWithIcon({
+        title: 'Calculation finished',
+        content: getNotificationContent(state),
+        icon: getNotificationIcon(state)
+      });
+      stopCalculationPolling();
+      refreshAll();
+    } else if (this.runningCalculations.length > 0 && !isPolling) {
       this.setState({
         isPolling: true
       });
-      startPolling(POLLING_FREQUENCY);
+      startCalculationPolling(POLLING_FREQUENCY);
     }
   }
 
   public render() {
-    const { datasets, workspace, workspaceId, startPolling } = this.props;
+    const {
+      datasets,
+      workspace,
+      workspaceId,
+      startCalculationPolling
+    } = this.props;
 
     if (this.runningCalculations.length > 0) {
       return (
@@ -294,8 +172,9 @@ export class Editor extends Component<EditorProps, EditorState> {
             )}
             onStartCalculation={handleStartCalculation(
               startCalculation,
-              startPolling,
-              workspaceId
+              startCalculationPolling,
+              workspaceId,
+              POLLING_FREQUENCY
             )}
           />
         )}

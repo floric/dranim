@@ -12,7 +12,7 @@ export const TimeInfo: SFC<TimeInfoProps> = ({ text, time }) => (
   <Row>
     <Col xs={6}>{text}:</Col>
     <Col xs={18}>
-      <Tooltip title={time}>{moment(time).toNow()}</Tooltip>
+      <Tooltip title={time}>{moment(time).fromNow()}</Tooltip>
     </Col>
   </Row>
 );

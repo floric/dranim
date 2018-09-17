@@ -1093,6 +1093,10 @@
   version "23.3.1"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-23.3.1.tgz#a4319aedb071d478e6f407d1c4578ec8156829cf"
 
+"@types/js-combinatorics@^0.5.29":
+  version "0.5.29"
+  resolved "https://registry.yarnpkg.com/@types/js-combinatorics/-/js-combinatorics-0.5.29.tgz#47a7819a0b6925b6dc4bd2c2278a7e6329b29387"
+
 "@types/long@^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@types/long/-/long-4.0.0.tgz#719551d2352d301ac8b81db732acb6bdc28dbdef"
@@ -6828,6 +6832,10 @@ js-beautify@^1.7.5:
     editorconfig "^0.15.0"
     mkdirp "~0.5.0"
     nopt "~4.0.1"
+
+js-combinatorics@^0.5.3:
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/js-combinatorics/-/js-combinatorics-0.5.3.tgz#5da5a1c4632ec59fdf8d49dccfe59ef088122b15"
 
 js-tokens@^3.0.0, js-tokens@^3.0.2:
   version "3.0.2"

@@ -1,31 +1,19 @@
 import {
   allAreDefinedAndPresent,
-  ApolloContext,
-  Dataset,
   DataType,
   DistinctEntriesNodeDef,
   DistinctEntriesNodeForm,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
-  IOValues,
-  NodeInstance,
   ServerNodeDefWithContextFn,
   SocketDefs,
   SocketState,
+  Values,
   ValueSchema
 } from '@masterthesis/shared';
+import Combinatorics from 'js-combinatorics';
 
-import { createUniqueDatasetName } from '../../calculation/utils';
-import {
-  addValueSchema,
-  createDataset,
-  deleteDataset,
-  tryGetDataset
-} from '../../workspace/dataset';
-import { createEntry, getEntryCollection } from '../../workspace/entry';
-import { processDocumentsWithCursor } from './utils';
-
-const getDistinctValueName = (vs: ValueSchema) => `${vs.name}-distinct`;
+const getDistinctValueName = (vsName: string) => `${vsName}-distinct`;
 
 export const DistinctEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
@@ -51,10 +39,10 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
     }
 
     const res: SocketDefs<any> = {};
-    form.distinctSchemas.forEach(ds => {
-      res[getDistinctValueName(ds)] = {
-        dataType: ds.type,
-        displayName: getDistinctValueName(ds),
+    form.distinctSchemas.forEach(vs => {
+      res[getDistinctValueName(vs.name)] = {
+        dataType: vs.type,
+        displayName: getDistinctValueName(vs.name),
         state: SocketState.DYNAMIC
       };
     });
@@ -88,11 +76,12 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
     return { ...other, ...contextOutputDefs };
   },
   onMetaExecution: async (form, inputs) => {
+    const { addedSchemas, distinctSchemas } = form;
     if (
       !allAreDefinedAndPresent(inputs) ||
-      !form.distinctSchemas ||
-      form.distinctSchemas.length === 0 ||
-      !form.addedSchemas
+      !distinctSchemas ||
+      distinctSchemas.length === 0 ||
+      !addedSchemas
     ) {
       return { dataset: { content: { schema: [] }, isPresent: false } };
     }
@@ -101,109 +90,110 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
       dataset: {
         content: {
           schema: [
-            ...form.distinctSchemas.map(s => ({
-              ...s,
-              name: getDistinctValueName(s)
+            ...distinctSchemas.map(vs => ({
+              ...vs,
+              name: getDistinctValueName(vs.name)
             })),
-            ...form.addedSchemas!
+            ...addedSchemas!
           ]
         },
         isPresent: true
       }
     };
   },
-  onNodeExecution: async (
-    form,
-    inputs,
-    { reqContext, contextFnExecution, node }
-  ) => {
-    const [existingDs, newDs] = await Promise.all([
-      tryGetDataset(inputs.dataset.datasetId, reqContext),
-      createDataset(
-        createUniqueDatasetName(DistinctEntriesNodeDef.type, node.id),
-        reqContext,
-        node.workspaceId
-      )
-    ]);
+  onNodeExecution: async (form, inputs, { contextFnExecution }) => {
+    const { distinctSchemas, addedSchemas } = form;
 
-    await Promise.all(
-      [
-        ...form.distinctSchemas!.map(s => ({
-          ...s,
-          name: getDistinctValueName(s)
-        })),
-        ...form.addedSchemas!
-      ].map(s => addValueSchema(newDs.id, s, reqContext))
+    const distinctValuesArr = getDistinctValuesArr(
+      distinctSchemas!,
+      inputs.dataset.entries
+    );
+    const names = distinctValuesArr.map(n => n[0]);
+    const entries: Array<Values> = [];
+    const permutations = await getPermutations(
+      distinctValuesArr.map(n => Array.from(n[1].values()))
     );
 
-    const entryColl = getEntryCollection(existingDs.id, reqContext.db);
-    const aggregateNames = {};
-    form.distinctSchemas!.map(s => s.name).forEach(s => {
-      aggregateNames[s] = `$values.${s}`;
-    });
+    for (const distinctE of permutations) {
+      const filteredDataset = await getFilteredDataset(
+        inputs.dataset.entries,
+        distinctE,
+        names
+      );
 
-    const cursor = entryColl.aggregate([{ $group: { _id: aggregateNames } }]);
-    await processDocumentsWithCursor(cursor, doc =>
-      processDistinctDatasets(
-        doc!._id,
-        form.distinctSchemas!,
-        existingDs,
-        newDs,
-        node,
-        contextFnExecution!,
-        reqContext
-      )
-    );
+      if (filteredDataset.length > 0) {
+        const args = getContextArguments(distinctE, filteredDataset, names);
+        const res = await contextFnExecution!(args);
+        entries.push(res);
+      }
+    }
 
     return {
       outputs: {
         dataset: {
-          datasetId: newDs.id
+          entries,
+          schema: [
+            ...distinctSchemas!.map(vs => ({
+              ...vs,
+              name: getDistinctValueName(vs.name)
+            })),
+            ...addedSchemas!
+          ]
         }
       }
     };
   }
 };
 
-const processDistinctDatasets = async (
-  distinctValues: { [name: string]: any },
-  distinctSchemas: Array<ValueSchema>,
-  existingDs: Dataset,
-  newDs: Dataset,
-  node: NodeInstance,
-  contextFnExecution: (input: IOValues<any>) => any,
-  reqContext: ApolloContext
-) => {
-  const tempDs = await createDataset(
-    createUniqueDatasetName(DistinctEntriesNodeDef.name, node.id),
-    reqContext,
-    node.workspaceId
-  );
-
-  const query = {};
-  const values: IOValues<any> = {};
-  distinctSchemas!.forEach(s => {
-    query[`values.${s.name}`] = distinctValues[s.name];
-    values[getDistinctValueName(s)] = distinctValues[s.name];
+const getPermutations = (args: Array<Array<string>>) =>
+  new Promise<Array<Array<string>>>(resolve => {
+    resolve(Combinatorics.cartesianProduct(...args).toArray());
   });
-  values.filteredDataset = {
-    datasetId: tempDs.id
+
+const getContextArguments = (
+  distinctE: Values,
+  filteredDataset: Array<Values>,
+  names: Array<string>
+) => {
+  const args: { filteredDataset: Array<Values>; [name: string]: any } = {
+    filteredDataset: []
   };
+  distinctE.forEach((c, i) => (args[getDistinctValueName(names[i])] = c));
+  args.filteredDataset = filteredDataset;
+  return args;
+};
 
-  const entryColl = getEntryCollection(existingDs.id, reqContext.db);
-  await entryColl
-    .aggregate(
-      [
-        { $match: query },
-        { $out: getEntryCollection(tempDs.id, reqContext.db).collectionName }
-      ],
-      { bypassDocumentValidation: true }
-    )
-    .next();
+const getFilteredDataset = (
+  entries: Array<Values>,
+  distinctE: Values,
+  names: Array<string>
+): Promise<Array<Values>> =>
+  new Promise(resolve => {
+    resolve(
+      entries.filter(
+        e =>
+          distinctE
+            .map((n, i) => e[names[i]] === n)
+            .reduce((a, b) => a && b, true) === true
+      )
+    );
+  });
 
-  const { outputs } = await contextFnExecution!(values);
-  await Promise.all([
-    createEntry(newDs.id, outputs, reqContext),
-    deleteDataset(tempDs.id, reqContext)
-  ]);
+const getDistinctValuesArr = (
+  distinctSchemas: Array<ValueSchema>,
+  entries: Array<Values>
+) => {
+  const distinctValues: Map<string, Set<string>> = new Map();
+  for (const s of distinctSchemas!) {
+    distinctValues.set(s.name, new Set());
+  }
+
+  for (const e of entries) {
+    for (const s of distinctSchemas!) {
+      const valueSet = distinctValues.get(s.name)!;
+      valueSet.add(e[s.name]);
+    }
+  }
+
+  return Array.from(distinctValues.entries());
 };

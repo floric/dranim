@@ -57,6 +57,7 @@ export const tryOperation = async <T>(
 
     return res;
   } catch (err) {
+    console.error(err);
     if (onFail) {
       onFail();
     }

@@ -168,26 +168,22 @@ export class DataActionsPage extends Component<
                     context={{ hasUpload: true }}
                   >
                     {uploadEntriesCsv => (
-                      <>
-                        <Row style={{ marginBottom: '1rem' }}>
-                          <Col>
-                            <Upload {...this.getUploadProps()}>
-                              <Button icon="upload">Select CSV file</Button>
-                            </Upload>
-                          </Col>
-                          <Col>
-                            <AsyncButton
-                              type="primary"
-                              onClick={() =>
-                                this.handleUpload(uploadEntriesCsv)
-                              }
-                              disabled={this.state.fileList.length === 0}
-                            >
-                              {uploading ? 'Uploading...' : 'Start Upload'}
-                            </AsyncButton>
-                          </Col>
-                        </Row>
-                      </>
+                      <Row style={{ marginBottom: 0 }} type="flex" gutter={8}>
+                        <Col>
+                          <Upload {...this.getUploadProps()}>
+                            <Button icon="upload">Select CSV file</Button>
+                          </Upload>
+                        </Col>
+                        <Col>
+                          <AsyncButton
+                            type="primary"
+                            onClick={() => this.handleUpload(uploadEntriesCsv)}
+                            disabled={this.state.fileList.length === 0}
+                          >
+                            {uploading ? 'Uploading...' : 'Start Upload'}
+                          </AsyncButton>
+                        </Col>
+                      </Row>
                     )}
                   </Mutation>
                 </Card>

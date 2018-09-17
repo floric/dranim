@@ -54,14 +54,13 @@ export const DataSchemas: SFC<DataSchemasProps> = ({ dataset }) => {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
-      render: (_, record) => (
-        <Tag color={Colors[record.type]}>{record.type}</Tag>
-      )
+      render: (_, { type }) => <Tag color={Colors[type]}>{type}</Tag>
     },
     {
       title: 'Fallback',
       dataIndex: 'fallback',
-      key: 'fallback'
+      key: 'fallback',
+      render: (_, { required, fallback }) => (!required ? fallback : '')
     },
     {
       title: 'Properties',
@@ -123,7 +122,13 @@ export const DataSchemas: SFC<DataSchemasProps> = ({ dataset }) => {
           {schemasDataSource.length > 0 ? (
             <Card bordered={false}>
               <h3>Value Schemas</h3>
-              <Table
+              <Table<{
+                key: string;
+                type: string;
+                unique: boolean;
+                required: boolean;
+                fallback: string;
+              }>
                 size="small"
                 pagination={false}
                 dataSource={schemasDataSource}

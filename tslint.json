@@ -12,7 +12,6 @@
     "jsx-boolean-value": false,
     "no-var-requires": false,
     "no-unused-expression": true,
-    "no-unused-variable": true,
     "interface-name": false,
     "max-classes-per-file": false,
     "ordered-imports": true,

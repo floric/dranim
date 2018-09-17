@@ -298,7 +298,7 @@ describe('Validation', () => {
     expect(res).toBe(false);
   });
 
-  test('should have dataset input with invalid id', async () => {
+  test('should have dataset input with empty schema', async () => {
     (getInputDefs as jest.Mock).mockResolvedValue({
       dataset: {
         dataType: DataType.DATASET,
@@ -320,7 +320,7 @@ describe('Validation', () => {
         state: NodeState.VALID,
         variables: {}
       },
-      { dataset: { datasetId: VALID_OBJECT_ID } },
+      { dataset: { entries: [], schema: [] } },
       { db: null, userId: '' }
     );
     expect(res).toBe(false);
@@ -357,7 +357,19 @@ describe('Validation', () => {
         state: NodeState.VALID,
         variables: {}
       },
-      { dataset: { datasetId: VALID_OBJECT_ID } },
+      {
+        dataset: {
+          entries: [],
+          schema: [
+            {
+              name: 'abc',
+              type: DataType.STRING,
+              unique: false,
+              required: false
+            }
+          ]
+        }
+      },
       { db: null, userId: '' }
     );
     expect(res).toBe(true);
@@ -429,8 +441,18 @@ describe('Validation', () => {
         variables: {}
       },
       {
-        datasetA: { datasetId: ds.id },
-        datasetB: { datasetId: null }
+        datasetA: {
+          schema: [
+            {
+              name: 'test',
+              type: DataType.STRING,
+              unique: false,
+              required: false
+            }
+          ],
+          entries: []
+        },
+        datasetB: { schema: null, entries: [] }
       },
       { db: null, userId: '' }
     );

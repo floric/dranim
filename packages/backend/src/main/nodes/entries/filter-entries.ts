@@ -1,23 +1,15 @@
 import {
   allAreDefinedAndPresent,
-  ApolloContext,
   DataType,
   FilterEntriesNodeDef,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
   ServerNodeDefWithContextFn,
   SocketState,
-  ValueSchema
+  Values
 } from '@masterthesis/shared';
 
-import { createUniqueDatasetName } from '../../calculation/utils';
-import {
-  addValueSchema,
-  createDataset,
-  tryGetDataset
-} from '../../workspace/dataset';
-import { createEntry } from '../../workspace/entry';
-import { getDynamicEntryContextInputs, processEntries } from './utils';
+import { getDynamicEntryContextInputs } from './utils';
 
 export const FilterEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
@@ -42,43 +34,24 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
 
     return inputs;
   },
-  onNodeExecution: async (
-    form,
-    inputs,
-    { reqContext, contextFnExecution, node: { workspaceId, id } }
-  ) => {
-    const newDs = await createDataset(
-      createUniqueDatasetName(FilterEntriesNodeDef.type, id),
-      reqContext,
-      workspaceId
-    );
-    const oldDs = await tryGetDataset(inputs.dataset.datasetId, reqContext);
-
-    await copySchemas(oldDs.valueschemas, newDs.id, reqContext);
-    await processEntries(
-      inputs.dataset.datasetId,
-      id,
-      async entry => {
-        const result = await contextFnExecution!(entry.values);
-        if (result.outputs.keepEntry) {
-          await createEntry(newDs.id, entry.values, reqContext);
-        }
-      },
-      reqContext
-    );
+  onNodeExecution: async (form, inputs, { contextFnExecution }) => {
+    const entries: Array<Values> = [];
+    for (const e of inputs.dataset.entries) {
+      const {
+        outputs: { keepEntry }
+      } = await contextFnExecution!(e);
+      if (keepEntry) {
+        entries.push(e);
+      }
+    }
 
     return {
       outputs: {
         dataset: {
-          datasetId: newDs.id
+          entries,
+          schema: inputs.dataset.schema
         }
       }
     };
   }
 };
-
-const copySchemas = (
-  schemas: Array<ValueSchema>,
-  newDsId: string,
-  reqContext: ApolloContext
-) => Promise.all(schemas.map(s => addValueSchema(newDsId, s, reqContext)));

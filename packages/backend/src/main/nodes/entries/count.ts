@@ -6,9 +6,6 @@ import {
   ServerNodeDef
 } from '@masterthesis/shared';
 
-import { tryGetDataset } from '../../workspace/dataset';
-import { getEntriesCount } from '../../workspace/entry';
-
 export const CountEntriesNode: ServerNodeDef<
   CountEntriesNodeInputs,
   CountEntriesNodeOutputs
@@ -22,11 +19,9 @@ export const CountEntriesNode: ServerNodeDef<
     return { count: { content: {}, isPresent: true } };
   },
   onNodeExecution: async (form, inputs, { reqContext }) => {
-    const ds = await tryGetDataset(inputs.dataset.datasetId, reqContext);
-
     return {
       outputs: {
-        count: await getEntriesCount(ds.id, reqContext)
+        count: inputs.dataset.entries.length
       }
     };
   }

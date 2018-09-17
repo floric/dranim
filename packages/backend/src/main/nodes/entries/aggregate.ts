@@ -5,13 +5,10 @@ import {
   AggregateEntriesNodeOutputs,
   AggregationEntriesType,
   allAreDefinedAndPresent,
-  ApolloContext,
   DataType,
-  ServerNodeDef
+  ServerNodeDef,
+  Values
 } from '@masterthesis/shared';
-
-import { tryGetDataset } from '../../workspace/dataset';
-import { getEntryCollection } from '../../workspace/entry';
 
 export const AggregateEntriesNode: ServerNodeDef<
   AggregateEntriesNodeInputs,
@@ -20,36 +17,46 @@ export const AggregateEntriesNode: ServerNodeDef<
 > = {
   type: AggregateEntriesNodeDef.type,
   onMetaExecution: async (form, inputs) => {
-    if (!allAreDefinedAndPresent(inputs)) {
+    if (!allAreDefinedAndPresent(inputs) || !form.valueName) {
       return { value: { content: {}, isPresent: false } };
     }
 
     return { value: { content: {}, isPresent: true } };
   },
-  onNodeExecution: async (form, inputs, { reqContext }) => {
-    const ds = await tryGetDataset(inputs.dataset.datasetId, reqContext);
-    const matchingSchema = ds.valueschemas.find(n => n.name === form.valueName);
+  onNodeExecution: async (form, inputs) => {
+    const { valueName } = form;
+    const {
+      dataset: { entries, schema }
+    } = inputs;
+    const matchingSchema = schema.find(n => n.name === valueName);
     if (!matchingSchema) {
-      throw new Error('Schema not found');
+      throw new Error('Schema missing in Entries');
     }
 
     if (matchingSchema.type !== DataType.NUMBER) {
-      throw new Error('Datatype not supported');
+      throw new Error('Aggregation methods only supported for numeric fields');
     }
 
     let value = 0;
-    if (form.type === AggregationEntriesType.AVG) {
-      value = await getValue('avg', ds.id, form.valueName!, reqContext);
-    } else if (form.type === AggregationEntriesType.MIN) {
-      value = await getValue('min', ds.id, form.valueName!, reqContext);
-    } else if (form.type === AggregationEntriesType.MAX) {
-      value = await getValue('max', ds.id, form.valueName!, reqContext);
-    } else if (form.type === AggregationEntriesType.SUM) {
-      value = await getValue('sum', ds.id, form.valueName!, reqContext);
-    } else if (form.type === AggregationEntriesType.MED) {
-      throw new Error('Median not supported yet');
+    switch (form.type) {
+      case AggregationEntriesType.AVG: {
+        const sum = getSum(entries, valueName!);
+        value = sum / entries.length;
+        break;
+      }
+      case AggregationEntriesType.MAX: {
+        value = getMax(entries, valueName!);
+        break;
+      }
+      case AggregationEntriesType.MIN: {
+        value = getMin(entries, valueName!);
+        break;
+      }
+      case AggregationEntriesType.SUM: {
+        value = getSum(entries, valueName!);
+        break;
+      }
     }
-
     return {
       outputs: {
         value
@@ -58,19 +65,11 @@ export const AggregateEntriesNode: ServerNodeDef<
   }
 };
 
-const getValue = async (
-  type: 'avg' | 'sum' | 'min' | 'max',
-  dsId: string,
-  valueName: string,
-  reqContext: ApolloContext
-): Promise<number> => {
-  const entryColl = getEntryCollection(dsId, reqContext.db);
+const getSum = (values: Values, valueName: string) =>
+  values.map(n => n[valueName!]).reduce((a, b) => a + b, 0);
 
-  const value = await entryColl
-    .aggregate([
-      { $group: { _id: null, value: { [`$${type}`]: `$values.${valueName}` } } }
-    ])
-    .next();
+const getMin = (values: Values, valueName: string) =>
+  values.map(n => n[valueName!]).reduce((a, b) => (a > b ? b : a), 0);
 
-  return (value as any).value;
-};
+const getMax = (values: Values, valueName: string) =>
+  values.map(n => n[valueName!]).reduce((a, b) => (a > b ? a : b), 0);

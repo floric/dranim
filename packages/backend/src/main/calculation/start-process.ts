@@ -105,6 +105,7 @@ const doCalculation = async (
       durationMs
     );
   } catch (err) {
+    console.error(err);
     Raven.captureException(err);
     await updateFinishedProcess(
       processId,

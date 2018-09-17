@@ -144,12 +144,10 @@ describe.only('Entries Utils', () => {
     });
     (getEntriesCount as jest.Mock).mockResolvedValue(250);
 
-    const res = await processEntries(
-      VALID_OBJECT_ID,
-      VALID_OBJECT_ID,
-      processFn,
-      { db: null, userId: '' }
-    );
+    const res = await processEntries(VALID_OBJECT_ID, processFn, {
+      db: null,
+      userId: ''
+    });
     expect(processFn).toHaveBeenCalledTimes(250);
     expect(res).toBeUndefined();
   });

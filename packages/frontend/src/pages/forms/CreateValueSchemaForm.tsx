@@ -35,7 +35,7 @@ class CreateValueSchemaFormImpl extends Component<
 
   private handleSubmit = (e: FormEvent<any>) => {
     e.preventDefault();
-    const { form } = this.props;
+    const { form, handleCreateValueSchema } = this.props;
     form.validateFields(async (err, values) => {
       if (err) {
         return;
@@ -44,6 +44,7 @@ class CreateValueSchemaFormImpl extends Component<
       const name = form.getFieldValue('name');
       const type = form.getFieldValue('type');
       const required = form.getFieldValue('required');
+      const unique = form.getFieldValue('unique');
 
       let fallback = '';
       switch (type) {
@@ -65,20 +66,23 @@ class CreateValueSchemaFormImpl extends Component<
         default:
           throw new Error('Unsupported value schema type!');
       }
+      if (fallback == null) {
+        fallback = '';
+      }
 
-      await this.setState({
+      this.setState({
         saving: true
       });
 
-      await this.props.handleCreateValueSchema({
+      await handleCreateValueSchema({
         name,
         type,
         required,
-        fallback,
-        unique: type === DataType.STRING ? form.getFieldValue('unique') : false
+        fallback: JSON.stringify(fallback),
+        unique: type === DataType.STRING ? unique : false
       });
 
-      await this.setState({
+      this.setState({
         saving: false
       });
     });
@@ -134,8 +138,8 @@ class CreateValueSchemaFormImpl extends Component<
   private renderRequired = ({ getFieldDecorator }: WrappedFormUtils) => (
     <Form.Item label="Required">
       {getFieldDecorator('required', {
-        initialValue: false
-      })(<Checkbox />)}
+        initialValue: true
+      })(<Checkbox defaultChecked />)}
     </Form.Item>
   );
 
@@ -153,17 +157,22 @@ class CreateValueSchemaFormImpl extends Component<
       form: { getFieldsError, getFieldValue }
     } = this.props;
     const valueType = getFieldValue('type');
+    const unique = getFieldValue('required');
 
     return (
       <Form layout="inline" onSubmit={this.handleSubmit}>
         {this.renderName(form)}
         {this.renderType(form)}
 
-        {valueType === DataType.BOOLEAN && renderBooleanInput(form)}
-        {valueType === DataType.STRING && renderStringInput(form)}
-        {valueType === DataType.DATETIME && renderDatetimeInput(form)}
-        {valueType === DataType.TIME && renderTimeInput(form)}
-        {valueType === DataType.NUMBER && renderNumberInput(form)}
+        {unique === false ? (
+          <>
+            {valueType === DataType.BOOLEAN && renderBooleanInput(form)}
+            {valueType === DataType.STRING && renderStringInput(form)}
+            {valueType === DataType.DATETIME && renderDatetimeInput(form)}
+            {valueType === DataType.TIME && renderTimeInput(form)}
+            {valueType === DataType.NUMBER && renderNumberInput(form)}
+          </>
+        ) : null}
 
         {this.renderRequired(form)}
         {valueType === DataType.STRING && this.renderUnique(form)}
@@ -201,7 +210,7 @@ const renderStringInput = ({ getFieldDecorator }: WrappedFormUtils) => (
 const renderDatetimeInput = ({ getFieldDecorator }: WrappedFormUtils) => (
   <Form.Item label="Fallback">
     {getFieldDecorator('fallbackDatetime', {
-      initialValue: moment(),
+      initialValue: moment.utc(),
       rules: [{ required: true, message: 'Please specify a value.' }]
     })(
       <DatePicker
@@ -216,7 +225,7 @@ const renderDatetimeInput = ({ getFieldDecorator }: WrappedFormUtils) => (
 const renderTimeInput = ({ getFieldDecorator }: WrappedFormUtils) => (
   <Form.Item label="Fallback">
     {getFieldDecorator('fallbackTime', {
-      initialValue: moment(),
+      initialValue: moment.utc(),
       rules: [{ required: true, message: 'Please specify a value.' }]
     })(<TimePicker placeholder="Select Time" />)}
   </Form.Item>

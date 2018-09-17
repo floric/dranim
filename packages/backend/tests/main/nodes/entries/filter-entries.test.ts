@@ -3,29 +3,19 @@ import {
   Dataset,
   DatasetSocket,
   DataType,
-  Entry,
   FilterEntriesNodeDef,
   SocketState,
   ValueSchema
 } from '@masterthesis/shared';
 
-import { createUniqueDatasetName } from '../../../../src/main/calculation/utils';
 import { FilterEntriesNode } from '../../../../src/main/nodes/entries/filter-entries';
-import {
-  getDynamicEntryContextInputs,
-  processEntries
-} from '../../../../src/main/nodes/entries/utils';
-import {
-  createDataset,
-  tryGetDataset
-} from '../../../../src/main/workspace/dataset';
-import { createEntry } from '../../../../src/main/workspace/entry';
-import { NeverGoHereError, NODE, VALID_OBJECT_ID } from '../../../test-utils';
+import { getDynamicEntryContextInputs } from '../../../../src/main/nodes/entries/utils';
+import { tryGetDataset } from '../../../../src/main/workspace/dataset';
+import { NeverGoHereError, NODE } from '../../../test-utils';
 
 jest.mock('@masterthesis/shared');
 jest.mock('../../../../src/main/nodes/entries/utils');
 jest.mock('../../../../src/main/workspace/dataset');
-jest.mock('../../../../src/main/workspace/entry');
 jest.mock('../../../../src/main/calculation/utils');
 
 describe('FilterEntriesNode', () => {
@@ -45,31 +35,23 @@ describe('FilterEntriesNode', () => {
     ).toBeDefined();
   });
 
-  test('should create new DS and do changes on this one', async () => {
-    const oldDs: Dataset = {
-      id: VALID_OBJECT_ID,
-      created: '',
-      description: '',
-      valueschemas: [],
-      name: 'Old DS',
-      workspaceId: 'CDE'
-    };
-    const newDs: Dataset = {
-      id: 'ABC',
-      created: '',
-      description: '',
-      valueschemas: [],
-      name: 'New DS',
-      workspaceId: 'CDE'
-    };
-    (createUniqueDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
-    (processEntries as jest.Mock).mockImplementation(() => Promise.resolve());
-    (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
-    (createDataset as jest.Mock).mockResolvedValue(newDs);
-
+  test('should filter entries', async () => {
     const res = await FilterEntriesNode.onNodeExecution(
       {},
-      { dataset: { datasetId: oldDs.id } },
+      {
+        dataset: {
+          entries: [{ test: 9 }],
+          schema: [
+            {
+              name: 'test',
+              unique: false,
+              required: false,
+              fallback: '',
+              type: DataType.NUMBER
+            }
+          ]
+        }
+      },
       {
         reqContext: { db: null, userId: '' },
         node: NODE,
@@ -77,7 +59,16 @@ describe('FilterEntriesNode', () => {
           Promise.resolve({ outputs: { keepEntry: true } })
       }
     );
-    expect(res.outputs.dataset.datasetId).toBe(newDs.id);
+    expect(res.outputs.dataset.entries).toEqual([{ test: 9 }]);
+    expect(res.outputs.dataset.schema).toEqual([
+      {
+        name: 'test',
+        unique: false,
+        required: false,
+        fallback: '',
+        type: DataType.NUMBER
+      }
+    ]);
     expect(res.results).toBeUndefined();
   });
 
@@ -186,14 +177,6 @@ describe('FilterEntriesNode', () => {
       unique: false,
       required: true
     };
-    const oldDs: Dataset = {
-      id: VALID_OBJECT_ID,
-      created: '',
-      description: '',
-      valueschemas: [vs],
-      name: 'Old DS',
-      workspaceId: 'CDE'
-    };
     const newDs: Dataset = {
       id: 'ABC',
       created: '',
@@ -202,32 +185,13 @@ describe('FilterEntriesNode', () => {
       name: 'New DS',
       workspaceId: 'CDE'
     };
-    const entryA: Entry = {
-      id: 'eA',
-      values: { [vs.name]: 1 }
-    };
-    const entryB: Entry = {
-      id: 'eB',
-      values: { [vs.name]: 15 }
-    };
-    const entryC: Entry = {
-      id: 'eC',
-      values: { [vs.name]: 2 }
-    };
-    (createUniqueDatasetName as jest.Mock).mockReturnValue('EditEntries-123');
-    (tryGetDataset as jest.Mock).mockResolvedValue(oldDs);
-    (createDataset as jest.Mock).mockResolvedValue(newDs);
-    (processEntries as jest.Mock).mockImplementation(
-      async (a, b, processFn) => {
-        await processFn(entryA);
-        await processFn(entryB);
-        await processFn(entryC);
-      }
-    );
+    const entryA = { [vs.name]: 1 };
+    const entryB = { [vs.name]: 15 };
+    const entryC = { [vs.name]: 2 };
 
     const res = await FilterEntriesNode.onNodeExecution(
       {},
-      { dataset: { datasetId: oldDs.id } },
+      { dataset: { entries: [entryA, entryB, entryC], schema: [vs] } },
       {
         reqContext: { db: null, userId: '' },
         node: NODE,
@@ -237,40 +201,6 @@ describe('FilterEntriesNode', () => {
           })
       }
     );
-    expect(res.outputs.dataset.datasetId).toBe(newDs.id);
-    expect(createEntry as jest.Mock).toHaveBeenCalledTimes(2);
-    expect(createEntry as jest.Mock).toHaveBeenCalledWith(
-      newDs.id,
-      {
-        [vs.name]: 1
-      },
-      { db: null, userId: '' }
-    );
-    expect(createEntry as jest.Mock).toHaveBeenCalledWith(
-      newDs.id,
-      {
-        [vs.name]: 2
-      },
-      { db: null, userId: '' }
-    );
-  });
-
-  test('should throw errors for missing context', async () => {
-    (tryGetDataset as jest.Mock).mockImplementation(() => {
-      throw new Error('Unknown dataset source');
-    });
-    try {
-      await FilterEntriesNode.onNodeExecution(
-        {},
-        { dataset: { datasetId: VALID_OBJECT_ID } },
-        {
-          reqContext: { db: null, userId: '' },
-          node: NODE
-        }
-      );
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Unknown dataset source');
-    }
+    expect(res.outputs.dataset.entries).toEqual([{ val: 1 }, { val: 2 }]);
   });
 });

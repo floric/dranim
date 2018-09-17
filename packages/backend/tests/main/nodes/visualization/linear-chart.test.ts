@@ -8,12 +8,9 @@ import {
   ValueSchema
 } from '@masterthesis/shared';
 
-import {
-  getDynamicEntryContextInputs,
-  processEntries
-} from '../../../../src/main/nodes/entries/utils';
+import { getDynamicEntryContextInputs } from '../../../../src/main/nodes/entries/utils';
 import { LinearChartNode } from '../../../../src/main/nodes/visualizations/linear-chart';
-import { NODE, VALID_OBJECT_ID } from '../../../test-utils';
+import { NODE } from '../../../test-utils';
 
 jest.mock('../../../../src/main/nodes/entries/utils');
 
@@ -127,17 +124,10 @@ describe('LinearChart', () => {
       id: 'eC',
       values: { [vs.name]: 2 }
     };
-    (processEntries as jest.Mock).mockImplementation(
-      async (a, b, processFn) => {
-        await processFn(entryA);
-        await processFn(entryB);
-        await processFn(entryC);
-      }
-    );
 
     const res = await LinearChartNode.onNodeExecution(
       { name: 'a', type: LinearChartType.BAR, description: '' },
-      { dataset: { datasetId: VALID_OBJECT_ID } },
+      { dataset: { entries: [entryA, entryB, entryC], schema: [vs] } },
       {
         reqContext: { db: null, userId: '' },
         node: NODE,
@@ -156,6 +146,59 @@ describe('LinearChart', () => {
         type: DataType.VIS,
         value: {
           type: LinearChartType.BAR,
+          values: [
+            { label: 'test', value: 9 },
+            { label: 'test', value: 9 },
+            { label: 'test', value: 9 }
+          ]
+        },
+        workspaceId: NODE.workspaceId
+      }
+    });
+  });
+
+  test('should create result with default type', async () => {
+    const vs: ValueSchema = {
+      name: 'val',
+      type: DataType.NUMBER,
+      fallback: '',
+      unique: false,
+      required: true
+    };
+    const entryA: Entry = {
+      id: 'eA',
+      values: { [vs.name]: 1 }
+    };
+    const entryB: Entry = {
+      id: 'eB',
+      values: { [vs.name]: 15 }
+    };
+    const entryC: Entry = {
+      id: 'eC',
+      values: { [vs.name]: 2 }
+    };
+
+    const res = await LinearChartNode.onNodeExecution(
+      { name: 'a', type: null, description: '' },
+      { dataset: { entries: [entryA, entryB, entryC], schema: [vs] } },
+      {
+        reqContext: { db: null, userId: '' },
+        node: NODE,
+        contextFnExecution: () =>
+          Promise.resolve({
+            outputs: { label: 'test', value: 9 }
+          })
+      }
+    );
+
+    expect(res).toEqual({
+      outputs: {},
+      results: {
+        description: '',
+        name: 'a',
+        type: DataType.VIS,
+        value: {
+          type: LinearChartType.COLUMN,
           values: [
             { label: 'test', value: 9 },
             { label: 'test', value: 9 },

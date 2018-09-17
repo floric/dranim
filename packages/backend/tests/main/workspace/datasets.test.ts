@@ -86,6 +86,14 @@ describe('Dataset', () => {
     expect(unknownDs).toBe(null);
   });
 
+  test('should return null for invalid ID', async () => {
+    const ds = await getDataset('test', {
+      db,
+      userId: ''
+    });
+    expect(ds).toEqual(null);
+  });
+
   test('should add valueschema', async () => {
     const newDs = await createDataset('test', {
       db,

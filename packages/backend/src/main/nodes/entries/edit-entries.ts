@@ -1,6 +1,5 @@
 import {
   allAreDefinedAndPresent,
-  ApolloContext,
   EditEntriesNodeDef,
   EditEntriesNodeForm,
   ForEachEntryNodeInputs,
@@ -8,17 +7,10 @@ import {
   ServerNodeDefWithContextFn,
   SocketDef,
   SocketState,
-  ValueSchema
+  Values
 } from '@masterthesis/shared';
 
-import { createUniqueDatasetName } from '../../calculation/utils';
-import {
-  addValueSchema,
-  createDataset,
-  tryGetDataset
-} from '../../workspace/dataset';
-import { createEntry } from '../../workspace/entry';
-import { getDynamicEntryContextInputs, processEntries } from './utils';
+import { getDynamicEntryContextInputs } from './utils';
 
 export const EditEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
@@ -49,7 +41,7 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
     return dynOutputs;
   },
   transformInputDefsToContextInputDefs: getDynamicEntryContextInputs,
-  onMetaExecution: async (form, inputs, db) => {
+  onMetaExecution: async (form, inputs) => {
     if (!allAreDefinedAndPresent(inputs)) {
       return { dataset: { content: { schema: [] }, isPresent: false } };
     }
@@ -63,48 +55,20 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
       }
     };
   },
-  onNodeExecution: async (
-    form,
-    inputs,
-    { reqContext, contextFnExecution, node: { workspaceId, id } }
-  ) => {
-    const [oldDs, newDs] = await Promise.all([
-      tryGetDataset(inputs.dataset.datasetId, reqContext),
-      createDataset(
-        createUniqueDatasetName(EditEntriesNodeDef.type, id),
-        reqContext,
-        workspaceId
-      )
-    ]);
-
-    await addDynamicSchemas(
-      newDs.id,
-      form.values || oldDs.valueschemas,
-      reqContext
-    );
-
-    await processEntries(
-      inputs.dataset.datasetId,
-      id,
-      async entry => {
-        const result = await contextFnExecution!(entry.values);
-        await createEntry(newDs.id, result.outputs, reqContext);
-      },
-      reqContext
-    );
+  onNodeExecution: async (form, inputs, { contextFnExecution }) => {
+    const entries: Array<Values> = [];
+    for (const e of inputs.dataset.entries) {
+      const res = await contextFnExecution!(e);
+      entries.push(res.outputs);
+    }
 
     return {
       outputs: {
         dataset: {
-          datasetId: newDs.id
+          entries,
+          schema: form.values || inputs.dataset.schema
         }
       }
     };
   }
 };
-
-const addDynamicSchemas = (
-  dsId: string,
-  formValues: Array<ValueSchema>,
-  reqContext: ApolloContext
-) => Promise.all(formValues.map(f => addValueSchema(dsId, f, reqContext)));

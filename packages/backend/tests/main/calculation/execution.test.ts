@@ -535,34 +535,4 @@ describe('Execution', () => {
     });
     expect(res).toEqual({ outputs: { a: { x: 1 } } });
   });
-
-  test('should throw error', async () => {
-    const node: NodeInstance = {
-      id: 'node',
-      contextIds: [],
-      form: [],
-      inputs: [],
-      outputs: [],
-      type: ContextNodeType.INPUT,
-      workspaceId: VALID_OBJECT_ID,
-      x: 0,
-      y: 0,
-      state: NodeState.VALID,
-      variables: {}
-    };
-    (tryGetNode as jest.Mock).mockResolvedValue(node);
-    (tryGetCalculation as jest.Mock).mockResolvedValue({
-      state: ProcessState.PROCESSING
-    });
-
-    try {
-      await executeNode(node, VALID_OBJECT_ID, {
-        db: null,
-        userId: ''
-      });
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Context needs context inputs');
-    }
-  });
 });

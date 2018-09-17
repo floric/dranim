@@ -9,7 +9,8 @@ import {
 } from '@masterthesis/shared';
 
 import { isOutputFormValid } from '../../calculation/utils';
-import { saveTemporaryDataset, tryGetDataset } from '../../workspace/dataset';
+import { addValueSchema, createDataset } from '../../workspace/dataset';
+import { createManyEntries } from '../../workspace/entry';
 
 export const DatasetOutputNode: ServerNodeDef<
   DatasetOutputNodeInputs,
@@ -25,8 +26,13 @@ export const DatasetOutputNode: ServerNodeDef<
     inputs,
     { reqContext, node: { workspaceId } }
   ) => {
-    const ds = await tryGetDataset(inputs.dataset.datasetId, reqContext);
-    await saveTemporaryDataset(ds.id, form.name!, reqContext);
+    const ds = await createDataset(form.name!, reqContext);
+    for (const s of inputs.dataset.schema) {
+      await addValueSchema(ds.id, s, reqContext);
+    }
+
+    await createManyEntries(ds.id, inputs.dataset.entries, reqContext);
+
     return {
       outputs: {},
       results: {

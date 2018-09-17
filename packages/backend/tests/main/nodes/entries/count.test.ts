@@ -1,11 +1,6 @@
-import { CountEntriesNodeDef, Dataset } from '@masterthesis/shared';
+import { CountEntriesNodeDef, DataType } from '@masterthesis/shared';
 
 import { CountEntriesNode } from '../../../../src/main/nodes/entries/count';
-import { tryGetDataset } from '../../../../src/main/workspace/dataset';
-import { getEntriesCount } from '../../../../src/main/workspace/entry';
-
-jest.mock('../../../../src/main/workspace/dataset');
-jest.mock('../../../../src/main/workspace/entry');
 
 describe('CountEntriesNode', () => {
   beforeEach(() => {
@@ -19,23 +14,25 @@ describe('CountEntriesNode', () => {
   });
 
   test('should count entries', async () => {
-    const ds: Dataset = {
-      id: '1',
-      created: '',
-      description: '',
-      name: 'name',
-      workspaceId: '1',
-      valueschemas: []
-    };
-    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
-    (getEntriesCount as jest.Mock).mockResolvedValue(123);
-
     const res = await CountEntriesNode.onNodeExecution(
       {},
-      { dataset: { datasetId: '1' } },
+      {
+        dataset: {
+          entries: [{ test: 1 }, { test: 2 }],
+          schema: [
+            {
+              name: 'test',
+              unique: false,
+              required: true,
+              fallback: '0',
+              type: DataType.NUMBER
+            }
+          ]
+        }
+      },
       { node: null, reqContext: { db: null, userId: '' } }
     );
-    expect(res).toEqual({ outputs: { count: 123 } });
+    expect(res).toEqual({ outputs: { count: 2 } });
   });
 
   test('should have invalid meta', async () => {

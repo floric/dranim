@@ -1,4 +1,10 @@
-import { ApolloContext, Dataset, Entry, Values } from '@masterthesis/shared';
+import {
+  ApolloContext,
+  Dataset,
+  DataType,
+  Entry,
+  Values
+} from '@masterthesis/shared';
 import { Collection, Db, ObjectID } from 'mongodb';
 
 import { tryGetDataset } from './dataset';
@@ -96,6 +102,12 @@ export const createEntry = async (
     checkForUnsupportedValues(ds, keys);
   }
 
+  ds.valueschemas
+    .filter(v => v.type === DataType.TIME || v.type === DataType.DATETIME)
+    .forEach(c => {
+      values[c.name] = new Date(values[c.name]);
+    });
+
   try {
     const collection = getEntryCollection(ds.id, reqContext.db);
     const res = await collection.insertOne({
@@ -124,6 +136,33 @@ export const createEntry = async (
   }
 };
 
+export const createManyEntries = async (
+  datasetId: string,
+  values: Array<Values>,
+  reqContext: ApolloContext
+): Promise<boolean> => {
+  if (values.length === 0) {
+    return true;
+  }
+
+  const ds = await tryGetDataset(datasetId, reqContext);
+
+  try {
+    const collection = getEntryCollection(ds.id, reqContext.db);
+    const res = await collection.insertMany(values.map(n => ({ values: n })), {
+      ordered: false
+    });
+
+    if (res.insertedCount !== values.length) {
+      throw new Error('Writing dataset failed');
+    }
+
+    return true;
+  } catch (err) {
+    throw new UploadEntryError('Writing entry failed.', 'internal-write-error');
+  }
+};
+
 const checkForInvalidOrEmptyValues = (values: Values) => {
   const valuesArr = Object.entries(values);
   if (valuesArr.length === 0) {
@@ -132,7 +171,7 @@ const checkForInvalidOrEmptyValues = (values: Values) => {
 
   valuesArr.forEach(v => {
     if (!v || v[0] == null || v[1] == null) {
-      throw new Error('Value malformed');
+      throw new Error(`Value malformed: ${JSON.stringify(values)}`);
     }
   });
 };

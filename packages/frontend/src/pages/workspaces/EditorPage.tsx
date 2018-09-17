@@ -10,32 +10,37 @@ import { QueryResult } from 'react-apollo';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { HandledQuery } from '../../components/HandledQuery';
-import { DATASETS, WORKSPACE_NODE_SELECTION } from '../../graphql/editor-page';
+import { CALCULATIONS, DASETS_AND_WORKSPACES } from '../../graphql/editor-page';
 import { Editor } from './components/Editor';
 import { UnknownWorkspaceCard } from './DetailPage';
 
 type DatasetsResult = {
   datasets: Array<GQLDataset>;
+  workspace: GQLWorkspace | null;
 };
 
 type SelectedNodeResult = {
-  workspace: GQLWorkspace | null;
   calculations: Array<GQLCalculationProcess>;
 };
 
 const ComposedQueries = adopt<
   {
-    datasets: QueryResult<DatasetsResult>;
-    selectedNode: QueryResult<SelectedNodeResult>;
+    all: QueryResult<DatasetsResult>;
+    calculations: QueryResult<SelectedNodeResult>;
   },
   { workspaceId: string }
 >({
-  datasets: ({ render }) => (
-    <HandledQuery<DatasetsResult> query={DATASETS}>{render}</HandledQuery>
+  all: ({ render, workspaceId }) => (
+    <HandledQuery<DatasetsResult, { workspaceId: string }>
+      query={DASETS_AND_WORKSPACES}
+      variables={{ workspaceId }}
+    >
+      {render}
+    </HandledQuery>
   ),
-  selectedNode: ({ render, workspaceId }) => (
+  calculations: ({ render, workspaceId }) => (
     <HandledQuery<SelectedNodeResult, { workspaceId: string }>
-      query={WORKSPACE_NODE_SELECTION}
+      query={CALCULATIONS}
       variables={{ workspaceId }}
     >
       {render}
@@ -54,11 +59,12 @@ const WorkspaceEditorPage: SFC<WorkspaceEditorPageProps> = ({
 }) => (
   <ComposedQueries workspaceId={workspaceId}>
     {({
-      datasets: {
-        data: { datasets }
+      all: {
+        data: { workspace, datasets },
+        refetch
       },
-      selectedNode: {
-        data: { workspace, calculations },
+      calculations: {
+        data: { calculations },
         startPolling,
         stopPolling
       }
@@ -69,8 +75,9 @@ const WorkspaceEditorPage: SFC<WorkspaceEditorPageProps> = ({
 
       return (
         <Editor
-          startPolling={startPolling}
-          stopPolling={stopPolling}
+          refreshAll={refetch}
+          startCalculationPolling={startPolling}
+          stopCalculationPolling={stopPolling}
           calculations={calculations}
           datasets={datasets}
           workspace={workspace}

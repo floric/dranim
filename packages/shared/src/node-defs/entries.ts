@@ -100,8 +100,7 @@ export enum AggregationEntriesType {
   SUM = 'Sum',
   AVG = 'Average',
   MIN = 'Minimum',
-  MAX = 'Maximum',
-  MED = 'Median'
+  MAX = 'Maximum'
 }
 
 export interface AggregateEntriesNodeInputs {

@@ -4,13 +4,13 @@ import {
   DataType,
   IOValues,
   NodeInstance,
-  parseNodeForm
+  parseNodeForm,
+  DatasetRef
 } from '@masterthesis/shared';
 
 import { Log } from '../../logging';
 import { getMetaInputs } from '../calculation/meta-execution';
 import { tryGetNodeType } from '../nodes/all-nodes';
-import { getDataset } from '../workspace/dataset';
 import { getInputDefs } from '../workspace/nodes-detail';
 
 export const isNodeInMetaValid = async (
@@ -51,15 +51,14 @@ export const areNodeInputsValid = async (
 };
 
 const validateDataset = async (
-  datasetRef: any,
+  datasetRef: DatasetRef,
   reqContext: ApolloContext
 ): Promise<boolean> => {
-  const ds = await getDataset(datasetRef.datasetId, reqContext);
-  if (!ds) {
+  if (!datasetRef.entries || !datasetRef.schema) {
     return false;
   }
 
-  return true;
+  return datasetRef.schema.length > 0;
 };
 
 const validateNumber = (value: any) => {
