@@ -65,8 +65,6 @@ export interface CalculationProcess {
   id: string;
   start: string;
   finish: string | null;
-  processedOutputs: number;
-  totalOutputs: number;
   state: ProcessState;
 }
 

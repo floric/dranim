@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import {
   GQLCalculationProcess,
   GQLDataset,
+  GQLNodeInstance,
   GQLWorkspace,
   ProcessState
 } from '@masterthesis/shared';
@@ -55,28 +56,28 @@ const ComposedMutations = adopt({
   )
 });
 
-const POLLING_FREQUENCY = 5000;
+const POLLING_FREQUENCY = 1000;
+const POLLING_FALLOF = 1.1;
 
 export type EditorProps = {
   workspace: GQLWorkspace;
   calculations: Array<GQLCalculationProcess>;
   datasets: Array<GQLDataset>;
+  nodes: Array<GQLNodeInstance>;
   workspaceId: string;
-  startCalculationPolling: (msFrequency: number) => void;
-  stopCalculationPolling: () => void;
+  refetchCalculations: () => Promise<any>;
   refreshAll: () => Promise<any>;
 };
 
 type EditorState = {
+  currentFrequency: number;
   isPolling: boolean;
 };
 
 const getNotificationIcon = (state: ProcessState) =>
-  state === ProcessState.SUCCESSFUL
+  state === ProcessState.SUCCESSFUL || state === ProcessState.CANCELED
     ? 'success'
-    : state === ProcessState.CANCELED
-      ? 'info'
-      : 'error';
+    : 'error';
 const getNotificationContent = (state: ProcessState) =>
   state === ProcessState.SUCCESSFUL
     ? 'Calculation finished successfully.'
@@ -84,46 +85,57 @@ const getNotificationContent = (state: ProcessState) =>
       ? 'Calculation canceled successfully.'
       : 'Calculation has failed.';
 
-export class Editor extends Component<EditorProps, EditorState> {
-  public state: EditorState = { isPolling: false };
+const getNotificationTitle = (state: ProcessState) =>
+  state === ProcessState.SUCCESSFUL
+    ? 'Calculation finished.'
+    : state === ProcessState.CANCELED
+      ? 'Calculation canceled.'
+      : 'Calculation failed.';
 
-  private get runningCalculations() {
-    return this.props.calculations.filter(
-      n => n.state === ProcessState.PROCESSING
-    );
-  }
+const getRunningCalculations = (calculations: Array<GQLCalculationProcess>) =>
+  calculations.filter(n => n.state === ProcessState.PROCESSING);
+
+export class Editor extends Component<EditorProps, EditorState> {
+  public state: EditorState = {
+    currentFrequency: POLLING_FREQUENCY,
+    isPolling: false
+  };
 
   public componentDidMount() {
-    this.startOrStopPolling(this.props);
+    this.increaseTimeout();
   }
 
-  public componentWillReceiveProps(nextProps: EditorProps) {
-    this.startOrStopPolling(nextProps);
-  }
+  private increaseTimeout = async () => {
+    const { currentFrequency } = this.state;
+    const { refetchCalculations, calculations } = this.props;
+    const runningCalcs = getRunningCalculations(calculations);
+    if (runningCalcs.length === 0) {
+      return;
+    }
 
-  private startOrStopPolling(props: EditorProps) {
-    const {
-      stopCalculationPolling,
-      startCalculationPolling,
-      refreshAll,
-      calculations
-    } = props;
+    this.setState({
+      currentFrequency: currentFrequency * POLLING_FALLOF,
+      isPolling: true
+    });
+
+    await refetchCalculations();
+    await sleep(currentFrequency);
+    this.increaseTimeout();
+  };
+
+  public componentDidUpdate() {
+    const { refreshAll, calculations } = this.props;
     const { isPolling } = this.state;
-    if (this.runningCalculations.length === 0 && isPolling) {
+    const runningCalcs = getRunningCalculations(calculations);
+    if (runningCalcs.length === 0 && isPolling) {
       this.setState({ isPolling: false });
       const state = calculations[calculations.length - 1].state;
       showNotificationWithIcon({
-        title: 'Calculation finished',
+        title: getNotificationTitle(state),
         content: getNotificationContent(state),
         icon: getNotificationIcon(state)
       });
-      stopCalculationPolling();
       refreshAll();
-    } else if (this.runningCalculations.length > 0 && !isPolling) {
-      this.setState({
-        isPolling: true
-      });
-      startCalculationPolling(POLLING_FREQUENCY);
     }
   }
 
@@ -132,12 +144,16 @@ export class Editor extends Component<EditorProps, EditorState> {
       datasets,
       workspace,
       workspaceId,
-      startCalculationPolling
+      nodes,
+      calculations
     } = this.props;
-
-    if (this.runningCalculations.length > 0) {
+    const runningCalcs = getRunningCalculations(calculations);
+    if (runningCalcs.length > 0) {
       return (
-        <ProcessRunningCard currentCalculation={this.runningCalculations[0]} />
+        <ProcessRunningCard
+          nodes={nodes}
+          currentCalculation={runningCalcs[0]}
+        />
       );
     }
 
@@ -170,15 +186,15 @@ export class Editor extends Component<EditorProps, EditorState> {
               addOrUpdateFormValue,
               workspaceId
             )}
-            onStartCalculation={handleStartCalculation(
-              startCalculation,
-              startCalculationPolling,
-              workspaceId,
-              POLLING_FREQUENCY
-            )}
+            onStartCalculation={async () => {
+              await handleStartCalculation(startCalculation, workspaceId)();
+              await this.increaseTimeout();
+            }}
           />
         )}
       </ComposedMutations>
     );
   }
 }
+
+const sleep = (ms: number) => new Promise(resolve => setInterval(resolve, ms));

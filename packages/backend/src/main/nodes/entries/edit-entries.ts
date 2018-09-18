@@ -10,7 +10,10 @@ import {
   Values
 } from '@masterthesis/shared';
 
-import { getDynamicEntryContextInputs } from './utils';
+import {
+  getDynamicEntryContextInputs,
+  updateNodeProgressWithSleep
+} from './utils';
 
 export const EditEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
@@ -55,11 +58,23 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
       }
     };
   },
-  onNodeExecution: async (form, inputs, { contextFnExecution }) => {
+  onNodeExecution: async (
+    form,
+    inputs,
+    { contextFnExecution, node: { id }, reqContext }
+  ) => {
     const entries: Array<Values> = [];
+    let i = 0;
     for (const e of inputs.dataset.entries) {
       const res = await contextFnExecution!(e);
       entries.push(res.outputs);
+      await updateNodeProgressWithSleep(
+        i,
+        inputs.dataset.entries.length,
+        id,
+        reqContext
+      );
+      i += 1;
     }
 
     return {

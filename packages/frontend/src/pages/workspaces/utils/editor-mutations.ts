@@ -6,13 +6,11 @@ import { tryOperation } from '../../../utils/form';
 
 export const handleStartCalculation = (
   startCalculation: MutationFn<any, any>,
-  startPolling: (msFreq: number) => any,
-  workspaceId: string,
-  pollingFrequency: number
+  workspaceId: string
 ) => () =>
   tryOperation({
-    op: async () => {
-      await startCalculation({
+    op: () =>
+      startCalculation({
         variables: { workspaceId },
         awaitRefetchQueries: true,
         refetchQueries: [
@@ -23,17 +21,13 @@ export const handleStartCalculation = (
                   id
                   start
                   state
-                  processedOutputs
-                  totalOutputs
                 }
               }
             `,
             variables: { workspaceId }
           }
         ]
-      });
-      startPolling(pollingFrequency);
-    },
+      }),
     successTitle: () => 'Process started',
     successMessage: () => 'This might take several minutes',
     failedTitle: 'Process start has failed'

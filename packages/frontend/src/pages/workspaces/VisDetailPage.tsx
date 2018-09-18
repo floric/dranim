@@ -27,8 +27,6 @@ const WORKSPACE = gql`
       start
       finish
       state
-      processedOutputs
-      totalOutputs
     }
   }
 `;

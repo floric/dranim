@@ -63,8 +63,16 @@ export const CALCULATIONS = gql`
       id
       start
       state
-      processedOutputs
-      totalOutputs
+    }
+    workspace(id: $workspaceId) {
+      id
+      nodes {
+        id
+        type
+        hasContextFn
+        progress
+        contextIds
+      }
     }
   }
 `;

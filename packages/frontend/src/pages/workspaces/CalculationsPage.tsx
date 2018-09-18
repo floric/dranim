@@ -19,8 +19,6 @@ const CALCULATIONS = gql`
       start
       finish
       state
-      processedOutputs
-      totalOutputs
     }
   }
 `;
@@ -41,11 +39,7 @@ const calculationsToDatasource = (calculations: Array<CalculationProcess>) =>
             <Icon type="exclamation-circle" />
           )}
         </Tooltip>
-      ),
-      results: {
-        processed: e.processedOutputs.toLocaleString(),
-        total: e.totalOutputs.toLocaleString()
-      }
+      )
     }));
 
 const schemasColumns = [
@@ -59,17 +53,6 @@ const schemasColumns = [
     dataIndex: 'time',
     key: 'time',
     render: time => <ProcessTime start={time.start} finish={time.finish} />
-  },
-  {
-    title: 'Results',
-    dataIndex: 'results',
-    key: 'results',
-    render: u => (
-      <Row>
-        <Col xs={8}>{`${u.processed} Processed`}</Col>
-        <Col xs={8}>{`${u.total} Total`}</Col>
-      </Row>
-    )
   }
 ];
 

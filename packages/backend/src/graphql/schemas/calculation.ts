@@ -4,8 +4,6 @@ const CalculationProcessDef = `
     start: Date!
     finish: Date
     state: String!
-    processedOutputs: Int!
-    totalOutputs: Int!
   }
 `;
 

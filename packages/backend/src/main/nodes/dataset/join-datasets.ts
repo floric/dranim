@@ -1,5 +1,6 @@
 import {
   allAreDefinedAndPresent,
+  ApolloContext,
   JoinDatasetsNodeDef,
   JoinDatasetsNodeForm,
   JoinDatasetsNodeInputs,
@@ -9,6 +10,7 @@ import {
   ValueSchema
 } from '@masterthesis/shared';
 
+import { updateNodeProgressWithSleep } from '../entries/utils';
 import { validateNonEmptyString } from '../string/utils';
 
 export const JoinDatasetsNode: ServerNodeDef<
@@ -44,7 +46,7 @@ export const JoinDatasetsNode: ServerNodeDef<
       }
     };
   },
-  onNodeExecution: async (form, inputs) => {
+  onNodeExecution: async (form, inputs, { node: { id }, reqContext }) => {
     checkSchemas(
       inputs.datasetA.schema,
       inputs.datasetB.schema,
@@ -56,7 +58,9 @@ export const JoinDatasetsNode: ServerNodeDef<
       inputs.datasetA.entries,
       inputs.datasetB.entries,
       form.valueA!,
-      form.valueB!
+      form.valueB!,
+      id,
+      reqContext
     );
     const schema = getJoinedSchemas(
       inputs.datasetA.schema,
@@ -78,10 +82,13 @@ const combineEntries = (
   entriesA: Array<Values>,
   entriesB: Array<Values>,
   valueA: string,
-  valueB: string
+  valueB: string,
+  nodeId: string,
+  reqContext: ApolloContext
 ) =>
-  new Promise<Array<Values>>(resolve => {
+  new Promise<Array<Values>>(async resolve => {
     const entries: Array<Values> = [];
+    let i = 0;
 
     for (const eA of entriesA) {
       const valueFromA = eA[valueA!];
@@ -91,6 +98,8 @@ const combineEntries = (
           entries.push(merge(eA, eB));
         }
       }
+      await updateNodeProgressWithSleep(i, entriesA.length, nodeId, reqContext);
+      i += 1;
     }
 
     resolve(entries);

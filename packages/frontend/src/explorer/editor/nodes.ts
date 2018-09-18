@@ -62,7 +62,7 @@ export const renderNode = (
   ].map(p =>
     renderSockets(p.defs, n, server, state, p.type, socketsMap, editorFunctions)
   );
-  const stateRect = getStateRect(height, n.progress, n.state);
+  const stateRect = getStateRect(height, n.state);
 
   nodeGroup.add(bgRect);
   nodeGroup.add(nodeTitle);
@@ -131,13 +131,9 @@ const getContextFunctionNote = () =>
     x: NODE_WIDTH / 2 - 5
   });
 
-const getStateRect = (
-  height: number,
-  progress: number | null,
-  state: NodeState
-) =>
+const getStateRect = (height: number, state: NodeState) =>
   new Rect({
-    width: progress !== null ? progress * NODE_WIDTH : NODE_WIDTH,
+    width: NODE_WIDTH,
     height: STATE_LINE_HEIGHT,
     x: 0,
     y: height - STATE_LINE_HEIGHT,

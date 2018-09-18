@@ -3,6 +3,7 @@ import {
   DatasetMeta,
   Entry,
   FormValues,
+  sleep,
   SocketDef,
   SocketDefs,
   SocketMetaDef,
@@ -14,9 +15,11 @@ import PromiseQueue from 'promise-queue';
 import { Log } from '../../../logging';
 import { addValueSchema } from '../../workspace/dataset';
 import { getEntryCollection } from '../../workspace/entry';
+import { updateProgress } from '../../workspace/nodes-detail';
 
 export const CHECK_FREQUENCY = 5000;
 export const CONCURRENT_JOBS_COUNT = 4;
+const PROGRESS_UPDATE_FREQUENCY = 5000;
 
 export const copySchemas = (
   schemas: Array<ValueSchema>,
@@ -89,4 +92,20 @@ export const processDocumentsWithCursor = async <T = any>(
   }
 
   await cursor.close();
+};
+
+export const updateNodeProgressWithSleep = async (
+  i: number,
+  total: number,
+  nodeId: string,
+  reqContext: ApolloContext
+) => {
+  if (i % PROGRESS_UPDATE_FREQUENCY === 0) {
+    const progress = (i * 100) / total;
+    await Promise.all([
+      updateProgress(nodeId, progress, reqContext),
+      sleep(100)
+    ]);
+    Log.info('Update progress');
+  }
 };
