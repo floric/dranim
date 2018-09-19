@@ -11,8 +11,8 @@ import {
 } from '../../../src/main/workspace/upload';
 import {
   getTestMongoDb,
-  VALID_OBJECT_ID,
-  NeverGoHereError
+  NeverGoHereError,
+  VALID_OBJECT_ID
 } from '../../test-utils';
 
 let conn;

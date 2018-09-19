@@ -62,6 +62,7 @@ export const handleNodeCreate = (
                     y
                     state
                     contextIds
+                    progress
                     inputs {
                       name
                       connectionId

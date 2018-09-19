@@ -2,6 +2,7 @@ import React, { Component, createRef, RefObject } from 'react';
 
 import {
   Colors,
+  GQLDataset,
   GQLWorkspace,
   NodeState,
   SocketInstance
@@ -34,6 +35,7 @@ const filterTreeNode = (inputValue: string, path: Array<{ index: string }>) => {
 };
 
 export interface ExplorerEditorProps {
+  datasets: Array<GQLDataset>;
   workspace: GQLWorkspace;
   onNodeCreate: (
     type: string,

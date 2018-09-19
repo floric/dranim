@@ -45,7 +45,7 @@ const renderCreateExampleButton = (type: string) => (
                 ]
               }),
             successTitle: () => 'Example created',
-            successMessage: () => 'Example data successfully created',
+            successMessage: () => 'Example data created successfully.',
             failedMessage:
               'Example creation failed. Some part might have been created nontheless',
             failedTitle: 'Example creation failed'
@@ -90,8 +90,9 @@ const StartPage: SFC = () => (
           <Divider />
           <h3>Birthdays</h3>
           <p>
-            This Dataset contains 2500 randomly generated entries with persons.
-            Each entry consists of a name, a random value as well as a birthday.
+            This Dataset contains 25.000 randomly generated entries with
+            persons. Each entry consists of a name, a random value as well as a
+            birthday.
           </p>
           {renderCreateExampleButton('Birthdays')}
           <Divider />

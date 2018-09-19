@@ -12,6 +12,7 @@ export const Log: Logger = createLogger({
     new transports.File({ filename: 'combined.log' }),
     new transports.Console({
       format: format.combine(format.timestamp(), logFormat),
+      silent: process.env.NODE_ENV === 'test',
       level: process.env.NODE_ENV !== 'production' ? 'verbose' : 'info'
     })
   ]

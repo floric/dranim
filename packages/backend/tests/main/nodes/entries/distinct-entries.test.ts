@@ -372,7 +372,7 @@ describe('DistinctEntriesNode', () => {
   test('should call context function for distinct values but only for existing datasets', async () => {
     const contextFnExecution = jest.fn(e => ({
       outputs: {
-        value: e.filteredDataset
+        value: e.filteredDataset.entries
           .map(n => n.otherVal)
           .reduce((a, b) => a + b, 0),
         'source-distinct': e['source-distinct'],
@@ -453,15 +453,40 @@ describe('DistinctEntriesNode', () => {
 
     expect(contextFnExecution).toHaveBeenCalledWith({
       'destination-distinct': 'c',
-      filteredDataset: [
-        { destination: 'c', otherVal: 7, source: 'b' },
-        { destination: 'c', otherVal: 3, source: 'b' }
-      ],
+      filteredDataset: {
+        schema: [
+          {
+            fallback: '',
+            name: 'source',
+            required: true,
+            type: 'String',
+            unique: false
+          },
+          {
+            fallback: '',
+            name: 'destination',
+            required: true,
+            type: 'String',
+            unique: false
+          },
+          {
+            fallback: '0',
+            name: 'otherVal',
+            required: true,
+            type: 'Number',
+            unique: false
+          }
+        ],
+        entries: [
+          { destination: 'c', otherVal: 7, source: 'b' },
+          { destination: 'c', otherVal: 3, source: 'b' }
+        ]
+      },
       'source-distinct': 'b'
     });
     expect(contextFnExecution).not.toHaveBeenCalledWith({
       'destination-distinct': 'c',
-      filteredDataset: [],
+      filteredDataset: expect.anything(),
       'source-distinct': 'a'
     });
 
@@ -470,39 +495,29 @@ describe('DistinctEntriesNode', () => {
         dataset: {
           entries: [
             {
-              outputs: {
-                'destination-distinct': 'b',
-                'source-distinct': 'a',
-                value: 5
-              }
+              'destination-distinct': 'b',
+              'source-distinct': 'a',
+              value: 5
             },
             {
-              outputs: {
-                'destination-distinct': 'a',
-                'source-distinct': 'a',
-                value: 6
-              }
+              'destination-distinct': 'a',
+              'source-distinct': 'a',
+              value: 6
             },
             {
-              outputs: {
-                'destination-distinct': 'a',
-                'source-distinct': 'b',
-                value: 3
-              }
+              'destination-distinct': 'a',
+              'source-distinct': 'b',
+              value: 3
             },
             {
-              outputs: {
-                'destination-distinct': 'a',
-                'source-distinct': 'c',
-                value: 2
-              }
+              'destination-distinct': 'a',
+              'source-distinct': 'c',
+              value: 2
             },
             {
-              outputs: {
-                'destination-distinct': 'c',
-                'source-distinct': 'b',
-                value: 10
-              }
+              'destination-distinct': 'c',
+              'source-distinct': 'b',
+              value: 10
             }
           ],
           schema: [

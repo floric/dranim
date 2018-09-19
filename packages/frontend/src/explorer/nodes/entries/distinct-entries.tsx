@@ -50,6 +50,7 @@ export const DistinctEntriesNode: ClientNodeDef<
 
     return (
       <>
+        <h4>Distinct Values</h4>
         <Row style={{ marginBottom: '1rem' }} gutter={8}>
           <Col xs={24} lg={18} xxl={14}>
             <Select
@@ -95,6 +96,7 @@ export const DistinctEntriesNode: ClientNodeDef<
           </Col>
         </Row>
         {values.map(v => renderValue(v, setFieldsValue, touchForm, values))}
+        <h4>Additional Values</h4>
         <Row style={{ marginBottom: '1rem' }} gutter={8}>
           <Col xs={24} lg={6} xxl={6}>
             <Input

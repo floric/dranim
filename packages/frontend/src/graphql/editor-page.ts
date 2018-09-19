@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 
-export const DASETS_AND_WORKSPACES = gql`
-  query workspace($workspaceId: ID!) {
+export const DATASETS_AND_WORKSPACES = gql`
+  query datasetsAndWorkspaces($workspaceId: ID!) {
     datasets {
       id
       name
@@ -57,7 +57,7 @@ export const DASETS_AND_WORKSPACES = gql`
 `;
 
 export const CALCULATIONS = gql`
-  query workspace($workspaceId: ID!) {
+  query calculations($workspaceId: ID!) {
     calculations(workspaceId: $workspaceId) {
       id
       start

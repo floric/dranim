@@ -1,11 +1,11 @@
 import {
   ApolloContext,
   ContextNodeType,
+  DatasetRef,
   DataType,
   IOValues,
   NodeInstance,
-  parseNodeForm,
-  DatasetRef
+  parseNodeForm
 } from '@masterthesis/shared';
 
 import { Log } from '../../logging';

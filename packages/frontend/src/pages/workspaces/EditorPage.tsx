@@ -10,7 +10,10 @@ import { QueryResult } from 'react-apollo';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { HandledQuery } from '../../components/HandledQuery';
-import { CALCULATIONS, DASETS_AND_WORKSPACES } from '../../graphql/editor-page';
+import {
+  CALCULATIONS,
+  DATASETS_AND_WORKSPACES
+} from '../../graphql/editor-page';
 import { Editor } from './components/Editor';
 import { UnknownWorkspaceCard } from './DetailPage';
 
@@ -33,7 +36,7 @@ const ComposedQueries = adopt<
 >({
   all: ({ render, workspaceId }) => (
     <HandledQuery<DatasetsResult, { workspaceId: string }>
-      query={DASETS_AND_WORKSPACES}
+      query={DATASETS_AND_WORKSPACES}
       variables={{ workspaceId }}
     >
       {render}
@@ -84,7 +87,6 @@ const WorkspaceEditorPage: SFC<WorkspaceEditorPageProps> = ({
           nodes={progressNodes}
           datasets={datasets}
           workspace={workspace}
-          workspaceId={workspaceId}
         />
       );
     }}

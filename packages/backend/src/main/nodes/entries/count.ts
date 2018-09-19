@@ -18,7 +18,7 @@ export const CountEntriesNode: ServerNodeDef<
 
     return { count: { content: {}, isPresent: true } };
   },
-  onNodeExecution: async (form, inputs, { reqContext }) => {
+  onNodeExecution: async (form, inputs) => {
     return {
       outputs: {
         count: inputs.dataset.entries.length

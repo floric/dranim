@@ -64,7 +64,6 @@ export type EditorProps = {
   calculations: Array<GQLCalculationProcess>;
   datasets: Array<GQLDataset>;
   nodes: Array<GQLNodeInstance>;
-  workspaceId: string;
   refetchCalculations: () => Promise<any>;
   refreshAll: () => Promise<any>;
 };
@@ -140,7 +139,13 @@ export class Editor extends Component<EditorProps, EditorState> {
   }
 
   public render() {
-    const { workspace, workspaceId, nodes, calculations } = this.props;
+    const {
+      workspace,
+      workspace: { id },
+      nodes,
+      calculations,
+      datasets
+    } = this.props;
     const runningCalcs = getRunningCalculations(calculations);
     if (runningCalcs.length > 0) {
       return (
@@ -163,24 +168,19 @@ export class Editor extends Component<EditorProps, EditorState> {
           updateNodePosition
         }) => (
           <ExplorerEditor
+            datasets={datasets}
             workspace={workspace}
-            onNodeCreate={handleNodeCreate(createNode, workspaceId)}
-            onNodeDelete={handleNodeDelete(deleteNode, workspaceId)}
-            onNodeUpdate={handleNodeUpdate(updateNodePosition, workspaceId)}
-            onConnectionCreate={handleConnectionCreate(
-              createConnection,
-              workspaceId
-            )}
-            onConnectionDelete={handleConnectionDelete(
-              deleteConnection,
-              workspaceId
-            )}
+            onNodeCreate={handleNodeCreate(createNode, id)}
+            onNodeDelete={handleNodeDelete(deleteNode, id)}
+            onNodeUpdate={handleNodeUpdate(updateNodePosition, id)}
+            onConnectionCreate={handleConnectionCreate(createConnection, id)}
+            onConnectionDelete={handleConnectionDelete(deleteConnection, id)}
             onAddOrUpdateFormValue={handleAddOrUpdateFormValue(
               addOrUpdateFormValue,
-              workspaceId
+              id
             )}
             onStartCalculation={async () => {
-              await handleStartCalculation(startCalculation, workspaceId)();
+              await handleStartCalculation(startCalculation, id)();
               await this.increaseTimeout();
             }}
           />

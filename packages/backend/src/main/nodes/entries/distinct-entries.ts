@@ -1,5 +1,6 @@
 import {
   allAreDefinedAndPresent,
+  DatasetRef,
   DataType,
   DistinctEntriesNodeDef,
   DistinctEntriesNodeForm,
@@ -121,16 +122,20 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
     let i = 0;
 
     for (const distinctE of permutations) {
-      const filteredDataset = await getFilteredDataset(
+      const filteredDatasetEntries = await getFilteredDataset(
         inputs.dataset.entries,
         distinctE,
         names
       );
 
-      if (filteredDataset.length > 0) {
-        const args = getContextArguments(distinctE, filteredDataset, names);
+      if (filteredDatasetEntries.length > 0) {
+        const args = getContextArguments(
+          distinctE,
+          { entries: filteredDatasetEntries, schema: inputs.dataset.schema },
+          names
+        );
         const res = await contextFnExecution!(args);
-        entries.push(res);
+        entries.push(res.outputs);
       }
 
       await updateNodeProgressWithSleep(
@@ -166,12 +171,10 @@ const getPermutations = (args: Array<Array<string>>) =>
 
 const getContextArguments = (
   distinctE: Values,
-  filteredDataset: Array<Values>,
+  filteredDataset: DatasetRef,
   names: Array<string>
 ) => {
-  const args: { filteredDataset: Array<Values>; [name: string]: any } = {
-    filteredDataset: []
-  };
+  const args: { [name: string]: any } = {};
   distinctE.forEach((c, i) => (args[getDistinctValueName(names[i])] = c));
   args.filteredDataset = filteredDataset;
   return args;

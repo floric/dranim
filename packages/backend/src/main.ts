@@ -19,7 +19,6 @@ import { generateErrorResponse, registerRoutes } from './routes';
 export const GRAPHQL_ROUTE = '/graphql';
 
 export interface MainOptions {
-  env: string;
   port: number;
   frontendDomain: string;
 }
@@ -29,7 +28,7 @@ const CORS = (options: MainOptions) => ({
   maxAge: 600,
   credentials: true,
   origin:
-    options.env === 'production'
+    process.env.NODE_ENV === 'production'
       ? `https://${options.frontendDomain}`
       : 'http://localhost:1234'
 });
@@ -78,7 +77,7 @@ export const main = async (options: MainOptions) => {
     schema: Schema,
     context: context => ({ db, userId: context.req!.session!.userId }),
     engine:
-      options.env === 'production'
+      process.env.NODE_ENV === 'production'
         ? {
             apiKey: process.env.APOLLO_ENGINE_KEY
           }
@@ -112,11 +111,9 @@ export const initDb = async (db: Db) => {
 };
 
 const PORT = parseInt(process.env.PORT || '80', 10);
-const NODE_ENV = process.env.NODE_ENV !== 'production' ? 'dev' : 'production';
 const FRONTEND_DOMAIN = process.env.FRONTEND_DOMAIN || 'localhost:1234';
 
 main({
-  env: NODE_ENV,
   frontendDomain: FRONTEND_DOMAIN!,
   port: PORT
 });

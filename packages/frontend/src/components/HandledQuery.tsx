@@ -28,6 +28,10 @@ export class HandledQuery<Data, Variables = null> extends Component<
             return <UnknownErrorCard error={error} />;
           }
 
+          if (Object.keys(result.data).length === 0) {
+            throw new Error('Empty query result should never happen.');
+          }
+
           return children(result);
         }}
       </Query>
