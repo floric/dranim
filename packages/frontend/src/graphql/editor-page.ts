@@ -37,7 +37,6 @@ export const DASETS_AND_WORKSPACES = gql`
         }
         metaInputs
         hasContextFn
-        progress
         inputSockets
         outputSockets
       }
@@ -68,8 +67,6 @@ export const CALCULATIONS = gql`
       id
       nodes {
         id
-        type
-        hasContextFn
         progress
         contextIds
       }

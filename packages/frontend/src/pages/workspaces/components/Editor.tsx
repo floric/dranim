@@ -12,6 +12,15 @@ import { Mutation } from 'react-apollo';
 
 import { ExplorerEditor } from '../../../explorer/ExplorerEditor';
 import {
+  handleAddOrUpdateFormValue,
+  handleConnectionCreate,
+  handleConnectionDelete,
+  handleNodeCreate,
+  handleNodeDelete,
+  handleNodeUpdate,
+  handleStartCalculation
+} from '../../../graphql/editor-mutations';
+import {
   ADD_OR_UPDATE_FORM_VALUE,
   CREATE_CONNECTION,
   CREATE_NODE,
@@ -21,15 +30,6 @@ import {
   UPDATE_NODE
 } from '../../../graphql/editor-page';
 import { showNotificationWithIcon } from '../../../utils/form';
-import {
-  handleAddOrUpdateFormValue,
-  handleConnectionCreate,
-  handleConnectionDelete,
-  handleNodeCreate,
-  handleNodeDelete,
-  handleNodeUpdate,
-  handleStartCalculation
-} from '../utils/editor-mutations';
 import { ProcessRunningCard } from './ProcessRunningCard';
 
 const ComposedMutations = adopt({
@@ -140,13 +140,7 @@ export class Editor extends Component<EditorProps, EditorState> {
   }
 
   public render() {
-    const {
-      datasets,
-      workspace,
-      workspaceId,
-      nodes,
-      calculations
-    } = this.props;
+    const { workspace, workspaceId, nodes, calculations } = this.props;
     const runningCalcs = getRunningCalculations(calculations);
     if (runningCalcs.length > 0) {
       return (
@@ -170,7 +164,6 @@ export class Editor extends Component<EditorProps, EditorState> {
         }) => (
           <ExplorerEditor
             workspace={workspace}
-            datasets={datasets}
             onNodeCreate={handleNodeCreate(createNode, workspaceId)}
             onNodeDelete={handleNodeDelete(deleteNode, workspaceId)}
             onNodeUpdate={handleNodeUpdate(updateNodePosition, workspaceId)}

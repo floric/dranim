@@ -25,11 +25,14 @@ import {
 import {
   addConnection,
   addOrUpdateFormValue,
+  addOrUpdateVariable,
+  deleteVariable,
   getContextInputDefs,
   getContextOutputDefs,
   getInputDefs,
   getOutputDefs,
-  removeConnection
+  removeConnection,
+  updateProgress
 } from '../../../src/main/workspace/nodes-detail';
 import { updateStates } from '../../../src/main/workspace/nodes-state';
 import {
@@ -730,7 +733,7 @@ describe('Node Details', () => {
     );
   });
 
-  /*test('should add or update variable', async () => {
+  test('should add or update variable', async () => {
     const node: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
@@ -759,10 +762,9 @@ describe('Node Details', () => {
     expect(res).toBe(true);
     expect(updateStates).toHaveBeenCalledTimes(1);
     expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(1);
-    
-  });*/
+  });
 
-  /*test('should delete variable', async () => {
+  test('should delete variable', async () => {
     const node: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
@@ -794,7 +796,7 @@ describe('Node Details', () => {
         $unset: { [`variables.123`]: '' }
       }
     );
-  });*/
+  });
 
   test('should also delete variable when deleting variable connection', async () => {
     const node: NodeInstance = {
@@ -845,5 +847,138 @@ describe('Node Details', () => {
         $unset: { [`variables.test`]: '' }
       }
     );
+  });
+
+  test('should update nodes progress', async () => {
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateOne: jest.fn(() => ({ modifiedCount: 1 }))
+    });
+    (tryGetNode as jest.Mock).mockResolvedValue(node);
+
+    const res = await updateProgress(node.id, 50, { db, userId: '' });
+    expect(res).toBe(true);
+
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(1);
+    expect(getNodesCollection(db).updateOne).toHaveBeenCalledWith(
+      { _id: new ObjectID(VALID_OBJECT_ID) },
+      {
+        $set: {
+          progress: 50
+        }
+      }
+    );
+  });
+
+  test('should not update nodes progress', async () => {
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [VALID_OBJECT_ID],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateOne: jest.fn()
+    });
+    (tryGetNode as jest.Mock).mockResolvedValue(node);
+
+    const res = await updateProgress(node.id, 50, { db, userId: '' });
+    expect(res).toBe(true);
+
+    expect(getNodesCollection(db).updateOne).not.toHaveBeenCalled();
+  });
+
+  test('should throw error for to high progress value', async () => {
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    (tryGetNode as jest.Mock).mockResolvedValue(node);
+
+    try {
+      await updateProgress(node.id, 101, { db, userId: '' });
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Progress value is invalid.');
+    }
+  });
+
+  test('should throw error for to low progress value', async () => {
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    (tryGetNode as jest.Mock).mockResolvedValue(node);
+
+    try {
+      await updateProgress(node.id, -0.1, { db, userId: '' });
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Progress value is invalid.');
+    }
+  });
+
+  test('should throw error for invalid update', async () => {
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: [],
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    (tryGetNode as jest.Mock).mockResolvedValue(node);
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateOne: jest.fn(() => ({ modifiedCount: 0 }))
+    });
+
+    try {
+      await updateProgress(node.id, 0, { db, userId: '' });
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Updating the progress has failed.');
+    }
   });
 });

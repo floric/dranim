@@ -2,7 +2,7 @@ import gql from 'graphql-tag';
 import { MutationFn } from 'react-apollo';
 
 import { SocketInstance } from '@masterthesis/shared';
-import { tryOperation } from '../../../utils/form';
+import { tryOperation } from '../utils/form';
 
 export const handleStartCalculation = (
   startCalculation: MutationFn<any, any>,
@@ -76,7 +76,6 @@ export const handleNodeCreate = (
                     }
                     metaInputs
                     hasContextFn
-                    progress
                     inputSockets
                     outputSockets
                   }
@@ -123,7 +122,6 @@ export const handleNodeDelete = (
                       value
                     }
                     metaInputs
-                    progress
                     inputSockets
                     outputSockets
                   }
@@ -210,7 +208,6 @@ export const handleConnectionCreate = (
                       value
                     }
                     metaInputs
-                    progress
                     inputSockets
                     outputSockets
                   }
@@ -265,7 +262,6 @@ export const handleConnectionDelete = (
                       connectionId
                     }
                     metaInputs
-                    progress
                     inputSockets
                     outputSockets
                   }
@@ -320,7 +316,6 @@ export const handleAddOrUpdateFormValue = (
                       value
                     }
                     metaInputs
-                    progress
                     inputSockets
                     outputSockets
                   }

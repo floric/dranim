@@ -39,7 +39,7 @@ jest.mock('../../../src/main/workspace/connections');
 jest.mock('../../../src/main/calculation/start-process');
 
 describe('Execution', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.resetAllMocks();
   });
 

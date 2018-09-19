@@ -304,13 +304,13 @@ export const updateProgress = async (
   progress: number,
   reqContext: ApolloContext
 ) => {
+  if (progress < 0 || progress > 100) {
+    throw new Error('Progress value is invalid.');
+  }
+
   const node = await tryGetNode(id, reqContext);
   if (node.contextIds.length > 0) {
     return true;
-  }
-
-  if (progress < 0 || progress > 100) {
-    throw new Error('Progress value is invalid.');
   }
 
   const collection = getNodesCollection(reqContext.db);

@@ -2,7 +2,6 @@ import React, { Component, createRef, RefObject } from 'react';
 
 import {
   Colors,
-  Dataset,
   GQLWorkspace,
   NodeState,
   SocketInstance
@@ -36,7 +35,6 @@ const filterTreeNode = (inputValue: string, path: Array<{ index: string }>) => {
 
 export interface ExplorerEditorProps {
   workspace: GQLWorkspace;
-  datasets: Array<Dataset>;
   onNodeCreate: (
     type: string,
     x: number,
@@ -93,17 +91,14 @@ export class ExplorerEditor extends Component<
     prevState: ExplorerEditorState
   ) {
     const {
-      workspace: { nodes, connections },
-      datasets
+      workspace: { nodes, connections }
     } = this.props;
     const {
-      workspace: { nodes: prevNodes, connections: prevConnections },
-      datasets: prevDatasets
+      workspace: { nodes: prevNodes, connections: prevConnections }
     } = prevProps;
 
     if (
       !deepEqual(nodes, prevNodes) ||
-      !deepEqual(datasets, prevDatasets) ||
       !deepEqual(connections, prevConnections) ||
       !deepEqual(prevState, this.state)
     ) {

@@ -9,13 +9,15 @@ import {
   copySchemas,
   getDynamicEntryContextInputs,
   processDocumentsWithCursor,
-  processEntries
+  processEntries,
+  updateNodeProgressWithSleep
 } from '../../../../src/main/nodes/entries/utils';
 import { addValueSchema } from '../../../../src/main/workspace/dataset';
 import {
   getEntriesCount,
   getEntryCollection
 } from '../../../../src/main/workspace/entry';
+import { updateProgress } from '../../../../src/main/workspace/nodes-detail';
 import { NeverGoHereError, VALID_OBJECT_ID } from '../../../test-utils';
 
 jest.mock('mongodb');
@@ -23,7 +25,13 @@ jest.mock('../../../../src/main/workspace/entry');
 jest.mock('../../../../src/main/workspace/nodes-detail');
 jest.mock('../../../../src/main/workspace/dataset');
 
+const reqContext = { db: null, userId: '' };
+
 describe.only('Entries Utils', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   test('should return empty inputs for missing dataset', async () => {
     let res = await getDynamicEntryContextInputs(
       {},
@@ -122,9 +130,7 @@ describe.only('Entries Utils', () => {
       id: 'eA',
       values: { [schemaA.name]: 'test', [schemaOnlyA.name]: true }
     };
-    const processFn = jest.fn(async () => {
-      //
-    });
+    const processFn = jest.fn();
     (getEntryCollection as jest.Mock).mockReturnValue({
       find: () => {
         let entriesToProces = 250;
@@ -144,10 +150,7 @@ describe.only('Entries Utils', () => {
     });
     (getEntriesCount as jest.Mock).mockResolvedValue(250);
 
-    const res = await processEntries(VALID_OBJECT_ID, processFn, {
-      db: null,
-      userId: ''
-    });
+    const res = await processEntries(VALID_OBJECT_ID, processFn, reqContext);
     expect(processFn).toHaveBeenCalledTimes(250);
     expect(res).toBeUndefined();
   });
@@ -174,6 +177,26 @@ describe.only('Entries Utils', () => {
         }
       },
       fn
+    );
+    expect(fn).toHaveBeenCalledTimes(100);
+    expect(fn).toHaveBeenCalledWith(123);
+  });
+
+  test('should be called five times with custom concurrency', async () => {
+    const counter = new Counter(100);
+    const fn = jest.fn();
+    await processDocumentsWithCursor(
+      {
+        close: () => Promise.resolve(),
+        hasNext: () => Promise.resolve(counter.value() > 0),
+        next: async () => {
+          counter.decrement();
+          await sleep(10);
+          return 123;
+        }
+      },
+      fn,
+      { concurrency: 1 }
     );
     expect(fn).toHaveBeenCalledTimes(100);
     expect(fn).toHaveBeenCalledWith(123);
@@ -219,9 +242,32 @@ describe.only('Entries Utils', () => {
         }
       ],
       VALID_OBJECT_ID,
-      { db: null, userId: '' }
+      reqContext
     );
     expect(res).toEqual([true, true]);
     expect(addValueSchema).toHaveBeenCalledTimes(2);
+  });
+
+  test('should not update progress and sleep', async () => {
+    await updateNodeProgressWithSleep(1, 500, VALID_OBJECT_ID, reqContext);
+
+    expect(updateProgress).not.toHaveBeenCalled();
+  });
+
+  test('should update progress and sleep', async () => {
+    await updateNodeProgressWithSleep(0, 10, VALID_OBJECT_ID, reqContext);
+
+    expect(updateProgress).toHaveBeenCalledTimes(1);
+    expect(updateProgress).toHaveBeenCalledWith(VALID_OBJECT_ID, 0, {
+      db: null,
+      userId: ''
+    });
+  });
+
+  test('should update progress and sleep', async () => {
+    await updateNodeProgressWithSleep(2, 10, VALID_OBJECT_ID, reqContext, 2);
+    await updateNodeProgressWithSleep(4, 10, VALID_OBJECT_ID, reqContext, 2);
+
+    expect(updateProgress).toHaveBeenCalledTimes(2);
   });
 });

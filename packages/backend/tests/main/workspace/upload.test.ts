@@ -9,7 +9,11 @@ import {
   getUpload,
   uploadEntriesCsv
 } from '../../../src/main/workspace/upload';
-import { getTestMongoDb, VALID_OBJECT_ID } from '../../test-utils';
+import {
+  getTestMongoDb,
+  VALID_OBJECT_ID,
+  NeverGoHereError
+} from '../../test-utils';
 
 let conn;
 let db: Db;
@@ -67,6 +71,26 @@ describe('Upload', () => {
 
     res = await getUpload('test', { db, userId: '' });
     expect(res).toBe(null);
+  });
+
+  test('should do upload with valid and invalid entries', async () => {
+    (tryGetDataset as jest.Mock).mockImplementation(() => {
+      throw new Error('Unknown DS');
+    });
+
+    try {
+      await uploadEntriesCsv(
+        [{ filename: 'test.csv', stream: new Counter() }],
+        VALID_OBJECT_ID,
+        {
+          db,
+          userId: ''
+        }
+      );
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Upload failed');
+    }
   });
 
   test('should do upload with valid and invalid entries', async () => {

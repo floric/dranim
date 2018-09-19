@@ -98,14 +98,15 @@ export const updateNodeProgressWithSleep = async (
   i: number,
   total: number,
   nodeId: string,
-  reqContext: ApolloContext
+  reqContext: ApolloContext,
+  updateFrequency: number = PROGRESS_UPDATE_FREQUENCY
 ) => {
-  if (i % PROGRESS_UPDATE_FREQUENCY === 0) {
+  if (i % updateFrequency === 0) {
     const progress = (i * 100) / total;
     await Promise.all([
       updateProgress(nodeId, progress, reqContext),
       sleep(100)
     ]);
-    Log.info('Update progress');
+    Log.info(`Updated progress of ${nodeId} to ${progress}`);
   }
 };
