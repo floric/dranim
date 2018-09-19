@@ -13,7 +13,7 @@ import { executeNode } from '../calculation/execution';
 import { addOrUpdateResult } from '../dashboards/results';
 import { getNodeType, hasNodeType } from '../nodes/all-nodes';
 import { clearGeneratedDatasets } from '../workspace/dataset';
-import { getAllNodes } from '../workspace/nodes';
+import { getAllNodes, resetProgress } from '../workspace/nodes';
 
 export const CANCEL_CHECKS_MS = 5000;
 
@@ -32,8 +32,6 @@ export const startProcess = async (
     start: new Date(),
     finish: null,
     workspaceId,
-    processedOutputs: 0,
-    totalOutputs: 0,
     state: ProcessState.STARTED
   });
 
@@ -69,15 +67,17 @@ const doCalculation = async (
       await getAllNodes(workspaceId, reqContext)
     );
 
-    await processCollection.updateOne(
-      { _id: new ObjectID(processId) },
-      {
-        $set: {
-          totalOutputs: outputNodes.length,
-          state: ProcessState.PROCESSING
+    await Promise.all([
+      resetProgress(workspaceId, reqContext),
+      processCollection.updateOne(
+        { _id: new ObjectID(processId) },
+        {
+          $set: {
+            state: ProcessState.PROCESSING
+          }
         }
-      }
-    );
+      )
+    ]);
 
     Log.info(`Started calculation ${processId}`);
 
@@ -161,18 +161,7 @@ const executeOutputNode = async (
   processId: string,
   reqContext: ApolloContext
 ): Promise<OutputResult<any> | null> => {
-  const processCollection = getCalculationsCollection(reqContext.db);
-
   const res = await executeNode(o, processId, reqContext);
-  await processCollection.updateOne(
-    { _id: new ObjectID(processId) },
-    {
-      $inc: {
-        processedOutputs: 1
-      }
-    }
-  );
-
   return res.results || null;
 };
 

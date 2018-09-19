@@ -2,17 +2,15 @@ import gql from 'graphql-tag';
 import { MutationFn } from 'react-apollo';
 
 import { SocketInstance } from '@masterthesis/shared';
-import { tryOperation } from '../../../utils/form';
+import { tryOperation } from '../utils/form';
 
 export const handleStartCalculation = (
   startCalculation: MutationFn<any, any>,
-  startPolling: (msFreq: number) => any,
-  workspaceId: string,
-  pollingFrequency: number
+  workspaceId: string
 ) => () =>
   tryOperation({
-    op: async () => {
-      await startCalculation({
+    op: () =>
+      startCalculation({
         variables: { workspaceId },
         awaitRefetchQueries: true,
         refetchQueries: [
@@ -23,17 +21,13 @@ export const handleStartCalculation = (
                   id
                   start
                   state
-                  processedOutputs
-                  totalOutputs
                 }
               }
             `,
             variables: { workspaceId }
           }
         ]
-      });
-      startPolling(pollingFrequency);
-    },
+      }),
     successTitle: () => 'Process started',
     successMessage: () => 'This might take several minutes',
     failedTitle: 'Process start has failed'
@@ -82,7 +76,6 @@ export const handleNodeCreate = (
                     }
                     metaInputs
                     hasContextFn
-                    progress
                     inputSockets
                     outputSockets
                   }
@@ -129,7 +122,6 @@ export const handleNodeDelete = (
                       value
                     }
                     metaInputs
-                    progress
                     inputSockets
                     outputSockets
                   }
@@ -216,7 +208,6 @@ export const handleConnectionCreate = (
                       value
                     }
                     metaInputs
-                    progress
                     inputSockets
                     outputSockets
                   }
@@ -271,7 +262,6 @@ export const handleConnectionDelete = (
                       connectionId
                     }
                     metaInputs
-                    progress
                     inputSockets
                     outputSockets
                   }
@@ -326,7 +316,6 @@ export const handleAddOrUpdateFormValue = (
                       value
                     }
                     metaInputs
-                    progress
                     inputSockets
                     outputSockets
                   }

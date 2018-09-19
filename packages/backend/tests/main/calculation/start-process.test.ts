@@ -86,8 +86,6 @@ describe('Start Process', () => {
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
     expect(newProcess.finish).toBeNull();
-    expect(newProcess.processedOutputs).toBe(0);
-    expect(newProcess.totalOutputs).toBe(0);
     expect(newProcess.start).toBeDefined();
 
     const processes = await getAllCalculations(ws.id, { db, userId: '' });
@@ -96,8 +94,6 @@ describe('Start Process', () => {
     const finishedProcess = processes[0];
     expect(finishedProcess.state).toBe(ProcessState.SUCCESSFUL);
     expect(finishedProcess.finish).toBeDefined();
-    expect(finishedProcess.processedOutputs).toBe(0);
-    expect(finishedProcess.totalOutputs).toBe(0);
     expect(finishedProcess.start).toBeDefined();
 
     expect((executeNode as jest.Mock).mock.calls.length).toBe(0);
@@ -158,8 +154,6 @@ describe('Start Process', () => {
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
     expect(newProcess.finish).toBeNull();
-    expect(newProcess.processedOutputs).toBe(0);
-    expect(newProcess.totalOutputs).toBe(0);
     expect(newProcess.start).toBeDefined();
 
     const processes = await getAllCalculations(ws.id, { db, userId: '' });
@@ -168,8 +162,6 @@ describe('Start Process', () => {
     const finishedProcess = processes[0];
     expect(finishedProcess.state).toBe(ProcessState.SUCCESSFUL);
     expect(finishedProcess.finish).toBeDefined();
-    expect(finishedProcess.processedOutputs).toBe(2);
-    expect(finishedProcess.totalOutputs).toBe(2);
     expect(finishedProcess.start).toBeDefined();
 
     expect((executeNode as jest.Mock).mock.calls.length).toBe(2);
@@ -244,8 +236,6 @@ describe('Start Process', () => {
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
     expect(newProcess.finish).toBeNull();
-    expect(newProcess.processedOutputs).toBe(0);
-    expect(newProcess.totalOutputs).toBe(0);
     expect(newProcess.start).toBeDefined();
 
     const processes = await getAllCalculations(ws.id, { db, userId: '' });
@@ -254,8 +244,6 @@ describe('Start Process', () => {
     const finishedProcess = processes[0];
     expect(finishedProcess.state).toBe(ProcessState.SUCCESSFUL);
     expect(finishedProcess.finish).toBeDefined();
-    expect(finishedProcess.processedOutputs).toBe(2);
-    expect(finishedProcess.totalOutputs).toBe(2);
     expect(finishedProcess.start).toBeDefined();
 
     expect(executeNode as jest.Mock).toHaveBeenCalledTimes(2);
@@ -348,8 +336,6 @@ describe('Start Process', () => {
 
     expect(newProcess.state).toBe(ProcessState.STARTED);
     expect(newProcess.finish).toBeNull();
-    expect(newProcess.processedOutputs).toBe(0);
-    expect(newProcess.totalOutputs).toBe(0);
     expect(newProcess.start).toBeDefined();
 
     const processes = await getAllCalculations(ws.id, { db, userId: '' });
@@ -358,8 +344,6 @@ describe('Start Process', () => {
     const finishedProcess = processes[0];
     expect(finishedProcess.state).toBe(ProcessState.ERROR);
     expect(finishedProcess.finish).toBeDefined();
-    expect(finishedProcess.processedOutputs).toBe(0);
-    expect(finishedProcess.totalOutputs).toBe(1);
     expect(finishedProcess.start).toBeDefined();
 
     expect(executeNode).toHaveBeenCalledTimes(1);
@@ -401,9 +385,7 @@ describe('Start Process', () => {
     expect(stopRes).toBe(true);
     expect(clearGeneratedDatasets).toHaveBeenCalledTimes(1);
     expect(otherRes).toEqual({
-      processedOutputs: 0,
       state: ProcessState.CANCELED,
-      totalOutputs: 1,
       userId: '',
       workspaceId: VALID_OBJECT_ID
     });
@@ -422,9 +404,7 @@ describe('Start Process', () => {
 
     expect(clearGeneratedDatasets).toHaveBeenCalled();
     expect(otherRes).toEqual({
-      processedOutputs: 0,
       state: ProcessState.SUCCESSFUL,
-      totalOutputs: 0,
       userId: '',
       workspaceId: VALID_OBJECT_ID
     });

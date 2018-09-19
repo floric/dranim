@@ -21,6 +21,7 @@ type DatasetsResult = {
 
 type SelectedNodeResult = {
   calculations: Array<GQLCalculationProcess>;
+  workspace: GQLWorkspace | null;
 };
 
 const ComposedQueries = adopt<
@@ -61,12 +62,14 @@ const WorkspaceEditorPage: SFC<WorkspaceEditorPageProps> = ({
     {({
       all: {
         data: { workspace, datasets },
-        refetch
+        refetch: refetchAll
       },
       calculations: {
-        data: { calculations },
-        startPolling,
-        stopPolling
+        data: {
+          calculations,
+          workspace: { nodes: progressNodes }
+        },
+        refetch: refetchCalculations
       }
     }) => {
       if (!workspace) {
@@ -75,10 +78,10 @@ const WorkspaceEditorPage: SFC<WorkspaceEditorPageProps> = ({
 
       return (
         <Editor
-          refreshAll={refetch}
-          startCalculationPolling={startPolling}
-          stopCalculationPolling={stopPolling}
+          refreshAll={refetchAll}
+          refetchCalculations={refetchCalculations}
           calculations={calculations}
+          nodes={progressNodes}
           datasets={datasets}
           workspace={workspace}
           workspaceId={workspaceId}

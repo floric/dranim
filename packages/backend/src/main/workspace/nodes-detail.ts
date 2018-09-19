@@ -298,3 +298,30 @@ export const deleteVariable = async (
   Log.info(`Deleted variable ${varId}`);
   return true;
 };
+
+export const updateProgress = async (
+  id: string,
+  progress: number,
+  reqContext: ApolloContext
+) => {
+  if (progress < 0 || progress > 100) {
+    throw new Error('Progress value is invalid.');
+  }
+
+  const node = await tryGetNode(id, reqContext);
+  if (node.contextIds.length > 0) {
+    return true;
+  }
+
+  const collection = getNodesCollection(reqContext.db);
+  const res = await collection.updateOne(
+    { _id: new ObjectID(node.id) },
+    { $set: { progress } }
+  );
+
+  if (res.modifiedCount !== 1) {
+    throw new Error('Updating the progress has failed.');
+  }
+
+  return true;
+};

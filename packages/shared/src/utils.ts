@@ -1,5 +1,3 @@
-const sleepPromise = require('sleep-promise');
-
 import {
   FormValue,
   FormValues,
@@ -28,7 +26,8 @@ export const parseNodeForm = (form: Array<FormValue>): FormValues<any> => {
 
 export const isNumeric = (n: any) => !isNaN(parseFloat(n)) && isFinite(n);
 
-export const sleep = (ms: number): Promise<void> => sleepPromise(ms);
+export const sleep = (ms: number) =>
+  new Promise<void>(resolve => setInterval(resolve, ms));
 
 export const hasContextFn = (
   nodeDef: ServerNodeDef | ServerNodeDefWithContextFn

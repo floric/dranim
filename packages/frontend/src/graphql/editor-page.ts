@@ -37,7 +37,6 @@ export const DASETS_AND_WORKSPACES = gql`
         }
         metaInputs
         hasContextFn
-        progress
         inputSockets
         outputSockets
       }
@@ -63,8 +62,14 @@ export const CALCULATIONS = gql`
       id
       start
       state
-      processedOutputs
-      totalOutputs
+    }
+    workspace(id: $workspaceId) {
+      id
+      nodes {
+        id
+        progress
+        contextIds
+      }
     }
   }
 `;

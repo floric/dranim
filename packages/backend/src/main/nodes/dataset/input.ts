@@ -7,7 +7,8 @@ import {
 } from '@masterthesis/shared';
 
 import { getDataset, tryGetDataset } from '../../workspace/dataset';
-import { processEntries } from '../entries/utils';
+import { getEntriesCount } from '../../workspace/entry';
+import { processEntries, updateNodeProgressWithSleep } from '../entries/utils';
 
 export const DatasetInputNode: ServerNodeDef<
   {},
@@ -39,14 +40,20 @@ export const DatasetInputNode: ServerNodeDef<
       }
     };
   },
-  onNodeExecution: async (form, inputs, { reqContext, node }) => {
-    const ds = await tryGetDataset(form.dataset!, reqContext);
+  onNodeExecution: async (form, inputs, { reqContext, node: { id } }) => {
+    const [ds, entriesCount] = await Promise.all([
+      tryGetDataset(form.dataset!, reqContext),
+      getEntriesCount(form.dataset!, reqContext)
+    ]);
 
+    let i = 0;
     const entries: Array<Values> = [];
     await processEntries(
       form.dataset!,
       async e => {
         entries.push(e.values);
+        await updateNodeProgressWithSleep(i, entriesCount, id, reqContext);
+        i += 1;
       },
       reqContext
     );

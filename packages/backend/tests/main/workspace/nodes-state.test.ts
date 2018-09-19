@@ -39,7 +39,7 @@ jest.mock('../../../src/main/calculation/validation');
 jest.mock('../../../src/main/workspace/connections');
 
 describe('Node State', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.resetAllMocks();
   });
 

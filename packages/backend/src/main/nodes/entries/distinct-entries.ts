@@ -12,6 +12,7 @@ import {
   ValueSchema
 } from '@masterthesis/shared';
 import Combinatorics from 'js-combinatorics';
+import { updateNodeProgressWithSleep } from './utils';
 
 const getDistinctValueName = (vsName: string) => `${vsName}-distinct`;
 
@@ -101,7 +102,11 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
       }
     };
   },
-  onNodeExecution: async (form, inputs, { contextFnExecution }) => {
+  onNodeExecution: async (
+    form,
+    inputs,
+    { contextFnExecution, node: { id }, reqContext }
+  ) => {
     const { distinctSchemas, addedSchemas } = form;
 
     const distinctValuesArr = getDistinctValuesArr(
@@ -113,6 +118,7 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
     const permutations = await getPermutations(
       distinctValuesArr.map(n => Array.from(n[1].values()))
     );
+    let i = 0;
 
     for (const distinctE of permutations) {
       const filteredDataset = await getFilteredDataset(
@@ -126,6 +132,14 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
         const res = await contextFnExecution!(args);
         entries.push(res);
       }
+
+      await updateNodeProgressWithSleep(
+        i,
+        inputs.dataset.entries.length,
+        id,
+        reqContext
+      );
+      i += 1;
     }
 
     return {
