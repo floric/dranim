@@ -927,7 +927,7 @@ describe('Node Details', () => {
       await updateProgress(node.id, 101, { db, userId: '' });
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Progress value is invalid.');
+      expect(err.message).toBe('Progress value is invalid: 101');
     }
   });
 
@@ -951,7 +951,7 @@ describe('Node Details', () => {
       await updateProgress(node.id, -0.1, { db, userId: '' });
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Progress value is invalid.');
+      expect(err.message).toBe('Progress value is invalid: -0.1');
     }
   });
 

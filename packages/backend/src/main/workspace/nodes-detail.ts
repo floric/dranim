@@ -317,7 +317,7 @@ export const updateProgress = async (
   reqContext: ApolloContext
 ) => {
   if (progress < 0 || progress > 100) {
-    throw new Error('Progress value is invalid.');
+    throw new Error(`Progress value is invalid: ${progress}`);
   }
 
   const node = await tryGetNode(id, reqContext);

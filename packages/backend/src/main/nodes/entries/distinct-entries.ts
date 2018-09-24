@@ -138,12 +138,7 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
         entries.push(res.outputs);
       }
 
-      await updateNodeProgressWithSleep(
-        i,
-        inputs.dataset.entries.length,
-        id,
-        reqContext
-      );
+      await updateNodeProgressWithSleep(i, permutations.length, id, reqContext);
       i++;
     }
 
