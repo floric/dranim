@@ -19,7 +19,7 @@ import { updateProgress } from '../../workspace/nodes-detail';
 
 export const CHECK_FREQUENCY = 5000;
 export const CONCURRENT_JOBS_COUNT = 4;
-const PROGRESS_UPDATE_FREQUENCY = 5000;
+const PROGRESS_UPDATE_FREQUENCY = 10000;
 
 export const copySchemas = (
   schemas: Array<ValueSchema>,

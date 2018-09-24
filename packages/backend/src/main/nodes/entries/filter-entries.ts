@@ -58,7 +58,7 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
       if (keepEntry) {
         entries.push(e);
       }
-      i += 1;
+      i++;
     }
 
     return {

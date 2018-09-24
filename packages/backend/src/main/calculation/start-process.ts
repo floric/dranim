@@ -14,6 +14,7 @@ import { addOrUpdateResult } from '../dashboards/results';
 import { getNodeType, hasNodeType } from '../nodes/all-nodes';
 import { clearGeneratedDatasets } from '../workspace/dataset';
 import { getAllNodes, resetProgress } from '../workspace/nodes';
+import { InMemoryCache } from './inmemory-cache';
 
 export const CANCEL_CHECKS_MS = 5000;
 
@@ -161,7 +162,9 @@ const executeOutputNode = async (
   processId: string,
   reqContext: ApolloContext
 ): Promise<OutputResult<any> | null> => {
-  const res = await executeNode(o, processId, reqContext);
+  const cache = new InMemoryCache();
+  const res = await executeNode(o, processId, reqContext, {}, cache);
+  cache.logUsage();
   return res.results || null;
 };
 

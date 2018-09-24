@@ -59,7 +59,7 @@ export interface DatasetOutputNodeInputs {
   dataset: DatasetRef;
 }
 
-export const DatasetOutputNodeDef: NodeDef<DatasetOutputNodeInputs, {}> = {
+export const DatasetOutputNodeDef: NodeDef<DatasetOutputNodeInputs> = {
   name: 'Output Dataset',
   type: 'DatasetOutput',
   inputs: {

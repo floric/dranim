@@ -13,10 +13,7 @@ import {
   SocketState
 } from '@masterthesis/shared';
 
-import {
-  executeNode,
-  executeNodeWithId
-} from '../../../src/main/calculation/execution';
+import { executeNode } from '../../../src/main/calculation/execution';
 import { tryGetCalculation } from '../../../src/main/calculation/start-process';
 import {
   areNodeInputsValid,
@@ -82,14 +79,10 @@ describe('Execution', () => {
       state: ProcessState.PROCESSING
     });
 
-    const { outputs, results } = await executeNodeWithId(
-      VALID_OBJECT_ID,
-      VALID_OBJECT_ID,
-      {
-        db: null,
-        userId: ''
-      }
-    );
+    const { outputs, results } = await executeNode(node, VALID_OBJECT_ID, {
+      db: null,
+      userId: ''
+    });
 
     expect(outputs).toBeDefined();
     expect(results).toBeUndefined();
@@ -101,9 +94,9 @@ describe('Execution', () => {
       id: 'nodeA',
       contextIds: [],
       form: [{ name: 'value', value: JSON.stringify('test') }],
-      inputs: [{ name: 'a', connectionId }],
-      outputs: [],
-      type: 'type',
+      inputs: [],
+      outputs: [{ name: 'a', connectionId }],
+      type: 'typeA',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
@@ -113,19 +106,37 @@ describe('Execution', () => {
     const nodeB: NodeInstance = {
       id: 'nodeB',
       contextIds: [],
-      form: [{ name: 'name', value: JSON.stringify('test') }],
-      inputs: [],
-      outputs: [{ name: 'a', connectionId }],
-      type: 'type',
+      form: [],
+      inputs: [{ name: 'a', connectionId }],
+      outputs: [],
+      type: 'typeB',
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
       state: NodeState.VALID,
       variables: {}
     };
-    const typeA: ServerNodeDef & NodeDef = {
-      type: 'type',
+    const typeA: ServerNodeDef<{}, { a: string }, { value: string }> &
+      NodeDef = {
+      type: 'typeA',
       name: 'a',
+      inputs: {},
+      outputs: {
+        a: {
+          dataType: DataType.STRING,
+          displayName: 'value',
+          state: SocketState.STATIC
+        }
+      },
+      keywords: [],
+      path: [],
+      onMetaExecution: async () => ({ a: { content: {}, isPresent: true } }),
+      onNodeExecution: async form => ({ outputs: { a: form.value } })
+    };
+    const typeB: ServerNodeDef<{ a: string }, {}, {}, { z: string }> &
+      NodeDef = {
+      type: 'typeB',
+      name: 'b',
       inputs: {
         a: {
           dataType: DataType.STRING,
@@ -137,23 +148,10 @@ describe('Execution', () => {
       keywords: [],
       path: [],
       onMetaExecution: async () => ({}),
-      onNodeExecution: async () => ({ outputs: {} })
-    };
-    const typeB: ServerNodeDef & NodeDef = {
-      type: 'type',
-      name: 'b',
-      inputs: {},
-      outputs: {
-        a: {
-          dataType: DataType.STRING,
-          displayName: 'value',
-          state: SocketState.STATIC
-        }
-      },
-      keywords: [],
-      path: [],
-      onMetaExecution: async () => ({}),
-      onNodeExecution: async () => ({ outputs: { a: 1 } })
+      onNodeExecution: async (form, inputs) => ({
+        outputs: {},
+        results: { z: inputs.a }
+      })
     };
     const conn: ConnectionInstance = {
       from: { name: 'a', nodeId: nodeA.id },
@@ -163,13 +161,13 @@ describe('Execution', () => {
       contextIds: []
     };
 
-    (tryGetNode as jest.Mock)
-      .mockResolvedValueOnce(nodeA)
-      .mockResolvedValueOnce(nodeB);
-    (tryGetNodeType as jest.Mock)
-      .mockReturnValueOnce(typeA)
-      .mockReturnValueOnce(typeB);
-    (parseNodeForm as jest.Mock).mockReturnValue({});
+    (tryGetNode as jest.Mock).mockImplementation(id =>
+      Promise.resolve(id === nodeA.id ? nodeA : nodeB)
+    );
+    (tryGetNodeType as jest.Mock).mockImplementation(
+      type => (type === typeA.type ? typeA : typeB)
+    );
+    (parseNodeForm as jest.Mock).mockReturnValue({ value: 'test' });
     (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
     (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
     (tryGetConnection as jest.Mock).mockResolvedValue(conn);
@@ -177,12 +175,13 @@ describe('Execution', () => {
       state: ProcessState.PROCESSING
     });
 
-    const res = await executeNodeWithId(nodeB.id, VALID_OBJECT_ID, {
+    const res = await executeNode(nodeB, VALID_OBJECT_ID, {
       db: null,
       userId: ''
     });
 
-    expect(res).toEqual({ outputs: { a: 1 } });
+    expect(res).toEqual({ outputs: {}, results: { z: 'test' } });
+    expect(tryGetNode).toHaveBeenCalledTimes(1);
   });
 
   test('should return outputs from context for context input nodes', async () => {
@@ -432,6 +431,7 @@ describe('Execution', () => {
     });
 
     expect(res).toEqual({ outputs: { a: 1 } });
+    expect(tryGetNode).toHaveBeenCalledTimes(2);
   });
 
   test('should support context functions', async () => {

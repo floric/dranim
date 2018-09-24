@@ -99,7 +99,7 @@ const combineEntries = (
         }
       }
       await updateNodeProgressWithSleep(i, entriesA.length, nodeId, reqContext);
-      i += 1;
+      i++;
     }
 
     resolve(entries);

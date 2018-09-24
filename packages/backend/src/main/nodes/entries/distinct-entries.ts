@@ -144,7 +144,7 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
         id,
         reqContext
       );
-      i += 1;
+      i++;
     }
 
     return {

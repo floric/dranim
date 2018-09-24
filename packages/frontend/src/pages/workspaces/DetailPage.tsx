@@ -17,6 +17,7 @@ import { CustomErrorCard } from '../../components/layout/CustomCards';
 import { PageHeaderCard } from '../../components/layout/PageHeaderCard';
 import { EditableText } from '../../components/properties/EditableText';
 import { RoutedTabs } from '../../components/RoutedTabs';
+import { nodeTypes } from '../../explorer/nodes/all-nodes';
 import { tryOperation } from '../../utils/form';
 import WorkspaceCalculationsPage from './CalculationsPage';
 import WorkspaceEditorPage from './EditorPage';
@@ -30,6 +31,7 @@ const WORKSPACE = gql`
       state
       nodes {
         id
+        type
       }
       connections {
         id
@@ -62,9 +64,15 @@ const getCurrentStep = (
     workspace.connections.length === 0
   ) {
     return 2;
+  } else if (
+    workspace.nodes
+      .map(n => nodeTypes.get(n.type))
+      .filter(n => n && n.isOutputNode).length > 0
+  ) {
+    return 3;
   }
 
-  return 3;
+  return 2;
 };
 
 const HelpSteps: SFC<{

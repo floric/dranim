@@ -53,7 +53,7 @@ export const DatasetInputNode: ServerNodeDef<
       async e => {
         entries.push(e.values);
         await updateNodeProgressWithSleep(i, entriesCount, id, reqContext);
-        i += 1;
+        i++;
       },
       reqContext
     );

@@ -4,6 +4,7 @@ import {
   ContextNodeType,
   DataType,
   GQLNodeInstance,
+  NodeDef,
   NodeState,
   parseNodeForm,
   SocketDef,
@@ -19,7 +20,7 @@ import {
   ExplorerEditorState,
   OpenConnection
 } from '../ExplorerEditor';
-import { nodeTypes } from '../nodes/all-nodes';
+import { ClientNodeDef, nodeTypes } from '../nodes/all-nodes';
 import { EditorFunctions } from './editor-stage';
 import {
   getSocketId,
@@ -50,46 +51,61 @@ export const renderNode = (
   const inputs = JSON.parse(n.inputSockets);
   const outputs = JSON.parse(n.outputSockets);
   const height = getHeight(n, inputs, outputs, state.openConnection);
-  const bgRect = getBackgroundRect(height);
-  const nodeTitle = getHeaderText(
-    isSelected,
-    nodeType ? nodeType.name : n.type
-  );
 
-  const [inputsGroup, outputsGroup] = [
-    { defs: inputs, type: SocketType.INPUT },
-    { defs: outputs, type: SocketType.OUTPUT }
-  ].map(p =>
-    renderSockets(p.defs, n, server, state, p.type, socketsMap, editorFunctions)
+  nodeGroup.add(getBackgroundRect(height));
+  nodeGroup.add(
+    getHeaderText(
+      isSelected,
+      nodeType
+        ? nodeType.name
+        : n.type === ContextNodeType.INPUT
+          ? 'Context Input'
+          : 'Context Output'
+    )
   );
-  const stateRect = getStateRect(height, n.state);
-
-  nodeGroup.add(bgRect);
-  nodeGroup.add(nodeTitle);
   if (n.hasContextFn) {
     nodeGroup.add(getContextFunctionNote());
   }
   if (nodeType && nodeType.renderName) {
-    nodeGroup.add(
-      new Text({
-        fill: Colors.GrayMedium,
-        align: 'center',
-        fontSize: 18,
-        text: nodeType.renderName(
-          { node: n, state: server },
-          parseNodeForm(n.form)
-        ),
-        y: TEXT_HEIGHT * 1.25,
-        width: NODE_WIDTH
-      })
-    );
+    nodeGroup.add(getInformationText(n, nodeType, server));
   }
-  nodeGroup.add(inputsGroup);
-  nodeGroup.add(outputsGroup);
-  nodeGroup.add(stateRect);
+  [
+    { defs: inputs, type: SocketType.INPUT },
+    { defs: outputs, type: SocketType.OUTPUT }
+  ].forEach(p =>
+    nodeGroup.add(
+      renderSockets(
+        p.defs,
+        n,
+        server,
+        state,
+        p.type,
+        socketsMap,
+        editorFunctions
+      )
+    )
+  );
+  nodeGroup.add(getStateRect(height, n.state));
 
   return nodeGroup;
 };
+
+const getInformationText = (
+  n: GQLNodeInstance,
+  nodeType: NodeDef & ClientNodeDef,
+  server: ExplorerEditorProps
+) =>
+  new Text({
+    fill: Colors.GrayMedium,
+    align: 'center',
+    fontSize: 18,
+    text: nodeType.renderName(
+      { node: n, state: server },
+      parseNodeForm(n.form)
+    ),
+    y: TEXT_HEIGHT * 1.25,
+    width: NODE_WIDTH
+  });
 
 const addEventHandlers = (
   nodeGroup: Group,

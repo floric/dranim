@@ -147,7 +147,7 @@ describe('SoundChart', () => {
         node: NODE,
         contextFnExecution: () => {
           if (call === 0) {
-            call += 1;
+            call++;
             return Promise.resolve({
               outputs: {
                 source: 'a',
@@ -157,7 +157,7 @@ describe('SoundChart', () => {
               }
             });
           } else if (call === 1) {
-            call += 1;
+            call++;
             return Promise.resolve({
               outputs: {
                 source: 'a',

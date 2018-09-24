@@ -74,7 +74,7 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
         id,
         reqContext
       );
-      i += 1;
+      i++;
     }
 
     return {

@@ -4,3 +4,5 @@ storage:
       cacheSizeGB: 4
   journal:
     commitIntervalMs: 500
+systemLog:
+  verbosity: 1
