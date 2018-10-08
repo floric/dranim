@@ -31,7 +31,10 @@ import {
 } from '../../../src/main/workspace/nodes';
 import { addOrUpdateFormValue } from '../../../src/main/workspace/nodes-detail';
 import { updateStates } from '../../../src/main/workspace/nodes-state';
-import { getWorkspace } from '../../../src/main/workspace/workspace';
+import {
+  getWorkspace,
+  tryGetWorkspace
+} from '../../../src/main/workspace/workspace';
 import {
   getTestMongoDb,
   NeverGoHereError,
@@ -46,6 +49,15 @@ let server;
 jest.mock('../../../src/main/workspace/workspace');
 jest.mock('../../../src/main/workspace/connections');
 jest.mock('../../../src/main/workspace/nodes-state');
+
+const ws: Workspace = {
+  id: VALID_OBJECT_ID,
+  userId: 'abc',
+  name: 'ws',
+  description: '',
+  created: '',
+  lastChange: ''
+};
 
 describe('Nodes', () => {
   beforeAll(async () => {
@@ -69,13 +81,6 @@ describe('Nodes', () => {
   });
 
   test('should create and get node', async () => {
-    const ws: Workspace = {
-      id: VALID_OBJECT_ID,
-      name: 'ws',
-      description: '',
-      created: '',
-      lastChange: ''
-    };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
     (updateStates as jest.Mock).mockResolvedValue({});
 
@@ -107,13 +112,6 @@ describe('Nodes', () => {
   });
 
   test('should create and get node in context', async () => {
-    const ws: Workspace = {
-      id: VALID_OBJECT_ID,
-      name: 'ws',
-      description: '',
-      created: '',
-      lastChange: ''
-    };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
 
     const contextNode = await createNode(
@@ -164,13 +162,6 @@ describe('Nodes', () => {
   });
 
   test('should try to get node', async () => {
-    const ws: Workspace = {
-      id: VALID_OBJECT_ID,
-      name: 'ws',
-      description: '',
-      created: '',
-      lastChange: ''
-    };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
     const reqContext = { db, userId: '123' };
 
@@ -200,6 +191,9 @@ describe('Nodes', () => {
 
   test('should not create node for unknown workspace', async () => {
     try {
+      (tryGetWorkspace as jest.Mock).mockImplementation(() => {
+        throw new Error('Unknown workspace');
+      });
       await createNode(NumberInputNodeDef.type, '123', [], 0, 0, {
         db,
         userId: ''
@@ -211,13 +205,6 @@ describe('Nodes', () => {
   });
 
   test('should not create node for unknown context node', async () => {
-    const ws: Workspace = {
-      id: VALID_OBJECT_ID,
-      name: 'ws',
-      description: '',
-      created: '',
-      lastChange: ''
-    };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
 
     try {
@@ -239,13 +226,6 @@ describe('Nodes', () => {
   });
 
   test('should create and delete node', async () => {
-    const ws: Workspace = {
-      id: VALID_OBJECT_ID,
-      name: 'ws',
-      description: '',
-      created: '',
-      lastChange: ''
-    };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
 
     let nrOfNodes = await getNodesCollection(db).countDocuments();
@@ -284,13 +264,6 @@ describe('Nodes', () => {
   });
 
   test('should throw error when deleting context type node', async () => {
-    const ws: Workspace = {
-      id: VALID_OBJECT_ID,
-      name: 'ws',
-      description: '',
-      created: '',
-      lastChange: ''
-    };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
 
     await createNode(EditEntriesNodeDef.type, ws.id, [], 0, 0, {
@@ -337,13 +310,6 @@ describe('Nodes', () => {
   });
 
   test('should update node and change x and y', async () => {
-    const ws: Workspace = {
-      id: VALID_OBJECT_ID,
-      name: 'ws',
-      description: '',
-      created: '',
-      lastChange: ''
-    };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
 
     const createdNode = await createNode(
@@ -388,13 +354,6 @@ describe('Nodes', () => {
   });
 
   test('should get all nodes', async () => {
-    const ws: Workspace = {
-      id: VALID_OBJECT_ID,
-      name: 'ws',
-      description: '',
-      created: '',
-      lastChange: ''
-    };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
     (updateStates as jest.Mock).mockResolvedValue({});
 
@@ -439,13 +398,6 @@ describe('Nodes', () => {
   });
 
   test('should throw error for invalid node type', async () => {
-    const ws: Workspace = {
-      id: VALID_OBJECT_ID,
-      name: 'ws',
-      description: '',
-      created: '',
-      lastChange: ''
-    };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
 
     try {
@@ -460,13 +412,6 @@ describe('Nodes', () => {
   });
 
   test('should throw error for output node in context', async () => {
-    const ws: Workspace = {
-      id: VALID_OBJECT_ID,
-      name: 'ws',
-      description: '',
-      created: '',
-      lastChange: ''
-    };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
 
     const contextNode = await createNode(
@@ -500,13 +445,6 @@ describe('Nodes', () => {
   });
 
   test('should create node and nested context nodes', async () => {
-    const ws: Workspace = {
-      id: VALID_OBJECT_ID,
-      name: 'ws',
-      description: '',
-      created: '',
-      lastChange: ''
-    };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
     (updateStates as jest.Mock).mockResolvedValue({});
 
@@ -535,13 +473,6 @@ describe('Nodes', () => {
   });
 
   test('should delete connection infos on nodes', async () => {
-    const ws: Workspace = {
-      id: VALID_OBJECT_ID,
-      name: 'ws',
-      description: '',
-      created: '',
-      lastChange: ''
-    };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
     (createConnection as jest.Mock).mockImplementation(
       async (from, to, context) => {
@@ -626,13 +557,6 @@ describe('Nodes', () => {
   });
 
   test('should delete all context nodes and connections', async () => {
-    const ws: Workspace = {
-      id: VALID_OBJECT_ID,
-      name: 'ws',
-      description: '',
-      created: '',
-      lastChange: ''
-    };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
 
     const contextNode = await createNode(
@@ -693,13 +617,6 @@ describe('Nodes', () => {
   });
 
   test('should delete all nested context nodes and connections', async () => {
-    const ws: Workspace = {
-      id: VALID_OBJECT_ID,
-      name: 'ws',
-      description: '',
-      created: '',
-      lastChange: ''
-    };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
 
     const contextANode = await createNode(
@@ -771,13 +688,6 @@ describe('Nodes', () => {
   });
 
   test('should get context node', async () => {
-    const ws: Workspace = {
-      id: VALID_OBJECT_ID,
-      name: 'ws',
-      description: '',
-      created: '',
-      lastChange: ''
-    };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
 
     const eeNode = await createNode(
@@ -805,13 +715,6 @@ describe('Nodes', () => {
   });
 
   test('should return null for node without context', async () => {
-    const ws: Workspace = {
-      id: VALID_OBJECT_ID,
-      name: 'ws',
-      description: '',
-      created: '',
-      lastChange: ''
-    };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
 
     const node = await createNode(
@@ -833,13 +736,6 @@ describe('Nodes', () => {
   });
 
   test('should try to get context node', async () => {
-    const ws: Workspace = {
-      id: VALID_OBJECT_ID,
-      name: 'ws',
-      description: '',
-      created: '',
-      lastChange: ''
-    };
     (getWorkspace as jest.Mock).mockResolvedValue(ws);
 
     const reqContext = { db, userId: '123' };

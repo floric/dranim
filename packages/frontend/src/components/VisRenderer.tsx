@@ -54,7 +54,7 @@ const renderInfos = (result: GQLOutputResult, value: any) => (
         return (
           <p>
             <Link to={`/data/${ds.id}`}>
-              Dataset <strong>{ds.name}</strong>
+              Table <strong>{ds.name}</strong>
             </Link>{' '}
             created successfully
           </p>

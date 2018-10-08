@@ -148,7 +148,7 @@ export const DistinctEntriesNode: ClientNodeDef<
                 )
               }
             >
-              Add Schema
+              Add Field
             </Button>
           </Col>
         </Row>
@@ -245,7 +245,7 @@ const addSchema = (
     showNotificationWithIcon({
       icon: 'error',
       content: 'Name must be unique and not empty',
-      title: 'Schema not added'
+      title: 'Field not added'
     });
     return;
   }

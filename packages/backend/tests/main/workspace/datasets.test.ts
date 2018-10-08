@@ -168,7 +168,7 @@ describe('Dataset', () => {
       });
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Dataset not found');
+      expect(err.message).toBe('Unknown dataset');
     }
   });
 
@@ -269,6 +269,12 @@ describe('Dataset', () => {
     } catch (err) {
       expect(err.message).toBe('Unknown dataset');
     }
+  });
+
+  test('should not find dataset from other user', async () => {
+    const ds = await createDataset('test', { db, userId: '123' });
+    const otherDs = await getDataset(ds.id, { db, userId: 'abc' });
+    expect(otherDs).toBe(null);
   });
 
   test('should rename dataset with trimmed name', async () => {

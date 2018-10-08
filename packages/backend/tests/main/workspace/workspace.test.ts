@@ -140,10 +140,20 @@ describe('Workspaces', () => {
     }
   });
 
-  test('should try to get unknown workspace', async () => {
+  test('should not find workspace from other user', async () => {
     const ws = await createWorkspace('test', {
       db,
-      userId: ''
+      userId: 'abc'
+    });
+
+    const foundWs = await getWorkspace(ws.id, { db, userId: '123' });
+    expect(foundWs).toBe(null);
+  });
+
+  test('should try to get workspace', async () => {
+    const ws = await createWorkspace('test', {
+      db,
+      userId: '123'
     });
 
     const res = await tryGetWorkspace(ws.id, { db, userId: '123' });

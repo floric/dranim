@@ -56,7 +56,7 @@ class CreateDataSetFormImpl extends Component<
           help={nameError || ''}
         >
           {getFieldDecorator('name', {
-            rules: [{ required: true, message: 'Please enter dataset name!' }]
+            rules: [{ required: true, message: 'Please enter a name!' }]
           })(
             <Input
               autoComplete="off"
@@ -72,7 +72,7 @@ class CreateDataSetFormImpl extends Component<
             loading={this.state.saving}
             disabled={hasErrors(getFieldsError())}
           >
-            Add Dataset
+            Add Table
           </Button>
         </Form.Item>
       </Form>

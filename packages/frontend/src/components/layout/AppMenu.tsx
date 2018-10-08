@@ -60,11 +60,7 @@ export const AppMenu: SFC<AppMenuProps> = ({
         }
       >
         <Menu.Item key="data">
-          <MenuItemContent
-            collapsed={collapsed}
-            href="/data"
-            title="Datasets"
-          />
+          <MenuItemContent collapsed={collapsed} href="/data" title="Tables" />
         </Menu.Item>
         {datasets && datasets.length > 0 && <Menu.Divider />}
         {datasets &&

@@ -80,8 +80,8 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
           if (!dataset) {
             return (
               <CustomErrorCard
-                title="Unknown Dataset"
-                description={`The Dataset with ID ${id} doesn't exist.`}
+                title="Unknown Table"
+                description={`The Table doesn't exist or you are missing the permissions to view it.`}
                 actions={<NoDatasetExceptionActions history={history} />}
               />
             );
@@ -115,18 +115,19 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
                         }
                       />
                     }
-                    typeTitle="Dataset"
+                    typeTitle="Table"
                     helpContent={
                       <>
                         <p>
-                          A <strong>Dataset</strong> is defined using{' '}
-                          <strong>Valueschemas</strong>. Each Valueschema
-                          represents one column of values.
+                          A <strong>Table</strong> is defined with a{' '}
+                          <strong>Schema</strong>. Each Schema consists of
+                          several <strong>Fields</strong> which represent each
+                          column of a Table.
                         </p>
                         <p>
                           <strong>Entries</strong> need to fit to the defined
-                          Valueschema. They can be manually defined in the
-                          Entries tab or uploaded. Currently only CSV files are
+                          Schema. Entries can be manually defined in the Entries
+                          tab or uploaded. Currently only CSV files are
                           supported. But more import types could be supported in
                           the future.
                         </p>
@@ -139,12 +140,10 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
                             style={{ marginTop: '1rem', marginBottom: '1rem' }}
                           />
                           <Steps current={step} size="small">
-                            <Steps.Step title="Dataset created" />
+                            <Steps.Step title="Table created" />
                             <Steps.Step
                               title={
-                                step < 2
-                                  ? 'Specify Schemas'
-                                  : 'Schemas specified'
+                                step < 2 ? 'Specify Schema' : 'Schema specified'
                               }
                             />
                             <Steps.Step title="Create or upload entries" />
@@ -161,7 +160,7 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
                 location={location}
                 panes={[
                   {
-                    name: `${dataset.valueschemas.length} Schemas`,
+                    name: `${dataset.valueschemas.length} Fields`,
                     key: 'schemas',
                     content: <DataSchemas dataset={dataset} />
                   },

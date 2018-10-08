@@ -48,9 +48,18 @@ export const createDataset = async (
 };
 
 export const deleteDataset = async (id: string, reqContext: ApolloContext) => {
+  const ds = await tryGetDataset(id, reqContext);
+  if (!ds) {
+    return false;
+  }
+
   await clearEntries(id, reqContext);
+
   const collection = getDatasetsCollection(reqContext.db);
-  const res = await collection.deleteOne({ _id: new ObjectID(id) });
+  const res = await collection.deleteOne({
+    _id: new ObjectID(id),
+    userId: reqContext.userId
+  });
   if (res.result.ok !== 1 || res.deletedCount !== 1) {
     throw new Error('Deletion of Dataset failed');
   }
@@ -83,13 +92,15 @@ export const getDataset = async (
   }
 
   const collection = getDatasetsCollection(reqContext.db);
-  const res = await collection.findOne({ _id: new ObjectID(id) });
+  const res = await collection.findOne({
+    _id: new ObjectID(id),
+    userId: reqContext.userId
+  });
   if (!res) {
     return null;
   }
 
   const { _id, ...obj } = res;
-
   return {
     id: _id.toHexString(),
     ...obj
@@ -134,17 +145,13 @@ export const addValueSchema = async (
   reqContext: ApolloContext
 ): Promise<boolean> => {
   const collection = getDatasetsCollection(reqContext.db);
-  const ds = await getDataset(datasetId, reqContext);
-  if (!ds) {
-    throw new Error('Dataset not found');
-  }
-
+  const ds = await tryGetDataset(datasetId, reqContext);
   if (schema.name.length === 0) {
     throw new Error('Name must not be empty');
   }
 
   if (ds.valueschemas.find(s => s.name === schema.name)) {
-    throw new Error('Schema already exists');
+    throw new Error('Field with this name already exists.');
   }
 
   const res = await collection.updateOne(

@@ -54,12 +54,11 @@ const WorkspacesOverviewPage: SFC<WorkspacesOverviewPageProps> = () => (
         <>
           <p>
             <strong>Workspaces</strong> are used to aggregate, filter or modify{' '}
-            <strong>Datasets</strong>.
+            <strong>Tables</strong>.
           </p>
           <p>
             Create one Workspace for each scientific topic to focus on one
-            specific issue. Workspaces can have many different Datasets as
-            inputs.
+            specific issue. Workspaces can have many different Tables as inputs.
           </p>
         </>
       }

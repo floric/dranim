@@ -5,6 +5,7 @@ import {
   NodeState
 } from './nodes';
 import { DataType } from './sockets';
+import { UserOwned } from './users';
 
 export interface Values {
   [name: string]: any;
@@ -23,7 +24,7 @@ export interface ValueSchema {
   unique: boolean;
 }
 
-export interface Dataset {
+export interface Dataset extends UserOwned {
   id: string;
   name: string;
   valueschemas: Array<ValueSchema>;
@@ -38,7 +39,7 @@ export interface GQLDataset extends Dataset {
   latestEntries: Array<Entry>;
 }
 
-export interface Workspace {
+export interface Workspace extends UserOwned {
   id: string;
   name: string;
   lastChange: string;
