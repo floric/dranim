@@ -1,6 +1,6 @@
 import React, { SFC } from 'react';
 
-import { Card, Col, Divider, Icon, List, Row } from 'antd';
+import { Alert, Card, Col, Divider, Icon, List, Row } from 'antd';
 import gql from 'graphql-tag';
 import moment from 'moment';
 import { Mutation } from 'react-apollo';
@@ -16,7 +16,7 @@ const CREATE_DEMO_DATA = gql`
   }
 `;
 
-const renderCreateExampleButton = (type: string) => (
+const CreateExampleButton: SFC<{ type: string }> = ({ type }) => (
   <Mutation mutation={CREATE_DEMO_DATA}>
     {createDemoData => (
       <AsyncButton
@@ -70,6 +70,14 @@ const StartPage: SFC = () => (
       }
     />
     <Row gutter={8}>
+      <Col style={{ marginBottom: 8 }}>
+        <Alert
+          message="Alpha Status"
+          type="warning"
+          description="This web application is not stable yet. Use with caution and feel free to report any errors which might occur."
+          showIcon
+        />
+      </Col>
       <Col sm={24} md={12} lg={8}>
         <Card bordered={false}>
           <h2>Examples</h2>
@@ -86,7 +94,7 @@ const StartPage: SFC = () => (
             This will generate empty Tables and a sample Workspace. Note that
             you will still need to upload data.
           </p>
-          {renderCreateExampleButton('STR')}
+          <CreateExampleButton type="STR" />
           <Divider />
           <h3>Birthdays</h3>
           <p>
@@ -94,11 +102,11 @@ const StartPage: SFC = () => (
             with persons. Each entry consists of a name, a random value as well
             as a birthday.
           </p>
-          {renderCreateExampleButton('Birthdays')}
+          <CreateExampleButton type="Birthdays" />
           <Divider />
           <h3>Car Manufacturers</h3>
           <p>Demo data for market shares of german car manufacturers.</p>
-          {renderCreateExampleButton('Cars')}
+          <CreateExampleButton type="Cars" />
         </Card>
       </Col>
       <Col sm={24} md={12} lg={16}>

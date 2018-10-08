@@ -228,7 +228,7 @@ describe('Dataset', () => {
       });
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Schema already exists');
+      expect(err.message).toBe('Field with this name already exists.');
     }
   });
 

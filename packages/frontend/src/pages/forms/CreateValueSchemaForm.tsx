@@ -1,4 +1,4 @@
-import React, { Component, FormEvent } from 'react';
+import React, { Component, FormEvent, SFC } from 'react';
 
 import { DataType, ValueSchema } from '@masterthesis/shared';
 import {
@@ -16,6 +16,70 @@ import moment from 'moment';
 
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { hasErrors } from '../../utils/form';
+
+const FormName: SFC<{ form: WrappedFormUtils }> = ({ form }) => {
+  const { getFieldDecorator, isFieldTouched, getFieldError } = form;
+  const nameError = isFieldTouched('name') && getFieldError('name');
+
+  return (
+    <Form.Item
+      label="Name"
+      validateStatus={nameError ? 'error' : 'success'}
+      help={nameError || ''}
+    >
+      {getFieldDecorator('name', {
+        rules: [{ required: true, message: 'Please enter an unique name!' }]
+      })(<Input placeholder="Name" />)}
+    </Form.Item>
+  );
+};
+
+const FormRequired: SFC<{ form: WrappedFormUtils }> = ({
+  form: { getFieldDecorator }
+}) => (
+  <Form.Item label="Required">
+    {getFieldDecorator('required', {
+      initialValue: true
+    })(<Checkbox defaultChecked />)}
+  </Form.Item>
+);
+
+const FormUnique: SFC<{ form: WrappedFormUtils }> = ({
+  form: { getFieldDecorator }
+}) => (
+  <Form.Item label="Unique">
+    {getFieldDecorator('unique', {
+      initialValue: false
+    })(<Checkbox />)}
+  </Form.Item>
+);
+
+const FormType: SFC<{
+  form: WrappedFormUtils;
+  handleSelectTypeChange: (type: string) => void;
+}> = ({ form: { getFieldDecorator }, handleSelectTypeChange }) => (
+  <Form.Item label="Type">
+    {getFieldDecorator('type', {
+      initialValue: DataType.STRING
+    })(
+      <Select onChange={handleSelectTypeChange} style={{ width: 120 }}>
+        <Select.OptGroup label="Primitive">
+          {[
+            DataType.STRING,
+            DataType.NUMBER,
+            DataType.BOOLEAN,
+            DataType.DATETIME,
+            DataType.TIME
+          ].map(type => (
+            <Select.Option value={type} key={`option-${type}`}>
+              {type}
+            </Select.Option>
+          ))}
+        </Select.OptGroup>
+      </Select>
+    )}
+  </Form.Item>
+);
 
 export interface CreateValueSchemaFormProps extends FormComponentProps {
   handleCreateValueSchema: (value: ValueSchema) => void;
@@ -94,63 +158,6 @@ class CreateValueSchemaFormImpl extends Component<
     });
   };
 
-  private renderType = ({ getFieldDecorator }: WrappedFormUtils) => (
-    <Form.Item label="Type">
-      {getFieldDecorator('type', {
-        initialValue: DataType.STRING
-      })(
-        <Select onChange={this.handleSelectTypeChange} style={{ width: 120 }}>
-          <Select.OptGroup label="Primitive">
-            {[
-              DataType.STRING,
-              DataType.NUMBER,
-              DataType.BOOLEAN,
-              DataType.DATETIME,
-              DataType.TIME
-            ].map(type => (
-              <Select.Option value={type} key={`option-${type}`}>
-                {type}
-              </Select.Option>
-            ))}
-          </Select.OptGroup>
-        </Select>
-      )}
-    </Form.Item>
-  );
-
-  private renderName = (form: WrappedFormUtils) => {
-    const { getFieldDecorator, isFieldTouched, getFieldError } = form;
-    const nameError = isFieldTouched('name') && getFieldError('name');
-
-    return (
-      <Form.Item
-        label="Name"
-        validateStatus={nameError ? 'error' : 'success'}
-        help={nameError || ''}
-      >
-        {getFieldDecorator('name', {
-          rules: [{ required: true, message: 'Please enter an unique name!' }]
-        })(<Input placeholder="Name" />)}
-      </Form.Item>
-    );
-  };
-
-  private renderRequired = ({ getFieldDecorator }: WrappedFormUtils) => (
-    <Form.Item label="Required">
-      {getFieldDecorator('required', {
-        initialValue: true
-      })(<Checkbox defaultChecked />)}
-    </Form.Item>
-  );
-
-  private renderUnique = ({ getFieldDecorator }: WrappedFormUtils) => (
-    <Form.Item label="Unique">
-      {getFieldDecorator('unique', {
-        initialValue: false
-      })(<Checkbox />)}
-    </Form.Item>
-  );
-
   public render() {
     const {
       form,
@@ -161,8 +168,11 @@ class CreateValueSchemaFormImpl extends Component<
 
     return (
       <Form layout="inline" onSubmit={this.handleSubmit}>
-        {this.renderName(form)}
-        {this.renderType(form)}
+        <FormName form={form} />
+        <FormType
+          form={form}
+          handleSelectTypeChange={this.handleSelectTypeChange}
+        />
 
         {unique === false ? (
           <>
@@ -174,8 +184,8 @@ class CreateValueSchemaFormImpl extends Component<
           </>
         ) : null}
 
-        {this.renderRequired(form)}
-        {valueType === DataType.STRING && this.renderUnique(form)}
+        <FormRequired form={form} />
+        {valueType === DataType.STRING && <FormUnique form={form} />}
         <Form.Item>
           <Button
             type="primary"

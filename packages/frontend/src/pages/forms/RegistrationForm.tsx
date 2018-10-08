@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, SFC } from 'react';
 
 import { Button, Col, Form, Icon, Input, Row } from 'antd';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
@@ -7,6 +7,130 @@ import { History } from 'history';
 import { register } from '../../io/auth';
 
 const FormItem = Form.Item;
+
+const FormName: SFC<{ form: WrappedFormUtils }> = ({
+  form: { getFieldDecorator }
+}) => (
+  <Row gutter={8}>
+    <Col xs={24} md={12}>
+      <FormItem>
+        {getFieldDecorator('firstName', {
+          rules: [
+            {
+              required: true,
+              message: 'Please enter your first name',
+              whitespace: true
+            }
+          ]
+        })(
+          <Input
+            placeholder="First name"
+            prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
+          />
+        )}
+      </FormItem>
+    </Col>
+    <Col xs={24} md={12}>
+      <FormItem>
+        {getFieldDecorator('lastName', {
+          rules: [
+            {
+              required: true,
+              message: 'Please enter your last name',
+              whitespace: true
+            }
+          ]
+        })(<Input placeholder="Last name" />)}
+      </FormItem>
+    </Col>
+  </Row>
+);
+
+const FormMail: SFC<{ form: WrappedFormUtils }> = ({
+  form: { getFieldDecorator }
+}) => (
+  <FormItem>
+    {getFieldDecorator('mail', {
+      rules: [
+        {
+          type: 'email',
+          message: 'This mail address is not valid'
+        },
+        {
+          required: true,
+          message: 'Please enter your mail address'
+        }
+      ]
+    })(
+      <Input
+        prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />}
+        placeholder="Email"
+      />
+    )}
+  </FormItem>
+);
+
+const FormPasswords: SFC<{
+  validateToNextPassword: (
+    rule: any,
+    value: string,
+    callback: () => void
+  ) => void;
+  compareToFirstPassword: (
+    rule: any,
+    value: string,
+    callback: () => void
+  ) => void;
+  handleConfirmBlur: (e: any) => void;
+  form: WrappedFormUtils;
+}> = ({
+  form: { getFieldDecorator },
+  validateToNextPassword,
+  compareToFirstPassword,
+  handleConfirmBlur
+}) => (
+  <>
+    <FormItem>
+      {getFieldDecorator('password', {
+        rules: [
+          {
+            required: true,
+            message: 'Please choose a password'
+          },
+          {
+            validator: validateToNextPassword
+          }
+        ]
+      })(
+        <Input
+          type="password"
+          placeholder="Password"
+          prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
+        />
+      )}
+    </FormItem>
+    <FormItem>
+      {getFieldDecorator('confirm', {
+        rules: [
+          {
+            required: true,
+            message: 'Please confirm your password'
+          },
+          {
+            validator: compareToFirstPassword
+          }
+        ]
+      })(
+        <Input
+          type="password"
+          placeholder="Confirm Password"
+          onBlur={handleConfirmBlur}
+          prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
+        />
+      )}
+    </FormItem>
+  </>
+);
 
 export type RegistrationFormProps = {
   form: WrappedFormUtils;
@@ -77,116 +201,19 @@ class RegistrationFormImpl extends Component<
     callback();
   };
 
-  private renderNames = ({ getFieldDecorator }: WrappedFormUtils) => (
-    <Row gutter={8}>
-      <Col xs={24} md={12}>
-        <FormItem>
-          {getFieldDecorator('firstName', {
-            rules: [
-              {
-                required: true,
-                message: 'Please enter your first name',
-                whitespace: true
-              }
-            ]
-          })(
-            <Input
-              placeholder="First name"
-              prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
-            />
-          )}
-        </FormItem>
-      </Col>
-      <Col xs={24} md={12}>
-        <FormItem>
-          {getFieldDecorator('lastName', {
-            rules: [
-              {
-                required: true,
-                message: 'Please enter your last name',
-                whitespace: true
-              }
-            ]
-          })(<Input placeholder="Last name" />)}
-        </FormItem>
-      </Col>
-    </Row>
-  );
-
-  private renderMail = ({ getFieldDecorator }: WrappedFormUtils) => (
-    <FormItem>
-      {getFieldDecorator('mail', {
-        rules: [
-          {
-            type: 'email',
-            message: 'This mail address is not valid'
-          },
-          {
-            required: true,
-            message: 'Please enter your mail address'
-          }
-        ]
-      })(
-        <Input
-          prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />}
-          placeholder="Email"
-        />
-      )}
-    </FormItem>
-  );
-
-  private renderPasswords = ({ getFieldDecorator }: WrappedFormUtils) => (
-    <>
-      <FormItem>
-        {getFieldDecorator('password', {
-          rules: [
-            {
-              required: true,
-              message: 'Please choose a password'
-            },
-            {
-              validator: this.validateToNextPassword
-            }
-          ]
-        })(
-          <Input
-            type="password"
-            placeholder="Password"
-            prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
-          />
-        )}
-      </FormItem>
-      <FormItem>
-        {getFieldDecorator('confirm', {
-          rules: [
-            {
-              required: true,
-              message: 'Please confirm your password'
-            },
-            {
-              validator: this.compareToFirstPassword
-            }
-          ]
-        })(
-          <Input
-            type="password"
-            placeholder="Confirm Password"
-            onBlur={this.handleConfirmBlur}
-            prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
-          />
-        )}
-      </FormItem>
-    </>
-  );
-
   public render() {
     const { form } = this.props;
 
     return (
       <Form onSubmit={this.handleSubmit}>
-        {this.renderNames(form)}
-        {this.renderMail(form)}
-        {this.renderPasswords(form)}
+        <FormName form={form} />
+        <FormMail form={form} />
+        <FormPasswords
+          form={form}
+          compareToFirstPassword={this.compareToFirstPassword}
+          handleConfirmBlur={this.handleConfirmBlur}
+          validateToNextPassword={this.validateToNextPassword}
+        />
 
         <FormItem>
           <Button

@@ -74,8 +74,8 @@ export const main = async (options: MainOptions) => {
     });
 
   const server = new ApolloServer({
-    schema: Schema,
-    context: context => ({ db, userId: context.req!.session!.userId }),
+    schema: Schema as any,
+    context: context => ({ db, userId: context.req.session.userId }),
     engine:
       process.env.NODE_ENV === 'production'
         ? {
@@ -106,9 +106,7 @@ export const main = async (options: MainOptions) => {
     });
 };
 
-export const initDb = async (db: Db) => {
-  await initWorkspaceDb(db);
-};
+export const initDb = (db: Db) => initWorkspaceDb(db);
 
 const PORT = parseInt(process.env.PORT || '80', 10);
 const FRONTEND_DOMAIN = process.env.FRONTEND_DOMAIN || 'localhost:1234';

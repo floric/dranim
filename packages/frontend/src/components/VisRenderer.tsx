@@ -34,13 +34,16 @@ export const VisRenderer: SFC<VisRenderer> = ({ result }) => {
   const value = JSON.parse(result.value);
 
   if (result.type === DataType.VIS) {
-    return renderVisualizations(result, value);
+    return <Visualizations result={result} value={value} />;
   }
 
-  return renderInfos(result, value);
+  return <Infos result={result} value={value} />;
 };
 
-const renderInfos = (result: GQLOutputResult, value: any) => (
+const Infos: SFC<{ result: GQLOutputResult; value: any }> = ({
+  result,
+  value
+}) => (
   <VisCard result={result}>
     {(() => {
       if (result.type === DataType.NUMBER) {
@@ -66,7 +69,10 @@ const renderInfos = (result: GQLOutputResult, value: any) => (
   </VisCard>
 );
 
-const renderVisualizations = (result: GQLOutputResult, value: any) => {
+const Visualizations: SFC<{ result: GQLOutputResult; value: any }> = ({
+  result,
+  value
+}) => {
   if (
     value.type === LinearChartType.BAR ||
     value.type === LinearChartType.COLUMN ||
