@@ -46,16 +46,16 @@ const DELETE_DATASET = gql`
 const DatasetsPage: SFC = () => (
   <>
     <PageHeaderCard
-      title="Datasets"
+      title="Tables"
       helpContent={
         <>
           <p>
-            Structured data is represented in <strong>Datasets</strong>.
+            Structured data is represented in <strong>Tables</strong>.
           </p>
           <p>
-            Datasets are comparable to Tables in SQL and can contain{' '}
-            <strong>Entries</strong> with their structure defined using{' '}
-            <strong>Valueschemas</strong>.
+            They are comparable to Tables in relational Databases and can
+            contain <strong>Entries</strong> with their structure defined using{' '}
+            <strong>Fields</strong> in a <strong>Schema</strong>.
           </p>
         </>
       }
@@ -74,7 +74,7 @@ const DatasetsPage: SFC = () => (
                       id={ds.id}
                       name={ds.name}
                       path="/data"
-                      confirmDeleteMessage="Delete Dataset?"
+                      confirmDeleteMessage="Delete Table?"
                       handleDelete={() =>
                         tryOperation({
                           op: () =>
@@ -85,16 +85,16 @@ const DatasetsPage: SFC = () => (
                               awaitRefetchQueries: true,
                               refetchQueries: [{ query: ALL_DATASETS }]
                             }),
-                          successTitle: () => 'Dataset deleted',
+                          successTitle: () => 'Table deleted',
                           successMessage: () =>
-                            `Dataset "${ds.name}" deleted successfully.`,
-                          failedTitle: 'Dataset not deleted.',
-                          failedMessage: `Dataset "${ds.name}" deletion failed.`
+                            `Table "${ds.name}" deleted successfully.`,
+                          failedTitle: 'Table not deleted.',
+                          failedMessage: `Table "${ds.name}" deletion failed.`
                         })
                       }
                     >
                       <Col xs={{ span: 24 }} md={{ span: 12 }}>
-                        {`${ds.valueschemas.length} Schemas`}
+                        {`${ds.valueschemas.length} Fields`}
                       </Col>
                       <Col xs={{ span: 24 }} md={{ span: 12 }}>
                         {`${ds.entriesCount} Entries`}
@@ -114,7 +114,7 @@ const DatasetsPage: SFC = () => (
             style={{ marginBottom: '1rem' }}
           >
             <Card bordered={false}>
-              <h2>New Dataset</h2>
+              <h2>New Table</h2>
               <Mutation mutation={CREATE_DATASET}>
                 {createDataset => (
                   <CreateDataSetForm
@@ -126,11 +126,11 @@ const DatasetsPage: SFC = () => (
                             awaitRefetchQueries: true,
                             refetchQueries: [{ query: ALL_DATASETS }]
                           }),
-                        successTitle: () => 'Dataset created',
+                        successTitle: () => 'Table created',
                         successMessage: () =>
-                          `Dataset "${name}" created successfully.`,
-                        failedTitle: 'Dataset not created.',
-                        failedMessage: `Dataset  "${name}" creation failed.`
+                          `Table "${name}" created successfully.`,
+                        failedTitle: 'Table not created.',
+                        failedMessage: `Table  "${name}" creation failed.`
                       })
                     }
                   />

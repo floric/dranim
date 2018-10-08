@@ -4,3 +4,7 @@ export interface User {
   lastName: string;
   mail: string;
 }
+
+export interface UserOwned {
+  userId: string;
+}

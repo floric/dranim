@@ -100,7 +100,7 @@ export const UnknownWorkspaceCard: SFC<{ history: History }> = ({
 }) => (
   <CustomErrorCard
     title="Unknown Workspace"
-    description="Workspace doesn't exist."
+    description="This Workspace doesn't exist or you are missing the permissions to view it."
     actions={
       <Button
         type="primary"

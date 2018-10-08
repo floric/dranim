@@ -30,7 +30,7 @@ export const DatasetInputNode: ClientNodeDef<
         rules: [{ required: true }],
         initialValue: getValueOrDefault(nodeForm, 'dataset', '')
       })(
-        <Select showSearch style={{ width: 200 }} placeholder="Select Dataset">
+        <Select showSearch style={{ width: 200 }} placeholder="Select Table">
           {datasets.map(ds => (
             <Select.Option value={ds.id} key={ds.id}>
               {ds.name}

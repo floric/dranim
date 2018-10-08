@@ -164,7 +164,6 @@ const executeOutputNode = async (
 ): Promise<OutputResult<any> | null> => {
   const cache = new InMemoryCache();
   const res = await executeNode(o, processId, reqContext, {}, cache);
-  cache.logUsage();
   return res.results || null;
 };
 

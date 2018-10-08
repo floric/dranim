@@ -326,14 +326,10 @@ export const updateProgress = async (
   }
 
   const collection = getNodesCollection(reqContext.db);
-  const res = await collection.updateOne(
+  await collection.updateOne(
     { _id: new ObjectID(node.id) },
     { $set: { progress } }
   );
-
-  if (res.modifiedCount !== 1) {
-    throw new Error('Updating the progress has failed.');
-  }
 
   return true;
 };

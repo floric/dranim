@@ -21,7 +21,7 @@ export const JoinDatasetsNode: ClientNodeDef<
     const dsA = inputs.datasetA;
     const dsB = inputs.datasetB;
     if (!dsA || !dsB || !dsA.isPresent || !dsB.isPresent) {
-      return <p>Plugin the two datasets first.</p>;
+      return <p>Plugin the two Tables at first.</p>;
     }
 
     const schemasA = dsA.content.schema;

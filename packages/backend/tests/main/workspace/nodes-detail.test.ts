@@ -954,31 +954,4 @@ describe('Node Details', () => {
       expect(err.message).toBe('Progress value is invalid: -0.1');
     }
   });
-
-  test('should throw error for invalid update', async () => {
-    const node: NodeInstance = {
-      id: VALID_OBJECT_ID,
-      contextIds: [],
-      form: [],
-      inputs: [],
-      outputs: [],
-      type: 'type',
-      workspaceId: VALID_OBJECT_ID,
-      x: 0,
-      y: 0,
-      state: NodeState.VALID,
-      variables: {}
-    };
-    (tryGetNode as jest.Mock).mockResolvedValue(node);
-    (getNodesCollection as jest.Mock).mockReturnValue({
-      updateOne: jest.fn(() => ({ modifiedCount: 0 }))
-    });
-
-    try {
-      await updateProgress(node.id, 0, { db, userId: '' });
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Updating the progress has failed.');
-    }
-  });
 });

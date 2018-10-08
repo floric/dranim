@@ -64,7 +64,7 @@ class CreateValueSchemaFormImpl extends Component<
           fallback = form.getFieldValue('fallbackString');
           break;
         default:
-          throw new Error('Unsupported value schema type!');
+          throw new Error('Unsupported Field type!');
       }
       if (fallback == null) {
         fallback = '';
@@ -183,7 +183,7 @@ class CreateValueSchemaFormImpl extends Component<
             htmlType="submit"
             disabled={hasErrors(getFieldsError())}
           >
-            Add Value Schema
+            Add Field
           </Button>
         </Form.Item>
       </Form>

@@ -167,8 +167,8 @@ export class DataEntriesPage extends Component<DataEntriesPageProps> {
               </Mutation>
             ) : (
               <Warning
-                title="Value Schemas needed"
-                message="Please add Value Schemas first."
+                title="Schema with Fields needed"
+                message="Please add Fields to the Schema."
               />
             )}
           </Card>

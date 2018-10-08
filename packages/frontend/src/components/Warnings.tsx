@@ -15,5 +15,5 @@ export const Warning: SFC<WarningProps> = ({
 }) => <Alert message={title} description={message} type={type} />;
 
 export const NoDatasetInputWarning: SFC = () => (
-  <Warning title="No Dataset present" message="Please input a valid Dataset." />
+  <Warning title="No Table present" message="Please input a valid Table." />
 );

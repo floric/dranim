@@ -45,12 +45,12 @@ export const createWorkspace = async (
     throw new Error('Writing workspace failed');
   }
 
-  const newItem = res.ops[0];
+  const { _id, ...newItem } = res.ops[0];
 
-  Log.info(`Workspace ${newItem._id.toHexString()} created`);
+  Log.info(`Workspace ${_id.toHexString()} created`);
 
   return {
-    id: newItem._id.toHexString(),
+    id: _id.toHexString(),
     ...newItem
   };
 };
@@ -67,7 +67,10 @@ export const deleteWorkspace = async (
   const connectionsCollection = getConnectionsCollection(reqContext.db);
   const nodesCollection = getNodesCollection(reqContext.db);
 
-  const wsRes = await wsCollection.deleteOne({ _id: new ObjectID(id) });
+  const wsRes = await wsCollection.deleteOne({
+    _id: new ObjectID(id),
+    userId: reqContext.userId
+  });
 
   if (wsRes.result.ok !== 1 || wsRes.deletedCount !== 1) {
     throw new Error('Deletion of Workspace failed.');
@@ -166,22 +169,23 @@ export const getAllWorkspaces = async (
 export const getWorkspace = async (
   id: string,
   reqContext: ApolloContext
-): Promise<Workspace & { _id: ObjectID } | null> => {
+): Promise<Workspace | null> => {
   if (!ObjectID.isValid(id)) {
     return null;
   }
 
   const wsCollection = getWorkspacesCollection(reqContext.db);
-  const ws = await wsCollection.findOne({
-    _id: new ObjectID(id)
+  const res = await wsCollection.findOne({
+    _id: new ObjectID(id),
+    userId: reqContext.userId
   });
-  if (!ws) {
+  if (!res) {
     return null;
   }
-
+  const { _id, ...obj } = res;
   return {
-    id: ws._id.toHexString(),
-    ...ws
+    id: res._id.toHexString(),
+    ...obj
   };
 };
 

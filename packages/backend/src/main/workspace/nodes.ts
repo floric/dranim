@@ -12,7 +12,7 @@ import { Log } from '../../logging';
 import { getNodeType, tryGetNodeType } from '../nodes/all-nodes';
 import { deleteConnection, deleteConnectionsInContext } from './connections';
 import { updateStates } from './nodes-state';
-import { getWorkspace, updateLastChange } from './workspace';
+import { tryGetWorkspace, updateLastChange } from './workspace';
 
 export const getNodesCollection = (
   db: Db
@@ -132,15 +132,8 @@ const checkNoOutputNodeInContexts = async (
   }
 };
 
-const checkValidWorkspace = async (
-  workspaceId: string,
-  reqContext: ApolloContext
-) => {
-  const ws = await getWorkspace(workspaceId, reqContext);
-  if (!ws) {
-    throw new Error('Unknown workspace');
-  }
-};
+const checkValidWorkspace = (workspaceId: string, reqContext: ApolloContext) =>
+  tryGetWorkspace(workspaceId, reqContext);
 
 export const deleteNode = async (id: string, reqContext: ApolloContext) => {
   const nodeToDelete = await tryGetNode(id, reqContext);

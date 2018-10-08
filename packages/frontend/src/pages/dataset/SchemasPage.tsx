@@ -80,7 +80,7 @@ export const DataSchemas: SFC<DataSchemasProps> = ({ dataset }) => {
       <Row style={{ marginBottom: '1rem' }}>
         <Col>
           <Card bordered={false}>
-            <h3>Add Value Schema</h3>
+            <h3>Add Field</h3>
             <Mutation mutation={ADD_VALUE_SCHEMA}>
               {addValueSchema => (
                 <CreateValueSchemaForm
@@ -101,13 +101,11 @@ export const DataSchemas: SFC<DataSchemasProps> = ({ dataset }) => {
                             { query: DATASET, variables: { id: dataset.id } }
                           ]
                         }),
-                      successTitle: () => 'Valueschema created',
+                      successTitle: () => 'Field created',
                       successMessage: () =>
-                        `Valueschema "${schema.name}" created successfully.`,
-                      failedTitle: 'Valueschema not created.',
-                      failedMessage: `Valueschema  "${
-                        schema.name
-                      }" creation failed.`
+                        `Field "${schema.name}" created successfully.`,
+                      failedTitle: 'Field not created.',
+                      failedMessage: `Field  "${schema.name}" creation failed.`
                     })
                   }
                 />
@@ -121,7 +119,7 @@ export const DataSchemas: SFC<DataSchemasProps> = ({ dataset }) => {
         <Col style={{ marginBottom: '1rem' }}>
           {schemasDataSource.length > 0 ? (
             <Card bordered={false}>
-              <h3>Value Schemas</h3>
+              <h3>Fields</h3>
               <Table<{
                 key: string;
                 type: string;
@@ -136,8 +134,8 @@ export const DataSchemas: SFC<DataSchemasProps> = ({ dataset }) => {
               />
             </Card>
           ) : (
-            <Card bordered={false} title="No Value Schemas present">
-              You need to add Value Schemas first.
+            <Card bordered={false} title="No Fields present">
+              You need to add Fields first.
             </Card>
           )}
         </Col>

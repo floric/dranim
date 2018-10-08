@@ -1,7 +1,7 @@
 import { ApolloContext, SocketDefs, SocketMetas } from '@masterthesis/shared';
 import { GraphQLUpload } from 'apollo-server-express';
 import { GraphQLScalarType, Kind } from 'graphql';
-import { IResolvers, makeExecutableSchema } from 'graphql-tools';
+import { makeExecutableSchema } from 'graphql-tools';
 
 import { Dataset } from './resolvers/dataset';
 import { Entry } from './resolvers/entry';
@@ -28,7 +28,7 @@ export const SchemaDefinition = `
   }
 `;
 
-const resolvers: IResolvers<any, ApolloContext> = {
+const resolvers: any = {
   Query,
   Entry,
   Dataset,

@@ -55,6 +55,7 @@ export const clearEntries = async (
   datasetId: string,
   reqContext: ApolloContext
 ) => {
+  await tryGetDataset(datasetId, reqContext);
   const count = await getEntriesCount(datasetId, reqContext);
   if (count > 0) {
     const entryCollection = getEntryCollection(datasetId, reqContext.db);
@@ -71,6 +72,7 @@ export const getLatestEntries = async (
   reqContext: ApolloContext,
   options?: LatestEntriesOptions
 ): Promise<Array<Entry>> => {
+  await tryGetDataset(datasetId, reqContext);
   const collection = getEntryCollection(datasetId, reqContext.db);
   // TODO Introduce pagination later
   const entries = await collection

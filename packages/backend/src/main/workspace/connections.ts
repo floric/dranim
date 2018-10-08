@@ -44,8 +44,8 @@ export const createConnection = async (
     throw new Error('Writing connection failed');
   }
 
-  const newItem = insertRes.ops[0];
-  const connId = newItem._id.toHexString();
+  const { _id, ...newItem } = insertRes.ops[0];
+  const connId = _id.toHexString();
 
   await Promise.all([
     addConnection(from, to, 'output', connId, reqContext),
@@ -57,7 +57,7 @@ export const createConnection = async (
   Log.info(`Connection ${connId} created`);
 
   return {
-    id: newItem._id.toHexString(),
+    id: _id.toHexString(),
     ...newItem
   };
 };
@@ -201,8 +201,10 @@ export const deleteConnection = async (
     return true;
   }
 
-  await tryGetNode(connection.from.nodeId, reqContext);
-  await tryGetNode(connection.to.nodeId, reqContext);
+  await Promise.all([
+    tryGetNode(connection.from.nodeId, reqContext),
+    tryGetNode(connection.to.nodeId, reqContext)
+  ]);
 
   await Promise.all([
     removeConnection(connection.from, 'output', connection.id, reqContext),
@@ -234,20 +236,22 @@ export const tryGetConnection = async (
 export const getConnection = async (
   id: string,
   reqContext: ApolloContext
-): Promise<ConnectionInstance & { _id: ObjectID } | null> => {
+): Promise<ConnectionInstance | null> => {
   if (!ObjectID.isValid(id)) {
     return null;
   }
 
   const collection = getConnectionsCollection(reqContext.db);
-  const connection = await collection.findOne({ _id: new ObjectID(id) });
-  if (!connection) {
+  const res = await collection.findOne({ _id: new ObjectID(id) });
+  if (!res) {
     return null;
   }
 
+  const { _id, ...obj } = res;
+
   return {
-    id: connection._id.toHexString(),
-    ...connection
+    id: res._id.toHexString(),
+    ...obj
   };
 };
 
