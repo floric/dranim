@@ -1,23 +1,14 @@
 import {
   allAreDefinedAndPresent,
-  Dataset,
   DataType,
   EditEntriesNodeDef,
-  Entry,
   NodeState,
   SocketState,
   ValueSchema
 } from '@masterthesis/shared';
 
-import { createUniqueDatasetName } from '../../../../src/main/calculation/utils';
 import { EditEntriesNode } from '../../../../src/main/nodes/entries/edit-entries';
-import { processEntries } from '../../../../src/main/nodes/entries/utils';
-import {
-  createDataset,
-  tryGetDataset
-} from '../../../../src/main/workspace/dataset';
-import { createEntry } from '../../../../src/main/workspace/entry';
-import { NeverGoHereError, NODE, VALID_OBJECT_ID } from '../../../test-utils';
+import { VALID_OBJECT_ID } from '../../../test-utils';
 
 jest.mock('@masterthesis/shared');
 jest.mock('../../../../src/main/nodes/entries/utils');
@@ -388,7 +379,7 @@ describe('EditEntriesNode', () => {
           state: NodeState.VALID,
           variables: {}
         },
-        contextFnExecution: async inputs => ({
+        contextFnExecution: async () => ({
           outputs: { new: 'super' }
         })
       }

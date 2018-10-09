@@ -1,20 +1,12 @@
 import {
-  Dataset,
   DatasetSocket,
   DataType,
   SocketState,
   SoundChartDef
 } from '@masterthesis/shared';
 
-import {
-  getDynamicEntryContextInputs,
-  processEntries
-} from '../../../../src/main/nodes/entries/utils';
+import { getDynamicEntryContextInputs } from '../../../../src/main/nodes/entries/utils';
 import { SoundChartNode } from '../../../../src/main/nodes/visualizations/sound-chart';
-import {
-  getDatasetsCollection,
-  tryGetDataset
-} from '../../../../src/main/workspace/dataset';
 import { NODE, VALID_OBJECT_ID } from '../../../test-utils';
 
 jest.mock('../../../../src/main/nodes/entries/utils');

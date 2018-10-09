@@ -1,23 +1,12 @@
 import {
   allAreDefinedAndPresent,
-  Dataset,
   DataType,
   DistinctEntriesNodeDef,
   SocketState
 } from '@masterthesis/shared';
 
-import { createUniqueDatasetName } from '../../../../src/main/calculation/utils';
 import { DistinctEntriesNode } from '../../../../src/main/nodes/entries/distinct-entries';
-import { processDocumentsWithCursor } from '../../../../src/main/nodes/entries/utils';
-import {
-  createDataset,
-  tryGetDataset
-} from '../../../../src/main/workspace/dataset';
-import {
-  createEntry,
-  getEntryCollection
-} from '../../../../src/main/workspace/entry';
-import { NeverGoHereError, NODE, VALID_OBJECT_ID } from '../../../test-utils';
+import { NODE } from '../../../test-utils';
 
 jest.mock('@masterthesis/shared');
 jest.mock('../../../../src/main/workspace/dataset');

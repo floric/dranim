@@ -10,8 +10,7 @@ import {
 
 import { FilterEntriesNode } from '../../../../src/main/nodes/entries/filter-entries';
 import { getDynamicEntryContextInputs } from '../../../../src/main/nodes/entries/utils';
-import { tryGetDataset } from '../../../../src/main/workspace/dataset';
-import { NeverGoHereError, NODE } from '../../../test-utils';
+import { NODE } from '../../../test-utils';
 
 jest.mock('@masterthesis/shared');
 jest.mock('../../../../src/main/nodes/entries/utils');
@@ -176,14 +175,6 @@ describe('FilterEntriesNode', () => {
       fallback: '',
       unique: false,
       required: true
-    };
-    const newDs: Dataset = {
-      id: 'ABC',
-      created: '',
-      description: '',
-      valueschemas: [],
-      name: 'New DS',
-      workspaceId: 'CDE'
     };
     const entryA = { [vs.name]: 1 };
     const entryB = { [vs.name]: 15 };

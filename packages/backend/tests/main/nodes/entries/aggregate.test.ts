@@ -9,7 +9,6 @@ import {
 import { AggregateEntriesNode } from '../../../../src/main/nodes/entries/aggregate';
 import { tryGetDataset } from '../../../../src/main/workspace/dataset';
 import { getEntryCollection } from '../../../../src/main/workspace/entry';
-import { NeverGoHereError } from '../../../test-utils';
 
 jest.mock('../../../../src/main/workspace/dataset');
 jest.mock('../../../../src/main/workspace/entry');
@@ -74,6 +73,7 @@ describe('AggregateEntriesNode', () => {
   test('should throw error for missing schema', async () => {
     const ds: Dataset = {
       id: '1',
+      userId: '',
       created: '',
       description: '',
       name: 'name',
