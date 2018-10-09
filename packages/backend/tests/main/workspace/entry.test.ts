@@ -1,5 +1,4 @@
 import { Dataset, DataType, ValueSchema } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { getDataset, tryGetDataset } from '../../../src/main/workspace/dataset';
 import {
@@ -20,7 +19,7 @@ import {
 } from '../../test-utils';
 
 let conn;
-let db: Db;
+let db;
 let server;
 
 jest.mock('../../../src/main/workspace/dataset');
@@ -55,6 +54,7 @@ describe('Entry', () => {
       fallback: ''
     };
     const ds: Dataset = {
+      userId: '',
       created: '',
       description: '',
       id: VALID_OBJECT_ID,
@@ -100,6 +100,7 @@ describe('Entry', () => {
 
   test('should return null for missing entry', async () => {
     const ds: Dataset = {
+      userId: '',
       id: VALID_OBJECT_ID,
       name: 'ds',
       created: '',
@@ -136,6 +137,7 @@ describe('Entry', () => {
 
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       name: 'ds',
       created: '',
       description: '',
@@ -184,6 +186,7 @@ describe('Entry', () => {
   test('should get entries count', async () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       name: 'ds',
       created: '',
       description: '',
@@ -234,6 +237,7 @@ describe('Entry', () => {
 
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       name: 'ds',
       created: '',
       description: '',
@@ -280,6 +284,7 @@ describe('Entry', () => {
 
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       name: 'ds',
       created: '',
       description: '',
@@ -317,6 +322,7 @@ describe('Entry', () => {
   test('should throw error for undefined values', async () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       name: 'ds',
       created: '',
       description: '',
@@ -345,6 +351,7 @@ describe('Entry', () => {
   test('should throw error for missing values', async () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       name: 'ds',
       created: '',
       description: '',
@@ -373,6 +380,7 @@ describe('Entry', () => {
   test('should throw error for null keys or undefined values', async () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       name: 'ds',
       created: '',
       description: '',
@@ -449,6 +457,7 @@ describe('Entry', () => {
     };
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       name: 'ds',
       created: '',
       description: '',
@@ -484,6 +493,7 @@ describe('Entry', () => {
     };
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       name: 'ds',
       created: '',
       description: '',
@@ -522,6 +532,7 @@ describe('Entry', () => {
     };
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       name: 'ds',
       created: '',
       description: '',
@@ -571,6 +582,7 @@ describe('Entry', () => {
     };
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       name: 'ds',
       created: '',
       description: '',
@@ -626,6 +638,7 @@ describe('Entry', () => {
   test('should delete entries', async () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       name: 'ds',
       created: '',
       description: '',
@@ -678,6 +691,7 @@ describe('Entry', () => {
   test('should get latest entries', async () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       name: 'ds',
       created: '',
       description: '',
@@ -723,6 +737,7 @@ describe('Entry', () => {
   test('should clear entries', async () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       name: 'ds',
       created: '',
       description: '',
@@ -777,6 +792,7 @@ describe('Entry', () => {
   test('should create many entries', async () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       name: 'ds',
       created: '',
       description: '',

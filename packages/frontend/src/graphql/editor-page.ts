@@ -31,10 +31,7 @@ export const DATASETS_AND_WORKSPACES = gql`
           name
           connectionId
         }
-        form {
-          name
-          value
-        }
+        form
         metaInputs
         hasContextFn
         inputSockets

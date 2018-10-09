@@ -1,5 +1,3 @@
-import { Db } from 'mongodb';
-
 import { DataType, ValueSchema } from '@masterthesis/shared';
 
 import {
@@ -24,7 +22,7 @@ import {
 } from '../../test-utils';
 
 let conn;
-let db: Db;
+let db;
 let server;
 
 const SCHEMA: ValueSchema = {

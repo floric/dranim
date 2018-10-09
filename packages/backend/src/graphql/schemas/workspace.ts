@@ -22,7 +22,7 @@ const NodeDef = `
     outputs: [SocketValue!]!
     contextIds: [String!]!
     state: String!
-    form: [FormValue!]!
+    form: FormValues!
     workspace: Workspace!
     metaInputs: Meta!
     metaOutputs: Meta!
@@ -107,6 +107,10 @@ const SocketDefsDef = `
   scalar SocketDefs
 `;
 
+const FormValuesDef = `
+  scalar FormValues
+`;
+
 const DateDef = `scalar Date`;
 
 export default () => [
@@ -114,6 +118,7 @@ export default () => [
   DateDef,
   MetaDef,
   SocketDefsDef,
+  FormValuesDef,
   FormValueDef,
   SocketValueDef,
   NodeDef,

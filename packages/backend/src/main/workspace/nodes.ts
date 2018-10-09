@@ -6,17 +6,18 @@ import {
   NodeState,
   ServerNodeDef
 } from '@masterthesis/shared';
-import { Collection, Db, ObjectID } from 'mongodb';
+import { Db, ObjectID } from 'mongodb';
 
 import { Log } from '../../logging';
+import { Omit } from '../../main';
 import { getNodeType, tryGetNodeType } from '../nodes/all-nodes';
 import { deleteConnection, deleteConnectionsInContext } from './connections';
 import { updateStates } from './nodes-state';
 import { tryGetWorkspace, updateLastChange } from './workspace';
 
-export const getNodesCollection = (
+export const getNodesCollection = <T = NodeInstance & { _id: ObjectID }>(
   db: Db
-): Collection<NodeInstance & { _id: ObjectID }> => db.collection('Nodes');
+) => db.collection<T>('Nodes');
 
 export const createNode = async (
   type: string,
@@ -34,12 +35,15 @@ export const createNode = async (
     checkValidWorkspace(workspaceId, reqContext)
   ]);
 
-  const collection = getNodesCollection(reqContext.db);
+  const collection = getNodesCollection<Omit<NodeInstance, 'id'>>(
+    reqContext.db
+  );
   const res = await collection.insertOne({
     x,
     y,
     outputs: [],
     inputs: [],
+    form: {},
     contextIds: contextNodeIds,
     workspaceId,
     type,
@@ -70,7 +74,7 @@ export const createNode = async (
 
   return {
     id: newNodeId,
-    form: [],
+    form: {},
     ...other
   };
 };
@@ -83,7 +87,9 @@ const addContextNodesIfNecessary = async (
   reqContext: ApolloContext
 ) => {
   if (hasContextFn(nodeType)) {
-    const collection = getNodesCollection(reqContext.db);
+    const collection = getNodesCollection<Omit<NodeInstance, 'id'>>(
+      reqContext.db
+    );
     const nestedContextIds = [...contextNodeIds, newNodeId];
     const contextNodes = [ContextNodeType.INPUT, ContextNodeType.OUTPUT].map(
       contextType => ({
@@ -91,6 +97,7 @@ const addContextNodesIfNecessary = async (
         y: 100,
         outputs: [],
         inputs: [],
+        form: {},
         contextIds: nestedContextIds,
         workspaceId,
         type: contextType,
@@ -201,12 +208,11 @@ export const getAllNodes = async (
   const collection = getNodesCollection(reqContext.db);
   const all = await collection.find({ workspaceId }).toArray();
   return all.map(n => {
-    const valueNames = n.form ? Object.keys(n.form) : [];
     const { _id, ...other } = n;
     return {
       ...other,
       id: _id.toHexString(),
-      form: valueNames.map(name => ({ name, value: n.form[name] }))
+      form: n.form
     };
   });
 };
@@ -225,13 +231,12 @@ export const getNode = async (
     return null;
   }
 
-  const valueNames = obj.form ? Object.keys(obj.form) : [];
   const { _id, ...res } = obj;
 
   return {
     ...res,
     id: _id.toHexString(),
-    form: valueNames.map(name => ({ name, value: obj.form[name] }))
+    form: res.form
   };
 };
 

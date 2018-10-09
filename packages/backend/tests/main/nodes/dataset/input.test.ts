@@ -1,5 +1,4 @@
 import { Dataset, DatasetInputNodeDef, DataType } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { DatasetInputNode } from '../../../../src/main/nodes/dataset/input';
 import { processEntries } from '../../../../src/main/nodes/entries/utils';
@@ -10,7 +9,7 @@ import {
 import { getTestMongoDb, NODE, VALID_OBJECT_ID } from '../../../test-utils';
 
 let conn;
-let db: Db;
+let db;
 let server;
 
 jest.mock('../../../../src/main/workspace/dataset');
@@ -18,6 +17,7 @@ jest.mock('../../../../src/main/nodes/entries/utils');
 
 const ds: Dataset = {
   id: VALID_OBJECT_ID,
+  userId: '',
   name: 'test',
   valueschemas: [
     {

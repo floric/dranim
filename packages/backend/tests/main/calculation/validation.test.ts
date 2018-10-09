@@ -5,7 +5,6 @@ import {
   NodeDef,
   NodeInstance,
   NodeState,
-  parseNodeForm,
   ServerNodeDef,
   SocketState
 } from '@masterthesis/shared';
@@ -53,7 +52,7 @@ describe('Validation', () => {
     const node: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: typeName,
@@ -81,7 +80,7 @@ describe('Validation', () => {
     const node: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: typeName,
@@ -123,7 +122,7 @@ describe('Validation', () => {
     const node: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: typeName,
@@ -168,7 +167,7 @@ describe('Validation', () => {
     const node: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: typeName,
@@ -207,7 +206,7 @@ describe('Validation', () => {
     const node: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: ContextNodeType.INPUT,
@@ -224,7 +223,6 @@ describe('Validation', () => {
     const res = await isNodeInMetaValid(node, { db: null, userId: '' });
     expect(res).toBe(true);
 
-    expect(parseNodeForm as jest.Mock).toHaveBeenCalledTimes(0);
     expect(tryGetNodeType as jest.Mock).toHaveBeenCalledTimes(0);
   });
 
@@ -249,7 +247,7 @@ describe('Validation', () => {
     const node: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: ContextNodeType.OUTPUT,
@@ -266,7 +264,6 @@ describe('Validation', () => {
     const res = await isNodeInMetaValid(node, { db: null, userId: '' });
     expect(res).toBe(true);
 
-    expect(parseNodeForm as jest.Mock).toHaveBeenCalledTimes(0);
     expect(tryGetNodeType as jest.Mock).toHaveBeenCalledTimes(0);
   });
 
@@ -282,7 +279,7 @@ describe('Validation', () => {
       {
         id: VALID_OBJECT_ID,
         contextIds: [],
-        form: [],
+        form: {},
         inputs: [],
         outputs: [],
         type: 'type',
@@ -310,7 +307,7 @@ describe('Validation', () => {
       {
         id: VALID_OBJECT_ID,
         contextIds: [],
-        form: [],
+        form: {},
         inputs: [],
         outputs: [],
         type: 'type',
@@ -329,6 +326,7 @@ describe('Validation', () => {
   test('should have valid dataset input', async () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       created: '',
       description: '',
       name: 'ds',
@@ -347,7 +345,7 @@ describe('Validation', () => {
       {
         id: VALID_OBJECT_ID,
         contextIds: [],
-        form: [],
+        form: {},
         inputs: [],
         outputs: [],
         type: 'type',
@@ -387,7 +385,7 @@ describe('Validation', () => {
       {
         id: VALID_OBJECT_ID,
         contextIds: [],
-        form: [],
+        form: {},
         inputs: [],
         outputs: [],
         type: 'type',
@@ -406,6 +404,7 @@ describe('Validation', () => {
   test('should have valid and invalid input', async () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       created: '',
       description: '',
       name: 'ds',
@@ -430,7 +429,7 @@ describe('Validation', () => {
       {
         id: VALID_OBJECT_ID,
         contextIds: [],
-        form: [],
+        form: {},
         inputs: [],
         outputs: [],
         type: 'type',

@@ -12,7 +12,6 @@ import {
   sleep,
   Workspace
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { executeNode } from '../../../src/main/calculation/execution';
 import {
@@ -28,7 +27,7 @@ import { getAllNodes } from '../../../src/main/workspace/nodes';
 import { getTestMongoDb, VALID_OBJECT_ID } from '../../test-utils';
 
 let conn;
-let db: Db;
+let db;
 let server;
 
 jest.mock('../../../src/main/calculation/execution');
@@ -38,6 +37,7 @@ jest.mock('../../../src/main/workspace/nodes');
 jest.mock('../../../src/main/workspace/dataset');
 
 const ws: Workspace = {
+  userId: '',
   name: 'test',
   description: '',
   created: '',
@@ -103,7 +103,7 @@ describe('Start Process', () => {
     const nodes: Array<NodeInstance> = [
       {
         contextIds: [],
-        form: [],
+        form: {},
         id: VALID_OBJECT_ID,
         inputs: [],
         outputs: [],
@@ -116,7 +116,7 @@ describe('Start Process', () => {
       },
       {
         contextIds: [],
-        form: [],
+        form: {},
         id: VALID_OBJECT_ID,
         inputs: [],
         outputs: [],
@@ -129,7 +129,7 @@ describe('Start Process', () => {
       },
       {
         contextIds: [],
-        form: [],
+        form: {},
         id: VALID_OBJECT_ID,
         inputs: [],
         outputs: [],
@@ -185,7 +185,7 @@ describe('Start Process', () => {
     const nodes: Array<NodeInstance> = [
       {
         contextIds: [],
-        form: [],
+        form: {},
         id: VALID_OBJECT_ID,
         inputs: [],
         outputs: [],
@@ -198,7 +198,7 @@ describe('Start Process', () => {
       },
       {
         contextIds: [],
-        form: [],
+        form: {},
         id: VALID_OBJECT_ID,
         inputs: [],
         outputs: [],
@@ -211,7 +211,7 @@ describe('Start Process', () => {
       },
       {
         contextIds: [],
-        form: [],
+        form: {},
         id: VALID_OBJECT_ID,
         inputs: [],
         outputs: [],
@@ -315,7 +315,7 @@ describe('Start Process', () => {
     (getAllNodes as jest.Mock).mockResolvedValue([
       {
         contextIds: [],
-        form: [],
+        form: {},
         id: VALID_OBJECT_ID,
         inputs: [],
         outputs: [],
@@ -355,7 +355,7 @@ describe('Start Process', () => {
     const nodes: Array<NodeInstance> = [
       {
         contextIds: [],
-        form: [],
+        form: {},
         id: VALID_OBJECT_ID,
         inputs: [],
         outputs: [],

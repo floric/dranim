@@ -62,11 +62,12 @@ export enum ProcessState {
   CANCELED = 'CANCELED'
 }
 
-export interface CalculationProcess {
+export interface CalculationProcess extends UserOwned {
   id: string;
   start: string;
   finish: string | null;
   state: ProcessState;
+  workspaceId: string;
 }
 
 export type GQLCalculationProcess = CalculationProcess;

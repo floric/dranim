@@ -34,7 +34,7 @@ export const getTestMongoDb = async () => {
 export const NODE: NodeInstance = {
   id: VALID_OBJECT_ID,
   contextIds: [],
-  form: [],
+  form: {},
   inputs: [],
   outputs: [],
   type: '',

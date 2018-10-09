@@ -1,13 +1,13 @@
 import { ApolloContext, User } from '@masterthesis/shared';
 
 import { compare, hash } from 'bcrypt';
-import { Collection, Db, ObjectID } from 'mongodb';
+import { Db, ObjectID } from 'mongodb';
 
 import { Log } from '../../logging';
+import { Omit } from '../../main';
 
-const getUsersCollection = (
-  db: Db
-): Collection<User & { _id: ObjectID; pw: string }> => db.collection('Users');
+const getUsersCollection = <T = User & { _id: ObjectID; pw: string }>(db: Db) =>
+  db.collection<T>('Users');
 
 export const login = async (
   mail: string,
@@ -71,7 +71,9 @@ export const register = async (
   reqContext: ApolloContext
 ): Promise<User | null> => {
   const saltedPw = await hash(pw, 10);
-  const coll = getUsersCollection(reqContext.db);
+  const coll = getUsersCollection<Omit<User, 'id'> & { pw: string }>(
+    reqContext.db
+  );
   await coll.createIndex('mail', {
     unique: true
   });

@@ -1,5 +1,3 @@
-import { Db } from 'mongodb';
-
 import {
   login,
   register,
@@ -12,7 +10,7 @@ import {
 } from '../../test-utils';
 
 let conn;
-let db: Db;
+let db;
 let server;
 
 describe('Users Management', () => {

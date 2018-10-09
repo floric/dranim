@@ -5,8 +5,8 @@ import {
   NodesMap,
   SocketMetas
 } from '@masterthesis/shared';
+import { CascaderOptionType } from 'antd/lib/cascader';
 import { FormComponentProps } from 'antd/lib/form';
-import { TreeNode } from 'antd/lib/tree-select';
 import deepEqual from 'deep-equal';
 
 import * as BooleanNodes from './boolean';
@@ -71,7 +71,7 @@ const allNodes = [
 const buildTree = (
   elems: Array<ClientNodeDef & NodeDef>,
   curPath: Array<string>
-): Array<TreeNode> => {
+): Array<CascaderOptionType> => {
   const nextPaths = elems
     .filter(
       e =>

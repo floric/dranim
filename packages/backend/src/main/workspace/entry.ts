@@ -5,16 +5,16 @@ import {
   Entry,
   Values
 } from '@masterthesis/shared';
-import { Collection, Db, ObjectID } from 'mongodb';
+import { Db, ObjectID } from 'mongodb';
 
+import { Omit } from '../../main';
 import { tryGetDataset } from './dataset';
 import { UploadEntryError } from './upload';
 
-export const getEntryCollection = (
+export const getEntryCollection = <T = Entry & { _id: ObjectID }>(
   datasetId: string,
   db: Db
-): Collection<Entry & { _id: ObjectID }> =>
-  db.collection(`Entries_${datasetId}`);
+) => db.collection<T>(`Entries_${datasetId}`);
 
 export const getEntry = async (
   datasetId: string,
@@ -111,7 +111,10 @@ export const createEntry = async (
     });
 
   try {
-    const collection = getEntryCollection(ds.id, reqContext.db);
+    const collection = getEntryCollection<Omit<Entry, 'id'>>(
+      ds.id,
+      reqContext.db
+    );
     const res = await collection.insertOne({
       values
     });
@@ -150,7 +153,10 @@ export const createManyEntries = async (
   const ds = await tryGetDataset(datasetId, reqContext);
 
   try {
-    const collection = getEntryCollection(ds.id, reqContext.db);
+    const collection = getEntryCollection<Omit<Entry, 'id'>>(
+      ds.id,
+      reqContext.db
+    );
     const res = await collection.insertMany(values.map(n => ({ values: n })), {
       ordered: false
     });

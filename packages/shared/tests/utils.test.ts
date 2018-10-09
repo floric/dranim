@@ -1,4 +1,4 @@
-import { FormValue, NodeInstance, NodeState } from '../src';
+import { NodeInstance, NodeState } from '../src';
 import {
   allAreDefinedAndPresent,
   hasContextFn,
@@ -7,7 +7,7 @@ import {
   sleep
 } from '../src/utils';
 
-const createNodeWithForm = (form: Array<FormValue>): NodeInstance => ({
+const createNodeWithForm = (form: { [key: string]: string }): NodeInstance => ({
   id: '1',
   inputs: [],
   outputs: [],
@@ -17,12 +17,13 @@ const createNodeWithForm = (form: Array<FormValue>): NodeInstance => ({
   x: 0,
   y: 0,
   form,
+  variables: {},
   state: NodeState.VALID
 });
 
 describe('Utils', () => {
   test('should parse empty node form', () => {
-    const node = createNodeWithForm([]);
+    const node = createNodeWithForm({});
 
     const res = parseNodeForm(node.form);
 
@@ -30,10 +31,10 @@ describe('Utils', () => {
   });
 
   test('should parse valid node form', () => {
-    const node = createNodeWithForm([
-      { name: 'test', value: JSON.stringify(123) },
-      { name: 'car', value: JSON.stringify('test') }
-    ]);
+    const node = createNodeWithForm({
+      test: JSON.stringify(123),
+      car: JSON.stringify('test')
+    });
 
     const res = parseNodeForm(node.form);
 
@@ -41,26 +42,11 @@ describe('Utils', () => {
     expect(res.car).toBe('test');
   });
 
-  test('should not parse node form with values with duplicated names', () => {
-    const node = createNodeWithForm([
-      { name: 'test', value: JSON.stringify(123) },
-      { name: 'test', value: JSON.stringify('test') }
-    ]);
-
-    expect(() => {
-      parseNodeForm(node.form);
-    }).toThrow(Error);
-
-    expect(() => {
-      parseNodeForm(node.form);
-    }).toThrow('Duplicate form value names: test');
-  });
-
   test('should not parse node form and throw error for invalid values', () => {
-    const node = createNodeWithForm([
-      { name: 'test', value: JSON.stringify(123) },
-      { name: 'car', value: 'invalid-str' }
-    ]);
+    const node = createNodeWithForm({
+      test: JSON.stringify(123),
+      car: 'invalid-str'
+    });
 
     const res = parseNodeForm(node.form);
 

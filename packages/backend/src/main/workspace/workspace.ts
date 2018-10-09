@@ -5,9 +5,10 @@ import {
   NodeState,
   Workspace
 } from '@masterthesis/shared';
-import { Collection, Db, ObjectID } from 'mongodb';
+import { Db, ObjectID } from 'mongodb';
 
 import { Log } from '../../logging';
+import { Omit } from '../../main';
 import { getConnectionsCollection } from './connections';
 import { getAllNodes, getNodesCollection } from './nodes';
 
@@ -19,16 +20,21 @@ export const initWorkspaceDb = async (db: Db) => {
   return true;
 };
 
-export const getWorkspacesCollection = (
+export const getWorkspacesCollection = <T = Workspace & { _id: ObjectID }>(
   db: Db
-): Collection<Workspace & { _id: ObjectID }> => db.collection('Workspaces');
+) => db.collection<T>('Workspaces');
 
 export const createWorkspace = async (
   name: string,
   reqContext: ApolloContext,
   description?: string
 ): Promise<Workspace> => {
-  const wsCollection = getWorkspacesCollection(reqContext.db);
+  const wsCollection = getWorkspacesCollection<
+    Omit<Workspace, 'id' | 'lastChange' | 'created'> & {
+      lastChange: Date;
+      created: Date;
+    }
+  >(reqContext.db);
   if (!name.length) {
     throw new Error('Name of workspace must not be empty.');
   }
@@ -99,7 +105,9 @@ export const renameWorkspace = async (
   const collection = getWorkspacesCollection(reqContext.db);
   const res = await collection.updateOne(
     { _id: new ObjectID(ws.id) },
-    { $set: { name: name.trim() } }
+    {
+      $set: { name: name.trim() }
+    }
   );
 
   if (res.modifiedCount !== 1) {

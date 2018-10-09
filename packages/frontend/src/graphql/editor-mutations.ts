@@ -71,10 +71,7 @@ export const handleNodeCreate = (
                       name
                       connectionId
                     }
-                    form {
-                      name
-                      value
-                    }
+                    form
                     metaInputs
                     hasContextFn
                     inputSockets
@@ -118,10 +115,7 @@ export const handleNodeDelete = (
                       name
                       connectionId
                     }
-                    form {
-                      name
-                      value
-                    }
+                    form
                     metaInputs
                     inputSockets
                     outputSockets
@@ -204,10 +198,7 @@ export const handleConnectionCreate = (
                       name
                       connectionId
                     }
-                    form {
-                      name
-                      value
-                    }
+                    form
                     metaInputs
                     inputSockets
                     outputSockets
@@ -312,10 +303,7 @@ export const handleAddOrUpdateFormValue = (
                   nodes {
                     id
                     state
-                    form {
-                      name
-                      value
-                    }
+                    form
                     metaInputs
                     inputSockets
                     outputSockets

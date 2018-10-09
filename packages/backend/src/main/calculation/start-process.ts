@@ -5,10 +5,11 @@ import {
   OutputResult,
   ProcessState
 } from '@masterthesis/shared';
-import { Collection, Db, ObjectID } from 'mongodb';
+import { Db, ObjectID } from 'mongodb';
 import Raven from 'raven';
 
 import { Log } from '../../logging';
+import { Omit } from '../../main';
 import { executeNode } from '../calculation/execution';
 import { addOrUpdateResult } from '../dashboards/results';
 import { getNodeType, hasNodeType } from '../nodes/all-nodes';
@@ -27,7 +28,9 @@ export const startProcess = async (
   reqContext: ApolloContext,
   options?: StartCalculationOptions
 ): Promise<CalculationProcess> => {
-  const coll = getCalculationsCollection(reqContext.db);
+  const coll = getCalculationsCollection<
+    Omit<CalculationProcess, 'id' | 'start'> & { start: Date }
+  >(reqContext.db);
   const newProcess = await coll.insertOne({
     userId: reqContext.userId,
     start: new Date(),
@@ -193,10 +196,9 @@ const updateFinishedProcess = async (
   await clearGeneratedDatasets(workspaceId, reqContext);
 };
 
-const getCalculationsCollection = (
+const getCalculationsCollection = <T = CalculationProcess & { _id: ObjectID }>(
   db: Db
-): Collection<CalculationProcess & { _id: ObjectID }> =>
-  db.collection('Calculations');
+) => db.collection<T>('Calculations');
 
 export const stopCalculation = async (
   id: string,

@@ -1,5 +1,4 @@
 import { Dataset, DatasetOutputNodeDef, DataType } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { DatasetOutputNode } from '../../../../src/main/nodes/dataset/output';
 import { createDataset } from '../../../../src/main/workspace/dataset';
@@ -7,7 +6,7 @@ import { createManyEntries } from '../../../../src/main/workspace/entry';
 import { getTestMongoDb, NODE, VALID_OBJECT_ID } from '../../../test-utils';
 
 let conn;
-let db: Db;
+let db;
 let server;
 
 jest.mock('../../../../src/main/workspace/dataset');
@@ -45,6 +44,7 @@ describe('DatasetOutputNode', () => {
   test('should have valid dataset', async () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       name: 'tes',
       description: '',
       created: new Date().toISOString(),

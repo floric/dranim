@@ -11,7 +11,7 @@ import {
   SumNodeDef,
   Workspace
 } from '@masterthesis/shared';
-import { Db, ObjectID } from 'mongodb';
+import { ObjectID } from 'mongodb';
 
 import {
   createConnection,
@@ -43,7 +43,7 @@ import {
 } from '../../test-utils';
 
 let conn;
-let db: Db;
+let db;
 let server;
 
 jest.mock('../../../src/main/workspace/workspace');
@@ -107,7 +107,7 @@ describe('Nodes', () => {
 
     expect(node).toEqual({
       ...newNode,
-      ...{ form: [{ name: 'test', value: '"abc"' }] }
+      ...{ form: {test: '"abc"' }}
     });
   });
 
@@ -382,7 +382,7 @@ describe('Nodes', () => {
     });
     expect(allNodes).toContainEqual({
       contextIds: [],
-      form: [{ name: 'test', value: 'a' }],
+      form: { test: 'a' },
       id: nodeA.id,
       state: NodeState.VALID,
       inputs: [],

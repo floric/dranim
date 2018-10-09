@@ -6,7 +6,6 @@ import {
   GQLNodeInstance,
   NodeDef,
   NodeState,
-  parseNodeForm,
   SocketDef,
   SocketDefs,
   SocketState,
@@ -99,10 +98,7 @@ const getInformationText = (
     fill: Colors.GrayMedium,
     align: 'center',
     fontSize: 18,
-    text: nodeType.renderName(
-      { node: n, state: server },
-      parseNodeForm(n.form)
-    ),
+    text: nodeType.renderName({ node: n, state: server }, n.form),
     y: TEXT_HEIGHT * 1.25,
     width: NODE_WIDTH
   });

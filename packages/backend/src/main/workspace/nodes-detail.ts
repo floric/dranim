@@ -5,7 +5,6 @@ import {
   hasContextFn,
   NodeDef,
   NodeInstance,
-  parseNodeForm,
   ServerNodeDef,
   SocketDef,
   SocketDefs,
@@ -46,7 +45,7 @@ export const getContextInputDefs = async (
   const parentDefs = await parentType.transformInputDefsToContextInputDefs(
     parentType.inputs,
     parentInputs,
-    parseNodeForm(parent.form),
+    parent.form,
     reqContext
   );
 
@@ -78,7 +77,7 @@ export const getContextOutputDefs = async (
   const contextInputDefs = await parentType.transformInputDefsToContextInputDefs(
     parentType.inputs,
     parentInputs,
-    parseNodeForm(parent.form),
+    parent.form,
     reqContext
   );
 
@@ -99,7 +98,7 @@ export const getContextOutputDefs = async (
     parentInputs,
     contextInputDefs,
     contextInputs,
-    parseNodeForm(parent.form),
+    parent.form,
     reqContext
   );
 };

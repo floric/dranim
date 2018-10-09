@@ -4,21 +4,24 @@ import {
   DataType,
   ValueSchema
 } from '@masterthesis/shared';
-import { Collection, Db, ObjectID } from 'mongodb';
+import { Db, ObjectID } from 'mongodb';
 
 import { Log } from '../../logging';
+import { Omit } from '../../main';
 import { clearEntries, getEntryCollection } from './entry';
 
-export const getDatasetsCollection = (
+export const getDatasetsCollection = <T = Dataset & { _id: ObjectID }>(
   db: Db
-): Collection<Dataset & { _id: ObjectID }> => db.collection('Datasets');
+) => db.collection<T>('Datasets');
 
 export const createDataset = async (
   name: string,
   reqContext: ApolloContext,
   workspaceId: string | null = null
 ): Promise<Dataset> => {
-  const collection = getDatasetsCollection(reqContext.db);
+  const collection = getDatasetsCollection<
+    Omit<Dataset, 'id' | 'created'> & { created: Date }
+  >(reqContext.db);
   if (name.length === 0) {
     throw new Error('Name must not be empty');
   }

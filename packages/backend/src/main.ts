@@ -16,6 +16,8 @@ import { Log, MorganLogStream } from './logging';
 import { initWorkspaceDb } from './main/workspace/workspace';
 import { generateErrorResponse, registerRoutes } from './routes';
 
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
 export const GRAPHQL_ROUTE = '/graphql';
 
 export interface MainOptions {

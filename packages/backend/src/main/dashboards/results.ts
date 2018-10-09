@@ -1,12 +1,11 @@
 import { ApolloContext, OutputResult } from '@masterthesis/shared';
 
-import { Collection, Db, ObjectID } from 'mongodb';
+import { Db, ObjectID } from 'mongodb';
 import { tryGetWorkspace } from '../workspace/workspace';
 
-export const getResultsCollection = (
+export const getResultsCollection = <T = OutputResult & { _id: ObjectID }>(
   db: Db
-): Collection<OutputResult & { _id: ObjectID; id: string }> =>
-  db.collection('Results');
+) => db.collection<T>('Results');
 
 export const addOrUpdateResult = async (
   result: OutputResult,
@@ -34,7 +33,7 @@ const createResult = async (
   reqContext: ApolloContext
 ) => {
   const { name, type, value, workspaceId, description } = result;
-  const coll = getResultsCollection(reqContext.db);
+  const coll = getResultsCollection<OutputResult>(reqContext.db);
   const res = await coll.insertOne({
     name,
     type,

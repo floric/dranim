@@ -1,5 +1,4 @@
 import { NodeInstance, NodeState, sleep } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { getConnectionsCollection } from '../../../src/main/workspace/connections';
 import {
@@ -25,7 +24,7 @@ import {
 } from '../../test-utils';
 
 let conn;
-let db: Db;
+let db;
 let server;
 
 jest.mock('../../../src/main/workspace/nodes');
@@ -294,7 +293,7 @@ describe('Workspaces', () => {
     const nodeA: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'a',
@@ -307,7 +306,7 @@ describe('Workspaces', () => {
     const nodeB: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'a',

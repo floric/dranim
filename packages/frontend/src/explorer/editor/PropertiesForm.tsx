@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 
-import { parseNodeForm } from '@masterthesis/shared';
 import { Button, Form } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
@@ -83,8 +82,8 @@ class PropertiesFormImpl extends Component<
     } = this.props;
     const { saving } = this.state;
     const unsavedChanges = form.isFieldsTouched() || this.state.isTouched;
-    const inputs = node ? JSON.parse(node.metaInputs as any) : {};
-    const nodeForm = node ? parseNodeForm(node.form) : {};
+    const inputs = node ? JSON.parse(node.metaInputs) : {};
+    const nodeForm = node ? node.form : {};
 
     return (
       <Form layout="inline" hideRequiredMark onSubmit={this.handleSubmit}>

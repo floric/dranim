@@ -23,8 +23,9 @@ export const isNodeInMetaValid = async (
     node.type !== ContextNodeType.OUTPUT
   ) {
     const type = tryGetNodeType(node.type);
-    const form = parseNodeForm(node.form);
-    isValidForm = type.isFormValid ? await type.isFormValid(form) : true;
+    isValidForm = type.isFormValid
+      ? await type.isFormValid(parseNodeForm(node.form))
+      : true;
   }
 
   const metaDefs = await getMetaInputs(node, reqContext);

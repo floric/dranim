@@ -1,5 +1,4 @@
 import { DataType, OutputResult } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import {
   addOrUpdateResult,
@@ -17,7 +16,7 @@ import {
 } from '../../test-utils';
 
 let conn;
-let db: Db;
+let db;
 let server;
 
 jest.mock('../../../src/main/workspace/workspace');

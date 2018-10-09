@@ -47,7 +47,7 @@ describe('Node State', () => {
     const node: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'type',
@@ -88,7 +88,7 @@ describe('Node State', () => {
     const node: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: ContextNodeType.INPUT,
@@ -101,7 +101,7 @@ describe('Node State', () => {
     const contextNode: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: ContextNodeType.OUTPUT,
@@ -114,7 +114,7 @@ describe('Node State', () => {
     const parentNode: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'type',
@@ -157,7 +157,7 @@ describe('Node State', () => {
     const node: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'type',
@@ -181,7 +181,7 @@ describe('Node State', () => {
     const cNode: NodeInstance = {
       id: VALID_OBJECT_ID,
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'type',
@@ -245,7 +245,7 @@ describe('Node State', () => {
     const nodeA: NodeInstance = {
       id: 'i',
       contextIds: [VALID_OBJECT_ID],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [{ name: 'a', connectionId: VALID_OBJECT_ID }],
       type: ContextNodeType.INPUT,
@@ -258,7 +258,7 @@ describe('Node State', () => {
     const otherNode: NodeInstance = {
       id: 'other',
       contextIds: [VALID_OBJECT_ID],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [{ name: 'a', connectionId: VALID_OBJECT_ID }],
       type: 'type',
@@ -271,7 +271,7 @@ describe('Node State', () => {
     const nodeB: NodeInstance = {
       id: 'o',
       contextIds: [VALID_OBJECT_ID],
-      form: [],
+      form: {},
       inputs: [{ name: 'a', connectionId: VALID_OBJECT_ID }],
       outputs: [],
       type: ContextNodeType.OUTPUT,
@@ -322,7 +322,7 @@ describe('Node State', () => {
     const nodeA: NodeInstance = {
       id: 'i',
       contextIds: [VALID_OBJECT_ID],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [{ name: 'a', connectionId: VALID_OBJECT_ID }],
       type: ContextNodeType.INPUT,
@@ -335,7 +335,7 @@ describe('Node State', () => {
     const otherNode: NodeInstance = {
       id: 'other',
       contextIds: [VALID_OBJECT_ID],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [{ name: 'a', connectionId: VALID_OBJECT_ID }],
       type: 'type',
@@ -348,7 +348,7 @@ describe('Node State', () => {
     const nodeB: NodeInstance = {
       id: 'o',
       contextIds: [VALID_OBJECT_ID],
-      form: [],
+      form: {},
       inputs: [{ name: 'a', connectionId: VALID_OBJECT_ID }],
       outputs: [],
       type: ContextNodeType.OUTPUT,
@@ -377,7 +377,7 @@ describe('Node State', () => {
       {
         id: VALID_OBJECT_ID,
         contextIds: [VALID_OBJECT_ID],
-        form: [],
+        form: {},
         inputs: [],
         outputs: [{ name: 'a', connectionId: VALID_OBJECT_ID }],
         type: ContextNodeType.INPUT,
@@ -390,7 +390,7 @@ describe('Node State', () => {
       {
         id: VALID_OBJECT_ID,
         contextIds: [VALID_OBJECT_ID],
-        form: [],
+        form: {},
         inputs: [],
         outputs: [{ name: 'a', connectionId: VALID_OBJECT_ID }],
         type: 'type',
@@ -403,7 +403,7 @@ describe('Node State', () => {
       {
         id: VALID_OBJECT_ID,
         contextIds: [VALID_OBJECT_ID],
-        form: [],
+        form: {},
         inputs: [{ name: 'a', connectionId: VALID_OBJECT_ID }],
         outputs: [],
         type: ContextNodeType.OUTPUT,

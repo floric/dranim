@@ -79,7 +79,12 @@
       "^.+\\.tsx?$": "ts-jest"
     },
     "globals": {
-      "NODE_ENV": "test"
+      "NODE_ENV": "test",
+      "ts-jest": {
+        "diagnostics": {
+          "warnOnly": true
+        }
+      }
     },
     "testEnvironment": "node",
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",

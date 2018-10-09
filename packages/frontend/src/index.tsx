@@ -17,5 +17,5 @@ ReactDOM.render(
       <App />
     </ApolloProvider>
   </BrowserRouter>,
-  document.getElementById('root') as HTMLElement
+  document.getElementById('root')
 );

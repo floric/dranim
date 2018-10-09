@@ -1,4 +1,4 @@
-import { DataType, NumberOutputNodeDef } from '@masterthesis/shared';
+import { DataType, NodeState, NumberOutputNodeDef } from '@masterthesis/shared';
 
 import { NumberOutputNode } from '../../../../src/main/nodes/number/output';
 
@@ -20,12 +20,14 @@ describe('NumberOutputNode', () => {
         reqContext: null,
         node: {
           contextIds: [],
-          form: [],
+          form: {},
           id: 'abc',
           inputs: [],
           outputs: [],
           type: 'a',
           workspaceId: 'abc',
+          variables: {},
+          state: NodeState.VALID,
           x: 0,
           y: 0
         }

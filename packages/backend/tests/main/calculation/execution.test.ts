@@ -6,11 +6,11 @@ import {
   NodeDef,
   NodeInstance,
   NodeState,
-  parseNodeForm,
   ProcessState,
   ServerNodeDef,
   ServerNodeDefWithContextFn,
-  SocketState
+  SocketState,
+  parseNodeForm
 } from '@masterthesis/shared';
 
 import { executeNode } from '../../../src/main/calculation/execution';
@@ -44,7 +44,7 @@ describe('Execution', () => {
     const node: NodeInstance = {
       id: 'node',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'type',
@@ -72,7 +72,6 @@ describe('Execution', () => {
     };
     (tryGetNode as jest.Mock).mockResolvedValue(node);
     (tryGetNodeType as jest.Mock).mockReturnValue(type);
-    (parseNodeForm as jest.Mock).mockReturnValue({});
     (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
     (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
     (tryGetCalculation as jest.Mock).mockResolvedValue({
@@ -93,7 +92,7 @@ describe('Execution', () => {
     const nodeA: NodeInstance = {
       id: 'nodeA',
       contextIds: [],
-      form: [{ name: 'value', value: JSON.stringify('test') }],
+      form: { value: '"test"' },
       inputs: [],
       outputs: [{ name: 'a', connectionId }],
       type: 'typeA',
@@ -106,7 +105,7 @@ describe('Execution', () => {
     const nodeB: NodeInstance = {
       id: 'nodeB',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [{ name: 'a', connectionId }],
       outputs: [],
       type: 'typeB',
@@ -167,13 +166,13 @@ describe('Execution', () => {
     (tryGetNodeType as jest.Mock).mockImplementation(
       type => (type === typeA.type ? typeA : typeB)
     );
-    (parseNodeForm as jest.Mock).mockReturnValue({ value: 'test' });
     (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
     (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
     (tryGetConnection as jest.Mock).mockResolvedValue(conn);
     (tryGetCalculation as jest.Mock).mockResolvedValue({
       state: ProcessState.PROCESSING
     });
+    (parseNodeForm as jest.Mock).mockReturnValue({ value: 'test' });
 
     const res = await executeNode(nodeB, VALID_OBJECT_ID, {
       db: null,
@@ -195,7 +194,7 @@ describe('Execution', () => {
         id: VALID_OBJECT_ID,
         outputs: [],
         inputs: [],
-        form: [],
+        form: {},
         contextIds: [VALID_OBJECT_ID],
         state: NodeState.VALID,
         variables: {}
@@ -211,7 +210,7 @@ describe('Execution', () => {
     const node: NodeInstance = {
       id: 'nodeB',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'type',
@@ -241,7 +240,7 @@ describe('Execution', () => {
           id: VALID_OBJECT_ID,
           outputs: [],
           inputs: [],
-          form: [],
+          form: {},
           contextIds: [VALID_OBJECT_ID],
           state: NodeState.VALID,
           variables: {}
@@ -259,7 +258,7 @@ describe('Execution', () => {
     const node: NodeInstance = {
       id: 'nodeB',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'type',
@@ -301,7 +300,7 @@ describe('Execution', () => {
     const nodeA: NodeInstance = {
       id: 'nodeA',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [{ name: 'a', connectionId: connBId }],
       type: 'type',
@@ -314,7 +313,7 @@ describe('Execution', () => {
     const nodeB: NodeInstance = {
       id: 'nodeB',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [{ name: 'b', connectionId: connAId }],
       type: 'type',
@@ -327,7 +326,7 @@ describe('Execution', () => {
     const sumNode: NodeInstance = {
       id: 'nodeB',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [
         { name: 'a', connectionId: connAId },
         { name: 'b', connectionId: connBId }
@@ -415,7 +414,6 @@ describe('Execution', () => {
       .mockReturnValueOnce(typeA)
       .mockReturnValueOnce(typeB)
       .mockReturnValueOnce(sumType);
-    (parseNodeForm as jest.Mock).mockReturnValue({});
     (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
     (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
     (tryGetConnection as jest.Mock)
@@ -438,7 +436,7 @@ describe('Execution', () => {
     const node: NodeInstance = {
       id: 'node',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'type',
@@ -451,7 +449,7 @@ describe('Execution', () => {
     const cNode: NodeInstance = {
       id: 'cNode',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [{ connectionId: 'c', name: 'x' }],
       outputs: [],
       type: ContextNodeType.OUTPUT,
@@ -464,7 +462,7 @@ describe('Execution', () => {
     const iNode: NodeInstance = {
       id: 'iNode',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [{ connectionId: 'c', name: 'x' }],
       type: 'a',
@@ -519,7 +517,6 @@ describe('Execution', () => {
       .mockReturnValueOnce(type)
       .mockReturnValueOnce(cType);
     (tryGetConnection as jest.Mock).mockResolvedValue(conn);
-    (parseNodeForm as jest.Mock).mockReturnValue({});
     (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
     (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
     (hasContextFn as any)

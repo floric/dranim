@@ -7,11 +7,12 @@ import {
   ValueSchema
 } from '@masterthesis/shared';
 import fastCsv from 'fast-csv';
-import { Collection, Db, ObjectID } from 'mongodb';
+import { Db, ObjectID } from 'mongodb';
 import promisesAll from 'promises-all';
 import { Readable } from 'stream';
 
 import { Log } from '../../logging';
+import { Omit } from '../../main';
 import { tryGetDataset } from '../../main/workspace/dataset';
 import { createEntry } from '../../main/workspace/entry';
 
@@ -26,9 +27,9 @@ export class UploadEntryError extends Error {
   }
 }
 
-export const getUploadsCollection = (
+export const getUploadsCollection = <T = UploadProcess & { _id: ObjectID }>(
   db: Db
-): Collection<UploadProcess & { _id: ObjectID }> => db.collection('Uploads');
+) => db.collection<T>('Uploads');
 
 export const getAllUploads = async (
   datasetId: string,
@@ -293,7 +294,9 @@ export const uploadEntriesCsv = async (
   reqContext: ApolloContext
 ): Promise<UploadProcess> => {
   try {
-    const uploadsCollection = getUploadsCollection(reqContext.db);
+    const uploadsCollection = getUploadsCollection<
+      Omit<UploadProcess, 'id' | 'start'> & { start: Date }
+    >(reqContext.db);
     const ds = await tryGetDataset(datasetId, reqContext);
     const newProcess = {
       addedEntries: 0,
@@ -301,6 +304,7 @@ export const uploadEntriesCsv = async (
       invalidEntries: 0,
       start: new Date(),
       state: ProcessState.STARTED,
+      finish: null,
       datasetId,
       fileNames: [],
       errors: []

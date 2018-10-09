@@ -1,4 +1,4 @@
-import { DataType, StringOutputNodeDef } from '@masterthesis/shared';
+import { DataType, NodeState, StringOutputNodeDef } from '@masterthesis/shared';
 
 import { StringOutputNode } from '../../../../src/main/nodes/string/output';
 
@@ -23,12 +23,14 @@ describe('StringOutputNode', () => {
         reqContext: null,
         node: {
           contextIds: [],
-          form: [],
+          form: {},
           id: 'abc',
           inputs: [],
           outputs: [],
           type: 'a',
           workspaceId: 'abc',
+          variables: {},
+          state: NodeState.VALID,
           x: 0,
           y: 0
         }
@@ -51,12 +53,14 @@ describe('StringOutputNode', () => {
         reqContext: null,
         node: {
           contextIds: [],
-          form: [],
+          form: {},
           id: 'abc',
           inputs: [],
           outputs: [],
           type: 'a',
           workspaceId: 'abc',
+          variables: {},
+          state: NodeState.VALID,
           x: 0,
           y: 0
         }

@@ -1,4 +1,5 @@
 import {
+  ConnectionInstance,
   DataType,
   hasContextFn,
   NodeInstance,
@@ -7,8 +8,8 @@ import {
   SocketInstance,
   SocketState
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
+import { Omit } from '../../../src/main';
 import { getNodeType } from '../../../src/main/nodes/all-nodes';
 import {
   createConnection,
@@ -31,7 +32,7 @@ import {
 } from '../../test-utils';
 
 let conn;
-let db: Db;
+let db;
 let server;
 
 jest.mock('@masterthesis/shared');
@@ -66,7 +67,7 @@ describe('Connections', () => {
     const nodeA: NodeInstance = {
       id: 'ida',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'abc',
@@ -79,7 +80,7 @@ describe('Connections', () => {
     const nodeB: NodeInstance = {
       id: 'idb',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'test',
@@ -166,7 +167,7 @@ describe('Connections', () => {
     const nodeA: NodeInstance = {
       id: 'ida',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'abc',
@@ -179,7 +180,7 @@ describe('Connections', () => {
     const nodeB: NodeInstance = {
       id: 'idb',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'test',
@@ -241,7 +242,7 @@ describe('Connections', () => {
     const node: NodeInstance = {
       id: 'ida',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'abc',
@@ -254,7 +255,7 @@ describe('Connections', () => {
     const nodeAinContext: NodeInstance = {
       id: 'idb-i',
       contextIds: [node.id],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: '123',
@@ -267,7 +268,7 @@ describe('Connections', () => {
     const nodeBinContext: NodeInstance = {
       id: 'idb-o',
       contextIds: [node.id],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'abc',
@@ -334,7 +335,7 @@ describe('Connections', () => {
     const nodeA: NodeInstance = {
       id: 'ida',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'abc',
@@ -347,7 +348,7 @@ describe('Connections', () => {
     const nodeB: NodeInstance = {
       id: 'idb',
       contextIds: [],
-      form: [],
+      form:{},
       inputs: [],
       outputs: [],
       type: 'test',
@@ -404,7 +405,7 @@ describe('Connections', () => {
     const nodeA: NodeInstance = {
       id: 'ida',
       contextIds: [],
-      form: [],
+      form:{},
       inputs: [],
       outputs: [],
       type: 'abc',
@@ -442,7 +443,7 @@ describe('Connections', () => {
     const nodeA: NodeInstance = {
       id: 'ida',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'abc',
@@ -455,7 +456,7 @@ describe('Connections', () => {
     const nodeB: NodeInstance = {
       id: 'idb',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'test',
@@ -491,7 +492,7 @@ describe('Connections', () => {
     const nodeA: NodeInstance = {
       id: 'ida',
       contextIds: ['id'],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'abc',
@@ -504,7 +505,7 @@ describe('Connections', () => {
     const nodeB: NodeInstance = {
       id: 'idb',
       contextIds: ['otherid'],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'test',
@@ -537,15 +538,15 @@ describe('Connections', () => {
   });
 
   test('should delete connections with context id', async () => {
-    const connectionsCollection = getConnectionsCollection(db);
+    const connectionsCollection = getConnectionsCollection<Omit<ConnectionInstance, 'id'>>(db);
     await connectionsCollection.insertOne({
-      contextIds: ['randomid']
+      contextIds: ['randomid'], from: {name: '', nodeId: VALID_OBJECT_ID}, to: {name: '', nodeId: VALID_OBJECT_ID},workspaceId: VALID_OBJECT_ID
     });
     await connectionsCollection.insertOne({
-      contextIds: ['randomid', 'test']
+      contextIds: ['randomid', 'test'], from: {name: '', nodeId: VALID_OBJECT_ID}, to: {name: '', nodeId: VALID_OBJECT_ID},workspaceId: VALID_OBJECT_ID
     });
     await connectionsCollection.insertOne({
-      contextIds: ['abc', 'randomid', 'test']
+      contextIds: ['abc', 'randomid', 'test'], from: {name: '', nodeId: VALID_OBJECT_ID}, to: {name: '', nodeId: VALID_OBJECT_ID},workspaceId: VALID_OBJECT_ID
     });
 
     await deleteConnectionsInContext('randomid', {
@@ -567,7 +568,7 @@ describe('Connections', () => {
       const nodeA: NodeInstance = {
         id: 'ida',
         contextIds: [],
-        form: [],
+        form: {},
         inputs: [],
         outputs: [],
         type: 'abc',
@@ -580,7 +581,7 @@ describe('Connections', () => {
       const nodeB: NodeInstance = {
         id: 'idb',
         contextIds: [],
-        form: [],
+        form: {},
         inputs: [],
         outputs: [],
         type: 'test',
@@ -627,7 +628,7 @@ describe('Connections', () => {
       const nodeA: NodeInstance = {
         id: 'ida',
         contextIds: [],
-        form: [],
+        form: {},
         inputs: [],
         outputs: [],
         type: 'abc',
@@ -640,7 +641,7 @@ describe('Connections', () => {
       const nodeB: NodeInstance = {
         id: 'idb',
         contextIds: [],
-        form: [],
+        form: {},
         inputs: [],
         outputs: [],
         type: 'test',
@@ -682,7 +683,7 @@ describe('Connections', () => {
       const nodeA: NodeInstance = {
         id: 'ida',
         contextIds: [],
-        form: [],
+        form: {},
         inputs: [],
         outputs: [],
         type: 'abc',
@@ -695,7 +696,7 @@ describe('Connections', () => {
       const nodeB: NodeInstance = {
         id: 'idb',
         contextIds: [],
-        form: [],
+        form:{},
         inputs: [],
         outputs: [],
         type: 'test',
@@ -736,7 +737,7 @@ describe('Connections', () => {
     const nodeA: NodeInstance = {
       id: 'ida',
       contextIds: [],
-      form: [],
+      form:{},
       inputs: [],
       outputs: [],
       type: 'abc',
@@ -749,7 +750,7 @@ describe('Connections', () => {
     const nodeB: NodeInstance = {
       id: 'idb',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'test',
@@ -767,7 +768,7 @@ describe('Connections', () => {
     const contextType: NodeInstance = {
       id: 'parentnode',
       contextIds: [],
-      form: [],
+      form: {},
       inputs: [],
       outputs: [],
       type: 'type',

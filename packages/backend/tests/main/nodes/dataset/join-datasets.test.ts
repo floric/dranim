@@ -4,13 +4,12 @@ import {
   JoinDatasetsNodeDef,
   ValueSchema
 } from '@masterthesis/shared';
-import { Db } from 'mongodb';
 
 import { JoinDatasetsNode } from '../../../../src/main/nodes/dataset/join-datasets';
 import { getTestMongoDb, NeverGoHereError, NODE } from '../../../test-utils';
 
 let conn;
-let db: Db;
+let db;
 let server;
 
 jest.mock('@masterthesis/shared');

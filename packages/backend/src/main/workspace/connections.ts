@@ -6,9 +6,10 @@ import {
   NodeInstance,
   SocketInstance
 } from '@masterthesis/shared';
-import { Collection, Db, ObjectID } from 'mongodb';
+import { Db, ObjectID } from 'mongodb';
 
 import { Log } from '../../logging';
+import { Omit } from '../../main';
 import { getNodeType } from '../nodes/all-nodes';
 import { tryGetNode } from './nodes';
 import {
@@ -19,10 +20,11 @@ import {
 } from './nodes-detail';
 import { updateStates } from './nodes-state';
 
-export const getConnectionsCollection = (
+export const getConnectionsCollection = <
+  T = ConnectionInstance & { _id: ObjectID }
+>(
   db: Db
-): Collection<ConnectionInstance & { _id: ObjectID }> =>
-  db.collection('Connections');
+) => db.collection<T>('Connections');
 
 export const createConnection = async (
   from: SocketInstance,
@@ -32,7 +34,9 @@ export const createConnection = async (
   await validateConnection(from, to, reqContext);
 
   const destination = await tryGetNode(to.nodeId, reqContext);
-  const collection = getConnectionsCollection(reqContext.db);
+  const collection = getConnectionsCollection<Omit<ConnectionInstance, 'id'>>(
+    reqContext.db
+  );
   const insertRes = await collection.insertOne({
     from,
     to,

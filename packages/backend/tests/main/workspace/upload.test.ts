@@ -1,4 +1,3 @@
-import { Db } from 'mongodb';
 import { Readable } from 'stream';
 
 import { Dataset, DataType, ProcessState } from '@masterthesis/shared';
@@ -16,7 +15,7 @@ import {
 } from '../../test-utils';
 
 let conn;
-let db: Db;
+let db;
 let server;
 
 jest.mock('../../../src/main/workspace/dataset');
@@ -96,6 +95,7 @@ describe('Upload', () => {
   test('should do upload with valid and invalid entries', async () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,
+      userId: '',
       name: 'DS',
       created: '',
       description: '',
@@ -137,6 +137,7 @@ describe('Upload', () => {
       failedEntries: 0,
       fileNames: [],
       invalidEntries: 0,
+      finish: null,
       state: ProcessState.STARTED
     });
 

@@ -13,17 +13,16 @@ export const API_URL =
     ? `https://${process.env.BACKEND_DOMAIN}`
     : 'http://localhost:3000';
 
-const cache = new InMemoryCache();
 const linkOptions = {
   uri: `${API_URL}/graphql`,
   credentials: 'include'
 };
 
-const authLink = setContext((_, { headers }) => {
+const authLink = setContext((_, response) => {
   const token = localStorage.getItem('SESSION_TOKEN');
   return {
     headers: {
-      ...headers,
+      ...response.headers,
       authorization: token ? `Bearer ${token}` : ''
     }
   };
@@ -65,5 +64,5 @@ export const client = new ApolloClient({
       ApolloLink.from([errorLink, batchLink])
     )
   ),
-  cache
+  cache: new InMemoryCache()
 });

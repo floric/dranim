@@ -1,22 +1,20 @@
-import {
-  FormValue,
-  FormValues,
-  ServerNodeDef,
-  ServerNodeDefWithContextFn
-} from './nodes';
+import { FormValues, ServerNodeDef, ServerNodeDefWithContextFn } from './nodes';
 import { SocketMetaDef } from './sockets';
 
-export const parseNodeForm = (form: Array<FormValue>): FormValues<any> => {
+export const parseNodeForm = (form: {
+  [key: string]: string;
+}): FormValues<any> => {
   const fullForm = {};
-  Array.from(Object.values(form)).forEach(e => {
-    if (fullForm[e.name] !== undefined) {
-      throw new Error(`Duplicate form value names: ${e.name}`);
+  Object.entries(form).forEach(e => {
+    if (fullForm[e[0]] !== undefined) {
+      throw new Error(`Duplicate form value names: ${e[0]}`);
     }
 
     try {
-      fullForm[e.name] = JSON.parse(e.value);
+      fullForm[e[0]] = JSON.parse(e[1]);
     } catch (err) {
-      fullForm[e.name] = null;
+      fullForm[e[0]] = null;
+      console.log(form);
       console.error('Invalid value from server.');
     }
   });

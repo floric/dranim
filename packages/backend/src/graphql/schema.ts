@@ -56,6 +56,19 @@ const resolvers: any = {
     serialize: (value: SocketMetas<any>) => JSON.stringify(value),
     parseLiteral: ast =>
       ast.kind === Kind.STRING ? JSON.parse(ast.value) : null
+  }),
+  FormValues: new GraphQLScalarType({
+    name: 'FormValues',
+    parseValue: (value: { [key: string]: any }) => ({}),
+    serialize: (value: { [key: string]: any }) => {
+      const res = {};
+      Object.entries(value).forEach(c => {
+        res[c[0]] = JSON.parse(c[1]);
+      });
+
+      return res;
+    },
+    parseLiteral: ast => ({})
   })
 };
 
