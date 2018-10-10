@@ -55,7 +55,8 @@ export const createNode = async (
     throw new Error('Writing node failed');
   }
 
-  const newNodeId = res.ops[0]._id.toHexString();
+  const { _id, ...other } = res.ops[0];
+  const newNodeId = _id.toHexString();
 
   await Promise.all([
     addContextNodesIfNecessary(
@@ -68,13 +69,10 @@ export const createNode = async (
     updateStates(workspaceId, reqContext)
   ]);
 
-  const { _id, ...other } = res.ops[0];
-
   Log.info(`Node ${newNodeId} created`);
 
   return {
     id: newNodeId,
-    form: {},
     ...other
   };
 };
@@ -282,17 +280,4 @@ export const tryGetContextNode = async (
   }
 
   return contextNode;
-};
-
-export const resetProgress = async (id: string, reqContext: ApolloContext) => {
-  const nodesColl = getNodesCollection(reqContext.db);
-  await nodesColl.updateMany(
-    { workspaceId: id },
-    {
-      $set: {
-        progress: null
-      }
-    }
-  );
-  return true;
 };

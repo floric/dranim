@@ -1,6 +1,11 @@
-import { ApolloContext, OutputResult } from '@masterthesis/shared';
+import {
+  ApolloContext,
+  NodeOutputResult,
+  OutputResult
+} from '@masterthesis/shared';
 
 import { Db, ObjectID } from 'mongodb';
+import { Omit } from '../../main';
 import { tryGetWorkspace } from '../workspace/workspace';
 
 export const getResultsCollection = <T = OutputResult & { _id: ObjectID }>(
@@ -8,37 +13,58 @@ export const getResultsCollection = <T = OutputResult & { _id: ObjectID }>(
 ) => db.collection<T>('Results');
 
 export const addOrUpdateResult = async (
-  result: OutputResult,
+  result: NodeOutputResult,
+  workspaceId: string,
   reqContext: ApolloContext
-): Promise<OutputResult & { id: string }> => {
-  const { name, workspaceId } = result;
+): Promise<OutputResult> => {
+  const { name } = result;
   const collection = getResultsCollection(reqContext.db);
-  await validateInputs(result, reqContext);
+  await validateResult(result, workspaceId, reqContext);
 
-  const existing = await collection.findOne({ name, workspaceId });
+  const existing = await collection.findOne({
+    name,
+    workspaceId
+  });
 
-  let safedRes: OutputResult & { _id: ObjectID };
   if (existing) {
-    safedRes = await updateResult(result, reqContext);
-  } else {
-    safedRes = await createResult(result, reqContext);
+    const { _id: skipId, ...unchanged } = existing;
+    return await updateResult(
+      {
+        ...unchanged,
+        type: result.type,
+        value: result.value,
+        description: result.description
+      },
+      reqContext
+    );
   }
 
-  const { _id, ...rest } = safedRes;
-  return { ...rest, id: _id.toHexString() };
+  return await createResult(result, workspaceId, reqContext);
+};
+
+export const setResultVisibility = async (
+  id: string,
+  visible: boolean,
+  reqContext: ApolloContext
+) => {
+  const result = await tryGetResult(id, reqContext);
+  return await updateResult({ ...result, visible }, reqContext);
 };
 
 const createResult = async (
-  result: OutputResult,
+  result: NodeOutputResult,
+  workspaceId: string,
   reqContext: ApolloContext
 ) => {
-  const { name, type, value, workspaceId, description } = result;
-  const coll = getResultsCollection<OutputResult>(reqContext.db);
+  const { name, type, value, description } = result;
+  const coll = getResultsCollection<Omit<OutputResult, 'id'>>(reqContext.db);
   const res = await coll.insertOne({
     name,
     type,
     description,
-    value: JSON.stringify(value),
+    userId: reqContext.userId,
+    value,
+    visible: false,
     workspaceId
   });
 
@@ -46,24 +72,32 @@ const createResult = async (
     throw new Error('Writing result failed');
   }
 
-  return res.ops[0];
+  const { _id, ...rest } = res.ops[0];
+  return { ...rest, id: _id.toHexString() };
 };
 
 const updateResult = async (
   result: OutputResult,
   reqContext: ApolloContext
 ) => {
-  const { name, type, value, workspaceId, description } = result;
+  const {
+    name,
+    workspaceId,
+    value,
+    type,
+    description,
+    userId,
+    visible
+  } = result;
   const coll = getResultsCollection(reqContext.db);
   const res = await coll.findOneAndUpdate(
-    { name, workspaceId },
+    { name, workspaceId, userId },
     {
       $set: {
-        name,
+        value,
         type,
         description,
-        value: JSON.stringify(value),
-        workspaceId
+        visible
       }
     }
   );
@@ -72,18 +106,19 @@ const updateResult = async (
     throw new Error('Writing result failed');
   }
 
-  return res.value;
+  return result;
 };
 
-const validateInputs = async (
-  result: OutputResult,
+const validateResult = async (
+  result: NodeOutputResult,
+  workspaceId: string,
   reqContext: ApolloContext
 ) => {
   if (result.name.length === 0) {
     throw new Error('Name must not be empty');
   }
 
-  await tryGetWorkspace(result.workspaceId, reqContext);
+  await tryGetWorkspace(workspaceId, reqContext);
 };
 
 export const deleteResultById = async (
@@ -118,7 +153,7 @@ export const deleteResultsByWorkspace = async (
   reqContext: ApolloContext
 ) => {
   const coll = getResultsCollection(reqContext.db);
-  const res = await coll.deleteMany({ workspaceId });
+  const res = await coll.deleteMany({ workspaceId, userId: reqContext.userId });
   if (res.result.ok !== 1) {
     throw new Error('Deletion of Result failed');
   }
@@ -129,9 +164,9 @@ export const deleteResultsByWorkspace = async (
 export const getResultsForWorkspace = async (
   workspaceId: string,
   reqContext: ApolloContext
-): Promise<Array<OutputResult & { id: string }>> => {
+): Promise<Array<OutputResult>> => {
   const all = await getResultsCollection(reqContext.db)
-    .find({ workspaceId })
+    .find({ workspaceId, userId: reqContext.userId })
     .toArray();
 
   return all.map(n => {
@@ -143,17 +178,29 @@ export const getResultsForWorkspace = async (
 export const getResult = async (
   id: string,
   reqContext: ApolloContext
-): Promise<(OutputResult & { id: string }) | null> => {
+): Promise<OutputResult | null> => {
   if (!ObjectID.isValid(id)) {
     return null;
   }
 
   const collection = getResultsCollection(reqContext.db);
-  const obj = await collection.findOne({ _id: new ObjectID(id) });
+  const obj = await collection.findOne({
+    _id: new ObjectID(id),
+    userId: reqContext.userId
+  });
   if (!obj) {
     return null;
   }
 
   const { _id, ...rest } = obj;
   return { ...rest, id: _id.toHexString() };
+};
+
+export const tryGetResult = async (id: string, reqContext: ApolloContext) => {
+  const res = await getResult(id, reqContext);
+  if (!res) {
+    throw new Error('Unknown Result');
+  }
+
+  return res;
 };

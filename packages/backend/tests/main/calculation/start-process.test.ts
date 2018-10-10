@@ -4,10 +4,10 @@ import {
   DataType,
   IOValues,
   NodeInstance,
+  NodeOutputResult,
   NodeState,
   NumberInputNodeDef,
   NumberOutputNodeDef,
-  OutputResult,
   ProcessState,
   sleep,
   Workspace
@@ -34,6 +34,7 @@ jest.mock('../../../src/main/calculation/execution');
 jest.mock('../../../src/main/dashboards/results');
 jest.mock('../../../src/main/workspace/workspace');
 jest.mock('../../../src/main/workspace/nodes');
+jest.mock('../../../src/main/workspace/nodes-detail');
 jest.mock('../../../src/main/workspace/dataset');
 
 const ws: Workspace = {
@@ -168,15 +169,13 @@ describe('Start Process', () => {
   });
 
   test('should start new calculation process with one node with results', async () => {
-    const resultA: OutputResult<number> = {
-      workspaceId: '123',
+    const resultA: NodeOutputResult<number> = {
       type: DataType.NUMBER,
       name: 'n',
       value: 9,
       description: 'desc'
     };
-    const resultB: OutputResult<string> = {
-      workspaceId: '123',
+    const resultB: NodeOutputResult<string> = {
       type: DataType.STRING,
       name: 'n',
       value: 'test',
@@ -224,8 +223,8 @@ describe('Start Process', () => {
       }
     ];
     (executeNode as jest.Mock)
-      .mockResolvedValueOnce({ outputs: {}, results: { resultA } })
-      .mockResolvedValueOnce({ outputs: {}, results: { resultB } });
+      .mockResolvedValueOnce({ outputs: {}, results: resultA })
+      .mockResolvedValueOnce({ outputs: {}, results: resultB });
     (getAllNodes as jest.Mock).mockResolvedValue(nodes);
 
     const newProcess = await startProcess(
@@ -250,14 +249,16 @@ describe('Start Process', () => {
     expect(clearGeneratedDatasets).toHaveBeenCalledTimes(1);
     expect(addOrUpdateResult as jest.Mock).toHaveBeenCalledTimes(2);
     expect(addOrUpdateResult as jest.Mock).toHaveBeenCalledWith(
-      { resultA },
+      resultA,
+      VALID_OBJECT_ID,
       {
         db,
         userId: ''
       }
     );
     expect(addOrUpdateResult as jest.Mock).toHaveBeenCalledWith(
-      { resultB },
+      resultB,
+      VALID_OBJECT_ID,
       {
         db,
         userId: ''

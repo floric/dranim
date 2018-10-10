@@ -3,8 +3,8 @@ import {
   DatasetOutputNodeDef,
   DatasetOutputNodeInputs,
   DataType,
+  NodeOutputResult,
   OutputNodeForm,
-  OutputResult,
   ServerNodeDef
 } from '@masterthesis/shared';
 
@@ -16,7 +16,7 @@ export const DatasetOutputNode: ServerNodeDef<
   DatasetOutputNodeInputs,
   {},
   OutputNodeForm,
-  OutputResult<Dataset>
+  NodeOutputResult<Dataset>
 > = {
   type: DatasetOutputNodeDef.type,
   isFormValid: isOutputFormValid,
@@ -39,7 +39,6 @@ export const DatasetOutputNode: ServerNodeDef<
         name: form.name!,
         value: { ...ds, name: form.name! },
         type: DataType.DATASET,
-        workspaceId,
         description: form.description || ''
       }
     };

@@ -119,7 +119,7 @@ const DatasetsPage: SFC = () => (
                 {createDataset => (
                   <CreateDataSetForm
                     handleCreateDataset={name =>
-                      tryOperation<any>({
+                      tryOperation({
                         op: () =>
                           createDataset({
                             variables: { name },

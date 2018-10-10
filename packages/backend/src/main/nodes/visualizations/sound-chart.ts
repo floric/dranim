@@ -1,7 +1,7 @@
 import {
   DataType,
+  NodeOutputResult,
   OutputNodeForm,
-  OutputResult,
   ServerNodeDefWithContextFn,
   SocketState,
   SoundChartDef,
@@ -28,7 +28,7 @@ export const SoundChartNode: ServerNodeDefWithContextFn<
   VisInputs,
   {},
   OutputNodeForm,
-  OutputResult<{}>,
+  NodeOutputResult<{}>,
   ContextResult
 > = {
   type: SoundChartDef.type,
@@ -113,7 +113,6 @@ export const SoundChartNode: ServerNodeDefWithContextFn<
         },
         type: DataType.VIS,
         name: form.name!,
-        workspaceId,
         description: form.description || ''
       }
     };

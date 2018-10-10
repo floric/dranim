@@ -1,7 +1,7 @@
 import {
   DataType,
+  NodeOutputResult,
   OutputNodeForm,
-  OutputResult,
   ServerNodeDef,
   StringOutputNodeDef,
   StringOutputNodeInputs
@@ -13,7 +13,7 @@ export const StringOutputNode: ServerNodeDef<
   StringOutputNodeInputs,
   {},
   OutputNodeForm,
-  OutputResult<string>
+  NodeOutputResult<string>
 > = {
   type: StringOutputNodeDef.type,
   isFormValid: isOutputFormValid,
@@ -25,7 +25,6 @@ export const StringOutputNode: ServerNodeDef<
         name: form.name!,
         value: inputs.value,
         type: DataType.STRING,
-        workspaceId,
         description: form.description || ''
       }
     })

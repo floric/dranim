@@ -5,6 +5,7 @@ import {
   Dataset,
   Entry,
   NodeInstance,
+  OutputResult,
   UploadProcess,
   Workspace
 } from '@masterthesis/shared';
@@ -17,6 +18,7 @@ import {
   startProcess,
   stopCalculation
 } from '../../main/calculation/start-process';
+import { setResultVisibility } from '../../main/dashboards/results';
 import {
   createConnection,
   deleteConnection
@@ -115,5 +117,7 @@ export const Mutation: IResolverObject<any, ApolloContext> = {
     context
   ): Promise<CalculationProcess> => startProcess(workspaceId, context),
   stopCalculation: (_, { id }, context): Promise<boolean> =>
-    stopCalculation(id, context)
+    stopCalculation(id, context),
+  setResultVisibility: (_, { id, visible }, context): Promise<OutputResult> =>
+    setResultVisibility(id, visible, context)
 };

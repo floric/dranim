@@ -32,6 +32,7 @@ import {
   getInputDefs,
   getOutputDefs,
   removeConnection,
+  resetProgress,
   updateProgress
 } from '../../../src/main/workspace/nodes-detail';
 import { updateStates } from '../../../src/main/workspace/nodes-state';
@@ -953,5 +954,19 @@ describe('Node Details', () => {
     } catch (err) {
       expect(err.message).toBe('Progress value is invalid: -0.1');
     }
+  });
+
+  test('should reset progress', async () => {
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateMany: jest.fn()
+    });
+
+    const res = await resetProgress(VALID_OBJECT_ID, { db, userId: '' });
+    expect(res).toBe(true);
+    expect(getNodesCollection(db).updateMany).toHaveBeenCalledTimes(1);
+    expect(getNodesCollection(db).updateMany).toHaveBeenCalledWith(
+      { workspaceId: VALID_OBJECT_ID },
+      { $set: { progress: null } }
+    );
   });
 });

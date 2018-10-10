@@ -82,7 +82,12 @@
       "NODE_ENV": "test",
       "ts-jest": {
         "diagnostics": {
-          "warnOnly": true
+          "warnOnly": true,
+          "pathRegex": "\\.(spec|test)\\.ts$",
+          "ignoreCodes": [
+            "TS2531",
+            "TS2532"
+          ]
         }
       }
     },

@@ -107,7 +107,7 @@ describe('Nodes', () => {
 
     expect(node).toEqual({
       ...newNode,
-      ...{ form: {test: '"abc"' }}
+      ...{ form: { test: '"abc"' } }
     });
   });
 

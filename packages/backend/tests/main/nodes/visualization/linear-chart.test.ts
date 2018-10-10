@@ -151,8 +151,7 @@ describe('LinearChart', () => {
             { label: 'test', value: 9 },
             { label: 'test', value: 9 }
           ]
-        },
-        workspaceId: NODE.workspaceId
+        }
       }
     });
   });
@@ -204,8 +203,7 @@ describe('LinearChart', () => {
             { label: 'test', value: 9 },
             { label: 'test', value: 9 }
           ]
-        },
-        workspaceId: NODE.workspaceId
+        }
       }
     });
   });

@@ -1,7 +1,12 @@
 import React, { Component } from 'react';
 
-import { GQLOutputResult } from '@masterthesis/shared';
+import { GQLOutputResult, OutputResult } from '@masterthesis/shared';
 import { Button, Card, Divider, Dropdown, Icon, Menu } from 'antd';
+import gql from 'graphql-tag';
+import { Mutation } from 'react-apollo';
+
+import { tryOperation } from '../../utils/form';
+import { AsyncButton } from '../AsyncButton';
 
 type DownloadOptions = Array<{
   name: string;
@@ -39,6 +44,14 @@ const generateDownloadMenu = (options: DownloadOptions) => (
   </Menu>
 );
 
+const SET_RESULT_VISIBILITY = gql`
+  mutation setResultVisibility($id: ID!, $visible: Boolean!) {
+    setResultVisibility(id: $id, visible: $visible) {
+      visible
+    }
+  }
+`;
+
 export class VisCard extends Component<VisCardProps, VisCardState> {
   public state: VisCardState = {
     showProperties: false
@@ -48,12 +61,17 @@ export class VisCard extends Component<VisCardProps, VisCardState> {
     this.setState({ showProperties: !this.state.showProperties });
 
   public render() {
-    const { result, children, downloadOptions, properties } = this.props;
+    const {
+      result: { name, description, visible, id, workspaceId },
+      children,
+      downloadOptions,
+      properties
+    } = this.props;
     const { showProperties } = this.state;
 
     return (
       <Card
-        title={result.name}
+        title={name}
         bordered={false}
         style={{ marginBottom: '1rem' }}
         extra={
@@ -72,6 +90,46 @@ export class VisCard extends Component<VisCardProps, VisCardState> {
                   <Button icon="download">Export</Button>
                 </Dropdown>
               )}
+            <Mutation<OutputResult, { id: string; visible: boolean }>
+              mutation={SET_RESULT_VISIBILITY}
+            >
+              {(setResultVisibility, res) => (
+                <AsyncButton
+                  onClick={() =>
+                    tryOperation({
+                      op: () =>
+                        setResultVisibility({
+                          variables: { id, visible: !visible },
+                          awaitRefetchQueries: true,
+                          refetchQueries: [
+                            {
+                              query: gql`
+                                query workspace($workspaceId: ID!) {
+                                  workspace(id: $workspaceId) {
+                                    id
+                                    results {
+                                      id
+                                      visible
+                                    }
+                                  }
+                                }
+                              `,
+                              variables: { workspaceId }
+                            }
+                          ]
+                        }),
+                      successTitle: () => 'Visibility changed',
+                      successMessage: () =>
+                        !visible
+                          ? 'Result is now visible via the published link.'
+                          : 'Result is now exclusively visible to you.'
+                    })
+                  }
+                  tooltip={visible ? 'Public' : 'Private'}
+                  icon={visible ? 'unlock' : 'lock'}
+                />
+              )}
+            </Mutation>
           </Button.Group>
         }
       >
@@ -83,10 +141,10 @@ export class VisCard extends Component<VisCardProps, VisCardState> {
         ) : null}
         {children}
 
-        {!!result.description && (
+        {!!description && (
           <>
             <Divider style={{ marginTop: '1rem', marginBottom: '1rem' }} />
-            <Card.Meta description={result.description} />
+            <Card.Meta description={description} />
           </>
         )}
       </Card>

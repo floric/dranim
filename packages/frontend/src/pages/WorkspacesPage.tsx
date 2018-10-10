@@ -117,7 +117,7 @@ const WorkspacesOverviewPage: SFC<WorkspacesOverviewPageProps> = () => (
                 {createWorkspace => (
                   <CreateWorkspaceForm
                     handleCreateWorkspace={(name, description) =>
-                      tryOperation<any>({
+                      tryOperation({
                         op: () =>
                           createWorkspace({
                             variables: { name, description },

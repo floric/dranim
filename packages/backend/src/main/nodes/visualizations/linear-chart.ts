@@ -3,8 +3,8 @@ import {
   LinearChartDef,
   LinearChartForm,
   LinearChartType,
+  NodeOutputResult,
   OutputNodeForm,
-  OutputResult,
   ServerNodeDefWithContextFn,
   SocketState,
   VisInputs
@@ -22,7 +22,7 @@ export const LinearChartNode: ServerNodeDefWithContextFn<
   VisInputs,
   {},
   OutputNodeForm & LinearChartForm,
-  OutputResult<{
+  NodeOutputResult<{
     type: LinearChartType;
     values: Array<ValueLabelAssignment>;
   }>,
@@ -68,7 +68,6 @@ export const LinearChartNode: ServerNodeDefWithContextFn<
         },
         type: DataType.VIS,
         name: form.name!,
-        workspaceId,
         description: form.description || ''
       }
     };

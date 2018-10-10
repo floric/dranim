@@ -2,7 +2,7 @@ import {
   ApolloContext,
   CalculationProcess,
   NodeInstance,
-  OutputResult,
+  NodeOutputResult,
   ProcessState
 } from '@masterthesis/shared';
 import { Db, ObjectID } from 'mongodb';
@@ -14,7 +14,8 @@ import { executeNode } from '../calculation/execution';
 import { addOrUpdateResult } from '../dashboards/results';
 import { getNodeType, hasNodeType } from '../nodes/all-nodes';
 import { clearGeneratedDatasets } from '../workspace/dataset';
-import { getAllNodes, resetProgress } from '../workspace/nodes';
+import { getAllNodes } from '../workspace/nodes';
+import { resetProgress } from '../workspace/nodes-detail';
 import { InMemoryCache } from './inmemory-cache';
 
 export const CANCEL_CHECKS_MS = 5000;
@@ -100,7 +101,7 @@ const doCalculation = async (
 
     const durationMs = new Date().getTime() - start;
 
-    await saveResults(results, reqContext);
+    await saveResults(results, workspaceId, reqContext);
     await updateFinishedProcess(
       processId,
       workspaceId,
@@ -151,20 +152,21 @@ const checkForCanceledProcess = (
   });
 
 const saveResults = async (
-  results: Array<OutputResult | null>,
+  results: Array<NodeOutputResult | null>,
+  workspaceId: string,
   reqContext: ApolloContext
 ) =>
   Promise.all(
     results
       .filter(r => r != null && Object.keys(r).length > 0)
-      .map(r => addOrUpdateResult(r!, reqContext))
+      .map(r => addOrUpdateResult(r!, workspaceId, reqContext))
   );
 
 const executeOutputNode = async (
   o: NodeInstance,
   processId: string,
   reqContext: ApolloContext
-): Promise<OutputResult<any> | null> => {
+): Promise<NodeOutputResult<any> | null> => {
   const cache = new InMemoryCache();
   const res = await executeNode(o, processId, reqContext, {}, cache);
   return res.results || null;

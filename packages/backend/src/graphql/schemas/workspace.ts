@@ -82,6 +82,8 @@ const OutputResultDef = `
     type: String!
     name: String!
     description: String!
+    visible: Boolean!
+    workspaceId: String!
   }
 `;
 

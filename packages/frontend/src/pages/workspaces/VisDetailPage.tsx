@@ -20,6 +20,8 @@ const WORKSPACE = gql`
         type
         value
         description
+        visible
+        workspaceId
       }
     }
     calculations(workspaceId: $id) {

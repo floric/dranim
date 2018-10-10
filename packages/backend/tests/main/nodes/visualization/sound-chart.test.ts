@@ -7,7 +7,7 @@ import {
 
 import { getDynamicEntryContextInputs } from '../../../../src/main/nodes/entries/utils';
 import { SoundChartNode } from '../../../../src/main/nodes/visualizations/sound-chart';
-import { NODE, VALID_OBJECT_ID } from '../../../test-utils';
+import { NODE } from '../../../test-utils';
 
 jest.mock('../../../../src/main/nodes/entries/utils');
 jest.mock('../../../../src/main/workspace/dataset');
@@ -196,8 +196,7 @@ describe('SoundChart', () => {
               { destination: 'c', isEastPassage: false, source: 'b', value: 15 }
             ]
           }
-        },
-        workspaceId: VALID_OBJECT_ID
+        }
       }
     });
   });

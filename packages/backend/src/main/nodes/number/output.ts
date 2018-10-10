@@ -1,9 +1,9 @@
 import {
   DataType,
+  NodeOutputResult,
   NumberOutputNodeDef,
   NumberOutputNodeInputs,
   OutputNodeForm,
-  OutputResult,
   ServerNodeDef
 } from '@masterthesis/shared';
 
@@ -13,7 +13,7 @@ export const NumberOutputNode: ServerNodeDef<
   NumberOutputNodeInputs,
   {},
   OutputNodeForm,
-  OutputResult<number>
+  NodeOutputResult<number>
 > = {
   type: NumberOutputNodeDef.type,
   isFormValid: isOutputFormValid,
@@ -25,7 +25,6 @@ export const NumberOutputNode: ServerNodeDef<
         name: form.name!,
         value: inputs.value,
         type: DataType.NUMBER,
-        workspaceId,
         description: form.description || ''
       }
     })

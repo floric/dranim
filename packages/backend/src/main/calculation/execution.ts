@@ -12,7 +12,6 @@ import {
   ServerNodeDefWithContextFn
 } from '@masterthesis/shared';
 
-import { Log } from '../../logging';
 import { tryGetNodeType } from '../nodes/all-nodes';
 import { tryGetConnection } from '../workspace/connections';
 import { tryGetContextNode, tryGetNode } from '../workspace/nodes';
@@ -25,7 +24,7 @@ export const executeNode = async (
   reqContext: ApolloContext,
   contextInputs: IOValues<any> = {},
   cache: InMemoryCache = new InMemoryCache()
-): Promise<NodeExecutionResult<{}, any>> => {
+): Promise<NodeExecutionResult<{}>> => {
   if (node.type === ContextNodeType.INPUT) {
     return {
       outputs: contextInputs
@@ -46,10 +45,6 @@ export const executeNode = async (
   const nodeForm = parseNodeForm(node.form);
 
   await validateInputs(node, nodeInputs, reqContext);
-
-  if (node.contextIds.length === 0) {
-    Log.info(`Executing node (type: ${node.type}, id: ${node.id})`);
-  }
 
   const type = tryGetNodeType(node.type);
   if (hasContextFn(type)) {

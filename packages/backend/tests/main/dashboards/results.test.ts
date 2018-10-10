@@ -1,4 +1,4 @@
-import { DataType, OutputResult } from '@masterthesis/shared';
+import { DataType, NodeOutputResult, OutputResult } from '@masterthesis/shared';
 
 import {
   addOrUpdateResult,
@@ -6,7 +6,9 @@ import {
   deleteResultByName,
   deleteResultsByWorkspace,
   getResult,
-  getResultsForWorkspace
+  getResultsForWorkspace,
+  setResultVisibility,
+  tryGetResult
 } from '../../../src/main/dashboards/results';
 import { tryGetWorkspace } from '../../../src/main/workspace/workspace';
 import {
@@ -20,6 +22,7 @@ let db;
 let server;
 
 jest.mock('../../../src/main/workspace/workspace');
+jest.mock('');
 
 describe('Dashboard Results', () => {
   beforeAll(async () => {
@@ -43,21 +46,26 @@ describe('Dashboard Results', () => {
   });
 
   test('should create result', async () => {
-    const value: OutputResult<string> = {
-      workspaceId: 'abc',
+    const value: NodeOutputResult<string> = {
       description: 'desc',
       name: 'test',
       type: DataType.STRING,
       value: 'val'
     };
 
-    const res = await addOrUpdateResult(value, { db, userId: '' });
+    const res = await addOrUpdateResult(value, VALID_OBJECT_ID, {
+      db,
+      userId: '123'
+    });
     expect(res).toBeDefined();
 
-    const all = await getResultsForWorkspace('abc', { db, userId: '' });
+    const all = await getResultsForWorkspace(VALID_OBJECT_ID, {
+      db,
+      userId: '123'
+    });
     expect(all.length).toBe(1);
-    expect(all[0].value).toEqual(JSON.stringify(value.value));
-    expect(all[0].workspaceId).toEqual(value.workspaceId);
+    expect(all[0].value).toEqual(value.value);
+    expect(all[0].workspaceId).toEqual(VALID_OBJECT_ID);
     expect(all[0].type).toEqual(value.type);
     expect(all[0].name).toEqual(value.name);
   });
@@ -69,9 +77,9 @@ describe('Dashboard Results', () => {
           name: '',
           description: 'desc',
           value: '',
-          workspaceId: 'test',
           type: DataType.STRING
         },
+        VALID_OBJECT_ID,
         { db, userId: '' }
       );
       throw NeverGoHereError;
@@ -90,9 +98,9 @@ describe('Dashboard Results', () => {
           name: 'test',
           description: 'desc',
           value: '',
-          workspaceId: 'test',
           type: DataType.STRING
         },
+        VALID_OBJECT_ID,
         { db, userId: '' }
       );
       throw NeverGoHereError;
@@ -102,45 +110,55 @@ describe('Dashboard Results', () => {
   });
 
   test('should update result', async () => {
-    const oldValue: OutputResult<string> = {
-      workspaceId: 'abc',
+    const oldValue: NodeOutputResult<string> = {
       description: 'desc',
       name: 'test',
       type: DataType.STRING,
       value: 'val'
     };
-    const newValue: OutputResult<number> = {
-      workspaceId: 'abc',
+    const newValue: NodeOutputResult<number> = {
       description: 'new desc',
       name: 'test',
       type: DataType.NUMBER,
       value: 123
     };
 
-    let res = await addOrUpdateResult(oldValue, { db, userId: '123' });
+    let res = await addOrUpdateResult(oldValue, VALID_OBJECT_ID, {
+      db,
+      userId: '123'
+    });
     expect(res).toBeDefined();
 
-    res = await addOrUpdateResult(newValue, { db, userId: '123' });
+    res = await addOrUpdateResult(newValue, VALID_OBJECT_ID, {
+      db,
+      userId: '123'
+    });
     expect(res).toBeDefined();
 
-    const all = await getResultsForWorkspace('abc', { db, userId: '123' });
+    const all = await getResultsForWorkspace(VALID_OBJECT_ID, {
+      db,
+      userId: '123'
+    });
     expect(all.length).toBe(1);
-    expect(all[0].value).toEqual(JSON.stringify(newValue.value));
-    expect(all[0].workspaceId).toEqual(newValue.workspaceId);
-    expect(all[0].type).toEqual(newValue.type);
+    expect(all[0].value).toEqual(newValue.value);
+    expect(all[0].workspaceId).toEqual(VALID_OBJECT_ID);
     expect(all[0].name).toEqual(newValue.name);
+    expect(all[0].description).toEqual(newValue.description);
+    expect(all[0].type).toEqual(newValue.type);
   });
 
   test('should get result', async () => {
-    const value: OutputResult<string> = {
-      workspaceId: 'abc',
+    const value: NodeOutputResult<string> = {
       description: 'desc',
       name: 'test',
       type: DataType.STRING,
       value: 'val'
     };
 
-    const savedRes = await addOrUpdateResult(value, { db, userId: '' });
+    const savedRes = await addOrUpdateResult(value, VALID_OBJECT_ID, {
+      db,
+      userId: ''
+    });
     expect(savedRes.id).toBeDefined();
 
     const res = await getResult(savedRes.id, { db, userId: '' });
@@ -149,15 +167,17 @@ describe('Dashboard Results', () => {
   });
 
   test('should delete result by id', async () => {
-    const value: OutputResult<string> = {
-      workspaceId: 'abc',
+    const value: NodeOutputResult<string> = {
       description: 'desc',
       name: 'test',
       type: DataType.STRING,
       value: 'val'
     };
 
-    const savedRes = await addOrUpdateResult(value, { db, userId: '' });
+    const savedRes = await addOrUpdateResult(value, VALID_OBJECT_ID, {
+      db,
+      userId: ''
+    });
     expect(savedRes.id).toBeDefined();
 
     const res = await deleteResultById(savedRes.id, { db, userId: '' });
@@ -168,18 +188,23 @@ describe('Dashboard Results', () => {
   });
 
   test('should delete result by workspace id', async () => {
-    const value: OutputResult<string> = {
-      workspaceId: 'abc',
+    const value: NodeOutputResult<string> = {
       description: 'desc',
       name: 'test',
       type: DataType.STRING,
       value: 'val'
     };
 
-    const savedRes = await addOrUpdateResult(value, { db, userId: '' });
+    const savedRes = await addOrUpdateResult(value, VALID_OBJECT_ID, {
+      db,
+      userId: ''
+    });
     expect(savedRes.id).toBeDefined();
 
-    const res = await deleteResultsByWorkspace('abc', { db, userId: '' });
+    const res = await deleteResultsByWorkspace(VALID_OBJECT_ID, {
+      db,
+      userId: ''
+    });
     expect(res).toEqual(true);
 
     const newRes = await getResult(savedRes.id, { db, userId: '' });
@@ -195,15 +220,17 @@ describe('Dashboard Results', () => {
   });
 
   test('should delete result by name', async () => {
-    const value: OutputResult<string> = {
-      workspaceId: 'abc',
+    const value: NodeOutputResult<string> = {
       description: 'desc',
       name: 'test',
       type: DataType.STRING,
       value: 'val'
     };
 
-    const savedRes = await addOrUpdateResult(value, { db, userId: '' });
+    const savedRes = await addOrUpdateResult(value, VALID_OBJECT_ID, {
+      db,
+      userId: ''
+    });
     expect(savedRes.id).toBeDefined();
 
     const res = await deleteResultByName(savedRes.name, savedRes.workspaceId, {
@@ -235,15 +262,13 @@ describe('Dashboard Results', () => {
   });
 
   test('should get only results for correct workspace', async () => {
-    const value: OutputResult<string> = {
-      workspaceId: 'abc',
+    const value: NodeOutputResult<string> = {
       description: 'desc',
       name: 'test',
       type: DataType.STRING,
       value: 'val'
     };
-    const otherValue: OutputResult<string> = {
-      workspaceId: 'otherDb',
+    const otherValue: NodeOutputResult<string> = {
       description: 'desc 2',
       name: 'test',
       type: DataType.STRING,
@@ -251,16 +276,53 @@ describe('Dashboard Results', () => {
     };
 
     await Promise.all([
-      addOrUpdateResult(value, { db, userId: '' }),
-      addOrUpdateResult(otherValue, { db, userId: '' })
+      addOrUpdateResult(value, VALID_OBJECT_ID, { db, userId: '' }),
+      addOrUpdateResult(otherValue, 'abc', { db, userId: '' })
     ]);
 
-    const res = await getResultsForWorkspace(value.workspaceId, {
+    const res = await getResultsForWorkspace(VALID_OBJECT_ID, {
       db,
       userId: ''
     });
     expect(res.length).toBe(1);
-    expect(res[0].value).toEqual(JSON.stringify(value.value));
+    expect(res[0].value).toEqual(value.value);
     expect(res[0].id).toBeDefined();
+  });
+
+  test('should throw error for unknown result', async () => {
+    try {
+      await tryGetResult(VALID_OBJECT_ID, { db, userId: '' });
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('Unknown Result');
+    }
+  });
+
+  test('should try and get result', async () => {
+    const res = await addOrUpdateResult(
+      { name: 'test', value: 9, description: '', type: DataType.NUMBER },
+      VALID_OBJECT_ID,
+      { db, userId: '' }
+    );
+    const triedRes = await tryGetResult(res.id, { db, userId: '' });
+    expect(res).toEqual(triedRes);
+  });
+
+  test('should set result visibility', async () => {
+    const newRes = await addOrUpdateResult(
+      { name: 'test', value: 9, description: '', type: DataType.NUMBER },
+      VALID_OBJECT_ID,
+      { db, userId: '' }
+    );
+    expect(newRes.visible).toBe(false);
+
+    const res = await setResultVisibility(newRes.id, true, {
+      db,
+      userId: ''
+    });
+    const triedRes = await tryGetResult(newRes.id, { db, userId: '' });
+
+    expect(res).toEqual(triedRes);
+    expect(triedRes.visible).toBe(true);
   });
 });
