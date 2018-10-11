@@ -78,7 +78,7 @@ const ConnectionInputDef = `
 const OutputResultDef = `
   type OutputResult {
     id: ID!
-    value: String!
+    value: Object!
     type: String!
     name: String!
     description: String!
@@ -98,6 +98,18 @@ const WorkspaceDef = `
     connections: [Connection!]!
     results: [OutputResult!]!
     state: String!
+  }
+`;
+
+const PublicResultsDef = `
+  type PublicResults {
+    id: ID!
+    name: String!
+    lastChange: Date!
+    created: Date!
+    description: String!
+    results: [OutputResult!]!
+    userId: String!
   }
 `;
 
@@ -129,5 +141,6 @@ export default () => [
   SocketInputDef,
   ConnectionDef,
   ConnectionInputDef,
-  WorkspaceDef
+  WorkspaceDef,
+  PublicResultsDef
 ];

@@ -1,7 +1,7 @@
 import React, { SFC } from 'react';
 
 import { GQLDataset } from '@masterthesis/shared';
-import { Card, Col } from 'antd';
+import { Card, Col, Row } from 'antd';
 import gql from 'graphql-tag';
 import { Mutation } from 'react-apollo';
 
@@ -11,7 +11,7 @@ import { CardItem } from '../components/layout/CardItem';
 import { cardItemProps, CardsLayout } from '../components/layout/CardsLayout';
 import { PageHeaderCard } from '../components/layout/PageHeaderCard';
 import { compareByName } from '../utils/data';
-import { tryOperation } from '../utils/form';
+import { tryMutation } from '../utils/form';
 import { CreateDataSetForm } from './forms/CreateDatasetForm';
 
 const ALL_DATASETS = gql`
@@ -76,7 +76,7 @@ const DatasetsPage: SFC = () => (
                       path="/data"
                       confirmDeleteMessage="Delete Table?"
                       handleDelete={() =>
-                        tryOperation({
+                        tryMutation({
                           op: () =>
                             deleteDataset({
                               variables: {
@@ -93,15 +93,20 @@ const DatasetsPage: SFC = () => (
                         })
                       }
                     >
-                      <Col xs={{ span: 24 }} md={{ span: 12 }}>
-                        {`${ds.valueschemas.length} Fields`}
-                      </Col>
-                      <Col xs={{ span: 24 }} md={{ span: 12 }}>
-                        {`${ds.entriesCount} Entries`}
-                      </Col>
-                      <Col>
-                        <TimeInfo text="Created" time={ds.created} />
-                      </Col>
+                      <Row
+                        type="flex"
+                        justify="space-between"
+                        gutter={8}
+                        style={{ marginBottom: 8 }}
+                      >
+                        <Col>
+                          <strong>{ds.valueschemas.length}</strong> Fields
+                        </Col>
+                        <Col>
+                          <strong>{ds.entriesCount}</strong> Entries
+                        </Col>
+                      </Row>
+                      <TimeInfo text="Created" time={ds.created} />
                     </CardItem>
                   )}
                 </Mutation>
@@ -115,22 +120,23 @@ const DatasetsPage: SFC = () => (
           >
             <Card bordered={false}>
               <h2>New Table</h2>
-              <Mutation mutation={CREATE_DATASET}>
+              <Mutation<boolean> mutation={CREATE_DATASET}>
                 {createDataset => (
                   <CreateDataSetForm
                     handleCreateDataset={name =>
-                      tryOperation({
+                      tryMutation({
                         op: () =>
                           createDataset({
                             variables: { name },
                             awaitRefetchQueries: true,
                             refetchQueries: [{ query: ALL_DATASETS }]
                           }),
+                        fallback: false,
                         successTitle: () => 'Table created',
                         successMessage: () =>
                           `Table "${name}" created successfully.`,
                         failedTitle: 'Table not created.',
-                        failedMessage: `Table  "${name}" creation failed.`
+                        failedMessage: `Table "${name}" creation failed.`
                       })
                     }
                   />

@@ -1,12 +1,18 @@
 import {
   ApolloContext,
+  GQLPublicResults,
   NodeOutputResult,
   OutputResult
 } from '@masterthesis/shared';
 
 import { Db, ObjectID } from 'mongodb';
 import { Omit } from '../../main';
-import { tryGetWorkspace } from '../workspace/workspace';
+import { checkLoggedInUser } from '../users/management';
+import { getSafeObjectID } from '../utils';
+import {
+  getWorkspacesCollection,
+  tryGetWorkspace
+} from '../workspace/workspace';
 
 export const getResultsCollection = <T = OutputResult & { _id: ObjectID }>(
   db: Db
@@ -56,13 +62,15 @@ const createResult = async (
   workspaceId: string,
   reqContext: ApolloContext
 ) => {
+  checkLoggedInUser(reqContext);
+
   const { name, type, value, description } = result;
   const coll = getResultsCollection<Omit<OutputResult, 'id'>>(reqContext.db);
   const res = await coll.insertOne({
     name,
     type,
     description,
-    userId: reqContext.userId,
+    userId: reqContext.userId!,
     value,
     visible: false,
     workspaceId
@@ -126,7 +134,7 @@ export const deleteResultById = async (
   reqContext: ApolloContext
 ) => {
   const coll = getResultsCollection(reqContext.db);
-  const res = await coll.deleteOne({ _id: new ObjectID(id) });
+  const res = await coll.deleteOne({ _id: getSafeObjectID(id) });
   if (res.result.ok !== 1 || res.deletedCount !== 1) {
     throw new Error('Deletion of Result failed');
   }
@@ -179,13 +187,9 @@ export const getResult = async (
   id: string,
   reqContext: ApolloContext
 ): Promise<OutputResult | null> => {
-  if (!ObjectID.isValid(id)) {
-    return null;
-  }
-
   const collection = getResultsCollection(reqContext.db);
   const obj = await collection.findOne({
-    _id: new ObjectID(id),
+    _id: getSafeObjectID(id),
     userId: reqContext.userId
   });
   if (!obj) {
@@ -203,4 +207,29 @@ export const tryGetResult = async (id: string, reqContext: ApolloContext) => {
   }
 
   return res;
+};
+
+export const getPublicResults = async (
+  workspaceId: string,
+  reqContext: ApolloContext
+): Promise<GQLPublicResults | null> => {
+  const wsCollection = getWorkspacesCollection(reqContext.db);
+  const resultsCollection = getResultsCollection(reqContext.db);
+
+  const [ws, results] = await Promise.all([
+    wsCollection.findOne({ _id: getSafeObjectID(workspaceId) }),
+    resultsCollection.find({ workspaceId, visible: true }).toArray()
+  ]);
+
+  if (!ws) {
+    return null;
+  }
+
+  const { _id, ...rest } = ws;
+
+  return {
+    ...rest,
+    id: _id.toHexString(),
+    results: results.map(n => ({ id: n._id.toHexString(), ...n }))
+  };
 };

@@ -14,7 +14,7 @@ import { mongoDbClient } from './config/db';
 import Schema from './graphql/schema';
 import { Log, MorganLogStream } from './logging';
 import { initWorkspaceDb } from './main/workspace/workspace';
-import { generateErrorResponse, registerRoutes } from './routes';
+import { registerRoutes } from './routes';
 
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
@@ -44,36 +44,26 @@ export const main = async (options: MainOptions) => {
   }).install();
 
   const app = express();
-  app
-    .use(
-      cors(CORS(options)),
-      helmet(),
-      session({
-        secret: process.env.SESSION_SECRET,
-        sameSite: false,
-        resave: true,
-        saveUninitialized: false,
-        store: new MongoStore({ db }),
-        cookie: { secure: false }
-      }),
-      morgan('short', {
-        skip: req => req.headers['user-agent'] === 'ELB-HealthChecker/1.0',
-        stream: new MorganLogStream()
-      }),
-      bodyParser.json({}),
-      bodyParser.urlencoded({
-        extended: true
-      })
-    )
-    .use(GRAPHQL_ROUTE, (req, res, next) => {
-      if (req.session && req.session.userId) {
-        next();
-      } else {
-        res
-          .status(401)
-          .send(generateErrorResponse('Login to access this resource'));
-      }
-    });
+  app.use(
+    cors(CORS(options)),
+    helmet(),
+    session({
+      secret: process.env.SESSION_SECRET,
+      sameSite: false,
+      resave: true,
+      saveUninitialized: false,
+      store: new MongoStore({ db }),
+      cookie: { secure: false }
+    }),
+    morgan('short', {
+      skip: req => req.headers['user-agent'] === 'ELB-HealthChecker/1.0',
+      stream: new MorganLogStream()
+    }),
+    bodyParser.json({}),
+    bodyParser.urlencoded({
+      extended: true
+    })
+  );
 
   const server = new ApolloServer({
     schema: Schema as any,

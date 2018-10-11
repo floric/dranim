@@ -5,7 +5,7 @@ import { UserOwned } from './users';
 
 export interface ApolloContext {
   db: Db;
-  userId: string;
+  userId: string | null;
 }
 
 export enum NodeState {

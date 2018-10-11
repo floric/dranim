@@ -15,8 +15,28 @@ import { AsyncButton } from '../../components/AsyncButton';
 import { HandledQuery } from '../../components/HandledQuery';
 import { ProcessTime } from '../../components/ProcessTime';
 import { API_URL } from '../../io/apollo-client';
-import { tryOperation } from '../../utils/form';
-import { DATASET } from './DetailPage';
+import { tryMutation } from '../../utils/form';
+
+const DATASET = gql`
+  query dataset($id: ID!) {
+    dataset(id: $id) {
+      id
+      name
+      valueschemas {
+        name
+        type
+        required
+        fallback
+        unique
+      }
+      entriesCount
+      latestEntries {
+        id
+        values
+      }
+    }
+  }
+`;
 
 const UPLOAD_ENTRIES_CSV = gql`
   mutation($files: [Upload!]!, $datasetId: ID!) {
@@ -59,7 +79,7 @@ export interface DataActionsState {
   uploading: boolean;
 }
 
-export class DataActionsPage extends Component<
+export default class DataActionsPage extends Component<
   DataActionsPageProps,
   DataActionsState
 > {
@@ -77,7 +97,7 @@ export class DataActionsPage extends Component<
     const { fileList } = this.state;
     const { dataset } = this.props;
 
-    await tryOperation({
+    await tryMutation({
       op: async () => {
         await this.setState({
           uploading: true,

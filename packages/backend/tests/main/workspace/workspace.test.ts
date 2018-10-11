@@ -1,4 +1,4 @@
-import { NodeInstance, NodeState, sleep } from '@masterthesis/shared';
+import { NodeState, sleep } from '@masterthesis/shared';
 
 import { getConnectionsCollection } from '../../../src/main/workspace/connections';
 import {
@@ -14,8 +14,7 @@ import {
   initWorkspaceDb,
   renameWorkspace,
   tryGetWorkspace,
-  updateLastChange,
-  updateWorkspace
+  updateLastChange
 } from '../../../src/main/workspace/workspace';
 import {
   getTestMongoDb,
@@ -186,7 +185,7 @@ describe('Workspaces', () => {
       });
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toEqual('Invalid ID');
+      expect(err.message).toEqual('Deletion of Workspace failed.');
     }
   });
 
@@ -227,117 +226,6 @@ describe('Workspaces', () => {
 
     const wsA = allWs.filter(n => n.name === 'a');
     expect(wsA.length).toBe(1);
-  });
-
-  test('should update only lastChange in workspace', async () => {
-    const description = 'desc';
-    const name = 'wsname';
-
-    const ws = await createWorkspace(
-      name,
-      {
-        db,
-        userId: ''
-      },
-      description
-    );
-
-    await sleep(100);
-
-    const res = await updateWorkspace(ws.id, [], [], {
-      db,
-      userId: ''
-    });
-    expect(res).toBe(true);
-
-    const newWs = await getWorkspace(ws.id, {
-      db,
-      userId: ''
-    });
-    expect(new Date(ws.lastChange).getTime()).toBeLessThan(
-      new Date(newWs.lastChange).getTime()
-    );
-  });
-
-  test('should throw error when updating workspaces with invalid id', async () => {
-    try {
-      await updateWorkspace('test', [], [], {
-        db,
-        userId: ''
-      });
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Invalid ID');
-    }
-  });
-
-  test('should move nodes with update workspace', async () => {
-    (getNodesCollection as jest.Mock).mockReturnValue({
-      updateOne: jest.fn()
-    });
-    (getConnectionsCollection as jest.Mock).mockReturnValue({
-      updateOne: jest.fn()
-    });
-    const description = 'desc';
-    const name = 'wsname';
-
-    const ws = await createWorkspace(
-      name,
-      {
-        db,
-        userId: ''
-      },
-      description
-    );
-
-    const nodeA: NodeInstance = {
-      id: VALID_OBJECT_ID,
-      contextIds: [],
-      form: {},
-      inputs: [],
-      outputs: [],
-      type: 'a',
-      x: 0,
-      y: 0,
-      workspaceId: ws.id,
-      state: NodeState.VALID,
-      variables: {}
-    };
-    const nodeB: NodeInstance = {
-      id: VALID_OBJECT_ID,
-      contextIds: [],
-      form: {},
-      inputs: [],
-      outputs: [],
-      type: 'a',
-      x: 0,
-      y: 0,
-      workspaceId: ws.id,
-      state: NodeState.VALID,
-      variables: {}
-    };
-
-    const res = await updateWorkspace(
-      ws.id,
-      [{ ...nodeA, x: 1, y: 2 }, { ...nodeB, x: 3, y: 4 }],
-      [
-        {
-          workspaceId: ws.id,
-          contextIds: [],
-          from: { name: 'val', nodeId: nodeA.id },
-          to: { name: 'val', nodeId: nodeB.id },
-          id: VALID_OBJECT_ID
-        }
-      ],
-      {
-        db,
-        userId: ''
-      }
-    );
-    expect(res).toBe(true);
-
-    expect(getConnectionsCollection(db).updateOne).toHaveBeenCalledTimes(1);
-    expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(2);
   });
 
   test('should return true after initializing workspaces', async () => {

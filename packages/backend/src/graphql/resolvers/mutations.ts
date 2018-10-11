@@ -40,8 +40,7 @@ import { uploadEntriesCsv } from '../../main/workspace/upload';
 import {
   createWorkspace,
   deleteWorkspace,
-  renameWorkspace,
-  updateWorkspace
+  renameWorkspace
 } from '../../main/workspace/workspace';
 
 export const Mutation: IResolverObject<any, ApolloContext> = {
@@ -103,8 +102,6 @@ export const Mutation: IResolverObject<any, ApolloContext> = {
     createConnection(input.from, input.to, context),
   deleteConnection: (_, { id }, context): Promise<boolean> =>
     deleteConnection(id, context),
-  updateWorkspace: (_, { id, nodes, connections }, context): Promise<boolean> =>
-    updateWorkspace(id, nodes, connections, context),
   createWorkspace: (_, { name, description }, context): Promise<Workspace> =>
     createWorkspace(name, context, description),
   deleteWorkspace: (_, { id }, context): Promise<boolean> =>

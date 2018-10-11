@@ -11,6 +11,7 @@ import { Db, ObjectID } from 'mongodb';
 import { Log } from '../../logging';
 import { Omit } from '../../main';
 import { getNodeType } from '../nodes/all-nodes';
+import { getSafeObjectID } from '../utils';
 import { tryGetNode } from './nodes';
 import {
   addConnection,
@@ -216,7 +217,7 @@ export const deleteConnection = async (
   ]);
 
   const connCollection = getConnectionsCollection(reqContext.db);
-  await connCollection.deleteOne({ _id: new ObjectID(id) });
+  await connCollection.deleteOne({ _id: getSafeObjectID(id) });
 
   await updateStates(connection.workspaceId, reqContext);
 
@@ -241,12 +242,8 @@ export const getConnection = async (
   id: string,
   reqContext: ApolloContext
 ): Promise<ConnectionInstance | null> => {
-  if (!ObjectID.isValid(id)) {
-    return null;
-  }
-
   const collection = getConnectionsCollection(reqContext.db);
-  const res = await collection.findOne({ _id: new ObjectID(id) });
+  const res = await collection.findOne({ _id: getSafeObjectID(id) });
   if (!res) {
     return null;
   }

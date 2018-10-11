@@ -349,7 +349,7 @@ describe('Nodes', () => {
         userId: ''
       });
     } catch (err) {
-      expect(err.message).toBe('Invalid ID');
+      expect(err.message).toBe('Updating node failed');
     }
   });
 

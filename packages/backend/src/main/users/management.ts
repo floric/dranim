@@ -5,6 +5,7 @@ import { Db, ObjectID } from 'mongodb';
 
 import { Log } from '../../logging';
 import { Omit } from '../../main';
+import { getSafeObjectID } from '../utils';
 
 const getUsersCollection = <T = User & { _id: ObjectID; pw: string }>(db: Db) =>
   db.collection<T>('Users');
@@ -43,13 +44,15 @@ const getFullUserByMail = async (mail: string, reqContext: ApolloContext) => {
   return await coll.findOne({ mail });
 };
 
-const getUser = async (reqContext: ApolloContext): Promise<User | null> => {
-  if (!ObjectID.isValid(reqContext.userId)) {
+export const getUser = async (
+  reqContext: ApolloContext
+): Promise<User | null> => {
+  if (!reqContext.userId) {
     return null;
   }
 
   const coll = getUsersCollection(reqContext.db);
-  const res = await coll.findOne({ _id: new ObjectID(reqContext.userId) });
+  const res = await coll.findOne({ _id: getSafeObjectID(reqContext.userId) });
 
   if (!res) {
     return null;
@@ -115,4 +118,11 @@ export const tryGetUser = async (reqContext: ApolloContext): Promise<User> => {
   }
 
   return user;
+};
+
+export const checkLoggedInUser = (reqContext: ApolloContext) => {
+  const { userId } = reqContext;
+  if (userId === null) {
+    throw new Error('User is not logged in');
+  }
 };

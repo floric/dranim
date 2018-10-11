@@ -8,7 +8,8 @@ import {
 import { Db, ObjectID } from 'mongodb';
 
 import { Omit } from '../../main';
-import { tryGetDataset } from './dataset';
+import { getSafeObjectID } from '../utils';
+import { getDataset, tryGetDataset } from './dataset';
 import { UploadEntryError } from './upload';
 
 export const getEntryCollection = <T = Entry & { _id: ObjectID }>(
@@ -22,7 +23,7 @@ export const getEntry = async (
   reqContext: ApolloContext
 ): Promise<Entry | null> => {
   const collection = getEntryCollection(datasetId, reqContext.db);
-  const obj = await collection.findOne({ _id: new ObjectID(id) });
+  const obj = await collection.findOne({ _id: getSafeObjectID(id) });
   if (!obj) {
     return null;
   }
@@ -222,12 +223,13 @@ export const deleteEntry = async (
   entryId: string,
   reqContext: ApolloContext
 ) => {
-  if (!ObjectID.isValid(entryId) || !ObjectID.isValid(datasetId)) {
-    throw new Error('Invalid ID');
+  const ds = await getDataset(datasetId, reqContext);
+  if (!ds) {
+    throw new Error('Deleting entry failed');
   }
 
   const collection = getEntryCollection(datasetId, reqContext.db);
-  const res = await collection.deleteOne({ _id: new ObjectID(entryId) });
+  const res = await collection.deleteOne({ _id: getSafeObjectID(entryId) });
   if (res.deletedCount !== 1) {
     throw new Error('Deleting entry failed');
   }

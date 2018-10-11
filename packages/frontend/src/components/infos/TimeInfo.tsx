@@ -9,9 +9,12 @@ export interface TimeInfoProps {
 }
 
 export const TimeInfo: SFC<TimeInfoProps> = ({ text, time }) => (
-  <Row>
-    <Col xs={6}>{text}:</Col>
-    <Col xs={18}>
+  <Row type="flex" justify="space-between">
+    <Col>
+      {text}
+      :&nbsp;
+    </Col>
+    <Col>
       <Tooltip title={time}>{moment(time).fromNow()}</Tooltip>
     </Col>
   </Row>

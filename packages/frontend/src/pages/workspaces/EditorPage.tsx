@@ -15,7 +15,7 @@ import {
   DATASETS_AND_WORKSPACES
 } from '../../graphql/editor-page';
 import { Editor } from './components/Editor';
-import { UnknownWorkspaceCard } from './DetailPage';
+import { UnknownWorkspaceCard } from './components/UnknownWorkspaceCard';
 
 type DatasetsResult = {
   datasets: Array<GQLDataset>;

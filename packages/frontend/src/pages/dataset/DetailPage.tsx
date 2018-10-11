@@ -12,10 +12,10 @@ import { CustomErrorCard } from '../../components/layout/CustomCards';
 import { PageHeaderCard } from '../../components/layout/PageHeaderCard';
 import { EditableText } from '../../components/properties/EditableText';
 import { RoutedTabs } from '../../components/RoutedTabs';
-import { tryOperation } from '../../utils/form';
-import { DataActionsPage } from './ActionsPage';
-import { DataEntriesPage } from './EntriesPage';
-import { DataSchemas } from './SchemasPage';
+import { tryMutation } from '../../utils/form';
+import DataActionsPage from './ActionsPage';
+import DataEntriesPage from './EntriesPage';
+import DataSchemas from './SchemasPage';
 
 export interface DataDetailPageProps
   extends RouteComponentProps<{ id: string }, {}> {}
@@ -30,7 +30,7 @@ const NoDatasetExceptionActions: SFC<{ history: History }> = ({ history }) => (
   </Button>
 );
 
-export const DATASET = gql`
+const DATASET = gql`
   query dataset($id: ID!) {
     dataset(id: $id) {
       id
@@ -98,7 +98,7 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
                       <EditableText
                         text={dataset.name}
                         onChange={name =>
-                          tryOperation({
+                          tryMutation({
                             op: () =>
                               renameDataset({
                                 variables: { id, name },

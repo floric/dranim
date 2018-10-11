@@ -1,13 +1,13 @@
 import React, { SFC } from 'react';
 
-import { DataType, GQLOutputResult, GQLWorkspace } from '@masterthesis/shared';
+import { GQLWorkspace } from '@masterthesis/shared';
 import { Card, Col, Icon, Row } from 'antd';
 import gql from 'graphql-tag';
 import { NavLink, RouteComponentProps } from 'react-router-dom';
 
 import { HandledQuery } from '../../components/HandledQuery';
 import { VisRenderer } from '../../components/VisRenderer';
-import { UnknownWorkspaceCard } from './DetailPage';
+import { resultCardSize } from '../../components/visualizations/VisCard';
 
 const WORKSPACE = gql`
   query workspace($id: ID!) {
@@ -33,16 +33,10 @@ const WORKSPACE = gql`
   }
 `;
 
-const resultCardSize = (result: GQLOutputResult) =>
-  result.type === DataType.VIS
-    ? { xs: 24, sm: 24, lg: 12, xxl: 8 }
-    : { xs: 24, sm: 12, lg: 6, xxl: 4 };
-
 export interface VisDetailPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
 const VisDetailPage: SFC<VisDetailPageProps> = ({
-  history,
   match: {
     params: { workspaceId }
   }
@@ -53,10 +47,12 @@ const VisDetailPage: SFC<VisDetailPageProps> = ({
   >
     {({ data: { workspace } }) => {
       if (!workspace) {
-        return <UnknownWorkspaceCard history={history} />;
+        return <p>Unknow Workspace accessed</p>;
       }
 
-      if (workspace.results.length === 0) {
+      const { results } = workspace;
+
+      if (results.length === 0) {
         return (
           <Card bordered={false} title="No results present">
             <p>You need to start a calculation with Output nodes first.</p>
@@ -67,14 +63,34 @@ const VisDetailPage: SFC<VisDetailPageProps> = ({
         );
       }
 
+      const resultsPath = `/results/${workspaceId}`;
+
       return (
-        <Row gutter={8} type="flex">
-          {workspace.results.map(r => (
-            <Col {...resultCardSize(r)} key={r.id}>
-              <VisRenderer result={r} />
-            </Col>
-          ))}
-        </Row>
+        <>
+          <Card bordered={false} style={{ marginBottom: 8 }}>
+            {results.filter(n => n.visible).length > 0 ? (
+              <>
+                Published results can be accessed at{' '}
+                <a href={resultsPath} target="_href">
+                  <Icon type="link" />{' '}
+                  {`${window.location.origin}${resultsPath}`}
+                </a>
+                . Anybody with this link can access the published results.
+              </>
+            ) : (
+              <>
+                Use the <Icon type="lock" /> Lock to publish Results.
+              </>
+            )}
+          </Card>
+          <Row gutter={8} type="flex">
+            {results.map(r => (
+              <Col {...resultCardSize(r)} key={r.id}>
+                <VisRenderer result={r} visibility="private" />
+              </Col>
+            ))}
+          </Row>
+        </>
       );
     }}
   </HandledQuery>

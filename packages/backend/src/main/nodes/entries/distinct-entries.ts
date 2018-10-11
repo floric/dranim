@@ -36,7 +36,7 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
   },
   transformInputDefsToContextInputDefs: async (inputDefs, inputs, form) => {
     if (form.distinctSchemas == null) {
-      return {} as any;
+      return {};
     }
 
     const res: SocketDefs<any> = {};

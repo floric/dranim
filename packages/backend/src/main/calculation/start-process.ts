@@ -13,6 +13,8 @@ import { Omit } from '../../main';
 import { executeNode } from '../calculation/execution';
 import { addOrUpdateResult } from '../dashboards/results';
 import { getNodeType, hasNodeType } from '../nodes/all-nodes';
+import { checkLoggedInUser } from '../users/management';
+import { getSafeObjectID } from '../utils';
 import { clearGeneratedDatasets } from '../workspace/dataset';
 import { getAllNodes } from '../workspace/nodes';
 import { resetProgress } from '../workspace/nodes-detail';
@@ -29,11 +31,13 @@ export const startProcess = async (
   reqContext: ApolloContext,
   options?: StartCalculationOptions
 ): Promise<CalculationProcess> => {
+  checkLoggedInUser(reqContext);
+
   const coll = getCalculationsCollection<
     Omit<CalculationProcess, 'id' | 'start'> & { start: Date }
   >(reqContext.db);
   const newProcess = await coll.insertOne({
-    userId: reqContext.userId,
+    userId: reqContext.userId!,
     start: new Date(),
     finish: null,
     workspaceId,
@@ -75,7 +79,7 @@ const doCalculation = async (
     await Promise.all([
       resetProgress(workspaceId, reqContext),
       processCollection.updateOne(
-        { _id: new ObjectID(processId) },
+        { _id: getSafeObjectID(processId) },
         {
           $set: {
             state: ProcessState.PROCESSING
@@ -181,7 +185,7 @@ const updateFinishedProcess = async (
 ) => {
   const processCollection = getCalculationsCollection(reqContext.db);
   await processCollection.updateOne(
-    { _id: new ObjectID(processId) },
+    { _id: getSafeObjectID(processId) },
     {
       $set: {
         finish: new Date(),
@@ -208,7 +212,7 @@ export const stopCalculation = async (
 ): Promise<boolean> => {
   const coll = getCalculationsCollection(reqContext.db);
   const res = await coll.updateOne(
-    { _id: new ObjectID(id) },
+    { _id: getSafeObjectID(id) },
     {
       $set: {
         state: ProcessState.CANCELED
@@ -229,12 +233,8 @@ const getCalculation = async (
   id: string,
   reqContext: ApolloContext
 ): Promise<CalculationProcess | null> => {
-  if (!ObjectID.isValid(id)) {
-    return null;
-  }
-
   const coll = getCalculationsCollection(reqContext.db);
-  const res = await coll.findOne({ _id: new ObjectID(id) });
+  const res = await coll.findOne({ _id: getSafeObjectID(id) });
   if (!res) {
     return null;
   }

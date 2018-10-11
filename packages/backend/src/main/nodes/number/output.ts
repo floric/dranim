@@ -18,8 +18,9 @@ export const NumberOutputNode: ServerNodeDef<
   type: NumberOutputNodeDef.type,
   isFormValid: isOutputFormValid,
   onMetaExecution: () => Promise.resolve({}),
-  onNodeExecution: (form, inputs, { node: { workspaceId } }) =>
-    Promise.resolve({
+  onNodeExecution: async (form, inputs) => {
+    console.log(inputs);
+    return {
       outputs: {},
       results: {
         name: form.name!,
@@ -27,5 +28,6 @@ export const NumberOutputNode: ServerNodeDef<
         type: DataType.NUMBER,
         description: form.description || ''
       }
-    })
+    };
+  }
 };

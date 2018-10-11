@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
 
-import { GQLOutputResult, OutputResult } from '@masterthesis/shared';
+import { DataType, GQLOutputResult, OutputResult } from '@masterthesis/shared';
 import { Button, Card, Divider, Dropdown, Icon, Menu } from 'antd';
+import { ColProps } from 'antd/lib/col';
 import gql from 'graphql-tag';
 import { Mutation } from 'react-apollo';
 
-import { tryOperation } from '../../utils/form';
+import { tryMutation } from '../../utils/form';
 import { AsyncButton } from '../AsyncButton';
+import { PublicComponent } from '../VisRenderer';
 
 type DownloadOptions = Array<{
   name: string;
@@ -18,11 +20,16 @@ export type VisCardProps = {
   result: GQLOutputResult;
   downloadOptions?: DownloadOptions;
   properties?: JSX.Element;
-};
+} & PublicComponent;
 
 export interface VisCardState {
   showProperties: boolean;
 }
+
+export const resultCardSize = (result: GQLOutputResult): ColProps =>
+  result.type === DataType.VIS
+    ? { sm: 24, md: 12, xxl: 8 }
+    : { xs: 24, sm: 12, md: 8, lg: 6, xl: 4 };
 
 const generateDownloadMenu = (options: DownloadOptions) => (
   <Menu
@@ -65,7 +72,8 @@ export class VisCard extends Component<VisCardProps, VisCardState> {
       result: { name, description, visible, id, workspaceId },
       children,
       downloadOptions,
-      properties
+      properties,
+      visibility
     } = this.props;
     const { showProperties } = this.state;
 
@@ -90,46 +98,48 @@ export class VisCard extends Component<VisCardProps, VisCardState> {
                   <Button icon="download">Export</Button>
                 </Dropdown>
               )}
-            <Mutation<OutputResult, { id: string; visible: boolean }>
-              mutation={SET_RESULT_VISIBILITY}
-            >
-              {(setResultVisibility, res) => (
-                <AsyncButton
-                  onClick={() =>
-                    tryOperation({
-                      op: () =>
-                        setResultVisibility({
-                          variables: { id, visible: !visible },
-                          awaitRefetchQueries: true,
-                          refetchQueries: [
-                            {
-                              query: gql`
-                                query workspace($workspaceId: ID!) {
-                                  workspace(id: $workspaceId) {
-                                    id
-                                    results {
+            {visibility === 'private' && (
+              <Mutation<OutputResult, { id: string; visible: boolean }>
+                mutation={SET_RESULT_VISIBILITY}
+              >
+                {setResultVisibility => (
+                  <AsyncButton
+                    onClick={() =>
+                      tryMutation({
+                        op: () =>
+                          setResultVisibility({
+                            variables: { id, visible: !visible },
+                            awaitRefetchQueries: true,
+                            refetchQueries: [
+                              {
+                                query: gql`
+                                  query workspace($workspaceId: ID!) {
+                                    workspace(id: $workspaceId) {
                                       id
-                                      visible
+                                      results {
+                                        id
+                                        visible
+                                      }
                                     }
                                   }
-                                }
-                              `,
-                              variables: { workspaceId }
-                            }
-                          ]
-                        }),
-                      successTitle: () => 'Visibility changed',
-                      successMessage: () =>
-                        !visible
-                          ? 'Result is now visible via the published link.'
-                          : 'Result is now exclusively visible to you.'
-                    })
-                  }
-                  tooltip={visible ? 'Public' : 'Private'}
-                  icon={visible ? 'unlock' : 'lock'}
-                />
-              )}
-            </Mutation>
+                                `,
+                                variables: { workspaceId }
+                              }
+                            ]
+                          }),
+                        successTitle: () => 'Visibility changed',
+                        successMessage: ({ visible: newVisibility }) =>
+                          newVisibility
+                            ? 'Result is now visible via the published link.'
+                            : 'Result is now exclusively visible to you.'
+                      })
+                    }
+                    tooltip={visible ? 'Public' : 'Private'}
+                    icon={visible ? 'unlock' : 'lock'}
+                  />
+                )}
+              </Mutation>
+            )}
           </Button.Group>
         }
       >

@@ -9,6 +9,7 @@ import { showNotificationWithIcon } from '../../utils/form';
 import { LoadingCard } from '../layout/CustomCards';
 import { NumericProperty } from '../properties/NumericProperty';
 import { SelectProperty } from '../properties/SelectProperty';
+import { PublicComponent } from '../VisRenderer';
 import { VisCard } from './VisCard';
 
 export interface VegaChart {
@@ -32,7 +33,7 @@ export interface InputProperty<T = any> {
 
 export type InputProperties = Array<InputProperty>;
 
-export interface VegaProps {
+export interface VegaProps extends PublicComponent {
   content: VegaChart;
   result: GQLOutputResult;
   width: number;
@@ -65,7 +66,7 @@ export const downloadFromUrl = (url: string, fileName: string) => {
   document.body.removeChild(downloadLink);
 };
 
-export class Vega extends Component<VegaProps, VegaState> {
+export class VegaCard extends Component<VegaProps, VegaState> {
   public state: VegaState = {
     properties: propertiesToObj(this.props.content.properties),
     containerId: `c-${v4()}`,
@@ -136,7 +137,8 @@ export class Vega extends Component<VegaProps, VegaState> {
   public render() {
     const {
       result,
-      content: { properties }
+      content: { properties },
+      visibility
     } = this.props;
     const { view, containerId } = this.state;
     if (!view) {
@@ -145,6 +147,7 @@ export class Vega extends Component<VegaProps, VegaState> {
 
     return (
       <VisCard
+        visibility={visibility}
         result={result}
         downloadOptions={[
           { name: 'SVG', icon: 'code', onClick: this.handleDownloadSvg },

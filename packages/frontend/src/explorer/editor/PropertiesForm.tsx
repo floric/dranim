@@ -4,7 +4,7 @@ import { Button, Form } from 'antd';
 import { FormComponentProps } from 'antd/lib/form';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 
-import { tryOperation } from '../../utils/form';
+import { tryMutation } from '../../utils/form';
 import { EditorContext, RenderFormItemsProps } from '../nodes/all-nodes';
 
 export interface PropertiesFormProps {
@@ -50,7 +50,7 @@ class PropertiesFormImpl extends Component<
       await this.setState({
         saving: true
       });
-      await tryOperation({
+      await tryMutation({
         op: () => handleSubmit(form, id),
         successTitle: () => 'Properties saved',
         successMessage: () => `Properties saved successfully.`,

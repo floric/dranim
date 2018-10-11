@@ -6,8 +6,9 @@ import { v4 } from 'uuid';
 
 import { showNotificationWithIcon } from '../../utils/form';
 import { NumericProperty } from '../properties/NumericProperty';
+import { PublicComponent } from '../VisRenderer';
 import { renderSTRChart } from './str-svg';
-import { downloadFromUrl } from './Vega';
+import { downloadFromUrl } from './VegaCard';
 import { VisCard } from './VisCard';
 
 export const TEXT_OFFSET = 5;
@@ -20,14 +21,14 @@ const HEIGHT_DEFAULT = 0.8;
 const CURVE_DEFAULT = 0.2;
 const OFFSETS_DEFAULT: [number, number] = [0.5, 0.6];
 
-export interface STRChartProps {
+export interface STRChartCardProps extends PublicComponent {
   value: any;
   result: GQLOutputResult;
   width: number;
   height: number;
 }
 
-export interface STRChartState {
+export interface STRChartCardState {
   gapDistance: number;
   height: number;
   curveDistance: number;
@@ -49,12 +50,15 @@ export interface STRChartState {
   soundNames: Array<string>;
 }
 
-export class STRChart extends Component<STRChartProps, STRChartState> {
+export class STRChartCard extends Component<
+  STRChartCardProps,
+  STRChartCardState
+> {
   private canvasContainer: RefObject<HTMLDivElement> = createRef<
     HTMLDivElement
   >();
 
-  public state: STRChartState = {
+  public state: STRChartCardState = {
     gapDistance: GAP_DIST_DEFAULT,
     height: HEIGHT_DEFAULT,
     curveDistance: CURVE_DEFAULT,
@@ -126,8 +130,9 @@ export class STRChart extends Component<STRChartProps, STRChartState> {
     );
   };
 
-  private handleChangeWithRerendering = (newState: Pick<STRChartState, any>) =>
-    this.setState(newState, this.renderChart);
+  private handleChangeWithRerendering = (
+    newState: Pick<STRChartCardState, any>
+  ) => this.setState(newState, this.renderChart);
   private handleChangeGap = (val: number) =>
     this.handleChangeWithRerendering({ gapDistance: val });
   private handleChangeHeight = (val: number) =>
@@ -187,9 +192,10 @@ export class STRChart extends Component<STRChartProps, STRChartState> {
       curveDistance,
       offsets
     } = this.state;
-    const { result } = this.props;
+    const { result, visibility } = this.props;
     return (
       <VisCard
+        visibility={visibility}
         result={result}
         downloadOptions={[
           { name: 'SVG', icon: 'code', onClick: this.handleDownloadSvg }

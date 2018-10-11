@@ -621,7 +621,7 @@ describe('Entry', () => {
       });
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Invalid ID');
+      expect(err.message).toBe('Deleting entry failed');
     }
 
     try {
@@ -631,7 +631,7 @@ describe('Entry', () => {
       });
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Invalid ID');
+      expect(err.message).toBe('Deleting entry failed');
     }
   });
 

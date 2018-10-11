@@ -11,6 +11,7 @@ import { Db, ObjectID } from 'mongodb';
 import { Log } from '../../logging';
 import { Omit } from '../../main';
 import { getNodeType, tryGetNodeType } from '../nodes/all-nodes';
+import { getSafeObjectID } from '../utils';
 import { deleteConnection, deleteConnectionsInContext } from './connections';
 import { updateStates } from './nodes-state';
 import { tryGetWorkspace, updateLastChange } from './workspace';
@@ -161,7 +162,7 @@ export const deleteNode = async (id: string, reqContext: ApolloContext) => {
   const nodesCollection = getNodesCollection(reqContext.db);
   const res = await nodesCollection.deleteMany({
     $or: [
-      { _id: new ObjectID(id) },
+      { _id: getSafeObjectID(id) },
       { contextIds: { $elemMatch: { $eq: id } } }
     ]
   });
@@ -180,17 +181,13 @@ export const updateNodePosition = async (
   y: number,
   reqContext: ApolloContext
 ) => {
-  if (!ObjectID.isValid(id)) {
-    throw new Error('Invalid ID');
-  }
-
   const collection = getNodesCollection(reqContext.db);
   const res = await collection.findOneAndUpdate(
-    { _id: new ObjectID(id) },
+    { _id: getSafeObjectID(id) },
     { $set: { x, y } }
   );
 
-  if (res.ok !== 1) {
+  if (res.ok !== 1 || !res.value) {
     throw new Error('Updating node failed');
   }
 
@@ -219,12 +216,8 @@ export const getNode = async (
   id: string,
   reqContext: ApolloContext
 ): Promise<NodeInstance | null> => {
-  if (!ObjectID.isValid(id)) {
-    return null;
-  }
-
   const collection = getNodesCollection(reqContext.db);
-  const obj = await collection.findOne({ _id: new ObjectID(id) });
+  const obj = await collection.findOne({ _id: getSafeObjectID(id) });
   if (!obj) {
     return null;
   }

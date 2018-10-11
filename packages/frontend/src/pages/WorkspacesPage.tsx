@@ -12,7 +12,7 @@ import { CardItem } from '../components/layout/CardItem';
 import { cardItemProps, CardsLayout } from '../components/layout/CardsLayout';
 import { PageHeaderCard } from '../components/layout/PageHeaderCard';
 import { compareByName } from '../utils/data';
-import { tryOperation } from './../utils/form';
+import { tryMutation } from './../utils/form';
 import { CreateWorkspaceForm } from './forms/CreateWorkspaceForm';
 
 export const ALL_WORKSPACES = gql`
@@ -79,7 +79,7 @@ const WorkspacesOverviewPage: SFC<WorkspacesOverviewPageProps> = () => (
                       description={ws.description}
                       confirmDeleteMessage="Delete Workspace?"
                       handleDelete={() =>
-                        tryOperation({
+                        tryMutation({
                           op: () =>
                             deleteWorkspace({
                               variables: {
@@ -113,11 +113,11 @@ const WorkspacesOverviewPage: SFC<WorkspacesOverviewPageProps> = () => (
           >
             <Card bordered={false}>
               <h2>New Workspace</h2>
-              <Mutation mutation={CREATE_WORKSPACE}>
+              <Mutation<boolean> mutation={CREATE_WORKSPACE}>
                 {createWorkspace => (
                   <CreateWorkspaceForm
                     handleCreateWorkspace={(name, description) =>
-                      tryOperation({
+                      tryMutation({
                         op: () =>
                           createWorkspace({
                             variables: { name, description },

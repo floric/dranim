@@ -2,6 +2,7 @@ import {
   ApolloContext,
   CalculationProcess,
   Dataset,
+  GQLPublicResults,
   UploadProcess,
   User,
   Workspace
@@ -9,7 +10,8 @@ import {
 import { IResolverObject } from 'graphql-tools';
 
 import { getAllCalculations } from '../../main/calculation/start-process';
-import { tryGetUser } from '../../main/users/management';
+import { getPublicResults } from '../../main/dashboards/results';
+import { getUser } from '../../main/users/management';
 import { getAllDatasets, getDataset } from '../../main/workspace/dataset';
 import { getAllUploads } from '../../main/workspace/upload';
 import { getAllWorkspaces, getWorkspace } from '../../main/workspace/workspace';
@@ -32,5 +34,7 @@ export const Query: IResolverObject<any, ApolloContext> = {
     context
   ): Promise<Array<CalculationProcess>> =>
     getAllCalculations(workspaceId, context),
-  user: (_, __, context): Promise<User> => tryGetUser(context)
+  user: (_, __, context): Promise<User | null> => getUser(context),
+  results: (_, { workspaceId }, context): Promise<GQLPublicResults | null> =>
+    getPublicResults(workspaceId, context)
 };

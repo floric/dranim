@@ -1,6 +1,6 @@
 import { Colors } from '@masterthesis/shared';
 import { Spec } from 'vega-lib';
-import { VegaChart } from './Vega';
+import { VegaChart } from './VegaCard';
 
 export const ColumnChart: VegaChart = {
   properties: [],

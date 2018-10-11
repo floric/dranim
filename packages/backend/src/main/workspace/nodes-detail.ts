@@ -5,18 +5,19 @@ import {
   hasContextFn,
   NodeDef,
   NodeInstance,
+  parseNodeForm,
   ServerNodeDef,
   SocketDef,
   SocketDefs,
   SocketInstance,
   SocketState
 } from '@masterthesis/shared';
-import { ObjectID } from 'mongodb';
 
 import { Log } from '../../logging';
 import { InMemoryCache } from '../calculation/inmemory-cache';
 import { getMetaInputs } from '../calculation/meta-execution';
 import { getNodeType, hasNodeType, tryGetNodeType } from '../nodes/all-nodes';
+import { getSafeObjectID } from '../utils';
 import {
   getNode,
   getNodesCollection,
@@ -45,7 +46,7 @@ export const getContextInputDefs = async (
   const parentDefs = await parentType.transformInputDefsToContextInputDefs(
     parentType.inputs,
     parentInputs,
-    parent.form,
+    parseNodeForm(parent.form),
     reqContext
   );
 
@@ -77,7 +78,7 @@ export const getContextOutputDefs = async (
   const contextInputDefs = await parentType.transformInputDefsToContextInputDefs(
     parentType.inputs,
     parentInputs,
-    parent.form,
+    parseNodeForm(parent.form),
     reqContext
   );
 
@@ -98,7 +99,7 @@ export const getContextOutputDefs = async (
     parentInputs,
     contextInputDefs,
     contextInputs,
-    parent.form,
+    parseNodeForm(parent.form),
     reqContext
   );
 };
@@ -174,7 +175,7 @@ export const addOrUpdateFormValue = async (
   const node = await tryGetNode(nodeId, reqContext);
   const collection = getNodesCollection(reqContext.db);
   const res = await collection.updateOne(
-    { _id: new ObjectID(nodeId) },
+    { _id: getSafeObjectID(nodeId) },
     { $set: { [`form.${name}`]: value } }
   );
 
@@ -200,7 +201,7 @@ export const addConnection = async (
 
   const coll = getNodesCollection(reqContext.db);
   await coll.updateOne(
-    { _id: new ObjectID(socket.nodeId) },
+    { _id: getSafeObjectID(socket.nodeId) },
     {
       $push: {
         [type === 'input' ? 'inputs' : 'outputs']: {
@@ -248,7 +249,7 @@ export const removeConnection = async (
 
   const coll = getNodesCollection(reqContext.db);
   await coll.updateOne(
-    { _id: new ObjectID(socket.nodeId) },
+    { _id: getSafeObjectID(socket.nodeId) },
     {
       $pull: {
         [type === 'input' ? 'inputs' : 'outputs']: {
@@ -273,7 +274,7 @@ export const addOrUpdateVariable = async (
 ) => {
   const coll = getNodesCollection(reqContext.db);
   await coll.updateOne(
-    { _id: new ObjectID(node.id) },
+    { _id: getSafeObjectID(node.id) },
     {
       $set: {
         [`variables.${varId}`]: {
@@ -298,7 +299,7 @@ export const deleteVariable = async (
 ) => {
   const coll = getNodesCollection(reqContext.db);
   await coll.updateOne(
-    { _id: new ObjectID(node.id) },
+    { _id: getSafeObjectID(node.id) },
     {
       $unset: { [`variables.${varId}`]: '' }
     }
@@ -326,7 +327,7 @@ export const updateProgress = async (
 
   const collection = getNodesCollection(reqContext.db);
   await collection.updateOne(
-    { _id: new ObjectID(node.id) },
+    { _id: getSafeObjectID(node.id) },
     { $set: { progress } }
   );
 
