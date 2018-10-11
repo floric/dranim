@@ -230,6 +230,9 @@ export const getPublicResults = async (
   return {
     ...rest,
     id: _id.toHexString(),
-    results: results.map(n => ({ id: n._id.toHexString(), ...n }))
+    results: results.map(n => {
+      const { _id: skippedObjID, ...other } = n;
+      return { id: skippedObjID.toHexString(), ...other };
+    })
   };
 };

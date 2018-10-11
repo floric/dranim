@@ -61,7 +61,7 @@ const ObjectScalarType = new GraphQLScalarType({
   }
 });
 
-const resolvers: any = {
+export const resolvers: any = {
   Object: ObjectScalarType,
   Query,
   Entry,
@@ -106,7 +106,7 @@ const resolvers: any = {
   })
 };
 
-const typeDefs = [
+export const typeDefs = [
   ObjectDef,
   SchemaDefinition,
   QueryDef,

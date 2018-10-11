@@ -1,4 +1,4 @@
-import { NodeInstance, NodeState } from '@masterthesis/shared';
+import { ApolloContext, NodeInstance, NodeState } from '@masterthesis/shared';
 import { Db, MongoClient } from 'mongodb';
 import MongodbMemoryServer from 'mongodb-memory-server';
 
@@ -44,3 +44,11 @@ export const NODE: NodeInstance = {
   state: NodeState.VALID,
   variables: {}
 };
+
+export interface TestCase {
+  id: string;
+  query: string;
+  expected: object;
+  beforeTestAndGetVars: (reqContext: ApolloContext) => Promise<object>;
+  afterTest?: (reqContext: ApolloContext) => Promise<any>;
+}

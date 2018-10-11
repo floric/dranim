@@ -55,7 +55,7 @@ export const createDataset = async (
 };
 
 export const deleteDataset = async (id: string, reqContext: ApolloContext) => {
-  const ds = await tryGetDataset(id, reqContext);
+  const ds = await getDataset(id, reqContext);
   if (!ds) {
     return false;
   }

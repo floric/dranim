@@ -789,6 +789,37 @@ describe('Entry', () => {
     expect(entriesCount).toBe(0);
   });
 
+  test('should not drop empty collection when clearin entries', async () => {
+    const ds: Dataset = {
+      id: VALID_OBJECT_ID,
+      userId: '',
+      name: 'ds',
+      created: '',
+      description: '',
+      workspaceId: 'ws',
+      valueschemas: [
+        {
+          name: 'value',
+          type: DataType.STRING,
+          unique: false,
+          fallback: '',
+          required: true
+        }
+      ]
+    };
+
+    (getDataset as jest.Mock).mockResolvedValue(ds);
+    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
+
+    const allEntries = await getLatestEntries(ds.id, { db, userId: '' });
+    expect(allEntries.length).toBe(0);
+
+    await clearEntries(ds.id, {
+      db,
+      userId: ''
+    });
+  });
+
   test('should create many entries', async () => {
     const ds: Dataset = {
       id: VALID_OBJECT_ID,

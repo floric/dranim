@@ -1,10 +1,4 @@
-import {
-  ApolloContext,
-  ConnectionInstance,
-  NodeInstance,
-  NodeState,
-  Workspace
-} from '@masterthesis/shared';
+import { ApolloContext, NodeState, Workspace } from '@masterthesis/shared';
 import { Db, ObjectID } from 'mongodb';
 
 import { Log } from '../../logging';
@@ -13,14 +7,6 @@ import { checkLoggedInUser } from '../users/management';
 import { getSafeObjectID } from '../utils';
 import { getConnectionsCollection } from './connections';
 import { getAllNodes, getNodesCollection } from './nodes';
-
-export const initWorkspaceDb = async (db: Db) => {
-  const connCollection = getConnectionsCollection(db);
-  const nodesCollection = getNodesCollection(db);
-  await connCollection.createIndex('workspaceId');
-  await nodesCollection.createIndex('workspaceId');
-  return true;
-};
 
 export const getWorkspacesCollection = <T = Workspace & { _id: ObjectID }>(
   db: Db

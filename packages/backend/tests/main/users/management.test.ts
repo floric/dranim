@@ -1,4 +1,6 @@
 import {
+  checkLoggedInUser,
+  getUser,
   login,
   register,
   tryGetUser
@@ -85,7 +87,7 @@ describe('Users Management', () => {
     expect(res).toBe(null);
   });
 
-  test('should get user', async () => {
+  test('should try to get user', async () => {
     const { id } = await register('Florian', 'Richter', 'flo@flo.de', '123', {
       db,
       userId: ''
@@ -96,6 +98,11 @@ describe('Users Management', () => {
     expect(user.firstName).toBe('Florian');
     expect(user.lastName).toBe('Richter');
     expect(user.mail).toBe('flo@flo.de');
+  });
+
+  test('should get null for missing user', async () => {
+    const user = await getUser({ db, userId: null });
+    expect(user).toBe(null);
   });
 
   test('should throw error for unknown user', async () => {
@@ -111,6 +118,19 @@ describe('Users Management', () => {
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unknown user');
+    }
+  });
+
+  test('should check user successful', () => {
+    checkLoggedInUser({ db, userId: VALID_OBJECT_ID });
+  });
+
+  test('should throw error for missing user ID', () => {
+    try {
+      checkLoggedInUser({ db, userId: null });
+      throw NeverGoHereError;
+    } catch (err) {
+      expect(err.message).toBe('User is not authorized');
     }
   });
 });

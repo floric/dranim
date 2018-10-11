@@ -11,7 +11,6 @@ import {
   getAllWorkspaces,
   getWorkspace,
   getWorkspaceState,
-  initWorkspaceDb,
   renameWorkspace,
   tryGetWorkspace,
   updateLastChange
@@ -226,21 +225,6 @@ describe('Workspaces', () => {
 
     const wsA = allWs.filter(n => n.name === 'a');
     expect(wsA.length).toBe(1);
-  });
-
-  test('should return true after initializing workspaces', async () => {
-    (getNodesCollection as jest.Mock).mockReturnValue({
-      createIndex: jest.fn()
-    });
-    (getConnectionsCollection as jest.Mock).mockReturnValue({
-      createIndex: jest.fn()
-    });
-
-    const res = await initWorkspaceDb(db);
-    expect(res).toBe(true);
-
-    expect(getConnectionsCollection(db).createIndex).toHaveBeenCalledTimes(1);
-    expect(getNodesCollection(db).createIndex).toHaveBeenCalledTimes(1);
   });
 
   test('should update last change of workspace', async () => {

@@ -11,7 +11,7 @@ const config = {
       : 'mongodb://127.0.0.1:27017'
 };
 
-export const mongoDbClient = async (): Promise<MongoClient> => {
+export const connectToDb = async (): Promise<MongoClient> => {
   return promiseRetry(async (retry, i) => {
     try {
       return await tryConnectToDb();
@@ -28,6 +28,7 @@ const tryConnectToDb = async () => {
     config.db,
     { useNewUrlParser: true }
   );
+  console.log(client);
   Log.info('Connected to MongoDB');
   return client;
 };

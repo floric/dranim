@@ -18,9 +18,8 @@ export const NumberOutputNode: ServerNodeDef<
   type: NumberOutputNodeDef.type,
   isFormValid: isOutputFormValid,
   onMetaExecution: () => Promise.resolve({}),
-  onNodeExecution: async (form, inputs) => {
-    console.log(inputs);
-    return {
+  onNodeExecution: (form, inputs) =>
+    Promise.resolve({
       outputs: {},
       results: {
         name: form.name!,
@@ -28,6 +27,5 @@ export const NumberOutputNode: ServerNodeDef<
         type: DataType.NUMBER,
         description: form.description || ''
       }
-    };
-  }
+    })
 };

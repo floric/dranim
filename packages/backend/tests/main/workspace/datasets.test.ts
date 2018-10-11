@@ -230,6 +230,11 @@ describe('Dataset', () => {
     }
   });
 
+  test('should do nothing when trying to delete unknown dataset', async () => {
+    const res = await deleteDataset(VALID_OBJECT_ID, { db, userId: '' });
+    expect(res).toBe(false);
+  });
+
   test('should return all datasets', async () => {
     const [dsA, dsB, dsC] = await Promise.all([
       createDataset('test', {

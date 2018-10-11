@@ -123,6 +123,6 @@ export const tryGetUser = async (reqContext: ApolloContext): Promise<User> => {
 export const checkLoggedInUser = (reqContext: ApolloContext) => {
   const { userId } = reqContext;
   if (userId === null) {
-    throw new Error('User is not logged in');
+    throw new Error('User is not authorized');
   }
 };

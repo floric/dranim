@@ -1,16 +1,21 @@
-import { DataType, NodeOutputResult, OutputResult } from '@masterthesis/shared';
+import { DataType, NodeOutputResult, Workspace } from '@masterthesis/shared';
 
+import { ObjectID } from 'bson';
 import {
   addOrUpdateResult,
   deleteResultById,
   deleteResultByName,
   deleteResultsByWorkspace,
+  getPublicResults,
   getResult,
   getResultsForWorkspace,
   setResultVisibility,
   tryGetResult
 } from '../../../src/main/dashboards/results';
-import { tryGetWorkspace } from '../../../src/main/workspace/workspace';
+import {
+  getWorkspacesCollection,
+  tryGetWorkspace
+} from '../../../src/main/workspace/workspace';
 import {
   getTestMongoDb,
   NeverGoHereError,
@@ -22,7 +27,6 @@ let db;
 let server;
 
 jest.mock('../../../src/main/workspace/workspace');
-jest.mock('');
 
 describe('Dashboard Results', () => {
   beforeAll(async () => {
@@ -324,5 +328,69 @@ describe('Dashboard Results', () => {
 
     expect(res).toEqual(triedRes);
     expect(triedRes.visible).toBe(true);
+  });
+
+  test('should get public results', async () => {
+    const ws: Workspace & { _id: ObjectID } = {
+      _id: new ObjectID(VALID_OBJECT_ID),
+      id: VALID_OBJECT_ID,
+      userId: '',
+      created: '',
+      description: '',
+      name: 'test',
+      lastChange: ''
+    };
+    (getWorkspacesCollection as jest.Mock).mockImplementation(() => ({
+      findOne: jest.fn(() => Promise.resolve(ws))
+    }));
+    const resultA: NodeOutputResult = {
+      name: 'testA',
+      description: 'abc',
+      type: DataType.STRING,
+      value: 'a'
+    };
+    const resultB: NodeOutputResult = {
+      name: 'testB',
+      description: 'abc',
+      type: DataType.STRING,
+      value: 'a'
+    };
+
+    const [resAObj] = await Promise.all([
+      addOrUpdateResult(resultA, ws.id, { db, userId: '' }),
+      addOrUpdateResult(resultB, ws.id, { db, userId: '' })
+    ]);
+    await setResultVisibility(resAObj.id, true, { db, userId: '' });
+
+    const res = await getPublicResults(ws.id, { db, userId: '' });
+    expect(res).toEqual({
+      created: '',
+      description: '',
+      id: VALID_OBJECT_ID,
+      lastChange: '',
+      name: 'test',
+      results: [
+        {
+          description: 'abc',
+          id: expect.any(String),
+          name: 'testA',
+          type: 'String',
+          userId: '',
+          value: 'a',
+          visible: true,
+          workspaceId: VALID_OBJECT_ID
+        }
+      ],
+      userId: ''
+    });
+  });
+
+  test('should get public results', async () => {
+    (getWorkspacesCollection as jest.Mock).mockImplementation(() => ({
+      findOne: jest.fn(() => Promise.resolve(null))
+    }));
+
+    const res = await getPublicResults(VALID_OBJECT_ID, { db, userId: '' });
+    expect(res).toBe(null);
   });
 });

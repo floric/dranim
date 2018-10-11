@@ -10,10 +10,13 @@ import { ApolloServer } from 'apollo-server-express';
 import { Db } from 'mongodb';
 import Raven from 'raven';
 
-import { mongoDbClient } from './config/db';
+import { connectToDb } from './config/db';
 import Schema from './graphql/schema';
 import { Log, MorganLogStream } from './logging';
-import { initWorkspaceDb } from './main/workspace/workspace';
+import { getConnectionsCollection } from './main/workspace/connections';
+import { getDatasetsCollection } from './main/workspace/dataset';
+import { getNodesCollection } from './main/workspace/nodes';
+import { getWorkspacesCollection } from './main/workspace/workspace';
 import { registerRoutes } from './routes';
 
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
@@ -26,6 +29,8 @@ export interface MainOptions {
 }
 
 const MAX_UPLOAD_LIMIT = 100 * 1024 * 1024 * 1024;
+const PORT = parseInt(process.env.PORT || '80', 10);
+const FRONTEND_DOMAIN = process.env.FRONTEND_DOMAIN || 'localhost:1234';
 const CORS = (options: MainOptions) => ({
   maxAge: 600,
   credentials: true,
@@ -35,14 +40,15 @@ const CORS = (options: MainOptions) => ({
       : 'http://localhost:1234'
 });
 
-export const main = async (options: MainOptions) => {
-  const client = await mongoDbClient();
-  const db = client.db(process.env.DB_NAME || 'dranim');
-  await initDb(db);
-  Raven.config('https://16afe3c47bed41f28bee907b0c100c93@sentry.io/1279808', {
-    autoBreadcrumbs: true
-  }).install();
+const initDatabase = async (db: Db) =>
+  await Promise.all([
+    getConnectionsCollection(db).createIndex('workspaceId'),
+    getNodesCollection(db).createIndex('workspaceId'),
+    getWorkspacesCollection(db).createIndex('userId'),
+    getDatasetsCollection(db).createIndex('userId')
+  ]);
 
+const initServer = (options: MainOptions, db: Db) => {
   const app = express();
   app.use(
     cors(CORS(options)),
@@ -98,10 +104,18 @@ export const main = async (options: MainOptions) => {
     });
 };
 
-export const initDb = (db: Db) => initWorkspaceDb(db);
+const initSentry = () =>
+  Raven.config('https://16afe3c47bed41f28bee907b0c100c93@sentry.io/1279808', {
+    autoBreadcrumbs: true
+  }).install();
 
-const PORT = parseInt(process.env.PORT || '80', 10);
-const FRONTEND_DOMAIN = process.env.FRONTEND_DOMAIN || 'localhost:1234';
+export const main = async (options: MainOptions) => {
+  const client = await connectToDb();
+  const db = client.db(process.env.DB_NAME || 'dranim');
+  await initDatabase(db);
+  initServer(options, db);
+  initSentry();
+};
 
 main({
   frontendDomain: FRONTEND_DOMAIN!,

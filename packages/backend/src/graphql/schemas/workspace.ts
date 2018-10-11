@@ -27,8 +27,6 @@ const NodeDef = `
     metaInputs: Meta!
     metaOutputs: Meta!
     hasContextFn: Boolean!
-    contextInputDefs: SocketDefs
-    contextOutputDefs: SocketDefs
     progress: Float
     inputSockets: SocketDefs
     outputSockets: SocketDefs
@@ -64,7 +62,6 @@ const ConnectionDef = `
     from: Socket
     to: Socket
     contextIds: [String!]!
-    workspace: Workspace!
   }
 `;
 
@@ -98,6 +95,7 @@ const WorkspaceDef = `
     connections: [Connection!]!
     results: [OutputResult!]!
     state: String!
+    calculations: [CalculationProcess!]!
   }
 `;
 

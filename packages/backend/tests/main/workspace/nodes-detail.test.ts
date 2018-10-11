@@ -355,9 +355,23 @@ describe('Node Details', () => {
   });
 
   test('should throw error for invalid node id', async () => {
-    (tryGetNode as jest.Mock).mockImplementation(() => {
-      throw new Error('Node not found');
+    const node: NodeInstance = {
+      id: VALID_OBJECT_ID,
+      contextIds: [],
+      form: {},
+      inputs: [],
+      outputs: [],
+      type: 'type',
+      workspaceId: VALID_OBJECT_ID,
+      x: 0,
+      y: 0,
+      state: NodeState.VALID,
+      variables: {}
+    };
+    (getNodesCollection as jest.Mock).mockReturnValue({
+      updateOne: () => Promise.resolve({ result: { ok: 0 } })
     });
+    (tryGetNode as jest.Mock).mockResolvedValueOnce(node);
 
     try {
       await addOrUpdateFormValue(VALID_OBJECT_ID, 'test', 'test', {
@@ -366,7 +380,7 @@ describe('Node Details', () => {
       });
       throw NeverGoHereError;
     } catch (err) {
-      expect(err.message).toBe('Node not found');
+      expect(err.message).toBe('Adding or updating form value failed');
     }
   });
 
