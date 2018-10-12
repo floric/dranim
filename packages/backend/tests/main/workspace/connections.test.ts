@@ -75,6 +75,7 @@ describe('Connections', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const nodeB: NodeInstance = {
@@ -88,6 +89,7 @@ describe('Connections', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const sourceSocket: SocketDef = {
@@ -175,6 +177,7 @@ describe('Connections', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const nodeB: NodeInstance = {
@@ -188,6 +191,7 @@ describe('Connections', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
 
@@ -250,6 +254,7 @@ describe('Connections', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const nodeAinContext: NodeInstance = {
@@ -263,6 +268,7 @@ describe('Connections', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const nodeBinContext: NodeInstance = {
@@ -276,6 +282,7 @@ describe('Connections', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
 
@@ -343,12 +350,13 @@ describe('Connections', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const nodeB: NodeInstance = {
       id: 'idb',
       contextIds: [],
-      form:{},
+      form: {},
       inputs: [],
       outputs: [],
       type: 'test',
@@ -356,6 +364,7 @@ describe('Connections', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
 
@@ -405,7 +414,7 @@ describe('Connections', () => {
     const nodeA: NodeInstance = {
       id: 'ida',
       contextIds: [],
-      form:{},
+      form: {},
       inputs: [],
       outputs: [],
       type: 'abc',
@@ -413,6 +422,7 @@ describe('Connections', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
 
@@ -451,6 +461,7 @@ describe('Connections', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const nodeB: NodeInstance = {
@@ -464,6 +475,7 @@ describe('Connections', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
 
@@ -500,6 +512,7 @@ describe('Connections', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const nodeB: NodeInstance = {
@@ -513,6 +526,7 @@ describe('Connections', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
 
@@ -538,15 +552,26 @@ describe('Connections', () => {
   });
 
   test('should delete connections with context id', async () => {
-    const connectionsCollection = getConnectionsCollection<Omit<ConnectionInstance, 'id'>>(db);
+    const connectionsCollection = getConnectionsCollection<
+      Omit<ConnectionInstance, 'id'>
+    >(db);
     await connectionsCollection.insertOne({
-      contextIds: ['randomid'], from: {name: '', nodeId: VALID_OBJECT_ID}, to: {name: '', nodeId: VALID_OBJECT_ID},workspaceId: VALID_OBJECT_ID
+      contextIds: ['randomid'],
+      from: { name: '', nodeId: VALID_OBJECT_ID },
+      to: { name: '', nodeId: VALID_OBJECT_ID },
+      workspaceId: VALID_OBJECT_ID
     });
     await connectionsCollection.insertOne({
-      contextIds: ['randomid', 'test'], from: {name: '', nodeId: VALID_OBJECT_ID}, to: {name: '', nodeId: VALID_OBJECT_ID},workspaceId: VALID_OBJECT_ID
+      contextIds: ['randomid', 'test'],
+      from: { name: '', nodeId: VALID_OBJECT_ID },
+      to: { name: '', nodeId: VALID_OBJECT_ID },
+      workspaceId: VALID_OBJECT_ID
     });
     await connectionsCollection.insertOne({
-      contextIds: ['abc', 'randomid', 'test'], from: {name: '', nodeId: VALID_OBJECT_ID}, to: {name: '', nodeId: VALID_OBJECT_ID},workspaceId: VALID_OBJECT_ID
+      contextIds: ['abc', 'randomid', 'test'],
+      from: { name: '', nodeId: VALID_OBJECT_ID },
+      to: { name: '', nodeId: VALID_OBJECT_ID },
+      workspaceId: VALID_OBJECT_ID
     });
 
     await deleteConnectionsInContext('randomid', {
@@ -576,6 +601,7 @@ describe('Connections', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       };
       const nodeB: NodeInstance = {
@@ -589,6 +615,7 @@ describe('Connections', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       };
       const sourceSocket: SocketDef = {
@@ -636,6 +663,7 @@ describe('Connections', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       };
       const nodeB: NodeInstance = {
@@ -649,6 +677,7 @@ describe('Connections', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       };
       const sourceSocket: SocketDef = {
@@ -691,12 +720,13 @@ describe('Connections', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       };
       const nodeB: NodeInstance = {
         id: 'idb',
         contextIds: [],
-        form:{},
+        form: {},
         inputs: [],
         outputs: [],
         type: 'test',
@@ -704,6 +734,7 @@ describe('Connections', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       };
       const destinationSocket: SocketDef = {
@@ -737,7 +768,7 @@ describe('Connections', () => {
     const nodeA: NodeInstance = {
       id: 'ida',
       contextIds: [],
-      form:{},
+      form: {},
       inputs: [],
       outputs: [],
       type: 'abc',
@@ -745,6 +776,7 @@ describe('Connections', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const nodeB: NodeInstance = {
@@ -758,6 +790,7 @@ describe('Connections', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const destinationSocket: SocketDef = {
@@ -776,6 +809,7 @@ describe('Connections', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
 

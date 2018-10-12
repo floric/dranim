@@ -21,7 +21,6 @@ export const Query: IResolverObject<any, ApolloContext> = {
     getAllDatasets(context),
   dataset: (_, { id }, context): Promise<Dataset | null> =>
     getDataset(id, context),
-  entry: (_, {}) => null,
   workspaces: (_, __, context): Promise<Array<Workspace>> =>
     getAllWorkspaces(context),
   workspace: (_, { id }, context): Promise<Workspace | null> =>

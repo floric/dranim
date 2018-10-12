@@ -5,9 +5,9 @@ import {
   createDataset
 } from '../../../src/main/workspace/dataset';
 import { createEntry } from '../../../src/main/workspace/entry';
-import { TestCase } from '../../test-utils';
+import { QueryTestCase } from '../../test-utils';
 
-export const datasetTest: TestCase = {
+export const datasetTest: QueryTestCase = {
   id: 'Dataset',
   query: `
     query Dataset($id: ID!) {
@@ -31,7 +31,7 @@ export const datasetTest: TestCase = {
       }
     }
   `,
-  beforeTestAndGetVars: async reqContext => {
+  beforeTest: async reqContext => {
     const ds = await createDataset('DS1', reqContext);
     await addValueSchema(
       ds.id,
@@ -49,7 +49,7 @@ export const datasetTest: TestCase = {
       createEntry(ds.id, { count: 2 }, reqContext),
       createEntry(ds.id, { count: 3 }, reqContext)
     ]);
-    return { id: ds.id };
+    return { variables: { id: ds.id } };
   },
   expected: {
     dataset: {

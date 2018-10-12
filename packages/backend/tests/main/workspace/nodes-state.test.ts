@@ -55,6 +55,7 @@ describe('Node State', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const type: ServerNodeDef & NodeDef = {
@@ -96,6 +97,7 @@ describe('Node State', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const contextNode: NodeInstance = {
@@ -109,6 +111,7 @@ describe('Node State', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const parentNode: NodeInstance = {
@@ -122,6 +125,7 @@ describe('Node State', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const parentType: ServerNodeDef & NodeDef = {
@@ -165,6 +169,7 @@ describe('Node State', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const type: ServerNodeDef & NodeDef = {
@@ -189,6 +194,7 @@ describe('Node State', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const cType: ServerNodeDef & NodeDef = {
@@ -253,6 +259,7 @@ describe('Node State', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const otherNode: NodeInstance = {
@@ -266,6 +273,7 @@ describe('Node State', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const nodeB: NodeInstance = {
@@ -279,6 +287,7 @@ describe('Node State', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     (getAllConnections as jest.Mock).mockResolvedValueOnce(conns);
@@ -330,6 +339,7 @@ describe('Node State', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const otherNode: NodeInstance = {
@@ -343,6 +353,7 @@ describe('Node State', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const nodeB: NodeInstance = {
@@ -356,6 +367,7 @@ describe('Node State', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     (getAllConnections as jest.Mock).mockResolvedValueOnce(conns);
@@ -385,6 +397,7 @@ describe('Node State', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       },
       {
@@ -398,6 +411,7 @@ describe('Node State', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       },
       {
@@ -411,6 +425,7 @@ describe('Node State', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       }
     ];

@@ -121,7 +121,7 @@ const ResultsPage: SFC<ResultsPageProps> = ({
                 )}
               </Card>
             )}
-            {/* Ugly Hack to preven Parcel from not finding AsyncButton */}
+            {/* Ugly Hack to prevent Parcel from not loading AsyncButton */}
             {publicResults.length < 0 && <AsyncButton />}
           </Layout.Content>
           <Footer />

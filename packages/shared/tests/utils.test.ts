@@ -18,6 +18,7 @@ const createNodeWithForm = (form: { [key: string]: string }): NodeInstance => ({
   y: 0,
   form,
   variables: {},
+  progress: null,
   state: NodeState.VALID
 });
 

@@ -86,6 +86,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     (hasNodeType as jest.Mock).mockReturnValue(true);
@@ -115,6 +116,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     (getNode as jest.Mock).mockResolvedValue(null);
@@ -163,6 +165,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const inputNode: NodeInstance = {
@@ -176,6 +179,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     (getNode as jest.Mock).mockResolvedValue(parentNode);
@@ -222,6 +226,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const inputNode: NodeInstance = {
@@ -235,6 +240,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     (getNode as jest.Mock).mockResolvedValue(parentNode);
@@ -282,6 +288,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const inputNode: NodeInstance = {
@@ -295,6 +302,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     (getNode as jest.Mock).mockResolvedValue(parentNode);
@@ -328,6 +336,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
 
@@ -366,6 +375,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     (getNodesCollection as jest.Mock).mockReturnValue({
@@ -397,6 +407,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const parentType: ServerNodeDefWithContextFn & NodeDef = {
@@ -429,6 +440,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     (getNode as jest.Mock).mockResolvedValueOnce(parentNode);
@@ -449,6 +461,7 @@ describe('Node Details', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       },
       null
@@ -476,6 +489,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const parentType: ServerNodeDefWithContextFn & NodeDef = {
@@ -508,6 +522,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     (getNode as jest.Mock).mockResolvedValueOnce(parentNode);
@@ -528,6 +543,7 @@ describe('Node Details', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       },
       null
@@ -555,6 +571,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
 
@@ -570,6 +587,7 @@ describe('Node Details', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       },
       null
@@ -590,6 +608,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
 
@@ -605,6 +624,7 @@ describe('Node Details', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       },
       null
@@ -627,6 +647,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     (tryGetNode as jest.Mock).mockResolvedValue(node);
@@ -680,6 +701,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const sourceNode: NodeInstance = {
@@ -693,6 +715,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const inputSocketDef: SocketDef = {
@@ -760,6 +783,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     (getNodesCollection as jest.Mock).mockReturnValue({
@@ -791,6 +815,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     (getNodesCollection as jest.Mock).mockReturnValue({
@@ -825,6 +850,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const contextNodeType: ServerNodeDefWithContextFn & NodeDef = {
@@ -876,6 +902,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     (getNodesCollection as jest.Mock).mockReturnValue({
@@ -909,6 +936,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     (getNodesCollection as jest.Mock).mockReturnValue({
@@ -934,6 +962,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     (tryGetNode as jest.Mock).mockResolvedValue(node);
@@ -958,6 +987,7 @@ describe('Node Details', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     (tryGetNode as jest.Mock).mockResolvedValue(node);

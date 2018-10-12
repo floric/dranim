@@ -42,13 +42,25 @@ export const NODE: NodeInstance = {
   x: 0,
   y: 9,
   state: NodeState.VALID,
+  progress: null,
   variables: {}
 };
 
-export interface TestCase {
+export interface QueryTestCase {
   id: string;
   query: string;
   expected: object;
-  beforeTestAndGetVars: (reqContext: ApolloContext) => Promise<object>;
+  beforeTest: (
+    reqContext: ApolloContext
+  ) => Promise<{ variables?: object; reqContext?: ApolloContext }>;
+}
+
+export interface MutationTestCase {
+  id: string;
+  query: string;
+  expected: object;
+  beforeTest: (
+    reqContext: ApolloContext
+  ) => Promise<{ variables?: object; reqContext?: ApolloContext }>;
   afterTest?: (reqContext: ApolloContext) => Promise<any>;
 }

@@ -8,9 +8,9 @@ import { createConnection } from '../../../src/main/workspace/connections';
 import { createNode } from '../../../src/main/workspace/nodes';
 import { addOrUpdateFormValue } from '../../../src/main/workspace/nodes-detail';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
-import { TestCase } from '../../test-utils';
+import { QueryTestCase } from '../../test-utils';
 
-export const workspacesTest: TestCase = {
+export const workspacesTest: QueryTestCase = {
   id: 'Workspaces',
   query: `
     query {
@@ -77,35 +77,53 @@ export const workspacesTest: TestCase = {
       }
     }
   `,
-  beforeTestAndGetVars: async reqContext => {
+  beforeTest: async reqContext => {
     const ws = await createWorkspace(
       'WS1',
       reqContext,
       'This is a description'
     );
-    const [a, b, sum, o] = await Promise.all([
-      createNode(NumberInputNode.type, ws.id, [], 1, 2, reqContext),
-      createNode(NumberInputNode.type, ws.id, [], 3, 4, reqContext),
-      createNode(SumNode.type, ws.id, [], 5, 6, reqContext),
-      createNode(NumberOutputNode.type, ws.id, [], 7, 8, reqContext)
-    ]);
-    await Promise.all([
-      createConnection(
-        { name: 'value', nodeId: a.id },
-        { name: 'a', nodeId: sum.id },
-        reqContext
-      ),
-      createConnection(
-        { name: 'value', nodeId: b.id },
-        { name: 'b', nodeId: sum.id },
-        reqContext
-      ),
-      createConnection(
-        { name: 'sum', nodeId: sum.id },
-        { name: 'value', nodeId: o.id },
-        reqContext
-      )
-    ]);
+    const a = await createNode(
+      NumberInputNode.type,
+      ws.id,
+      [],
+      1,
+      2,
+      reqContext
+    );
+    const b = await createNode(
+      NumberInputNode.type,
+      ws.id,
+      [],
+      3,
+      4,
+      reqContext
+    );
+    const sum = await createNode(SumNode.type, ws.id, [], 5, 6, reqContext);
+    const o = await createNode(
+      NumberOutputNode.type,
+      ws.id,
+      [],
+      7,
+      8,
+      reqContext
+    );
+
+    await createConnection(
+      { name: 'value', nodeId: a.id },
+      { name: 'a', nodeId: sum.id },
+      reqContext
+    );
+    await createConnection(
+      { name: 'value', nodeId: b.id },
+      { name: 'b', nodeId: sum.id },
+      reqContext
+    );
+    await createConnection(
+      { name: 'sum', nodeId: sum.id },
+      { name: 'value', nodeId: o.id },
+      reqContext
+    );
     await Promise.all([
       addOrUpdateFormValue(a.id, 'value', JSON.stringify(1), reqContext),
       addOrUpdateFormValue(b.id, 'value', JSON.stringify(1), reqContext),
@@ -205,8 +223,7 @@ export const workspacesTest: TestCase = {
               { connectionId: expect.any(String), name: 'a' },
               { connectionId: expect.any(String), name: 'b' }
             ]),
-            metaInputs:
-              '{"a":{"content":{},"isPresent":true},"b":{"content":{},"isPresent":true}}',
+            metaInputs: expect.any(String),
             metaOutputs: '{"sum":{"content":{},"isPresent":true}}',
             outputSockets:
               '{"sum":{"dataType":"Number","displayName":"Sum","state":"Static"}}',

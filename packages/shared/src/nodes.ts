@@ -142,6 +142,7 @@ export interface NodeInstance {
   type: string;
   form: { [key: string]: string };
   state: NodeState;
+  progress: number | null;
 }
 
 export interface GQLNodeInstance extends NodeInstance {
@@ -149,7 +150,6 @@ export interface GQLNodeInstance extends NodeInstance {
   metaInputs: string;
   metaOutputs: string;
   hasContextFn: boolean;
-  progress: number | null;
   inputSockets: string;
   outputSockets: string;
 }

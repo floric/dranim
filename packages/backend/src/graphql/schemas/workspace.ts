@@ -126,8 +126,8 @@ const FormValuesDef = `
 const DateDef = `scalar Date`;
 
 export default () => [
-  OutputResultDef,
   DateDef,
+  OutputResultDef,
   MetaDef,
   SocketDefsDef,
   FormValuesDef,

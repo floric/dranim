@@ -54,6 +54,7 @@ describe('Meta Execution', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       },
       null
@@ -99,6 +100,7 @@ describe('Meta Execution', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     (getInputDefs as jest.Mock).mockResolvedValue({
@@ -123,6 +125,7 @@ describe('Meta Execution', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       },
       null
@@ -145,6 +148,7 @@ describe('Meta Execution', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       },
       null
@@ -164,6 +168,7 @@ describe('Meta Execution', () => {
       type: 'p',
       workspaceId: '',
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const parentType: ServerNodeDefWithContextFn & NodeDef = {
@@ -207,6 +212,7 @@ describe('Meta Execution', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       },
       null
@@ -230,6 +236,7 @@ describe('Meta Execution', () => {
         type: 'p',
         workspaceId: '',
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       };
       const parentType: ServerNodeDefWithContextFn & NodeDef = {
@@ -260,6 +267,7 @@ describe('Meta Execution', () => {
           x: 0,
           y: 0,
           state: NodeState.VALID,
+          progress: null,
           variables: {}
         },
         null
