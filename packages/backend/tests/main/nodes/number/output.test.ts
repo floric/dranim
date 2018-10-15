@@ -37,7 +37,6 @@ describe('NumberOutputNode', () => {
     expect(res.results.value).toBe(2);
     expect(res.results.type).toBe(DataType.NUMBER);
     expect(res.results.name).toBe('test');
-    expect(res.results.workspaceId).toBe('abc');
     expect(res.results.description).toBe('desc');
     expect(Object.keys(res.outputs).length).toBe(0);
 

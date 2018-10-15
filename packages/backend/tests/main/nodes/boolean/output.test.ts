@@ -22,7 +22,6 @@ describe('BooleanOutputNode', () => {
     expect(res.results.value).toBe(true);
     expect(res.results.type).toBe(DataType.BOOLEAN);
     expect(res.results.name).toBe('test');
-    expect(res.results.workspaceId).toBe('abc');
     expect(res.results.description).toBe('desc');
     expect(Object.keys(res.outputs).length).toBe(0);
 

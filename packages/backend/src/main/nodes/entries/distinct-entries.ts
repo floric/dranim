@@ -20,8 +20,7 @@ const getDistinctValueName = (vsName: string) => `${vsName}-distinct`;
 export const DistinctEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
-  DistinctEntriesNodeForm,
-  {}
+  DistinctEntriesNodeForm
 > = {
   type: DistinctEntriesNodeDef.type,
   isFormValid: async form => {
@@ -37,7 +36,7 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
   },
   transformInputDefsToContextInputDefs: async (inputDefs, inputs, form) => {
     if (form.distinctSchemas == null) {
-      return {} as any;
+      return {};
     }
 
     const res: SocketDefs<any> = {};

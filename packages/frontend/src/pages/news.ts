@@ -7,10 +7,21 @@ export enum NewsType {
 export const news = [
   {
     type: NewsType.NOTIFICATION,
-    date: new Date(2018, 8, 30),
+    date: new Date(2018, 11, 1),
     title: 'Next Milestone',
-    description:
-      'Add more neded nodes and improve calculation speed and progress reporting.'
+    description: 'Add more neded nodes.'
+  },
+  {
+    type: NewsType.FEATURE,
+    date: new Date(2018, 9, 11),
+    title: 'Publish results',
+    description: 'Results can now be published by making them public.'
+  },
+  {
+    type: NewsType.FEATURE,
+    date: new Date(2018, 8, 19),
+    title: 'Added calculation progress',
+    description: 'Added progress for calculation process.'
   },
   {
     type: NewsType.IMPROVEMENT,

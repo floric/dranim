@@ -8,9 +8,29 @@ import { NavLink } from 'react-router-dom';
 
 import { AsyncButton } from '../../components/AsyncButton';
 import { Warning } from '../../components/Warnings';
-import { tryOperation } from '../../utils/form';
+import { tryMutation } from '../../utils/form';
 import { CreateEntryForm } from '../forms/CreateEntryForm';
-import { DATASET } from './DetailPage';
+
+const DATASET = gql`
+  query dataset($id: ID!) {
+    dataset(id: $id) {
+      id
+      name
+      valueschemas {
+        name
+        type
+        required
+        fallback
+        unique
+      }
+      entriesCount
+      latestEntries {
+        id
+        values
+      }
+    }
+  }
+`;
 
 export interface DataEntriesPageProps {
   dataset: GQLDataset;
@@ -75,7 +95,7 @@ const handleDeleteEntry = (
   datasetId: string,
   deleteEntry: MutationFn<any, any>
 ) =>
-  tryOperation({
+  tryMutation({
     op: () =>
       deleteEntry({
         variables: {
@@ -123,13 +143,13 @@ const generateEntryColumns = (datasetId: string) => [
   }
 ];
 
-export class DataEntriesPage extends Component<DataEntriesPageProps> {
+export default class DataEntriesPage extends Component<DataEntriesPageProps> {
   private handleCreateEntry = (
     values: any,
     datasetId: string,
     addEntry: MutationFn<any, any>
   ) =>
-    tryOperation({
+    tryMutation({
       op: () =>
         addEntry({
           variables: {

@@ -5,9 +5,29 @@ import { Card, Col, Row, Table, Tag } from 'antd';
 import gql from 'graphql-tag';
 import { Mutation } from 'react-apollo';
 
-import { tryOperation } from '../../utils/form';
+import { tryMutation } from '../../utils/form';
 import { CreateValueSchemaForm } from '../forms/CreateValueSchemaForm';
-import { DATASET } from './DetailPage';
+
+const DATASET = gql`
+  query dataset($id: ID!) {
+    dataset(id: $id) {
+      id
+      name
+      valueschemas {
+        name
+        type
+        required
+        fallback
+        unique
+      }
+      entriesCount
+      latestEntries {
+        id
+        values
+      }
+    }
+  }
+`;
 
 const ADD_VALUE_SCHEMA = gql`
   mutation addValueSchema(
@@ -29,11 +49,11 @@ const ADD_VALUE_SCHEMA = gql`
   }
 `;
 
-export interface DataSchemasProps {
+export interface DataSchemasPageProps {
   dataset: GQLDataset;
 }
 
-export const DataSchemas: SFC<DataSchemasProps> = ({ dataset }) => {
+const DataSchemasPage: SFC<DataSchemasPageProps> = ({ dataset }) => {
   const schemasDataSource = dataset.valueschemas.map(e => ({
     key: e.name,
     type: e.type,
@@ -85,7 +105,7 @@ export const DataSchemas: SFC<DataSchemasProps> = ({ dataset }) => {
               {addValueSchema => (
                 <CreateValueSchemaForm
                   handleCreateValueSchema={schema =>
-                    tryOperation({
+                    tryMutation({
                       op: () =>
                         addValueSchema({
                           variables: {
@@ -143,3 +163,5 @@ export const DataSchemas: SFC<DataSchemasProps> = ({ dataset }) => {
     </>
   );
 };
+
+export default DataSchemasPage;

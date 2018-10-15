@@ -14,7 +14,6 @@ export const parseNodeForm = (form: {
       fullForm[e[0]] = JSON.parse(e[1]);
     } catch (err) {
       fullForm[e[0]] = null;
-      console.log(form);
       console.error('Invalid value from server.');
     }
   });

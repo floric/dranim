@@ -4,6 +4,7 @@ import { Colors } from '@masterthesis/shared';
 import { Card, Col, Layout, Row } from 'antd';
 import { Link, RouteComponentProps } from 'react-router-dom';
 
+import { Footer } from '../components/layout/Footer';
 import { RegistrationForm } from './forms/RegistrationForm';
 
 const FLEX_SIZE = {
@@ -35,6 +36,7 @@ const RegistrationPage: SFC<RegistrationPageProps> = ({ history }) => (
         </Col>
       </Row>
     </Layout.Content>
+    <Footer />
   </Layout>
 );
 

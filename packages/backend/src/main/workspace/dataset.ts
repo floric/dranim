@@ -8,6 +8,8 @@ import { Db, ObjectID } from 'mongodb';
 
 import { Log } from '../../logging';
 import { Omit } from '../../main';
+import { checkLoggedInUser } from '../users/management';
+import { getSafeObjectID } from '../utils';
 import { clearEntries, getEntryCollection } from './entry';
 
 export const getDatasetsCollection = <T = Dataset & { _id: ObjectID }>(
@@ -19,6 +21,8 @@ export const createDataset = async (
   reqContext: ApolloContext,
   workspaceId: string | null = null
 ): Promise<Dataset> => {
+  checkLoggedInUser(reqContext);
+
   const collection = getDatasetsCollection<
     Omit<Dataset, 'id' | 'created'> & { created: Date }
   >(reqContext.db);
@@ -28,7 +32,7 @@ export const createDataset = async (
 
   const res = await collection.insertOne({
     name: name.trim(),
-    userId: reqContext.userId,
+    userId: reqContext.userId!,
     valueschemas: [],
     workspaceId,
     description: '',
@@ -51,7 +55,7 @@ export const createDataset = async (
 };
 
 export const deleteDataset = async (id: string, reqContext: ApolloContext) => {
-  const ds = await tryGetDataset(id, reqContext);
+  const ds = await getDataset(id, reqContext);
   if (!ds) {
     return false;
   }
@@ -60,7 +64,7 @@ export const deleteDataset = async (id: string, reqContext: ApolloContext) => {
 
   const collection = getDatasetsCollection(reqContext.db);
   const res = await collection.deleteOne({
-    _id: new ObjectID(id),
+    _id: getSafeObjectID(id),
     userId: reqContext.userId
   });
   if (res.result.ok !== 1 || res.deletedCount !== 1) {
@@ -90,13 +94,9 @@ export const getDataset = async (
   id: string,
   reqContext: ApolloContext
 ): Promise<Dataset | null> => {
-  if (!ObjectID.isValid(id)) {
-    return null;
-  }
-
   const collection = getDatasetsCollection(reqContext.db);
   const res = await collection.findOne({
-    _id: new ObjectID(id),
+    _id: getSafeObjectID(id),
     userId: reqContext.userId
   });
   if (!res) {
@@ -131,7 +131,7 @@ export const renameDataset = async (
   const ds = await tryGetDataset(id, reqContext);
   const collection = getDatasetsCollection(reqContext.db);
   const res = await collection.updateOne(
-    { _id: new ObjectID(ds.id) },
+    { _id: getSafeObjectID(ds.id) },
     { $set: { name: name.trim() } }
   );
 
@@ -158,7 +158,7 @@ export const addValueSchema = async (
   }
 
   const res = await collection.updateOne(
-    { _id: new ObjectID(datasetId) },
+    { _id: getSafeObjectID(datasetId) },
     {
       $push: { valueschemas: schema }
     },
@@ -200,7 +200,7 @@ export const saveTemporaryDataset = async (
 ) => {
   const coll = getDatasetsCollection(reqContext.db);
   const res = await coll.updateOne(
-    { _id: new ObjectID(dsId) },
+    { _id: getSafeObjectID(dsId) },
     {
       $set: { name, workspaceId: null, description: 'Generated with Explorer' }
     }

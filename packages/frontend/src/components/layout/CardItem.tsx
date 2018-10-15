@@ -1,6 +1,6 @@
 import React, { SFC } from 'react';
 
-import { Card, Row } from 'antd';
+import { Card } from 'antd';
 import { Link } from 'react-router-dom';
 
 import { AsyncButton } from '../AsyncButton';
@@ -42,6 +42,6 @@ export const CardItem: SFC<CardItemProps> = ({
       />
     }
   >
-    <Row>{children}</Row>
+    {children}
   </Card>
 );

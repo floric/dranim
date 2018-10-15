@@ -5,6 +5,7 @@ import {
   Dataset,
   Entry,
   NodeInstance,
+  OutputResult,
   UploadProcess,
   Workspace
 } from '@masterthesis/shared';
@@ -17,6 +18,7 @@ import {
   startProcess,
   stopCalculation
 } from '../../main/calculation/start-process';
+import { setResultVisibility } from '../../main/dashboards/results';
 import {
   createConnection,
   deleteConnection
@@ -38,8 +40,7 @@ import { uploadEntriesCsv } from '../../main/workspace/upload';
 import {
   createWorkspace,
   deleteWorkspace,
-  renameWorkspace,
-  updateWorkspace
+  renameWorkspace
 } from '../../main/workspace/workspace';
 
 export const Mutation: IResolverObject<any, ApolloContext> = {
@@ -101,8 +102,6 @@ export const Mutation: IResolverObject<any, ApolloContext> = {
     createConnection(input.from, input.to, context),
   deleteConnection: (_, { id }, context): Promise<boolean> =>
     deleteConnection(id, context),
-  updateWorkspace: (_, { id, nodes, connections }, context): Promise<boolean> =>
-    updateWorkspace(id, nodes, connections, context),
   createWorkspace: (_, { name, description }, context): Promise<Workspace> =>
     createWorkspace(name, context, description),
   deleteWorkspace: (_, { id }, context): Promise<boolean> =>
@@ -115,5 +114,7 @@ export const Mutation: IResolverObject<any, ApolloContext> = {
     context
   ): Promise<CalculationProcess> => startProcess(workspaceId, context),
   stopCalculation: (_, { id }, context): Promise<boolean> =>
-    stopCalculation(id, context)
+    stopCalculation(id, context),
+  setResultVisibility: (_, { id, visible }, context): Promise<OutputResult> =>
+    setResultVisibility(id, visible, context)
 };

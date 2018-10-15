@@ -1,6 +1,6 @@
 import { Colors } from '@masterthesis/shared';
 import { LegendOrient, Spec } from 'vega-lib';
-import { InputPropertyType, VegaChart } from './Vega';
+import { InputPropertyType, VegaChart } from './VegaCard';
 
 export const PieChart: VegaChart = {
   properties: [

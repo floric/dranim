@@ -11,6 +11,7 @@ import { Db, ObjectID } from 'mongodb';
 import { Log } from '../../logging';
 import { Omit } from '../../main';
 import { getNodeType, tryGetNodeType } from '../nodes/all-nodes';
+import { getSafeObjectID } from '../utils';
 import { deleteConnection, deleteConnectionsInContext } from './connections';
 import { updateStates } from './nodes-state';
 import { tryGetWorkspace, updateLastChange } from './workspace';
@@ -47,6 +48,7 @@ export const createNode = async (
     contextIds: contextNodeIds,
     workspaceId,
     type,
+    progress: null,
     variables: {},
     state: NodeState.VALID
   });
@@ -55,7 +57,8 @@ export const createNode = async (
     throw new Error('Writing node failed');
   }
 
-  const newNodeId = res.ops[0]._id.toHexString();
+  const { _id, ...other } = res.ops[0];
+  const newNodeId = _id.toHexString();
 
   await Promise.all([
     addContextNodesIfNecessary(
@@ -68,13 +71,10 @@ export const createNode = async (
     updateStates(workspaceId, reqContext)
   ]);
 
-  const { _id, ...other } = res.ops[0];
-
   Log.info(`Node ${newNodeId} created`);
 
   return {
     id: newNodeId,
-    form: {},
     ...other
   };
 };
@@ -102,6 +102,7 @@ const addContextNodesIfNecessary = async (
         workspaceId,
         type: contextType,
         variables: {},
+        progress: null,
         state: NodeState.VALID
       })
     );
@@ -120,7 +121,7 @@ const checkValidContextNode = async (
       reqContext
     );
     if (!contextNode) {
-      throw new Error('Unknown context node');
+      throw new Error('Context node missing');
     }
   }
 };
@@ -163,7 +164,7 @@ export const deleteNode = async (id: string, reqContext: ApolloContext) => {
   const nodesCollection = getNodesCollection(reqContext.db);
   const res = await nodesCollection.deleteMany({
     $or: [
-      { _id: new ObjectID(id) },
+      { _id: getSafeObjectID(id) },
       { contextIds: { $elemMatch: { $eq: id } } }
     ]
   });
@@ -182,17 +183,13 @@ export const updateNodePosition = async (
   y: number,
   reqContext: ApolloContext
 ) => {
-  if (!ObjectID.isValid(id)) {
-    throw new Error('Invalid ID');
-  }
-
   const collection = getNodesCollection(reqContext.db);
   const res = await collection.findOneAndUpdate(
-    { _id: new ObjectID(id) },
+    { _id: getSafeObjectID(id) },
     { $set: { x, y } }
   );
 
-  if (res.ok !== 1) {
+  if (res.ok !== 1 || !res.value) {
     throw new Error('Updating node failed');
   }
 
@@ -221,12 +218,8 @@ export const getNode = async (
   id: string,
   reqContext: ApolloContext
 ): Promise<NodeInstance | null> => {
-  if (!ObjectID.isValid(id)) {
-    return null;
-  }
-
   const collection = getNodesCollection(reqContext.db);
-  const obj = await collection.findOne({ _id: new ObjectID(id) });
+  const obj = await collection.findOne({ _id: getSafeObjectID(id) });
   if (!obj) {
     return null;
   }
@@ -282,17 +275,4 @@ export const tryGetContextNode = async (
   }
 
   return contextNode;
-};
-
-export const resetProgress = async (id: string, reqContext: ApolloContext) => {
-  const nodesColl = getNodesCollection(reqContext.db);
-  await nodesColl.updateMany(
-    { workspaceId: id },
-    {
-      $set: {
-        progress: null
-      }
-    }
-  );
-  return true;
 };

@@ -27,8 +27,6 @@ const NodeDef = `
     metaInputs: Meta!
     metaOutputs: Meta!
     hasContextFn: Boolean!
-    contextInputDefs: SocketDefs
-    contextOutputDefs: SocketDefs
     progress: Float
     inputSockets: SocketDefs
     outputSockets: SocketDefs
@@ -64,7 +62,6 @@ const ConnectionDef = `
     from: Socket
     to: Socket
     contextIds: [String!]!
-    workspace: Workspace!
   }
 `;
 
@@ -78,10 +75,12 @@ const ConnectionInputDef = `
 const OutputResultDef = `
   type OutputResult {
     id: ID!
-    value: String!
+    value: Object!
     type: String!
     name: String!
     description: String!
+    visible: Boolean!
+    workspaceId: String!
   }
 `;
 
@@ -96,6 +95,19 @@ const WorkspaceDef = `
     connections: [Connection!]!
     results: [OutputResult!]!
     state: String!
+    calculations: [CalculationProcess!]!
+  }
+`;
+
+const PublicResultsDef = `
+  type PublicResults {
+    id: ID!
+    name: String!
+    lastChange: Date!
+    created: Date!
+    description: String!
+    results: [OutputResult!]!
+    userId: String!
   }
 `;
 
@@ -114,8 +126,8 @@ const FormValuesDef = `
 const DateDef = `scalar Date`;
 
 export default () => [
-  OutputResultDef,
   DateDef,
+  OutputResultDef,
   MetaDef,
   SocketDefsDef,
   FormValuesDef,
@@ -127,5 +139,6 @@ export default () => [
   SocketInputDef,
   ConnectionDef,
   ConnectionInputDef,
-  WorkspaceDef
+  WorkspaceDef,
+  PublicResultsDef
 ];

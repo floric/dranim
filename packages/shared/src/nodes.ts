@@ -1,10 +1,11 @@
 import { Db } from 'mongodb';
 
 import { DataType, SocketDefs, SocketMetas } from './sockets';
+import { UserOwned } from './users';
 
 export interface ApolloContext {
   db: Db;
-  userId: string;
+  userId: string | null;
 }
 
 export enum NodeState {
@@ -31,12 +32,17 @@ export interface OutputNodeForm {
   description: string;
 }
 
-export interface OutputResult<T = any> {
+export interface NodeOutputResult<T = {}> {
   value: T;
   type: DataType;
   name: string;
   description: string;
+}
+
+export interface OutputResult<T = {}> extends UserOwned, NodeOutputResult<T> {
+  id: string;
   workspaceId: string;
+  visible: boolean;
 }
 
 export interface GQLOutputResult extends OutputResult<any> {
@@ -53,7 +59,10 @@ export interface NodeDef<NodeInputs = {}, NodeOutputs = {}> {
   keywords: Array<string>;
 }
 
-export interface NodeExecutionResult<NodeOutputs, NodeResults = {}> {
+export interface NodeExecutionResult<
+  NodeOutputs,
+  NodeResults extends NodeOutputResult = NodeOutputResult<{}>
+> {
   outputs: IOValues<NodeOutputs>;
   results?: NodeResults;
 }
@@ -62,7 +71,7 @@ export interface ServerNodeDef<
   NodeInputs = {},
   NodeOutputs = {},
   NodeForm = {},
-  NodeResults = {}
+  NodeResults extends NodeOutputResult = NodeOutputResult
 > {
   type: string;
   isFormValid?: (form: FormValues<NodeForm>) => Promise<boolean>;
@@ -86,7 +95,7 @@ export interface ServerNodeDefWithContextFn<
   NodeInputs = {},
   NodeOutputs = {},
   NodeForm = {},
-  NodeResults = {},
+  NodeResults extends NodeOutputResult = NodeOutputResult,
   ContextResults = {}
 > extends ServerNodeDef<NodeInputs, NodeOutputs, NodeForm, NodeResults> {
   onNodeExecution: (
@@ -133,6 +142,7 @@ export interface NodeInstance {
   type: string;
   form: { [key: string]: string };
   state: NodeState;
+  progress: number | null;
 }
 
 export interface GQLNodeInstance extends NodeInstance {
@@ -140,7 +150,6 @@ export interface GQLNodeInstance extends NodeInstance {
   metaInputs: string;
   metaOutputs: string;
   hasContextFn: boolean;
-  progress: number | null;
   inputSockets: string;
   outputSockets: string;
 }

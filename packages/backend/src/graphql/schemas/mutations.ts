@@ -59,15 +59,14 @@ export const MutationDef = `
     deleteWorkspace (
       id: ID!
     ): Boolean!
-    updateWorkspace (
-      id: ID!
-      nodes: [NodeInput!]!
-      connections: [ConnectionInput!]!
-    ): Boolean!
     renameWorkspace (
       id: ID!
       name: String!
     ): Boolean!
+    setResultVisibility (
+      id: ID!
+      visible: Boolean!
+    ): OutputResult!
     createDemoData(type: String!): Boolean!
     uploadEntriesCsv (files: [Upload!]!, datasetId: ID!): UploadProcess!
     startCalculation (workspaceId: ID!): CalculationProcess!

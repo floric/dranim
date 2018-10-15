@@ -6,11 +6,11 @@ import {
   NodeDef,
   NodeInstance,
   NodeState,
+  parseNodeForm,
   ProcessState,
   ServerNodeDef,
   ServerNodeDefWithContextFn,
-  SocketState,
-  parseNodeForm
+  SocketState
 } from '@masterthesis/shared';
 
 import { executeNode } from '../../../src/main/calculation/execution';
@@ -48,6 +48,7 @@ describe('Execution', () => {
       inputs: [],
       outputs: [],
       type: 'type',
+      progress: null,
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
@@ -96,6 +97,7 @@ describe('Execution', () => {
       inputs: [],
       outputs: [{ name: 'a', connectionId }],
       type: 'typeA',
+      progress: null,
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
@@ -109,6 +111,7 @@ describe('Execution', () => {
       inputs: [{ name: 'a', connectionId }],
       outputs: [],
       type: 'typeB',
+      progress: null,
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
@@ -132,8 +135,7 @@ describe('Execution', () => {
       onMetaExecution: async () => ({ a: { content: {}, isPresent: true } }),
       onNodeExecution: async form => ({ outputs: { a: form.value } })
     };
-    const typeB: ServerNodeDef<{ a: string }, {}, {}, { z: string }> &
-      NodeDef = {
+    const typeB: ServerNodeDef<{ a: string }, {}, {}> & NodeDef = {
       type: 'typeB',
       name: 'b',
       inputs: {
@@ -149,7 +151,12 @@ describe('Execution', () => {
       onMetaExecution: async () => ({}),
       onNodeExecution: async (form, inputs) => ({
         outputs: {},
-        results: { z: inputs.a }
+        results: {
+          value: inputs.a,
+          description: '',
+          name: 'z',
+          type: DataType.STRING
+        }
       })
     };
     const conn: ConnectionInstance = {
@@ -179,7 +186,15 @@ describe('Execution', () => {
       userId: ''
     });
 
-    expect(res).toEqual({ outputs: {}, results: { z: 'test' } });
+    expect(res).toEqual({
+      outputs: {},
+      results: {
+        description: '',
+        name: 'z',
+        type: DataType.STRING,
+        value: 'test'
+      }
+    });
     expect(tryGetNode).toHaveBeenCalledTimes(1);
   });
 
@@ -192,6 +207,7 @@ describe('Execution', () => {
         y: 0,
         workspaceId: VALID_OBJECT_ID,
         id: VALID_OBJECT_ID,
+        progress: null,
         outputs: [],
         inputs: [],
         form: {},
@@ -214,6 +230,7 @@ describe('Execution', () => {
       inputs: [],
       outputs: [],
       type: 'type',
+      progress: null,
       workspaceId: VALID_OBJECT_ID,
       x: 0,
       y: 0,
@@ -238,6 +255,7 @@ describe('Execution', () => {
           y: 0,
           workspaceId: VALID_OBJECT_ID,
           id: VALID_OBJECT_ID,
+          progress: null,
           outputs: [],
           inputs: [],
           form: {},
@@ -259,6 +277,7 @@ describe('Execution', () => {
       id: 'nodeB',
       contextIds: [],
       form: {},
+      progress: null,
       inputs: [],
       outputs: [],
       type: 'type',
@@ -308,6 +327,7 @@ describe('Execution', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const nodeB: NodeInstance = {
@@ -321,6 +341,7 @@ describe('Execution', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const sumNode: NodeInstance = {
@@ -337,6 +358,7 @@ describe('Execution', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const typeA: ServerNodeDef & NodeDef = {
@@ -444,6 +466,7 @@ describe('Execution', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const cNode: NodeInstance = {
@@ -457,6 +480,7 @@ describe('Execution', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const iNode: NodeInstance = {
@@ -470,6 +494,7 @@ describe('Execution', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
     const type: ServerNodeDefWithContextFn & NodeDef = {

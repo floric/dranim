@@ -1,5 +1,9 @@
 import * as d3 from 'd3';
-import { SOUND_BAR_OFFSET, STRChartState, TEXT_OFFSET } from './STRChart';
+import {
+  SOUND_BAR_OFFSET,
+  STRChartCardState,
+  TEXT_OFFSET
+} from './STRChartCard';
 import { LABEL_FONT_FAMILY, LABEL_FONT_SIZE } from './styles';
 
 interface Passage {
@@ -26,7 +30,7 @@ export const renderSTRChart = (
   containerId: string,
   cities: Cities,
   passages: Array<Passage>,
-  state: STRChartState,
+  state: STRChartCardState,
   width: number,
   height: number
 ) => {
@@ -51,7 +55,7 @@ const renderSound = (
   chart: d3.Selection<d3.BaseType, {}, HTMLElement, any>,
   passages: Array<Passage>,
   cityPositions: Map<string, { x: number; y: number }>,
-  state: STRChartState
+  state: STRChartCardState
 ) => {
   if (state.soundNames.length === 0) {
     return;
@@ -103,7 +107,7 @@ const renderSound = (
     .style('text-anchor', 'middle');
 };
 
-const getSoundPos = (state: STRChartState) => ({
+const getSoundPos = (state: STRChartCardState) => ({
   x: state.offsets[0] * state.container.width,
   y:
     (state.container.height - state.height) * (state.offsets[1] - 0.5) -
@@ -124,7 +128,7 @@ const renderPassages = (
   chart: d3.Selection<d3.BaseType, {}, HTMLElement, any>,
   values: Array<Passage>,
   cityPositions: Map<string, { x: number; y: number }>,
-  state: STRChartState
+  state: STRChartCardState
 ) => {
   const maxEastPassageVal = d3.max(
     values.filter(n => n.isEastPassage).map(n => n.value)
@@ -167,7 +171,7 @@ const renderNames = (
   cities: any,
   cityPositions: Map<string, { x: number; y: number }>,
   isWest: boolean,
-  state: STRChartState
+  state: STRChartCardState
 ) => {
   const cityStats: Array<CityStat> = Object.entries(cities)
     .filter(
@@ -225,7 +229,7 @@ const setCityPositions = (
   cityStats: Array<CityStat>,
   isWest: boolean,
   cityPositions: Map<string, { x: number; y: number }>,
-  state: STRChartState
+  state: STRChartCardState
 ) => {
   const cityNames = cityStats.map(n => n.name);
   if (state.curveDistance === 0) {

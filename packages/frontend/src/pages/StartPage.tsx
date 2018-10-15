@@ -7,7 +7,7 @@ import { Mutation } from 'react-apollo';
 
 import { AsyncButton } from '../components/AsyncButton';
 import { PageHeaderCard } from '../components/layout/PageHeaderCard';
-import { tryOperation } from '../utils/form';
+import { tryMutation } from '../utils/form';
 import { news, NewsType } from './news';
 
 const CREATE_DEMO_DATA = gql`
@@ -22,7 +22,7 @@ const CreateExampleButton: SFC<{ type: string }> = ({ type }) => (
       <AsyncButton
         icon="plus-square"
         onClick={() =>
-          tryOperation({
+          tryMutation({
             op: () =>
               createDemoData({
                 variables: { type },

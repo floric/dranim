@@ -2,8 +2,8 @@ import {
   BooleanOutputNodeDef,
   BooleanOutputNodeInputs,
   DataType,
+  NodeOutputResult,
   OutputNodeForm,
-  OutputResult,
   ServerNodeDef
 } from '@masterthesis/shared';
 
@@ -13,7 +13,7 @@ export const BooleanOutputNode: ServerNodeDef<
   BooleanOutputNodeInputs,
   {},
   OutputNodeForm,
-  OutputResult<boolean>
+  NodeOutputResult<boolean>
 > = {
   type: BooleanOutputNodeDef.type,
   isFormValid: isOutputFormValid,
@@ -25,7 +25,6 @@ export const BooleanOutputNode: ServerNodeDef<
         name: form.name!,
         value: inputs.value,
         type: DataType.BOOLEAN,
-        workspaceId,
         description: form.description || ''
       }
     })

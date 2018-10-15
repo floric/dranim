@@ -16,11 +16,15 @@ import { StringInfo } from './infos/StringInfo';
 import { BarChart } from './visualizations/BarChart';
 import { ColumnChart } from './visualizations/ColumnChart';
 import { PieChart } from './visualizations/PieChart';
-import { STRChart } from './visualizations/STRChart';
-import { Vega } from './visualizations/Vega';
+import { STRChartCard } from './visualizations/STRChartCard';
+import { VegaCard } from './visualizations/VegaCard';
 import { VisCard } from './visualizations/VisCard';
 
-export interface VisRenderer {
+export interface PublicComponent {
+  visibility?: 'public' | 'private';
+}
+
+export interface VisRendererProps extends PublicComponent {
   result: GQLOutputResult;
 }
 
@@ -30,21 +34,26 @@ export interface ChartRender {
 
 const CARD_PADDING = 24;
 
-export const VisRenderer: SFC<VisRenderer> = ({ result }) => {
-  const value = JSON.parse(result.value);
-
+export const VisRenderer: SFC<VisRendererProps> = ({
+  result,
+  visibility = 'public',
+  result: { value }
+}) => {
   if (result.type === DataType.VIS) {
-    return <Visualizations result={result} value={value} />;
+    return (
+      <Visualizations visibility={visibility} result={result} value={value} />
+    );
   }
 
-  return <Infos result={result} value={value} />;
+  return <Infos visibility={visibility} result={result} value={value} />;
 };
 
-const Infos: SFC<{ result: GQLOutputResult; value: any }> = ({
+const Infos: SFC<{ result: GQLOutputResult; value: any } & PublicComponent> = ({
   result,
+  visibility,
   value
 }) => (
-  <VisCard result={result}>
+  <VisCard result={result} visibility={visibility}>
     {(() => {
       if (result.type === DataType.NUMBER) {
         return <NumberInfo total={value} />;
@@ -69,10 +78,9 @@ const Infos: SFC<{ result: GQLOutputResult; value: any }> = ({
   </VisCard>
 );
 
-const Visualizations: SFC<{ result: GQLOutputResult; value: any }> = ({
-  result,
-  value
-}) => {
+const Visualizations: SFC<
+  { result: GQLOutputResult; value: any } & PublicComponent
+> = ({ result, visibility, value }) => {
   if (
     value.type === LinearChartType.BAR ||
     value.type === LinearChartType.COLUMN ||
@@ -81,7 +89,8 @@ const Visualizations: SFC<{ result: GQLOutputResult; value: any }> = ({
     return (
       <ContainerDimensions>
         {({ width }) => (
-          <Vega
+          <VegaCard
+            visibility={visibility}
             width={width - 2 * CARD_PADDING}
             height={width - 2 * CARD_PADDING}
             result={result}
@@ -101,7 +110,8 @@ const Visualizations: SFC<{ result: GQLOutputResult; value: any }> = ({
     return (
       <ContainerDimensions>
         {({ width }) => (
-          <STRChart
+          <STRChartCard
+            visibility={visibility}
             result={result}
             value={value}
             width={width - 2 * CARD_PADDING}

@@ -1,4 +1,4 @@
-import { NodeInstance, NodeState } from '@masterthesis/shared';
+import { ApolloContext, NodeInstance, NodeState } from '@masterthesis/shared';
 import { Db, MongoClient } from 'mongodb';
 import MongodbMemoryServer from 'mongodb-memory-server';
 
@@ -7,28 +7,42 @@ export const MONGO_DB_NAME = 'jest';
 
 export const NeverGoHereError = new Error('Should never reach this line!');
 
-export const getTestMongoDb = async () => {
+export const doTestWithDb = async (op: (db: Db) => Promise<void>) => {
   jest.setTimeout(10000);
+  jest.resetAllMocks();
 
   const mongodbServer = new MongodbMemoryServer({
     instance: {
       dbName: MONGO_DB_NAME
     }
   });
-
   const uri = await mongodbServer.getConnectionString();
-
-  const connection = await MongoClient.connect(
+  const client = await MongoClient.connect(
     uri,
     { useNewUrlParser: true }
   );
-  const database: Db = await connection.db(MONGO_DB_NAME);
+  const database = await client.db(MONGO_DB_NAME);
 
-  return {
-    connection,
-    database,
-    mongodbServer
-  };
+  try {
+    await op(database);
+  } catch (err) {
+    await cleanDatabase(client, mongodbServer);
+    throw err;
+  }
+
+  await cleanDatabase(client, mongodbServer);
+};
+
+const cleanDatabase = async (
+  client: MongoClient,
+  server: MongodbMemoryServer
+) => {
+  if (client.isConnected() && server.isRunning) {
+    await client.close(true);
+  }
+  if (server.isRunning) {
+    await server.stop();
+  }
 };
 
 export const NODE: NodeInstance = {
@@ -42,5 +56,30 @@ export const NODE: NodeInstance = {
   x: 0,
   y: 9,
   state: NodeState.VALID,
+  progress: null,
   variables: {}
 };
+
+export interface QueryTestCase {
+  id: string;
+  query: string;
+  expected: object;
+  beforeTest: (
+    reqContext: ApolloContext
+  ) => Promise<{ variables?: object; reqContext?: ApolloContext }>;
+}
+
+export interface MutationTestCase {
+  id: string;
+  mutation: {
+    query: string;
+    expected: any;
+  };
+  query: {
+    query: string;
+    expected: any;
+  };
+  beforeTest: (
+    reqContext: ApolloContext
+  ) => Promise<{ variables?: object; reqContext?: ApolloContext }>;
+}

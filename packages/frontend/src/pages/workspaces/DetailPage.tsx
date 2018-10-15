@@ -5,20 +5,20 @@ import {
   GQLWorkspace,
   NodeState
 } from '@masterthesis/shared';
-import { Button, Divider, Steps } from 'antd';
+import { Divider, Steps } from 'antd';
 import { css } from 'glamor';
 import gql from 'graphql-tag';
-import { History } from 'history';
 import { Mutation } from 'react-apollo';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { HandledQuery } from '../../components/HandledQuery';
-import { CustomErrorCard } from '../../components/layout/CustomCards';
 import { PageHeaderCard } from '../../components/layout/PageHeaderCard';
 import { EditableText } from '../../components/properties/EditableText';
 import { RoutedTabs } from '../../components/RoutedTabs';
 import { nodeTypes } from '../../explorer/nodes/all-nodes';
-import { tryOperation } from '../../utils/form';
+import { tryMutation } from '../../utils/form';
+import { UnknownWorkspaceCard } from './components/UnknownWorkspaceCard';
+
 import WorkspaceCalculationsPage from './CalculationsPage';
 import WorkspaceEditorPage from './EditorPage';
 import VisDetailPage from './VisDetailPage';
@@ -95,24 +95,6 @@ const HelpSteps: SFC<{
   ) : null;
 };
 
-export const UnknownWorkspaceCard: SFC<{ history: History }> = ({
-  history
-}) => (
-  <CustomErrorCard
-    title="Unknown Workspace"
-    description="This Workspace doesn't exist or you are missing the permissions to view it."
-    actions={
-      <Button
-        type="primary"
-        icon="plus-square"
-        onClick={() => history.push('/workspaces')}
-      >
-        Create Workspace
-      </Button>
-    }
-  />
-);
-
 export interface WorkspacesPageProps
   extends RouteComponentProps<{ workspaceId: string }> {}
 
@@ -154,7 +136,7 @@ const WorkspacesPage: SFC<WorkspacesPageProps> = ({
                   <EditableText
                     text={workspace.name}
                     onChange={name =>
-                      tryOperation({
+                      tryMutation({
                         op: () =>
                           renameWorkspace({
                             variables: { id: workspace.id, name },

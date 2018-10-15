@@ -1,9 +1,9 @@
 import {
   DataType,
+  NodeOutputResult,
   NumberOutputNodeDef,
   NumberOutputNodeInputs,
   OutputNodeForm,
-  OutputResult,
   ServerNodeDef
 } from '@masterthesis/shared';
 
@@ -13,19 +13,18 @@ export const NumberOutputNode: ServerNodeDef<
   NumberOutputNodeInputs,
   {},
   OutputNodeForm,
-  OutputResult<number>
+  NodeOutputResult<number>
 > = {
   type: NumberOutputNodeDef.type,
   isFormValid: isOutputFormValid,
   onMetaExecution: () => Promise.resolve({}),
-  onNodeExecution: (form, inputs, { node: { workspaceId } }) =>
+  onNodeExecution: (form, inputs) =>
     Promise.resolve({
       outputs: {},
       results: {
         name: form.name!,
         value: inputs.value,
         type: DataType.NUMBER,
-        workspaceId,
         description: form.description || ''
       }
     })

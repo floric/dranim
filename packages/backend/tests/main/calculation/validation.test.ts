@@ -60,6 +60,7 @@ describe('Validation', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
 
@@ -88,6 +89,7 @@ describe('Validation', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
 
@@ -130,6 +132,7 @@ describe('Validation', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
 
@@ -175,6 +178,7 @@ describe('Validation', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
 
@@ -214,6 +218,7 @@ describe('Validation', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
 
@@ -255,6 +260,7 @@ describe('Validation', () => {
       x: 0,
       y: 0,
       state: NodeState.VALID,
+      progress: null,
       variables: {}
     };
 
@@ -287,6 +293,7 @@ describe('Validation', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       },
       {},
@@ -315,6 +322,7 @@ describe('Validation', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       },
       { dataset: { entries: [], schema: [] } },
@@ -353,6 +361,7 @@ describe('Validation', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       },
       {
@@ -393,6 +402,7 @@ describe('Validation', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       },
       { test: 'abc' },
@@ -437,6 +447,7 @@ describe('Validation', () => {
         x: 0,
         y: 0,
         state: NodeState.VALID,
+        progress: null,
         variables: {}
       },
       {

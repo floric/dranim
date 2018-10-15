@@ -40,7 +40,6 @@ describe('StringOutputNode', () => {
     expect(res.results.value).toBe(inputValue);
     expect(res.results.type).toBe(DataType.STRING);
     expect(res.results.name).toBe('test');
-    expect(res.results.workspaceId).toBe('abc');
     expect(res.results.description).toBe('desc');
     expect(Object.keys(res.outputs).length).toBe(0);
 

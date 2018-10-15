@@ -2,13 +2,13 @@ import gql from 'graphql-tag';
 import { MutationFn } from 'react-apollo';
 
 import { SocketInstance } from '@masterthesis/shared';
-import { tryOperation } from '../utils/form';
+import { tryMutation } from '../utils/form';
 
 export const handleStartCalculation = (
   startCalculation: MutationFn<any, any>,
   workspaceId: string
 ) => () =>
-  tryOperation({
+  tryMutation({
     op: () =>
       startCalculation({
         variables: { workspaceId },
@@ -37,7 +37,7 @@ export const handleNodeCreate = (
   createNode: MutationFn<any, any>,
   workspaceId: string
 ) => (type: string, x: number, y: number, contextIds: Array<string>) =>
-  tryOperation({
+  tryMutation({
     op: () =>
       createNode({
         variables: {
@@ -92,7 +92,7 @@ export const handleNodeDelete = (
   deleteNode: MutationFn<any, any>,
   workspaceId: string
 ) => (nodeId: string) =>
-  tryOperation({
+  tryMutation({
     op: () =>
       deleteNode({
         variables: { id: nodeId },
@@ -138,7 +138,7 @@ export const handleNodeUpdate = (
   updateNodePosition: MutationFn<any, any>,
   workspaceId: string
 ) => (nodeId: string, x: number, y: number) =>
-  tryOperation({
+  tryMutation({
     op: () =>
       updateNodePosition({
         variables: {
@@ -173,7 +173,7 @@ export const handleConnectionCreate = (
   createConnection: MutationFn<any, any>,
   workspaceId: string
 ) => (from: SocketInstance, to: SocketInstance) =>
-  tryOperation({
+  tryMutation({
     op: () =>
       createConnection({
         variables: {
@@ -230,7 +230,7 @@ export const handleConnectionDelete = (
   deleteConnection: MutationFn<any, any>,
   workspaceId: string
 ) => (connId: string) =>
-  tryOperation({
+  tryMutation({
     op: () =>
       deleteConnection({
         variables: { id: connId },
@@ -284,7 +284,7 @@ export const handleAddOrUpdateFormValue = (
   addOrUpdateFormValue: MutationFn<any, any>,
   workspaceId: string
 ) => (nodeId: string, name: string, value: string) =>
-  tryOperation({
+  tryMutation({
     op: () =>
       addOrUpdateFormValue({
         variables: {

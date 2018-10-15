@@ -28,7 +28,41 @@ export const SchemaDefinition = `
   }
 `;
 
-const resolvers: any = {
+const ObjectDef = `
+  scalar Object
+`;
+
+const parseValue = (value: string) => {
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value);
+    } catch (err) {
+      return value;
+    }
+  }
+
+  return value;
+};
+
+const ObjectScalarType = new GraphQLScalarType({
+  name: 'Object',
+  description: 'Arbitrary object',
+  parseValue,
+  serialize: parseValue,
+  parseLiteral: ast => {
+    switch (ast.kind) {
+      case Kind.STRING:
+        return JSON.parse(ast.value);
+      case Kind.OBJECT:
+        throw new Error(`Not sure what to do with OBJECT for ObjectScalarType`);
+      default:
+        return null;
+    }
+  }
+});
+
+export const resolvers: any = {
+  Object: ObjectScalarType,
   Query,
   Entry,
   Dataset,
@@ -68,11 +102,12 @@ const resolvers: any = {
 
       return res;
     },
-    parseLiteral: ast => ({})
+    parseLiteral: () => ({})
   })
 };
 
-const typeDefs = [
+export const typeDefs = [
+  ObjectDef,
   SchemaDefinition,
   QueryDef,
   MutationDef,

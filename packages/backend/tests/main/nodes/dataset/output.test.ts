@@ -3,37 +3,13 @@ import { Dataset, DatasetOutputNodeDef, DataType } from '@masterthesis/shared';
 import { DatasetOutputNode } from '../../../../src/main/nodes/dataset/output';
 import { createDataset } from '../../../../src/main/workspace/dataset';
 import { createManyEntries } from '../../../../src/main/workspace/entry';
-import { getTestMongoDb, NODE, VALID_OBJECT_ID } from '../../../test-utils';
-
-let conn;
-let db;
-let server;
+import { NODE, VALID_OBJECT_ID } from '../../../test-utils';
 
 jest.mock('../../../../src/main/workspace/dataset');
 jest.mock('../../../../src/main/workspace/entry');
 jest.mock('../../../../src/main/workspace/entry');
 
 describe('DatasetOutputNode', () => {
-  beforeAll(async () => {
-    const { connection, database, mongodbServer } = await getTestMongoDb();
-    conn = connection;
-    db = database;
-    server = mongodbServer;
-  });
-
-  afterAll(async () => {
-    await conn.close();
-    await server.stop();
-    db = undefined;
-    conn = undefined;
-    server = undefined;
-  });
-
-  beforeEach(async () => {
-    await db.dropDatabase();
-    jest.resetAllMocks();
-  });
-
   test('should have correct properties', () => {
     expect(DatasetOutputNode.type).toBe(DatasetOutputNodeDef.type);
     expect(DatasetOutputNode.isInputValid).toBeUndefined();
@@ -70,7 +46,7 @@ describe('DatasetOutputNode', () => {
         }
       },
       {
-        reqContext: { db, userId: '' },
+        reqContext: { db: null, userId: '' },
         node: NODE
       }
     );
@@ -105,7 +81,7 @@ describe('DatasetOutputNode', () => {
         }
       },
       {
-        db,
+        db: null,
         userId: ''
       }
     );

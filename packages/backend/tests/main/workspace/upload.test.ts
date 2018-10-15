@@ -9,14 +9,10 @@ import {
   uploadEntriesCsv
 } from '../../../src/main/workspace/upload';
 import {
-  getTestMongoDb,
+  doTestWithDb,
   NeverGoHereError,
   VALID_OBJECT_ID
 } from '../../test-utils';
-
-let conn;
-let db;
-let server;
 
 jest.mock('../../../src/main/workspace/dataset');
 jest.mock('../../../src/main/workspace/entry');
@@ -39,150 +35,134 @@ class Counter extends Readable {
 }
 
 describe('Upload', () => {
-  beforeAll(async () => {
-    const { connection, database, mongodbServer } = await getTestMongoDb();
-    conn = connection;
-    db = database;
-    server = mongodbServer;
-  });
+  test('should get all uploads', () =>
+    doTestWithDb(async db => {
+      const res = await getAllUploads(VALID_OBJECT_ID, { db, userId: '' });
+      expect(res).toEqual([]);
+    }));
 
-  afterAll(async () => {
-    await conn.close();
-    await server.stop();
-    db = undefined;
-    conn = undefined;
-    server = undefined;
-  });
+  test('should get no upload', () =>
+    doTestWithDb(async db => {
+      let res = await getUpload(VALID_OBJECT_ID, { db, userId: '' });
+      expect(res).toBe(null);
 
-  beforeEach(async () => {
-    await db.dropDatabase();
-    jest.resetAllMocks();
-  });
+      res = await getUpload('test', { db, userId: '' });
+      expect(res).toBe(null);
+    }));
 
-  test('should get all uploads', async () => {
-    const res = await getAllUploads(VALID_OBJECT_ID, { db, userId: '' });
-    expect(res).toEqual([]);
-  });
+  test('should do upload with valid and invalid entries', () =>
+    doTestWithDb(async db => {
+      (tryGetDataset as jest.Mock).mockImplementation(() => {
+        throw new Error('Unknown DS');
+      });
 
-  test('should get no upload', async () => {
-    let res = await getUpload(VALID_OBJECT_ID, { db, userId: '' });
-    expect(res).toBe(null);
+      try {
+        await uploadEntriesCsv(
+          [{ filename: 'test.csv', stream: new Counter() }],
+          VALID_OBJECT_ID,
+          {
+            db,
+            userId: ''
+          }
+        );
+        throw NeverGoHereError;
+      } catch (err) {
+        expect(err.message).toBe('Upload failed');
+      }
+    }));
 
-    res = await getUpload('test', { db, userId: '' });
-    expect(res).toBe(null);
-  });
+  test('should do upload with valid and invalid entries', () =>
+    doTestWithDb(async db => {
+      const ds: Dataset = {
+        id: VALID_OBJECT_ID,
+        userId: '',
+        name: 'DS',
+        created: '',
+        description: '',
+        valueschemas: [
+          {
+            name: 'value',
+            fallback: '0',
+            required: true,
+            type: DataType.NUMBER,
+            unique: false
+          },
+          {
+            name: 'otherValue',
+            fallback: '0',
+            required: true,
+            type: DataType.BOOLEAN,
+            unique: false
+          }
+        ],
+        workspaceId: ''
+      };
+      (tryGetDataset as jest.Mock).mockResolvedValue(ds);
 
-  test('should do upload with valid and invalid entries', async () => {
-    (tryGetDataset as jest.Mock).mockImplementation(() => {
-      throw new Error('Unknown DS');
-    });
-
-    try {
-      await uploadEntriesCsv(
-        [{ filename: 'test.csv', stream: new Counter() }],
+      const stream = new Counter();
+      const res = await uploadEntriesCsv(
+        [{ filename: 'test.csv', stream }],
         VALID_OBJECT_ID,
         {
           db,
           userId: ''
         }
       );
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Upload failed');
-    }
-  });
 
-  test('should do upload with valid and invalid entries', async () => {
-    const ds: Dataset = {
-      id: VALID_OBJECT_ID,
-      userId: '',
-      name: 'DS',
-      created: '',
-      description: '',
-      valueschemas: [
-        {
-          name: 'value',
-          fallback: '0',
-          required: true,
-          type: DataType.NUMBER,
-          unique: false
-        },
-        {
-          name: 'otherValue',
-          fallback: '0',
-          required: true,
-          type: DataType.BOOLEAN,
-          unique: false
-        }
-      ],
-      workspaceId: ''
-    };
-    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
-
-    const stream = new Counter();
-    const res = await uploadEntriesCsv(
-      [{ filename: 'test.csv', stream }],
-      VALID_OBJECT_ID,
-      {
-        db,
-        userId: ''
-      }
-    );
-
-    const { id, start, ...rest } = res;
-    expect(rest).toEqual({
-      addedEntries: 0,
-      datasetId: VALID_OBJECT_ID,
-      errors: [],
-      failedEntries: 0,
-      fileNames: [],
-      invalidEntries: 0,
-      finish: null,
-      state: ProcessState.STARTED
-    });
-
-    await new Promise((resolve, reject) =>
-      setTimeout(async () => {
-        const tmp = await getUpload(id, { db, userId: '' });
-        if (!tmp) {
-          reject('Upload failed');
-        }
-
-        const { state } = tmp;
-        if (state === ProcessState.SUCCESSFUL) {
-          resolve();
-        }
-
-        reject();
-      }, 1000)
-    );
-
-    const upload = await getUpload(id, { db, userId: '' });
-
-    expect(stream.read()).toBe(null);
-    expect(upload.addedEntries).toBe(75);
-    expect(upload.failedEntries).toBe(0);
-    expect(upload.invalidEntries).toBe(75);
-    expect(upload.errors).toEqual([]);
-
-    const uploads = await getAllUploads(VALID_OBJECT_ID, { db, userId: '' });
-    expect(
-      uploads.map(n => ({ ...n, finish: new Date(0), start: new Date(0) }))
-    ).toEqual([
-      {
-        addedEntries: 75,
+      const { id, start, ...rest } = res;
+      expect(rest).toEqual({
+        addedEntries: 0,
         datasetId: VALID_OBJECT_ID,
         errors: [],
         failedEntries: 0,
-        fileNames: ['test.csv'],
-        finish: new Date(0),
-        id: upload.id,
-        invalidEntries: 75,
-        start: new Date(0),
-        state: ProcessState.SUCCESSFUL
-      }
-    ]);
+        fileNames: [],
+        invalidEntries: 0,
+        finish: null,
+        state: ProcessState.STARTED
+      });
 
-    expect(createEntry).toHaveBeenCalledTimes(75);
-  });
+      await new Promise((resolve, reject) =>
+        setTimeout(async () => {
+          const tmp = await getUpload(id, { db, userId: '' });
+          if (!tmp) {
+            reject('Upload failed');
+          }
+
+          const { state } = tmp;
+          if (state === ProcessState.SUCCESSFUL) {
+            resolve();
+          }
+
+          reject();
+        }, 1000)
+      );
+
+      const upload = await getUpload(id, { db, userId: '' });
+
+      expect(stream.read()).toBe(null);
+      expect(upload.addedEntries).toBe(75);
+      expect(upload.failedEntries).toBe(0);
+      expect(upload.invalidEntries).toBe(75);
+      expect(upload.errors).toEqual([]);
+
+      const uploads = await getAllUploads(VALID_OBJECT_ID, { db, userId: '' });
+      expect(
+        uploads.map(n => ({ ...n, finish: new Date(0), start: new Date(0) }))
+      ).toEqual([
+        {
+          addedEntries: 75,
+          datasetId: VALID_OBJECT_ID,
+          errors: [],
+          failedEntries: 0,
+          fileNames: ['test.csv'],
+          finish: new Date(0),
+          id: upload.id,
+          invalidEntries: 75,
+          start: new Date(0),
+          state: ProcessState.SUCCESSFUL
+        }
+      ]);
+
+      expect(createEntry).toHaveBeenCalledTimes(75);
+    }));
 });

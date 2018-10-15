@@ -54,6 +54,10 @@ export interface GQLWorkspace extends Workspace {
   state: NodeState;
 }
 
+export interface GQLPublicResults extends Workspace {
+  results: Array<GQLOutputResult>;
+}
+
 export enum ProcessState {
   STARTED = 'STARTED',
   PROCESSING = 'PROCESSING',

@@ -4,6 +4,7 @@ import {
   FilterEntriesNodeDef,
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
+  NodeOutputResult,
   ServerNodeDefWithContextFn,
   SocketState,
   Values
@@ -18,7 +19,7 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs,
   {},
-  {},
+  NodeOutputResult,
   { keepEntry: boolean }
 > = {
   type: FilterEntriesNodeDef.type,

@@ -6,11 +6,7 @@ import {
 } from '@masterthesis/shared';
 
 import { JoinDatasetsNode } from '../../../../src/main/nodes/dataset/join-datasets';
-import { getTestMongoDb, NeverGoHereError, NODE } from '../../../test-utils';
-
-let conn;
-let db;
-let server;
+import { NeverGoHereError, NODE } from '../../../test-utils';
 
 jest.mock('@masterthesis/shared');
 jest.mock('../../../../src/main/nodes/entries/utils');
@@ -19,26 +15,6 @@ jest.mock('../../../../src/main/workspace/entry');
 jest.mock('../../../../src/main/calculation/utils');
 
 describe('JoinDatasetsNode', () => {
-  beforeAll(async () => {
-    const { connection, database, mongodbServer } = await getTestMongoDb();
-    conn = connection;
-    db = database;
-    server = mongodbServer;
-  });
-
-  afterAll(async () => {
-    await conn.close();
-    await server.stop();
-    db = undefined;
-    conn = undefined;
-    server = undefined;
-  });
-
-  beforeEach(async () => {
-    await db.dropDatabase();
-    jest.resetAllMocks();
-  });
-
   test('should have correct properties', () => {
     expect(JoinDatasetsNode.type).toBe(JoinDatasetsNodeDef.type);
     expect(JoinDatasetsNode.isFormValid).toBeDefined();
@@ -92,7 +68,7 @@ describe('JoinDatasetsNode', () => {
           }
         },
         {
-          reqContext: { db, userId: '' },
+          reqContext: { db: null, userId: '' },
           node: NODE
         }
       );
@@ -133,7 +109,7 @@ describe('JoinDatasetsNode', () => {
           }
         },
         {
-          reqContext: { db, userId: '' },
+          reqContext: { db: null, userId: '' },
           node: NODE
         }
       );
@@ -193,7 +169,7 @@ describe('JoinDatasetsNode', () => {
         }
       },
       {
-        reqContext: { db, userId: '' },
+        reqContext: { db: null, userId: '' },
         node: NODE
       }
     );
@@ -287,7 +263,7 @@ describe('JoinDatasetsNode', () => {
         }
       },
       {
-        reqContext: { db, userId: '' },
+        reqContext: { db: null, userId: '' },
         node: NODE
       }
     );
@@ -339,7 +315,7 @@ describe('JoinDatasetsNode', () => {
         datasetA: { content: { schema: [] }, isPresent: true },
         datasetB: { content: { schema: [] }, isPresent: true }
       },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toEqual({
       joined: { isPresent: false, content: { schema: [] } }
@@ -351,7 +327,7 @@ describe('JoinDatasetsNode', () => {
         datasetA: { content: { schema: [] }, isPresent: true },
         datasetB: { content: { schema: [] }, isPresent: true }
       },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toEqual({
       joined: { isPresent: false, content: { schema: [] } }
@@ -363,7 +339,7 @@ describe('JoinDatasetsNode', () => {
         datasetA: { content: { schema: [] }, isPresent: true },
         datasetB: { content: { schema: [] }, isPresent: true }
       },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toEqual({
       joined: { isPresent: false, content: { schema: [] } }
@@ -375,7 +351,7 @@ describe('JoinDatasetsNode', () => {
         datasetA: { content: { schema: [] }, isPresent: false },
         datasetB: { content: { schema: [] }, isPresent: true }
       },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toEqual({
       joined: { isPresent: false, content: { schema: [] } }
@@ -387,7 +363,7 @@ describe('JoinDatasetsNode', () => {
         datasetA: { content: { schema: [] }, isPresent: true },
         datasetB: { content: { schema: [] }, isPresent: false }
       },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toEqual({
       joined: { isPresent: false, content: { schema: [] } }
@@ -436,7 +412,7 @@ describe('JoinDatasetsNode', () => {
           isPresent: true
         }
       },
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toEqual({
       joined: {

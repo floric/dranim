@@ -2,7 +2,7 @@ import {
   ApolloContext,
   CalculationProcess,
   NodeInstance,
-  OutputResult,
+  NodeOutputResult,
   ProcessState
 } from '@masterthesis/shared';
 import { Db, ObjectID } from 'mongodb';
@@ -13,8 +13,11 @@ import { Omit } from '../../main';
 import { executeNode } from '../calculation/execution';
 import { addOrUpdateResult } from '../dashboards/results';
 import { getNodeType, hasNodeType } from '../nodes/all-nodes';
+import { checkLoggedInUser } from '../users/management';
+import { getSafeObjectID } from '../utils';
 import { clearGeneratedDatasets } from '../workspace/dataset';
-import { getAllNodes, resetProgress } from '../workspace/nodes';
+import { getAllNodes } from '../workspace/nodes';
+import { resetProgress } from '../workspace/nodes-detail';
 import { InMemoryCache } from './inmemory-cache';
 
 export const CANCEL_CHECKS_MS = 5000;
@@ -28,11 +31,13 @@ export const startProcess = async (
   reqContext: ApolloContext,
   options?: StartCalculationOptions
 ): Promise<CalculationProcess> => {
+  checkLoggedInUser(reqContext);
+
   const coll = getCalculationsCollection<
     Omit<CalculationProcess, 'id' | 'start'> & { start: Date }
   >(reqContext.db);
   const newProcess = await coll.insertOne({
-    userId: reqContext.userId,
+    userId: reqContext.userId!,
     start: new Date(),
     finish: null,
     workspaceId,
@@ -74,7 +79,7 @@ const doCalculation = async (
     await Promise.all([
       resetProgress(workspaceId, reqContext),
       processCollection.updateOne(
-        { _id: new ObjectID(processId) },
+        { _id: getSafeObjectID(processId) },
         {
           $set: {
             state: ProcessState.PROCESSING
@@ -100,7 +105,7 @@ const doCalculation = async (
 
     const durationMs = new Date().getTime() - start;
 
-    await saveResults(results, reqContext);
+    await saveResults(results, workspaceId, reqContext);
     await updateFinishedProcess(
       processId,
       workspaceId,
@@ -151,20 +156,21 @@ const checkForCanceledProcess = (
   });
 
 const saveResults = async (
-  results: Array<OutputResult | null>,
+  results: Array<NodeOutputResult | null>,
+  workspaceId: string,
   reqContext: ApolloContext
 ) =>
   Promise.all(
     results
       .filter(r => r != null && Object.keys(r).length > 0)
-      .map(r => addOrUpdateResult(r!, reqContext))
+      .map(r => addOrUpdateResult(r!, workspaceId, reqContext))
   );
 
 const executeOutputNode = async (
   o: NodeInstance,
   processId: string,
   reqContext: ApolloContext
-): Promise<OutputResult<any> | null> => {
+): Promise<NodeOutputResult<any> | null> => {
   const cache = new InMemoryCache();
   const res = await executeNode(o, processId, reqContext, {}, cache);
   return res.results || null;
@@ -179,7 +185,7 @@ const updateFinishedProcess = async (
 ) => {
   const processCollection = getCalculationsCollection(reqContext.db);
   await processCollection.updateOne(
-    { _id: new ObjectID(processId) },
+    { _id: getSafeObjectID(processId) },
     {
       $set: {
         finish: new Date(),
@@ -206,7 +212,7 @@ export const stopCalculation = async (
 ): Promise<boolean> => {
   const coll = getCalculationsCollection(reqContext.db);
   const res = await coll.updateOne(
-    { _id: new ObjectID(id) },
+    { _id: getSafeObjectID(id) },
     {
       $set: {
         state: ProcessState.CANCELED
@@ -227,12 +233,8 @@ const getCalculation = async (
   id: string,
   reqContext: ApolloContext
 ): Promise<CalculationProcess | null> => {
-  if (!ObjectID.isValid(id)) {
-    return null;
-  }
-
   const coll = getCalculationsCollection(reqContext.db);
-  const res = await coll.findOne({ _id: new ObjectID(id) });
+  const res = await coll.findOne({ _id: getSafeObjectID(id) });
   if (!res) {
     return null;
   }

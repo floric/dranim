@@ -9,7 +9,7 @@
     "clean": "rm -rf dist node_modules",
     "lint": "tslint -p . --fix",
     "start": "concurrently \"tsc -w\" \"cross-env SESSION_SECRET=secret PORT=3000 NODE_ENV=development nodemon dist/main.js\"",
-    "test": "jest --logHeapUsage --coverage --maxWorkers 4 --silent",
+    "test": "jest --logHeapUsage --coverage --maxWorkers=4 --detectOpenHandles",
     "test:watch": "jest --watch --maxWorkers=3"
   },
   "dependencies": {
@@ -82,7 +82,12 @@
       "NODE_ENV": "test",
       "ts-jest": {
         "diagnostics": {
-          "warnOnly": true
+          "warnOnly": true,
+          "pathRegex": "\\.(spec|test)\\.ts$",
+          "ignoreCodes": [
+            "TS2531",
+            "TS2532"
+          ]
         }
       }
     },

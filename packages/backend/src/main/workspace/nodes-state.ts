@@ -5,12 +5,12 @@ import {
   NodeInstance,
   NodeState
 } from '@masterthesis/shared';
-import { ObjectID } from 'mongodb';
 
 import { Log } from '../../logging';
 import { InMemoryCache } from '../calculation/inmemory-cache';
 import { isNodeInMetaValid } from '../calculation/validation';
 import { getNodeType } from '../nodes/all-nodes';
+import { getSafeObjectID } from '../utils';
 import { deleteConnection, getAllConnections } from './connections';
 import {
   getAllNodes,
@@ -73,7 +73,7 @@ export const updateState = async (
   const state = await calculateState(node, reqContext);
   const nodesCollection = getNodesCollection(reqContext.db);
   await nodesCollection.updateOne(
-    { _id: new ObjectID(node.id) },
+    { _id: getSafeObjectID(node.id) },
     {
       $set: { state }
     }
