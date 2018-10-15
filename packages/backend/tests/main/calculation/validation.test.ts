@@ -277,7 +277,7 @@ describe('Validation', () => {
     (getInputDefs as jest.Mock).mockResolvedValue({
       dataset: {
         dataType: DataType.DATASET,
-        displayName: 'dataset'
+        displayName: 'Table'
       }
     });
 
@@ -306,7 +306,7 @@ describe('Validation', () => {
     (getInputDefs as jest.Mock).mockResolvedValue({
       dataset: {
         dataType: DataType.DATASET,
-        displayName: 'dataset'
+        displayName: 'Table'
       }
     });
 
@@ -344,7 +344,7 @@ describe('Validation', () => {
     (getInputDefs as jest.Mock).mockResolvedValue({
       dataset: {
         dataType: DataType.DATASET,
-        displayName: 'dataset'
+        displayName: 'Table'
       }
     });
     (getDataset as jest.Mock).mockResolvedValue(ds);

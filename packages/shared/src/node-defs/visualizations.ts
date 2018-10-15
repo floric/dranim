@@ -20,7 +20,7 @@ export const LinearChartDef: NodeDef<VisInputs, {}> = {
   name: 'Linear Charts',
   type: 'LinearChart',
   inputs: {
-    dataset: DatasetSocket('Dataset')
+    dataset: DatasetSocket('Table')
   },
   outputs: {},
   isOutputNode: true,
@@ -32,7 +32,7 @@ export const SoundChartDef: NodeDef<VisInputs, {}> = {
   name: 'Sound Chart',
   type: 'SoundChart',
   inputs: {
-    dataset: DatasetSocket('Dataset')
+    dataset: DatasetSocket('Table')
   },
   outputs: {},
   isOutputNode: true,

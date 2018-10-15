@@ -32,7 +32,6 @@ const tryConnectToDb = async () => {
       reconnectInterval: 5000
     }
   );
-  console.log(client);
   Log.info('Connected to MongoDB');
   return client;
 };

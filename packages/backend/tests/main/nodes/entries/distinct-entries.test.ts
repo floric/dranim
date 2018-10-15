@@ -199,8 +199,8 @@ describe('DistinctEntriesNode', () => {
     );
     expect(res).toEqual({
       filteredDataset: {
-        dataType: 'Dataset',
-        displayName: 'Filtered Dataset',
+        dataType: DataType.DATASET,
+        displayName: 'Filtered Table',
         state: 'Dynamic'
       },
       'test-distinct': {

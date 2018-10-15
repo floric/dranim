@@ -54,7 +54,7 @@ const errorLink = onError(err => {
   }
 });
 const uploadLink = createUploadLink(linkOptions);
-const batchLink = new BatchHttpLink({ batchInterval: 30, ...linkOptions });
+const batchLink = new BatchHttpLink({ batchInterval: 20, ...linkOptions });
 
 export const client = new ApolloClient({
   link: authLink.concat(

@@ -50,13 +50,13 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
 
     res.filteredDataset = {
       dataType: DataType.DATASET,
-      displayName: 'Filtered Dataset',
+      displayName: 'Filtered Table',
       state: SocketState.DYNAMIC
     };
 
     return res;
   },
-  transformContextInputDefsToContextOutputDefs: async (
+  transformContextInputDefsToContextOutputDefs: async (                                                                                                                                                                                                                                                                                                                                       
     inputDefs,
     inputs,
     contextInputDefs,

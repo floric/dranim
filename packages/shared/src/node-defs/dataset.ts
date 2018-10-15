@@ -16,11 +16,11 @@ export interface DatasetInputNodeForm {
 }
 
 export const DatasetInputNodeDef: NodeDef<{}, DatasetInputNodeOutputs> = {
-  name: 'Input Dataset',
+  name: 'Input Table',
   type: 'DatasetInput',
   inputs: {},
-  outputs: { dataset: DatasetSocket('Dataset') },
-  path: ['Dataset'],
+  outputs: { dataset: DatasetSocket('Table') },
+  path: ['Table'],
   keywords: []
 };
 
@@ -42,16 +42,16 @@ export const JoinDatasetsNodeDef: NodeDef<
   JoinDatasetsNodeInputs,
   JoinDatasetsNodeOutputs
 > = {
-  name: 'Join Datasets',
+  name: 'Join Tables',
   type: 'JoinDatasets',
   inputs: {
-    datasetA: DatasetSocket('Dataset A'),
-    datasetB: DatasetSocket('Dataset B')
+    datasetA: DatasetSocket('Table A'),
+    datasetB: DatasetSocket('Table B')
   },
   outputs: {
     joined: DatasetSocket('Joined')
   },
-  path: ['Dataset', 'Aggregation'],
+  path: ['Table', 'Aggregation'],
   keywords: []
 };
 
@@ -60,13 +60,13 @@ export interface DatasetOutputNodeInputs {
 }
 
 export const DatasetOutputNodeDef: NodeDef<DatasetOutputNodeInputs> = {
-  name: 'Output Dataset',
+  name: 'Output Table',
   type: 'DatasetOutput',
   inputs: {
-    dataset: DatasetSocket('Dataset')
+    dataset: DatasetSocket('Table')
   },
   isOutputNode: true,
   outputs: {},
-  path: ['Dataset'],
+  path: ['Table'],
   keywords: []
 };

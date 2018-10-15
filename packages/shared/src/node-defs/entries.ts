@@ -19,15 +19,15 @@ export const FilterEntriesNodeDef: NodeDef<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs
 > = {
-  name: 'Filter Dataset',
+  name: 'Filter Table',
   type: 'FilterEntries',
   inputs: {
-    dataset: DatasetSocket('Dataset')
+    dataset: DatasetSocket('Table')
   },
   outputs: {
-    dataset: DatasetSocket('Dataset')
+    dataset: DatasetSocket('Table')
   },
-  path: ['Dataset'],
+  path: ['Table'],
   keywords: []
 };
 
@@ -43,12 +43,12 @@ export const DistinctEntriesNodeDef: NodeDef<
   name: 'Distinct Entries',
   type: 'DistinctEntries',
   inputs: {
-    dataset: DatasetSocket('Dataset')
+    dataset: DatasetSocket('Table')
   },
   outputs: {
-    dataset: DatasetSocket('Dataset')
+    dataset: DatasetSocket('Table')
   },
-  path: ['Dataset', 'Aggregation'],
+  path: ['Table', 'Aggregation'],
   keywords: []
 };
 
@@ -60,15 +60,15 @@ export const EditEntriesNodeDef: NodeDef<
   ForEachEntryNodeInputs,
   ForEachEntryNodeOutputs
 > = {
-  name: 'Edit Entries',
+  name: 'Edit Table',
   type: 'EditEntries',
   inputs: {
-    dataset: DatasetSocket('Dataset')
+    dataset: DatasetSocket('Table')
   },
   outputs: {
-    dataset: DatasetSocket('Dataset')
+    dataset: DatasetSocket('Table')
   },
-  path: ['Dataset', 'Modification'],
+  path: ['Table', 'Modification'],
   keywords: []
 };
 
@@ -87,12 +87,12 @@ export const CountEntriesNodeDef: NodeDef<
   name: 'Count Entries',
   type: 'CountEntries',
   inputs: {
-    dataset: DatasetSocket('Dataset')
+    dataset: DatasetSocket('Table')
   },
   outputs: {
     count: NumberSocket('Count')
   },
-  path: ['Dataset', 'Aggregation'],
+  path: ['Table', 'Aggregation'],
   keywords: []
 };
 
@@ -123,11 +123,11 @@ export const AggregateEntriesNodeDef: NodeDef<
   name: 'Aggregate Entries',
   type: 'AggregateEntries',
   inputs: {
-    dataset: DatasetSocket('Dataset')
+    dataset: DatasetSocket('Table')
   },
   outputs: {
     value: NumberSocket('Aggregated value')
   },
-  path: ['Dataset', 'Aggregation'],
+  path: ['Table', 'Aggregation'],
   keywords: []
 };

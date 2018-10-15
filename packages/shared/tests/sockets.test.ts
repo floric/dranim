@@ -5,7 +5,7 @@ describe('Sockets', () => {
     expect(SocketType.INPUT).toBe('INPUT');
     expect(SocketType.OUTPUT).toBe('OUTPUT');
 
-    expect(DataType.DATASET).toBe('Dataset');
+    expect(DataType.DATASET).toBe('Table');
     expect(DataType.NUMBER).toBe('Number');
     expect(DataType.BOOLEAN).toBe('Boolean');
     expect(DataType.DATETIME).toBe('Datetime');

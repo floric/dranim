@@ -8,7 +8,7 @@ export enum SocketType {
 }
 
 export enum DataType {
-  DATASET = 'Dataset',
+  DATASET = 'Table',
   NUMBER = 'Number',
   BOOLEAN = 'Boolean',
   DATETIME = 'Datetime',

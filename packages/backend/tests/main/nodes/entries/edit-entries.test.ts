@@ -129,7 +129,7 @@ describe('EditEntriesNode', () => {
         dataset: {
           dataType: DataType.DATASET,
           state: SocketState.STATIC,
-          displayName: 'Dataset'
+          displayName: 'Table'
         }
       },
       { dataset: { isPresent: true, content: { schema: [] } } },
@@ -162,7 +162,7 @@ describe('EditEntriesNode', () => {
         dataset: {
           dataType: DataType.DATASET,
           state: SocketState.STATIC,
-          displayName: 'Dataset'
+          displayName: 'Table'
         }
       },
       { dataset: { isPresent: true, content: { schema: [] } } },
@@ -202,7 +202,7 @@ describe('EditEntriesNode', () => {
         dataset: {
           dataType: DataType.DATASET,
           state: SocketState.STATIC,
-          displayName: 'Dataset'
+          displayName: 'Table'
         }
       },
       { dataset: { isPresent: false, content: { schema: [] } } },
@@ -269,6 +269,7 @@ describe('EditEntriesNode', () => {
           form: {},
           x: 0,
           y: 0,
+          progress: null,
           state: NodeState.VALID,
           variables: {}
         },
@@ -324,6 +325,7 @@ describe('EditEntriesNode', () => {
           x: 0,
           y: 0,
           state: NodeState.VALID,
+          progress: null,
           variables: {}
         },
         contextFnExecution: async inputs => ({
@@ -376,6 +378,7 @@ describe('EditEntriesNode', () => {
           form: {},
           x: 0,
           y: 0,
+          progress: null,
           state: NodeState.VALID,
           variables: {}
         },
