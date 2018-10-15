@@ -5,7 +5,7 @@ const promiseRetry = require('promise-retry');
 const config = {
   db:
     process.env.NODE_ENV === 'production'
-      ? `mongodb://${process.env.DB_USER}:${process.env.DB_PW}@${
+      ? `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PW}@${
           process.env.DB_MLAB_URL
         }`
       : 'mongodb://127.0.0.1:27017'
