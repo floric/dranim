@@ -5,13 +5,20 @@ import { addMockFunctionsToSchema } from 'graphql-tools';
 import schema, { resolvers } from '../../../src/graphql/schema';
 import { doTestWithDb, MutationTestCase } from '../../test-utils';
 import { addEntryTest } from './add-entry';
+import { addOrUpdateFormTest } from './add-or-update-form-value';
 import { addValueSchemaTest } from './add-vs';
+import { createConnTest } from './create-conn';
 import { createDsTest } from './create-ds';
 import { createNodeTest } from './create-node';
+import { createWsTest } from './create-ws';
+import { deleteConnTest } from './delete-conn';
 import { deleteDsTest } from './delete-ds';
 import { deleteEntryTest } from './delete-entry';
 import { deleteNodeTest } from './delete-node';
+import { deleteWsTest } from './delete-ws';
 import { renameDsTest } from './rename-ds';
+import { renameWsTest } from './rename-ws';
+import { updateNodePosTest } from './update-node-pos';
 
 const cases: Array<MutationTestCase> = [
   createNodeTest,
@@ -21,7 +28,14 @@ const cases: Array<MutationTestCase> = [
   addEntryTest,
   renameDsTest,
   deleteDsTest,
-  createDsTest
+  createDsTest,
+  updateNodePosTest,
+  createWsTest,
+  renameWsTest,
+  deleteWsTest,
+  addOrUpdateFormTest,
+  createConnTest,
+  deleteConnTest
 ];
 
 describe('Mutation Tests', () => {

@@ -121,7 +121,7 @@ const checkValidContextNode = async (
       reqContext
     );
     if (!contextNode) {
-      throw new Error('Unknown context node');
+      throw new Error('Context node missing');
     }
   }
 };

@@ -211,7 +211,7 @@ describe('Nodes', () => {
         );
         throw NeverGoHereError;
       } catch (err) {
-        expect(err.message).toBe('Unknown context node');
+        expect(err.message).toBe('Context node missing');
       }
     }));
 

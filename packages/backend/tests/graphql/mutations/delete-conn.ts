@@ -2,40 +2,21 @@ import {
   NumberInputNode,
   NumberOutputNode
 } from '../../../src/main/nodes/number';
+import { createConnection } from '../../../src/main/workspace/connections';
 import { createNode } from '../../../src/main/workspace/nodes';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
 import { MutationTestCase } from '../../test-utils';
 
-export const createConnTest: MutationTestCase = {
-  id: 'Create Connection',
+export const deleteConnTest: MutationTestCase = {
+  id: 'Delete Connection',
   mutation: {
     query: `
-      mutation createConnection($input: ConnectionInput!) {
-        createConnection(input: $input) {
-          id
-          from {
-            nodeId
-            name
-          }
-          to {
-            nodeId
-            name
-          }
-        }
+      mutation deleteConnection($id: ID!) {
+        deleteConnection(id: $id)
       }
     `,
     expected: {
-      createConnection: {
-        id: expect.any(String),
-        from: {
-          nodeId: expect.any(String),
-          name: 'value'
-        },
-        to: {
-          nodeId: expect.any(String),
-          name: 'value'
-        }
-      }
+      deleteConnection: true
     }
   },
   query: {
@@ -60,13 +41,7 @@ export const createConnTest: MutationTestCase = {
     expected: {
       workspaces: [
         {
-          connections: [
-            {
-              from: { name: 'value', nodeId: expect.any(String) },
-              id: expect.any(String),
-              to: { name: 'value', nodeId: expect.any(String) }
-            }
-          ],
+          connections: [],
           id: expect.any(String)
         }
       ]
@@ -90,13 +65,15 @@ export const createConnTest: MutationTestCase = {
       0,
       reqContext
     );
+    const { id } = await createConnection(
+      { nodeId: iNode.id, name: 'value' },
+      { nodeId: oNode.id, name: 'value' },
+      reqContext
+    );
 
     return {
       variables: {
-        input: {
-          from: { nodeId: iNode.id, name: 'value' },
-          to: { nodeId: oNode.id, name: 'value' }
-        }
+        id
       }
     };
   }

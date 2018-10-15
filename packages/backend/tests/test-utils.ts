@@ -9,6 +9,7 @@ export const NeverGoHereError = new Error('Should never reach this line!');
 
 export const doTestWithDb = async (op: (db: Db) => Promise<void>) => {
   jest.setTimeout(10000);
+  jest.resetAllMocks();
 
   const mongodbServer = new MongodbMemoryServer({
     instance: {
@@ -25,14 +26,22 @@ export const doTestWithDb = async (op: (db: Db) => Promise<void>) => {
   try {
     await op(database);
   } catch (err) {
-    //
+    await cleanDatabase(client, mongodbServer);
+    throw err;
   }
 
-  if (client.isConnected() && mongodbServer.isRunning) {
+  await cleanDatabase(client, mongodbServer);
+};
+
+const cleanDatabase = async (
+  client: MongoClient,
+  server: MongodbMemoryServer
+) => {
+  if (client.isConnected() && server.isRunning) {
     await client.close(true);
   }
-  if (mongodbServer.isRunning) {
-    await mongodbServer.stop();
+  if (server.isRunning) {
+    await server.stop();
   }
 };
 
