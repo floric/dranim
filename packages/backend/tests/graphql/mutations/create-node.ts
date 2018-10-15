@@ -1,6 +1,6 @@
+import { NumberInputNode } from '../../../src/main/nodes/number';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
 import { MutationTestCase } from '../../test-utils';
-import { NumberInputNode } from '../../../src/main/nodes/number';
 
 export const createNodeTest: MutationTestCase = {
   id: 'Create Node',

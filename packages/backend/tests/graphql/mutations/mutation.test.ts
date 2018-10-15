@@ -3,7 +3,7 @@ import { graphql } from 'graphql';
 import { addMockFunctionsToSchema } from 'graphql-tools';
 
 import schema, { resolvers } from '../../../src/graphql/schema';
-import { getTestMongoDb, MutationTestCase } from '../../test-utils';
+import { doTestWithDb, MutationTestCase } from '../../test-utils';
 import { addEntryTest } from './add-entry';
 import { addValueSchemaTest } from './add-vs';
 import { createDsTest } from './create-ds';
@@ -12,10 +12,6 @@ import { deleteDsTest } from './delete-ds';
 import { deleteEntryTest } from './delete-entry';
 import { deleteNodeTest } from './delete-node';
 import { renameDsTest } from './rename-ds';
-
-let conn;
-let db;
-let server;
 
 const cases: Array<MutationTestCase> = [
   createNodeTest,
@@ -29,26 +25,6 @@ const cases: Array<MutationTestCase> = [
 ];
 
 describe('Mutation Tests', () => {
-  beforeAll(async () => {
-    const { connection, database, mongodbServer } = await getTestMongoDb();
-    conn = connection;
-    db = database;
-    server = mongodbServer;
-  });
-
-  afterAll(async () => {
-    await conn.close();
-    await server.stop();
-    db = undefined;
-    conn = undefined;
-    server = undefined;
-  });
-
-  beforeEach(async () => {
-    await db.dropDatabase();
-    jest.resetAllMocks();
-  });
-
   addMockFunctionsToSchema({
     schema,
     preserveResolvers: true
@@ -57,37 +33,38 @@ describe('Mutation Tests', () => {
   cases.forEach(obj => {
     const { id, query, beforeTest, mutation } = obj;
 
-    test(`should pass test: ${id}`, async () => {
-      const reqContext: ApolloContext = { db, userId: '123' };
-      const { variables, reqContext: overwrittenContext } = await beforeTest(
-        reqContext
-      );
+    test(`should pass test: ${id}`, () =>
+      doTestWithDb(async db => {
+        const reqContext: ApolloContext = { db, userId: '123' };
+        const { variables, reqContext: overwrittenContext } = await beforeTest(
+          reqContext
+        );
 
-      const { data: mutationData, errors: mutationErrors } = await graphql(
-        schema,
-        mutation.query,
-        null,
-        { ...reqContext, ...overwrittenContext },
-        variables,
-        undefined,
-        resolvers
-      );
+        const { data: mutationData, errors: mutationErrors } = await graphql(
+          schema,
+          mutation.query,
+          null,
+          { ...reqContext, ...overwrittenContext },
+          variables,
+          undefined,
+          resolvers
+        );
 
-      expect(mutationErrors).toBeUndefined();
-      expect(mutationData).toMatchObject(mutation.expected);
+        expect(mutationErrors).toBeUndefined();
+        expect(mutationData).toMatchObject(mutation.expected);
 
-      const { data: queryData, errors: queryErrors } = await graphql(
-        schema,
-        query.query,
-        null,
-        { ...reqContext, ...overwrittenContext },
-        variables,
-        undefined,
-        resolvers
-      );
+        const { data: queryData, errors: queryErrors } = await graphql(
+          schema,
+          query.query,
+          null,
+          { ...reqContext, ...overwrittenContext },
+          variables,
+          undefined,
+          resolvers
+        );
 
-      expect(queryErrors).toBeUndefined();
-      expect(queryData).toMatchObject(query.expected);
-    });
+        expect(queryErrors).toBeUndefined();
+        expect(queryData).toMatchObject(query.expected);
+      }));
   });
 });

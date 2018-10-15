@@ -7,7 +7,7 @@ export const MONGO_DB_NAME = 'jest';
 
 export const NeverGoHereError = new Error('Should never reach this line!');
 
-export const getTestMongoDb = async () => {
+export const doTestWithDb = async (op: (db: Db) => Promise<void>) => {
   jest.setTimeout(10000);
 
   const mongodbServer = new MongodbMemoryServer({
@@ -15,20 +15,25 @@ export const getTestMongoDb = async () => {
       dbName: MONGO_DB_NAME
     }
   });
-
   const uri = await mongodbServer.getConnectionString();
-
-  const connection = await MongoClient.connect(
+  const client = await MongoClient.connect(
     uri,
     { useNewUrlParser: true }
   );
-  const database: Db = await connection.db(MONGO_DB_NAME);
+  const database = await client.db(MONGO_DB_NAME);
 
-  return {
-    connection,
-    database,
-    mongodbServer
-  };
+  try {
+    await op(database);
+  } catch (err) {
+    //
+  }
+
+  if (client.isConnected() && mongodbServer.isRunning) {
+    await client.close(true);
+  }
+  if (mongodbServer.isRunning) {
+    await mongodbServer.stop();
+  }
 };
 
 export const NODE: NodeInstance = {

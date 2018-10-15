@@ -6,11 +6,7 @@ import {
   getDataset,
   tryGetDataset
 } from '../../../../src/main/workspace/dataset';
-import { getTestMongoDb, NODE, VALID_OBJECT_ID } from '../../../test-utils';
-
-let conn;
-let db;
-let server;
+import { doTestWithDb, NODE, VALID_OBJECT_ID } from '../../../test-utils';
 
 jest.mock('../../../../src/main/workspace/dataset');
 jest.mock('../../../../src/main/nodes/entries/utils');
@@ -34,58 +30,39 @@ const ds: Dataset = {
 };
 
 describe('DatasetInputNode', () => {
-  beforeAll(async () => {
-    const { connection, database, mongodbServer } = await getTestMongoDb();
-    conn = connection;
-    db = database;
-    server = mongodbServer;
-  });
-
-  afterAll(async () => {
-    await conn.close();
-    await server.stop();
-    db = undefined;
-    conn = undefined;
-    server = undefined;
-  });
-
-  beforeEach(async () => {
-    await db.dropDatabase();
-    jest.resetAllMocks();
-  });
-
   test('should have correct properties', () => {
     expect(DatasetInputNode.type).toBe(DatasetInputNodeDef.type);
     expect(DatasetInputNode.isFormValid).toBeDefined();
     expect(DatasetInputNode.isInputValid).toBeUndefined();
   });
 
-  test('should get output value from form with valid dataset', async () => {
-    (tryGetDataset as jest.Mock).mockResolvedValue(ds);
-    (processEntries as jest.Mock).mockImplementation(async (a, processFn) =>
-      processFn({ values: { test: 'abc' }, id: 'test' })
-    );
-    const res = await DatasetInputNode.onNodeExecution(
-      { dataset: VALID_OBJECT_ID },
-      {},
-      {
-        reqContext: { db, userId: '' },
-        node: NODE
-      }
-    );
-    expect(res.outputs.dataset).toEqual({
-      entries: [{ test: 'abc' }],
-      schema: [
+  test('should get output value from form with valid dataset', () =>
+    doTestWithDb(async db => {
+      (tryGetDataset as jest.Mock).mockResolvedValue(ds);
+      (processEntries as jest.Mock).mockImplementation(async (a, processFn) =>
+        processFn({ values: { test: 'abc' }, id: 'test' })
+      );
+      const res = await DatasetInputNode.onNodeExecution(
+        { dataset: VALID_OBJECT_ID },
+        {},
         {
-          name: 'test',
-          type: DataType.STRING,
-          fallback: '',
-          required: true,
-          unique: false
+          reqContext: { db, userId: '' },
+          node: NODE
         }
-      ]
-    });
-  });
+      );
+      expect(res.outputs.dataset).toEqual({
+        entries: [{ test: 'abc' }],
+        schema: [
+          {
+            name: 'test',
+            type: DataType.STRING,
+            fallback: '',
+            required: true,
+            unique: false
+          }
+        ]
+      });
+    }));
 
   test('should accept form', async () => {
     const res = await DatasetInputNode.isFormValid({ dataset: 'test' });
@@ -103,7 +80,7 @@ describe('DatasetInputNode', () => {
     let res = await DatasetInputNode.onMetaExecution(
       { dataset: null },
       {},
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toEqual({
       dataset: { isPresent: false, content: { schema: [] } }
@@ -112,7 +89,7 @@ describe('DatasetInputNode', () => {
     res = await DatasetInputNode.onMetaExecution(
       { dataset: undefined },
       {},
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toEqual({
       dataset: { isPresent: false, content: { schema: [] } }
@@ -121,7 +98,7 @@ describe('DatasetInputNode', () => {
     res = await DatasetInputNode.onMetaExecution(
       { dataset: '' },
       {},
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toEqual({
       dataset: { isPresent: false, content: { schema: [] } }
@@ -130,7 +107,7 @@ describe('DatasetInputNode', () => {
     res = await DatasetInputNode.onMetaExecution(
       { dataset: VALID_OBJECT_ID },
       {},
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toEqual({
       dataset: { isPresent: false, content: { schema: [] } }
@@ -143,7 +120,7 @@ describe('DatasetInputNode', () => {
     const res = await DatasetInputNode.onMetaExecution(
       { dataset: VALID_OBJECT_ID },
       {},
-      { db, userId: '' }
+      { db: null, userId: '' }
     );
     expect(res).toEqual({
       dataset: {
