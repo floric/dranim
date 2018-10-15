@@ -33,66 +33,17 @@ interface TryArgs<T> {
   failedMessage?: string;
 }
 
-export interface TryOperationArgs<T> extends TryArgs<T> {
-  op: () => Promise<T>;
-}
-
 export interface TryMutationArgs<T, Fallback = null> extends TryArgs<T> {
   op: () => Promise<void | FetchResult<T>>;
   fallback?: Fallback;
 }
-
-export const tryOperation = async <T>(
-  args: TryOperationArgs<T>
-): Promise<T | null> => {
-  const {
-    op,
-    onFail,
-    successTitle = () => 'Operation successful',
-    successMessage = () => 'Operation done successfully.',
-    failedTitle = 'Operation failed',
-    failedMessage = 'Operation has failed.'
-  } = args;
-  try {
-    const res = await op();
-
-    if (successTitle !== null) {
-      showNotificationWithIcon({
-        icon: 'success',
-        content: successMessage(res),
-        title: successTitle(res)
-      });
-    }
-
-    return res;
-  } catch (err) {
-    console.error(err);
-    if (onFail) {
-      onFail();
-    }
-
-    if (failedTitle !== null) {
-      showNotificationWithIcon({
-        icon: 'error',
-        content: failedMessage,
-        title: failedTitle
-      });
-    }
-
-    return null;
-  }
-};
 
 export const tryMutation = async <Result, Fallback = null>(
   args: TryMutationArgs<Result, Fallback>
 ): Promise<Result | Fallback> => {
   const {
     op,
-    onFail,
-    successTitle = () => 'Operation successful',
-    successMessage = () => 'Operation done successfully.',
-    failedTitle = 'Operation failed',
-    failedMessage = 'Operation has failed.',
+
     fallback = null
   } = args;
   try {
@@ -102,36 +53,60 @@ export const tryMutation = async <Result, Fallback = null>(
     }
 
     const { data, errors } = res;
-    if (errors && errors.length > 0) {
-      throw new Error('Errors happened');
-    }
-
-    if (successTitle !== null) {
-      showNotificationWithIcon({
-        icon: 'success',
-        content: successMessage(data),
-        title: successTitle(data)
-      });
-    }
+    checkErrors(errors);
+    showSuccess(data, args);
 
     return data;
   } catch (err) {
-    console.error(err);
-    if (onFail) {
-      onFail();
-    }
-
-    if (failedTitle !== null) {
-      showNotificationWithIcon({
-        icon: 'error',
-        content:
-          isApolloError(err) && err.graphQLErrors.length > 0
-            ? `${failedMessage} ${err.graphQLErrors[0].message}`
-            : failedMessage,
-        title: failedTitle
-      });
-    }
-
+    processFailure(err, args);
     return null;
+  }
+};
+
+const checkErrors = (errors: Array<Error>) => {
+  if (errors && errors.length > 0) {
+    throw new Error('Errors happened');
+  }
+};
+
+const showSuccess = <Result, Fallback = null>(
+  data: Result,
+  {
+    successTitle = () => 'Operation successful',
+    successMessage = () => 'Operation done successfully.'
+  }: TryMutationArgs<Result, Fallback>
+) => {
+  if (successTitle !== null) {
+    showNotificationWithIcon({
+      icon: 'success',
+      content: successMessage(data),
+      title: successTitle(data)
+    });
+  }
+};
+
+const processFailure = <Result, Fallback = null>(
+  err: Error,
+  {
+    onFail,
+    failedTitle = 'Operation failed',
+    failedMessage = 'Operation has failed.'
+  }: TryMutationArgs<Result, Fallback>
+) => {
+  console.error(err);
+
+  if (onFail) {
+    onFail();
+  }
+
+  if (failedTitle !== null) {
+    showNotificationWithIcon({
+      icon: 'error',
+      content:
+        isApolloError(err) && err.graphQLErrors.length > 0
+          ? `${failedMessage} ${err.graphQLErrors[0].message}`
+          : failedMessage,
+      title: failedTitle
+    });
   }
 };

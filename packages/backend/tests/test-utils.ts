@@ -57,10 +57,15 @@ export interface QueryTestCase {
 
 export interface MutationTestCase {
   id: string;
-  query: string;
-  expected: object;
+  mutation: {
+    query: string;
+    expected: any;
+  };
+  query: {
+    query: string;
+    expected: any;
+  };
   beforeTest: (
     reqContext: ApolloContext
   ) => Promise<{ variables?: object; reqContext?: ApolloContext }>;
-  afterTest?: (reqContext: ApolloContext) => Promise<any>;
 }
