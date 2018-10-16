@@ -34,7 +34,7 @@ const generateBirthdaysEntries: () => Array<Values> = () =>
     .map((_, i) => ({
       firstName: casual.first_name,
       lastName: casual.last_name,
-      gender: casual.boolean ? 'm' : 'f',
+      sex: casual.boolean ? 'm' : 'f',
       birthday: new Date(casual.date('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'))
     }));
 
@@ -54,7 +54,7 @@ const birthdaysSchema: Array<ValueSchema> = [
     unique: false
   },
   {
-    name: 'gender',
+    name: 'sex',
     type: DataType.STRING,
     required: true,
     fallback: '',
