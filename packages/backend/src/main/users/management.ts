@@ -1,5 +1,6 @@
 import { ApolloContext, User } from '@masterthesis/shared';
 
+import { AuthenticationError, ForbiddenError } from 'apollo-server-core';
 import { compare, hash } from 'bcrypt';
 import { Db, ObjectID } from 'mongodb';
 
@@ -114,7 +115,7 @@ export const register = async (
 export const tryGetUser = async (reqContext: ApolloContext): Promise<User> => {
   const user = await getUser(reqContext);
   if (!user) {
-    throw new Error('Unknown user');
+    throw new ForbiddenError('Unknown user');
   }
 
   return user;
@@ -122,7 +123,7 @@ export const tryGetUser = async (reqContext: ApolloContext): Promise<User> => {
 
 export const checkLoggedInUser = (reqContext: ApolloContext) => {
   const { userId } = reqContext;
-  if (userId === null) {
-    throw new Error('User is not authorized');
+  if (userId == null) {
+    throw new AuthenticationError('User is not authorized');
   }
 };

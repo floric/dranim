@@ -6,8 +6,6 @@ import { setContext } from 'apollo-link-context';
 import { onError } from 'apollo-link-error';
 import { createUploadLink } from 'apollo-upload-client';
 
-import { logout } from './auth';
-
 export const API_URL =
   process.env.NODE_ENV === 'production'
     ? `https://${process.env.BACKEND_DOMAIN}`
@@ -30,17 +28,6 @@ const authLink = setContext((_, response) => {
 
 const errorLink = onError(err => {
   const { graphQLErrors, networkError } = err;
-
-  if (
-    networkError &&
-    (networkError as any).response &&
-    (networkError as any).response.status === 401
-  ) {
-    logout();
-    window.location.reload();
-    return;
-  }
-
   if (graphQLErrors) {
     graphQLErrors.map(({ message, locations, path }) =>
       console.log(

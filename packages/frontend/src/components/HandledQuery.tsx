@@ -2,7 +2,9 @@ import React, { Component, ReactNode } from 'react';
 
 import { DocumentNode } from 'graphql';
 import { Query, QueryResult } from 'react-apollo';
+import { Redirect, Route } from 'react-router-dom';
 
+import { resetCache } from '../io/auth';
 import { LoadingCard, UnknownErrorCard } from './layout/CustomCards';
 
 export interface HandledQueryProps<Data, Variables> {
@@ -25,6 +27,13 @@ export class HandledQuery<Data, Variables = null> extends Component<
           }
 
           if (error) {
+            const authError = error.graphQLErrors.find(
+              n => n.extensions && n.extensions.code === 'UNAUTHENTICATED'
+            );
+            if (authError) {
+              return <Route path="/" render={() => <Redirect to="/login" />} />;
+            }
+
             return <UnknownErrorCard error={error} />;
           }
 

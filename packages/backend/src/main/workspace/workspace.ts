@@ -1,4 +1,5 @@
 import { ApolloContext, NodeState, Workspace } from '@masterthesis/shared';
+import { UserInputError } from 'apollo-server-core';
 import { Db, ObjectID } from 'mongodb';
 
 import { Log } from '../../logging';
@@ -26,7 +27,7 @@ export const createWorkspace = async (
     }
   >(reqContext.db);
   if (!name.length) {
-    throw new Error('Name of workspace must not be empty.');
+    throw new UserInputError('Name of workspace must not be empty.');
   }
 
   const res = await wsCollection.insertOne({
@@ -117,6 +118,7 @@ export const updateLastChange = async (
 export const getAllWorkspaces = async (
   reqContext: ApolloContext
 ): Promise<Array<Workspace>> => {
+  checkLoggedInUser(reqContext);
   const wsCollection = getWorkspacesCollection(reqContext.db);
   const all = await wsCollection.find({ userId: reqContext.userId }).toArray();
   return all.map(ws => ({

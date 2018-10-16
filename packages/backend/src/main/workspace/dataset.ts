@@ -11,6 +11,7 @@ import { Omit } from '../../main';
 import { checkLoggedInUser } from '../users/management';
 import { getSafeObjectID } from '../utils';
 import { clearEntries, getEntryCollection } from './entry';
+import { UserInputError } from 'apollo-server-core';
 
 export const getDatasetsCollection = <T = Dataset & { _id: ObjectID }>(
   db: Db
@@ -77,6 +78,8 @@ export const deleteDataset = async (id: string, reqContext: ApolloContext) => {
 export const getAllDatasets = async (
   reqContext: ApolloContext
 ): Promise<Array<Dataset>> => {
+  checkLoggedInUser(reqContext);
+
   const collection = getDatasetsCollection(reqContext.db);
   const allDatasets = await collection
     .find({ userId: reqContext.userId, workspaceId: null })
@@ -150,11 +153,11 @@ export const addValueSchema = async (
   const collection = getDatasetsCollection(reqContext.db);
   const ds = await tryGetDataset(datasetId, reqContext);
   if (schema.name.length === 0) {
-    throw new Error('Name must not be empty');
+    throw new UserInputError('Name must not be empty');
   }
 
   if (ds.valueschemas.find(s => s.name === schema.name)) {
-    throw new Error('Field with this name already exists.');
+    throw new UserInputError('Field with this name already exists.');
   }
 
   const res = await collection.updateOne(
@@ -191,21 +194,4 @@ export const clearGeneratedDatasets = async (
   }
 
   Log.info(`Cleared temporary datasets including entries.`);
-};
-
-export const saveTemporaryDataset = async (
-  dsId: string,
-  name: string,
-  reqContext: ApolloContext
-) => {
-  const coll = getDatasetsCollection(reqContext.db);
-  const res = await coll.updateOne(
-    { _id: getSafeObjectID(dsId) },
-    {
-      $set: { name, workspaceId: null, description: 'Generated with Explorer' }
-    }
-  );
-  if (res.modifiedCount !== 1) {
-    throw new Error('Saving temporary dataset failed');
-  }
 };

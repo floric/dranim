@@ -8,6 +8,7 @@ import { NavLink, RouteComponentProps } from 'react-router-dom';
 import { HandledQuery } from '../../components/HandledQuery';
 import { VisRenderer } from '../../components/VisRenderer';
 import { resultCardSize } from '../../components/visualizations/VisCard';
+import { SubtleWarning } from '../../components/Warnings';
 
 const WORKSPACE = gql`
   query workspace($id: ID!) {
@@ -69,18 +70,18 @@ const VisDetailPage: SFC<VisDetailPageProps> = ({
         <>
           <Card bordered={false} style={{ marginBottom: 8 }}>
             {results.filter(n => n.visible).length > 0 ? (
-              <>
+              <SubtleWarning type="warning">
                 Published results can be accessed at{' '}
                 <a href={resultsPath} target="_href">
                   <Icon type="link" />{' '}
                   {`${window.location.origin}${resultsPath}`}
                 </a>
                 . Anybody with this link can access the published results.
-              </>
+              </SubtleWarning>
             ) : (
-              <>
+              <SubtleWarning type="info-circle">
                 Use the <Icon type="lock" /> Lock to publish Results.
-              </>
+              </SubtleWarning>
             )}
           </Card>
           <Row gutter={8} type="flex">

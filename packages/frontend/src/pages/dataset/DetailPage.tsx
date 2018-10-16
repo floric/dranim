@@ -88,6 +88,8 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
           }
 
           const step = getCurrentStep(dataset);
+          const valueschemasCount = dataset.valueschemas.length;
+          const { entriesCount, name } = dataset;
 
           return (
             <>
@@ -96,12 +98,12 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
                   <PageHeaderCard
                     title={
                       <EditableText
-                        text={dataset.name}
-                        onChange={name =>
+                        text={name}
+                        onChange={newName =>
                           tryMutation({
                             op: () =>
                               renameDataset({
-                                variables: { id, name },
+                                variables: { id, name: newName },
                                 refetchQueries: [
                                   { query: DATASET, variables: { id } }
                                 ],
@@ -143,7 +145,7 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
                             <Steps.Step title="Table created" />
                             <Steps.Step
                               title={
-                                step < 2 ? 'Specify Schema' : 'Schema specified'
+                                step < 2 ? 'Specify Fields' : 'Fields specified'
                               }
                             />
                             <Steps.Step title="Create or upload entries" />
@@ -160,18 +162,20 @@ export default class DataDetailPage extends Component<DataDetailPageProps> {
                 location={location}
                 panes={[
                   {
-                    name: `${dataset.valueschemas.length} Fields`,
+                    name: `${valueschemasCount} Fields`,
                     key: 'schemas',
                     content: <DataSchemas dataset={dataset} />
                   },
                   {
-                    name: `${dataset.entriesCount} Entries`,
+                    name: `${entriesCount} Entries`,
                     key: 'entries',
+                    disabled: valueschemasCount === 0,
                     content: <DataEntriesPage dataset={dataset} />
                   },
                   {
                     name: 'Import / Export',
                     key: 'actions',
+                    disabled: valueschemasCount === 0,
                     content: <DataActionsPage dataset={dataset} />
                   }
                 ]}

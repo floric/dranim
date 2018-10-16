@@ -3,14 +3,6 @@ import { User } from '@masterthesis/shared';
 import { showNotificationWithIcon } from '../utils/form';
 import { API_URL, client } from './apollo-client';
 
-const SESSION_KEY = 'SESSION_ACTIVE';
-
-export const isLoggedIn = () => localStorage.getItem(SESSION_KEY) === 'true';
-
-const setLoggedIn = (value: boolean) => {
-  localStorage.setItem(SESSION_KEY, value ? 'true' : '');
-};
-
 export const logout = async () => {
   await fetch(`${API_URL}/logout`, {
     cache: 'no-cache',
@@ -21,9 +13,10 @@ export const logout = async () => {
     redirect: 'follow',
     referrer: 'no-referrer'
   });
-  await client.cache.reset();
-  setLoggedIn(false);
+  await resetCache();
 };
+
+export const resetCache = () => client.cache.reset();
 
 export const register = async (
   firstName: string,
@@ -52,7 +45,6 @@ export const register = async (
 
     const user: User = await res.json();
 
-    setLoggedIn(true);
     showNotificationWithIcon({
       title: `Hello ${user.firstName}`,
       icon: 'success',
@@ -61,8 +53,6 @@ export const register = async (
 
     return user;
   } catch (err) {
-    setLoggedIn(false);
-
     showNotificationWithIcon({
       content:
         'Registration has failed. Maybe the email address is already used.',
@@ -89,7 +79,6 @@ export const login = async (mail: string, pw: string): Promise<User | null> => {
       referrer: 'no-referrer'
     });
     if (res.status === 401) {
-      setLoggedIn(false);
       showNotificationWithIcon({
         content: 'The login has failed.',
         icon: 'error',
@@ -100,7 +89,6 @@ export const login = async (mail: string, pw: string): Promise<User | null> => {
 
     const user: User = await res.json();
 
-    setLoggedIn(true);
     showNotificationWithIcon({
       title: `Hello ${user.firstName}`,
       icon: 'success',
@@ -109,7 +97,6 @@ export const login = async (mail: string, pw: string): Promise<User | null> => {
 
     return user;
   } catch (err) {
-    setLoggedIn(false);
     showNotificationWithIcon({
       content: 'Unknown error',
       icon: 'error',

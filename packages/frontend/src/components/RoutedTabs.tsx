@@ -9,6 +9,7 @@ type Panes = Array<{
   name: string;
   key: string;
   content: JSX.Element;
+  disabled?: boolean;
 }>;
 
 export type RoutedTabsProps = {
@@ -69,8 +70,8 @@ export class RoutedTabs extends Component<RoutedTabsProps> {
           animated={{ inkBar: true, tabPane: false }}
           tabBarStyle={{ marginBottom: 0 }}
         >
-          {panes.map(({ key, name }) => (
-            <Tabs.TabPane key={key} tab={name} />
+          {panes.map(({ key, name, disabled = false }) => (
+            <Tabs.TabPane key={key} tab={name} disabled={disabled} />
           ))}
         </Tabs>
         <Switch>

@@ -99,8 +99,8 @@ const StartPage: SFC = () => (
           <h3>Birthdays</h3>
           <p>
             This example contains a Table with 25.000 randomly generated entries
-            with persons. Each entry consists of a name, a random value as well
-            as a birthday.
+            with persons. Each randomly generated entry consists of a name, a
+            sex and a day of birth.
           </p>
           <CreateExampleButton type="Birthdays" />
           <Divider />

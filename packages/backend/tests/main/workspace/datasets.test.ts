@@ -8,7 +8,6 @@ import {
   getAllDatasets,
   getDataset,
   renameDataset,
-  saveTemporaryDataset,
   tryGetDataset
 } from '../../../src/main/workspace/dataset';
 import {
@@ -332,50 +331,5 @@ describe('Dataset', () => {
       expect(resDsB.id).toBeDefined();
       expect(resDsC).toBe(null);
       expect(clearEntries).toHaveBeenCalledTimes(1);
-    }));
-
-  test('should save temporary dataset', () =>
-    doTestWithDb(async db => {
-      const [dsA, dsB] = await Promise.all([
-        createDataset(
-          'test',
-          {
-            db,
-            userId: ''
-          },
-          VALID_OBJECT_ID
-        ),
-        createDataset(
-          'test2',
-          {
-            db,
-            userId: ''
-          },
-          VALID_OBJECT_ID
-        )
-      ]);
-
-      await saveTemporaryDataset(dsA.id, 'New DS', { db, userId: '' });
-
-      const [resDsA, resDsB] = await Promise.all(
-        [dsA, dsB].map(n => getDataset(n.id, { db, userId: '' }))
-      );
-
-      expect(resDsA.workspaceId).toBe(null);
-      expect(resDsB.workspaceId).toBe(VALID_OBJECT_ID);
-      expect(resDsA.description).toBe('Generated with Explorer');
-    }));
-
-  test('should throw error trying to save temporary dataset', () =>
-    doTestWithDb(async db => {
-      try {
-        await saveTemporaryDataset(VALID_OBJECT_ID, 'New DS', {
-          db,
-          userId: ''
-        });
-        throw NeverGoHereError;
-      } catch (err) {
-        expect(err.message).toBe('Saving temporary dataset failed');
-      }
     }));
 });

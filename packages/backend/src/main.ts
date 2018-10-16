@@ -40,8 +40,8 @@ const CORS = (options: MainOptions) => ({
       : 'http://localhost:1234'
 });
 
-const initDatabase = async (db: Db) =>
-  await Promise.all([
+const initDatabase = (db: Db) =>
+  Promise.all([
     getConnectionsCollection(db).createIndex('workspaceId'),
     getNodesCollection(db).createIndex('workspaceId'),
     getWorkspacesCollection(db).createIndex('userId'),
@@ -58,7 +58,7 @@ const initServer = (options: MainOptions, db: Db) => {
       sameSite: false,
       resave: true,
       saveUninitialized: false,
-      store: new MongoStore({ db }),
+      store: new MongoStore({ db, touchAfter: 60 }),
       cookie: { secure: false }
     }),
     morgan('short', {
@@ -72,8 +72,8 @@ const initServer = (options: MainOptions, db: Db) => {
   );
 
   const server = new ApolloServer({
-    schema: Schema as any,
-    context: context => ({ db, userId: context.req.session.userId }),
+    schema: Schema,
+    context: context => ({ db, userId: context.req.session.userId || null }),
     engine:
       process.env.NODE_ENV === 'production'
         ? {
