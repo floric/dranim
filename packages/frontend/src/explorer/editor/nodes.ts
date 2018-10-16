@@ -51,7 +51,7 @@ export const renderNode = (
   const outputs = JSON.parse(n.outputSockets);
   const height = getHeight(n, inputs, outputs, state.openConnection);
 
-  nodeGroup.add(getBackgroundRect(height));
+  nodeGroup.add(getBackgroundRect(height, isSelected));
   nodeGroup.add(
     getHeaderText(
       isSelected,
@@ -84,7 +84,9 @@ export const renderNode = (
       )
     )
   );
-  nodeGroup.add(getStateRect(height, n.state));
+  if (n.state !== NodeState.VALID) {
+    nodeGroup.add(getStateRect(height, n.state));
+  }
 
   return nodeGroup;
 };
@@ -157,14 +159,13 @@ const getStateRect = (height: number, state: NodeState) =>
           : Colors.Warning
   });
 
-const getBackgroundRect = (height: number) =>
+const getBackgroundRect = (height: number, isSelected: boolean) =>
   new Rect({
     width: NODE_WIDTH,
     height,
-    shadowColor: Colors.Black,
-    shadowOpacity: 0.1,
-    shadowBlur: 5,
-    fill: Colors.White
+    fill: Colors.White,
+    strokeWidth: 1,
+    stroke: isSelected ? Colors.Selection : Colors.GrayLight
   });
 
 const getHeaderText = (isSelected: boolean, text: string) =>
