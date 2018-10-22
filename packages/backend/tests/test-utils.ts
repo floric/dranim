@@ -10,7 +10,7 @@ export const doTestWithDb = async (op: (db: Db) => Promise<void>) => {
   jest.setTimeout(10000);
   jest.resetAllMocks();
 
-  const dbName = `jest-${Math.random() * 1000}`;
+  const dbName = `jest-${Math.floor(Math.random() * 1000)}`;
   const mongodbServer = new MongodbMemoryServer({
     instance: {
       dbName
