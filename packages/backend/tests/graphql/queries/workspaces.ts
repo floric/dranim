@@ -243,7 +243,16 @@ export const workspacesTest: QueryTestCase = {
               { connectionId: expect.any(String), name: 'a' },
               { connectionId: expect.any(String), name: 'b' }
             ]),
-            metaInputs: {},
+            metaInputs: {
+              a: {
+                content: {},
+                isPresent: true
+              },
+              b: {
+                content: {},
+                isPresent: true
+              }
+            },
             metaOutputs: { sum: { content: {}, isPresent: true } },
             outputSockets: {
               sum: { dataType: 'Number', displayName: 'Sum', state: 'Static' }
