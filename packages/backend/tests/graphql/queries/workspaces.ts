@@ -179,12 +179,17 @@ export const workspacesTest: QueryTestCase = {
             form: { value: 1 },
             hasContextFn: false,
             id: expect.any(String),
-            inputSockets: '{}',
+            inputSockets: {},
             inputs: [],
-            metaInputs: '{}',
-            metaOutputs: '{"value":{"content":{},"isPresent":true}}',
-            outputSockets:
-              '{"value":{"dataType":"Number","displayName":"Number","state":"Static"}}',
+            metaInputs: {},
+            metaOutputs: { value: { content: {}, isPresent: true } },
+            outputSockets: {
+              value: {
+                dataType: 'Number',
+                displayName: 'Number',
+                state: 'Static'
+              }
+            },
             outputs: [{ connectionId: expect.any(String), name: 'value' }],
             progress: null,
             state: 'VALID',
@@ -198,12 +203,17 @@ export const workspacesTest: QueryTestCase = {
             form: { value: 1 },
             hasContextFn: false,
             id: expect.any(String),
-            inputSockets: '{}',
+            inputSockets: {},
             inputs: [],
-            metaInputs: '{}',
-            metaOutputs: '{"value":{"content":{},"isPresent":true}}',
-            outputSockets:
-              '{"value":{"dataType":"Number","displayName":"Number","state":"Static"}}',
+            metaInputs: {},
+            metaOutputs: { value: { content: {}, isPresent: true } },
+            outputSockets: {
+              value: {
+                dataType: 'Number',
+                displayName: 'Number',
+                state: 'Static'
+              }
+            },
             outputs: [{ connectionId: expect.any(String), name: 'value' }],
             progress: null,
             state: 'VALID',
@@ -217,16 +227,27 @@ export const workspacesTest: QueryTestCase = {
             form: {},
             hasContextFn: false,
             id: expect.any(String),
-            inputSockets:
-              '{"a":{"dataType":"Number","displayName":"Number A","state":"Static"},"b":{"dataType":"Number","displayName":"Number B","state":"Static"}}',
+            inputSockets: {
+              a: {
+                dataType: 'Number',
+                displayName: 'Number A',
+                state: 'Static'
+              },
+              b: {
+                dataType: 'Number',
+                displayName: 'Number B',
+                state: 'Static'
+              }
+            },
             inputs: expect.arrayContaining([
               { connectionId: expect.any(String), name: 'a' },
               { connectionId: expect.any(String), name: 'b' }
             ]),
-            metaInputs: expect.any(String),
-            metaOutputs: '{"sum":{"content":{},"isPresent":true}}',
-            outputSockets:
-              '{"sum":{"dataType":"Number","displayName":"Sum","state":"Static"}}',
+            metaInputs: {},
+            metaOutputs: { sum: { content: {}, isPresent: true } },
+            outputSockets: {
+              sum: { dataType: 'Number', displayName: 'Sum', state: 'Static' }
+            },
             outputs: [{ connectionId: expect.any(String), name: 'sum' }],
             progress: null,
             state: 'VALID',
@@ -240,12 +261,17 @@ export const workspacesTest: QueryTestCase = {
             form: { name: 'Easy task' },
             hasContextFn: false,
             id: expect.any(String),
-            inputSockets:
-              '{"value":{"dataType":"Number","displayName":"Number","state":"Static"}}',
+            inputSockets: {
+              value: {
+                dataType: 'Number',
+                displayName: 'Number',
+                state: 'Static'
+              }
+            },
             inputs: [{ connectionId: expect.any(String), name: 'value' }],
-            metaInputs: '{"value":{"content":{},"isPresent":true}}',
-            metaOutputs: '{}',
-            outputSockets: '{}',
+            metaInputs: { value: { content: {}, isPresent: true } },
+            metaOutputs: {},
+            outputSockets: {},
             outputs: [],
             progress: null,
             state: 'VALID',

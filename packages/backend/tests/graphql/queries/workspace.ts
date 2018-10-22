@@ -123,12 +123,17 @@ export const workspaceTest: QueryTestCase = {
           form: { value: 1 },
           hasContextFn: false,
           id: expect.any(String),
-          inputSockets: '{}',
+          inputSockets: {},
           inputs: [],
-          metaInputs: '{}',
-          metaOutputs: '{"value":{"content":{},"isPresent":true}}',
-          outputSockets:
-            '{"value":{"dataType":"Number","displayName":"Number","state":"Static"}}',
+          metaInputs: {},
+          metaOutputs: { value: { content: {}, isPresent: true } },
+          outputSockets: {
+            value: {
+              dataType: 'Number',
+              displayName: 'Number',
+              state: 'Static'
+            }
+          },
           outputs: [{ connectionId: expect.any(String), name: 'value' }],
           progress: null,
           state: 'VALID',
@@ -142,12 +147,17 @@ export const workspaceTest: QueryTestCase = {
           form: { name: 'Straight through' },
           hasContextFn: false,
           id: expect.any(String),
-          inputSockets:
-            '{"value":{"dataType":"Number","displayName":"Number","state":"Static"}}',
+          inputSockets: {
+            value: {
+              dataType: 'Number',
+              displayName: 'Number',
+              state: 'Static'
+            }
+          },
           inputs: [{ connectionId: expect.any(String), name: 'value' }],
-          metaInputs: '{"value":{"content":{},"isPresent":true}}',
-          metaOutputs: '{}',
-          outputSockets: '{}',
+          metaInputs: { value: { content: {}, isPresent: true } },
+          metaOutputs: {},
+          outputSockets: {},
           outputs: [],
           progress: null,
           state: 'VALID',

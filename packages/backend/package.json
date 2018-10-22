@@ -10,7 +10,7 @@
     "lint": "tslint -p . --fix",
     "start": "concurrently \"tsc -w\" \"cross-env SESSION_SECRET=secret PORT=3000 NODE_ENV=development nodemon dist/main.js\"",
     "test": "jest --logHeapUsage --coverage --maxWorkers=4",
-    "test:watch": "jest --watch --maxWorkers=4"
+    "test:watch": "jest --watch --maxWorkers=2"
   },
   "dependencies": {
     "@masterthesis/shared": "1.0.0",
@@ -61,7 +61,7 @@
     "jest": "^23.0.0",
     "jest-environment-node": "^23.0.0",
     "jest-localstorage-mock": "^2.2.0",
-    "mongodb-memory-server": "^2.0.1",
+    "mongodb-memory-server": "^2.6.0",
     "nodemon": "^1.17.5",
     "standard-version": "^4.4.0",
     "ts-jest": "^23.0.1",
