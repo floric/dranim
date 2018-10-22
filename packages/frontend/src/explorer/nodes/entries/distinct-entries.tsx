@@ -91,12 +91,12 @@ export const DistinctEntriesNode: ClientNodeDef<
                 )
               }
             >
-              Add distinct Value
+              Add Value
             </Button>
           </Col>
         </Row>
         {values.map(v => renderValue(v, setFieldsValue, touchForm, values))}
-        <h4>Additional Values</h4>
+        <h4>Output Fields</h4>
         <Row style={{ marginBottom: '1rem' }} gutter={8}>
           <Col xs={24} lg={6} xxl={6}>
             <Input

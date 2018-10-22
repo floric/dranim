@@ -26,6 +26,7 @@ import {
   tryGetNode
 } from '../../../src/main/workspace/nodes';
 import { NeverGoHereError, VALID_OBJECT_ID } from '../../test-utils';
+import { Db, Server } from 'mongodb';
 
 jest.mock('@masterthesis/shared');
 jest.mock('../../../src/main/workspace/workspace');
@@ -553,6 +554,7 @@ describe('Execution', () => {
 
     const res = await executeNode(node, VALID_OBJECT_ID, {
       db: null,
+      //  db: new Db('test', new Server('a', 0)),
       userId: ''
     });
     expect(res).toEqual({ outputs: { a: { x: 1 } } });

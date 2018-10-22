@@ -13,7 +13,7 @@
     "test": "lerna run test --stream",
     "lint": "lerna run lint --stream",
     "clean": "lerna run clean --stream && rm -rf node_modules && sudo rm -rf data",
-    "mongodb": "sudo docker run -v /home/florian/Dev/Github/masterthesis/configs:/etc/mongo -p 127.0.0.1:27017:27017 mongo:latest --config /etc/mongo/mongodb.yml"
+    "mongodb": "sudo docker run -p 127.0.0.1:27017:27017 mongo:latest"
   },
   "author": {
     "name": "Florian Richter"

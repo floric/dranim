@@ -41,11 +41,7 @@ export interface TryMutationArgs<T, Fallback = null> extends TryArgs<T> {
 export const tryMutation = async <Result, Fallback = null>(
   args: TryMutationArgs<Result, Fallback>
 ): Promise<Result | Fallback> => {
-  const {
-    op,
-
-    fallback = null
-  } = args;
+  const { op, fallback = null } = args;
   try {
     const res = await op();
     if (!res) {

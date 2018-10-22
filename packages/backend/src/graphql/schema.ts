@@ -1,4 +1,4 @@
-import { ApolloContext, SocketDefs, SocketMetas } from '@masterthesis/shared';
+import { ApolloContext } from '@masterthesis/shared';
 import { GraphQLUpload } from 'apollo-server-express';
 import { GraphQLScalarType, Kind } from 'graphql';
 import { makeExecutableSchema } from 'graphql-tools';
@@ -76,20 +76,6 @@ export const resolvers: any = {
     parseValue: (value: string) => new Date(value),
     serialize: (value: Date) => value.getTime(),
     parseLiteral: ast => (ast.kind === Kind.INT ? new Date(ast.value) : null)
-  }),
-  SocketDefs: new GraphQLScalarType({
-    name: 'SocketDefs',
-    parseValue: (value: string) => JSON.parse(value),
-    serialize: (value: SocketDefs<any>) => JSON.stringify(value),
-    parseLiteral: ast =>
-      ast.kind === Kind.STRING ? JSON.parse(ast.value) : null
-  }),
-  Meta: new GraphQLScalarType({
-    name: 'Meta',
-    parseValue: (value: string) => JSON.parse(value),
-    serialize: (value: SocketMetas<any>) => JSON.stringify(value),
-    parseLiteral: ast =>
-      ast.kind === Kind.STRING ? JSON.parse(ast.value) : null
   }),
   FormValues: new GraphQLScalarType({
     name: 'FormValues',
