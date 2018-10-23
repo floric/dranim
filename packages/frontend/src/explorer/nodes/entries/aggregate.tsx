@@ -5,7 +5,8 @@ import {
   AggregateEntriesNodeForm,
   AggregateEntriesNodeInputs,
   AggregateEntriesNodeOutputs,
-  AggregationEntriesType
+  AggregationEntriesType,
+  DataType
 } from '@masterthesis/shared';
 import { Form, Select } from 'antd';
 
@@ -26,7 +27,9 @@ export const AggregateEntriesNode: ClientNodeDef<
     }
 
     const options = dsInput.isPresent
-      ? dsInput.content.schema.map(s => s.name)
+      ? dsInput.content.schema
+          .filter(s => s.type === DataType.NUMBER)
+          .map(s => s.name)
       : [];
     return (
       <>

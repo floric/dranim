@@ -47,9 +47,12 @@ export const renderNode = (
   const nodeGroup = new Group({ draggable: true, x: n.x, y: n.y });
   addEventHandlers(nodeGroup, stage, n, server, editorFunctions);
 
-  const inputs = JSON.parse(n.inputSockets);
-  const outputs = JSON.parse(n.outputSockets);
-  const height = getHeight(n, inputs, outputs, state.openConnection);
+  const height = getHeight(
+    n,
+    n.inputSockets,
+    n.outputSockets,
+    state.openConnection
+  );
 
   nodeGroup.add(getBackgroundRect(height, isSelected));
   nodeGroup.add(
@@ -69,8 +72,8 @@ export const renderNode = (
     nodeGroup.add(getInformationText(n, nodeType, server));
   }
   [
-    { defs: inputs, type: SocketType.INPUT },
-    { defs: outputs, type: SocketType.OUTPUT }
+    { defs: n.inputSockets, type: SocketType.INPUT },
+    { defs: n.outputSockets, type: SocketType.OUTPUT }
   ].forEach(p =>
     nodeGroup.add(
       renderSockets(

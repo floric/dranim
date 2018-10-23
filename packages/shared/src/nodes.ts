@@ -1,6 +1,6 @@
 import { Db } from 'mongodb';
 
-import { DataType, SocketDefs, SocketMetas } from './sockets';
+import { DataType, SocketDefs, SocketMetas, SocketMetaDef } from './sockets';
 import { UserOwned } from './users';
 
 export interface ApolloContext {
@@ -147,11 +147,11 @@ export interface NodeInstance {
 
 export interface GQLNodeInstance extends NodeInstance {
   state: NodeState;
-  metaInputs: string;
-  metaOutputs: string;
+  metaInputs: { [name: string]: SocketMetaDef<any> };
+  metaOutputs: { [name: string]: SocketMetaDef<any> };
   hasContextFn: boolean;
-  inputSockets: string;
-  outputSockets: string;
+  inputSockets: SocketDefs<any>;
+  outputSockets: SocketDefs<any>;
 }
 
 export interface SocketInstance {

@@ -43,14 +43,14 @@ export const EditEntriesNode: ClientNodeDef<
     return (
       <>
         <Row style={{ marginBottom: '1rem' }} gutter={8}>
-          <Col xs={24} lg={6} xxl={6}>
+          <Col xs={24} lg={6}>
             <Input
               defaultValue={defaultName}
               placeholder="Name"
               onChange={ev => setTempState({ newValueName: ev.target.value })}
             />
           </Col>
-          <Col xs={24} lg={6} xxl={4}>
+          <Col xs={24} lg={6}>
             <Select
               defaultValue={defaultType}
               onSelect={val => setTempState({ newValueType: val })}
@@ -70,7 +70,7 @@ export const EditEntriesNode: ClientNodeDef<
               </Select.OptGroup>
             </Select>
           </Col>
-          <Col xs={24} lg={6} xxl={4}>
+          <Col xs={24} lg={6}>
             <Checkbox.Group
               options={[UNIQUE, REQUIRED]}
               defaultValue={defaultTags}
@@ -79,7 +79,7 @@ export const EditEntriesNode: ClientNodeDef<
               }
             />
           </Col>
-          <Col xs={24} lg={6} xxl={3}>
+          <Col xs={24} lg={6}>
             <Button
               icon="plus-square"
               style={{ width: '100%' }}
@@ -110,15 +110,15 @@ const renderValue = (
   values: Array<ValueSchema>
 ) => (
   <Row key={v.name} justify="space-around" gutter={8}>
-    <Col xs={9} lg={6} xxl={6}>
+    <Col xs={9} lg={6}>
       <p>{v.name}</p>
     </Col>
-    <Col xs={9} lg={12} xxl={8}>
+    <Col xs={9} lg={12}>
       <Tag color={Colors[v.type]}>{v.type}</Tag>
       {v.required && <Tag>Required</Tag>}
       {v.unique && <Tag>Unique</Tag>}
     </Col>
-    <Col xs={6} lg={6} xxl={3}>
+    <Col xs={6} lg={6}>
       <Button
         type="dashed"
         shape="circle"

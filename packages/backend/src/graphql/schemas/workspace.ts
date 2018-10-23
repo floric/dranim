@@ -24,12 +24,12 @@ const NodeDef = `
     state: String!
     form: FormValues!
     workspace: Workspace!
-    metaInputs: Meta!
-    metaOutputs: Meta!
+    metaInputs: Object!
+    metaOutputs: Object!
     hasContextFn: Boolean!
     progress: Float
-    inputSockets: SocketDefs
-    outputSockets: SocketDefs
+    inputSockets: Object
+    outputSockets: Object
   }
 `;
 
@@ -111,14 +111,6 @@ const PublicResultsDef = `
   }
 `;
 
-const MetaDef = `
-  scalar Meta
-`;
-
-const SocketDefsDef = `
-  scalar SocketDefs
-`;
-
 const FormValuesDef = `
   scalar FormValues
 `;
@@ -128,8 +120,6 @@ const DateDef = `scalar Date`;
 export default () => [
   DateDef,
   OutputResultDef,
-  MetaDef,
-  SocketDefsDef,
   FormValuesDef,
   FormValueDef,
   SocketValueDef,

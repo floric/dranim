@@ -4,7 +4,6 @@ import { DocumentNode } from 'graphql';
 import { Query, QueryResult } from 'react-apollo';
 import { Redirect, Route } from 'react-router-dom';
 
-import { resetCache } from '../io/auth';
 import { LoadingCard, UnknownErrorCard } from './layout/CustomCards';
 
 export interface HandledQueryProps<Data, Variables> {
