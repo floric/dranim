@@ -74,12 +74,7 @@ const initServer = (options: MainOptions, db: Db) => {
   const server = new ApolloServer({
     schema: Schema,
     context: context => ({ db, userId: context.req.session.userId || null }),
-    engine:
-      process.env.NODE_ENV === 'production'
-        ? {
-            apiKey: process.env.APOLLO_ENGINE_KEY
-          }
-        : undefined,
+    playground: false,
     uploads: {
       maxFieldSize: MAX_UPLOAD_LIMIT,
       maxFiles: 10,
