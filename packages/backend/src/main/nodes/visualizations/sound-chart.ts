@@ -15,6 +15,7 @@ interface ContextResult {
   source: string;
   destination: string;
   fromWestToEast: boolean;
+  sortingValue: number;
   value: number;
 }
 
@@ -22,6 +23,7 @@ interface CityStat {
   isWest: boolean;
   importVolume: number;
   exportVolume: number;
+  sortingValue: number;
 }
 
 export const SoundChartNode: ServerNodeDefWithContextFn<
@@ -45,6 +47,11 @@ export const SoundChartNode: ServerNodeDefWithContextFn<
         displayName: 'Destination',
         state: SocketState.STATIC
       },
+      sortingValue: {
+        dataType: DataType.NUMBER,
+        displayName: 'Sorting Value',
+        state: SocketState.STATIC
+      },
       fromWestToEast: {
         dataType: DataType.BOOLEAN,
         displayName: 'Is from West to East',
@@ -58,17 +65,14 @@ export const SoundChartNode: ServerNodeDefWithContextFn<
     }),
   isFormValid: isOutputFormValid,
   onMetaExecution: () => Promise.resolve({}),
-  onNodeExecution: async (
-    form,
-    inputs,
-    { node: { workspaceId }, contextFnExecution }
-  ) => {
+  onNodeExecution: async (form, inputs, { contextFnExecution }) => {
     const cities: Map<string, CityStat> = new Map();
 
     const passages: Array<{
       source: string;
       destination: string;
       value: number;
+      sortingValue: number;
       isEastPassage: boolean;
     }> = [];
 
@@ -81,7 +85,8 @@ export const SoundChartNode: ServerNodeDefWithContextFn<
         source: result.outputs.source,
         destination: result.outputs.destination,
         value: result.outputs.value,
-        isEastPassage: result.outputs.fromWestToEast
+        isEastPassage: result.outputs.fromWestToEast,
+        sortingValue: result.outputs.sortingValue
       });
     }
 
@@ -130,12 +135,14 @@ const aggregateCities = (
   cities.set(result.source, {
     isWest: source.isWest,
     exportVolume: result.value + source.exportVolume,
-    importVolume: source.importVolume
+    importVolume: source.importVolume,
+    sortingValue: result.sortingValue
   });
   cities.set(result.destination, {
     isWest: destination.isWest,
     exportVolume: destination.exportVolume,
-    importVolume: destination.importVolume + result.value
+    importVolume: destination.importVolume + result.value,
+    sortingValue: result.sortingValue
   });
 };
 
@@ -144,16 +151,13 @@ const getCity = (
   isWest: boolean,
   cities: Map<string, CityStat>
 ) => {
-  let currentValue: {
-    isWest: boolean;
-    exportVolume: number;
-    importVolume: number;
-  };
+  let currentValue: CityStat;
   if (!cities.has(name)) {
     currentValue = {
       isWest,
       exportVolume: 0,
-      importVolume: 0
+      importVolume: 0,
+      sortingValue: 0
     };
     cities.set(name, currentValue);
   } else {

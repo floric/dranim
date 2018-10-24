@@ -15,10 +15,14 @@ interface Passage {
 
 interface CityStat {
   isWest: boolean;
-  name: string;
-  maxValue: number;
   importVolume: number;
   exportVolume: number;
+  sortingValue: number;
+}
+
+interface EnrichedCityStat extends CityStat {
+  name: string;
+  maxValue: number;
 }
 
 interface Cities {
@@ -173,14 +177,14 @@ const renderNames = (
   isWest: boolean,
   state: STRChartCardState
 ) => {
-  const cityStats: Array<CityStat> = Object.entries(cities)
+  const cityStats: Array<EnrichedCityStat> = Object.entries<CityStat>(cities)
     .filter(
       n => state.soundNames.find(soundName => soundName === n[0]) === undefined
     )
-    .map(n => ({ name: n[0], ...(n[1] as CityStat) }))
     .map(n => ({
-      maxValue: Math.max(n.importVolume, n.exportVolume),
-      ...n
+      name: n[0],
+      maxValue: Math.max(n[1].importVolume, n[1].exportVolume),
+      ...n[1]
     }));
 
   setCityPositions(cityStats, isWest, cityPositions, state);
@@ -226,12 +230,14 @@ const calculateCirclePos = (
 };
 
 const setCityPositions = (
-  cityStats: Array<CityStat>,
+  cityStats: Array<EnrichedCityStat>,
   isWest: boolean,
   cityPositions: Map<string, { x: number; y: number }>,
   state: STRChartCardState
 ) => {
-  const cityNames = cityStats.map(n => n.name);
+  const cityNames = cityStats
+    .sort((a, b) => b.sortingValue - a.sortingValue)
+    .map(n => n.name);
   if (state.curveDistance === 0) {
     cityNames.forEach((c, i) => {
       cityPositions.set(c, {
@@ -246,6 +252,16 @@ const setCityPositions = (
     return;
   }
 
+  setCyclicPositions(cityNames, cityStats, isWest, cityPositions, state);
+};
+
+const setCyclicPositions = (
+  cityNames: Array<string>,
+  cityStats: Array<EnrichedCityStat>,
+  isWest: boolean,
+  cityPositions: Map<string, { x: number; y: number }>,
+  state: STRChartCardState
+) => {
   const beta = Math.atan(
     (state.height / 2 / (state.curveDistance * state.container.width)) *
       state.container.height
