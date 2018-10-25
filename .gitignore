@@ -12,3 +12,4 @@ lib/
 data/
 tmp/
 .vscode/launch.json
+.secrets.json

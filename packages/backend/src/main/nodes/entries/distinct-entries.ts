@@ -56,7 +56,7 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
 
     return res;
   },
-  transformContextInputDefsToContextOutputDefs: async (                                                                                                                                                                                                                                                                                                                                       
+  transformContextInputDefsToContextOutputDefs: async (
     inputDefs,
     inputs,
     contextInputDefs,
@@ -121,7 +121,7 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
     let i = 0;
 
     for (const distinctE of permutations) {
-      const filteredDatasetEntries = await getFilteredDataset(
+      const filteredDatasetEntries = getFilteredDataset(
         inputs.dataset.entries,
         distinctE,
         names
@@ -137,7 +137,13 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
         entries.push(res.outputs);
       }
 
-      await updateNodeProgressWithSleep(i, permutations.length, id, reqContext);
+      await updateNodeProgressWithSleep(
+        i,
+        permutations.length,
+        id,
+        reqContext,
+        1000
+      );
       i++;
     }
 
@@ -164,7 +170,7 @@ const getPermutations = (args: Array<Array<string>>) =>
   });
 
 const getContextArguments = (
-  distinctE: Values,
+  distinctE: Array<string>,
   filteredDataset: DatasetRef,
   names: Array<string>
 ) => {
@@ -176,18 +182,18 @@ const getContextArguments = (
 
 const getFilteredDataset = (
   entries: Array<Values>,
-  distinctE: Values,
+  distinctE: Array<string>,
   names: Array<string>
-): Promise<Array<Values>> =>
-  new Promise(resolve => {
-    resolve(
-      entries.filter(
-        e =>
-          distinctE
-            .map((n, i) => e[names[i]] === n)
-            .reduce((a, b) => a && b, true) === true
-      )
-    );
+): Array<Values> =>
+  entries.filter(e => {
+    for (let i = 0; i < distinctE.length; i++) {
+      const isInEntry = e[names[i]] === distinctE[i];
+      if (!isInEntry) {
+        return false;
+      }
+    }
+
+    return true;
   });
 
 const getDistinctValuesArr = (

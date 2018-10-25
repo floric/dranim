@@ -75,7 +75,7 @@ Resources:
       OptionSettings:
         - Namespace: aws:autoscaling:launchconfiguration
           OptionName: InstanceType
-          Value: t3.micro
+          Value: t3.small
         - Namespace: aws:elb:healthcheck
           OptionName: HealthyThreshold
           Value: 2
@@ -139,10 +139,7 @@ Resources:
         - Namespace: aws:elasticbeanstalk:application:environment
           OptionName: APOLLO_ENGINE_KEY
           Value: !Ref ApolloEngineKey
-        - Namespace: aws:elasticbeanstalk:environment:proxy
-          OptionName: ProxyServer
-          Value: none
-      SolutionStackName: 64bit Amazon Linux 2018.03 v2.12.3 running Docker 18.06.1-ce
+      SolutionStackName: 64bit Amazon Linux 2018.03 v2.11.3 running Multi-container Docker 18.06.1-ce (Generic)
 
   EBEnvironment:
     Type: AWS::ElasticBeanstalk::Environment
