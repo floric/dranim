@@ -34,35 +34,6 @@ Resources:
           - ExpirationInDays: 30
             Status: Enabled
 
-  ProdServiceRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - ec2.amazonaws.com
-            Action:
-              - sts:AssumeRole
-      Policies:
-        - PolicyName: root
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                Resource: '*'
-
-  ProdInstanceProfile:
-    Type: AWS::IAM::InstanceProfile
-    Properties:
-      Roles:
-        - !Ref ProdServiceRole
-
   EBApplication:
     Type: AWS::ElasticBeanstalk::Application
     Properties:
@@ -160,6 +131,9 @@ Resources:
         - Namespace: aws:elasticbeanstalk:healthreporting:system
           OptionName: SystemType
           Value: enhanced
+        - Namespace: aws:elasticbeanstalk:command
+          OptionName: DeploymentPolicy
+          Value: Rolling
       SolutionStackName: 64bit Amazon Linux 2018.03 v2.12.3 running Docker 18.06.1-ce
 
   EBEnvironment:
@@ -170,10 +144,10 @@ Resources:
       OptionSettings:
         - Namespace: aws:autoscaling:launchconfiguration
           OptionName: IamInstanceProfile
-          Value: !Ref ProdInstanceProfile
+          Value: aws-elasticbeanstalk-ec2-role
         - Namespace: aws:elasticbeanstalk:environment
           OptionName: ServiceRole
-          Value: !Ref ProdServiceRole
+          Value: aws-elasticbeanstalk-service-role
       Tier:
         Name: WebServer
         Type: Standard
