@@ -14,7 +14,7 @@
     "lint": "lerna run lint --stream",
     "clean": "lerna run clean --stream && rm -rf node_modules && rm -rf data",
     "mongodb": "sudo docker run -p 127.0.0.1:27017:27017 mongo:latest",
-    "deploy": "aws cloudformation update-stack --stack-name timeseries-explorer --template-body file://./deployment/cf.yml --parameters file://./.secrets.json --capabilities CAPABILITY_IAM"
+    "deploy": "aws cloudformation update-stack --stack-name dranim --template-body file://./deployment/cf.yml --parameters file://./.secrets.json --capabilities CAPABILITY_IAM"
   },
   "author": {
     "name": "Florian Richter"
