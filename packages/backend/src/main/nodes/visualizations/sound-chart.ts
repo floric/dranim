@@ -72,7 +72,6 @@ export const SoundChartNode: ServerNodeDefWithContextFn<
       source: string;
       destination: string;
       value: number;
-      sortingValue: number;
       isEastPassage: boolean;
     }> = [];
 
@@ -85,8 +84,7 @@ export const SoundChartNode: ServerNodeDefWithContextFn<
         source: result.outputs.source,
         destination: result.outputs.destination,
         value: result.outputs.value,
-        isEastPassage: result.outputs.fromWestToEast,
-        sortingValue: result.outputs.sortingValue
+        isEastPassage: result.outputs.fromWestToEast
       });
     }
 
