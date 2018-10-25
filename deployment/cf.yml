@@ -80,8 +80,17 @@ Resources:
           OptionName: LoadBalancerType
           Value: application
         - Namespace: aws:elasticbeanstalk:environment:process:default
-          OptionName: StickinessEnabled
-          Value: false
+          OptionName: HealthCheckPath
+          Value: /still-alive
+        - Namespace: aws:elasticbeanstalk:environment:process:default
+          OptionName: HealthCheckInterval
+          Value: 30
+        - Namespace: aws:elasticbeanstalk:environment:process:default
+          OptionName: MatcherHTTPCode
+          Value: 200,304
+        - Namespace: aws:elbv2:loadbalancer
+          OptionName: IdleTimeout
+          Value: 600
         - Namespace: aws:elbv2:listener:443
           OptionName: ListenerEnabled
           Value: true
@@ -97,9 +106,6 @@ Resources:
         - Namespace: aws:autoscaling:launchconfiguration
           OptionName: InstanceType
           Value: t3.small
-        - Namespace: aws:elasticbeanstalk:application
-          OptionName: Application Healthcheck URL
-          Value: /still-alive
         - Namespace: aws:elasticbeanstalk:cloudwatch:logs
           OptionName: StreamLogs
           Value: true
@@ -139,6 +145,21 @@ Resources:
         - Namespace: aws:elasticbeanstalk:environment:proxy
           OptionName: ProxyServer
           Value: none
+        - Namespace: aws:elasticbeanstalk:managedactions:platformupdate
+          OptionName: UpdateLevel
+          Value: minor
+        - Namespace: aws:elasticbeanstalk:managedactions:platformupdate
+          OptionName: InstanceRefreshEnabled
+          Value: true
+        - Namespace: aws:elasticbeanstalk:managedactions
+          OptionName: ManagedActionsEnabled
+          Value: true
+        - Namespace: aws:elasticbeanstalk:managedactions
+          OptionName: PreferredStartTime
+          Value: 'Sat:01:00'
+        - Namespace: aws:elasticbeanstalk:healthreporting:system
+          OptionName: SystemType
+          Value: enhanced
       SolutionStackName: 64bit Amazon Linux 2018.03 v2.12.3 running Docker 18.06.1-ce
 
   EBEnvironment:
