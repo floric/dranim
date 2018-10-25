@@ -2,7 +2,10 @@ import { Readable } from 'stream';
 
 import { Dataset, DataType, ProcessState } from '@masterthesis/shared';
 import { tryGetDataset } from '../../../src/main/workspace/dataset';
-import { createEntry } from '../../../src/main/workspace/entry';
+import {
+  createEntryWithDataset,
+  getEntriesCount
+} from '../../../src/main/workspace/entry';
 import {
   getAllUploads,
   getUpload,
@@ -98,6 +101,9 @@ describe('Upload', () => {
         workspaceId: ''
       };
       (tryGetDataset as jest.Mock).mockResolvedValue(ds);
+      (getEntriesCount as jest.Mock)
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(75);
 
       const stream = new Counter();
       const res = await uploadEntriesCsv(
@@ -113,7 +119,7 @@ describe('Upload', () => {
       expect(rest).toEqual({
         addedEntries: 0,
         datasetId: VALID_OBJECT_ID,
-        errors: [],
+        errors: {},
         failedEntries: 0,
         fileNames: [],
         invalidEntries: 0,
@@ -142,8 +148,8 @@ describe('Upload', () => {
       expect(stream.read()).toBe(null);
       expect(upload.addedEntries).toBe(75);
       expect(upload.failedEntries).toBe(0);
-      expect(upload.invalidEntries).toBe(75);
-      expect(upload.errors).toEqual([]);
+      expect(upload.invalidEntries).toBe(150);
+      expect(upload.errors).toEqual({});
 
       const uploads = await getAllUploads(VALID_OBJECT_ID, { db, userId: '' });
       expect(
@@ -152,17 +158,17 @@ describe('Upload', () => {
         {
           addedEntries: 75,
           datasetId: VALID_OBJECT_ID,
-          errors: [],
+          errors: {},
           failedEntries: 0,
           fileNames: ['test.csv'],
           finish: new Date(0),
           id: upload.id,
-          invalidEntries: 75,
+          invalidEntries: 150,
           start: new Date(0),
           state: ProcessState.SUCCESSFUL
         }
       ]);
 
-      expect(createEntry).toHaveBeenCalledTimes(75);
+      expect(createEntryWithDataset).toHaveBeenCalledTimes(75);
     }));
 });

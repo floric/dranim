@@ -90,15 +90,13 @@ export interface CreateEntryOptions {
   skipSchemaValidation?: boolean;
 }
 
-export const createEntry = async (
-  datasetId: string,
+const processEntry = async (
+  ds: Dataset,
   values: Values,
-  reqContext: ApolloContext,
   options?: CreateEntryOptions
-): Promise<Entry> => {
+): Promise<Values> => {
   checkForInvalidOrEmptyValues(values);
 
-  const ds = await tryGetDataset(datasetId, reqContext);
   if (!options || !options.skipSchemaValidation) {
     const keys = Object.keys(values);
     checkForMissingValues(ds, keys);
@@ -111,13 +109,34 @@ export const createEntry = async (
       values[c.name] = new Date(values[c.name]);
     });
 
+  return values;
+};
+
+export const createEntry = async (
+  datasetId: string,
+  values: Values,
+  reqContext: ApolloContext,
+  options?: CreateEntryOptions
+): Promise<Entry> => {
+  const ds = await tryGetDataset(datasetId, reqContext);
+  return await createEntryWithDataset(ds, values, reqContext, options);
+};
+
+export const createEntryWithDataset = async (
+  ds: Dataset,
+  values: Values,
+  reqContext: ApolloContext,
+  options?: CreateEntryOptions
+): Promise<Entry> => {
+  const processedValue = await processEntry(ds, values, options);
+
   try {
     const collection = getEntryCollection<Omit<Entry, 'id'>>(
       ds.id,
       reqContext.db
     );
     const res = await collection.insertOne({
-      values
+      values: processedValue
     });
 
     if (res.result.ok !== 1 || res.ops.length !== 1) {
@@ -145,25 +164,31 @@ export const createEntry = async (
 export const createManyEntries = async (
   datasetId: string,
   values: Array<Values>,
-  reqContext: ApolloContext
+  reqContext: ApolloContext,
+  options?: CreateEntryOptions
 ): Promise<boolean> => {
   if (values.length === 0) {
     return true;
   }
-
   const ds = await tryGetDataset(datasetId, reqContext);
 
   try {
+    const processedValues = await Promise.all(
+      values.map(async n => ({
+        values: await processEntry(ds, n, options)
+      }))
+    );
+
     const collection = getEntryCollection<Omit<Entry, 'id'>>(
       ds.id,
       reqContext.db
     );
-    const res = await collection.insertMany(values.map(n => ({ values: n })), {
+    const res = await collection.insertMany(processedValues, {
       ordered: false
     });
 
     if (res.insertedCount !== values.length) {
-      throw new Error('Writing dataset failed');
+      throw new Error('Writing entry failed');
     }
 
     return true;
@@ -208,14 +233,15 @@ const checkForUnsupportedValues = (ds: Dataset, valueNames: Array<string>) => {
   }
 };
 
-export const createEntryFromJSON = (
+export const createEntryFromJSON = async (
   datasetId: string,
   values: string,
   reqContext: ApolloContext,
   options?: CreateEntryOptions
 ): Promise<Entry> => {
   const parsedValues: Values = JSON.parse(values);
-  return createEntry(datasetId, parsedValues, reqContext, options);
+  const ds = await tryGetDataset(datasetId, reqContext);
+  return await createEntryWithDataset(ds, parsedValues, reqContext, options);
 };
 
 export const deleteEntry = async (

@@ -6,7 +6,7 @@ export const VALID_OBJECT_ID = '5b07b3129ba658500b75a29a';
 export const NeverGoHereError = new Error('Should never reach this line!');
 
 export const doTestWithDb = async (op: (db: Db) => Promise<void>) => {
-  jest.setTimeout(10000);
+  jest.setTimeout(15000);
   jest.resetAllMocks();
 
   const server = (global as any).__MONGODB_SERVER_;

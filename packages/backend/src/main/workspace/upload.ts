@@ -4,7 +4,8 @@ import {
   DataType,
   ProcessState,
   UploadProcess,
-  ValueSchema
+  ValueSchema,
+  sleep
 } from '@masterthesis/shared';
 import fastCsv from 'fast-csv';
 import { Db, ObjectID } from 'mongodb';
@@ -14,7 +15,10 @@ import { Readable } from 'stream';
 import { Log } from '../../logging';
 import { Omit } from '../../main';
 import { tryGetDataset } from '../../main/workspace/dataset';
-import { createEntry } from '../../main/workspace/entry';
+import {
+  createEntryWithDataset,
+  getEntriesCount
+} from '../../main/workspace/entry';
 import { getSafeObjectID } from '../utils';
 
 interface ApolloFile {
@@ -23,8 +27,15 @@ interface ApolloFile {
 }
 
 export class UploadEntryError extends Error {
-  constructor(customMessage: string, errorName: string) {
+  private errorType;
+
+  constructor(customMessage: string, errorType: string) {
     super(customMessage);
+    this.errorType = errorType;
+  }
+
+  public getType() {
+    return this.errorType;
   }
 }
 
@@ -152,22 +163,18 @@ const processValidEntry = async (
   const collection = getUploadsCollection(reqContext.db);
 
   try {
-    await createEntry(ds.id, values.obj, reqContext);
-    await collection.updateOne(
-      { _id: getSafeObjectID(processId) },
-      { $inc: { addedEntries: 1 } }
-    );
+    await createEntryWithDataset(ds, values.obj, reqContext);
   } catch (err) {
-    if (err.errorName && err.errorName.length > 0) {
+    if (err.errorType && err.errorType.length > 0) {
       await collection.updateOne(
         { _id: getSafeObjectID(processId) },
         {
           $inc: {
             failedEntries: 1,
-            [`errors.${err.errorName}.count`]: 1
+            [`errors.${err.errorType}.count`]: 1
           },
           $set: {
-            [`errors.${err.errorName}.message`]: err.message
+            [`errors.${err.errorType}.message`]: err.message
           }
         },
         { upsert: true }
@@ -176,22 +183,6 @@ const processValidEntry = async (
       Log.error(err);
     }
   }
-};
-
-const processInvalidEntry = async (
-  processId: string,
-  reqContext: ApolloContext,
-  invalidEntry: Array<string> | null
-) => {
-  if (invalidEntry === null) {
-    return;
-  }
-
-  const collection = getUploadsCollection(reqContext.db);
-  await collection.updateOne(
-    { _id: getSafeObjectID(processId) },
-    { $inc: { invalidEntries: 1 } }
-  );
 };
 
 const parseCsvFile = async (
@@ -204,6 +195,10 @@ const parseCsvFile = async (
   Log.info(`Started import of ${filename}.`);
 
   try {
+    // TODO avoid race conditions with counts in a better way
+    const oldCount = await getEntriesCount(ds.id, reqContext);
+    let invalidEntries = 0;
+
     await new Promise((resolve, reject) => {
       const csvStream = fastCsv({
         ignoreEmpty: true,
@@ -217,16 +212,23 @@ const parseCsvFile = async (
         .on('data', values =>
           processValidEntry(values, ds, processId, reqContext)
         )
-        .on('data-invalid', invalidEntry =>
-          processInvalidEntry(processId, reqContext, invalidEntry)
-        )
-        .on('error', reject)
-        .on('end', resolve);
+        .on('data-invalid', () => {
+          invalidEntries++;
+        });
 
       stream
         .pipe(csvStream)
         .on('error', reject)
-        .on('finish', resolve);
+        .on('finish', async () => {
+          await sleep(200);
+          const newCount = await getEntriesCount(ds.id, reqContext);
+          const collection = getUploadsCollection(reqContext.db);
+          await collection.updateOne(
+            { _id: getSafeObjectID(processId) },
+            { $set: { invalidEntries, addedEntries: newCount - oldCount } }
+          );
+          resolve();
+        });
     });
     Log.info(`Finished import of ${filename}.`);
   } catch (err) {
@@ -291,7 +293,10 @@ export const uploadEntriesCsv = async (
 ): Promise<UploadProcess> => {
   try {
     const uploadsCollection = getUploadsCollection<
-      Omit<UploadProcess, 'id' | 'start'> & { start: Date }
+      Omit<UploadProcess, 'id' | 'start' | 'errors'> & {
+        start: Date;
+        errors: object;
+      }
     >(reqContext.db);
     const ds = await tryGetDataset(datasetId, reqContext);
     const newProcess = {
@@ -303,7 +308,7 @@ export const uploadEntriesCsv = async (
       finish: null,
       datasetId,
       fileNames: [],
-      errors: []
+      errors: {}
     };
     const res = await uploadsCollection.insertOne(newProcess);
     if (res.result.ok !== 1 || res.insertedCount !== 1) {
