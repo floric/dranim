@@ -78,6 +78,11 @@ describe('SoundChart', () => {
         displayName: 'Is from West to East',
         state: SocketState.STATIC
       },
+      sortingValue: {
+        dataType: 'Number',
+        displayName: 'Sorting Value',
+        state: 'Static'
+      },
       value: {
         dataType: DataType.NUMBER,
         displayName: 'Value',
@@ -145,6 +150,7 @@ describe('SoundChart', () => {
                 source: 'a',
                 destination: 'b',
                 fromWestToEast: true,
+                sortingValue: 2,
                 value: 5
               }
             });
@@ -155,6 +161,7 @@ describe('SoundChart', () => {
                 source: 'a',
                 destination: 'b',
                 fromWestToEast: true,
+                sortingValue: 2,
                 value: 25
               }
             });
@@ -165,6 +172,7 @@ describe('SoundChart', () => {
               source: 'b',
               destination: 'c',
               fromWestToEast: false,
+              sortingValue: 3,
               value: 15
             }
           });
@@ -183,11 +191,26 @@ describe('SoundChart', () => {
           values: {
             cities: {
               east: {
-                b: { exportVolume: 15, importVolume: 30, isWest: false }
+                b: {
+                  exportVolume: 15,
+                  importVolume: 30,
+                  isWest: false,
+                  sortingValue: 3
+                }
               },
               west: {
-                a: { exportVolume: 30, importVolume: 0, isWest: true },
-                c: { exportVolume: 0, importVolume: 15, isWest: true }
+                a: {
+                  exportVolume: 30,
+                  importVolume: 0,
+                  isWest: true,
+                  sortingValue: 2
+                },
+                c: {
+                  exportVolume: 0,
+                  importVolume: 15,
+                  isWest: true,
+                  sortingValue: 3
+                }
               }
             },
             passages: [

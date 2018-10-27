@@ -17,27 +17,6 @@ import { ProcessTime } from '../../components/ProcessTime';
 import { API_URL } from '../../io/apollo-client';
 import { tryMutation } from '../../utils/form';
 
-const DATASET = gql`
-  query dataset($id: ID!) {
-    dataset(id: $id) {
-      id
-      name
-      valueschemas {
-        name
-        type
-        required
-        fallback
-        unique
-      }
-      entriesCount
-      latestEntries {
-        id
-        values
-      }
-    }
-  }
-`;
-
 const UPLOAD_ENTRIES_CSV = gql`
   mutation($files: [Upload!]!, $datasetId: ID!) {
     uploadEntriesCsv(files: $files, datasetId: $datasetId) {
@@ -110,7 +89,12 @@ export default class DataActionsPage extends Component<
             datasetId: dataset.id
           },
           awaitRefetchQueries: true,
-          refetchQueries: [{ query: DATASET, variables: { id: dataset.id } }]
+          refetchQueries: [
+            {
+              query: ALL_UPLOADS,
+              variables: { datasetId: dataset.id }
+            }
+          ]
         });
 
         await this.setState({

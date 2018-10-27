@@ -410,27 +410,6 @@ describe('Entry', () => {
       }
     }));
 
-  test('should throw error for invalid dataset id', () =>
-    doTestWithDb(async db => {
-      (tryGetDataset as jest.Mock).mockImplementation(() => {
-        throw new Error('Unknown dataset');
-      });
-
-      try {
-        await createEntry(
-          VALID_OBJECT_ID,
-          { test: 9 },
-          {
-            db,
-            userId: ''
-          }
-        );
-        throw NeverGoHereError;
-      } catch (err) {
-        expect(err.message).toBe('Unknown dataset');
-      }
-    }));
-
   test('should throw error for missing required values', () =>
     doTestWithDb(async db => {
       const schemaA: ValueSchema = {
@@ -831,8 +810,8 @@ describe('Entry', () => {
         workspaceId: 'ws',
         valueschemas: [
           {
-            name: 'value',
-            type: DataType.STRING,
+            name: 'test',
+            type: DataType.NUMBER,
             unique: false,
             fallback: '',
             required: true

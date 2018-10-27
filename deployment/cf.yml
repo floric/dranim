@@ -34,35 +34,6 @@ Resources:
           - ExpirationInDays: 30
             Status: Enabled
 
-  ProdServiceRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - ec2.amazonaws.com
-            Action:
-              - sts:AssumeRole
-      Policies:
-        - PolicyName: root
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                Resource: '*'
-
-  ProdInstanceProfile:
-    Type: AWS::IAM::InstanceProfile
-    Properties:
-      Roles:
-        - !Ref ProdServiceRole
-
   EBApplication:
     Type: AWS::ElasticBeanstalk::Application
     Properties:
@@ -73,36 +44,39 @@ Resources:
     Properties:
       ApplicationName: !Ref EBApplication
       OptionSettings:
+        - Namespace: aws:elasticbeanstalk:environment
+          OptionName: EnvironmentType
+          Value: LoadBalanced
+        - Namespace: aws:elasticbeanstalk:environment
+          OptionName: LoadBalancerType
+          Value: application
+        - Namespace: aws:elasticbeanstalk:environment:process:default
+          OptionName: HealthCheckPath
+          Value: /still-alive
+        - Namespace: aws:elasticbeanstalk:environment:process:default
+          OptionName: HealthCheckInterval
+          Value: 30
+        - Namespace: aws:elasticbeanstalk:environment:process:default
+          OptionName: MatcherHTTPCode
+          Value: 200,304
+        - Namespace: aws:elbv2:loadbalancer
+          OptionName: IdleTimeout
+          Value: 600
+        - Namespace: aws:elbv2:listener:443
+          OptionName: ListenerEnabled
+          Value: true
+        - Namespace: aws:elbv2:listener:443
+          OptionName: Protocol
+          Value: HTTPS
+        - Namespace: aws:elbv2:listener:443
+          OptionName: SSLCertificateArns
+          Value: !Ref EuWestCertArn
+        - Namespace: aws:elbv2:listener:443
+          OptionName: DefaultProcess
+          Value: default
         - Namespace: aws:autoscaling:launchconfiguration
           OptionName: InstanceType
-          Value: t3.micro
-        - Namespace: aws:elb:healthcheck
-          OptionName: HealthyThreshold
-          Value: 2
-        - Namespace: aws:elb:healthcheck
-          OptionName: Interval
-          Value: 60
-        - Namespace: aws:elasticbeanstalk:application
-          OptionName: Application Healthcheck URL
-          Value: /still-alive
-        - Namespace: aws:elb:listener:443
-          OptionName: ListenerProtocol
-          Value: HTTPS
-        - Namespace: aws:elb:listener:443
-          OptionName: InstancePort
-          Value: 80
-        - Namespace: aws:elb:listener:443
-          OptionName: InstanceProtocol
-          Value: HTTP
-        - Namespace: aws:elb:listener:443
-          OptionName: SSLCertificateId
-          Value: !Ref EuWestCertArn
-        - Namespace: aws:elb:policies
-          OptionName: ConnectionDrainingEnabled
-          Value: true
-        - Namespace: aws:elb:policies
-          OptionName: ConnectionDrainingTimeout
-          Value: 60
+          Value: t3.small
         - Namespace: aws:elasticbeanstalk:cloudwatch:logs
           OptionName: StreamLogs
           Value: true
@@ -142,6 +116,24 @@ Resources:
         - Namespace: aws:elasticbeanstalk:environment:proxy
           OptionName: ProxyServer
           Value: none
+        - Namespace: aws:elasticbeanstalk:managedactions:platformupdate
+          OptionName: UpdateLevel
+          Value: minor
+        - Namespace: aws:elasticbeanstalk:managedactions:platformupdate
+          OptionName: InstanceRefreshEnabled
+          Value: true
+        - Namespace: aws:elasticbeanstalk:managedactions
+          OptionName: ManagedActionsEnabled
+          Value: true
+        - Namespace: aws:elasticbeanstalk:managedactions
+          OptionName: PreferredStartTime
+          Value: 'Sat:01:00'
+        - Namespace: aws:elasticbeanstalk:healthreporting:system
+          OptionName: SystemType
+          Value: enhanced
+        - Namespace: aws:elasticbeanstalk:command
+          OptionName: DeploymentPolicy
+          Value: Rolling
       SolutionStackName: 64bit Amazon Linux 2018.03 v2.12.3 running Docker 18.06.1-ce
 
   EBEnvironment:
@@ -152,10 +144,10 @@ Resources:
       OptionSettings:
         - Namespace: aws:autoscaling:launchconfiguration
           OptionName: IamInstanceProfile
-          Value: !Ref ProdInstanceProfile
+          Value: aws-elasticbeanstalk-ec2-role
         - Namespace: aws:elasticbeanstalk:environment
           OptionName: ServiceRole
-          Value: !Ref ProdServiceRole
+          Value: aws-elasticbeanstalk-service-role
       Tier:
         Name: WebServer
         Type: Standard

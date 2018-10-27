@@ -1,72 +1,72 @@
 language: node_js
 env:
   global:
-  - CC_TEST_REPORTER_ID=fc64d003bdf120b91db2a980408cf2073efe351171845840b1fa6a0d87b658ea
+    - CC_TEST_REPORTER_ID=fc64d003bdf120b91db2a980408cf2073efe351171845840b1fa6a0d87b658ea
 node_js:
-- '10'
+  - '10'
 cache:
   yarn: true
   directories:
-  - "$HOME/.mongodb-binaries"
-  - node_modules
+    - '$HOME/.mongodb-binaries'
+    - node_modules
 before_install:
-- curl -o- -L https://yarnpkg.com/install.sh | bash
-- export PATH="$HOME/.yarn/bin:$PATH"
-- yarn global add greenkeeper-lockfile@1
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH="$HOME/.yarn/bin:$PATH"
+  - yarn global add greenkeeper-lockfile@1
 before_script:
-- greenkeeper-lockfile-update
-- curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
-  > ./cc-test-reporter
-- chmod +x ./cc-test-reporter
+  - greenkeeper-lockfile-update
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
+    > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
 script:
-- yarn build
-- cd packages/frontend
-- mkdir html
-- mv dist/index.html html/index.html
-- cd ../../
-- cd packages/shared
-- yarn test
-- cd ../backend
-- yarn test
-- cd ../../
-- cp -Lr packages/backend/node_modules packages/backend/dist/node_modules
-- cd packages/backend
-- zip -q -r backend-docker.zip .
-- cd ../../
+  - yarn build
+  - cd packages/frontend
+  - mkdir html
+  - mv dist/index.html html/index.html
+  - cd ../../
+  - cd packages/shared
+  - yarn test
+  - cd ../backend
+  - yarn test
+  - cd ../../
+  - cp -Lr packages/backend/node_modules packages/backend/dist/node_modules
+  - cd packages/backend
+  - zip -q -r backend-docker.zip .
+  - cd ../../
 after_script:
-- cd packages/shared
-- "../../cc-test-reporter format-coverage -o /tmp/codeclimate.shared.json"
-- cd ../backend
-- "../../cc-test-reporter format-coverage -o /tmp/codeclimate.backend.json"
-- cd ../../
-- "./cc-test-reporter sum-coverage /tmp/codeclimate.*.json -p 2 -o tmp/codeclimate.total.json"
-- "./cc-test-reporter upload-coverage -i tmp/codeclimate.total.json"
-- greenkeeper-lockfile-upload
+  - cd packages/shared
+  - '../../cc-test-reporter format-coverage -o /tmp/codeclimate.shared.json'
+  - cd ../backend
+  - '../../cc-test-reporter format-coverage -o /tmp/codeclimate.backend.json'
+  - cd ../../
+  - './cc-test-reporter sum-coverage /tmp/codeclimate.*.json -p 2 -o tmp/codeclimate.total.json'
+  - './cc-test-reporter upload-coverage -i tmp/codeclimate.total.json'
+  - greenkeeper-lockfile-upload
 deploy:
-- provider: s3
-  access_key_id: $AWS_ACCESS_KEY_ID
-  secret_access_key: $AWS_SECRET_ACCESS_KEY
-  bucket: timeseries-explorer-frontendbucket-1jueporougkwu
-  region: eu-west-1
-  cache_control: "public,max-age=604800"
-  local_dir: packages/frontend/dist
-  skip_cleanup: true
-- provider: s3
-  access_key_id: $AWS_ACCESS_KEY_ID
-  secret_access_key: $AWS_SECRET_ACCESS_KEY
-  bucket: timeseries-explorer-frontendbucket-1jueporougkwu
-  region: eu-west-1
-  local_dir: packages/frontend/html
-  skip_cleanup: true
-- provider: elasticbeanstalk
-  access_key_id: $AWS_ACCESS_KEY_ID
-  secret_access_key: $AWS_SECRET_ACCESS_KEY
-  region: eu-west-1
-  app: $AWS_EB_APP
-  env: $AWS_EB_APP_ENV
-  bucket_name: $AWS_APP_ARTIFACTS
-  zip_file: packages/backend/backend-docker.zip
-  skip_cleanup: true
+  - provider: s3
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    bucket: $AWS_FRONTEND_BUCKET
+    region: eu-west-1
+    cache_control: 'public,max-age=604800'
+    local_dir: packages/frontend/dist
+    skip_cleanup: true
+  - provider: s3
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    bucket: $AWS_FRONTEND_BUCKET
+    region: eu-west-1
+    local_dir: packages/frontend/html
+    skip_cleanup: true
+  - provider: elasticbeanstalk
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    region: eu-west-1
+    app: $AWS_EB_APP
+    env: $AWS_EB_APP_ENV
+    bucket_name: $AWS_APP_ARTIFACTS
+    zip_file: packages/backend/backend-docker.zip
+    skip_cleanup: true
 after_deploy:
   - pip install --user awscli
   - export PATH=$PATH:$HOME/.local/bin

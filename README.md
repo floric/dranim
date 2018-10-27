@@ -2,10 +2,10 @@
 
 [![Build Status](https://travis-ci.com/floric/Masterthesis_Prototype.svg?branch=master)](https://travis-ci.com/floric/Masterthesis_Prototype)
 [![Greenkeeper badge](https://badges.greenkeeper.io/floric/Masterthesis_Prototype.svg)](https://greenkeeper.io/)
-[![Maintainability](https://api.codeclimate.com/v1/badges/11ca2c9099496836609c/maintainability)](https://codeclimate.com/github/floric/Masterthesis_Prototype/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/11ca2c9099496836609c/test_coverage)](https://codeclimate.com/github/floric/Masterthesis_Prototype/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/11ca2c9099496836609c/maintainability)](https://codeclimate.com/github/floric/dranim/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/11ca2c9099496836609c/test_coverage)](https://codeclimate.com/github/floric/dranim/test_coverage)
 
-Backend: [![Known Vulnerabilities](https://snyk.io/test/github/floric/Masterthesis_Prototype/badge.svg?targetFile=packages/backend/package.json)](https://snyk.io/test/github/floric/Masterthesis_Prototype) Frontend: [![Known Vulnerabilities](https://snyk.io/test/github/floric/Masterthesis_Prototype/badge.svg?targetFile=packages/frontend/package.json)](https://snyk.io/test/github/floric/Masterthesis_Prototype) Shared: [![Known Vulnerabilities](https://snyk.io/test/github/floric/Masterthesis_Prototype/badge.svg?targetFile=packages/shared/package.json)](https://snyk.io/test/github/floric/Masterthesis_Prototype)
+Backend: [![Known Vulnerabilities](https://snyk.io/test/github/floric/dranim/badge.svg?targetFile=packages/backend/package.json)](https://snyk.io/test/github/floric/dranim) Frontend: [![Known Vulnerabilities](https://snyk.io/test/github/floric/dranim/badge.svg?targetFile=packages/frontend/package.json)](https://snyk.io/test/github/floric/dranim) Shared: [![Known Vulnerabilities](https://snyk.io/test/github/floric/dranim/badge.svg?targetFile=packages/shared/package.json)](https://snyk.io/test/github/floric/dranim)
 
 ## Requirements
 

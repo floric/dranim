@@ -22,7 +22,9 @@ export const createBirthdaysDemoData = async (reqContext: ApolloContext) => {
   const entries = generateBirthdaysEntries();
   Log.info('Generated birthdays entries');
 
-  await createManyEntries(ds.id, entries, reqContext);
+  await createManyEntries(ds.id, entries, reqContext, {
+    skipSchemaValidation: true
+  });
   await createWorkspace('Birthday Months', reqContext, 'Aggregate by months');
 
   return true;

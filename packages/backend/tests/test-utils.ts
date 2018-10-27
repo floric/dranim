@@ -1,47 +1,34 @@
 import { ApolloContext, NodeInstance, NodeState } from '@masterthesis/shared';
 import { Db, MongoClient } from 'mongodb';
-import MongodbMemoryServer from 'mongodb-memory-server';
 
 export const VALID_OBJECT_ID = '5b07b3129ba658500b75a29a';
 
 export const NeverGoHereError = new Error('Should never reach this line!');
 
 export const doTestWithDb = async (op: (db: Db) => Promise<void>) => {
-  jest.setTimeout(10000);
+  jest.setTimeout(15000);
   jest.resetAllMocks();
 
-  const dbName = `jest-${Math.floor(Math.random() * 1000)}`;
-  const mongodbServer = new MongodbMemoryServer({
-    instance: {
-      dbName
-    }
-  });
-  const uri = await mongodbServer.getConnectionString();
-  const client = await MongoClient.connect(
+  const server = (global as any).__MONGODB_SERVER_;
+
+  await server.start();
+  const uri = await server.getConnectionString();
+  const connection = await MongoClient.connect(
     uri,
-    { useNewUrlParser: true }
+    {
+      useNewUrlParser: true,
+      autoReconnect: false
+    }
   );
-  const database = await client.db(dbName);
+  const db: Db = connection.db();
 
   try {
-    await op(database);
-  } catch (err) {
-    await cleanDatabase(client, mongodbServer);
-    throw err;
-  }
-
-  await cleanDatabase(client, mongodbServer);
-};
-
-const cleanDatabase = async (
-  client: MongoClient,
-  server: MongodbMemoryServer
-) => {
-  if (client.isConnected() && server.isRunning) {
-    await client.close(true);
-  }
-  if (server.isRunning) {
+    await op(db);
     await server.stop();
+  } catch (err) {
+    await server.stop();
+
+    throw err;
   }
 };
 
