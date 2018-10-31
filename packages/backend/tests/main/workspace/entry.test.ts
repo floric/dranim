@@ -827,7 +827,7 @@ describe('Entry', () => {
         [{ test: 1 }, { test: 2 }],
         { db, userId: '' }
       );
-      expect(res).toBe(true);
+      expect(res).toEqual({ errors: {}, addedEntries: 2 });
 
       const entriesCount = await getEntriesCount(VALID_OBJECT_ID, {
         db,
@@ -838,23 +838,57 @@ describe('Entry', () => {
 
   test('should catch error when calling createManyEntries throws error', () =>
     doTestWithDb(async db => {
-      try {
-        await createManyEntries(VALID_OBJECT_ID, [null], {
-          db,
-          userId: ''
-        });
-        throw NeverGoHereError;
-      } catch (err) {
-        expect(err.message).toBe('Writing entry failed.');
-      }
+      const ds: Dataset = {
+        id: VALID_OBJECT_ID,
+        userId: '',
+        name: 'ds',
+        created: '',
+        description: '',
+        workspaceId: 'ws',
+        valueschemas: [
+          {
+            name: 'test',
+            type: DataType.NUMBER,
+            unique: false,
+            fallback: '',
+            required: true
+          }
+        ]
+      };
+      (tryGetDataset as jest.Mock).mockResolvedValue(ds);
+
+      const res = await createManyEntries(VALID_OBJECT_ID, [null], {
+        db,
+        userId: ''
+      });
+      expect(res).toEqual({ addedEntries: 0, errors: { 'value-empty': 1 } });
     }));
 
   test('should do nothing when calling createManyEntries with empty list', () =>
     doTestWithDb(async db => {
+      const ds: Dataset = {
+        id: VALID_OBJECT_ID,
+        userId: '',
+        name: 'ds',
+        created: '',
+        description: '',
+        workspaceId: 'ws',
+        valueschemas: [
+          {
+            name: 'test',
+            type: DataType.NUMBER,
+            unique: false,
+            fallback: '',
+            required: true
+          }
+        ]
+      };
+      (tryGetDataset as jest.Mock).mockResolvedValue(ds);
+
       const res = await createManyEntries(VALID_OBJECT_ID, [], {
         db,
         userId: ''
       });
-      expect(res).toBe(true);
+      expect(res).toEqual({ errors: {}, addedEntries: 0 });
     }));
 });

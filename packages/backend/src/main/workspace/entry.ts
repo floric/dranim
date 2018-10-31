@@ -90,26 +90,32 @@ export interface CreateEntryOptions {
   skipSchemaValidation?: boolean;
 }
 
-const processEntry = async (
+type CheckEntryResult = { values: Values; error: UploadEntryError | null };
+
+const processEntry = (
   ds: Dataset,
   values: Values,
   options?: CreateEntryOptions
-): Promise<Values> => {
-  checkForInvalidOrEmptyValues(values);
+): CheckEntryResult => {
+  try {
+    checkForInvalidOrEmptyValues(values);
 
-  if (!options || !options.skipSchemaValidation) {
-    const keys = Object.keys(values);
-    checkForMissingValues(ds, keys);
-    checkForUnsupportedValues(ds, keys);
+    if (!options || !options.skipSchemaValidation) {
+      const keys = Object.keys(values);
+      checkForMissingValues(ds, keys);
+      checkForUnsupportedValues(ds, keys);
+    }
+
+    ds.valueschemas
+      .filter(v => v.type === DataType.TIME || v.type === DataType.DATETIME)
+      .forEach(c => {
+        values[c.name] = new Date(values[c.name]);
+      });
+  } catch (error) {
+    return { values: {}, error };
   }
 
-  ds.valueschemas
-    .filter(v => v.type === DataType.TIME || v.type === DataType.DATETIME)
-    .forEach(c => {
-      values[c.name] = new Date(values[c.name]);
-    });
-
-  return values;
+  return { values, error: null };
 };
 
 export const createEntry = async (
@@ -128,7 +134,10 @@ export const createEntryWithDataset = async (
   reqContext: ApolloContext,
   options?: CreateEntryOptions
 ): Promise<Entry> => {
-  const processedValue = await processEntry(ds, values, options);
+  const checkedEntry = processEntry(ds, values, options);
+  if (checkedEntry.error) {
+    throw checkedEntry.error;
+  }
 
   try {
     const collection = getEntryCollection<Omit<Entry, 'id'>>(
@@ -136,7 +145,7 @@ export const createEntryWithDataset = async (
       reqContext.db
     );
     const res = await collection.insertOne({
-      values: processedValue
+      values: checkedEntry.values
     });
 
     if (res.result.ok !== 1 || res.ops.length !== 1) {
@@ -161,43 +170,89 @@ export const createEntryWithDataset = async (
   }
 };
 
+type CreateManyResult = {
+  addedEntries: number;
+  errors: { [name: string]: number };
+};
+
+export const createManyEntriesWithDataset = async (
+  ds: Dataset,
+  values: Array<Values>,
+  reqContext: ApolloContext,
+  options?: CreateEntryOptions
+): Promise<CreateManyResult> => {
+  if (values.length === 0) {
+    return { addedEntries: 0, errors: {} };
+  }
+
+  const processedValues = await Promise.all(
+    values.map(async n => processEntry(ds, n, options))
+  );
+
+  try {
+    const collection = getEntryCollection<Omit<Entry, 'id'>>(
+      ds.id,
+      reqContext.db
+    );
+    const res = await collection.insertMany(
+      processedValues
+        .filter(v => v.error == null)
+        .map(n => ({ values: n.values })),
+      {
+        ordered: false
+      }
+    );
+
+    return {
+      addedEntries: res.insertedCount,
+      errors: aggregateErrors(processCheckErrors(processedValues))
+    };
+  } catch (err) {
+    return {
+      addedEntries: err.result ? err.result.result.nInserted : 0,
+      errors: aggregateErrors([
+        ...processCheckErrors(processedValues),
+        ...(err.writeErrors
+          ? err.writeErrors.map(
+              e =>
+                e.err.code === 11000
+                  ? 'key-already-used'
+                  : 'internal-write-error'
+            )
+          : [])
+      ])
+    };
+  }
+};
+
+const processCheckErrors = (processedValues: Array<CheckEntryResult>) =>
+  processedValues.filter(n => n.error != null).map(n => n.error!.getType());
+
+const aggregateErrors: (
+  errors: Array<string>
+) => { [name: string]: number } = errors => {
+  const res = {};
+  errors.forEach(e => {
+    res[e] = res[e] !== undefined ? res[e] + 1 : 1;
+  });
+  return res;
+};
+
 export const createManyEntries = async (
   datasetId: string,
   values: Array<Values>,
   reqContext: ApolloContext,
   options?: CreateEntryOptions
-): Promise<boolean> => {
-  if (values.length === 0) {
-    return true;
-  }
+): Promise<CreateManyResult> => {
   const ds = await tryGetDataset(datasetId, reqContext);
-
-  try {
-    const processedValues = await Promise.all(
-      values.map(async n => ({
-        values: await processEntry(ds, n, options)
-      }))
-    );
-
-    const collection = getEntryCollection<Omit<Entry, 'id'>>(
-      ds.id,
-      reqContext.db
-    );
-    const res = await collection.insertMany(processedValues, {
-      ordered: false
-    });
-
-    if (res.insertedCount !== values.length) {
-      throw new Error('Writing entry failed');
-    }
-
-    return true;
-  } catch (err) {
-    throw new UploadEntryError('Writing entry failed.', 'internal-write-error');
-  }
+  return await createManyEntriesWithDataset(ds, values, reqContext, options);
 };
 
 const checkForInvalidOrEmptyValues = (values: Values) => {
+  if (!values) {
+    throw new UploadEntryError('Values empty', 'value-empty');
+  }
+
   const valuesArr = Object.entries(values);
   if (valuesArr.length === 0) {
     throw new UploadEntryError('No values specified for entry.', 'no-values');
@@ -205,7 +260,10 @@ const checkForInvalidOrEmptyValues = (values: Values) => {
 
   valuesArr.forEach(v => {
     if (!v || v[0] == null || v[1] == null) {
-      throw new Error(`Value malformed: ${JSON.stringify(values)}`);
+      throw new UploadEntryError(
+        `Value malformed: ${JSON.stringify(values)}`,
+        'value-malformed'
+      );
     }
   });
 };

@@ -1,11 +1,8 @@
 import { Readable } from 'stream';
 
-import { Dataset, DataType, ProcessState } from '@masterthesis/shared';
+import { Dataset, DataType, ProcessState, sleep } from '@masterthesis/shared';
 import { tryGetDataset } from '../../../src/main/workspace/dataset';
-import {
-  createEntryWithDataset,
-  getEntriesCount
-} from '../../../src/main/workspace/entry';
+import { createManyEntriesWithDataset } from '../../../src/main/workspace/entry';
 import {
   getAllUploads,
   getUpload,
@@ -53,7 +50,7 @@ describe('Upload', () => {
       expect(res).toBe(null);
     }));
 
-  test('should do upload with valid and invalid entries', () =>
+  test('should throw error when trying to upload with valid and invalid entries', () =>
     doTestWithDb(async db => {
       (tryGetDataset as jest.Mock).mockImplementation(() => {
         throw new Error('Unknown DS');
@@ -101,9 +98,10 @@ describe('Upload', () => {
         workspaceId: ''
       };
       (tryGetDataset as jest.Mock).mockResolvedValue(ds);
-      (getEntriesCount as jest.Mock)
-        .mockResolvedValueOnce(0)
-        .mockResolvedValueOnce(75);
+      (createManyEntriesWithDataset as jest.Mock).mockResolvedValue({
+        addedEntries: 50,
+        errors: { 'invalid-entry': 10, 'other-error': 15 }
+      });
 
       const stream = new Counter();
       const res = await uploadEntriesCsv(
@@ -115,8 +113,9 @@ describe('Upload', () => {
         }
       );
 
-      const { id, start, ...rest } = res;
-      expect(rest).toEqual({
+      expect(res).toEqual({
+        start: expect.any(Date),
+        id: expect.any(String),
         addedEntries: 0,
         datasetId: VALID_OBJECT_ID,
         errors: {},
@@ -127,48 +126,58 @@ describe('Upload', () => {
         state: ProcessState.STARTED
       });
 
-      await new Promise((resolve, reject) =>
-        setTimeout(async () => {
-          const tmp = await getUpload(id, { db, userId: '' });
-          if (!tmp) {
-            reject('Upload failed');
-          }
+      await sleep(3000);
 
-          const { state } = tmp;
-          if (state === ProcessState.SUCCESSFUL) {
-            resolve();
-          }
-
-          reject();
-        }, 1000)
-      );
-
-      const upload = await getUpload(id, { db, userId: '' });
+      const upload = await getUpload(res.id, { db, userId: '' });
 
       expect(stream.read()).toBe(null);
-      expect(upload.addedEntries).toBe(75);
-      expect(upload.failedEntries).toBe(0);
-      expect(upload.invalidEntries).toBe(150);
-      expect(upload.errors).toEqual({});
+      expect(upload).toEqual({
+        addedEntries: 50,
+        datasetId: ds.id,
+        errors: {
+          'invalid-entry': {
+            count: 10,
+            message: 'invalid-entry'
+          },
+          'other-error': {
+            count: 15,
+            message: 'other-error'
+          }
+        },
+        failedEntries: 25,
+        fileNames: ['test.csv'],
+        finish: expect.any(Date),
+        id: expect.any(String),
+        invalidEntries: 75,
+        start: expect.any(Date),
+        state: ProcessState.SUCCESSFUL
+      });
 
       const uploads = await getAllUploads(VALID_OBJECT_ID, { db, userId: '' });
-      expect(
-        uploads.map(n => ({ ...n, finish: new Date(0), start: new Date(0) }))
-      ).toEqual([
+      expect(uploads).toEqual([
         {
-          addedEntries: 75,
+          addedEntries: 50,
           datasetId: VALID_OBJECT_ID,
-          errors: {},
-          failedEntries: 0,
+          errors: {
+            'invalid-entry': {
+              count: 10,
+              message: 'invalid-entry'
+            },
+            'other-error': {
+              count: 15,
+              message: 'other-error'
+            }
+          },
+          failedEntries: 25,
           fileNames: ['test.csv'],
-          finish: new Date(0),
+          finish: expect.any(Date),
           id: upload.id,
-          invalidEntries: 150,
-          start: new Date(0),
+          invalidEntries: 75,
+          start: expect.any(Date),
           state: ProcessState.SUCCESSFUL
         }
       ]);
 
-      expect(createEntryWithDataset).toHaveBeenCalledTimes(75);
+      expect(createManyEntriesWithDataset).toHaveBeenCalledTimes(1);
     }));
 });

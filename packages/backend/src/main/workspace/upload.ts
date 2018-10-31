@@ -5,21 +5,22 @@ import {
   ProcessState,
   UploadProcess,
   ValueSchema,
-  sleep
+  Values
 } from '@masterthesis/shared';
 import fastCsv from 'fast-csv';
 import { Db, ObjectID } from 'mongodb';
 import promisesAll from 'promises-all';
+import { Batcher } from 'promise-batcher';
 import { Readable } from 'stream';
 
 import { Log } from '../../logging';
 import { Omit } from '../../main';
 import { tryGetDataset } from '../../main/workspace/dataset';
-import {
-  createEntryWithDataset,
-  getEntriesCount
-} from '../../main/workspace/entry';
+import { createManyEntriesWithDataset } from '../../main/workspace/entry';
 import { getSafeObjectID } from '../utils';
+
+const MAX_BATCH_SIZE = 25000;
+const MAX_BATCH_DELAY = 2000;
 
 interface ApolloFile {
   stream: Readable;
@@ -27,7 +28,7 @@ interface ApolloFile {
 }
 
 export class UploadEntryError extends Error {
-  private errorType;
+  private errorType: string;
 
   constructor(customMessage: string, errorType: string) {
     super(customMessage);
@@ -154,37 +155,6 @@ const isValidEntry = (transformedInput: {
     .reduce((a, b) => a && b, true);
 };
 
-const processValidEntry = async (
-  values: any,
-  ds: Dataset,
-  processId: string,
-  reqContext: ApolloContext
-) => {
-  const collection = getUploadsCollection(reqContext.db);
-
-  try {
-    await createEntryWithDataset(ds, values.obj, reqContext);
-  } catch (err) {
-    if (err.errorType && err.errorType.length > 0) {
-      await collection.updateOne(
-        { _id: getSafeObjectID(processId) },
-        {
-          $inc: {
-            failedEntries: 1,
-            [`errors.${err.errorType}.count`]: 1
-          },
-          $set: {
-            [`errors.${err.errorType}.message`]: err.message
-          }
-        },
-        { upsert: true }
-      );
-    } else {
-      Log.error(err);
-    }
-  }
-};
-
 const parseCsvFile = async (
   stream: Readable,
   filename: string,
@@ -194,11 +164,10 @@ const parseCsvFile = async (
 ): Promise<boolean> => {
   Log.info(`Started import of ${filename}.`);
 
-  try {
-    // TODO avoid race conditions with counts in a better way
-    const oldCount = await getEntriesCount(ds.id, reqContext);
-    let invalidEntries = 0;
+  const dbRequestBatcher = initBatcher(ds, processId, reqContext);
 
+  try {
+    let invalidEntries = 0;
     await new Promise((resolve, reject) => {
       const csvStream = fastCsv({
         ignoreEmpty: true,
@@ -209,23 +178,25 @@ const parseCsvFile = async (
       })
         .transform(obj => cleanData({ obj, schema: ds.valueschemas }))
         .validate(isValidEntry)
-        .on('data', values =>
-          processValidEntry(values, ds, processId, reqContext)
-        )
-        .on('data-invalid', () => {
-          invalidEntries++;
+        .on('data', values => dbRequestBatcher.getResult(values.obj))
+        .on('data-invalid', a => {
+          if (a) {
+            invalidEntries++;
+          }
         });
 
       stream
         .pipe(csvStream)
         .on('error', reject)
         .on('finish', async () => {
-          await sleep(200);
-          const newCount = await getEntriesCount(ds.id, reqContext);
           const collection = getUploadsCollection(reqContext.db);
+          await dbRequestBatcher.send();
           await collection.updateOne(
             { _id: getSafeObjectID(processId) },
-            { $set: { invalidEntries, addedEntries: newCount - oldCount } }
+            {
+              $set: { invalidEntries }
+            },
+            { upsert: true }
           );
           resolve();
         });
@@ -237,6 +208,42 @@ const parseCsvFile = async (
 
   return true;
 };
+
+const initBatcher = (
+  ds: Dataset,
+  processId: string,
+  reqContext: ApolloContext
+) =>
+  new Batcher<Values, boolean>({
+    batchingFunction: async values => {
+      Log.info('Doing batch request with ' + values.length + ' items');
+
+      const res = await createManyEntriesWithDataset(ds, values, reqContext);
+      const errorNames = {};
+      const incArg = {};
+      let failedEntries = 0;
+      Object.entries(res.errors).forEach(e => {
+        errorNames[`errors.${e[0]}.message`] = e[0];
+        incArg[`errors.${e[0]}.count`] = e[1];
+        failedEntries += e[1];
+      });
+      incArg['failedEntries'] = failedEntries;
+      incArg['addedEntries'] = res.addedEntries;
+
+      const collection = getUploadsCollection(reqContext.db);
+      await collection.updateOne(
+        { _id: getSafeObjectID(processId) },
+        {
+          $inc: incArg,
+          ...(Object.keys(errorNames).length > 0 ? { $set: errorNames } : {})
+        },
+        { upsert: true }
+      );
+      return new Array(values.length);
+    },
+    maxBatchSize: MAX_BATCH_SIZE,
+    queuingDelay: MAX_BATCH_DELAY
+  });
 
 const processUpload = async (
   file: ApolloFile,
@@ -259,7 +266,7 @@ const processUpload = async (
   }
 };
 
-const doUploadAsync = async (
+const startUpload = async (
   ds: Dataset,
   processId: string,
   files: Array<ApolloFile>,
@@ -321,7 +328,7 @@ export const uploadEntriesCsv = async (
       id: _id.toHexString(),
       ...rest
     };
-    await doUploadAsync(ds, process.id, files, reqContext);
+    await startUpload(ds, process.id, files, reqContext);
 
     return process;
   } catch (err) {
