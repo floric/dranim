@@ -5,8 +5,9 @@ export class InMemoryCache {
     key: string,
     fetchFn: () => Promise<T>
   ): Promise<T> {
-    if (this.cache.has(key)) {
-      return this.cache.get(key);
+    const cachedRes = this.cache.get(key);
+    if (cachedRes !== undefined) {
+      return cachedRes;
     }
 
     const res = await fetchFn();

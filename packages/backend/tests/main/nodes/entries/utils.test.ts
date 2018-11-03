@@ -249,13 +249,13 @@ describe.only('Entries Utils', () => {
   });
 
   test('should not update progress and sleep', async () => {
-    await updateNodeProgressWithSleep(1, 500, VALID_OBJECT_ID, reqContext);
+    await updateNodeProgressWithSleep(1, 500, VALID_OBJECT_ID, reqContext, 0);
 
     expect(updateProgress).not.toHaveBeenCalled();
   });
 
   test('should update progress and sleep', async () => {
-    await updateNodeProgressWithSleep(0, 10, VALID_OBJECT_ID, reqContext);
+    await updateNodeProgressWithSleep(0, 10, VALID_OBJECT_ID, reqContext, 1);
 
     expect(updateProgress).toHaveBeenCalledTimes(1);
     expect(updateProgress).toHaveBeenCalledWith(VALID_OBJECT_ID, 0, {
@@ -265,8 +265,8 @@ describe.only('Entries Utils', () => {
   });
 
   test('should update progress and sleep', async () => {
-    await updateNodeProgressWithSleep(2, 10, VALID_OBJECT_ID, reqContext, 2);
-    await updateNodeProgressWithSleep(4, 10, VALID_OBJECT_ID, reqContext, 2);
+    await updateNodeProgressWithSleep(2, 10, VALID_OBJECT_ID, reqContext, 10);
+    await updateNodeProgressWithSleep(4, 10, VALID_OBJECT_ID, reqContext, 10);
 
     expect(updateProgress).toHaveBeenCalledTimes(2);
   });

@@ -21,11 +21,7 @@ export const DatasetOutputNode: ServerNodeDef<
   type: DatasetOutputNodeDef.type,
   isFormValid: isOutputFormValid,
   onMetaExecution: () => Promise.resolve({}),
-  onNodeExecution: async (
-    form,
-    inputs,
-    { reqContext, node: { workspaceId } }
-  ) => {
+  onNodeExecution: async (form, inputs, { reqContext }) => {
     const ds = await createDataset(form.name!, reqContext);
     for (const s of inputs.dataset.schema) {
       await addValueSchema(ds.id, s, reqContext);

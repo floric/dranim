@@ -499,14 +499,14 @@ describe('DistinctEntriesNode', () => {
               value: 3
             },
             {
-              'destination-distinct': 'a',
-              'source-distinct': 'c',
-              value: 2
-            },
-            {
               'destination-distinct': 'c',
               'source-distinct': 'b',
               value: 10
+            },
+            {
+              'destination-distinct': 'a',
+              'source-distinct': 'c',
+              value: 2
             }
           ],
           schema: [

@@ -1207,11 +1207,6 @@
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-23.3.7.tgz#77f9a4332ccf8db680a31818ade3ee454c831a79"
   integrity sha512-N0p6mHrS0RHC3A9hHN4QH1RM2fGSb2E8rt6ONEK5xKSnyKtn/JAhr1VritkCn6cdyDBephVB80THqJGWzK8FAw==
 
-"@types/js-combinatorics@^0.5.29":
-  version "0.5.29"
-  resolved "https://registry.yarnpkg.com/@types/js-combinatorics/-/js-combinatorics-0.5.29.tgz#47a7819a0b6925b6dc4bd2c2278a7e6329b29387"
-  integrity sha1-R6eBmgtpJbbcS9LCJ4p+Yymyk4c=
-
 "@types/long@^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@types/long/-/long-4.0.0.tgz#719551d2352d301ac8b81db732acb6bdc28dbdef"
@@ -7994,11 +7989,6 @@ js-beautify@^1.7.5:
     editorconfig "^0.15.0"
     mkdirp "~0.5.0"
     nopt "~4.0.1"
-
-js-combinatorics@^0.5.3:
-  version "0.5.3"
-  resolved "https://registry.yarnpkg.com/js-combinatorics/-/js-combinatorics-0.5.3.tgz#5da5a1c4632ec59fdf8d49dccfe59ef088122b15"
-  integrity sha512-egCSKDP7vcTlwSyIVuipmGc4Btxpb8ftQ+dhRMgQHJ9JwifXS/yBeTokLADjoJmip4T20yEMJK4YT/DNkOTUtQ==
 
 js-tokens@^3.0.0, js-tokens@^3.0.2:
   version "3.0.2"

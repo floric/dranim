@@ -171,8 +171,13 @@ const executeOutputNode = async (
   processId: string,
   reqContext: ApolloContext
 ): Promise<NodeOutputResult<any> | null> => {
-  const cache = new InMemoryCache();
-  const res = await executeNode(o, processId, reqContext, {}, cache);
+  const res = await executeNode(
+    o,
+    processId,
+    reqContext,
+    {},
+    new InMemoryCache()
+  );
   return res.results || null;
 };
 

@@ -44,11 +44,11 @@ export const executeNode = async (
   const nodeInputs = inputValuesToObject(inputValues);
   const nodeForm = parseNodeForm(node.form);
 
-  await validateInputs(node, nodeInputs, reqContext);
+  await validateInputs(node, nodeInputs, reqContext, cache);
 
   const type = tryGetNodeType(node.type);
   if (hasContextFn(type)) {
-    return await executeContext(
+    return await executeNodeWithContextFn(
       node,
       type,
       nodeForm,
@@ -68,15 +68,21 @@ export const executeNode = async (
 const validateInputs = async (
   node: NodeInstance,
   nodeInputs: IOValues<{}>,
-  reqContext: ApolloContext
+  reqContext: ApolloContext,
+  cache: InMemoryCache
 ) => {
-  const execValid = await areNodeInputsValid(node, nodeInputs, reqContext);
+  const execValid = await areNodeInputsValid(
+    node,
+    nodeInputs,
+    reqContext,
+    cache
+  );
   if (!execValid) {
     throw new Error('Execution inputs are not valid');
   }
 };
 
-const executeContext = async (
+const executeNodeWithContextFn = async (
   node: NodeInstance,
   type: ServerNodeDefWithContextFn,
   nodeForm: FormValues<any>,
@@ -113,12 +119,10 @@ const getContextNodeOutputs = (
     value: string;
   }>
 ) => {
-  const res = {};
-  inputValues.forEach(i => {
-    res[i.socketName] = i.value;
-  });
+  const outputs = {};
+  inputValues.forEach(i => (outputs[i.socketName] = i.value));
   return {
-    outputs: res
+    outputs
   };
 };
 

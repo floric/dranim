@@ -17,10 +17,6 @@ import { addValueSchema } from '../../workspace/dataset';
 import { getEntryCollection } from '../../workspace/entry';
 import { updateProgress } from '../../workspace/nodes-detail';
 
-export const CHECK_FREQUENCY = 5000;
-export const CONCURRENT_JOBS_COUNT = 4;
-const PROGRESS_UPDATE_FREQUENCY = 10000;
-
 export const copySchemas = (
   schemas: Array<ValueSchema>,
   newDsId: string,
@@ -78,7 +74,7 @@ export const processDocumentsWithCursor = async <T = any>(
   options?: ProcessOptions
 ): Promise<void> => {
   const queue = new PromiseQueue(
-    options && options.concurrency ? options.concurrency : CONCURRENT_JOBS_COUNT
+    options && options.concurrency ? options.concurrency : 4
   );
 
   try {
@@ -99,8 +95,9 @@ export const updateNodeProgressWithSleep = async (
   total: number,
   nodeId: string,
   reqContext: ApolloContext,
-  updateFrequency: number = PROGRESS_UPDATE_FREQUENCY
+  updateAmount = 5
 ) => {
+  const updateFrequency = Math.ceil(total / updateAmount);
   if (i % updateFrequency === 0) {
     const progress = (i * 100) / total;
     await Promise.all([

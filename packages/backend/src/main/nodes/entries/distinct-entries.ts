@@ -1,6 +1,5 @@
 import {
   allAreDefinedAndPresent,
-  DatasetRef,
   DataType,
   DistinctEntriesNodeDef,
   DistinctEntriesNodeForm,
@@ -10,9 +9,10 @@ import {
   SocketDefs,
   SocketState,
   Values,
-  ValueSchema
+  ValueSchema,
+  DatasetRef
 } from '@masterthesis/shared';
-import Combinatorics from 'js-combinatorics';
+
 import { updateNodeProgressWithSleep } from './utils';
 
 const getDistinctValueName = (vsName: string) => `${vsName}-distinct`;
@@ -109,40 +109,28 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
   ) => {
     const { distinctSchemas, addedSchemas } = form;
 
-    const distinctValuesArr = getDistinctValuesArr(
+    const usedCombinations = getDistinctHashMap(
       distinctSchemas!,
       inputs.dataset.entries
     );
-    const names = distinctValuesArr.map(n => n[0]);
-    const entries: Array<Values> = [];
-    const permutations = await getPermutations(
-      distinctValuesArr.map(n => Array.from(n[1].values()))
-    );
+
     let i = 0;
+    const entries: Array<Values> = [];
 
-    for (const distinctE of permutations) {
-      const filteredDatasetEntries = getFilteredDataset(
-        inputs.dataset.entries,
-        distinctE,
-        names
+    for (const m of usedCombinations) {
+      const res = await contextFnExecution!(
+        getContextArguments(m.distinctValues, {
+          entries: m.filteredEntries,
+          schema: inputs.dataset.schema
+        })
       );
-
-      if (filteredDatasetEntries.length > 0) {
-        const args = getContextArguments(
-          distinctE,
-          { entries: filteredDatasetEntries, schema: inputs.dataset.schema },
-          names
-        );
-        const res = await contextFnExecution!(args);
-        entries.push(res.outputs);
-      }
+      entries.push(res.outputs);
 
       await updateNodeProgressWithSleep(
         i,
-        permutations.length,
+        usedCombinations.length,
         id,
-        reqContext,
-        1000
+        reqContext
       );
       i++;
     }
@@ -164,53 +152,47 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
   }
 };
 
-const getPermutations = (args: Array<Array<string>>) =>
-  new Promise<Array<Array<string>>>(resolve => {
-    resolve(Combinatorics.cartesianProduct(...args).toArray());
-  });
-
 const getContextArguments = (
-  distinctE: Array<string>,
-  filteredDataset: DatasetRef,
-  names: Array<string>
+  fieldValues: Values,
+  filteredDataset: DatasetRef
 ) => {
   const args: { [name: string]: any } = {};
-  distinctE.forEach((c, i) => (args[getDistinctValueName(names[i])] = c));
+  Object.entries(fieldValues).forEach(
+    field => (args[getDistinctValueName(field[0])] = field[1])
+  );
   args.filteredDataset = filteredDataset;
   return args;
 };
 
-const getFilteredDataset = (
-  entries: Array<Values>,
-  distinctE: Array<string>,
-  names: Array<string>
-): Array<Values> =>
-  entries.filter(e => {
-    for (let i = 0; i < distinctE.length; i++) {
-      const isInEntry = e[names[i]] === distinctE[i];
-      if (!isInEntry) {
-        return false;
-      }
-    }
-
-    return true;
-  });
-
-const getDistinctValuesArr = (
+const getDistinctHashMap = (
   distinctSchemas: Array<ValueSchema>,
   entries: Array<Values>
 ) => {
-  const distinctValues: Map<string, Set<string>> = new Map();
-  for (const s of distinctSchemas!) {
-    distinctValues.set(s.name, new Set());
-  }
+  const assignmentsMap: Map<
+    string,
+    {
+      filteredEntries: Array<Values>;
+      distinctValues: Values;
+    }
+  > = new Map();
+  const names = distinctSchemas.map(n => n.name);
 
   for (const e of entries) {
-    for (const s of distinctSchemas!) {
-      const valueSet = distinctValues.get(s.name)!;
-      valueSet.add(e[s.name]);
+    const combinationKey = names.map(n => e[n]).join('+');
+    let matches = assignmentsMap.get(combinationKey);
+    if (!matches) {
+      matches = {
+        filteredEntries: [],
+        distinctValues: {}
+      };
+      names.forEach(n => (matches!.distinctValues[n] = e[n]));
     }
+
+    assignmentsMap.set(combinationKey, {
+      ...matches,
+      filteredEntries: [...matches.filteredEntries, e]
+    });
   }
 
-  return Array.from(distinctValues.entries());
+  return Array.from(assignmentsMap.values());
 };
