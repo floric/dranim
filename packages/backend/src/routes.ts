@@ -5,6 +5,7 @@ import { Log } from './logging';
 import { login, register } from './main/users/management';
 import { getDataset } from './main/workspace/dataset';
 import { getEntryCollection } from './main/workspace/entry';
+import { InMemoryCache } from '@masterthesis/shared';
 
 export const generateErrorResponse = (message: string) =>
   JSON.stringify({ error: { message } });
@@ -40,7 +41,7 @@ const registerRegistration = (app: Express, db: Db) => {
         req.body.lastName,
         req.body.mail,
         req.body.pw,
-        { db, userId: req.session!.userId }
+        { db, userId: req.session!.userId, cache: new InMemoryCache() }
       );
       if (result) {
         (req.session as any).userId = result.id;
@@ -77,7 +78,11 @@ const registerLogin = (app: Express, db: Db) => {
 
     const mail = req.body.mail;
     const pw = req.body.pw;
-    const result = await login(mail, pw, { db, userId: req.session!.userId });
+    const result = await login(mail, pw, {
+      db,
+      userId: req.session!.userId,
+      cache: new InMemoryCache()
+    });
     if (result) {
       (req.session as any).userId = result.id;
       res.status(200).send(JSON.stringify(result));
@@ -93,7 +98,11 @@ const registerDatasetDownloads = (app: Express, db: Db) => {
   app.get('/downloads', async (req, res, next) => {
     if (req.session) {
       const dsId = req.query.dsId;
-      const ds = await getDataset(dsId, { db, userId: req.session.userId });
+      const ds = await getDataset(dsId, {
+        db,
+        userId: req.session.userId,
+        cache: new InMemoryCache()
+      });
       if (!ds) {
         res.status(404).send();
         return;

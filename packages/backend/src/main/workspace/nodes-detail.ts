@@ -14,7 +14,6 @@ import {
 } from '@masterthesis/shared';
 
 import { Log } from '../../logging';
-import { InMemoryCache } from '../calculation/inmemory-cache';
 import { getMetaInputs } from '../calculation/meta-execution';
 import { getNodeType, hasNodeType, tryGetNodeType } from '../nodes/all-nodes';
 import { getSafeObjectID } from '../utils';
@@ -28,16 +27,15 @@ import { updateStates } from './nodes-state';
 
 export const getContextInputDefs = async (
   node: NodeInstance,
-  reqContext: ApolloContext,
-  cache: InMemoryCache = new InMemoryCache()
+  reqContext: ApolloContext
 ): Promise<SocketDefs<any>> => {
   if (hasNodeType(node.type)) {
     return {};
   }
 
-  const parent = await tryGetParentNode(node, reqContext, cache);
+  const parent = await tryGetParentNode(node, reqContext);
   const parentType = tryGetNodeType(parent.type);
-  const parentInputs = await getMetaInputs(parent, reqContext, cache);
+  const parentInputs = await getMetaInputs(parent, reqContext);
 
   if (!hasContextFn(parentType)) {
     throw new Error('Parent nodes should always have a context function');
@@ -51,7 +49,7 @@ export const getContextInputDefs = async (
   );
 
   const variableDefs: SocketDefs<{}> = {};
-  Object.entries(await getInputDefs(parent, reqContext, cache))
+  Object.entries(await getInputDefs(parent, reqContext))
     .filter(n => n[1].state === SocketState.VARIABLE)
     .forEach(n => (variableDefs[n[0]] = n[1]));
 
@@ -60,16 +58,15 @@ export const getContextInputDefs = async (
 
 export const getContextOutputDefs = async (
   node: NodeInstance,
-  reqContext: ApolloContext,
-  cache: InMemoryCache = new InMemoryCache()
+  reqContext: ApolloContext
 ): Promise<SocketDefs<any> & { [name: string]: SocketDef }> => {
   if (hasNodeType(node.type)) {
     return {};
   }
 
-  const parent = await tryGetParentNode(node, reqContext, cache);
+  const parent = await tryGetParentNode(node, reqContext);
   const parentType = tryGetNodeType(parent.type);
-  const parentInputs = await getMetaInputs(parent, reqContext, cache);
+  const parentInputs = await getMetaInputs(parent, reqContext);
 
   if (!hasContextFn(parentType)) {
     throw new Error('Parent nodes should always have a context function');
@@ -88,11 +85,7 @@ export const getContextOutputDefs = async (
     reqContext
   );
 
-  const contextInputs = await getMetaInputs(
-    contextInputNode,
-    reqContext,
-    cache
-  );
+  const contextInputs = await getMetaInputs(contextInputNode, reqContext);
 
   return await parentType.transformContextInputDefsToContextOutputDefs(
     parentType.inputs,
@@ -106,15 +99,14 @@ export const getContextOutputDefs = async (
 
 export const tryGetParentNode = async (
   node: NodeInstance,
-  reqContext: ApolloContext,
-  cache: InMemoryCache = new InMemoryCache()
+  reqContext: ApolloContext
 ) => {
   if (node.contextIds.length === 0) {
     throw new Error('Node doesnt have context');
   }
 
   const parentNodeId = node.contextIds[node.contextIds.length - 1];
-  const parent = await cache.tryGetOrFetch(parentNodeId, () =>
+  const parent = await reqContext.cache.tryGetOrFetch(parentNodeId, () =>
     getNode(parentNodeId, reqContext)
   );
   if (parent === null) {
@@ -126,14 +118,13 @@ export const tryGetParentNode = async (
 
 export const getInputDefs = async (
   node: NodeInstance,
-  reqContext: ApolloContext,
-  cache: InMemoryCache = new InMemoryCache()
+  reqContext: ApolloContext
 ): Promise<SocketDefs<any>> => {
   let inputDefs: SocketDefs<any> = {};
   if (node.type === ContextNodeType.INPUT) {
     return {};
   } else if (node.type === ContextNodeType.OUTPUT) {
-    inputDefs = (await getContextOutputDefs(node, reqContext, cache)) || {};
+    inputDefs = (await getContextOutputDefs(node, reqContext)) || {};
   } else {
     const type = tryGetNodeType(node.type);
     inputDefs = hasContextFn(type)
@@ -146,14 +137,13 @@ export const getInputDefs = async (
 
 export const getOutputDefs = async (
   node: NodeInstance,
-  reqContext: ApolloContext,
-  cache: InMemoryCache = new InMemoryCache()
+  reqContext: ApolloContext
 ): Promise<SocketDefs<any>> => {
   let inputDefs: SocketDefs<any> = {};
   if (node.type === ContextNodeType.OUTPUT) {
     return {};
   } else if (node.type === ContextNodeType.INPUT) {
-    inputDefs = (await getContextInputDefs(node, reqContext, cache)) || {};
+    inputDefs = (await getContextInputDefs(node, reqContext)) || {};
   } else {
     const type = tryGetNodeType(node.type);
     inputDefs = type.outputs;

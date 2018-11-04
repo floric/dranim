@@ -32,7 +32,10 @@ export const UnknownErrorCard: SFC<UnknownErrorCardProps> = ({ error }) => (
       isApolloError(error) ? (
         <>
           {error.networkError ? (
-            <p>We're sorry. There seems to be a networking issue...</p>
+            <p>
+              We're sorry. There seems to be a networking issue. Please reload
+              try to reload the page.
+            </p>
           ) : null}
           {error.graphQLErrors.map((e, id) => (
             <Collapse key={`error-${id}`} bordered={false}>

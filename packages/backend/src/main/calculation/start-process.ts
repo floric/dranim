@@ -18,7 +18,6 @@ import { getSafeObjectID } from '../utils';
 import { clearGeneratedDatasets } from '../workspace/dataset';
 import { getAllNodes } from '../workspace/nodes';
 import { resetProgress } from '../workspace/nodes-detail';
-import { InMemoryCache } from './inmemory-cache';
 
 export const CANCEL_CHECKS_MS = 5000;
 
@@ -171,13 +170,7 @@ const executeOutputNode = async (
   processId: string,
   reqContext: ApolloContext
 ): Promise<NodeOutputResult<any> | null> => {
-  const res = await executeNode(
-    o,
-    processId,
-    reqContext,
-    {},
-    new InMemoryCache()
-  );
+  const res = await executeNode(o, processId, reqContext, {});
   return res.results || null;
 };
 

@@ -54,7 +54,8 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
         i,
         inputs.dataset.entries.length,
         id,
-        reqContext
+        reqContext,
+        10
       );
       if (keepEntry) {
         entries.push(e);

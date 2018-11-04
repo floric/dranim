@@ -2,10 +2,12 @@ import { Db } from 'mongodb';
 
 import { DataType, SocketDefs, SocketMetas, SocketMetaDef } from './sockets';
 import { UserOwned } from './users';
+import { InMemoryCache } from './utils';
 
 export interface ApolloContext {
   db: Db;
   userId: string | null;
+  cache: InMemoryCache;
 }
 
 export enum NodeState {

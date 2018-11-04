@@ -80,7 +80,7 @@ const StartPage: SFC = () => (
       </Col>
       <Col sm={24} md={12} lg={8}>
         <Card bordered={false}>
-          <h2>Examples</h2>
+          <h2>Projects</h2>
           <h3>Sound Toll Registers</h3>
           <p>
             "Sound Toll Registers online (short: STR online) is the electronic
@@ -94,19 +94,25 @@ const StartPage: SFC = () => (
             This will generate empty Tables and a sample Workspace. Note that
             you will still need to upload data.
           </p>
-          <CreateExampleButton type="STR" />
+          <p>
+            <CreateExampleButton type="STR" />
+          </p>
           <Divider />
+          <h2>Examples</h2>
           <h3>Birthdays</h3>
           <p>
             This example contains a Table with 25.000 randomly generated entries
             with persons. Each randomly generated entry consists of a name, a
             sex and a day of birth.
           </p>
-          <CreateExampleButton type="Birthdays" />
-          <Divider />
+          <p>
+            <CreateExampleButton type="Birthdays" />
+          </p>
           <h3>Car Manufacturers</h3>
           <p>Demo data for market shares of german car manufacturers.</p>
-          <CreateExampleButton type="Cars" />
+          <p>
+            <CreateExampleButton type="Cars" />
+          </p>
         </Card>
       </Col>
       <Col sm={24} md={12} lg={16}>

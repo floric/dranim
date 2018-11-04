@@ -1,11 +1,11 @@
 import {
   ConnectionInstance,
   ContextNodeType,
-  hasContextFn,
   NodeDef,
   NodeInstance,
   NodeState,
-  ServerNodeDef
+  ServerNodeDef,
+  InMemoryCache
 } from '@masterthesis/shared';
 
 import { isNodeInMetaValid } from '../../../src/main/calculation/validation';
@@ -31,7 +31,6 @@ import {
 } from '../../../src/main/workspace/nodes-state';
 import { VALID_OBJECT_ID } from '../../test-utils';
 
-jest.mock('@masterthesis/shared');
 jest.mock('../../../src/main/workspace/nodes');
 jest.mock('../../../src/main/workspace/nodes-detail');
 jest.mock('../../../src/main/nodes/all-nodes');
@@ -74,15 +73,17 @@ describe('Node State', () => {
 
     (tryGetNodeType as jest.Mock).mockReturnValueOnce(type);
     (tryGetNode as jest.Mock).mockReturnValueOnce(node);
-    (hasContextFn as any).mockReturnValue(false);
     (getNodesCollection as jest.Mock).mockReturnValue({
       updateOne: jest.fn()
     });
 
-    const res = await updateState(node, { db: null, userId: '' });
+    const res = await updateState(node, {
+      db: null,
+      userId: '',
+      cache: new InMemoryCache()
+    });
     expect(res).toBe(NodeState.VALID);
     expect(getNodesCollection(null).updateOne).toHaveBeenCalledTimes(1);
-    expect(hasContextFn).toHaveBeenCalledTimes(1);
   });
 
   test('should update state for context input node based on parent', async () => {
@@ -140,7 +141,6 @@ describe('Node State', () => {
       onNodeExecution: async () => ({ outputs: {} })
     };
 
-    (hasContextFn as any).mockReturnValueOnce(true).mockReturnValueOnce(false);
     (getNodesCollection as jest.Mock).mockReturnValue({
       updateOne: jest.fn()
     });
@@ -151,10 +151,13 @@ describe('Node State', () => {
     (tryGetContextNode as jest.Mock).mockResolvedValue(contextNode);
     (tryGetParentNode as jest.Mock).mockResolvedValueOnce(parentNode);
 
-    const res = await updateState(node, { db: null, userId: '' });
+    const res = await updateState(node, {
+      db: null,
+      userId: '',
+      cache: new InMemoryCache()
+    });
     expect(res).toBe(NodeState.VALID);
     expect(getNodesCollection(null).updateOne).toHaveBeenCalledTimes(1);
-    expect(hasContextFn).toHaveBeenCalledTimes(1);
   });
 
   test('should update state for node with context', async () => {
@@ -216,19 +219,17 @@ describe('Node State', () => {
 
     (tryGetNodeType as jest.Mock).mockReturnValueOnce(type);
     (tryGetNode as jest.Mock).mockReturnValueOnce(node);
-    (hasContextFn as any)
-      .mockReturnValueOnce(true)
-      .mockReturnValueOnce(false)
-      .mockReturnValueOnce(false)
-      .mockReturnValueOnce(true);
     (getNodesCollection as jest.Mock).mockReturnValue({
       updateOne: jest.fn()
     });
 
-    const res = await updateState(node, { db: null, userId: '' });
+    const res = await updateState(node, {
+      db: null,
+      userId: '',
+      cache: new InMemoryCache()
+    });
     expect(res).toBe(NodeState.VALID);
     expect(getNodesCollection(null).updateOne).toHaveBeenCalledTimes(1);
-    expect(hasContextFn).toHaveBeenCalledTimes(2);
   });
 
   test('should remove invalid connections', async () => {
@@ -236,7 +237,7 @@ describe('Node State', () => {
       {
         workspaceId: VALID_OBJECT_ID,
         contextIds: [],
-        from: { nodeId: VALID_OBJECT_ID, name: 'a' },
+        from: { nodeId: 'other', name: 'a' },
         to: { nodeId: 'o', name: 'a' },
         id: VALID_OBJECT_ID
       },
@@ -250,7 +251,7 @@ describe('Node State', () => {
     ];
     const nodeA: NodeInstance = {
       id: 'i',
-      contextIds: [VALID_OBJECT_ID],
+      contextIds: [],
       form: {},
       inputs: [],
       outputs: [{ name: 'a', connectionId: VALID_OBJECT_ID }],
@@ -264,7 +265,7 @@ describe('Node State', () => {
     };
     const otherNode: NodeInstance = {
       id: 'other',
-      contextIds: [VALID_OBJECT_ID],
+      contextIds: [],
       form: {},
       inputs: [],
       outputs: [{ name: 'a', connectionId: VALID_OBJECT_ID }],
@@ -278,7 +279,7 @@ describe('Node State', () => {
     };
     const nodeB: NodeInstance = {
       id: 'o',
-      contextIds: [VALID_OBJECT_ID],
+      contextIds: [],
       form: {},
       inputs: [{ name: 'a', connectionId: VALID_OBJECT_ID }],
       outputs: [],
@@ -290,6 +291,17 @@ describe('Node State', () => {
       progress: null,
       variables: {}
     };
+    const type: ServerNodeDef & NodeDef = {
+      type: 'type',
+      name: 't',
+      inputs: {},
+      outputs: {},
+      keywords: [],
+      path: [],
+      isFormValid: async () => true,
+      onMetaExecution: async () => ({}),
+      onNodeExecution: async () => ({ outputs: {} })
+    };
     (getAllConnections as jest.Mock).mockResolvedValueOnce(conns);
     (tryGetNode as jest.Mock).mockImplementation(
       async nodeId =>
@@ -298,8 +310,14 @@ describe('Node State', () => {
     (getContextInputDefs as jest.Mock).mockResolvedValue({});
     (getContextOutputDefs as jest.Mock).mockResolvedValue({});
     (getAllNodes as jest.Mock).mockResolvedValueOnce([]);
+    (tryGetNodeType as jest.Mock).mockReturnValue(type);
+    (getNodeType as jest.Mock).mockReturnValue(type);
 
-    await updateStates(VALID_OBJECT_ID, { db: null, userId: '' });
+    await updateStates(VALID_OBJECT_ID, {
+      db: null,
+      userId: '',
+      cache: new InMemoryCache()
+    });
 
     expect(deleteConnection).toHaveBeenCalledTimes(2);
   });
@@ -379,7 +397,11 @@ describe('Node State', () => {
     (getContextOutputDefs as jest.Mock).mockResolvedValue({ a: 0 });
     (getAllNodes as jest.Mock).mockResolvedValueOnce([]);
 
-    await updateStates(VALID_OBJECT_ID, { db: null, userId: '' });
+    await updateStates(VALID_OBJECT_ID, {
+      db: null,
+      userId: '',
+      cache: new InMemoryCache()
+    });
 
     expect(deleteConnection).not.toHaveBeenCalled();
   });
@@ -435,7 +457,11 @@ describe('Node State', () => {
       updateOne: jest.fn()
     });
 
-    await updateStates(VALID_OBJECT_ID, { db: null, userId: '' });
+    await updateStates(VALID_OBJECT_ID, {
+      db: null,
+      userId: '',
+      cache: new InMemoryCache()
+    });
 
     expect(getNodesCollection(null).updateOne).toHaveBeenCalledTimes(3);
   });

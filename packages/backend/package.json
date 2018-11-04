@@ -19,6 +19,7 @@
     "@types/express-session": "^1.15.11",
     "@types/helmet": "0.0.42",
     "@types/morgan": "^1.7.35",
+    "apollo-server-caching": "^0.1.2",
     "apollo-server-express": "^2.1.0",
     "bcrypt": "^3.0.1",
     "body-parser": "^1.18.3",

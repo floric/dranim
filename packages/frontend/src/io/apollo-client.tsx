@@ -5,6 +5,7 @@ import { BatchHttpLink } from 'apollo-link-batch-http';
 import { setContext } from 'apollo-link-context';
 import { onError } from 'apollo-link-error';
 import { createUploadLink } from 'apollo-upload-client';
+import { createPersistedQueryLink } from 'apollo-link-persisted-queries';
 
 export const API_URL =
   process.env.NODE_ENV === 'production'
@@ -48,7 +49,7 @@ export const client = new ApolloClient({
     ApolloLink.split(
       op => op.getContext().hasUpload,
       ApolloLink.from([errorLink, uploadLink]),
-      ApolloLink.from([errorLink, batchLink])
+      ApolloLink.from([createPersistedQueryLink(), errorLink, batchLink])
     )
   ),
   cache: new InMemoryCache()

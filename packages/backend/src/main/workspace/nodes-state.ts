@@ -7,7 +7,6 @@ import {
 } from '@masterthesis/shared';
 
 import { Log } from '../../logging';
-import { InMemoryCache } from '../calculation/inmemory-cache';
 import { isNodeInMetaValid } from '../calculation/validation';
 import { getNodeType } from '../nodes/all-nodes';
 import { getSafeObjectID } from '../utils';
@@ -24,27 +23,22 @@ import {
   tryGetParentNode
 } from './nodes-detail';
 
-export const updateStates = async (
-  wsId: string,
-  reqContext: ApolloContext,
-  cache = new InMemoryCache()
-) => {
+export const updateStates = async (wsId: string, reqContext: ApolloContext) => {
   const allConns = await getAllConnections(wsId, reqContext);
   await Promise.all(
     allConns.map(async c => {
       const [inputNode, outputNode] = await Promise.all([
-        cache.tryGetOrFetch(c.from.nodeId, () =>
+        reqContext.cache.tryGetOrFetch(c.from.nodeId, () =>
           tryGetNode(c.from.nodeId, reqContext)
         ),
-        cache.tryGetOrFetch(c.to.nodeId, () =>
+        reqContext.cache.tryGetOrFetch(c.to.nodeId, () =>
           tryGetNode(c.to.nodeId, reqContext)
         )
       ]);
       if (inputNode.type === ContextNodeType.INPUT) {
         const contextInputDefs = await getContextInputDefs(
           inputNode,
-          reqContext,
-          cache
+          reqContext
         );
         if (contextInputDefs[c.from.name] === undefined) {
           await deleteConnection(c.id, reqContext);
@@ -52,8 +46,7 @@ export const updateStates = async (
       } else if (outputNode.type === ContextNodeType.OUTPUT) {
         const contextOutputDefs = await getContextOutputDefs(
           outputNode,
-          reqContext,
-          cache
+          reqContext
         );
         if (contextOutputDefs[c.to.name] === undefined) {
           await deleteConnection(c.id, reqContext);

@@ -12,12 +12,10 @@ import { Log } from '../../logging';
 import { getMetaInputs } from '../calculation/meta-execution';
 import { tryGetNodeType } from '../nodes/all-nodes';
 import { getInputDefs } from '../workspace/nodes-detail';
-import { InMemoryCache } from './inmemory-cache';
 
 export const isNodeInMetaValid = async (
   node: NodeInstance,
-  reqContext: ApolloContext,
-  cache = new InMemoryCache()
+  reqContext: ApolloContext
 ) => {
   let isValidForm = true;
   if (
@@ -30,7 +28,7 @@ export const isNodeInMetaValid = async (
       : true;
   }
 
-  const metaDefs = await getMetaInputs(node, reqContext, cache);
+  const metaDefs = await getMetaInputs(node, reqContext);
   const allInputsArePresent = Object.values(metaDefs)
     .filter(a => !!a)
     .map(a => a.isPresent)
@@ -42,10 +40,9 @@ export const isNodeInMetaValid = async (
 export const areNodeInputsValid = async (
   node: NodeInstance,
   inputs: IOValues<{}>,
-  reqContext: ApolloContext,
-  cache = new InMemoryCache()
+  reqContext: ApolloContext
 ) => {
-  const inputDefs = await getInputDefs(node, reqContext, cache);
+  const inputDefs = await getInputDefs(node, reqContext);
   const res = await Promise.all(
     Object.entries(inputDefs).map(p =>
       isInputValid(inputs[p[0]], p[1].dataType)

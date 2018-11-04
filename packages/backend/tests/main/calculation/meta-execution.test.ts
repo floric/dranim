@@ -2,13 +2,13 @@ import {
   ConnectionInstance,
   ContextNodeType,
   DataType,
-  hasContextFn,
   NodeDef,
   NodeInstance,
   NodeState,
   ServerNodeDef,
   ServerNodeDefWithContextFn,
-  SocketState
+  SocketState,
+  InMemoryCache
 } from '@masterthesis/shared';
 
 import {
@@ -24,7 +24,6 @@ import {
 } from '../../../src/main/workspace/nodes-detail';
 import { NeverGoHereError } from '../../test-utils';
 
-jest.mock('@masterthesis/shared');
 jest.mock('../../../src/main/workspace/nodes-detail');
 jest.mock('../../../src/main/workspace/connections');
 jest.mock('../../../src/main/workspace/nodes');
@@ -128,7 +127,7 @@ describe('Meta Execution', () => {
         progress: null,
         variables: {}
       },
-      null
+      { cache: new InMemoryCache(), db: null, userId: '' }
     );
     expect(res).toEqual({
       test: { content: {}, isPresent: true }
@@ -151,7 +150,7 @@ describe('Meta Execution', () => {
         progress: null,
         variables: {}
       },
-      null
+      { cache: new InMemoryCache(), db: null, userId: '' }
     );
     expect(res).toEqual({});
   });
@@ -197,7 +196,6 @@ describe('Meta Execution', () => {
     };
     (tryGetParentNode as jest.Mock).mockResolvedValue(parent);
     (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
-    (hasContextFn as any).mockReturnValue(true);
     (getInputDefs as jest.Mock).mockResolvedValue({});
 
     const res = await getMetaOutputs(
@@ -215,7 +213,7 @@ describe('Meta Execution', () => {
         progress: null,
         variables: {}
       },
-      null
+      { cache: new InMemoryCache(), db: null, userId: '' }
     );
     expect(res).toEqual({
       abc: { content: {}, isPresent: true },
@@ -239,7 +237,7 @@ describe('Meta Execution', () => {
         progress: null,
         variables: {}
       };
-      const parentType: ServerNodeDefWithContextFn & NodeDef = {
+      const parentType: ServerNodeDef & NodeDef = {
         type: 'test',
         inputs: {},
         outputs: {},
@@ -247,13 +245,10 @@ describe('Meta Execution', () => {
         path: [],
         name: 'test',
         onMetaExecution: () => Promise.resolve({}),
-        onNodeExecution: () => Promise.resolve({ outputs: {} }),
-        transformContextInputDefsToContextOutputDefs: () => Promise.resolve({}),
-        transformInputDefsToContextInputDefs: () => Promise.resolve({})
+        onNodeExecution: () => Promise.resolve({ outputs: {} })
       };
       (tryGetParentNode as jest.Mock).mockResolvedValue(parent);
       (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
-      (hasContextFn as any).mockReturnValue(false);
 
       await getMetaOutputs(
         {
@@ -270,7 +265,7 @@ describe('Meta Execution', () => {
           progress: null,
           variables: {}
         },
-        null
+        { cache: new InMemoryCache(), db: null, userId: '' }
       );
       throw NeverGoHereError;
     } catch (err) {

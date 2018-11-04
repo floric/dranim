@@ -15,15 +15,13 @@ import {
 import { tryGetNodeType } from '../nodes/all-nodes';
 import { tryGetConnection } from '../workspace/connections';
 import { tryGetContextNode, tryGetNode } from '../workspace/nodes';
-import { InMemoryCache } from './inmemory-cache';
 import { areNodeInputsValid } from './validation';
 
 export const executeNode = async (
   node: NodeInstance,
   processId: string,
   reqContext: ApolloContext,
-  contextInputs: IOValues<any> = {},
-  cache: InMemoryCache = new InMemoryCache()
+  contextInputs: IOValues<any> = {}
 ): Promise<NodeExecutionResult<{}>> => {
   if (node.type === ContextNodeType.INPUT) {
     return {
@@ -33,7 +31,7 @@ export const executeNode = async (
 
   const inputValues = await Promise.all(
     node.inputs.map(i =>
-      getConnectionResult(i, processId, reqContext, contextInputs, cache)
+      getConnectionResult(i, processId, reqContext, contextInputs)
     )
   );
 
@@ -44,7 +42,7 @@ export const executeNode = async (
   const nodeInputs = inputValuesToObject(inputValues);
   const nodeForm = parseNodeForm(node.form);
 
-  await validateInputs(node, nodeInputs, reqContext, cache);
+  await validateInputs(node, nodeInputs, reqContext);
 
   const type = tryGetNodeType(node.type);
   if (hasContextFn(type)) {
@@ -54,8 +52,7 @@ export const executeNode = async (
       nodeForm,
       nodeInputs,
       processId,
-      reqContext,
-      cache
+      reqContext
     );
   }
 
@@ -68,15 +65,9 @@ export const executeNode = async (
 const validateInputs = async (
   node: NodeInstance,
   nodeInputs: IOValues<{}>,
-  reqContext: ApolloContext,
-  cache: InMemoryCache
+  reqContext: ApolloContext
 ) => {
-  const execValid = await areNodeInputsValid(
-    node,
-    nodeInputs,
-    reqContext,
-    cache
-  );
+  const execValid = await areNodeInputsValid(node, nodeInputs, reqContext);
   if (!execValid) {
     throw new Error('Execution inputs are not valid');
   }
@@ -88,10 +79,9 @@ const executeNodeWithContextFn = async (
   nodeForm: FormValues<any>,
   nodeInputs: IOValues<any>,
   processId: string,
-  reqContext: ApolloContext,
-  cache: InMemoryCache
+  reqContext: ApolloContext
 ) => {
-  const outputNode = await cache.tryGetOrFetch<NodeInstance>(
+  const outputNode = await reqContext.cache.tryGetOrFetch<NodeInstance>(
     `con-op-${node.id}`,
     () => tryGetContextNode(node, ContextNodeType.OUTPUT, reqContext)
   );
@@ -100,16 +90,10 @@ const executeNodeWithContextFn = async (
     reqContext,
     node,
     contextFnExecution: inputs =>
-      executeNode(
-        outputNode,
-        processId,
-        reqContext,
-        {
-          ...nodeInputs,
-          ...inputs
-        },
-        cache
-      )
+      executeNode(outputNode, processId, reqContext, {
+        ...nodeInputs,
+        ...inputs
+      })
   });
 };
 
@@ -130,14 +114,13 @@ const getConnectionResult = async (
   i: ConnectionDescription,
   processId: string,
   reqContext: ApolloContext,
-  contextInputs: IOValues<any> = {},
-  cache: InMemoryCache
+  contextInputs: IOValues<any> = {}
 ) => {
-  const conn = await cache.tryGetOrFetch<ConnectionInstance>(
+  const conn = await reqContext.cache.tryGetOrFetch<ConnectionInstance>(
     i.connectionId,
     () => tryGetConnection(i.connectionId, reqContext)
   );
-  const inputNode = await cache.tryGetOrFetch<NodeInstance>(
+  const inputNode = await reqContext.cache.tryGetOrFetch<NodeInstance>(
     conn.from.nodeId,
     () => tryGetNode(conn.from.nodeId, reqContext)
   );
@@ -146,8 +129,7 @@ const getConnectionResult = async (
     inputNode,
     processId,
     reqContext,
-    contextInputs,
-    cache
+    contextInputs
   );
 
   return { socketName: i.name, value: nodeRes.outputs[conn.from.name] };

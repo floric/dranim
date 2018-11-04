@@ -2,15 +2,14 @@ import {
   ConnectionInstance,
   ContextNodeType,
   DataType,
-  hasContextFn,
   NodeDef,
   NodeInstance,
   NodeState,
-  parseNodeForm,
   ProcessState,
   ServerNodeDef,
   ServerNodeDefWithContextFn,
-  SocketState
+  SocketState,
+  InMemoryCache
 } from '@masterthesis/shared';
 
 import { executeNode } from '../../../src/main/calculation/execution';
@@ -27,7 +26,6 @@ import {
 } from '../../../src/main/workspace/nodes';
 import { NeverGoHereError, VALID_OBJECT_ID } from '../../test-utils';
 
-jest.mock('@masterthesis/shared');
 jest.mock('../../../src/main/workspace/workspace');
 jest.mock('../../../src/main/workspace/nodes');
 jest.mock('../../../src/main/calculation/validation');
@@ -81,7 +79,8 @@ describe('Execution', () => {
 
     const { outputs, results } = await executeNode(node, VALID_OBJECT_ID, {
       db: null,
-      userId: ''
+      userId: '',
+      cache: new InMemoryCache()
     });
 
     expect(outputs).toBeDefined();
@@ -179,11 +178,11 @@ describe('Execution', () => {
     (tryGetCalculation as jest.Mock).mockResolvedValue({
       state: ProcessState.PROCESSING
     });
-    (parseNodeForm as jest.Mock).mockReturnValue({ value: 'test' });
 
     const res = await executeNode(nodeB, VALID_OBJECT_ID, {
       db: null,
-      userId: ''
+      userId: '',
+      cache: new InMemoryCache()
     });
 
     expect(res).toEqual({
@@ -216,7 +215,7 @@ describe('Execution', () => {
         variables: {}
       },
       VALID_OBJECT_ID,
-      { db: null, userId: '' },
+      { db: null, userId: '', cache: new InMemoryCache() },
       contextInputs
     );
     expect(res).toEqual({ outputs: contextInputs });
@@ -264,7 +263,7 @@ describe('Execution', () => {
           variables: {}
         },
         VALID_OBJECT_ID,
-        { db: null, userId: '' }
+        { db: null, userId: '', cache: new InMemoryCache() }
       );
       throw NeverGoHereError;
     } catch (err) {
@@ -306,7 +305,11 @@ describe('Execution', () => {
     });
 
     try {
-      await executeNode(node, VALID_OBJECT_ID, { db: null, userId: '' });
+      await executeNode(node, VALID_OBJECT_ID, {
+        db: null,
+        userId: '',
+        cache: new InMemoryCache()
+      });
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Execution inputs are not valid');
@@ -447,7 +450,8 @@ describe('Execution', () => {
 
     const res = await executeNode(sumNode, VALID_OBJECT_ID, {
       db: null,
-      userId: ''
+      userId: '',
+      cache: new InMemoryCache()
     });
 
     expect(res).toEqual({ outputs: { a: 1 } });
@@ -544,16 +548,14 @@ describe('Execution', () => {
     (tryGetConnection as jest.Mock).mockResolvedValue(conn);
     (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
     (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
-    (hasContextFn as any)
-      .mockReturnValueOnce(true)
-      .mockResolvedValueOnce(false);
     (tryGetCalculation as jest.Mock).mockResolvedValue({
       state: ProcessState.PROCESSING
     });
 
     const res = await executeNode(node, VALID_OBJECT_ID, {
       db: null,
-      userId: ''
+      userId: '',
+      cache: new InMemoryCache()
     });
     expect(res).toEqual({ outputs: { a: { x: 1 } } });
   });

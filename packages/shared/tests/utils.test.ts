@@ -4,7 +4,8 @@ import {
   hasContextFn,
   isNumeric,
   parseNodeForm,
-  sleep
+  sleep,
+  InMemoryCache
 } from '../src/utils';
 
 const createNodeWithForm = (form: { [key: string]: string }): NodeInstance => ({
@@ -123,5 +124,20 @@ describe('Utils', () => {
       valB: { isPresent: false, content: {} }
     });
     expect(res).toBe(false);
+  });
+
+  test('should cache following calls', async () => {
+    const fn = jest.fn();
+
+    const cache = new InMemoryCache();
+    await cache.tryGetOrFetch('test', async () => fn());
+    await Promise.all([
+      cache.tryGetOrFetch('test', async () => fn()),
+      cache.tryGetOrFetch('test', async () => fn())
+    ]);
+    await cache.tryGetOrFetch('abc', async () => fn());
+    await cache.tryGetOrFetch('abc', async () => fn());
+
+    expect(fn).toHaveBeenCalledTimes(2);
   });
 });

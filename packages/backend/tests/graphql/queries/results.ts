@@ -12,6 +12,7 @@ import { createNode } from '../../../src/main/workspace/nodes';
 import { addOrUpdateFormValue } from '../../../src/main/workspace/nodes-detail';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
 import { QueryTestCase } from '../../test-utils';
+import { InMemoryCache } from '@masterthesis/shared';
 
 export const resultsTest: QueryTestCase = {
   id: 'Results',
@@ -79,7 +80,11 @@ export const resultsTest: QueryTestCase = {
         reqContext
       )
     ]);
-    await startProcess(ws.id, reqContext, { awaitResult: true });
+    await startProcess(
+      ws.id,
+      { ...reqContext, cache: new InMemoryCache() },
+      { awaitResult: true }
+    );
     const allResults = await getResultsForWorkspace(ws.id, reqContext);
     await Promise.all(
       allResults.map(r => setResultVisibility(r.id, true, reqContext))

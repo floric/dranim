@@ -1,13 +1,13 @@
 import {
   ContextNodeType,
   DataType,
-  hasContextFn,
   NodeDef,
   NodeInstance,
   NodeState,
   ServerNodeDefWithContextFn,
   SocketDef,
-  SocketState
+  SocketState,
+  InMemoryCache
 } from '@masterthesis/shared';
 import { ObjectID } from 'mongodb';
 
@@ -42,7 +42,6 @@ import {
   VALID_OBJECT_ID
 } from '../../test-utils';
 
-jest.mock('@masterthesis/shared');
 jest.mock('../../../src/main/workspace/nodes');
 jest.mock('../../../src/main/workspace/nodes-state');
 jest.mock('../../../src/main/nodes/all-nodes');
@@ -70,13 +69,15 @@ describe('Node Details', () => {
 
       const inputRes = await getContextInputDefs(node, {
         db,
-        userId: ''
+        userId: '',
+        cache: new InMemoryCache()
       });
       expect(inputRes).toEqual({});
 
       const outputRes = await getContextOutputDefs(node, {
         db,
-        userId: ''
+        userId: '',
+        cache: new InMemoryCache()
       });
       expect(outputRes).toEqual({});
     }));
@@ -103,7 +104,8 @@ describe('Node Details', () => {
       try {
         await getContextInputDefs(node, {
           db,
-          userId: ''
+          userId: '',
+          cache: new InMemoryCache()
         });
         throw NeverGoHereError;
       } catch (err) {
@@ -164,11 +166,11 @@ describe('Node Details', () => {
       (getNode as jest.Mock).mockResolvedValue(parentNode);
       (getNodeType as jest.Mock).mockReturnValue(parentType);
       (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
-      (hasContextFn as any).mockReturnValue(true);
 
       const inputRes = await getContextInputDefs(inputNode, {
         db,
-        userId: ''
+        userId: '',
+        cache: new InMemoryCache()
       });
       expect(inputRes).toEqual({});
     }));
@@ -229,11 +231,11 @@ describe('Node Details', () => {
       (getNodeType as jest.Mock).mockReturnValue(parentType);
       (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
       (tryGetContextNode as jest.Mock).mockResolvedValue(inputNode);
-      (hasContextFn as any).mockReturnValue(true);
 
       const outputRes = await getContextOutputDefs(inputNode, {
         db,
-        userId: ''
+        userId: '',
+        cache: new InMemoryCache()
       });
       expect(outputRes).toEqual({});
     }));
@@ -296,12 +298,12 @@ describe('Node Details', () => {
       (tryGetContextNode as jest.Mock).mockImplementation(() => {
         throw new Error('Unknown context node');
       });
-      (hasContextFn as any).mockReturnValue(true);
 
       try {
         await getContextOutputDefs(inputNode, {
           db,
-          userId: ''
+          userId: '',
+          cache: new InMemoryCache()
         });
         throw NeverGoHereError;
       } catch (err) {
@@ -329,7 +331,8 @@ describe('Node Details', () => {
       try {
         await getContextOutputDefs(node, {
           db,
-          userId: ''
+          userId: '',
+          cache: new InMemoryCache()
         });
         throw NeverGoHereError;
       } catch (err) {
@@ -342,7 +345,8 @@ describe('Node Details', () => {
       try {
         await addOrUpdateFormValue(VALID_OBJECT_ID, '', 'test', {
           db,
-          userId: ''
+          userId: '',
+          cache: new InMemoryCache()
         });
         throw NeverGoHereError;
       } catch (err) {
@@ -374,7 +378,8 @@ describe('Node Details', () => {
       try {
         await addOrUpdateFormValue(VALID_OBJECT_ID, 'test', 'test', {
           db,
-          userId: ''
+          userId: '',
+          cache: new InMemoryCache()
         });
         throw NeverGoHereError;
       } catch (err) {
@@ -437,9 +442,6 @@ describe('Node Details', () => {
       (getNode as jest.Mock).mockResolvedValueOnce(parentNode);
       (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
       (hasNodeType as jest.Mock).mockReturnValueOnce(false);
-      (hasContextFn as any)
-        .mockReturnValueOnce(false)
-        .mockReturnValueOnce(true);
       (tryGetContextNode as jest.Mock).mockReturnValue(contextInputNode);
 
       const res = await getInputDefs(
@@ -457,9 +459,8 @@ describe('Node Details', () => {
           progress: null,
           variables: {}
         },
-        null
+        { db, userId: '', cache: new InMemoryCache() }
       );
-      expect(hasContextFn).toHaveBeenCalledTimes(2);
       expect(res).toEqual({
         test: {
           dataType: DataType.DATETIME,
@@ -524,9 +525,6 @@ describe('Node Details', () => {
       (getNode as jest.Mock).mockResolvedValueOnce(parentNode);
       (tryGetNodeType as jest.Mock).mockReturnValue(parentType);
       (hasNodeType as jest.Mock).mockReturnValueOnce(false);
-      (hasContextFn as any)
-        .mockReturnValueOnce(false)
-        .mockReturnValueOnce(true);
       (tryGetContextNode as jest.Mock).mockReturnValue(contextOutputNode);
 
       const res = await getOutputDefs(
@@ -544,9 +542,8 @@ describe('Node Details', () => {
           progress: null,
           variables: {}
         },
-        null
+        { db, userId: '', cache: new InMemoryCache() }
       );
-      expect(hasContextFn).toHaveBeenCalledTimes(3);
       expect(res).toEqual({
         test: {
           dataType: DataType.DATETIME,
@@ -661,7 +658,8 @@ describe('Node Details', () => {
         VALID_OBJECT_ID,
         {
           db,
-          userId: ''
+          userId: '',
+          cache: new InMemoryCache()
         }
       );
       await addConnection(
@@ -671,7 +669,8 @@ describe('Node Details', () => {
         VALID_OBJECT_ID,
         {
           db,
-          userId: ''
+          userId: '',
+          cache: new InMemoryCache()
         }
       );
       await removeConnection(
@@ -680,7 +679,8 @@ describe('Node Details', () => {
         VALID_OBJECT_ID,
         {
           db,
-          userId: ''
+          userId: '',
+          cache: new InMemoryCache()
         }
       );
       await removeConnection(
@@ -689,7 +689,8 @@ describe('Node Details', () => {
         VALID_OBJECT_ID,
         {
           db,
-          userId: ''
+          userId: '',
+          cache: new InMemoryCache()
         }
       );
       expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(4);
@@ -752,14 +753,13 @@ describe('Node Details', () => {
         .mockResolvedValueOnce(sourceNode);
       (getNodeType as jest.Mock).mockReturnValue(contextNodeType);
       (tryGetNodeType as jest.Mock).mockReturnValue(contextNodeType);
-      (hasContextFn as any).mockReturnValue(true);
 
       await addConnection(
         { name: 'test', nodeId: targetNode.id },
         { name: 'test', nodeId: VALID_OBJECT_ID },
         'input',
         VALID_OBJECT_ID,
-        { db, userId: '' }
+        { db, userId: '', cache: new InMemoryCache() }
       );
 
       expect(updateStates).toHaveBeenCalledTimes(1);
@@ -803,7 +803,7 @@ describe('Node Details', () => {
         'test',
         DataType.STRING,
         node,
-        { db, userId: '' }
+        { db, userId: '', cache: new InMemoryCache() }
       );
 
       expect(res).toBe(true);
@@ -833,7 +833,8 @@ describe('Node Details', () => {
 
       const res = await deleteVariable('123', node, {
         db,
-        userId: ''
+        userId: '',
+        cache: new InMemoryCache()
       });
 
       expect(res).toBe(true);
@@ -881,13 +882,12 @@ describe('Node Details', () => {
       });
       (tryGetNode as jest.Mock).mockResolvedValue(node);
       (getNodeType as jest.Mock).mockReturnValue(contextNodeType);
-      (hasContextFn as any).mockReturnValue(true);
 
       await removeConnection(
         { name: 'test', nodeId: VALID_OBJECT_ID },
         'input',
         VALID_OBJECT_ID,
-        { db, userId: '' }
+        { db, userId: '', cache: new InMemoryCache() }
       );
 
       expect(updateStates).toHaveBeenCalledTimes(1);
@@ -921,7 +921,11 @@ describe('Node Details', () => {
       });
       (tryGetNode as jest.Mock).mockResolvedValue(node);
 
-      const res = await updateProgress(node.id, 50, { db, userId: '' });
+      const res = await updateProgress(node.id, 50, {
+        db,
+        userId: '',
+        cache: new InMemoryCache()
+      });
       expect(res).toBe(true);
 
       expect(getNodesCollection(db).updateOne).toHaveBeenCalledTimes(1);
@@ -956,7 +960,11 @@ describe('Node Details', () => {
       });
       (tryGetNode as jest.Mock).mockResolvedValue(node);
 
-      const res = await updateProgress(node.id, 50, { db, userId: '' });
+      const res = await updateProgress(node.id, 50, {
+        db,
+        userId: '',
+        cache: new InMemoryCache()
+      });
       expect(res).toBe(true);
 
       expect(getNodesCollection(db).updateOne).not.toHaveBeenCalled();
@@ -981,7 +989,11 @@ describe('Node Details', () => {
       (tryGetNode as jest.Mock).mockResolvedValue(node);
 
       try {
-        await updateProgress(node.id, 101, { db, userId: '' });
+        await updateProgress(node.id, 101, {
+          db,
+          userId: '',
+          cache: new InMemoryCache()
+        });
         throw NeverGoHereError;
       } catch (err) {
         expect(err.message).toBe('Progress value is invalid: 101');
@@ -1007,7 +1019,11 @@ describe('Node Details', () => {
       (tryGetNode as jest.Mock).mockResolvedValue(node);
 
       try {
-        await updateProgress(node.id, -0.1, { db, userId: '' });
+        await updateProgress(node.id, -0.1, {
+          db,
+          userId: '',
+          cache: new InMemoryCache()
+        });
         throw NeverGoHereError;
       } catch (err) {
         expect(err.message).toBe('Progress value is invalid: -0.1');
@@ -1020,7 +1036,11 @@ describe('Node Details', () => {
         updateMany: jest.fn()
       });
 
-      const res = await resetProgress(VALID_OBJECT_ID, { db, userId: '' });
+      const res = await resetProgress(VALID_OBJECT_ID, {
+        db,
+        userId: '',
+        cache: new InMemoryCache()
+      });
       expect(res).toBe(true);
       expect(getNodesCollection(db).updateMany).toHaveBeenCalledTimes(1);
       expect(getNodesCollection(db).updateMany).toHaveBeenCalledWith(

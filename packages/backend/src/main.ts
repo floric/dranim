@@ -1,3 +1,4 @@
+import { InMemoryCache } from '@masterthesis/shared';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
@@ -7,6 +8,7 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 
 import { ApolloServer } from 'apollo-server-express';
+import { InMemoryLRUCache } from 'apollo-server-caching';
 import { Db } from 'mongodb';
 import Raven from 'raven';
 
@@ -48,6 +50,8 @@ const initDatabase = (db: Db) =>
     getDatasetsCollection(db).createIndex('userId')
   ]);
 
+const cache = new InMemoryLRUCache();
+
 const initServer = (options: MainOptions, db: Db) => {
   const app = express();
   app.use(
@@ -62,7 +66,6 @@ const initServer = (options: MainOptions, db: Db) => {
       cookie: { secure: false }
     }),
     morgan('short', {
-      skip: req => req.headers['user-agent'] === 'ELB-HealthChecker/1.0',
       stream: new MorganLogStream()
     }),
     bodyParser.json({}),
@@ -73,7 +76,15 @@ const initServer = (options: MainOptions, db: Db) => {
 
   const server = new ApolloServer({
     schema: Schema,
-    context: context => ({ db, userId: context.req.session.userId || null }),
+    context: context =>
+      Promise.resolve({
+        db,
+        userId: context.req.session.userId || null,
+        cache: new InMemoryCache()
+      }),
+    persistedQueries: { cache },
+    cache,
+    introspection: false,
     playground: false,
     uploads: {
       maxFieldSize: MAX_UPLOAD_LIMIT,

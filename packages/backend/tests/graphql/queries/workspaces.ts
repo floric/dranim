@@ -9,6 +9,8 @@ import { createNode } from '../../../src/main/workspace/nodes';
 import { addOrUpdateFormValue } from '../../../src/main/workspace/nodes-detail';
 import { createWorkspace } from '../../../src/main/workspace/workspace';
 import { QueryTestCase } from '../../test-utils';
+import { InMemoryCache } from '@masterthesis/shared';
+import { updateStates } from '../../../src/main/workspace/nodes-state';
 
 export const workspacesTest: QueryTestCase = {
   id: 'Workspaces',
@@ -134,7 +136,12 @@ export const workspacesTest: QueryTestCase = {
         reqContext
       )
     ]);
-    await startProcess(ws.id, reqContext, { awaitResult: true });
+    await startProcess(
+      ws.id,
+      { ...reqContext, cache: new InMemoryCache() },
+      { awaitResult: true }
+    );
+    await updateStates(ws.id, { ...reqContext, cache: new InMemoryCache() });
     return {};
   },
   expected: {

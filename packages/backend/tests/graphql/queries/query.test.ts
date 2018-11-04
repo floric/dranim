@@ -1,4 +1,4 @@
-import { ApolloContext } from '@masterthesis/shared';
+import { ApolloContext, InMemoryCache } from '@masterthesis/shared';
 import { graphql } from 'graphql';
 import { addMockFunctionsToSchema } from 'graphql-tools';
 
@@ -42,7 +42,11 @@ describe('Query Tests', () => {
 
     test(`should pass test: ${id}`, () =>
       doTestWithDb(async db => {
-        const reqContext: ApolloContext = { db, userId: '123' };
+        const reqContext: ApolloContext = {
+          db,
+          userId: '123',
+          cache: new InMemoryCache()
+        };
         const { variables, reqContext: overwrittenContext } = await beforeTest(
           reqContext
         );
@@ -51,7 +55,11 @@ describe('Query Tests', () => {
           schema,
           query,
           null,
-          { ...reqContext, ...overwrittenContext },
+          {
+            ...reqContext,
+            cache: new InMemoryCache(),
+            ...overwrittenContext
+          },
           variables,
           undefined,
           resolvers
