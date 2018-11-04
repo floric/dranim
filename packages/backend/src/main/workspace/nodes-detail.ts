@@ -79,10 +79,9 @@ export const getContextOutputDefs = async (
     reqContext
   );
 
-  const contextInputNode = await tryGetContextNode(
-    parent,
-    ContextNodeType.INPUT,
-    reqContext
+  const contextInputNode = await reqContext.cache.tryGetOrFetch<NodeInstance>(
+    `con-ip-${parent.id}`,
+    () => tryGetContextNode(parent, ContextNodeType.INPUT, reqContext)
   );
 
   const contextInputs = await getMetaInputs(contextInputNode, reqContext);

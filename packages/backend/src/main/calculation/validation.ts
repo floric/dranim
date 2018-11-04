@@ -3,7 +3,6 @@ import {
   ContextNodeType,
   DatasetRef,
   DataType,
-  IOValues,
   NodeInstance,
   parseNodeForm
 } from '@masterthesis/shared';
@@ -11,7 +10,6 @@ import {
 import { Log } from '../../logging';
 import { getMetaInputs } from '../calculation/meta-execution';
 import { tryGetNodeType } from '../nodes/all-nodes';
-import { getInputDefs } from '../workspace/nodes-detail';
 
 export const isNodeInMetaValid = async (
   node: NodeInstance,
@@ -37,20 +35,6 @@ export const isNodeInMetaValid = async (
   return isValidForm && allInputsArePresent;
 };
 
-export const areNodeInputsValid = async (
-  node: NodeInstance,
-  inputs: IOValues<{}>,
-  reqContext: ApolloContext
-) => {
-  const inputDefs = await getInputDefs(node, reqContext);
-  const res = await Promise.all(
-    Object.entries(inputDefs).map(p =>
-      isInputValid(inputs[p[0]], p[1].dataType)
-    )
-  );
-  return res.reduce((a, b) => a && b, true);
-};
-
 const validateDataset = (datasetRef: DatasetRef): boolean => {
   if (!datasetRef.entries || !datasetRef.schema) {
     return false;
@@ -59,25 +43,16 @@ const validateDataset = (datasetRef: DatasetRef): boolean => {
   return datasetRef.schema.length > 0;
 };
 
-const validateNumber = (value: any) => {
-  return typeof value === 'number' && !isNaN(value);
-};
+const validateNumber = (value: any) =>
+  typeof value === 'number' && !isNaN(value);
 
-const validateString = (value: any) => {
-  return typeof value === 'string';
-};
+const validateString = (value: any) => typeof value === 'string';
 
-const validateBoolean = (value: any) => {
-  return typeof value === 'boolean';
-};
+const validateBoolean = (value: any) => typeof value === 'boolean';
 
-const validateDatetime = (value: any) => {
-  return value instanceof Date;
-};
+const validateDatetime = (value: any) => value instanceof Date;
 
-const validateTime = (value: any) => {
-  return value instanceof Date;
-};
+const validateTime = (value: any) => value instanceof Date;
 
 const validationMethods: Map<string, (input: any) => boolean> = new Map([
   [DataType.DATASET, validateDataset],

@@ -19,7 +19,7 @@ import { tryGetDataset } from '../../main/workspace/dataset';
 import { createManyEntriesWithDataset } from '../../main/workspace/entry';
 import { getSafeObjectID } from '../utils';
 
-const MAX_BATCH_SIZE = 25000;
+const MAX_BATCH_SIZE = 10000;
 const MAX_BATCH_DELAY = 2000;
 
 interface ApolloFile {

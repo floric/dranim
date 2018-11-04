@@ -91,11 +91,11 @@ const calculateState = async (
 
     const nodeType = getNodeType(node.type);
     if (nodeType != null && hasContextFn(nodeType)) {
-      const contextOutputNode = await tryGetContextNode(
-        node,
-        ContextNodeType.OUTPUT,
-        reqContext
+      const contextOutputNode = await reqContext.cache.tryGetOrFetch(
+        `con-op-${node.id}`,
+        () => tryGetContextNode(node, ContextNodeType.OUTPUT, reqContext)
       );
+
       return await calculateState(contextOutputNode, reqContext);
     }
 

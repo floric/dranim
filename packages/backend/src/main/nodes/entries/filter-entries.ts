@@ -50,6 +50,7 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
       const {
         outputs: { keepEntry }
       } = await contextFnExecution!(e);
+
       await updateNodeProgressWithSleep(
         i,
         inputs.dataset.entries.length,
@@ -57,9 +58,11 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
         reqContext,
         10
       );
+
       if (keepEntry) {
         entries.push(e);
       }
+
       i++;
     }
 

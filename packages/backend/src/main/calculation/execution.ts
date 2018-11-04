@@ -15,7 +15,6 @@ import {
 import { tryGetNodeType } from '../nodes/all-nodes';
 import { tryGetConnection } from '../workspace/connections';
 import { tryGetContextNode, tryGetNode } from '../workspace/nodes';
-import { areNodeInputsValid } from './validation';
 
 export const executeNode = async (
   node: NodeInstance,
@@ -39,10 +38,8 @@ export const executeNode = async (
     return getContextNodeOutputs(inputValues);
   }
 
-  const nodeInputs = inputValuesToObject(inputValues);
+  const nodeInputs = transformInputToObject(inputValues);
   const nodeForm = parseNodeForm(node.form);
-
-  await validateInputs(node, nodeInputs, reqContext);
 
   const type = tryGetNodeType(node.type);
   if (hasContextFn(type)) {
@@ -60,17 +57,6 @@ export const executeNode = async (
     reqContext,
     node
   });
-};
-
-const validateInputs = async (
-  node: NodeInstance,
-  nodeInputs: IOValues<{}>,
-  reqContext: ApolloContext
-) => {
-  const execValid = await areNodeInputsValid(node, nodeInputs, reqContext);
-  if (!execValid) {
-    throw new Error('Execution inputs are not valid');
-  }
 };
 
 const executeNodeWithContextFn = async (
@@ -135,7 +121,7 @@ const getConnectionResult = async (
   return { socketName: i.name, value: nodeRes.outputs[conn.from.name] };
 };
 
-const inputValuesToObject = (
+const transformInputToObject = (
   inputValues: Array<{ socketName: string; value: string }>
 ): IOValues<{}> => {
   const inputs = {};
