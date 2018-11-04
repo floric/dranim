@@ -14,10 +14,7 @@ import {
 
 import { executeNode } from '../../../src/main/calculation/execution';
 import { tryGetCalculation } from '../../../src/main/calculation/start-process';
-import {
-  areNodeInputsValid,
-  isNodeInMetaValid
-} from '../../../src/main/calculation/validation';
+import { isNodeInMetaValid } from '../../../src/main/calculation/validation';
 import { tryGetNodeType } from '../../../src/main/nodes/all-nodes';
 import { tryGetConnection } from '../../../src/main/workspace/connections';
 import {
@@ -72,7 +69,6 @@ describe('Execution', () => {
     (tryGetNode as jest.Mock).mockResolvedValue(node);
     (tryGetNodeType as jest.Mock).mockReturnValue(type);
     (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
-    (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
     (tryGetCalculation as jest.Mock).mockResolvedValue({
       state: ProcessState.PROCESSING
     });
@@ -173,7 +169,6 @@ describe('Execution', () => {
       type => (type === typeA.type ? typeA : typeB)
     );
     (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
-    (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
     (tryGetConnection as jest.Mock).mockResolvedValue(conn);
     (tryGetCalculation as jest.Mock).mockResolvedValue({
       state: ProcessState.PROCESSING
@@ -241,7 +236,6 @@ describe('Execution', () => {
       throw new Error('Unknown node type: UnknownNodeType');
     });
     (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
-    (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
     (tryGetCalculation as jest.Mock).mockResolvedValue({
       state: ProcessState.PROCESSING
     });
@@ -268,51 +262,6 @@ describe('Execution', () => {
       throw NeverGoHereError;
     } catch (err) {
       expect(err.message).toBe('Unknown node type: UnknownNodeType');
-    }
-  });
-
-  test('should fail for invalid input', async () => {
-    const node: NodeInstance = {
-      id: 'nodeB',
-      contextIds: [],
-      form: {},
-      progress: null,
-      inputs: [],
-      outputs: [],
-      type: 'type',
-      workspaceId: VALID_OBJECT_ID,
-      x: 0,
-      y: 0,
-      state: NodeState.VALID,
-      variables: {}
-    };
-    const type: ServerNodeDef & NodeDef = {
-      type: 'type',
-      name: 'b',
-      inputs: {},
-      outputs: {},
-      keywords: [],
-      path: [],
-      onMetaExecution: async () => ({}),
-      onNodeExecution: async () => ({ outputs: {} })
-    };
-    (tryGetNode as jest.Mock).mockResolvedValue(node);
-    (tryGetNodeType as jest.Mock).mockReturnValue(type);
-    (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
-    (areNodeInputsValid as jest.Mock).mockResolvedValue(false);
-    (tryGetCalculation as jest.Mock).mockResolvedValue({
-      state: ProcessState.PROCESSING
-    });
-
-    try {
-      await executeNode(node, VALID_OBJECT_ID, {
-        db: null,
-        userId: '',
-        cache: new InMemoryCache()
-      });
-      throw NeverGoHereError;
-    } catch (err) {
-      expect(err.message).toBe('Execution inputs are not valid');
     }
   });
 
@@ -440,7 +389,6 @@ describe('Execution', () => {
       .mockReturnValueOnce(typeB)
       .mockReturnValueOnce(sumType);
     (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
-    (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
     (tryGetConnection as jest.Mock)
       .mockResolvedValueOnce(connA)
       .mockResolvedValueOnce(connB);
@@ -547,7 +495,6 @@ describe('Execution', () => {
       .mockReturnValueOnce(cType);
     (tryGetConnection as jest.Mock).mockResolvedValue(conn);
     (isNodeInMetaValid as jest.Mock).mockResolvedValue(true);
-    (areNodeInputsValid as jest.Mock).mockResolvedValue(true);
     (tryGetCalculation as jest.Mock).mockResolvedValue({
       state: ProcessState.PROCESSING
     });
