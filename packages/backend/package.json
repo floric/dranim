@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
-    "@types/connect-mongo": "^0.0.39",
+    "@types/connect-mongo": "^0.0.40",
     "@types/cors": "^2.8.4",
     "@types/graphql": "^14.0.3",
     "@types/jest": "^23.1.1",
