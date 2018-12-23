@@ -29,7 +29,7 @@
     "react-apollo": "^2.1.6",
     "react-async-component": "^2.0.0",
     "react-container-dimensions": "^1.4.1",
-    "react-dev-utils": "^6.1.0",
+    "react-dev-utils": "^7.0.0",
     "react-dom": "^16.6.0",
     "react-fontawesome": "^1.6.1",
     "react-konva": "^16.6.0",
