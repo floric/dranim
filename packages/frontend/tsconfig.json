@@ -18,8 +18,5 @@
     "esModuleInterop": true,
     "noUnusedLocals": true
   },
-  "exclude": ["node_modules", "build", "scripts", "dist"],
-  "parcelTsPluginOptions": {
-    "transpileOnly": false
-  }
+  "exclude": ["node_modules", "build", "scripts", "dist"]
 }
