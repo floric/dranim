@@ -1,5 +1,6 @@
 import React, { Component, ReactNode } from 'react';
 
+import { OperationVariables } from 'apollo-client';
 import { DocumentNode } from 'graphql';
 import { Query, QueryResult } from 'react-apollo';
 import { Redirect, Route } from 'react-router-dom';
@@ -12,13 +13,14 @@ export interface HandledQueryProps<Data, Variables> {
   children: (data: QueryResult<Data, Variables>) => ReactNode;
 }
 
-export class HandledQuery<Data, Variables = null> extends Component<
-  HandledQueryProps<Data, Variables>
-> {
+export class HandledQuery<
+  Data,
+  Variables = OperationVariables
+> extends Component<HandledQueryProps<Data, Variables>> {
   public render() {
     const { query, variables, children } = this.props;
     return (
-      <Query<Data, Variables> query={query} variables={variables}>
+      <Query<Data, Variables> query={query} variables={variables as any}>
         {result => {
           const { loading, error } = result;
           if (loading) {
