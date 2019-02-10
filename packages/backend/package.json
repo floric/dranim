@@ -8,7 +8,7 @@
     "build": "tsc -p tsconfig.json",
     "clean": "rm -rf dist node_modules",
     "lint": "tslint -p . --fix",
-    "start": "concurrently \"tsc -w\" \"cross-env SESSION_SECRET=secret PORT=3000 NODE_ENV=development nodemon dist/main.js\"",
+    "start": "tsc && cross-env SESSION_SECRET=secret PORT=3000 NODE_ENV=development node dist/main.js",
     "test": "jest --logHeapUsage --coverage  --maxWorkers=4 --forceExit",
     "test:watch": "jest --watch --maxWorkers=2"
   },
