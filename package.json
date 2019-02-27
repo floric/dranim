@@ -8,6 +8,8 @@
     "yarn": ">= 1.0.0"
   },
   "scripts": {
+    "commit": "npx git-cz",
+    "release": "yarn standard-version",
     "build": "lerna run build --stream",
     "start": "lerna run start --stream",
     "test": "lerna run test --stream",
@@ -27,6 +29,7 @@
   },
   "devDependencies": {
     "lerna": "^3.1.4",
+    "standard-version": "^5.0.0",
     "tslint": "^5.2.0",
     "tslint-config-prettier": "^1.13.0",
     "tslint-plugin-prettier": "^2.0.0",
