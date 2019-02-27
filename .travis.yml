@@ -3,11 +3,11 @@ env:
   global:
     - CC_TEST_REPORTER_ID=fc64d003bdf120b91db2a980408cf2073efe351171845840b1fa6a0d87b658ea
 node_js:
-  - '10'
+  - "10"
 cache:
   yarn: true
   directories:
-    - '$HOME/.mongodb-binaries'
+    - "$HOME/.mongodb-binaries"
     - node_modules
 before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash
@@ -36,20 +36,23 @@ script:
   - cd ../../
 after_script:
   - cd packages/shared
-  - '../../cc-test-reporter format-coverage -o /tmp/codeclimate.shared.json'
+  - "../../cc-test-reporter format-coverage -o /tmp/codeclimate.shared.json"
   - cd ../backend
-  - '../../cc-test-reporter format-coverage -o /tmp/codeclimate.backend.json'
+  - "../../cc-test-reporter format-coverage -o /tmp/codeclimate.backend.json"
   - cd ../../
-  - './cc-test-reporter sum-coverage /tmp/codeclimate.*.json -p 2 -o tmp/codeclimate.total.json'
-  - './cc-test-reporter upload-coverage -i tmp/codeclimate.total.json'
+  - "./cc-test-reporter sum-coverage /tmp/codeclimate.*.json -p 2 -o tmp/codeclimate.total.json"
+  - "./cc-test-reporter upload-coverage -i tmp/codeclimate.total.json"
   - greenkeeper-lockfile-upload
+before_deploy:
+  - export ELASTIC_BEANSTALK_LABEL=New Version $(git rev-parse --verify HEAD --short)
+  - export ELASTIC_BEANSTALK_DESCRIPTION=See https://github.com/floric/dranim/commit/$(git rev-parse --verify HEAD)
 deploy:
   - provider: s3
     access_key_id: $AWS_ACCESS_KEY_ID
     secret_access_key: $AWS_SECRET_ACCESS_KEY
     bucket: $AWS_FRONTEND_BUCKET
     region: eu-west-1
-    cache_control: 'public,max-age=604800'
+    cache_control: "public,max-age=604800"
     local_dir: packages/frontend/dist
     skip_cleanup: true
   - provider: s3
