@@ -44,7 +44,7 @@ after_script:
   - "./cc-test-reporter upload-coverage -i tmp/codeclimate.total.json"
   - greenkeeper-lockfile-upload
 before_deploy:
-  - export ELASTIC_BEANSTALK_LABEL=New Version $(git rev-parse --verify HEAD --short)
+  - export ELASTIC_BEANSTALK_LABEL=git-$(git rev-parse --verify HEAD --short)
   - export ELASTIC_BEANSTALK_DESCRIPTION=Deployment based on commit $(git rev-parse --verify HEAD)
 deploy:
   - provider: s3
