@@ -7,8 +7,8 @@ import morgan from 'morgan';
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 
-import { ApolloServer } from 'apollo-server-express';
 import { InMemoryLRUCache } from 'apollo-server-caching';
+import { ApolloServer } from 'apollo-server-express';
 import { Db } from 'mongodb';
 import Raven from 'raven';
 

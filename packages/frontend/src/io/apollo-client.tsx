@@ -4,8 +4,8 @@ import { ApolloLink } from 'apollo-link';
 import { BatchHttpLink } from 'apollo-link-batch-http';
 import { setContext } from 'apollo-link-context';
 import { onError } from 'apollo-link-error';
-import { createUploadLink } from 'apollo-upload-client';
 import { createPersistedQueryLink } from 'apollo-link-persisted-queries';
+import { createUploadLink } from 'apollo-upload-client';
 
 export const API_URL =
   process.env.NODE_ENV === 'production'

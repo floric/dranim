@@ -1,6 +1,6 @@
 import { Db } from 'mongodb';
 
-import { DataType, SocketDefs, SocketMetas, SocketMetaDef } from './sockets';
+import { DataType, SocketDefs, SocketMetaDef, SocketMetas } from './sockets';
 import { UserOwned } from './users';
 import { InMemoryCache } from './utils';
 

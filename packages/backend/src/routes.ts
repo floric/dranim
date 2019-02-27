@@ -1,11 +1,11 @@
 import { Express } from 'express';
 import { Db } from 'mongodb';
 
+import { InMemoryCache } from '@masterthesis/shared';
 import { Log } from './logging';
 import { login, register } from './main/users/management';
 import { getDataset } from './main/workspace/dataset';
 import { getEntryCollection } from './main/workspace/entry';
-import { InMemoryCache } from '@masterthesis/shared';
 
 export const generateErrorResponse = (message: string) =>
   JSON.stringify({ error: { message } });

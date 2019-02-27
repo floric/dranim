@@ -4,13 +4,13 @@ import {
   DataType,
   ProcessState,
   UploadProcess,
-  ValueSchema,
-  Values
+  Values,
+  ValueSchema
 } from '@masterthesis/shared';
 import fastCsv from 'fast-csv';
 import { Db, ObjectID } from 'mongodb';
-import promisesAll from 'promises-all';
 import { Batcher } from 'promise-batcher';
+import promisesAll from 'promises-all';
 import { Readable } from 'stream';
 
 import { Log } from '../../logging';
@@ -220,15 +220,17 @@ const initBatcher = (
 
       const res = await createManyEntriesWithDataset(ds, values, reqContext);
       const errorNames = {};
-      const incArg = {};
+      const incArg: { failedEntries: number; addedEntries: number } = {
+        failedEntries: 0,
+        addedEntries: res.addedEntries
+      };
       let failedEntries = 0;
       Object.entries(res.errors).forEach(e => {
         errorNames[`errors.${e[0]}.message`] = e[0];
         incArg[`errors.${e[0]}.count`] = e[1];
         failedEntries += e[1];
       });
-      incArg['failedEntries'] = failedEntries;
-      incArg['addedEntries'] = res.addedEntries;
+      incArg.failedEntries = failedEntries;
 
       const collection = getUploadsCollection(reqContext.db);
       await collection.updateOne(

@@ -6,12 +6,12 @@ import {
 } from '@masterthesis/shared';
 import { Db, ObjectID } from 'mongodb';
 
+import { UserInputError } from 'apollo-server-core';
 import { Log } from '../../logging';
 import { Omit } from '../../main';
 import { checkLoggedInUser } from '../users/management';
 import { getSafeObjectID } from '../utils';
 import { clearEntries, getEntryCollection } from './entry';
-import { UserInputError } from 'apollo-server-core';
 
 export const getDatasetsCollection = <T = Dataset & { _id: ObjectID }>(
   db: Db

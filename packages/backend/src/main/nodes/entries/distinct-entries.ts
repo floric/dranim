@@ -1,5 +1,6 @@
 import {
   allAreDefinedAndPresent,
+  DatasetRef,
   DataType,
   DistinctEntriesNodeDef,
   DistinctEntriesNodeForm,
@@ -9,8 +10,7 @@ import {
   SocketDefs,
   SocketState,
   Values,
-  ValueSchema,
-  DatasetRef
+  ValueSchema
 } from '@masterthesis/shared';
 
 import { updateNodeProgressWithSleep } from './utils';
