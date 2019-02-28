@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "lerna": "^3.1.4",
-    "standard-version": "^5.0.0",
+    "standard-version": "^5.0.1",
     "tslint": "^5.2.0",
     "tslint-config-prettier": "^1.13.0",
     "tslint-plugin-prettier": "^2.0.0",
