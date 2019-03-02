@@ -45,7 +45,7 @@ after_script:
   - greenkeeper-lockfile-upload
 before_deploy:
   - export ELASTIC_BEANSTALK_LABEL=git-$(git rev-parse --verify HEAD --short)
-  - export ELASTIC_BEANSTALK_DESCRIPTION=Deployment based on commit $(git rev-parse --verify HEAD)
+  - export ELASTIC_BEANSTALK_DESCRIPTION=Desc
 deploy:
   - provider: s3
     access_key_id: $AWS_ACCESS_KEY_ID
