@@ -19,8 +19,7 @@
   },
   "devDependencies": {
     "@types/mongodb": "^3.1.20",
-    "@types/uuid": "^3.4.3",
-    "weak": "^1.0.1"
+    "@types/uuid": "^3.4.3"
   },
   "jest": {
     "transform": {

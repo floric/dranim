@@ -1,14 +1,13 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 
-import { asyncComponent } from 'react-async-component';
-import {
-  LoadingCard,
-  UnknownErrorCard
-} from '../components/layout/CustomCards';
+import { LoadingCard } from '../components/layout/CustomCards';
 
-export const getAsyncPage = (importFn: () => any) =>
-  asyncComponent({
-    resolve: () => importFn(),
-    LoadingComponent: () => <LoadingCard text="Loading page..." />,
-    ErrorComponent: ({ error }) => <UnknownErrorCard error={error} />
-  });
+export const getAsyncPage = (importFn: () => any) => {
+  const Component = lazy(importFn);
+
+  return props => (
+    <Suspense fallback={<LoadingCard text="Loading..." />}>
+      <Component {...props} />
+    </Suspense>
+  );
+};
