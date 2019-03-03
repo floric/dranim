@@ -79,7 +79,7 @@ const initServer = (options: MainOptions, db: Db) => {
     context: context =>
       Promise.resolve({
         db,
-        userId: context.req.session.userId || null,
+        userId: context.req.session ? context.req.session.userId || null : null,
         cache: new InMemoryCache()
       }),
     persistedQueries: { cache },
