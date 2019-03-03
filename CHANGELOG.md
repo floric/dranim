@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.3](https://github.com/floric/dranim/compare/v1.0.2...v1.0.3) (2019-03-03)
+
+
+### Bug Fixes
+
+* 🐛 Upgraded graphql dependencies ([e271135](https://github.com/floric/dranim/commit/e271135))
+* 🐛 Upgraded konva ([56d934b](https://github.com/floric/dranim/commit/56d934b))
+
+
+
 ## [1.0.2](https://github.com/floric/dranim/compare/v1.0.1...v1.0.2) (2019-03-02)
 
 
