@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.4](https://github.com/floric/dranim/compare/v1.0.3...v1.0.4) (2019-03-03)
+
+
+### Bug Fixes
+
+* 🐛 Upgraded mongodb-memory-server ([e82a13c](https://github.com/floric/dranim/commit/e82a13c))
+* 🐛 Used React Lazy and reduced dependencies" ([fd306f8](https://github.com/floric/dranim/commit/fd306f8))
+
+
+
 ## [1.0.3](https://github.com/floric/dranim/compare/v1.0.2...v1.0.3) (2019-03-03)
 
 
