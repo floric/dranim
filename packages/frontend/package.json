@@ -63,7 +63,7 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-react-optimize": "^1.0.1",
     "parcel-plugin-sw-precache": "^1.0.1",
-    "tslint-react": "^3.6.0"
+    "tslint-react": "^4.0.0"
   },
   "workspaces": {
     "nohoist": [
