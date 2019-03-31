@@ -21,8 +21,8 @@ const authLink = setContext((_, response) => {
   const token = localStorage.getItem('SESSION_TOKEN');
   return {
     headers: {
-      ...response.headers,
-      authorization: token ? `Bearer ${token}` : ''
+      authorization: token ? `Bearer ${token}` : '',
+      ...response.headers
     }
   };
 });
