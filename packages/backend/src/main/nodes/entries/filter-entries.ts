@@ -6,14 +6,11 @@ import {
   ForEachEntryNodeOutputs,
   NodeOutputResult,
   ServerNodeDefWithContextFn,
-  SocketState,
-  Values
+  SocketState
 } from '@masterthesis/shared';
 
-import {
-  getDynamicEntryContextInputs,
-  updateNodeProgressWithSleep
-} from './utils';
+import { getDynamicEntryContextInputs } from './utils';
+import { filter, flatMap, map } from 'rxjs/operators';
 
 export const FilterEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
@@ -38,38 +35,23 @@ export const FilterEntriesNode: ServerNodeDefWithContextFn<
 
     return inputs;
   },
-  onNodeExecution: async (
-    form,
-    inputs,
-    { contextFnExecution, node: { id }, reqContext }
-  ) => {
-    const entries: Array<Values> = [];
-
-    let i = 0;
-    for (const e of inputs.dataset.entries) {
-      const {
-        outputs: { keepEntry }
-      } = await contextFnExecution!(e);
-
-      await updateNodeProgressWithSleep(
-        i,
-        inputs.dataset.entries.length,
-        id,
-        reqContext,
-        10
-      );
-
-      if (keepEntry) {
-        entries.push(e);
-      }
-
-      i++;
-    }
-
+  onNodeExecution: async (form, inputs, { contextFnExecution }) => {
     return {
       outputs: {
         dataset: {
-          entries,
+          entries: inputs.dataset.entries.pipe(
+            flatMap(async e => {
+              const {
+                outputs: { keepEntry }
+              } = await contextFnExecution!(e);
+              return {
+                keepEntry,
+                data: e
+              };
+            }),
+            filter(n => n.keepEntry),
+            map(n => n.data)
+          ),
           schema: inputs.dataset.schema
         }
       }

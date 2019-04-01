@@ -1,9 +1,11 @@
+import { Observable } from 'rxjs';
+
 import { NodeDef } from '../nodes';
 import { DatasetSocket } from '../sockets';
 import { Values, ValueSchema } from '../workspace';
 
 export interface DatasetRef {
-  entries: Array<Values>;
+  entries: Observable<Values>;
   schema: Array<ValueSchema>;
 }
 

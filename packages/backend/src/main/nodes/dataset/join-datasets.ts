@@ -1,6 +1,5 @@
 import {
   allAreDefinedAndPresent,
-  ApolloContext,
   JoinDatasetsNodeDef,
   JoinDatasetsNodeForm,
   JoinDatasetsNodeInputs,
@@ -9,9 +8,10 @@ import {
   Values,
   ValueSchema
 } from '@masterthesis/shared';
+import { toArray } from 'rxjs/operators';
 
-import { updateNodeProgressWithSleep } from '../entries/utils';
 import { validateNonEmptyString } from '../string/utils';
+import { Observable, Subscriber } from 'rxjs';
 
 export const JoinDatasetsNode: ServerNodeDef<
   JoinDatasetsNodeInputs,
@@ -54,14 +54,13 @@ export const JoinDatasetsNode: ServerNodeDef<
       form.valueB!
     );
 
-    const entries = await combineEntries(
-      inputs.datasetA.entries,
-      inputs.datasetB.entries,
-      form.valueA!,
-      form.valueB!,
-      id,
-      reqContext
-    );
+    const a = await inputs.datasetA.entries.pipe(toArray()).toPromise();
+    const b = await inputs.datasetB.entries.pipe(toArray()).toPromise();
+
+    const observable = new Observable(subscriber => {
+      combineEntries(subscriber, a, b, form.valueA!, form.valueB!);
+      subscriber.complete();
+    });
     const schema = getJoinedSchemas(
       inputs.datasetA.schema,
       inputs.datasetB.schema
@@ -70,7 +69,7 @@ export const JoinDatasetsNode: ServerNodeDef<
     return {
       outputs: {
         joined: {
-          entries,
+          entries: observable,
           schema
         }
       }
@@ -79,31 +78,22 @@ export const JoinDatasetsNode: ServerNodeDef<
 };
 
 const combineEntries = (
+  subscriber: Subscriber<Values>,
   entriesA: Array<Values>,
   entriesB: Array<Values>,
   valueA: string,
-  valueB: string,
-  nodeId: string,
-  reqContext: ApolloContext
-) =>
-  new Promise<Array<Values>>(async resolve => {
-    const entries: Array<Values> = [];
-    let i = 0;
-
-    for (const eA of entriesA) {
-      const valueFromA = eA[valueA!];
-      for (const eB of entriesB) {
-        const valueFromB = eB[valueB!];
-        if (valueFromA === valueFromB) {
-          entries.push(merge(eA, eB));
-        }
+  valueB: string
+) => {
+  for (const eA of entriesA) {
+    const valueFromA = eA[valueA!];
+    for (const eB of entriesB) {
+      const valueFromB = eB[valueB!];
+      if (valueFromA === valueFromB) {
+        subscriber.next(merge(eA, eB));
       }
-      await updateNodeProgressWithSleep(i, entriesA.length, nodeId, reqContext);
-      i++;
     }
-
-    resolve(entries);
-  });
+  }
+};
 
 const checkSchemas = (
   schemasA: Array<ValueSchema>,

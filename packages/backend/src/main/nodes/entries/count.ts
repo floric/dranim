@@ -5,6 +5,7 @@ import {
   CountEntriesNodeOutputs,
   ServerNodeDef
 } from '@masterthesis/shared';
+import { count } from 'rxjs/operators';
 
 export const CountEntriesNode: ServerNodeDef<
   CountEntriesNodeInputs,
@@ -21,7 +22,7 @@ export const CountEntriesNode: ServerNodeDef<
   onNodeExecution: async (form, inputs) => {
     return {
       outputs: {
-        count: inputs.dataset.entries.length
+        count: await inputs.dataset.entries.pipe(count()).toPromise()
       }
     };
   }

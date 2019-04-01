@@ -8,7 +8,6 @@ import {
   IOValues,
   NodeExecutionResult,
   NodeInstance,
-  parseNodeForm,
   ServerNodeDefWithContextFn
 } from '@masterthesis/shared';
 
@@ -39,7 +38,7 @@ export const executeNode = async (
   }
 
   const nodeInputs = transformInputToObject(inputValues);
-  const nodeForm = parseNodeForm(node.form);
+  const nodeForm = {};
 
   const type = tryGetNodeType(node.type);
   if (hasContextFn(type)) {

@@ -39,7 +39,7 @@ describe('DatasetInputNode', () => {
   test('should get output value from form with valid dataset', () =>
     doTestWithDb(async db => {
       (tryGetDataset as jest.Mock).mockResolvedValue(ds);
-      (processEntries as jest.Mock).mockImplementation(async (a, processFn) =>
+      (processEntries as jest.Mock).mockImplementation((a, processFn) =>
         processFn({ values: { test: 'abc' }, id: 'test' })
       );
       const res = await DatasetInputNode.onNodeExecution(
