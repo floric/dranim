@@ -97,7 +97,8 @@ export const Mutation: IResolverObject<any, ApolloContext> = {
     _,
     { nodeId, name, value },
     context
-  ): Promise<boolean> => addOrUpdateFormValue(nodeId, name, value, context),
+  ): Promise<boolean> =>
+    addOrUpdateFormValue(nodeId, name, JSON.parse(value), context),
   createConnection: (_, { input }, context): Promise<ConnectionInstance> =>
     createConnection(input.from, input.to, context),
   deleteConnection: (_, { id }, context): Promise<boolean> =>

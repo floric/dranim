@@ -96,16 +96,11 @@ const setFormValues = async (
   passagesId: string,
   reqContext: ApolloContext
 ) => {
-  await addOrUpdateFormValue(
-    dsInputNode.id,
-    'dataset',
-    JSON.stringify(passagesId),
-    reqContext
-  );
+  await addOrUpdateFormValue(dsInputNode.id, 'dataset', passagesId, reqContext);
   await addOrUpdateFormValue(
     distinctNode.id,
     'addedSchemas',
-    JSON.stringify([
+    [
       {
         name: 'count',
         type: 'Number',
@@ -113,13 +108,13 @@ const setFormValues = async (
         required: true,
         unique: false
       }
-    ]),
+    ],
     reqContext
   );
   await addOrUpdateFormValue(
     distinctNode.id,
     'distinctSchemas',
-    JSON.stringify([
+    [
       {
         name: 'departure_city',
         type: 'String',
@@ -134,7 +129,7 @@ const setFormValues = async (
         fallback: '',
         unique: false
       }
-    ]),
+    ],
     reqContext
   );
 };

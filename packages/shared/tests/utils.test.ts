@@ -3,59 +3,11 @@ import {
   allAreDefinedAndPresent,
   hasContextFn,
   isNumeric,
-  parseNodeForm,
   sleep,
   InMemoryCache
 } from '../src/utils';
 
-const createNodeWithForm = (form: { [key: string]: string }): NodeInstance => ({
-  id: '1',
-  inputs: [],
-  outputs: [],
-  type: 'Node',
-  contextIds: [],
-  workspaceId: '2',
-  x: 0,
-  y: 0,
-  form,
-  variables: {},
-  progress: null,
-  state: NodeState.VALID
-});
-
 describe('Utils', () => {
-  test('should parse empty node form', () => {
-    const node = createNodeWithForm({});
-
-    const res = parseNodeForm(node.form);
-
-    expect(Object.keys(res).length).toBe(0);
-  });
-
-  test('should parse valid node form', () => {
-    const node = createNodeWithForm({
-      test: JSON.stringify(123),
-      car: JSON.stringify('test')
-    });
-
-    const res = parseNodeForm(node.form);
-
-    expect(res.test).toBe(123);
-    expect(res.car).toBe('test');
-  });
-
-  test('should not parse node form and throw error for invalid values', () => {
-    const node = createNodeWithForm({
-      test: JSON.stringify(123),
-      car: 'invalid-str'
-    });
-
-    const res = parseNodeForm(node.form);
-
-    expect(res.test).toBe(123);
-    expect(res.car).toBe(null);
-  });
-
   test('should be numeric', () => {
     expect(isNumeric(3)).toBe(true);
     expect(isNumeric(-3)).toBe(true);

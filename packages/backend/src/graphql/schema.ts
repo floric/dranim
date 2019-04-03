@@ -76,19 +76,6 @@ export const resolvers: any = {
     parseValue: (value: string) => new Date(value),
     serialize: (value: Date) => value.getTime(),
     parseLiteral: ast => (ast.kind === Kind.INT ? new Date(ast.value) : null)
-  }),
-  FormValues: new GraphQLScalarType({
-    name: 'FormValues',
-    parseValue: (value: { [key: string]: any }) => ({}),
-    serialize: (value: { [key: string]: any }) => {
-      const res = {};
-      Object.entries(value).forEach(c => {
-        res[c[0]] = JSON.parse(c[1]);
-      });
-
-      return res;
-    },
-    parseLiteral: () => ({})
   })
 };
 

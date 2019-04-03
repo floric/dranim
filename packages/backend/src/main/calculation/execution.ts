@@ -38,21 +38,20 @@ export const executeNode = async (
   }
 
   const nodeInputs = transformInputToObject(inputValues);
-  const nodeForm = {};
-
   const type = tryGetNodeType(node.type);
+
   if (hasContextFn(type)) {
     return await executeNodeWithContextFn(
       node,
       type,
-      nodeForm,
+      node.form,
       nodeInputs,
       processId,
       reqContext
     );
   }
 
-  return await type.onNodeExecution(nodeForm, nodeInputs, {
+  return await type.onNodeExecution(node.form, nodeInputs, {
     reqContext,
     node
   });

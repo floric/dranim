@@ -127,14 +127,9 @@ export const workspacesTest: QueryTestCase = {
       reqContext
     );
     await Promise.all([
-      addOrUpdateFormValue(a.id, 'value', JSON.stringify(1), reqContext),
-      addOrUpdateFormValue(b.id, 'value', JSON.stringify(1), reqContext),
-      addOrUpdateFormValue(
-        o.id,
-        'name',
-        JSON.stringify('Easy task'),
-        reqContext
-      )
+      addOrUpdateFormValue(a.id, 'value', 1, reqContext),
+      addOrUpdateFormValue(b.id, 'value', 1, reqContext),
+      addOrUpdateFormValue(o.id, 'name', 'Easy task', reqContext)
     ]);
     await startProcess(
       ws.id,

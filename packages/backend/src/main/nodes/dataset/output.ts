@@ -41,7 +41,9 @@ export const DatasetOutputNode: ServerNodeDef<
               skipSchemaValidation: true
             });
           },
-          error => {},
+          error => {
+            throw new Error('Error occurred on saving entries: ${error}');
+          },
           resolve
         );
     });

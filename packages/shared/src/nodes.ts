@@ -142,7 +142,7 @@ export interface NodeInstance {
   inputs: Array<ConnectionDescription>;
   variables: SocketDefs<{}>;
   type: string;
-  form: { [key: string]: string };
+  form: { [key: string]: any };
   state: NodeState;
   progress: number | null;
 }

@@ -116,7 +116,7 @@ export const getDataset = async (
 export const tryGetDataset = async (id: string, reqContext: ApolloContext) => {
   const ds = await getDataset(id, reqContext);
   if (!ds) {
-    throw new Error('Unknown dataset');
+    throw new Error(`Unknown dataset: ${id}`);
   }
 
   return ds;
