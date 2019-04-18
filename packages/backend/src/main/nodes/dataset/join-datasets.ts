@@ -8,10 +8,11 @@ import {
   Values,
   ValueSchema
 } from '@masterthesis/shared';
+
 import { toArray } from 'rxjs/operators';
+import { Observable, Subscriber } from 'rxjs';
 
 import { validateNonEmptyString } from '../string/utils';
-import { Observable, Subscriber } from 'rxjs';
 
 export const JoinDatasetsNode: ServerNodeDef<
   JoinDatasetsNodeInputs,

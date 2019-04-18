@@ -14,6 +14,9 @@ import { createManyEntriesWithDataset } from '../../workspace/entry';
 import { bufferTime } from 'rxjs/operators';
 import { Log } from '../../../logging';
 
+const MAX_BUFFER_DELAY = 1000;
+const MAX_BUFFER_SIZE = 100000;
+
 export const DatasetOutputNode: ServerNodeDef<
   DatasetOutputNodeInputs,
   {},
@@ -28,10 +31,12 @@ export const DatasetOutputNode: ServerNodeDef<
     for (const s of inputs.dataset.schema) {
       await addValueSchema(ds.id, s, reqContext);
     }
-    console.log('Started saving');
+
+    Log.info(`Started writing dataset ${ds.id}`);
+
     await new Promise(resolve => {
       inputs.dataset.entries
-        .pipe(bufferTime(1000, undefined, 100000))
+        .pipe(bufferTime(MAX_BUFFER_DELAY, undefined, MAX_BUFFER_SIZE))
         .subscribe(
           batchedValues => {
             Log.info(
@@ -42,12 +47,13 @@ export const DatasetOutputNode: ServerNodeDef<
             });
           },
           error => {
-            throw new Error('Error occurred on saving entries: ${error}');
+            throw new Error(`Error occurred on saving entries: ${error}`);
           },
           resolve
         );
     });
-    console.log('Finished saving');
+
+    Log.info(`Finished writing dataset ${ds.id}`);
 
     return {
       outputs: {},

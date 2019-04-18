@@ -101,9 +101,9 @@ const StartPage: SFC = () => (
           <h2>Examples</h2>
           <h3>Birthdays</h3>
           <p>
-            This example contains a Table with 25.000 randomly generated entries
-            with persons. Each randomly generated entry consists of a name, a
-            sex and a day of birth.
+            This example contains a Table with 500.000 randomly generated
+            entries with persons. Each randomly generated entry consists of a
+            name, a sex and a day of birth.
           </p>
           <p>
             <CreateExampleButton type="Birthdays" />
@@ -131,8 +131,8 @@ const StartPage: SFC = () => (
                         item.type === NewsType.FEATURE
                           ? 'star'
                           : item.type === NewsType.IMPROVEMENT
-                            ? 'rocket'
-                            : 'notification'
+                          ? 'rocket'
+                          : 'notification'
                       }
                     />
                   }
