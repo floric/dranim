@@ -34,7 +34,8 @@
     "react-router-dom": "^4.3.1",
     "uuid": "^3.2.1",
     "vega-lib": "^4.2.0",
-    "whatwg-fetch": "3.0.0"
+    "whatwg-fetch": "3.0.0",
+    "snyk": "^1.316.1"
   },
   "author": {
     "name": "Florian Richter"
@@ -43,7 +44,9 @@
     "start": "parcel public/index.html --no-hmr --log-level 2",
     "lint": "tslint -p . --fix",
     "build": "parcel build public/index.html --no-cache --log-level 1",
-    "clean": "rm -rf build node_modules dist .cache"
+    "clean": "rm -rf build node_modules dist .cache",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-0",
@@ -71,5 +74,6 @@
   },
   "sw-precache": {
     "maximumFileSizeToCacheInBytes": 10485760
-  }
+  },
+  "snyk": true
 }
