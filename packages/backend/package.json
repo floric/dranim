@@ -58,7 +58,7 @@
     "@types/uuid": "^3.4.3",
     "concurrently": "^4.0.1",
     "mongodb-memory-server": "^3.1.2",
-    "standard-version": "^5.0.1"
+    "standard-version": "^8.0.1"
   },
   "jest": {
     "transform": {
