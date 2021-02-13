@@ -1,6 +1,5 @@
 import {
   allAreDefinedAndPresent,
-  DatasetRef,
   DataType,
   DistinctEntriesNodeDef,
   DistinctEntriesNodeForm,
@@ -8,12 +7,10 @@ import {
   ForEachEntryNodeOutputs,
   ServerNodeDefWithContextFn,
   SocketDefs,
-  SocketState,
-  Values,
-  ValueSchema
+  SocketState
 } from '@masterthesis/shared';
 
-import { updateNodeProgressWithSleep } from './utils';
+import { Observable } from 'rxjs';
 
 const getDistinctValueName = (vsName: string) => `${vsName}-distinct`;
 
@@ -102,97 +99,14 @@ export const DistinctEntriesNode: ServerNodeDefWithContextFn<
       }
     };
   },
-  onNodeExecution: async (
-    form,
-    inputs,
-    { contextFnExecution, node: { id }, reqContext }
-  ) => {
-    const { distinctSchemas, addedSchemas } = form;
-
-    const usedCombinations = getDistinctHashMap(
-      distinctSchemas!,
-      inputs.dataset.entries
-    );
-
-    let i = 0;
-    const entries: Array<Values> = [];
-
-    for (const m of usedCombinations) {
-      const res = await contextFnExecution!(
-        getContextArguments(m.distinctValues, {
-          entries: m.filteredEntries,
-          schema: inputs.dataset.schema
-        })
-      );
-      entries.push(res.outputs);
-
-      await updateNodeProgressWithSleep(
-        i,
-        usedCombinations.length,
-        id,
-        reqContext
-      );
-      i++;
-    }
-
+  onNodeExecution: async (form, inputs, { contextFnExecution }) => {
     return {
       outputs: {
         dataset: {
-          entries,
-          schema: [
-            ...distinctSchemas!.map(vs => ({
-              ...vs,
-              name: getDistinctValueName(vs.name)
-            })),
-            ...addedSchemas!
-          ]
+          entries: new Observable(),
+          schema: []
         }
       }
     };
   }
-};
-
-const getContextArguments = (
-  fieldValues: Values,
-  filteredDataset: DatasetRef
-) => {
-  const args: { [name: string]: any } = {};
-  Object.entries(fieldValues).forEach(
-    field => (args[getDistinctValueName(field[0])] = field[1])
-  );
-  args.filteredDataset = filteredDataset;
-  return args;
-};
-
-const getDistinctHashMap = (
-  distinctSchemas: Array<ValueSchema>,
-  entries: Array<Values>
-) => {
-  const assignmentsMap: Map<
-    string,
-    {
-      filteredEntries: Array<Values>;
-      distinctValues: Values;
-    }
-  > = new Map();
-  const names = distinctSchemas.map(n => n.name);
-
-  for (const e of entries) {
-    const combinationKey = names.map(n => e[n]).join('+');
-    let matches = assignmentsMap.get(combinationKey);
-    if (!matches) {
-      matches = {
-        filteredEntries: [],
-        distinctValues: {}
-      };
-      names.forEach(n => (matches!.distinctValues[n] = e[n]));
-    }
-
-    assignmentsMap.set(combinationKey, {
-      ...matches,
-      filteredEntries: [...matches.filteredEntries, e]
-    });
-  }
-
-  return Array.from(assignmentsMap.values());
 };

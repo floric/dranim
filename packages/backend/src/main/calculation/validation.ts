@@ -3,8 +3,7 @@ import {
   ContextNodeType,
   DatasetRef,
   DataType,
-  NodeInstance,
-  parseNodeForm
+  NodeInstance
 } from '@masterthesis/shared';
 
 import { Log } from '../../logging';
@@ -21,9 +20,7 @@ export const isNodeInMetaValid = async (
     node.type !== ContextNodeType.OUTPUT
   ) {
     const type = tryGetNodeType(node.type);
-    isValidForm = type.isFormValid
-      ? await type.isFormValid(parseNodeForm(node.form))
-      : true;
+    isValidForm = type.isFormValid ? await type.isFormValid(node.form) : true;
   }
 
   const metaDefs = await getMetaInputs(node, reqContext);

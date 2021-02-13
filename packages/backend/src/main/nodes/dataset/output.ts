@@ -10,7 +10,12 @@ import {
 
 import { isOutputFormValid } from '../../calculation/utils';
 import { addValueSchema, createDataset } from '../../workspace/dataset';
-import { createManyEntries } from '../../workspace/entry';
+import { createManyEntriesWithDataset } from '../../workspace/entry';
+import { bufferTime } from 'rxjs/operators';
+import { Log } from '../../../logging';
+
+const MAX_BUFFER_DELAY = 1000;
+const MAX_BUFFER_SIZE = 100000;
 
 export const DatasetOutputNode: ServerNodeDef<
   DatasetOutputNodeInputs,
@@ -27,7 +32,28 @@ export const DatasetOutputNode: ServerNodeDef<
       await addValueSchema(ds.id, s, reqContext);
     }
 
-    await createManyEntries(ds.id, inputs.dataset.entries, reqContext);
+    Log.info(`Started writing dataset ${ds.id}`);
+
+    await new Promise(resolve => {
+      inputs.dataset.entries
+        .pipe(bufferTime(MAX_BUFFER_DELAY, undefined, MAX_BUFFER_SIZE))
+        .subscribe(
+          batchedValues => {
+            Log.info(
+              `Writing ${batchedValues.length} entries to Dataset ${ds.id}`
+            );
+            createManyEntriesWithDataset(ds, batchedValues, reqContext, {
+              skipSchemaValidation: true
+            });
+          },
+          error => {
+            throw new Error(`Error occurred on saving entries: ${error}`);
+          },
+          resolve
+        );
+    });
+
+    Log.info(`Finished writing dataset ${ds.id}`);
 
     return {
       outputs: {},

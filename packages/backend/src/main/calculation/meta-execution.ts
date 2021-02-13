@@ -3,7 +3,6 @@ import {
   ContextNodeType,
   hasContextFn,
   NodeInstance,
-  parseNodeForm,
   SocketMetaDef,
   SocketMetas,
   SocketState
@@ -60,11 +59,7 @@ export const getMetaOutputs = async (
 
   const nodeType = tryGetNodeType(node.type);
   const allInputs = await getMetaInputs(node, reqContext);
-  return await nodeType.onMetaExecution(
-    parseNodeForm(node.form),
-    allInputs,
-    reqContext
-  );
+  return await nodeType.onMetaExecution(node.form, allInputs, reqContext);
 };
 
 const getDynamicContextInputMetas = async (
@@ -85,7 +80,7 @@ const getDynamicContextInputMetas = async (
   const dynContextDefs = await parentType.transformInputDefsToContextInputDefs(
     parentInputDefs,
     parentMetaInputs,
-    parseNodeForm(parent.form),
+    parent.form,
     reqContext
   );
 

@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "dependencies": {
     "mongodb": "^3.0.10",
+    "rxjs": "^6.4.0",
     "uuid": "^3.2.1"
   },
   "typings": "lib/index.d.ts",

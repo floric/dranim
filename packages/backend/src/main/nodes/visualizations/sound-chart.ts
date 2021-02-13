@@ -10,6 +10,7 @@ import {
 
 import { isOutputFormValid } from '../../calculation/utils';
 import { getDynamicEntryContextInputs } from '../entries/utils';
+import { toArray } from 'rxjs/operators';
 
 interface ContextResult {
   source: string;
@@ -74,8 +75,9 @@ export const SoundChartNode: ServerNodeDefWithContextFn<
       value: number;
       isEastPassage: boolean;
     }> = [];
+    const all = await inputs.dataset.entries.pipe(toArray()).toPromise();
 
-    for (const e of inputs.dataset.entries) {
+    for (const e of all) {
       const result = await contextFnExecution!(e);
 
       aggregateCities(cities, result.outputs);

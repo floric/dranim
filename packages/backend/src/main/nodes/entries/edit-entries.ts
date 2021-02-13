@@ -6,14 +6,11 @@ import {
   ForEachEntryNodeOutputs,
   ServerNodeDefWithContextFn,
   SocketDef,
-  SocketState,
-  Values
+  SocketState
 } from '@masterthesis/shared';
 
-import {
-  getDynamicEntryContextInputs,
-  updateNodeProgressWithSleep
-} from './utils';
+import { getDynamicEntryContextInputs } from './utils';
+import { flatMap } from 'rxjs/operators';
 
 export const EditEntriesNode: ServerNodeDefWithContextFn<
   ForEachEntryNodeInputs,
@@ -58,29 +55,16 @@ export const EditEntriesNode: ServerNodeDefWithContextFn<
       }
     };
   },
-  onNodeExecution: async (
-    form,
-    inputs,
-    { contextFnExecution, node: { id }, reqContext }
-  ) => {
-    const entries: Array<Values> = [];
-    let i = 0;
-    for (const e of inputs.dataset.entries) {
-      const res = await contextFnExecution!(e);
-      entries.push(res.outputs);
-      await updateNodeProgressWithSleep(
-        i,
-        inputs.dataset.entries.length,
-        id,
-        reqContext
-      );
-      i++;
-    }
-
+  onNodeExecution: async (form, inputs, { contextFnExecution }) => {
     return {
       outputs: {
         dataset: {
-          entries,
+          entries: inputs.dataset.entries.pipe(
+            flatMap(async e => {
+              const modifiedE = await contextFnExecution!(e);
+              return modifiedE.outputs;
+            })
+          ),
           schema: form.values || inputs.dataset.schema
         }
       }

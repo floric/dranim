@@ -12,6 +12,7 @@ import {
 
 import { isOutputFormValid } from '../../calculation/utils';
 import { getDynamicEntryContextInputs } from '../entries/utils';
+import { toArray } from 'rxjs/operators';
 
 interface ValueLabelAssignment {
   value: number;
@@ -53,8 +54,8 @@ export const LinearChartNode: ServerNodeDefWithContextFn<
     { node: { workspaceId }, contextFnExecution }
   ) => {
     const values: Array<ValueLabelAssignment> = [];
-
-    for (const e of inputs.dataset.entries) {
+    const all = await inputs.dataset.entries.pipe(toArray()).toPromise();
+    for (const e of all) {
       const res = await contextFnExecution!(e);
       values.push(res.outputs);
     }

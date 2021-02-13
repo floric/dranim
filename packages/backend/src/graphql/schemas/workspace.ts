@@ -1,10 +1,3 @@
-const FormValueDef = `
-  type FormValue {
-    name: String!
-    value: String!
-  }
-`;
-
 const SocketValueDef = `
   type SocketValue {
     name: String!
@@ -22,7 +15,7 @@ const NodeDef = `
     outputs: [SocketValue!]!
     contextIds: [String!]!
     state: String!
-    form: FormValues!
+    form: Object!
     workspace: Workspace!
     metaInputs: Object!
     metaOutputs: Object!
@@ -111,17 +104,11 @@ const PublicResultsDef = `
   }
 `;
 
-const FormValuesDef = `
-  scalar FormValues
-`;
-
 const DateDef = `scalar Date`;
 
 export default () => [
   DateDef,
   OutputResultDef,
-  FormValuesDef,
-  FormValueDef,
   SocketValueDef,
   NodeDef,
   NodeInputDef,

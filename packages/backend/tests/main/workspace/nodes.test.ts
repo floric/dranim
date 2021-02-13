@@ -79,7 +79,7 @@ describe('Nodes', () => {
       expect(newNode.workspaceId).toBe(ws.id);
       expect(newNode.type).toBe(NumberInputNodeDef.type);
 
-      await addOrUpdateFormValue(newNode.id, 'test', JSON.stringify('abc'), {
+      await addOrUpdateFormValue(newNode.id, 'test', 'abc', {
         db,
         userId: ''
       });

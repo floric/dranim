@@ -37,6 +37,7 @@
     "promise-retry": "^1.1.1",
     "promises-all": "^1.0.0",
     "raven": "^2.6.4",
+    "rxjs": "^6.4.0",
     "uuid": "^3.2.1",
     "winston": "^3.0.0"
   },

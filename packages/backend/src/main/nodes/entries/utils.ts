@@ -11,7 +11,6 @@ import {
   ValueSchema
 } from '@masterthesis/shared';
 
-import PromiseQueue from 'promise-queue';
 import { Log } from '../../../logging';
 import { addValueSchema } from '../../workspace/dataset';
 import { getEntryCollection } from '../../workspace/entry';
@@ -53,15 +52,14 @@ export interface ProcessOptions {
   concurrency?: number;
 }
 
-export const processEntries = async (
+export const processEntries = (
   dsId: string,
-  processFn: (entry: Entry) => Promise<void>,
-  reqContext: ApolloContext,
-  options?: ProcessOptions
+  processFn: (entry: Entry) => void,
+  reqContext: ApolloContext
 ): Promise<void> => {
   const coll = getEntryCollection(dsId, reqContext.db);
   const cursor = coll.find();
-  await processDocumentsWithCursor(cursor, processFn, options);
+  return processDocumentsWithCursor(cursor, processFn);
 };
 
 export const processDocumentsWithCursor = async <T = any>(
@@ -70,17 +68,12 @@ export const processDocumentsWithCursor = async <T = any>(
     hasNext?: () => Promise<boolean>;
     close: () => Promise<any>;
   },
-  processFn: (entry: T) => Promise<void>,
-  options?: ProcessOptions
+  processFn: (entry: T) => void
 ): Promise<void> => {
-  const queue = new PromiseQueue(
-    options && options.concurrency ? options.concurrency : 4
-  );
-
   try {
     while (await cursor.hasNext!()) {
       const doc = await cursor.next();
-      await queue.add(() => processFn(doc!));
+      processFn(doc!);
     }
   } catch (err) {
     Log.error(`Queue failed with error: ${err.message}`);

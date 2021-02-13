@@ -50,13 +50,8 @@ export const calculationsTest: QueryTestCase = {
       reqContext
     );
     await Promise.all([
-      addOrUpdateFormValue(i.id, 'value', JSON.stringify(1), reqContext),
-      addOrUpdateFormValue(
-        o.id,
-        'name',
-        JSON.stringify('Easy task'),
-        reqContext
-      )
+      addOrUpdateFormValue(i.id, 'value', 1, reqContext),
+      addOrUpdateFormValue(o.id, 'name', 'Easy task', reqContext)
     ]);
     await startProcess(ws.id, reqContext, { awaitResult: true });
     return { variables: { workspaceId: ws.id } };

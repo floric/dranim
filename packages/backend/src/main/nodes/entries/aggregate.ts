@@ -9,6 +9,8 @@ import {
   ServerNodeDef,
   Values
 } from '@masterthesis/shared';
+import { Observable } from 'rxjs';
+import { map, reduce, count, min, max } from 'rxjs/operators';
 
 export const AggregateEntriesNode: ServerNodeDef<
   AggregateEntriesNodeInputs,
@@ -40,20 +42,20 @@ export const AggregateEntriesNode: ServerNodeDef<
     let value = 0;
     switch (form.type) {
       case AggregationEntriesType.AVG: {
-        const sum = getSum(entries, valueName!);
-        value = sum / entries.length;
+        const sum = await getSum(entries, valueName!);
+        value = sum / (await getCount(entries));
         break;
       }
       case AggregationEntriesType.MAX: {
-        value = getMax(entries, valueName!);
+        value = await getMax(entries, valueName!);
         break;
       }
       case AggregationEntriesType.MIN: {
-        value = getMin(entries, valueName!);
+        value = await getMin(entries, valueName!);
         break;
       }
       case AggregationEntriesType.SUM: {
-        value = getSum(entries, valueName!);
+        value = await getSum(entries, valueName!);
         break;
       }
     }
@@ -65,11 +67,29 @@ export const AggregateEntriesNode: ServerNodeDef<
   }
 };
 
-const getSum = (values: Values, valueName: string) =>
-  values.map(n => n[valueName!]).reduce((a, b) => a + b, 0);
+const getCount = (values: Observable<Values>) =>
+  values.pipe(count()).toPromise();
 
-const getMin = (values: Values, valueName: string) =>
-  values.map(n => n[valueName!]).reduce((a, b) => (a > b ? b : a), 0);
+const getSum = (values: Observable<Values>, valueName: string) =>
+  values
+    .pipe<number, number>(
+      map(a => a[valueName!]),
+      reduce((a, b) => a + b)
+    )
+    .toPromise();
 
-const getMax = (values: Values, valueName: string) =>
-  values.map(n => n[valueName!]).reduce((a, b) => (a > b ? a : b), 0);
+const getMin = (values: Observable<Values>, valueName: string) =>
+  values
+    .pipe<number, number>(
+      map(a => a[valueName!]),
+      min()
+    )
+    .toPromise();
+
+const getMax = (values: Observable<Values>, valueName: string) =>
+  values
+    .pipe<number, number>(
+      map(a => a[valueName!]),
+      max()
+    )
+    .toPromise();

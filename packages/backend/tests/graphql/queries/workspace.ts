@@ -92,13 +92,8 @@ export const workspaceTest: QueryTestCase = {
       reqContext
     );
     await Promise.all([
-      addOrUpdateFormValue(a.id, 'value', JSON.stringify(1), reqContext),
-      addOrUpdateFormValue(
-        o.id,
-        'name',
-        JSON.stringify('Straight through'),
-        reqContext
-      )
+      addOrUpdateFormValue(a.id, 'value', 1, reqContext),
+      addOrUpdateFormValue(o.id, 'name', 'Straight through', reqContext)
     ]);
     return { variables: { id: ws.id } };
   },
