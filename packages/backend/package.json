@@ -10,7 +10,9 @@
     "lint": "tslint -p . --fix",
     "start": "tsc && cross-env SESSION_SECRET=secret PORT=3000 NODE_ENV=development node dist/main.js",
     "test": "jest --logHeapUsage --coverage  --maxWorkers=4 --forceExit",
-    "test:watch": "jest --watch --maxWorkers=2"
+    "test:watch": "jest --watch --maxWorkers=2",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "dependencies": {
     "@masterthesis/shared": "1.0.0",
@@ -38,7 +40,8 @@
     "promises-all": "^1.0.0",
     "raven": "^2.6.4",
     "uuid": "^3.2.1",
-    "winston": "^3.0.0"
+    "winston": "^3.0.0",
+    "snyk": "^1.189.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
@@ -96,5 +99,6 @@
     "nohoist": [
       "**"
     ]
-  }
+  },
+  "snyk": true
 }
